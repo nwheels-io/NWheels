@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F0ECF554-BF54-4843-B62F-C67C4DEB2764}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NWheels</RootNamespace>
+    <AssemblyName>NWheels</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Bin\Core\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\Bin\Core\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Autofac">
+      <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Entities\IEntityPartActiveStatus.cs" />
+    <Compile Include="Entities\IEntityPartCorrelationId.cs" />
+    <Compile Include="Entities\IEntityPartId.cs" />
+    <Compile Include="Entities\IEntityPartOrderBy.cs" />
+    <Compile Include="IFramework.cs" />
+    <Compile Include="Modules\Auth\IAuditEntryEntity.cs" />
+    <Compile Include="Modules\Auth\IEntityPartAudit.cs" />
+    <Compile Include="Modules\Auth\IPasswordEntity.cs" />
+    <Compile Include="Modules\Auth\IUserAccountEntity.cs" />
+    <Compile Include="Modules\Auth\IUserRoleEntity.cs" />
+    <Compile Include="Modules\Crm\CustomerEmailAddressType.cs" />
+    <Compile Include="Modules\Crm\CustomerPhoneType.cs" />
+    <Compile Include="Modules\Crm\CustomerPostalAddressType.cs" />
+    <Compile Include="Modules\Crm\IAbstractContactDetailEntity.cs" />
+    <Compile Include="Modules\Crm\IAbstractCustomerActivityEntity.cs" />
+    <Compile Include="Modules\Crm\IEmailContactDetailEntity.cs" />
+    <Compile Include="Modules\Crm\IPhoneContactDetailEntity.cs" />
+    <Compile Include="Modules\Crm\ICustomerEntity.cs" />
+    <Compile Include="Modules\Crm\IPostalContactDetailEntity.cs" />
+    <Compile Include="Modules\Crm\IOrganizationEntity.cs" />
+    <Compile Include="Modules\Crm\IOrganizationUnitEntity.cs" />
+    <Compile Include="Modules\Crm\ICustomerRelationshipEntity.cs" />
+    <Compile Include="Modules\Crm\ICustomerRelationshipTypeEntity.cs" />
+    <Compile Include="Modules\Geo\ICityEntity.cs" />
+    <Compile Include="Modules\Geo\ICityZipCodeEntity.cs" />
+    <Compile Include="Modules\Geo\ICountryEntity.cs" />
+    <Compile Include="Modules\Geo\ICountryStateEntity.cs" />
+    <Compile Include="Modules\Geo\IEntityPartGeoCoordinate.cs" />
+    <Compile Include="Modules\Geo\IEntityPartPostalAddress.cs" />
+    <Compile Include="Modules\Geo\IStateCountyEntity.cs" />
+    <Compile Include="Modules\Geo\IZipCodeEntity.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\IUiContainerBuilder.cs" />
+    <Compile Include="UI\IUiLayoutBuilder.cs" />
+    <Compile Include="UI\Layouts\IFlowUiContainerLayout.cs" />
+    <Compile Include="UI\Layouts\IGridUiContainerLayout.cs" />
+    <Compile Include="UI\Layouts\IStackUiContainerLayout.cs" />
+    <Compile Include="UI\Layouts\IDockUiContainerLayout.cs" />
+    <Compile Include="UI\Templates\IAdminUiScreenTemplate.cs" />
+    <Compile Include="UI\IUiElementBuilder.cs" />
+    <Compile Include="UI\IBoundUiElementBuilder.cs" />
+    <Compile Include="UI\IUiApplication.cs" />
+    <Compile Include="UI\IUiApplicationBuilder.cs" />
+    <Compile Include="UI\IUiScreenBuilder.cs" />
+    <Compile Include="UI\Templates\IWizardUiScreenTemplate.cs" />
+    <Compile Include="UI\Unbound.cs" />
+    <Compile Include="UI\Widgets\IDropDownMenuUiWidgetBuilder.cs" />
+    <Compile Include="UI\Widgets\IButtonUiWidgetBuilder.cs" />
+    <Compile Include="UI\Widgets\IMapUiWidgetBuilder.cs" />
+    <Compile Include="UI\Widgets\ITabsUiWidgetBuilder.cs" />
+    <Compile Include="UI\Widgets\ITextUiWidgetBuilder.cs" />
+    <Compile Include="UI\Widgets\ILookupFieldUiWidgetBuilder.cs" />
+    <Compile Include="UI\Widgets\ITextFieldUiWidgetBuilder.cs" />
+    <Compile Include="UI\Widgets\ILoggedInUserUiWidgetBuilder.cs" />
+    <Compile Include="UI\Widgets\IImageUiWidgetBuilder.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Modules\Merchant\" />
+    <Folder Include="UI\Commands\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
