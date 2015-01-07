@@ -41,8 +41,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="IAbstractContentEntity.cs" />
+    <Compile Include="IArticleEntity.cs" />
+    <Compile Include="IAuthorEntity.cs" />
+    <Compile Include="IPostEntity.cs" />
+    <Compile Include="IReplyEntity.cs" />
+    <Compile Include="ITagEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReplyStatus.cs" />
+    <Compile Include="UserRole.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels\NWheels.csproj">

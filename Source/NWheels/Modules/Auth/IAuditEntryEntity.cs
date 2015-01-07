@@ -7,7 +7,7 @@ using NWheels.Entities;
 
 namespace NWheels.Modules.Auth
 {
-    public interface IAuditEntryEntity
+    public interface IAuditEntryEntity : IEntityPartCorrelationId
     {
         DateTime When { get; set; }
         IUserAccountEntity Who { get; set; }
