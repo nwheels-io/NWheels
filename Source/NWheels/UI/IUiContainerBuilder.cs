@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.UI.Behaviors;
 using NWheels.UI.Widgets;
 using NWheels.UI.Layouts;
 
@@ -38,6 +39,13 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static ICheckboxUiWidgetBuilder<TModel, TState> WidgetCheckbox<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
+        {
+            return selector.CreateChildBuilder<ICheckboxUiWidgetBuilder<TModel, TState>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static ILookupFieldUiWidgetBuilder<TModel, TState, Unbound.Lookup> WidgetLookupField<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
         {
             return selector.CreateChildBuilder<ILookupFieldUiWidgetBuilder<TModel, TState, Unbound.Lookup>>();
@@ -52,6 +60,16 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static IUiCommandBuilder<TModel, TState> WidgetButtonCommand<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
+        {
+            var command = selector.CreateChildBuilder<IUiCommandBuilder<TModel, TState>>();
+            var button = selector.CreateChildBuilder<IButtonUiWidgetBuilder<TModel, TState>>();
+            button.BindToCommand(command);
+            return command;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static IDropDownMenuUiWidgetBuilder<TModel, TState> WidgetDropDownMenu<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
         {
             return selector.CreateChildBuilder<IDropDownMenuUiWidgetBuilder<TModel, TState>>();
@@ -59,9 +77,16 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static ITabsUiWidgetBuilder<TModel, TState> WidgetTabs<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
+        public static ITabbedContentUiWidgetBuilder<TModel, TState> WidgetTabbedContent<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
         {
-            return selector.CreateChildBuilder<ITabsUiWidgetBuilder<TModel, TState>>();
+            return selector.CreateChildBuilder<ITabbedContentUiWidgetBuilder<TModel, TState>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IDataGridUiWidgetBuilder<TModel, TState, Unbound.Model, Unbound.State> WidgetDataGrid<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
+        {
+            return selector.CreateChildBuilder<IDataGridUiWidgetBuilder<TModel, TState, Unbound.Model, Unbound.State>>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -76,6 +101,13 @@ namespace NWheels.UI
         public static ILoggedInUserUiWidgetBuilder<TModel, TState> WidgetLoggedInUser<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
         {
             return selector.CreateChildBuilder<ILoggedInUserUiWidgetBuilder<TModel, TState>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IMapUiWidgetBuilder<TModel, TState> WidgetMap<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
+        {
+            return selector.CreateChildBuilder<IMapUiWidgetBuilder<TModel, TState>>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI.Layouts
 {
-    public interface IStackUiContainerLayout<TModel, TState> : IUiContainerBuilder<TModel, TState>
+    public interface IStackUiContainerLayout<TModel, TState> :
+        IBoundUiElementBuilder<TModel, TState, IStackUiContainerLayout<TModel, TState>>,
+        IUiContainerBuilder<TModel, TState>
     {
         IStackUiContainerLayout<TModel, TState> OrientationHorizontal();
         IStackUiContainerLayout<TModel, TState> OrientationVertical();

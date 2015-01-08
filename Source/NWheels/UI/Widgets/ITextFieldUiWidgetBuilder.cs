@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.UI.Behaviors;
 
 namespace NWheels.UI.Widgets
 {
@@ -26,8 +27,6 @@ namespace NWheels.UI.Widgets
 
     public interface IAutocompleteBindingTargetSelector<TModel, TState, TResult>
     {
-        ITextFieldUiWidgetBuilder<TModel, TState> BindToModel(Expression<Func<TModel, TResult>> path);
-        ITextFieldUiWidgetBuilder<TModel, TState> BindToUiState(Expression<Func<TState, TResult>> path);
+        IMoveBehaviorTargetSelector<TModel, TState, TResult> MoveApiResult();
     }
-
 }

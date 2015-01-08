@@ -12,6 +12,7 @@ namespace NWheels.Modules.Geo
         ICountryEntity Country { get; set; }
         ICountryStateEntity State { get; set; }
         IStateCountyEntity County { get; set; }
-        IList<ICityZipCodeEntity> Cities { get; }
+        string Value { get; set; }
+        IQueryable<ICityZipCodeEntity> Cities { get; }
     }
 }

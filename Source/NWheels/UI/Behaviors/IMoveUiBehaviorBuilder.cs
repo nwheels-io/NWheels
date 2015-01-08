@@ -19,11 +19,11 @@ namespace NWheels.UI.Behaviors
 
     public interface IMoveBehaviorTargetSelector<TModel, TState, TData> : IBoundUiElementBuilder<TModel, TState>
     {
-        IUiCommandBuilder<TModel, TState> ToModel(Expression<Func<TModel, TData>> path);
-        IUiCommandBuilder<TModel, TState> ItemAddToModel(Expression<Func<TModel, IList<TData>>> path);
-        IUiCommandBuilder<TModel, TState> ItemsAddRangeToModel(Expression<Func<TModel, TData>> path);
-        IUiCommandBuilder<TModel, TState> ToUiState(Expression<Func<TState, TData>> path);
-        IUiCommandBuilder<TModel, TState> ItemAddToUiState(Expression<Func<TState, IList<TData>>> path);
-        IUiCommandBuilder<TModel, TState> ItemsAddRangeToUiState(Expression<Func<TState, TData>> path);
+        IPromiseUiBehaviorBuilder<TModel, TState, TData> ToModel(Expression<Func<TModel, TData>> path);
+        IPromiseUiBehaviorBuilder<TModel, TState, TData> ItemAddToModel(Expression<Func<TModel, IList<TData>>> path);
+        IPromiseUiBehaviorBuilder<TModel, TState, TData> ItemsAddRangeToModel(Expression<Func<TModel, TData>> path);
+        IPromiseUiBehaviorBuilder<TModel, TState, TData> ToUiState(Expression<Func<TState, TData>> path);
+        IPromiseUiBehaviorBuilder<TModel, TState, TData> ItemAddToUiState(Expression<Func<TState, IList<TData>>> path);
+        IPromiseUiBehaviorBuilder<TModel, TState, TData> ItemsAddRangeToUiState(Expression<Func<TState, TData>> path);
     }
 }

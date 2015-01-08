@@ -9,8 +9,8 @@ namespace NWheels.UI.Behaviors
 {
     public interface IUiBehaviorSelector<TModel, TState> : IBoundUiElementBuilder<TModel, TState>
     {
+        IPromiseUiBehaviorBuilder<TModel, TState, TModel> RemoveModelItem();
         IPromiseUiBehaviorBuilder<TModel, TState, TResult> InvokeApi<TApi, TResult>(Expression<Func<TModel, TState, TApi, TResult>> apiCall);
-
         IMoveUiBehaviorBuilder<TModel, TState> Move();
     }
 }

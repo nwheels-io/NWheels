@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\EntityKey.cs" />
     <Compile Include="Entities\IEntityPartActiveStatus.cs" />
     <Compile Include="Entities\IEntityPartCorrelationId.cs" />
     <Compile Include="Entities\IEntityPartId.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="Modules\Crm\IOrganizationUnitEntity.cs" />
     <Compile Include="Modules\Crm\ICustomerRelationshipEntity.cs" />
     <Compile Include="Modules\Crm\ICustomerRelationshipTypeEntity.cs" />
+    <Compile Include="Modules\Geo\GeoUnitConversion.cs" />
     <Compile Include="Modules\Geo\ICityEntity.cs" />
     <Compile Include="Modules\Geo\ICityZipCodeEntity.cs" />
     <Compile Include="Modules\Geo\ICountryEntity.cs" />
@@ -96,10 +98,12 @@
     <Compile Include="UI\IUiScreenBuilder.cs" />
     <Compile Include="UI\Templates\IWizardUiScreenTemplate.cs" />
     <Compile Include="UI\Unbound.cs" />
+    <Compile Include="UI\Widgets\ICheckboxUiWidgetBuilder.cs" />
+    <Compile Include="UI\Widgets\IDataGridUiWidgetBuilder.cs" />
     <Compile Include="UI\Widgets\IDropDownMenuUiWidgetBuilder.cs" />
     <Compile Include="UI\Widgets\IButtonUiWidgetBuilder.cs" />
     <Compile Include="UI\Widgets\IMapUiWidgetBuilder.cs" />
-    <Compile Include="UI\Widgets\ITabsUiWidgetBuilder.cs" />
+    <Compile Include="UI\Widgets\ITabbedContentUiWidgetBuilder.cs" />
     <Compile Include="UI\Widgets\ITextUiWidgetBuilder.cs" />
     <Compile Include="UI\Widgets\ILookupFieldUiWidgetBuilder.cs" />
     <Compile Include="UI\Widgets\ITextFieldUiWidgetBuilder.cs" />
