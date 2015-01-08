@@ -9,6 +9,6 @@ namespace NWheels.UI
 {
     public interface IUiElementBuilder
     {
-        T CreateChildBuilder<T>() where T : IUiElementBuilder;
+        T CreateChildBuilder<T>(params object[] arguments) where T : IUiElementBuilder;
     }
 }

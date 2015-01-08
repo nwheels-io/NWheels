@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.UI.Behaviors;
 
 namespace NWheels.UI
 {
@@ -30,6 +31,7 @@ namespace NWheels.UI
         TFluent InitializeUiState<T>(Expression<Func<TState, T>> path, T value);
         IBindingTargetSelector<TModel, TState, TFluent, T> BindModel<T>(Expression<Func<TModel, T>> path);
         IBindingTargetSelector<TModel, TState, TFluent, T> BindUiState<T>(Expression<Func<TState, T>> path);
+        IUiCommandBuilder<TModel, TState> Command();
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

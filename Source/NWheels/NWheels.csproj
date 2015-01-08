@@ -76,6 +76,12 @@
     <Compile Include="Modules\Geo\IStateCountyEntity.cs" />
     <Compile Include="Modules\Geo\IZipCodeEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\Behaviors\IApiErrorState.cs" />
+    <Compile Include="UI\Behaviors\IMoveUiBehaviorBuilder.cs" />
+    <Compile Include="UI\Behaviors\IPromiseUiBehaviorBuilder.cs" />
+    <Compile Include="UI\Behaviors\IUiBehaviorBuilder.cs" />
+    <Compile Include="UI\Behaviors\IUiBehaviorSelector.cs" />
+    <Compile Include="UI\Behaviors\IUiCommandBuilder.cs" />
     <Compile Include="UI\IUiContainerBuilder.cs" />
     <Compile Include="UI\IUiLayoutBuilder.cs" />
     <Compile Include="UI\Layouts\IFlowUiContainerLayout.cs" />
@@ -102,7 +108,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Modules\Merchant\" />
-    <Folder Include="UI\Commands\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

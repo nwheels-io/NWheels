@@ -15,6 +15,7 @@ namespace NWheels.UI.Widgets
 
     public interface IWidgetMapUiState
     {
-        IEntityPartGeoCoordinate Coordinate { get; set; }
+        IEntityPartGeoCoordinate Center { get; set; }
+        int RadiusInMeters { get; set; }
     }
 }
