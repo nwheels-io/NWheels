@@ -16,7 +16,7 @@ namespace NWheels.Modules.Auth
         bool IsEmailVerified { get; set; }
         IPasswordEntity CurrentPassword { get; set; }
         IQueryable<IPasswordEntity> PasswordHistory { get; }
-        IList<IUserRoleEntity> Roles { get; }
+        ISet<IUserRoleEntity> Roles { get; }
         DateTime LastLoginAt { get; set; }
         int FailedLoginCount { get; set; }
         bool IsLockedOut { get; set; }

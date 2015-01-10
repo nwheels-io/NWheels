@@ -97,6 +97,12 @@ namespace NWheels.UI
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        public static ILogoUiWidgetBuilder WidgetLogo<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
+        {
+            return selector.CreateChildBuilder<ILogoUiWidgetBuilder>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static ILoggedInUserUiWidgetBuilder<TModel, TState> WidgetLoggedInUser<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
         {

@@ -18,8 +18,7 @@ namespace NWheels.UI
     public interface IBoundValueUiElementBuilder<TModel, TState, TFluent> : IBoundUiElementBuilder<TModel, TState>
         where TFluent : IBoundUiElementBuilder<TModel, TState>
     {
-        TFluent BindValueToModel(Expression<Func<TModel, object>> path);
-        TFluent BindValueToUiState(Expression<Func<TState, object>> path);
+        TFluent BindValueTo(Expression<Func<IUiScope<TModel, TState>, object>> path);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,10 +26,8 @@ namespace NWheels.UI
     public interface IBoundUiElementBuilder<TModel, TState, TFluent> : IBoundUiElementBuilder<TModel, TState>
         where TFluent : IBoundUiElementBuilder<TModel, TState>
     {
-        TFluent InitializeModel<T>(Expression<Func<TModel, T>> path, T value);
-        TFluent InitializeUiState<T>(Expression<Func<TState, T>> path, T value);
-        IBindingTargetSelector<TModel, TState, TFluent, T> BindModel<T>(Expression<Func<TModel, T>> path);
-        IBindingTargetSelector<TModel, TState, TFluent, T> BindUiState<T>(Expression<Func<TState, T>> path);
+        TFluent Initialize<T>(Expression<Func<IUiScope<TModel, TState>, T>> path, T value);
+        IBindingTargetSelector<TModel, TState, TFluent, T> Bind<T>(Expression<Func<IUiScope<TModel, TState>, T>> path);
         IUiCommandBuilder<TModel, TState> Command();
     }
 
@@ -38,7 +35,6 @@ namespace NWheels.UI
 
     public interface IBindingTargetSelector<TModel, TState, TFluent, TValue>
     {
-        TFluent ToModel(Expression<Func<TModel, TValue>> path);
-        TFluent ToUiState(Expression<Func<TState, TValue>> path);
+        TFluent To(Expression<Func<IUiScope<TModel, TState>, TValue>> path);
     }
 }

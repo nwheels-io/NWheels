@@ -7,10 +7,41 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI.Behaviors
 {
-    public interface IUiBehaviorSelector<TModel, TState> : IBoundUiElementBuilder<TModel, TState>
+    public interface IUiBehaviorSelector<TModel, TState, TInput> : IBoundUiElementBuilder<TModel, TState>
     {
-        IPromiseUiBehaviorBuilder<TModel, TState, TModel> RemoveModelItem();
-        IPromiseUiBehaviorBuilder<TModel, TState, TResult> InvokeApi<TApi, TResult>(Expression<Func<TModel, TState, TApi, TResult>> apiCall);
-        IMoveUiBehaviorBuilder<TModel, TState> Move();
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class UiBehaviorChoices
+    {
+        public static IMoveUiBehaviorBuilder<TModel, TState, TInput> Move<TModel, TState, TInput>(
+            this IUiBehaviorSelector<TModel, TState, TInput> selector)
+        {
+            return selector.CreateChildBuilder<IMoveUiBehaviorBuilder<TModel, TState, TInput>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ICallUiBehaviorBuilder<TModel, TState, TInput> Call<TModel, TState, TInput>(this IUiBehaviorSelector<TModel, TState, TInput> selector)
+        {
+            return selector.CreateChildBuilder<ICallUiBehaviorBuilder<TModel, TState, TInput>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IAlertUiBehaviorBuilder<TModel, TState, TInput> Alert<TModel, TState, TInput>(
+            this IUiBehaviorSelector<TModel, TState, TInput> selector)
+        {
+            return selector.CreateChildBuilder<IAlertUiBehaviorBuilder<TModel, TState, TInput>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public static IRemoveBoundItemUiBehaviorBuilder<TModel, TState, TInput> RemoveBoundItem<TModel, TState, TInput>(
+            this IUiBehaviorSelector<TModel, TState, TInput> selector)
+        {
+            return selector.CreateChildBuilder<IRemoveBoundItemUiBehaviorBuilder<TModel, TState, TInput>>();
+        }
     }
 }

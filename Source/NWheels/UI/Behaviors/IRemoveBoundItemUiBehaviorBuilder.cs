@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI.Behaviors
 {
-    public interface IUiBehaviorBuilder<TModel, TState> : IBoundUiElementBuilder<TModel, TState>
+    public interface IRemoveBoundItemUiBehaviorBuilder<TModel, TState, TPromise> : IPromiseUiBehaviorBuilder<TModel, TState, TPromise>
     {
     }
 }

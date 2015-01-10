@@ -28,10 +28,8 @@ namespace NWheels.UI.Widgets
 
     public interface IDataGridColumnBuilder<TModel, TState, TRowModel, TRowState> : IBoundUiElementBuilder<TModel, TState>
     {
-        IDataGridColumnBuilder<TModel, TState, TRowModel, TRowState> BindToRowModel(string format, params Expression<Func<TRowModel, object>>[] paths);
-        IDataGridColumnBuilder<TModel, TState, TRowModel, TRowState> BindToRowModel(Expression<Func<TRowModel, object>> path);
-        IDataGridColumnBuilder<TModel, TState, TRowModel, TRowState> BindToRowUiState(string format, Expression<Func<TRowState, object>>[] paths);
-        IDataGridColumnBuilder<TModel, TState, TRowModel, TRowState> BindToRowUiState(Expression<Func<TRowState, object>> path);
+        IDataGridColumnBuilder<TModel, TState, TRowModel, TRowState> BindTo(string format, params Expression<Func<IUiScope<TRowModel, TRowState>, object>>[] paths);
+        IDataGridColumnBuilder<TModel, TState, TRowModel, TRowState> BindTo(Expression<Func<IUiScope<TRowModel, TRowState>, object>> path);
         IDataGridColumnBuilder<TModel, TState, TRowModel, TRowState> AlignRight();
         IDataGridColumnBuilder<TModel, TState, TRowModel, TRowState> AlignCenter();
         IUiLayoutBuilder<TRowModel, TRowState> TemplateHeader();

@@ -8,7 +8,9 @@ namespace NWheels.UI.Behaviors
 {
     public interface IPromiseUiBehaviorBuilder<TModel, TState, TPromise> : IBoundUiElementBuilder<TModel, TState>
     {
-        IUiBehaviorSelector<TModel, TState> Then(Func<IUiBehaviorSelector<TModel, TState>, IUiBehaviorBuilder<TModel, TState>> onError = null);
-        IUiCommandBuilder<TModel, TState> End();
+        IUiBehaviorSelector<TModel, TState, TPromise> Then(
+            Action<IUiBehaviorSelector<TModel, TState, TPromise>> onSuccess = null,
+            Action<IUiBehaviorSelector<TModel, TState, TPromise>> onError = null,
+            bool onErrorContinue = false);
     }
 }

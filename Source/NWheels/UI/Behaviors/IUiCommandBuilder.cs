@@ -15,12 +15,12 @@ namespace NWheels.UI.Behaviors
 
     public interface IUiCommandBuilder<TModel, TState> : IUiCommandBuilder, IBoundUiElementBuilder<TModel, TState>
     {
-        IUiCommandBuilder<TModel, TState> EnableByModel(Expression<Func<TModel, object>> path);
-        IUiCommandBuilder<TModel, TState> DisableByModel(Expression<Func<TModel, object>> path);
-        IUiCommandBuilder<TModel, TState> EnableByUiState(Expression<Func<TState, object>> path);
-        IUiCommandBuilder<TModel, TState> DisableByUiState(Expression<Func<TModel, object>> path);
+        IUiCommandBuilder<TModel, TState> EnableBy(Expression<Func<IUiScope<TModel, TState>, object>> path);
+        IUiCommandBuilder<TModel, TState> DisableBy(Expression<Func<IUiScope<TModel, TState>, object>> path);
+        IUiCommandBuilder<TModel, TState> HideWhileDisabled();
         IUiCommandBuilder<TModel, TState> Text(string displayText);
         IUiCommandBuilder<TModel, TState> Image(string imagePath);
-        IUiBehaviorSelector<TModel, TState> Behavior();
+        IUiCommandBuilder<TModel, TState> Behavior(Action<IUiBehaviorSelector<TModel, TState, Unbound.Input>> definition);
+        IUiCommandBuilder<TModel, TState> BehaviorWithArgument<TArgument>(Action<IUiBehaviorSelector<TModel, TState, TArgument>> definition);
     }
 }

@@ -10,9 +10,7 @@ namespace NWheels.UI.Widgets
 {
     public interface IMapUiWidgetBuilder<TModel, TState> : IBoundUiElementBuilder<TModel, TState, IMapUiWidgetBuilder<TModel, TState>>
     {
-        IMapUiWidgetBuilder<TModel, TState> BindToModel(Expression<Func<TModel, IWidgetMapUiState>> path);
-        IMapUiWidgetBuilder<TModel, TState> BindToUiState(Expression<Func<TState, IWidgetMapUiState>> path);
-        IMapUiWidgetBuilder<TModel, TState> Initialize<T>(Expression<Func<IWidgetMapUiState, T>> path, T value);
+        IMapUiWidgetBuilder<IWidgetMapUiState, TState> BindTo(Expression<Func<IUiScope<TModel, TState>, IWidgetMapUiState>> path);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
