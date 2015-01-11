@@ -1,23 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 using NWheels.UI.Behaviors;
-using NWheels.UI.Widgets;
+using NWheels.UI.Elements;
 using NWheels.UI.Layouts;
+using System;
 
-namespace NWheels.UI
+namespace NWheels.UI.Widgets
 {
-    public interface IUiContainerBuilder<TModel, TState> : IBoundUiElementBuilder<TModel, TState>
-    {
-        IUiWidgetSelector<TModel, TState> Add();
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public interface IUiWidgetSelector<TModel, TState> : IBoundUiElementBuilder<TModel, TState>
+    public interface IUiWidgetSelector<TModel, TState> : IUiElementBuilder
     {
     }
 
@@ -27,7 +16,26 @@ namespace NWheels.UI
     {
         public static ITextUiWidgetBuilder<TModel, TState> WidgetText<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector, string text)
         {
-            return selector.CreateChildBuilder<ITextUiWidgetBuilder<TModel, TState>>();
+            return selector.CreateChildBuilder<ITextUiWidgetBuilder<TModel, TState>>(text);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ITextUiWidgetBuilder<TModel, TState> WidgetText<TModel, TState>(
+            this IUiWidgetSelector<TModel, TState> selector, 
+            Expression<Func<IUiScope<TModel, TState>, object>> binding)
+        {
+            return selector.CreateChildBuilder<ITextUiWidgetBuilder<TModel, TState>>(binding);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ITextUiWidgetBuilder<TModel, TState> WidgetText<TModel, TState>(
+            this IUiWidgetSelector<TModel, TState> selector,
+            string format,
+            params Expression<Func<IUiScope<TModel, TState>, object>>[] args)
+        {
+            return selector.CreateChildBuilder<ITextUiWidgetBuilder<TModel, TState>>(format, args);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,7 +54,8 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static ILookupFieldUiWidgetBuilder<TModel, TState, Unbound.Lookup> WidgetLookupField<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
+        public static ILookupFieldUiWidgetBuilder<TModel, TState, Unbound.Lookup> WidgetLookupField<TModel, TState>(
+            this IUiWidgetSelector<TModel, TState> selector)
         {
             return selector.CreateChildBuilder<ILookupFieldUiWidgetBuilder<TModel, TState, Unbound.Lookup>>();
         }
@@ -84,22 +93,50 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static IDataGridUiWidgetBuilder<TModel, TState, Unbound.Model, Unbound.State> WidgetDataGrid<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
+        public static IDataGridUiWidgetBuilder<TModel, TState, Unbound.Model, IDataGridRowUiState> WidgetDataGrid<TModel, TState>(
+            this IUiWidgetSelector<TModel, TState> selector)
         {
-            return selector.CreateChildBuilder<IDataGridUiWidgetBuilder<TModel, TState, Unbound.Model, Unbound.State>>();
+            return selector.CreateChildBuilder<IDataGridUiWidgetBuilder<TModel, TState, Unbound.Model, IDataGridRowUiState>>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static IImageUiWidgetBuilder<TModel, TState> WidgetImage<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector, string imagePath)
         {
-            return selector.CreateChildBuilder<IImageUiWidgetBuilder<TModel, TState>>();
+            return selector.CreateChildBuilder<IImageUiWidgetBuilder<TModel, TState>>(imagePath);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        public static ILogoUiWidgetBuilder WidgetLogo<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
+
+        public static IImageUiWidgetBuilder<TModel, TState> WidgetImage<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector, object enumValue)
         {
-            return selector.CreateChildBuilder<ILogoUiWidgetBuilder>();
+            return selector.CreateChildBuilder<IImageUiWidgetBuilder<TModel, TState>>(enumValue);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IImageUiWidgetBuilder<TModel, TState> WidgetImage<TModel, TState>(
+            this IUiWidgetSelector<TModel, TState> selector, 
+            Expression<Func<IUiScope<TModel, TState>, object>> enumValueBinding)
+        {
+            return selector.CreateChildBuilder<IImageUiWidgetBuilder<TModel, TState>>(enumValueBinding);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IImageUiWidgetBuilder<TModel, TState> WidgetImage<TModel, TState>(
+            this IUiWidgetSelector<TModel, TState> selector,
+            string imagePathFormat,
+            params Expression<Func<IUiScope<TModel, TState>, object>>[] imagePathArgs)
+        {
+            return selector.CreateChildBuilder<IImageUiWidgetBuilder<TModel, TState>>(imagePathFormat, imagePathArgs);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ILogoUiWidgetBuilder<TModel, TState> WidgetLogo<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
+        {
+            return selector.CreateChildBuilder<ILogoUiWidgetBuilder<TModel, TState>>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -114,6 +151,13 @@ namespace NWheels.UI
         public static IMapUiWidgetBuilder<TModel, TState> WidgetMap<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
         {
             return selector.CreateChildBuilder<IMapUiWidgetBuilder<TModel, TState>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IFormUiWidgetBuilder<TModel, TState> WidgetForm<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
+        {
+            return selector.CreateChildBuilder<IFormUiWidgetBuilder<TModel, TState>>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

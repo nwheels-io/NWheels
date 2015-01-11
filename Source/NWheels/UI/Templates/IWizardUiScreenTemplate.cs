@@ -4,10 +4,12 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
+using NWheels.UI.Elements;
+using NWheels.UI.Layouts;
 
 namespace NWheels.UI.Templates
 {
-    public interface IWizardUiScreenTemplate<TModel, TState> : IBoundUiElementBuilder<TModel, TState, IWizardUiScreenTemplate<TModel, TState>>
+    public interface IWizardUiScreenTemplate<TModel, TState> : IUiContainerBuilder<TModel, TState, IWizardUiScreenTemplate<TModel, TState>>
     {
         IWizardUiScreenTemplate<TModel, TState> SideBarTitle(string title);
         IWizardUiScreenTemplate<TModel, TState> DefaultNextButton(string caption);
@@ -19,7 +21,7 @@ namespace NWheels.UI.Templates
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IWizardStepBuilder<TModel, TState> : IBoundUiElementBuilder<TModel, TState>
+    public interface IWizardStepBuilder<TModel, TState> : IVisualUiElementBuilder<TModel, TState, IWizardStepBuilder<TModel, TState>>
     {
         IWizardStepBuilder<TModel, TState> Page(Action<IUiLayoutBuilder<TModel, TState>> contents);
         IWizardStepBuilder<TModel, TState> NextButton(string caption);

@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.Entities
+namespace NWheels.UI.Globalization
 {
-    public interface IEntityPartOrderBy
+    public interface ILocalizableUiResources
     {
-        int OrderBy { get; set; }
     }
 }

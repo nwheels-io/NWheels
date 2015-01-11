@@ -5,11 +5,14 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.UI.Behaviors;
+using NWheels.UI.Elements;
 
 namespace NWheels.UI.Widgets
 {
-    public interface ITextFieldUiWidgetBuilder<TModel, TState> : IBoundValueUiElementBuilder<TModel, TState, ITextFieldUiWidgetBuilder<TModel, TState>>
+    public interface ITextFieldUiWidgetBuilder<TModel, TState> : IValueUiElementBuilder<TModel, TState, ITextFieldUiWidgetBuilder<TModel, TState>>
     {
+        ITextFieldUiWidgetBuilder<TModel, TState> Format(string format);
+
         IAutocompleteBindingTargetSelector<TModel, TState, TResult> AutocompleteApi<TApi, TResult>(
             Expression<Func<TApi, Func<string, IEnumerable<TResult>>>> apiMethod);
 

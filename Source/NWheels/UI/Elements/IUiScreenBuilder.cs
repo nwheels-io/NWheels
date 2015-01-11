@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using Autofac;
 using NWheels.UI.Templates;
 
-namespace NWheels.UI
+namespace NWheels.UI.Elements
 {
-    public interface IUiScreenBuilder<TModel, TState> : IBoundUiElementBuilder<TModel, TState, IUiScreenBuilder<TModel, TState>>
+    public interface IUiScreenBuilder<TModel, TState> : IUiContainerBuilder<TModel, TState, IUiScreenBuilder<TModel, TState>>
     {
         IUiScreenBuilder<TModel, TState> SetAsHome();
         IUiScreenBuilder<TNewModel, TState> BindToModel<TNewModel>(Expression<Func<TModel, TNewModel>> path = null);
@@ -31,6 +27,14 @@ namespace NWheels.UI
             this IUiScreenBuilder<TModel, TState> selector)
         {
             return selector.CreateChildBuilder<IAdminUiScreenTemplate<TModel, TState>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IFrontUiScreenTemplate<TModel, TState> TemplateFront<TModel, TState>(
+            this IUiScreenBuilder<TModel, TState> selector)
+        {
+            return selector.CreateChildBuilder<IFrontUiScreenTemplate<TModel, TState>>();
         }
     }
 }

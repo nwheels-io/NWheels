@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.UI.Layouts;
+using NWheels.UI.Elements;
 
-namespace NWheels.UI
+namespace NWheels.UI.Layouts
 {
-    public interface IUiLayoutBuilder<TModel, TState> : IBoundUiElementBuilder<TModel, TState, IUiLayoutBuilder<TModel, TState>>
+    public interface IUiLayoutBuilder<TModel, TState> : IUiContainerBuilder<TModel, TState, IUiLayoutBuilder<TModel, TState>>
     {
         IUiLayoutBuilder<TNewModel, TState> BindToModel<TNewModel>(Expression<Func<TModel, TNewModel>> path = null);
         IUiLayoutBuilder<TModel, TNewState> BindToUiState<TNewState>(Expression<Func<TState, TNewState>> path = null);

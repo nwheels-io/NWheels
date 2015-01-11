@@ -4,10 +4,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.UI.Elements;
 
 namespace NWheels.UI.Behaviors
 {
-    public interface IUiBehaviorSelector<TModel, TState, TInput> : IBoundUiElementBuilder<TModel, TState>
+    public interface IUiBehaviorSelector<TModel, TState, TInput> : IUiElementBuilder
     {
     }
 

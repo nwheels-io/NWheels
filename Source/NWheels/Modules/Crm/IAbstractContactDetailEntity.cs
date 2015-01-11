@@ -7,7 +7,7 @@ using NWheels.Entities;
 
 namespace NWheels.Modules.Crm
 {
-    public interface IAbstractContactDetailEntity : IEntityPartOrderBy
+    public interface IAbstractContactDetailEntity : IEntityPartPositionInList
     {
         ICustomerEntity Customer { get; set; }
     }

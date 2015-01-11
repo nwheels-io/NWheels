@@ -48,7 +48,7 @@
     <Compile Include="Entities\IEntityPartActiveStatus.cs" />
     <Compile Include="Entities\IEntityPartCorrelationId.cs" />
     <Compile Include="Entities\IEntityPartId.cs" />
-    <Compile Include="Entities\IEntityPartOrderBy.cs" />
+    <Compile Include="Entities\IEntityPartPositionInList.cs" />
     <Compile Include="IFramework.cs" />
     <Compile Include="Modules\Auth\UI\IUserAccountApi.cs" />
     <Compile Include="Modules\Auth\IAuditEntryEntity.cs" />
@@ -92,19 +92,27 @@
     <Compile Include="UI\Behaviors\IUiBehaviorSelector.cs" />
     <Compile Include="UI\Behaviors\IUiCommandBuilder.cs" />
     <Compile Include="UI\Behaviors\AlertDialogButtons.cs" />
+    <Compile Include="UI\Elements\IBindingTargetSelector.cs" />
+    <Compile Include="UI\Elements\IUiApplicationBuilder.cs" />
+    <Compile Include="UI\Elements\IUiContainerBuilder.cs" />
+    <Compile Include="UI\Elements\IUiElementBuilder.cs" />
+    <Compile Include="UI\Elements\IUiScreenBuilder.cs" />
+    <Compile Include="UI\Elements\IValueUiElementBuilder.cs" />
+    <Compile Include="UI\Elements\IVisualUiElementBuilder.cs" />
+    <Compile Include="UI\Globalization\InAnyCultureAttribute.cs" />
+    <Compile Include="UI\Globalization\InDefaultCultureAttribute.cs" />
+    <Compile Include="UI\Globalization\InCultureAttribute.cs" />
+    <Compile Include="UI\Globalization\DefaultCultureAttribute.cs" />
+    <Compile Include="UI\Globalization\ILocalizableUiResources.cs" />
     <Compile Include="UI\IUiScope.cs" />
-    <Compile Include="UI\IUiContainerBuilder.cs" />
-    <Compile Include="IUiLayoutBuilder.cs" />
     <Compile Include="UI\Layouts\IFlowUiContainerLayout.cs" />
     <Compile Include="UI\Layouts\IGridUiContainerLayout.cs" />
     <Compile Include="UI\Layouts\IStackUiContainerLayout.cs" />
     <Compile Include="UI\Layouts\IDockUiContainerLayout.cs" />
+    <Compile Include="Modules\Auth\UI\ISignInUiScreenTemplate.cs" />
+    <Compile Include="UI\Layouts\IUiLayoutBuilder.cs" />
     <Compile Include="UI\Templates\IAdminUiScreenTemplate.cs" />
-    <Compile Include="UI\IUiElementBuilder.cs" />
-    <Compile Include="UI\IBoundUiElementBuilder.cs" />
     <Compile Include="UI\IUiApplication.cs" />
-    <Compile Include="UI\IUiApplicationBuilder.cs" />
-    <Compile Include="UI\IUiScreenBuilder.cs" />
     <Compile Include="UI\Templates\IFrontUiScreenTemplate.cs" />
     <Compile Include="UI\Templates\IWizardUiScreenTemplate.cs" />
     <Compile Include="UI\Unbound.cs" />
@@ -122,6 +130,7 @@
     <Compile Include="UI\Widgets\ITextFieldUiWidgetBuilder.cs" />
     <Compile Include="UI\Widgets\ILoggedInUserUiWidgetBuilder.cs" />
     <Compile Include="UI\Widgets\IImageUiWidgetBuilder.cs" />
+    <Compile Include="UI\Widgets\IUiWidgetSelector.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Modules\Merchant\" />

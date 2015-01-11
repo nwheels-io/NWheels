@@ -4,10 +4,12 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.UI.Elements;
 
 namespace NWheels.UI.Behaviors
 {
-    public interface IAlertUiBehaviorBuilder<TModel, TState, TInput> : IBoundUiElementBuilder<TModel, TState>
+    public interface IAlertUiBehaviorBuilder<TModel, TState, TInput> : 
+        IUiElementBuilder<TModel, TState, IAlertUiBehaviorBuilder<TModel, TState, TInput>>
     {
         IPromiseUiBehaviorBuilder<TModel, TState, TInput> InfoInline(string text);
         IPromiseUiBehaviorBuilder<TModel, TState, TInput> InfoInline(
