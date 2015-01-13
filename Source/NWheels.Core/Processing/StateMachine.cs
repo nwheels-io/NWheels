@@ -48,6 +48,21 @@ namespace NWheels.Core.Processing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void ReceiveTrigger(TTrigger trigger)
+        {
+            var currentState = _currentState;
+            var transition = currentState.ValidateTransition(trigger);
+
+            if ( transition == null )
+            {
+                throw _errors.StateMachineTransitionAlreadyDefined(_codeBehind.GetType(), currentState.Value, trigger);
+            }
+
+            _currentState = _states[transition.DestinationStateValue];
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TState CurrentState
         {
             get
@@ -74,6 +89,7 @@ namespace NWheels.Core.Processing
         {
             private readonly StateMachine<TState, TTrigger> _owner;
             private readonly TState _value;
+            private readonly Dictionary<TTrigger, StateTransition> _transitions;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -81,6 +97,7 @@ namespace NWheels.Core.Processing
             {
                 _value = value;
                 _owner = owner;
+                _transitions = new Dictionary<TTrigger, StateTransition>();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -95,7 +112,36 @@ namespace NWheels.Core.Processing
 
             IStateMachineTransitionBuilder<TState, TTrigger> IStateMachineStateBuilder<TState, TTrigger>.OnTrigger(TTrigger trigger)
             {
-                return new TransitionBuilder(this, trigger);
+                if ( _transitions.ContainsKey(trigger) )
+                {
+                    throw _owner._errors.StateMachineTransitionAlreadyDefined(_owner._codeBehind.GetType(), _value, trigger);
+                }
+
+
+                return new StateTransition(_owner, this, trigger);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public StateTransition ValidateTransition(TTrigger trigger)
+            {
+                StateTransition transition;
+
+                if ( _transitions.TryGetValue(trigger, out transition) )
+                {
+                    return transition;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void AddTransition(StateTransition transition)
+            {
+                _transitions.Add(transition.Trigger, transition);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -108,24 +154,47 @@ namespace NWheels.Core.Processing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class TransitionBuilder : IStateMachineTransitionBuilder<TState, TTrigger>
+        private class StateTransition : IStateMachineTransitionBuilder<TState, TTrigger>
         {
-            private readonly MachineState _owner;
+            private readonly StateMachine<TState, TTrigger> _ownerMachine;
+            private readonly MachineState _ownerState;
             private readonly TTrigger _trigger;
+            private TState _destinationStateValue;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public TransitionBuilder(MachineState owner, TTrigger trigger)
+            public StateTransition(
+                StateMachine<TState, TTrigger> ownerMachine, 
+                MachineState ownerState, 
+                TTrigger trigger)
             {
+                _ownerMachine = ownerMachine;
+                _ownerState = ownerState;
                 _trigger = trigger;
-                _owner = owner;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             IStateMachineStateBuilder<TState, TTrigger> IStateMachineTransitionBuilder<TState, TTrigger>.TransitionTo(TState destination)
             {
-                return _owner;
+                _destinationStateValue = destination;
+                _ownerState.AddTransition(this);
+                
+                return _ownerState;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public TTrigger Trigger
+            {
+                get { return _trigger; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TState DestinationStateValue
+            {
+                get { return _destinationStateValue; }
             }
         }
     }

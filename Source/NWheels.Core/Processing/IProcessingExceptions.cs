@@ -11,5 +11,7 @@ namespace NWheels.Core.Processing
             Type codeBehindType, 
             object initialStateValue, 
             object attemptedStateValue);
+        CodeBehindErrorException StateMachineTransitionAlreadyDefined(Type codeBehindType, object stateValue, object triggerValue);
+        CodeBehindErrorException StateMachineTransitionNotDefined(Type codeBehindType, object stateValue, object triggerValue);
     }
 }
