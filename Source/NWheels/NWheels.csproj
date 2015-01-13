@@ -35,6 +35,12 @@
     <Reference Include="Autofac">
       <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
     </Reference>
+    <Reference Include="Hapil">
+      <HintPath>..\packages\FelixB.Hapil.0.9.1\lib\net45\Hapil.dll</HintPath>
+    </Reference>
+    <Reference Include="Hapil.Applied">
+      <HintPath>..\packages\FelixB.Hapil.0.9.1\lib\net45\Hapil.Applied.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,6 +55,8 @@
     <Compile Include="Entities\IEntityPartCorrelationId.cs" />
     <Compile Include="Entities\IEntityPartId.cs" />
     <Compile Include="Entities\IEntityPartPositionInList.cs" />
+    <Compile Include="Exceptions\CodeBehindErrorException.cs" />
+    <Compile Include="Exceptions\ILocalizableExceptions.cs" />
     <Compile Include="IFramework.cs" />
     <Compile Include="Modules\Auth\UI\IUserAccountApi.cs" />
     <Compile Include="Modules\Auth\IAuditEntryEntity.cs" />
@@ -82,6 +90,8 @@
     <Compile Include="Modules\Geo\IEntityPartPostalAddress.cs" />
     <Compile Include="Modules\Geo\IStateCountyEntity.cs" />
     <Compile Include="Modules\Geo\IZipCodeEntity.cs" />
+    <Compile Include="Processing\IStateMachineBuilder.cs" />
+    <Compile Include="Processing\IStateMachineCodeBehind.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\Behaviors\IAlertUiBehaviorBuilder.cs" />
     <Compile Include="UI\Behaviors\IApiErrorState.cs" />
