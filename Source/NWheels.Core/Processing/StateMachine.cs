@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Hapil.Applied.ApiContracts;
 using NWheels.Exceptions;
+using NWheels.Logging;
 using NWheels.Processing;
 
 namespace NWheels.Core.Processing
@@ -11,15 +13,15 @@ namespace NWheels.Core.Processing
     public class StateMachine<TState, TTrigger> : IStateMachineBuilder<TState, TTrigger>
     {
         private readonly IStateMachineCodeBehind<TState, TTrigger> _codeBehind;
-        private readonly IProcessingExceptions _errors;
+        private readonly ILogger _logger;
         private readonly Dictionary<TState, MachineState> _states;
         private volatile MachineState _currentState;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public StateMachine(IStateMachineCodeBehind<TState, TTrigger> codeBehind, IProcessingExceptions errors)
+        public StateMachine(IStateMachineCodeBehind<TState, TTrigger> codeBehind, ILogger logger)
         {
-            _errors = errors;
+            _logger = logger;
             _codeBehind = codeBehind;
             _states = new Dictionary<TState, MachineState>();
 
@@ -27,8 +29,10 @@ namespace NWheels.Core.Processing
 
             if ( _currentState == null )
             {
-                throw _errors.StateMachineInitialStateNotSet(_codeBehind.GetType());
+                throw _logger.InitialStateNotSet(_codeBehind.GetType());
             }
+
+            _currentState.Enter(new StateMachineEventArgs<TState, TTrigger>(_currentState.Value));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -37,7 +41,7 @@ namespace NWheels.Core.Processing
         {
             if ( _states.ContainsKey(value) )
             {
-                throw _errors.StateMachineStateAlreadyDefined(_codeBehind.GetType(), value);
+                throw _logger.StateAlreadyDefined(_codeBehind.GetType(), value);
             }
 
             var newState = new MachineState(this, value);
@@ -55,10 +59,25 @@ namespace NWheels.Core.Processing
 
             if ( transition == null )
             {
-                throw _errors.StateMachineTransitionAlreadyDefined(_codeBehind.GetType(), currentState.Value, trigger);
+                throw _logger.TransitionNotDefined(_codeBehind.GetType(), currentState.Value, trigger);
+            }
+
+            var eventArgs = new StateMachineEventArgs<TState, TTrigger>(_currentState.Value, transition.DestinationStateValue, trigger, context: null);
+
+            _currentState.Leave(eventArgs);
+
+            try
+            {
+                transition.RaiseTransitioning(eventArgs);
+            }
+            catch
+            {
+                _currentState.Enter(eventArgs);
+                throw;
             }
 
             _currentState = _states[transition.DestinationStateValue];
+            _currentState.Enter(eventArgs);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -77,7 +96,7 @@ namespace NWheels.Core.Processing
         {
             if ( _currentState != null )
             {
-                throw _errors.StateMachineInitialStateAlreadyDefined(_codeBehind.GetType(), _currentState.Value, machineState.Value);
+                throw _logger.InitialStateAlreadyDefined(_codeBehind.GetType(), _currentState.Value, machineState.Value);
             }
 
             _currentState = machineState;
@@ -87,16 +106,18 @@ namespace NWheels.Core.Processing
 
         private class MachineState : IStateMachineStateBuilder<TState, TTrigger>
         {
-            private readonly StateMachine<TState, TTrigger> _owner;
+            private readonly StateMachine<TState, TTrigger> _ownerMachine;
             private readonly TState _value;
             private readonly Dictionary<TTrigger, StateTransition> _transitions;
+            private EventHandler<StateMachineEventArgs<TState, TTrigger>> _onEntered = null;
+            private EventHandler<StateMachineEventArgs<TState, TTrigger>> _onLeaving = null;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public MachineState(StateMachine<TState, TTrigger> owner, TState value)
+            public MachineState(StateMachine<TState, TTrigger> ownerMachine, TState value)
             {
                 _value = value;
-                _owner = owner;
+                _ownerMachine = ownerMachine;
                 _transitions = new Dictionary<TTrigger, StateTransition>();
             }
 
@@ -104,7 +125,25 @@ namespace NWheels.Core.Processing
 
             IStateMachineStateBuilder<TState, TTrigger> IStateMachineStateBuilder<TState, TTrigger>.SetAsInitial()
             {
-                _owner.TrySetInitialState(this);
+                _ownerMachine.TrySetInitialState(this);
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            IStateMachineStateBuilder<TState, TTrigger> IStateMachineStateBuilder<TState, TTrigger>.OnEntered(
+                EventHandler<StateMachineEventArgs<TState, TTrigger>> handler)
+            {
+                _onEntered += handler;
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            IStateMachineStateBuilder<TState, TTrigger> IStateMachineStateBuilder<TState, TTrigger>.OnLeaving(
+                EventHandler<StateMachineEventArgs<TState, TTrigger>> handler)
+            {
+                _onLeaving += handler;
                 return this;
             }
 
@@ -114,11 +153,10 @@ namespace NWheels.Core.Processing
             {
                 if ( _transitions.ContainsKey(trigger) )
                 {
-                    throw _owner._errors.StateMachineTransitionAlreadyDefined(_owner._codeBehind.GetType(), _value, trigger);
+                    throw _ownerMachine._logger.TransitionAlreadyDefined(_ownerMachine._codeBehind.GetType(), _value, trigger);
                 }
 
-
-                return new StateTransition(_owner, this, trigger);
+                return new StateTransition(_ownerMachine, this, trigger);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -146,6 +184,26 @@ namespace NWheels.Core.Processing
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public void Enter(StateMachineEventArgs<TState, TTrigger> args)
+            {
+                if ( _onEntered != null )
+                {
+                    _onEntered(_ownerMachine, args);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Leave(StateMachineEventArgs<TState, TTrigger> args)
+            {
+                if ( _onLeaving != null )
+                {
+                    _onLeaving(_ownerMachine, args);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public TState Value
             {
                 get { return _value; }
@@ -160,6 +218,7 @@ namespace NWheels.Core.Processing
             private readonly MachineState _ownerState;
             private readonly TTrigger _trigger;
             private TState _destinationStateValue;
+            private EventHandler<StateMachineEventArgs<TState, TTrigger>> _onTransitioning = null;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -175,12 +234,25 @@ namespace NWheels.Core.Processing
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            IStateMachineStateBuilder<TState, TTrigger> IStateMachineTransitionBuilder<TState, TTrigger>.TransitionTo(TState destination)
+            IStateMachineStateBuilder<TState, TTrigger> IStateMachineTransitionBuilder<TState, TTrigger>.TransitionTo(
+                TState destination, 
+                EventHandler<StateMachineEventArgs<TState, TTrigger>> onTransitioning)
             {
                 _destinationStateValue = destination;
                 _ownerState.AddTransition(this);
-                
+                _onTransitioning = onTransitioning;
+
                 return _ownerState;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RaiseTransitioning(StateMachineEventArgs<TState, TTrigger> args)
+            {
+                if ( _onTransitioning != null )
+                {
+                    _onTransitioning(_ownerMachine, args);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -196,6 +268,17 @@ namespace NWheels.Core.Processing
             {
                 get { return _destinationStateValue; }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface ILogger : IApplicationEventLogger
+        {
+            CodeBehindErrorException InitialStateNotSet(Type codeBehind);
+            CodeBehindErrorException StateAlreadyDefined(Type codeBehind, TState state);
+            CodeBehindErrorException InitialStateAlreadyDefined(Type codeBehind, TState initialState, TState attemptedState);
+            CodeBehindErrorException TransitionAlreadyDefined(Type codeBehind, TState state, TTrigger trigger);
+            CodeBehindErrorException TransitionNotDefined(Type codeBehind, TState state, TTrigger trigger);
         }
     }
 }

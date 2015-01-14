@@ -47,7 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Processing\IProcessingExceptions.cs" />
+    <Compile Include="Logging\ActivityLogNode.cs" />
+    <Compile Include="Logging\ApplicationEventLoggerConvention.cs" />
+    <Compile Include="Logging\IThreadClock.cs" />
+    <Compile Include="Logging\ILazyLogText.cs" />
+    <Compile Include="Logging\LogNode.cs" />
+    <Compile Include="Logging\ThreadLog.cs" />
     <Compile Include="Processing\StateMachine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

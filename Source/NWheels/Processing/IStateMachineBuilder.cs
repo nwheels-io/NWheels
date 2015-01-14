@@ -16,6 +16,8 @@ namespace NWheels.Processing
     public interface IStateMachineStateBuilder<TState, TTrigger>
     {
         IStateMachineStateBuilder<TState, TTrigger> SetAsInitial();
+        IStateMachineStateBuilder<TState, TTrigger> OnEntered(EventHandler<StateMachineEventArgs<TState, TTrigger>> handler);
+        IStateMachineStateBuilder<TState, TTrigger> OnLeaving(EventHandler<StateMachineEventArgs<TState, TTrigger>> handler);
         IStateMachineTransitionBuilder<TState, TTrigger> OnTrigger(TTrigger trigger);
     }
 
@@ -23,6 +25,43 @@ namespace NWheels.Processing
 
     public interface IStateMachineTransitionBuilder<TState, TTrigger>
     {
-        IStateMachineStateBuilder<TState, TTrigger> TransitionTo(TState destination);
+        IStateMachineStateBuilder<TState, TTrigger> TransitionTo(
+            TState destination, 
+            EventHandler<StateMachineEventArgs<TState, TTrigger>> onTransitioning = null);
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class StateMachineEventArgs<TState, TTrigger> : EventArgs
+    {
+        public StateMachineEventArgs(TState initialState)
+        {
+            HasToState = true;
+            ToState = initialState;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public StateMachineEventArgs(TState from, TState to, TTrigger trigger, object context)
+        {
+            HasFromState = true;
+            HasToState = true;
+            HasTrigger = true;
+
+            FromState = from;
+            ToState = to;
+            Trigger = trigger;
+            Context = context;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool HasFromState { get; private set; }
+        public bool HasToState { get; private set; }
+        public bool HasTrigger { get; private set; }
+        public TState FromState { get; private set; }
+        public TState ToState { get; private set; }
+        public TTrigger Trigger { get; private set; }
+        public object Context { get; private set; }
     }
 }
