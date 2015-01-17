@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace NWheels.Logging
 {
-    public enum LogNodeType
+    public interface IThreadLogAppender
     {
-        Log,
-        Activity,
-        CommunicationMessage,
-        DataEntity
+        void AppendLogNode(LogNode node);
+        void AppendActivityNode(ActivityLogNode activity);
     }
 }

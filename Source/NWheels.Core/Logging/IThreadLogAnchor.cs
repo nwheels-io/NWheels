@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace NWheels.Core.Logging
 {
-    public interface ILazyLogText
+    internal interface IThreadLogAnchor
     {
-        string FormatBrief();
-        string FormatDetails();
+        ThreadLog CurrentThreadLog { get; set; }
     }
 }
