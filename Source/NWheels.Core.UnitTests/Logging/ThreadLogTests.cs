@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using NUnit.Framework;
 using NWheels.Core.Logging;
 using NWheels.Logging;
@@ -13,6 +16,18 @@ namespace NWheels.Core.UnitTests.Logging
     [TestFixture]
     public class ThreadLogTests : UnitTestBase
     {
+        private TestClock _clock;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [SetUp]
+        public void SetUp()
+        {
+            _clock = new TestClock();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [Test]
         public void NewInstance_StartedAtUtc_EqualsUtcNow()
         {
@@ -23,7 +38,8 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Act
 
-            var log = new ThreadLog(Framework, Resolve<ThreadLogRegistry>(), ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
+            var log = new ThreadLog(
+                Framework, _clock, Resolve<ThreadLogRegistry>(), ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -42,7 +58,8 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Act
 
-            var log = new ThreadLog(Framework, Resolve<ThreadLogRegistry>(), ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
+            var log = new ThreadLog(
+                Framework, _clock, Resolve<ThreadLogRegistry>(), ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -56,7 +73,8 @@ namespace NWheels.Core.UnitTests.Logging
         {
             //-- Act
 
-            var log = new ThreadLog(Framework, Resolve<ThreadLogRegistry>(), ThreadTaskType.QueuedWorkItem, new FormattedActivityLogNode("Test"));
+            var log = new ThreadLog(
+                Framework, _clock, Resolve<ThreadLogRegistry>(), ThreadTaskType.QueuedWorkItem, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -74,7 +92,8 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Act
 
-            var log = new ThreadLog(Framework, Resolve<ThreadLogRegistry>(), ThreadTaskType.Unspecified, rootActivity);
+            var log = new ThreadLog(
+                Framework, _clock, Resolve<ThreadLogRegistry>(), ThreadTaskType.Unspecified, rootActivity);
 
             //-- Assert
 
@@ -270,10 +289,113 @@ namespace NWheels.Core.UnitTests.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void ActivityNotClosed_Duration_FromThreadClock()
+        {
+            //-- Arrange
+
+            var log = CreateThreadLog();
+            ActivityLogNode activity;
+
+            log.AppendNode(new FormattedLogNode(LogLevel.Info, "One"));
+            log.AppendNode(activity = new FormattedActivityLogNode("Two"));
+
+            //-- Act
+
+            _clock.ElapsedMilliseconds = 123;
+
+            var rootDuration1 = log.RootActivity.MillisecondsDuration;
+            var childDuration1 = activity.MillisecondsDuration;
+
+            _clock.ElapsedMilliseconds = 456;
+
+            var rootDuration2 = log.RootActivity.MillisecondsDuration;
+            var childDuration2 = activity.MillisecondsDuration;
+
+            //-- Assert
+
+            Assert.That(rootDuration1, Is.EqualTo(123));
+            Assert.That(childDuration1, Is.EqualTo(123));
+
+            Assert.That(rootDuration2, Is.EqualTo(456));
+            Assert.That(childDuration2, Is.EqualTo(456));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void ActivityClosed_Duration_Fixed()
+        {
+            //-- Arrange
+
+            var log = CreateThreadLog();
+            ActivityLogNode activity;
+
+            log.AppendNode(new FormattedLogNode(LogLevel.Info, "One"));
+            log.AppendNode(activity = new FormattedActivityLogNode("Two"));
+
+            //-- Act
+
+            _clock.ElapsedMilliseconds = 123;
+
+            activity.Close();
+
+            _clock.ElapsedMilliseconds = 456;
+
+            var rootDuration = log.RootActivity.MillisecondsDuration;
+            var childDuration = activity.MillisecondsDuration;
+
+            //-- Assert
+
+            Assert.That(rootDuration, Is.EqualTo(456));
+            Assert.That(childDuration, Is.EqualTo(123));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void ThreadLogSnapshot_Serialize_Deserialize()
+        {
+            //-- Arrange
+
+            var log = CreateThreadLog();
+
+            log.AppendNode(new FormattedLogNode(LogLevel.Info, "One"));
+            log.AppendNode(new FormattedActivityLogNode("Two"));
+            log.AppendNode(new FormattedLogNode(LogLevel.Info, "Three"));
+            log.AppendNode(new FormattedActivityLogNode("Four"));
+            log.AppendNode(new FormattedLogNode(LogLevel.Error, "Five", exception: new Exception()));
+
+            var originalSnapshot = log.TakeSnapshot();
+            var serializer = new DataContractSerializer(typeof(ThreadLogSnapshot));
+            
+            //-- Act
+
+            var output1 = new StringBuilder();
+            var writer1 = XmlWriter.Create(output1, new XmlWriterSettings { Indent = true, IndentChars = "\t" });
+            serializer.WriteObject(writer1, originalSnapshot);
+            writer1.Flush();
+
+            var reader = XmlReader.Create(new StringReader(output1.ToString()));
+            var deserializedSnapshot = serializer.ReadObject(reader);
+
+            var output2 = new StringBuilder();
+            var writer2 = XmlWriter.Create(output2, new XmlWriterSettings { Indent = true, IndentChars = "\t" });
+            serializer.WriteObject(writer2, originalSnapshot);
+            writer2.Flush();
+
+            //-- Assert
+
+            Console.WriteLine(output1.ToString());
+            Assert.That(output2.ToString(), Is.EqualTo(output1.ToString()));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private ThreadLog CreateThreadLog(string rootActivityText = "Root", ThreadTaskType taskType = ThreadTaskType.Unspecified)
         {
             var rootActivity = new FormattedActivityLogNode(rootActivityText);
-            return new ThreadLog(Framework, Resolve<ThreadLogRegistry>(), ThreadTaskType.Unspecified, rootActivity);
+            return new ThreadLog(Framework, _clock, Resolve<ThreadLogRegistry>(), ThreadTaskType.Unspecified, rootActivity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -326,6 +448,13 @@ namespace NWheels.Core.UnitTests.Logging
 
             output.Append(":");
             output.Append(node.SingleLineText);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class TestClock : IClock
+        {
+            public long ElapsedMilliseconds { get; set; }
         }
     }
 }

@@ -10,17 +10,15 @@ namespace NWheels.Core.Logging
 {
     internal class ThreadLogAppender : IThreadLogAppender
     {
-        private readonly IFramework _framework;
         private readonly IThreadLogAnchor _anchor;
-        private readonly ThreadLogRegistry _registry;
+        private readonly IComponentContext _components;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ThreadLogAppender(IFramework framework, IThreadLogAnchor anchor, ThreadLogRegistry registry)
+        public ThreadLogAppender(IThreadLogAnchor anchor, IComponentContext components)
         {
             _anchor = anchor;
-            _registry = registry;
-            _framework = framework;
+            _components = components;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -51,7 +49,7 @@ namespace NWheels.Core.Logging
             }
             else
             {
-                _anchor.CurrentThreadLog = new ThreadLog(_framework, _registry, activity.TaskType, rootActivity: activity);
+                _anchor.CurrentThreadLog = _components.Resolve<ThreadLog>();
             }
         }
     }

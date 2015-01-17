@@ -44,6 +44,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
@@ -54,7 +55,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Logging\ApplicationEventLoggerConvention.cs" />
+    <Compile Include="Logging\IClock.cs" />
     <Compile Include="Logging\IThreadLogAnchor.cs" />
+    <Compile Include="Logging\StopwatchClock.cs" />
     <Compile Include="Logging\ThreadLog.cs" />
     <Compile Include="Logging\ThreadLogAppender.cs" />
     <Compile Include="Logging\ThreadLogRegistry.cs" />

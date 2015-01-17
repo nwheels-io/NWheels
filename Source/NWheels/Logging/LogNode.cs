@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,6 +24,20 @@ namespace NWheels.Logging
             _contentTypes = contentTypes;
             _level = initialLevel;
             _millisecondsTimestamp = -1;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual ThreadLogSnapshot.LogNodeSnapshot TakeSnapshot()
+        {
+            return new ThreadLogSnapshot.LogNodeSnapshot {
+                MillisecondsTimestamp = _millisecondsTimestamp,
+                Level = _level,
+                ContentTypes = _contentTypes,
+                SingleLineText = this.SingleLineText,
+                FullDetailsText = this.FullDetailsText,
+                ExceptionTypeName = (this.Exception != null ? this.Exception.GetType().FullName : null)
+            };
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -81,6 +97,16 @@ namespace NWheels.Logging
                 }
 
                 return _formattedFullDetailsText;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string ExceptionTypeName
+        {
+            get
+            {
+                return (this.Exception != null ? this.Exception.GetType().FullName : null);
             }
         }
 

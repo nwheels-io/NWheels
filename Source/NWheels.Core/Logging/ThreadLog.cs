@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Logging;
@@ -11,25 +12,26 @@ namespace NWheels.Core.Logging
     internal class ThreadLog : IThreadLog
     {
         private readonly ThreadLogRegistry _registry;
+        private readonly Guid _logId;
+        private readonly Guid _correlationId;
         private readonly ThreadTaskType _taskType;
         private readonly DateTime _startedAtUtc;
-        private readonly Guid _correlationId;
-        private readonly Stopwatch _watch;
+        private readonly IClock _clock;
         private ActivityLogNode _rootActivity;
         private ActivityLogNode _currentActivity;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ThreadLog(IFramework framework, ThreadLogRegistry registry, ThreadTaskType taskType, ActivityLogNode rootActivity)
+        public ThreadLog(IFramework framework, IClock clock, ThreadLogRegistry registry, ThreadTaskType taskType, ActivityLogNode rootActivity)
         {
             _registry = registry;
             _taskType = taskType;
             _rootActivity = rootActivity;
             _currentActivity = rootActivity;
             _startedAtUtc = framework.UtcNow;
-            _correlationId = framework.NewGuid();
-
-            _watch = Stopwatch.StartNew();
+            _logId = framework.NewGuid();
+            _correlationId = _logId;
+            _clock = clock;
 
             _rootActivity.AttachToThreadLog(this, parent: null);
             _registry.ThreadLogStarted(this);
@@ -71,6 +73,19 @@ namespace NWheels.Core.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ThreadLogSnapshot TakeSnapshot()
+        {
+            return new ThreadLogSnapshot {
+                LogId = _logId,
+                CorrelationId = _correlationId,
+                StartedAtUtc = _startedAtUtc,
+                TaskType = _taskType,
+                RootActivity = (ThreadLogSnapshot.ActivityNodeSnapshot)_rootActivity.TakeSnapshot()
+            };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Guid CorrelationId
         {
             get
@@ -105,7 +120,7 @@ namespace NWheels.Core.Logging
         {
             get
             {
-                return _watch.ElapsedMilliseconds;
+                return _clock.ElapsedMilliseconds;
             }
         }
 

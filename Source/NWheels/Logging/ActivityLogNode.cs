@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace NWheels.Logging
 {
@@ -17,6 +19,29 @@ namespace NWheels.Logging
         protected ActivityLogNode()
             : base(LogContentTypes.PerformanceMeasurement, LogLevel.Info)
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override ThreadLogSnapshot.LogNodeSnapshot TakeSnapshot()
+        {
+            var subNodes = new List<ThreadLogSnapshot.LogNodeSnapshot>();
+
+            for ( var child = _firstChild ; child != null ; child = child.NextSibling )
+            {
+                subNodes.Add(child.TakeSnapshot());
+            }
+
+            return new ThreadLogSnapshot.ActivityNodeSnapshot {
+                MillisecondsTimestamp = base.MillisecondsTimestamp,
+                Level = base.Level,
+                ContentTypes = base.ContentTypes,
+                SingleLineText = this.SingleLineText,
+                FullDetailsText = this.FullDetailsText,
+                ExceptionTypeName = (this.Exception != null ? this.Exception.GetType().FullName : null),
+                MillisecondsDuration = this.MillisecondsDuration,
+                SubNodes = subNodes.ToArray()
+            };
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

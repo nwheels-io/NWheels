@@ -43,6 +43,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -67,6 +68,7 @@
     <Compile Include="Logging\LogContentTypes.cs" />
     <Compile Include="Logging\LogLevelExtensions.cs" />
     <Compile Include="Logging\LogNode.cs" />
+    <Compile Include="Logging\ThreadLogSnapshot.cs" />
     <Compile Include="Logging\ThreadTaskType.cs" />
     <Compile Include="Modules\Auth\UI\IUserAccountApi.cs" />
     <Compile Include="Modules\Auth\IAuditEntryEntity.cs" />
