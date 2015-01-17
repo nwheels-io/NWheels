@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Core.UnitTests", "N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Testing", "NWheels.Testing\NWheels.Testing.csproj", "{CD358C0A-E2B8-43E1-8F3E-618E56EFFE0F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{CE3F724B-60C0-4274-B3F3-1C2CDD3D8531}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Tools.LogViewer", "NWheels.Tools.LogViewer\NWheels.Tools.LogViewer.csproj", "{2D7AE6DF-3152-4037-8131-20390F14438B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,10 @@ Global
 		{CD358C0A-E2B8-43E1-8F3E-618E56EFFE0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD358C0A-E2B8-43E1-8F3E-618E56EFFE0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD358C0A-E2B8-43E1-8F3E-618E56EFFE0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D7AE6DF-3152-4037-8131-20390F14438B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D7AE6DF-3152-4037-8131-20390F14438B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D7AE6DF-3152-4037-8131-20390F14438B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D7AE6DF-3152-4037-8131-20390F14438B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,5 +77,6 @@ Global
 		{B00952F0-E6C7-4C8E-9181-7367FD48CAF4} = {28191429-D848-4658-B8C2-8061E8990274}
 		{E02C2DAE-9021-4D9E-9EC5-97ADF7C4B12E} = {28191429-D848-4658-B8C2-8061E8990274}
 		{CD358C0A-E2B8-43E1-8F3E-618E56EFFE0F} = {689643DB-A9C4-47E6-94DC-6C29119E8317}
+		{2D7AE6DF-3152-4037-8131-20390F14438B} = {CE3F724B-60C0-4274-B3F3-1C2CDD3D8531}
 	EndGlobalSection
 EndGlobal

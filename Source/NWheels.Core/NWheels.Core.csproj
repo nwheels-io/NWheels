@@ -57,10 +57,12 @@
     <Compile Include="Logging\ApplicationEventLoggerConvention.cs" />
     <Compile Include="Logging\IClock.cs" />
     <Compile Include="Logging\IThreadLogAnchor.cs" />
+    <Compile Include="Logging\IThreadRegistry.cs" />
+    <Compile Include="Logging\IThreadPostMortem.cs" />
     <Compile Include="Logging\StopwatchClock.cs" />
     <Compile Include="Logging\ThreadLog.cs" />
     <Compile Include="Logging\ThreadLogAppender.cs" />
-    <Compile Include="Logging\ThreadLogRegistry.cs" />
+    <Compile Include="Logging\ThreadRegistry.cs" />
     <Compile Include="Logging\UniversalThreadLogAnchor.cs" />
     <Compile Include="Processing\StateMachine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

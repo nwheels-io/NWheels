@@ -103,7 +103,7 @@ namespace NWheels.Testing
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterType<ThreadLogRegistry>().SingleInstance();
+            builder.RegisterType<ThreadRegistry>().SingleInstance();
 
             return builder.Build();
         }

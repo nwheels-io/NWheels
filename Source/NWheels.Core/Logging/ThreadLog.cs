@@ -11,7 +11,7 @@ namespace NWheels.Core.Logging
 {
     internal class ThreadLog : IThreadLog
     {
-        private readonly ThreadLogRegistry _registry;
+        private readonly IThreadRegistry _registry;
         private readonly Guid _logId;
         private readonly Guid _correlationId;
         private readonly ThreadTaskType _taskType;
@@ -22,7 +22,7 @@ namespace NWheels.Core.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ThreadLog(IFramework framework, IClock clock, ThreadLogRegistry registry, ThreadTaskType taskType, ActivityLogNode rootActivity)
+        public ThreadLog(IFramework framework, IClock clock, IThreadRegistry registry, ThreadTaskType taskType, ActivityLogNode rootActivity)
         {
             _registry = registry;
             _taskType = taskType;
@@ -34,7 +34,7 @@ namespace NWheels.Core.Logging
             _clock = clock;
 
             _rootActivity.AttachToThreadLog(this, parent: null);
-            _registry.ThreadLogStarted(this);
+            _registry.ThreadStarted(this);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -82,6 +82,16 @@ namespace NWheels.Core.Logging
                 TaskType = _taskType,
                 RootActivity = (ThreadLogSnapshot.ActivityNodeSnapshot)_rootActivity.TakeSnapshot()
             };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Guid LogId
+        {
+            get
+            {
+                return _logId;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -148,7 +158,7 @@ namespace NWheels.Core.Logging
 
         private void Close()
         {
-            _registry.ThreadLogFinished(this);
+            _registry.ThreadFinished(this);
         }
     }
 }

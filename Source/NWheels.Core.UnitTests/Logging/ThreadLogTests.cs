@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using NUnit.Framework;
@@ -17,6 +18,7 @@ namespace NWheels.Core.UnitTests.Logging
     public class ThreadLogTests : UnitTestBase
     {
         private TestClock _clock;
+        private TestThreadRegistry _threadRegistry;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -24,6 +26,7 @@ namespace NWheels.Core.UnitTests.Logging
         public void SetUp()
         {
             _clock = new TestClock();
+            _threadRegistry = new TestThreadRegistry();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,7 +42,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, Resolve<ThreadLogRegistry>(), ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
+                Framework, _clock, _threadRegistry, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -49,7 +52,7 @@ namespace NWheels.Core.UnitTests.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void NewInstance_CorrelationId_NewGuid()
+        public void NewInstance_LogId_IsNewGuid()
         {
             //-- Arrange
 
@@ -59,7 +62,27 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, Resolve<ThreadLogRegistry>(), ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
+                Framework, _clock, _threadRegistry, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
+
+            //-- Assert
+
+            Assert.That(log.LogId, Is.EqualTo(newGuid));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void NewInstance_CorrelationId_EqualsLogId()
+        {
+            //-- Arrange
+
+            var newGuid = new Guid("E690328B-994E-494F-B4F6-B317A0E2668B");
+            Framework.PresetGuids.Enqueue(newGuid);
+
+            //-- Act
+
+            var log = new ThreadLog(
+                Framework, _clock, _threadRegistry, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -74,7 +97,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, Resolve<ThreadLogRegistry>(), ThreadTaskType.QueuedWorkItem, new FormattedActivityLogNode("Test"));
+                Framework, _clock, _threadRegistry, ThreadTaskType.QueuedWorkItem, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -93,7 +116,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, Resolve<ThreadLogRegistry>(), ThreadTaskType.Unspecified, rootActivity);
+                Framework, _clock, _threadRegistry, ThreadTaskType.Unspecified, rootActivity);
 
             //-- Assert
 
@@ -392,10 +415,88 @@ namespace NWheels.Core.UnitTests.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [TestCase(ThreadTaskType.StartUp, "Node is starting up", true, true)]
+        [TestCase(ThreadTaskType.StartUp, "Node is starting up", false, false)]
+        [TestCase(ThreadTaskType.IncomingRequest, "http://myapp/request", false, false)]
+        [TestCase(ThreadTaskType.ScheduledJob, "Timer [Cleaner]", false, false)]
+        [TestCase(ThreadTaskType.QueuedWorkItem, "Queue [Data] Item [12345]", false, false)]
+        [TestCase(ThreadTaskType.ShutDown, "Node is shutting down", false, false)]
+        public void GenerateExampleThreadLogs(ThreadTaskType taskType, string rootActivityText, bool includeWarning, bool includeError)
+        {
+            var realThreadRegistry = new ThreadRegistry(@"D:\ThreadLogExamples");
+            var rootActivity = new FormattedActivityLogNode(rootActivityText);
+            var log = new ThreadLog(Framework, _clock, realThreadRegistry, taskType, rootActivity);
+
+            log.AppendNode(new FormattedLogNode(LogLevel.Info, "One"));
+            log.AppendNode(new FormattedActivityLogNode("Two"));
+            log.AppendNode(new FormattedLogNode(LogLevel.Verbose, "Two-1"));
+            log.AppendNode(new FormattedLogNode(LogLevel.Verbose, "Two-2"));
+            log.AppendNode(new FormattedLogNode(LogLevel.Info, "Three"));
+            log.AppendNode(new FormattedActivityLogNode("Four"));
+
+            if ( includeError )
+            {
+                try
+                {
+                    throw new Exception("This is a generated exception");
+                }
+                catch ( Exception e )
+                {
+                    log.AppendNode(new FormattedLogNode(LogLevel.Error, "Five", exception: e, fullDetailsText: e.ToString()));
+                }
+            }
+
+            log.CurrentActivity.Close();
+
+            if ( includeWarning )
+            {
+                log.AppendNode(new FormattedLogNode(LogLevel.Warning, "Six"));
+            }
+
+            log.AppendNode(new FormattedLogNode(LogLevel.Debug, "Two-3"));
+            log.AppendNode(new FormattedLogNode(LogLevel.Debug, "Two-4"));
+
+            Thread.Sleep(5000);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void NewInstance_AddedToThreadRegistry()
+        {
+            //-- Act
+
+            var log = CreateThreadLog();
+
+            //-- Assert
+
+            Assert.IsTrue(_threadRegistry.GetRunningThreads().Contains(log));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CloseThreadLog_RemovedFromThreadRegistry()
+        {
+            //-- Arrange
+
+            var log = CreateThreadLog();
+
+            //-- Act
+
+            log.RootActivity.Close();
+
+            //-- Assert
+
+            Assert.IsFalse(_threadRegistry.GetRunningThreads().Contains(log));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private ThreadLog CreateThreadLog(string rootActivityText = "Root", ThreadTaskType taskType = ThreadTaskType.Unspecified)
         {
             var rootActivity = new FormattedActivityLogNode(rootActivityText);
-            return new ThreadLog(Framework, _clock, Resolve<ThreadLogRegistry>(), ThreadTaskType.Unspecified, rootActivity);
+            return new ThreadLog(Framework, _clock, _threadRegistry, ThreadTaskType.Unspecified, rootActivity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -455,6 +556,34 @@ namespace NWheels.Core.UnitTests.Logging
         private class TestClock : IClock
         {
             public long ElapsedMilliseconds { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class TestThreadRegistry : IThreadRegistry
+        {
+            private readonly HashSet<ThreadLog> _runningThreads = new HashSet<ThreadLog>();
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ThreadStarted(ThreadLog threadLog)
+            {
+                _runningThreads.Add(threadLog);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ThreadFinished(ThreadLog threadLog)
+            {
+                _runningThreads.Remove(threadLog);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ThreadLog[] GetRunningThreads()
+            {
+                return _runningThreads.ToArray();
+            }
         }
     }
 }
