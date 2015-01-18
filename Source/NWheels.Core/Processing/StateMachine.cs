@@ -10,7 +10,7 @@ using NWheels.Processing;
 
 namespace NWheels.Core.Processing
 {
-    public class StateMachine<TState, TTrigger> : IStateMachineBuilder<TState, TTrigger>
+    public class StateMachine<TState, TTrigger> : IStateMachine<TState, TTrigger>, IStateMachineBuilder<TState, TTrigger>
     {
         private readonly IStateMachineCodeBehind<TState, TTrigger> _codeBehind;
         private readonly ILogger _logger;

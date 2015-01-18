@@ -64,6 +64,7 @@
     <Compile Include="Logging\ThreadLogAppender.cs" />
     <Compile Include="Logging\ThreadRegistry.cs" />
     <Compile Include="Logging\UniversalThreadLogAnchor.cs" />
+    <Compile Include="Processing\RevertableSequence.cs" />
     <Compile Include="Processing\StateMachine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

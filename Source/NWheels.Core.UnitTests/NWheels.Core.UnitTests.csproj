@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Logging\LoggingBenchmarkTests.cs" />
     <Compile Include="Logging\ThreadLogTests.cs" />
+    <Compile Include="Processing\RevertableSequenceTests.cs" />
     <Compile Include="Processing\StateMachineTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
