@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NWheels.Logging
 {
-    public interface ILoggedActivity : IDisposable
+    public interface ILogActivity : IDisposable
     {
         void Warn(Exception error);
         void Fail(Exception error);

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace NWheels.Logging
 {
-    public abstract class ActivityLogNode : LogNode
+    public abstract class ActivityLogNode : LogNode, ILogActivity
     {
         private IThreadLog _threadLog;
         private ActivityLogNode _parent;
@@ -19,6 +19,45 @@ namespace NWheels.Logging
         protected ActivityLogNode()
             : base(LogContentTypes.PerformanceMeasurement, LogLevel.Info)
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void ILogActivity.Warn(Exception error)
+        {
+            if ( _exception == null )
+            {
+                _exception = error;
+            }
+            else
+            {
+                _exception = new AggregateException(_exception, error).Flatten();
+            }
+
+            base.BubbleLogLevelFrom(LogLevel.Warning);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void ILogActivity.Fail(Exception error)
+        {
+            if ( _exception == null )
+            {
+                _exception = error;
+            }
+            else
+            {
+                _exception = new AggregateException(_exception, error).Flatten();
+            }
+
+            base.BubbleLogLevelFrom(LogLevel.Error);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IDisposable.Dispose()
+        {
+            Close();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

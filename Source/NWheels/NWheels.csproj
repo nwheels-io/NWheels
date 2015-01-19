@@ -57,14 +57,16 @@
     <Compile Include="Entities\IEntityPartId.cs" />
     <Compile Include="Entities\IEntityPartPositionInList.cs" />
     <Compile Include="Exceptions\CodeBehindErrorException.cs" />
+    <Compile Include="Exceptions\ContractConventionException.cs" />
     <Compile Include="IFramework.cs" />
     <Compile Include="Logging\ActivityLogNode.cs" />
     <Compile Include="Logging\FormattedActivityLogNode.cs" />
     <Compile Include="Logging\FormattedLogNode.cs" />
     <Compile Include="Logging\IApplicationEventLogger.cs" />
-    <Compile Include="Logging\ILoggedActivity.cs" />
+    <Compile Include="Logging\ILogActivity.cs" />
     <Compile Include="Logging\IThreadLog.cs" />
     <Compile Include="Logging\IThreadLogAppender.cs" />
+    <Compile Include="Logging\LogAttributeBase.cs" />
     <Compile Include="Logging\LogLevel.cs" />
     <Compile Include="Logging\LogContentTypes.cs" />
     <Compile Include="Logging\LogLevelExtensions.cs" />

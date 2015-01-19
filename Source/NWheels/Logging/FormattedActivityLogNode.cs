@@ -11,14 +11,12 @@ namespace NWheels.Logging
     public class FormattedActivityLogNode : ActivityLogNode
     {
         private readonly string _singleLineText;
-        private readonly string _fullDetailsText;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public FormattedActivityLogNode(string singleLineText, string fullDetailsText = null)
+        public FormattedActivityLogNode(string singleLineText)
         {
             _singleLineText = singleLineText;
-            _fullDetailsText = fullDetailsText;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,7 +30,14 @@ namespace NWheels.Logging
 
         protected override string FormatFullDetailsText()
         {
-            return _fullDetailsText;
+            if ( base.Exception != null )
+            {
+                return base.Exception.ToString();
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

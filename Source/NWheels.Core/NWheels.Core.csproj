@@ -58,7 +58,6 @@
     <Compile Include="Logging\IClock.cs" />
     <Compile Include="Logging\IThreadLogAnchor.cs" />
     <Compile Include="Logging\IThreadRegistry.cs" />
-    <Compile Include="Logging\IThreadPostMortem.cs" />
     <Compile Include="Logging\StopwatchClock.cs" />
     <Compile Include="Logging\ThreadLog.cs" />
     <Compile Include="Logging\ThreadLogAppender.cs" />

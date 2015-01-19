@@ -32,6 +32,15 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Hapil">
+      <HintPath>..\packages\FelixB.Hapil.0.9.1\lib\net45\Hapil.dll</HintPath>
+    </Reference>
+    <Reference Include="Hapil.Applied">
+      <HintPath>..\packages\FelixB.Hapil.0.9.1\lib\net45\Hapil.Applied.dll</HintPath>
+    </Reference>
+    <Reference Include="Hapil.Testing.NUnit">
+      <HintPath>..\packages\FelixB.Hapil.0.9.1\lib\net45\Hapil.Testing.NUnit.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
@@ -47,6 +56,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Logging\ApplicationEventLoggerConventionTests.cs" />
     <Compile Include="Logging\LoggingBenchmarkTests.cs" />
     <Compile Include="Logging\ThreadLogTests.cs" />
     <Compile Include="Processing\RevertableSequenceTests.cs" />
