@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if INCLUDE_MANUAL_TESTS
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -9,10 +11,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using NWheels.Testing;
 
 namespace NWheels.Core.UnitTests.Logging
 {
-    [TestFixture]
+    [TestFixture, Category("Manual")]
     public class LoggingBenchmarkTests
     {
         private List<KeyValuePair<string, long>> _millisecondsByTestCaseName;
@@ -95,7 +98,7 @@ namespace NWheels.Core.UnitTests.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [TestCaseSource("s_ScopeStrategyTestCasesRepeated_x100")]
+        [TestCaseSource("s_ScopeStrategyTestCases")]
         public void ThreadStatic_SingleThread(Func<ScopeStrategyUnderTest> scopeFactory, Func<IDisposable> environmentFactory)
         {
             const int cyclesPerUnitOfWork = 10000;
@@ -114,7 +117,7 @@ namespace NWheels.Core.UnitTests.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [TestCaseSource("s_ScopeStrategyTestCasesRepeated_x100")]
+        [TestCaseSource("s_ScopeStrategyTestCases")]
         public void ThreadStatic_MultipleThreads(Func<ScopeStrategyUnderTest> scopeFactory, Func<IDisposable> environmentFactory)
         {
             const int threadCount = 25;
@@ -355,3 +358,5 @@ namespace NWheels.Core.UnitTests.Logging
         }
     }
 }
+
+#endif

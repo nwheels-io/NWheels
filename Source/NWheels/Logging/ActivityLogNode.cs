@@ -119,7 +119,7 @@ namespace NWheels.Logging
         {
             get
             {
-                return (_isClosed && this.Exception != null);
+                return (_isClosed && this.Level >= LogLevel.Error);
             }
         }
 
@@ -129,7 +129,7 @@ namespace NWheels.Logging
         {
             get
             {
-                return (_isClosed && this.Exception == null);
+                return (_isClosed && this.Level < LogLevel.Error);
             }
         }
 

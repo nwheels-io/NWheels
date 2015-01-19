@@ -25,7 +25,8 @@ namespace NWheels.Testing
 
         protected T Resolve<T>() where T : class
         {
-            return s_Framework.Components.Resolve<T>();
+            return null;
+            //return s_Framework.Components.Resolve<T>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

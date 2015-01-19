@@ -415,6 +415,40 @@ namespace NWheels.Core.UnitTests.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void NewInstance_AddedToThreadRegistry()
+        {
+            //-- Act
+
+            var log = CreateThreadLog();
+
+            //-- Assert
+
+            Assert.IsTrue(_threadRegistry.GetRunningThreads().Contains(log));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CloseThreadLog_RemovedFromThreadRegistry()
+        {
+            //-- Arrange
+
+            var log = CreateThreadLog();
+
+            //-- Act
+
+            log.RootActivity.Close();
+
+            //-- Assert
+
+            Assert.IsFalse(_threadRegistry.GetRunningThreads().Contains(log));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #if INCLUDE_MANUAL_TESTS
+        [Category("Manual")]
         [TestCase(ThreadTaskType.StartUp, "Node is starting up", true, true)]
         [TestCase(ThreadTaskType.StartUp, "Node is starting up", false, false)]
         [TestCase(ThreadTaskType.IncomingRequest, "http://myapp/request", false, false)]
@@ -458,38 +492,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             Thread.Sleep(5000);
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Test]
-        public void NewInstance_AddedToThreadRegistry()
-        {
-            //-- Act
-
-            var log = CreateThreadLog();
-
-            //-- Assert
-
-            Assert.IsTrue(_threadRegistry.GetRunningThreads().Contains(log));
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Test]
-        public void CloseThreadLog_RemovedFromThreadRegistry()
-        {
-            //-- Arrange
-
-            var log = CreateThreadLog();
-
-            //-- Act
-
-            log.RootActivity.Close();
-
-            //-- Assert
-
-            Assert.IsFalse(_threadRegistry.GetRunningThreads().Contains(log));
-        }
+        #endif
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

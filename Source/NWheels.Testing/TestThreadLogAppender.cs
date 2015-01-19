@@ -40,5 +40,21 @@ namespace NWheels.Testing
             _logNodes.Clear();
             return result;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string[] GetLogStrings()
+        {
+            return _logNodes.Select(node => node.SingleLineText).ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string[] TakeLogStrings()
+        {
+            var result = _logNodes.Select(node => node.SingleLineText).ToArray();
+            _logNodes.Clear();
+            return result;
+        }
     }
 }

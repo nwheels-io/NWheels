@@ -52,6 +52,80 @@ namespace NWheels.Core.UnitTests.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void CanAppendEmptyMessage()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+
+            //-- Act
+
+            logger.ThisIsMyEmptyDebugMessage();
+
+            //-- Assert
+
+            var log = _log.TakeLog();
+
+            Assert.That(log.Length, Is.EqualTo(1));
+            Assert.That(log[0].Level, Is.EqualTo(LogLevel.Debug));
+            Assert.That(log[0].SingleLineText, Is.EqualTo("This is my empty debug message"));
+            Assert.That(log[0].FullDetailsText, Is.Null);
+            Assert.That(log[0].Exception, Is.Null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanAppendMessageWithParameters()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+
+            //-- Act
+
+            logger.ThisIsMyDebugMessage(num: 123, str: "ABC");
+
+            //-- Assert
+
+            var log = _log.TakeLog();
+
+            Assert.That(log.Length, Is.EqualTo(1));
+            Assert.That(log[0].Level, Is.EqualTo(LogLevel.Debug));
+            Assert.That(log[0].SingleLineText, Is.EqualTo("This is my debug message: num=123, str=ABC"));
+            Assert.That(log[0].FullDetailsText, Is.Null);
+            Assert.That(log[0].Exception, Is.Null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanAppendMessageWithException()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+            var exception = new DivideByZeroException();
+
+            //-- Act
+
+            logger.ThisIsMyErrorMessageWithExceptionParameter(num: 123, str: "ABC", e: exception);
+
+            //-- Assert
+
+            var log = _log.TakeLog();
+
+            Assert.That(log.Length, Is.EqualTo(1));
+            Assert.That(log[0].Level, Is.EqualTo(LogLevel.Error));
+            Assert.That(log[0].SingleLineText, Is.EqualTo(
+                "This is my error message with exception parameter: num=123, str=ABC, e=System.DivideByZeroException: Attempted to divide by zero."));
+            //Assert.That(log[0].FullDetailsText, Is.EqualTo(exception.ToString()));
+            Assert.That(log[0].Exception, Is.SameAs(exception));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private ITestLogger CreateTestLogger()
         {
             return _factory.CreateInstanceOf<ITestLogger>().UsingConstructor<IThreadLogAppender>(_log);

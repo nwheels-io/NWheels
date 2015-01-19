@@ -58,6 +58,8 @@
     <Compile Include="Entities\IEntityPartPositionInList.cs" />
     <Compile Include="Exceptions\CodeBehindErrorException.cs" />
     <Compile Include="Exceptions\ContractConventionException.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="IFramework.cs" />
     <Compile Include="Logging\ActivityLogNode.cs" />
     <Compile Include="Logging\FormattedActivityLogNode.cs" />
