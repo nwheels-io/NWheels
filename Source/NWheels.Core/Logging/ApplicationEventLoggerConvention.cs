@@ -5,11 +5,13 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
+using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Logging;
+using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Core.Logging
 {
@@ -64,14 +66,15 @@ namespace NWheels.Core.Logging
         {
             private readonly TemplateMethodWriter _underlyingWriter;
             private readonly Field<IThreadLogAppender> _threadLogAppenderField;
-            private readonly MethodInfo _declaration;
             private readonly LogAttributeBase _attribute;
+            private readonly MethodInfo _declaration;
+            private readonly MethodSignature _signature;
             private readonly bool _mustCreateException;
-            private readonly ParameterInfo _exceptionParameter;
-            private readonly ParameterInfo[] _parameters;
+            private readonly List<int> _exceptionArgumentIndex;
+            private readonly List<int> _formatArgumentIndex;
             private string _formatString = null;
-            private Local<object[]> _argumentArrayLocal = null;
-            private IOperand<string> _logTextLocal;
+            private Local<object[]> _formatObjectArray = null;
+            private IOperand<string> _singleLineTextLocal;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -80,20 +83,20 @@ namespace NWheels.Core.Logging
                 _underlyingWriter = underlyingWriter;
                 _threadLogAppenderField = threadLogAppenderField;
                 _declaration = underlyingWriter.OwnerMethod.MethodDeclaration;
+                _signature = underlyingWriter.OwnerMethod.Signature;
                 _attribute = _declaration.GetCustomAttribute<LogAttributeBase>();
-
-                ValidateDeclaration();
-
-                _parameters = _declaration.GetParameters();
-                _exceptionParameter = _parameters.FirstOrDefault(p => p.ParameterType.IsExceptionType());
                 _mustCreateException = _declaration.ReturnType.IsExceptionType();
+                _exceptionArgumentIndex = new List<int>();
+                _formatArgumentIndex = new List<int>();
+
+                ValidateSignature();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public void Write()
             {
-                if ( _parameters.Length > 0 )
+                if ( _formatArgumentIndex.Count > 0 )
                 {
                     BuildFormatString();
                     CopyArgumentsToArray();
@@ -101,7 +104,7 @@ namespace NWheels.Core.Logging
                 }
                 else
                 {
-                    _logTextLocal = _underlyingWriter.Const(_declaration.Name.SplitPascalCase());
+                    _singleLineTextLocal = _underlyingWriter.Const(_declaration.Name.SplitPascalCase());
                 }
 
                 if ( _attribute.IsActivity )
@@ -112,7 +115,7 @@ namespace NWheels.Core.Logging
                 {
                     if ( _mustCreateException )
                     {
-                        CreateException();
+                        CreateNewException();
                     }
 
                     AppendLogNode();
@@ -130,8 +133,17 @@ namespace NWheels.Core.Logging
             {
                 var m = _underlyingWriter;
 
-                _argumentArrayLocal = m.Local(initialValue: m.NewArray<object>(length: m.Const(_declaration.GetParameters().Length)));
-                m.ForEachArgument((arg, index) => _argumentArrayLocal.ItemAt(index).Assign(arg.CastTo<object>()));
+                _formatObjectArray = m.Local(initialValue: m.NewArray<object>(length: m.Const(_formatArgumentIndex.Count)));
+
+                for ( int i = 0 ; i < _formatArgumentIndex.Count ; i++ )
+                {
+                    var argumentIndex = _formatArgumentIndex[i];
+
+                    using ( TT.CreateScope<TT.TArgument>(_signature.ArgumentType[argumentIndex]) )
+                    {
+                        _formatObjectArray.ItemAt(i).Assign(m.Argument<TT.TArgument>(argumentIndex + 1).CastTo<object>());
+                    }
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -139,15 +151,15 @@ namespace NWheels.Core.Logging
             private void FormatLogText()
             {
                 var m = _underlyingWriter;
-                _logTextLocal = m.Local(initialValue: Static.Func(string.Format, m.Const(_formatString), _argumentArrayLocal));
+                _singleLineTextLocal = m.Local(initialValue: Static.Func(string.Format, m.Const(_formatString), _formatObjectArray));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void CreateException()
+            private void CreateNewException()
             {
                 var m = _underlyingWriter;
-                m.ReturnValueLocal = m.Local(initialValue: m.New<TypeTemplate.TReturn>(_logTextLocal));
+                m.ReturnValueLocal = m.Local(initialValue: m.New<TT.TReturn>(_singleLineTextLocal));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -156,10 +168,10 @@ namespace NWheels.Core.Logging
             {
                 var m = _underlyingWriter;
 
-                var activityLocal = m.Local<ActivityLogNode>(initialValue: m.New<FormattedActivityLogNode>(_logTextLocal));
+                var activityLocal = m.Local<ActivityLogNode>(initialValue: m.New<FormattedActivityLogNode>(_singleLineTextLocal));
                 _threadLogAppenderField.Void(x => x.AppendActivityNode, activityLocal);
 
-                m.Return(activityLocal.CastTo<TypeTemplate.TReturn>());
+                m.Return(activityLocal.CastTo<TT.TReturn>());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -171,9 +183,23 @@ namespace NWheels.Core.Logging
                 IOperand<string> fullDetailsTextOperand;
                 IOperand<Exception> exceptionOperand;
 
-                if ( _exceptionParameter != null )
+                if ( _exceptionArgumentIndex.Count > 0  )
                 {
-                    exceptionOperand = m.Argument<Exception>(_exceptionParameter.Position + 1);
+                    if ( _exceptionArgumentIndex.Count == 1 )
+                    {
+                        exceptionOperand = m.Argument<Exception>(_exceptionArgumentIndex[0] + 1);
+                    }
+                    else
+                    {
+                        IOperand<Exception>[] exceptionArguments = _exceptionArgumentIndex.Select(i => m.Argument<Exception>(i + 1)).ToArray();
+                        exceptionOperand = m.New<AggregateException>(m.NewArray<Exception>(exceptionArguments));
+                    }
+
+                    fullDetailsTextOperand = exceptionOperand.FuncToString();
+                }
+                else if ( _mustCreateException )
+                {
+                    exceptionOperand = m.ReturnValueLocal.CastTo<Exception>();
                     fullDetailsTextOperand = exceptionOperand.FuncToString();
                 }
                 else
@@ -184,7 +210,7 @@ namespace NWheels.Core.Logging
                 
                 _threadLogAppenderField.Void(x => x.AppendLogNode, m.New<FormattedLogNode>(
                     m.Const(_attribute.Level),
-                    _logTextLocal,
+                    _singleLineTextLocal,
                     fullDetailsTextOperand,
                     m.Const(LogContentTypes.Text),
                     exceptionOperand));
@@ -192,7 +218,7 @@ namespace NWheels.Core.Logging
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void ValidateDeclaration()
+            private void ValidateSignature()
             {
                 if ( _attribute == null )
                 {
@@ -204,9 +230,21 @@ namespace NWheels.Core.Logging
                     throw NewContractConventionException(_declaration, "Method must either be void, return ILogActivity, or return an exception type");
                 }
 
-                if ( _declaration.GetParameters().Any(p => p.ParameterType.IsByRef || p.IsOut) )
+                for ( int i = 0 ; i < _signature.ArgumentCount ; i++ )
                 {
-                    throw NewContractConventionException(_declaration, "Method cannot have ref or out parameters");
+                    if ( _signature.ArgumentIsByRef[i] || _signature.ArgumentIsOut[i] )
+                    {
+                        throw NewContractConventionException(_declaration, "Method cannot have ref or out parameters");
+                    }
+
+                    if ( _signature.ArgumentType[i].IsExceptionType() )
+                    {
+                        _exceptionArgumentIndex.Add(i);
+                    }
+                    else
+                    {
+                        _formatArgumentIndex.Add(i);
+                    }
                 }
             }
 
@@ -215,12 +253,11 @@ namespace NWheels.Core.Logging
             private void BuildFormatString()
             {
                 var formatStringBuilder = new StringBuilder(_declaration.Name.SplitPascalCase());
-                var parameters = _declaration.GetParameters();
 
-                for ( int index = 0; index < parameters.Length; index++ )
+                for ( int i = 0 ; i < _formatArgumentIndex.Count ; i++ )
                 {
-                    formatStringBuilder.Append(index > 0 ? ", " : ": ");
-                    formatStringBuilder.AppendFormat("{0}={{{1}}}", parameters[index].Name, index);
+                    formatStringBuilder.Append(i > 0 ? ", " : ": ");
+                    formatStringBuilder.AppendFormat("{0}={{{1}}}", _signature.ArgumentName[_formatArgumentIndex[i]], i);
                 }
 
                 _formatString = formatStringBuilder.ToString();

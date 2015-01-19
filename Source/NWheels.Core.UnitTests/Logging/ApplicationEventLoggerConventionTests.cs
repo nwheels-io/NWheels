@@ -118,10 +118,39 @@ namespace NWheels.Core.UnitTests.Logging
 
             Assert.That(log.Length, Is.EqualTo(1));
             Assert.That(log[0].Level, Is.EqualTo(LogLevel.Error));
-            Assert.That(log[0].SingleLineText, Is.EqualTo(
-                "This is my error message with exception parameter: num=123, str=ABC, e=System.DivideByZeroException: Attempted to divide by zero."));
-            //Assert.That(log[0].FullDetailsText, Is.EqualTo(exception.ToString()));
+            Assert.That(log[0].SingleLineText, Is.EqualTo("This is my error message with exception parameter: num=123, str=ABC"));
+            Assert.That(log[0].FullDetailsText, Is.EqualTo(exception.ToString()));
             Assert.That(log[0].Exception, Is.SameAs(exception));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanAppendErrorMessageAndThrow()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+
+            //-- Act
+
+            try
+            {
+                throw logger.ThisIsMyErrorMessageThatCreatesException();
+            }
+            catch ( TestErrorException e )
+            {
+                //-- Assert
+
+                var log = _log.TakeLog();
+
+                Assert.That(e.Message, Is.EqualTo("This is my error message that creates exception"));
+                Assert.That(log.Length, Is.EqualTo(1));
+                Assert.That(log[0].Level, Is.EqualTo(LogLevel.Error));
+                Assert.That(log[0].SingleLineText, Is.EqualTo("This is my error message that creates exception"));
+                Assert.That(e.ToString().StartsWith(log[0].FullDetailsText));
+                Assert.That(log[0].Exception, Is.SameAs(e));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -148,7 +177,7 @@ namespace NWheels.Core.UnitTests.Logging
             [LogError]
             void ThisIsMyErrorMessageWithExceptionParameter(int num, string str, Exception e);
             [LogError]
-            TestErrorException ThisIsMyErrorMessagesThatCreatesException();
+            TestErrorException ThisIsMyErrorMessageThatCreatesException();
             [LogCritical]
             void ThisIsMyCriticalMessage();
             [LogCritical]
