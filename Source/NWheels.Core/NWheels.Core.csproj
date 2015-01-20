@@ -42,6 +42,9 @@
     <Reference Include="Hapil.Applied">
       <HintPath>..\packages\FelixB.Hapil.0.9.1\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
+    <Reference Include="NLog">
+      <HintPath>..\packages\NLog.3.2.0.0\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -54,10 +57,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Hosting\NodeHost.cs" />
+    <Compile Include="Hosting\NodeHostContainerEventArgs.cs" />
+    <Compile Include="Hosting\NodeTrigger.cs" />
     <Compile Include="Logging\ApplicationEventLoggerConvention.cs" />
     <Compile Include="Logging\IClock.cs" />
     <Compile Include="Logging\IThreadLogAnchor.cs" />
     <Compile Include="Logging\IThreadRegistry.cs" />
+    <Compile Include="Logging\PlainLog.cs" />
     <Compile Include="Logging\StopwatchClock.cs" />
     <Compile Include="Logging\ThreadLog.cs" />
     <Compile Include="Logging\ThreadLogAppender.cs" />

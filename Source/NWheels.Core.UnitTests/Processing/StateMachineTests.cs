@@ -217,6 +217,41 @@ namespace NWheels.Core.UnitTests.Processing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void TransitionState_OnEnteredSendsFeedback_TransitionFurtherByFeedback()
+        {
+            //-- Arrange
+
+            var codeBehind = new PhilisopherCodeBehindWithEvents() {
+                FeedBackFromEating = true
+            };
+
+            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+                codeBehind,
+                Resolve<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+
+            machine.ReceiveTrigger(PhilisopherTrigger.Hungry);
+            codeBehind.TakeLog();
+
+            //-- Act
+
+            machine.ReceiveTrigger(PhilisopherTrigger.GotForks); // will receive feedback Full from EatingEntered
+
+            //-- Assert
+
+            Assert.That(machine.CurrentState, Is.EqualTo(PhilisopherState.Thinking));
+            Assert.That(codeBehind.TakeLog(), Is.EqualTo(new[] {
+                "AcquiringForksLeaving(from[AcquiringForks]to[Eating]by[GotForks])",
+                "TransitioningFromAcquiringForksToEating(from[AcquiringForks]to[Eating]by[GotForks])",
+                "EatingEntered(from[AcquiringForks]to[Eating]by[GotForks])",
+                "EatingLeaving(from[Eating]to[Thinking]by[Full])",
+                "TransitioningFromEatingToThinking(from[Eating]to[Thinking]by[Full])",
+                "ThinkingEntered(from[Eating]to[Thinking]by[Full])",
+            }));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private enum PhilisopherState
         {
             Thinking,
@@ -302,6 +337,7 @@ namespace NWheels.Core.UnitTests.Processing
             public bool ThrowFromEatingEntered { get; set; }
             public bool ThrowFromEatingLeaving { get; set; }
             public bool ThrowFromTransitioningFromEatingToThinking { get; set; }
+            public bool FeedBackFromEating { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -328,7 +364,7 @@ namespace NWheels.Core.UnitTests.Processing
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void ThinkingEntered(object sender, StateMachineEventArgs<PhilisopherState, PhilisopherTrigger> e)
+            private void ThinkingEntered(object sender, StateMachineFeedbackEventArgs<PhilisopherState, PhilisopherTrigger> e)
             {
                 LogAndThrow(ThrowFromThinkingEntered, e);
             }
@@ -342,7 +378,7 @@ namespace NWheels.Core.UnitTests.Processing
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void AcquiringForksEntered(object sender, StateMachineEventArgs<PhilisopherState, PhilisopherTrigger> e)
+            private void AcquiringForksEntered(object sender, StateMachineFeedbackEventArgs<PhilisopherState, PhilisopherTrigger> e)
             {
                 LogAndThrow(ThrowFromAcquiringForksEntered, e);
             }
@@ -377,9 +413,14 @@ namespace NWheels.Core.UnitTests.Processing
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
             
-            private void EatingEntered(object sender, StateMachineEventArgs<PhilisopherState, PhilisopherTrigger> e)
+            private void EatingEntered(object sender, StateMachineFeedbackEventArgs<PhilisopherState, PhilisopherTrigger> e)
             {
                 LogAndThrow(ThrowFromEatingEntered, e);
+
+                if ( FeedBackFromEating )
+                {
+                    e.ReceiveFeedack(PhilisopherTrigger.Full);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -32,7 +32,13 @@ namespace NWheels.Core.Processing
                 throw _logger.InitialStateNotSet(_codeBehind.GetType());
             }
 
-            _currentState.Enter(new StateMachineEventArgs<TState, TTrigger>(_currentState.Value));
+            var eventArgs = new StateMachineFeedbackEventArgs<TState, TTrigger>(_currentState.Value);
+            _currentState.Enter(eventArgs);
+
+            if ( eventArgs.HasFeedback )
+            {
+                ReceiveTrigger(eventArgs.Feedback);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,30 +60,13 @@ namespace NWheels.Core.Processing
 
         public void ReceiveTrigger(TTrigger trigger)
         {
-            var currentState = _currentState;
-            var transition = currentState.ValidateTransition(trigger);
+            StateMachineFeedbackEventArgs<TState, TTrigger> eventArgs;
 
-            if ( transition == null )
+            do
             {
-                throw _logger.TransitionNotDefined(_codeBehind.GetType(), currentState.Value, trigger);
-            }
-
-            var eventArgs = new StateMachineEventArgs<TState, TTrigger>(_currentState.Value, transition.DestinationStateValue, trigger, context: null);
-
-            _currentState.Leave(eventArgs);
-
-            try
-            {
-                transition.RaiseTransitioning(eventArgs);
-            }
-            catch
-            {
-                _currentState.Enter(eventArgs);
-                throw;
-            }
-
-            _currentState = _states[transition.DestinationStateValue];
-            _currentState.Enter(eventArgs);
+                eventArgs = PerformTrigger(trigger);
+                trigger = eventArgs.Feedback;
+            } while ( eventArgs.HasFeedback );
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -104,12 +93,44 @@ namespace NWheels.Core.Processing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private StateMachineFeedbackEventArgs<TState, TTrigger> PerformTrigger(TTrigger trigger)
+        {
+            var currentState = _currentState;
+            var transition = currentState.ValidateTransition(trigger);
+
+            if ( transition == null )
+            {
+                throw _logger.TransitionNotDefined(_codeBehind.GetType(), currentState.Value, trigger);
+            }
+
+            var eventArgs = new StateMachineFeedbackEventArgs<TState, TTrigger>(_currentState.Value, transition.DestinationStateValue, trigger, context: null);
+
+            _currentState.Leave(eventArgs);
+
+            try
+            {
+                transition.RaiseTransitioning(eventArgs);
+            }
+            catch
+            {
+                _currentState.Enter(eventArgs);
+                throw;
+            }
+
+            _currentState = _states[transition.DestinationStateValue];
+            _currentState.Enter(eventArgs);
+
+            return eventArgs;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class MachineState : IStateMachineStateBuilder<TState, TTrigger>
         {
             private readonly StateMachine<TState, TTrigger> _ownerMachine;
             private readonly TState _value;
             private readonly Dictionary<TTrigger, StateTransition> _transitions;
-            private EventHandler<StateMachineEventArgs<TState, TTrigger>> _onEntered = null;
+            private EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> _onEntered = null;
             private EventHandler<StateMachineEventArgs<TState, TTrigger>> _onLeaving = null;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -132,7 +153,7 @@ namespace NWheels.Core.Processing
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             IStateMachineStateBuilder<TState, TTrigger> IStateMachineStateBuilder<TState, TTrigger>.OnEntered(
-                EventHandler<StateMachineEventArgs<TState, TTrigger>> handler)
+                EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> handler)
             {
                 _onEntered += handler;
                 return this;
@@ -184,7 +205,7 @@ namespace NWheels.Core.Processing
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void Enter(StateMachineEventArgs<TState, TTrigger> args)
+            public void Enter(StateMachineFeedbackEventArgs<TState, TTrigger> args)
             {
                 if ( _onEntered != null )
                 {
@@ -274,10 +295,15 @@ namespace NWheels.Core.Processing
 
         public interface ILogger : IApplicationEventLogger
         {
+            [LogError]
             CodeBehindErrorException InitialStateNotSet(Type codeBehind);
+            [LogError]
             CodeBehindErrorException StateAlreadyDefined(Type codeBehind, TState state);
+            [LogError]
             CodeBehindErrorException InitialStateAlreadyDefined(Type codeBehind, TState initialState, TState attemptedState);
+            [LogError]
             CodeBehindErrorException TransitionAlreadyDefined(Type codeBehind, TState state, TTrigger trigger);
+            [LogError]
             CodeBehindErrorException TransitionNotDefined(Type codeBehind, TState state, TTrigger trigger);
         }
     }

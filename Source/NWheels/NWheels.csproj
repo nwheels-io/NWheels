@@ -60,6 +60,9 @@
     <Compile Include="Exceptions\ContractConventionException.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Hosting\INodeHost.cs" />
+    <Compile Include="Hosting\NodeHostConfig.cs" />
+    <Compile Include="Hosting\NodeState.cs" />
     <Compile Include="IFramework.cs" />
     <Compile Include="Logging\ActivityLogNode.cs" />
     <Compile Include="Logging\FormattedActivityLogNode.cs" />
@@ -163,6 +166,7 @@
     <Compile Include="UI\Widgets\ILoggedInUserUiWidgetBuilder.cs" />
     <Compile Include="UI\Widgets\IImageUiWidgetBuilder.cs" />
     <Compile Include="UI\Widgets\IUiWidgetSelector.cs" />
+    <Compile Include="Utilities\PathUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Modules\Merchant\" />

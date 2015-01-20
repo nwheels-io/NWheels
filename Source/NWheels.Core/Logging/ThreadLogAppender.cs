@@ -35,6 +35,11 @@ namespace NWheels.Core.Logging
             {
                 //TODO: create an ad-hoc thread log for one node and close it immediately
             }
+
+            if ( node.Level >= LogLevel.Warning )
+            {
+                PlainLog.LogNode(node);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -16,7 +16,7 @@ namespace NWheels.Processing
     public interface IStateMachineStateBuilder<TState, TTrigger>
     {
         IStateMachineStateBuilder<TState, TTrigger> SetAsInitial();
-        IStateMachineStateBuilder<TState, TTrigger> OnEntered(EventHandler<StateMachineEventArgs<TState, TTrigger>> handler);
+        IStateMachineStateBuilder<TState, TTrigger> OnEntered(EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> handler);
         IStateMachineStateBuilder<TState, TTrigger> OnLeaving(EventHandler<StateMachineEventArgs<TState, TTrigger>> handler);
         IStateMachineTransitionBuilder<TState, TTrigger> OnTrigger(TTrigger trigger);
     }
@@ -63,5 +63,35 @@ namespace NWheels.Processing
         public TState ToState { get; private set; }
         public TTrigger Trigger { get; private set; }
         public object Context { get; private set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class StateMachineFeedbackEventArgs<TState, TTrigger> : StateMachineEventArgs<TState, TTrigger>
+    {
+        public StateMachineFeedbackEventArgs(TState initialState)
+            : base(initialState)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public StateMachineFeedbackEventArgs(TState from, TState to, TTrigger trigger, object context)
+            : base(from, to, trigger, context)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void ReceiveFeedack(TTrigger feedback)
+        {
+            this.HasFeedback = true;
+            this.Feedback = feedback;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool HasFeedback { get; private set; }
+        public TTrigger Feedback { get; private set; }
     }
 }
