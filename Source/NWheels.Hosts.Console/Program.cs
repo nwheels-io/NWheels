@@ -121,14 +121,18 @@ namespace NWheels.Hosts.Console
         {
             PlainLog.Info("Stopping node...");
             s_NodeHost.DeactivateAndUnload();
-            PlainLog.Info("NODE STOPPED.");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static void WaitUntilStopRequested()
         {
-            PlainLog.Info("UP AND RUNNING. PRESS CTRL + BREAK TO STOP . . . .");
+            System.Console.ForegroundColor = ConsoleColor.Green;
+            System.Console.WriteLine();
+            System.Console.WriteLine("------ UP AND RUNNING. PRESS CTRL + BREAK TO STOP ------");
+            System.Console.WriteLine();
+            System.Console.ForegroundColor = ConsoleColor.Gray;
+
             s_StopRequested.WaitOne();
         }
 
@@ -136,7 +140,7 @@ namespace NWheels.Hosts.Console
 
         private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
-            e.Cancel = false;
+            e.Cancel = true;
             s_StopRequested.Set();
         }
     }

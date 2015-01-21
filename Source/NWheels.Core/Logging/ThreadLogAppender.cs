@@ -43,10 +43,12 @@ namespace NWheels.Core.Logging
                 }
             }
 
-            if ( node.Level >= LogLevel.Warning )
-            {
-                PlainLog.LogNode(node);
-            }
+            PlainLog.LogNode(node);
+
+            //if ( node.Level >= LogLevel.Warning )
+            //{
+            //    PlainLog.LogNode(node);
+            //}
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -64,7 +66,7 @@ namespace NWheels.Core.Logging
                 StartThreadLogNoCheck(ThreadTaskType.Unspecified, activity);
             }
 
-            PlainLog.LogNode(activity);
+            PlainLog.LogActivity(activity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -76,6 +78,7 @@ namespace NWheels.Core.Logging
             if ( currentLog != null )
             {
                 currentLog.AppendNode(rootActivity);
+                PlainLog.LogActivity(rootActivity);
             }
             else
             {
@@ -88,6 +91,7 @@ namespace NWheels.Core.Logging
         private void StartThreadLogNoCheck(ThreadTaskType taskType, ActivityLogNode rootActivity)
         {
             _anchor.CurrentThreadLog = new ThreadLog(_framework, new StopwatchClock(), _registry, _anchor, taskType, rootActivity);
+            PlainLog.LogActivity(rootActivity);
         }
     }
 }

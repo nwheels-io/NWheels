@@ -47,7 +47,7 @@ namespace NWheels.Core.Hosting
                 _baseContainer.Resolve<Auto<StateMachine<NodeState, NodeTrigger>.ILogger>>());
 
             _logger = _baseContainer.ResolveAuto<ILogger>();
-            _logger.NodeHostInitializing(config.ApplicationName, config.NodeName, this.GetType().Assembly.GetName().Version);
+            _logger.NodeHostInitializing(config.ApplicationName, config.NodeName, this.GetType().Assembly.GetName().Version).Dispose();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -98,8 +98,11 @@ namespace NWheels.Core.Hosting
 
         public void LoadAndActivate()
         {
-            Load();
-            Activate();
+            using ( _logger.NodeStartingUp() )
+            {
+                Load();
+                Activate();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -140,8 +143,11 @@ namespace NWheels.Core.Hosting
 
         public void DeactivateAndUnload()
         {
-            Deactivate();
-            Unload();
+            using ( _logger.NodeShuttingDown() )
+            {
+                Deactivate();
+                Unload();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -306,9 +312,12 @@ namespace NWheels.Core.Hosting
 
         public interface ILogger : IApplicationEventLogger
         {
-            [LogInfo]
-            void NodeHostInitializing(string applicationName, string nodeName, Version version);
-            
+            [LogThread(ThreadTaskType.StartUp)]
+            ILogActivity NodeHostInitializing(string application, string node, Version hostVersion);
+
+            [LogThread(ThreadTaskType.StartUp)]
+            ILogActivity NodeStartingUp();
+
             [LogThread(ThreadTaskType.StartUp)]
             ILogActivity NodeLoading();
             
@@ -326,6 +335,9 @@ namespace NWheels.Core.Hosting
             
             [LogError]
             NodeHostException NodeHasFailedToActivate();
+
+            [LogThread(ThreadTaskType.ShutDown)]
+            ILogActivity NodeShuttingDown();
 
             [LogThread(ThreadTaskType.ShutDown)]
             ILogActivity NodeDeactivating();
