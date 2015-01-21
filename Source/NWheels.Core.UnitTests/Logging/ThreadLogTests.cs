@@ -19,6 +19,7 @@ namespace NWheels.Core.UnitTests.Logging
     {
         private TestClock _clock;
         private TestThreadRegistry _threadRegistry;
+        private TestThreadLogAnchor _anchor;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -27,6 +28,7 @@ namespace NWheels.Core.UnitTests.Logging
         {
             _clock = new TestClock();
             _threadRegistry = new TestThreadRegistry();
+            _anchor = new TestThreadLogAnchor();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,7 +44,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, _threadRegistry, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
+                Framework, _clock, _threadRegistry, _anchor, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -62,7 +64,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, _threadRegistry, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
+                Framework, _clock, _threadRegistry, _anchor, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -82,7 +84,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, _threadRegistry, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
+                Framework, _clock, _threadRegistry, _anchor, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -97,7 +99,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, _threadRegistry, ThreadTaskType.QueuedWorkItem, new FormattedActivityLogNode("Test"));
+                Framework, _clock, _threadRegistry, _anchor, ThreadTaskType.QueuedWorkItem, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -116,7 +118,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, _threadRegistry, ThreadTaskType.Unspecified, rootActivity);
+                Framework, _clock, _threadRegistry, _anchor, ThreadTaskType.Unspecified, rootActivity);
 
             //-- Assert
 
@@ -499,7 +501,7 @@ namespace NWheels.Core.UnitTests.Logging
         private ThreadLog CreateThreadLog(string rootActivityText = "Root", ThreadTaskType taskType = ThreadTaskType.Unspecified)
         {
             var rootActivity = new FormattedActivityLogNode(rootActivityText);
-            return new ThreadLog(Framework, _clock, _threadRegistry, ThreadTaskType.Unspecified, rootActivity);
+            return new ThreadLog(Framework, _clock, _threadRegistry, _anchor, ThreadTaskType.Unspecified, rootActivity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -559,6 +561,13 @@ namespace NWheels.Core.UnitTests.Logging
         private class TestClock : IClock
         {
             public long ElapsedMilliseconds { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class TestThreadLogAnchor : IThreadLogAnchor
+        {
+            public ThreadLog CurrentThreadLog { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
