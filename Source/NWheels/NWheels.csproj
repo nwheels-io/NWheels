@@ -60,6 +60,9 @@
     <Compile Include="Entities\IEntityPartPositionInList.cs" />
     <Compile Include="Exceptions\CodeBehindErrorException.cs" />
     <Compile Include="Exceptions\ContractConventionException.cs" />
+    <Compile Include="Exceptions\NodeHostConfigException.cs" />
+    <Compile Include="Exceptions\NodeHostException.cs" />
+    <Compile Include="Extensions\AutofacExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Hosting\INodeHost.cs" />

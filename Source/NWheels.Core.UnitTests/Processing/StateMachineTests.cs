@@ -21,7 +21,7 @@ namespace NWheels.Core.UnitTests.Processing
 
             var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
                 new PhilisopherCodeBehind(), 
-                Resolve<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
 
             //-- Assert
 
@@ -37,7 +37,7 @@ namespace NWheels.Core.UnitTests.Processing
 
             var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
                 new PhilisopherCodeBehind(),
-                Resolve<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
 
             //-- Act
 
@@ -66,7 +66,7 @@ namespace NWheels.Core.UnitTests.Processing
 
             var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
                 codeBehind,
-                Resolve<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
             var log1 = codeBehind.TakeLog();
 
             machine.ReceiveTrigger(PhilisopherTrigger.Hungry);
@@ -116,7 +116,7 @@ namespace NWheels.Core.UnitTests.Processing
 
             var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
                 codeBehind,
-                Resolve<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
 
             //-- Act
 
@@ -151,7 +151,7 @@ namespace NWheels.Core.UnitTests.Processing
 
             var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
                 codeBehind,
-                Resolve<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
 
             //-- Act
 
@@ -190,7 +190,7 @@ namespace NWheels.Core.UnitTests.Processing
 
             var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
                 codeBehind,
-                Resolve<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
 
             codeBehind.TakeLog();
 
@@ -228,7 +228,7 @@ namespace NWheels.Core.UnitTests.Processing
 
             var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
                 codeBehind,
-                Resolve<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
 
             machine.ReceiveTrigger(PhilisopherTrigger.Hungry);
             codeBehind.TakeLog();

@@ -7,7 +7,7 @@ using NWheels.Conventions;
 
 namespace NWheels
 {
-    public sealed class Auto<TService> 
+    public sealed class Auto<TService>
         where TService : class
     {
         private readonly TService _instance;
@@ -22,9 +22,33 @@ namespace NWheels
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal Auto(TService instance)
+        {
+            _instance = instance;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TService Instance
         {
             get { return _instance; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static implicit operator Auto<TService>(TService service)
+        {
+            return new Auto<TService>(service);
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class Auto
+    {
+        public static Auto<TService> Of<TService>(TService service) where TService : class
+        {
+            return new Auto<TService>(service);
         }
     }
 }

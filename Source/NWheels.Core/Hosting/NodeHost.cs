@@ -7,9 +7,14 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Builder;
 using Hapil;
+using NWheels.Conventions;
+using NWheels.Core.Conventions;
 using NWheels.Core.Logging;
 using NWheels.Core.Processing;
+using NWheels.Exceptions;
+using NWheels.Extensions;
 using NWheels.Hosting;
+using NWheels.Logging;
 using NWheels.Processing;
 using NWheels.Utilities;
 
@@ -19,8 +24,8 @@ namespace NWheels.Core.Hosting
     {
         private readonly NodeHostConfig _nodeHostConfig;
         private readonly DynamicModule _dynamicModule;
-        private readonly ConventionObjectFactory _loggerFactory;
         private readonly IContainer _baseContainer;
+        private readonly ILogger _logger;
         private readonly StateMachine<NodeState, NodeTrigger> _stateMachine;
         //private readonly List<Exception> _nodeHostErrors;
 
@@ -31,17 +36,18 @@ namespace NWheels.Core.Hosting
             _nodeHostConfig = config;
             
             _dynamicModule = new DynamicModule(
-                simpleName: "NWheels.RunTimeTypes." + Guid.NewGuid().ToString("N"), 
+                simpleName: "NWheels.RunTimeTypes", 
                 allowSave: true, 
                 saveDirectory: PathUtility.LocalBinPath());
             
-            _loggerFactory = new ConventionObjectFactory(_dynamicModule, new ApplicationEventLoggerConvention());
-
             _baseContainer = BuildBaseContainer();
             
             _stateMachine = new StateMachine<NodeState, NodeTrigger>(
                 new StateMachineCodeBehind(this), 
-                logger: _baseContainer.Resolve<StateMachine<NodeState, NodeTrigger>.ILogger>());
+                _baseContainer.Resolve<Auto<StateMachine<NodeState, NodeTrigger>.ILogger>>());
+
+            _logger = _baseContainer.ResolveAuto<ILogger>();
+            _logger.NodeHostInitializing(config.ApplicationName, config.NodeName, this.GetType().Assembly.GetName().Version);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,11 +64,16 @@ namespace NWheels.Core.Hosting
 
         public void Load()
         {
-            _stateMachine.ReceiveTrigger(NodeTrigger.Load);
-
-            if ( _stateMachine.CurrentState != NodeState.Standby )
+            using ( _logger.NodeLoading() )
             {
-                throw new Exception("Node load failed");
+                _stateMachine.ReceiveTrigger(NodeTrigger.Load);
+
+                if ( _stateMachine.CurrentState != NodeState.Standby )
+                {
+                    throw _logger.NodeHasFailedToLoad();
+                }
+
+                _logger.NodeSuccessfullyLoaded();
             }
         }
 
@@ -70,11 +81,16 @@ namespace NWheels.Core.Hosting
 
         public void Activate()
         {
-            _stateMachine.ReceiveTrigger(NodeTrigger.Activate);
-
-            if ( _stateMachine.CurrentState != NodeState.Active )
+            using ( _logger.NodeActivating() )
             {
-                throw new Exception("Node activate failed");
+                _stateMachine.ReceiveTrigger(NodeTrigger.Activate);
+
+                if ( _stateMachine.CurrentState != NodeState.Active )
+                {
+                    throw _logger.NodeHasFailedToActivate();
+                }
+
+                _logger.NodeSuccessfullyActivated();
             }
         }
 
@@ -90,11 +106,16 @@ namespace NWheels.Core.Hosting
 
         public void Deactivate()
         {
-            _stateMachine.ReceiveTrigger(NodeTrigger.Deactivate);
-
-            if ( _stateMachine.CurrentState != NodeState.Standby )
+            using ( _logger.NodeDeactivating() )
             {
-                throw new Exception("Node deactivate failed");
+                _stateMachine.ReceiveTrigger(NodeTrigger.Deactivate);
+
+                if ( _stateMachine.CurrentState != NodeState.Standby )
+                {
+                    throw _logger.NodeHasFailedToDeactivate();
+                }
+
+                _logger.NodeDeactivated();
             }
         }
 
@@ -102,11 +123,16 @@ namespace NWheels.Core.Hosting
 
         public void Unload()
         {
-            _stateMachine.ReceiveTrigger(NodeTrigger.Unload);
-
-            if ( _stateMachine.CurrentState != NodeState.Down )
+            using ( _logger.NodeUnloading() )
             {
-                throw new Exception("Node unload failed");
+                _stateMachine.ReceiveTrigger(NodeTrigger.Unload);
+
+                if ( _stateMachine.CurrentState != NodeState.Down )
+                {
+                    throw _logger.NodeHasFailedToUnload();
+                }
+
+                _logger.NodeUnloaded();
             }
         }
 
@@ -177,14 +203,19 @@ namespace NWheels.Core.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static IContainer BuildBaseContainer()
+        private IContainer BuildBaseContainer()
         {
             var builder = new ContainerBuilder();
 
-            //builder.Register()
+            builder.RegisterInstance<NodeHost>(this);
+            builder.RegisterInstance<DynamicModule>(_dynamicModule);
+            builder.RegisterGeneric(typeof(Auto<>)).SingleInstance();
+            builder.RegisterType<UniversalThreadLogAnchor>().As<IThreadLogAnchor>().SingleInstance();
+            builder.RegisterType<ThreadLogAppender>().As<IThreadLogAppender>().SingleInstance();
+            //builder.RegisterType<ThreadLog>().As<IThreadLog>().in;
+            builder.RegisterType<LoggerObjectFactory>().As<IAutoObjectFactory>().SingleInstance();
 
-
-            return builder.Build(ContainerBuildOptions.IgnoreStartableComponents);
+            return builder.Build();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -268,6 +299,50 @@ namespace NWheels.Core.Hosting
                 _owner.ExecuteUnloadPhase();
                 e.ReceiveFeedack(NodeTrigger.UnloadDone);
             }
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface ILogger : IApplicationEventLogger
+        {
+            [LogInfo]
+            void NodeHostInitializing(string applicationName, string nodeName, Version version);
+            
+            [LogActivity]
+            ILogActivity NodeLoading();
+            
+            [LogInfo]
+            void NodeSuccessfullyLoaded();
+            
+            [LogError]
+            NodeHostException NodeHasFailedToLoad();
+            
+            [LogActivity]
+            ILogActivity NodeActivating();
+            
+            [LogInfo]
+            void NodeSuccessfullyActivated();
+            
+            [LogError]
+            NodeHostException NodeHasFailedToActivate();
+            
+            [LogActivity]
+            ILogActivity NodeDeactivating();
+
+            [LogError]
+            NodeHostException NodeHasFailedToDeactivate();
+            
+            [LogInfo]
+            void NodeDeactivated();
+            
+            [LogActivity]
+            ILogActivity NodeUnloading();
+            
+            [LogInfo]
+            void NodeUnloaded();
+
+            [LogError]
+            NodeHostException NodeHasFailedToUnload();
         }
     }
 }

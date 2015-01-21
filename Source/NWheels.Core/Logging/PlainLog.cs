@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
+using NLog.Conditions;
 using NLog.Config;
+using NLog.Layouts;
 using NLog.Targets;
 using NWheels.Utilities;
 
@@ -18,17 +20,43 @@ namespace NWheels.Core.Logging
 
         static PlainLog()
         {
+            var config = new LoggingConfiguration();
+
             var fileTarget = new FileTarget() {
-                FileName = PathUtility.LocalBinPath("nwheels.log")
+                FileName = PathUtility.LocalBinPath("nwheels.log"),
             };
 
-            LogManager.Configuration.AddTarget("File", fileTarget);
+            fileTarget.Layout = @"${date:format=yyyy-MM-dd HH\:mm\:ss.fff}|${level:uppercase=true}|${message}";
+
+            config.AddTarget("File", fileTarget);
 
             var fileRule = new LoggingRule("*", LogLevel.Trace, fileTarget);
 
-            LogManager.Configuration.LoggingRules.Add(fileRule);
+            config.LoggingRules.Add(fileRule);
 
+            LogManager.Configuration = config;
             s_Logger = LogManager.GetCurrentClassLogger();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void ConfigureConsoleOutput()
+        {
+            var consoleTarget = new ColoredConsoleTarget();
+
+            consoleTarget.Layout = @"${date:format=HH\:mm\:ss.fff} ${message}";
+            consoleTarget.RowHighlightingRules.Clear();
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule("level == LogLevel.Debug", ConsoleOutputColor.Gray,ConsoleOutputColor.Black));
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule("level == LogLevel.Info", ConsoleOutputColor.White, ConsoleOutputColor.Black));
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule("level == LogLevel.Warn", ConsoleOutputColor.Yellow, ConsoleOutputColor.Black));
+            consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule("level >= LogLevel.Error", ConsoleOutputColor.Red, ConsoleOutputColor.Black));
+
+            LogManager.Configuration.AddTarget("Console", consoleTarget);
+
+            var consoleRule = new LoggingRule("*", LogLevel.Trace, consoleTarget);
+
+            LogManager.Configuration.LoggingRules.Add(consoleRule);
+            LogManager.ReconfigExistingLoggers();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,37 +86,37 @@ namespace NWheels.Core.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void LogDebug(string message)
+        public static void Debug(string format, params object[] args)
         {
-            s_Logger.Debug(message);
+            s_Logger.Debug(format, args);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void LogInfo(string message)
+        public static void Info(string format, params object[] args)
         {
-            s_Logger.Info(message);
-        }
-        
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static void LogWarning(string message)
-        {
-            s_Logger.Warn(message);
-        }
-        
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static void LogError(string message)
-        {
-            s_Logger.Error(message);
+            s_Logger.Info(format, args);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void LogCritical(string message)
+        public static void Warning(string format, params object[] args)
         {
-            s_Logger.Fatal(message);
+            s_Logger.Warn(format, args);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void Error(string format, params object[] args)
+        {
+            s_Logger.Error(format, args);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void Critical(string format, params object[] args)
+        {
+            s_Logger.Fatal(format, args);
         }
     }
 }

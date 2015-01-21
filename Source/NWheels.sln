@@ -27,6 +27,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{CE3F724B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Tools.LogViewer", "NWheels.Tools.LogViewer\NWheels.Tools.LogViewer.csproj", "{2D7AE6DF-3152-4037-8131-20390F14438B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Hosts", "Hosts", "{39E6D6C1-711C-4D16-B5E0-F56093FBE5AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Hosts.Console", "NWheels.Hosts.Console\NWheels.Hosts.Console.csproj", "{C281BD75-FAA9-4773-B5DE-511B6A789FF7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +69,10 @@ Global
 		{2D7AE6DF-3152-4037-8131-20390F14438B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D7AE6DF-3152-4037-8131-20390F14438B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D7AE6DF-3152-4037-8131-20390F14438B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C281BD75-FAA9-4773-B5DE-511B6A789FF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C281BD75-FAA9-4773-B5DE-511B6A789FF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C281BD75-FAA9-4773-B5DE-511B6A789FF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C281BD75-FAA9-4773-B5DE-511B6A789FF7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -78,5 +86,6 @@ Global
 		{E02C2DAE-9021-4D9E-9EC5-97ADF7C4B12E} = {28191429-D848-4658-B8C2-8061E8990274}
 		{CD358C0A-E2B8-43E1-8F3E-618E56EFFE0F} = {689643DB-A9C4-47E6-94DC-6C29119E8317}
 		{2D7AE6DF-3152-4037-8131-20390F14438B} = {CE3F724B-60C0-4274-B3F3-1C2CDD3D8531}
+		{C281BD75-FAA9-4773-B5DE-511B6A789FF7} = {39E6D6C1-711C-4D16-B5E0-F56093FBE5AA}
 	EndGlobalSection
 EndGlobal
