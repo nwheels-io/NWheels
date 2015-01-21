@@ -32,6 +32,10 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+    </Reference>
     <Reference Include="Hapil">
       <HintPath>..\packages\FelixB.Hapil.0.9.1\lib\net45\Hapil.dll</HintPath>
     </Reference>
@@ -56,6 +60,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoTests.cs" />
+    <Compile Include="Hosting\AutofacRegistrationTests.cs" />
     <Compile Include="Logging\ApplicationEventLoggerConventionTests.cs" />
     <Compile Include="Logging\LoggingBenchmarkTests.cs" />
     <Compile Include="Logging\ThreadLogTests.cs" />

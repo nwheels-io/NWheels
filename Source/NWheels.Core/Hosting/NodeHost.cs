@@ -20,7 +20,7 @@ namespace NWheels.Core.Hosting
         private readonly NodeHostConfig _nodeHostConfig;
         private readonly DynamicModule _dynamicModule;
         private readonly ConventionObjectFactory _loggerFactory;
-        private readonly IContainer _container;
+        private readonly IContainer _baseContainer;
         private readonly StateMachine<NodeState, NodeTrigger> _stateMachine;
         //private readonly List<Exception> _nodeHostErrors;
 
@@ -29,14 +29,29 @@ namespace NWheels.Core.Hosting
         public NodeHost(NodeHostConfig config)
         {
             _nodeHostConfig = config;
-            _dynamicModule = new DynamicModule(simpleName: "NWheels.RunTimeTypes", allowSave: true, saveDirectory: PathUtility.LocalBinPath());
+            
+            _dynamicModule = new DynamicModule(
+                simpleName: "NWheels.RunTimeTypes." + Guid.NewGuid().ToString("N"), 
+                allowSave: true, 
+                saveDirectory: PathUtility.LocalBinPath());
+            
             _loggerFactory = new ConventionObjectFactory(_dynamicModule, new ApplicationEventLoggerConvention());
 
-            _container = BuildInitialContainer();
+            _baseContainer = BuildBaseContainer();
             
             _stateMachine = new StateMachine<NodeState, NodeTrigger>(
                 new StateMachineCodeBehind(this), 
-                logger: _container.Resolve<StateMachine<NodeState, NodeTrigger>.ILogger>());
+                logger: _baseContainer.Resolve<StateMachine<NodeState, NodeTrigger>.ILogger>());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RegisterHostSpecificComponents(Action<ContainerBuilder> registrar)
+        {
+            var builder = new ContainerBuilder();
+            registrar(builder);
+
+            builder.Update(_baseContainer);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -135,10 +150,6 @@ namespace NWheels.Core.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //public event EventHandler<NodeHostContainerEventArgs> RegisteringHostComponents;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         private bool ExecuteLoadPhase()
         {
             return false;
@@ -166,11 +177,11 @@ namespace NWheels.Core.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static IContainer BuildInitialContainer()
+        private static IContainer BuildBaseContainer()
         {
             var builder = new ContainerBuilder();
 
-
+            //builder.Register()
 
 
             return builder.Build(ContainerBuildOptions.IgnoreStartableComponents);

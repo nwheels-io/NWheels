@@ -51,6 +51,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Auto.cs" />
+    <Compile Include="Conventions\IAutoObjectFactory.cs" />
     <Compile Include="Entities\EntityKey.cs" />
     <Compile Include="Entities\IEntityPartActiveStatus.cs" />
     <Compile Include="Entities\IEntityPartCorrelationId.cs" />
