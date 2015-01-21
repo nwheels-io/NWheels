@@ -19,12 +19,15 @@ namespace NWheels.Core.Logging
         private readonly IClock _clock;
         private ActivityLogNode _rootActivity;
         private ActivityLogNode _currentActivity;
+        private readonly IThreadLogAnchor _anchor;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ThreadLog(IFramework framework, IClock clock, IThreadRegistry registry, ThreadTaskType taskType, ActivityLogNode rootActivity)
+        public ThreadLog(
+            IFramework framework, IClock clock, IThreadRegistry registry, IThreadLogAnchor anchor, ThreadTaskType taskType, ActivityLogNode rootActivity)
         {
             _registry = registry;
+            _anchor = anchor;
             _taskType = taskType;
             _rootActivity = rootActivity;
             _currentActivity = rootActivity;
@@ -158,6 +161,7 @@ namespace NWheels.Core.Logging
 
         private void Close()
         {
+            _anchor.CurrentThreadLog = null;
             _registry.ThreadFinished(this);
         }
     }

@@ -178,14 +178,14 @@ namespace NWheels.Core.Hosting
 
         private bool ExecuteLoadPhase()
         {
-            return false;
+            return true;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private bool ExecuteActivatePhase()
         {
-            return false;
+            return true;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -211,8 +211,9 @@ namespace NWheels.Core.Hosting
             builder.RegisterInstance<DynamicModule>(_dynamicModule);
             builder.RegisterGeneric(typeof(Auto<>)).SingleInstance();
             builder.RegisterType<UniversalThreadLogAnchor>().As<IThreadLogAnchor>().SingleInstance();
+            builder.RegisterType<ThreadRegistry>().As<IThreadRegistry>().SingleInstance();
             builder.RegisterType<ThreadLogAppender>().As<IThreadLogAppender>().SingleInstance();
-            //builder.RegisterType<ThreadLog>().As<IThreadLog>().in;
+            builder.RegisterType<RealFramework>().As<IFramework>().SingleInstance();
             builder.RegisterType<LoggerObjectFactory>().As<IAutoObjectFactory>().SingleInstance();
 
             return builder.Build();
@@ -308,7 +309,7 @@ namespace NWheels.Core.Hosting
             [LogInfo]
             void NodeHostInitializing(string applicationName, string nodeName, Version version);
             
-            [LogActivity]
+            [LogThread(ThreadTaskType.StartUp)]
             ILogActivity NodeLoading();
             
             [LogInfo]
@@ -316,8 +317,8 @@ namespace NWheels.Core.Hosting
             
             [LogError]
             NodeHostException NodeHasFailedToLoad();
-            
-            [LogActivity]
+
+            [LogThread(ThreadTaskType.StartUp)]
             ILogActivity NodeActivating();
             
             [LogInfo]
@@ -325,8 +326,8 @@ namespace NWheels.Core.Hosting
             
             [LogError]
             NodeHostException NodeHasFailedToActivate();
-            
-            [LogActivity]
+
+            [LogThread(ThreadTaskType.ShutDown)]
             ILogActivity NodeDeactivating();
 
             [LogError]
@@ -334,8 +335,8 @@ namespace NWheels.Core.Hosting
             
             [LogInfo]
             void NodeDeactivated();
-            
-            [LogActivity]
+
+            [LogThread(ThreadTaskType.ShutDown)]
             ILogActivity NodeUnloading();
             
             [LogInfo]

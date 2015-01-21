@@ -4,21 +4,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using NWheels.Extensions;
 using NWheels.Logging;
 
 namespace NWheels.Core.Logging
 {
     internal class ThreadLogAppender : IThreadLogAppender
     {
+        private readonly IFramework _framework;
         private readonly IThreadLogAnchor _anchor;
-        private readonly IComponentContext _components;
+        private readonly IThreadRegistry _registry;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ThreadLogAppender(IThreadLogAnchor anchor, IComponentContext components)
+        public ThreadLogAppender(IFramework framework, IThreadLogAnchor anchor, IThreadRegistry registry)
         {
+            _framework = framework;
             _anchor = anchor;
-            _components = components;
+            _registry = registry;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,7 +36,11 @@ namespace NWheels.Core.Logging
             }
             else
             {
-                //TODO: create an ad-hoc thread log for one node and close it immediately
+                using ( var unknownThreadActivity = new FormattedActivityLogNode("???") )
+                { 
+                    StartThreadLogNoCheck(ThreadTaskType.Unspecified, unknownThreadActivity);
+                    _anchor.CurrentThreadLog.AppendNode(node);
+                }
             }
 
             if ( node.Level >= LogLevel.Warning )
@@ -54,8 +61,33 @@ namespace NWheels.Core.Logging
             }
             else
             {
-                _anchor.CurrentThreadLog = _components.Resolve<ThreadLog>();
+                StartThreadLogNoCheck(ThreadTaskType.Unspecified, activity);
             }
+
+            PlainLog.LogNode(activity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void StartThreadLog(ThreadTaskType taskType, ActivityLogNode rootActivity)
+        {
+            var currentLog = _anchor.CurrentThreadLog;
+
+            if ( currentLog != null )
+            {
+                currentLog.AppendNode(rootActivity);
+            }
+            else
+            {
+                StartThreadLogNoCheck(taskType, rootActivity);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void StartThreadLogNoCheck(ThreadTaskType taskType, ActivityLogNode rootActivity)
+        {
+            _anchor.CurrentThreadLog = new ThreadLog(_framework, new StopwatchClock(), _registry, _anchor, taskType, rootActivity);
         }
     }
 }

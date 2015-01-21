@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using NWheels.Utilities;
 
 namespace NWheels.Core.Logging
 {
@@ -19,7 +20,7 @@ namespace NWheels.Core.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ThreadRegistry()
-            : this(Path.Combine(Path.GetDirectoryName(typeof(ThreadRegistry).Assembly.Location), "Logs"))
+            : this(PathUtility.LocalBinPath("Logs"))
         {
         }
 

@@ -169,7 +169,15 @@ namespace NWheels.Core.Logging
                 var m = _underlyingWriter;
 
                 var activityLocal = m.Local<ActivityLogNode>(initialValue: m.New<FormattedActivityLogNode>(_singleLineTextLocal));
-                _threadLogAppenderField.Void(x => x.AppendActivityNode, activityLocal);
+
+                if ( _attribute.IsThread )
+                {
+                    _threadLogAppenderField.Void(x => x.StartThreadLog, m.Const(_attribute.TaskType), activityLocal);
+                }
+                else
+                {
+                    _threadLogAppenderField.Void(x => x.AppendActivityNode, activityLocal);
+                }
 
                 m.Return(activityLocal.CastTo<TT.TReturn>());
             }

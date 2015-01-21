@@ -155,6 +155,50 @@ namespace NWheels.Core.UnitTests.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void RegularLogsAndActivitiesDoNotStartThreadLog()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+
+            //-- Act
+
+            logger.ThisIsMyCriticalMessage();
+            logger.ThisIsMyActivity();
+
+            //-- Assert
+
+            Assert.IsFalse(_log.StartedThreadTaskType.HasValue);
+            Assert.IsFalse(_log.StartedThreadLogIndex.HasValue);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void ActivityMarkedAsLogThreadWillStartThreadLog()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+
+            //-- Act
+
+            logger.ThisIsMyCriticalMessage();
+            logger.ThisIsMyThread(123, "ABC");
+            logger.ThisIsMyActivity();
+
+            //-- Assert
+
+            Assert.That(_log.StartedThreadTaskType, Is.EqualTo(ThreadTaskType.ScheduledJob));
+            Assert.That(_log.StartedThreadLogIndex, Is.EqualTo(1));
+            
+            Assert.That(_log.GetLog()[1], Is.InstanceOf<ActivityLogNode>());
+            Assert.That(_log.GetLog()[1].SingleLineText, Is.EqualTo("This is my thread: num=123, str=ABC"));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private ITestLogger CreateTestLogger()
         {
             return _factory.CreateInstanceOf<ITestLogger>().UsingConstructor<IThreadLogAppender>(_log);
@@ -166,26 +210,39 @@ namespace NWheels.Core.UnitTests.Logging
         {
             [LogDebug]
             void ThisIsMyEmptyDebugMessage();
+            
             [LogDebug]
             void ThisIsMyDebugMessage(int num, string str);
+            
             [LogVerbose]
             void ThisIsMyVerboseMessageWithCollection(DayOfWeek day, IEnumerable<DateTime> dates);
+            
             [LogInfo]
             void ThisIsMyInfoMessageWithDefaultParameters(string first, string second = null, int third = 12345);
+            
             [LogError]
             void ThisIsMyEmptyErrorMessage();
+            
             [LogError]
             void ThisIsMyErrorMessageWithExceptionParameter(int num, string str, Exception e);
+            
             [LogError]
             TestErrorException ThisIsMyErrorMessageThatCreatesException();
+            
             [LogCritical]
             void ThisIsMyCriticalMessage();
+            
             [LogCritical]
             TestErrorException ThisIsMyCriticalMessageThatCreatesException();
+            
             [LogActivity]
             ILogActivity ThisIsMyActivity();
+            
             [LogActivity]
             ILogActivity ThisIsMyActivityWithParameters(int num, string str);
+            
+            [LogThread(ThreadTaskType.ScheduledJob)]
+            ILogActivity ThisIsMyThread(int num, string str);
         }
     
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

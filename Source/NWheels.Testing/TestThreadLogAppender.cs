@@ -24,7 +24,17 @@ namespace NWheels.Testing
         {
             _logNodes.Add(activity);
         }
-    
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void StartThreadLog(ThreadTaskType taskType, ActivityLogNode rootActivity)
+        {
+            this.StartedThreadLogIndex = _logNodes.Count;
+            this.StartedThreadTaskType = taskType;
+
+            _logNodes.Add(rootActivity);
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public LogNode[] GetLog()
@@ -37,7 +47,11 @@ namespace NWheels.Testing
         public LogNode[] TakeLog()
         {
             var result = _logNodes.ToArray();
+
             _logNodes.Clear();
+            this.StartedThreadLogIndex = null;
+            this.StartedThreadTaskType = null;
+            
             return result;
         }
 
@@ -45,16 +59,19 @@ namespace NWheels.Testing
 
         public string[] GetLogStrings()
         {
-            return _logNodes.Select(node => node.SingleLineText).ToArray();
+            return GetLog().Select(node => node.SingleLineText).ToArray();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public string[] TakeLogStrings()
         {
-            var result = _logNodes.Select(node => node.SingleLineText).ToArray();
-            _logNodes.Clear();
-            return result;
+            return TakeLog().Select(node => node.SingleLineText).ToArray();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public int? StartedThreadLogIndex { get; private set; }
+        public ThreadTaskType? StartedThreadTaskType { get; private set; }
     }
 }
