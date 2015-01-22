@@ -6,12 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Builder;
+using Autofac.Core;
 using Hapil;
 using NWheels.Conventions;
 using NWheels.Core.Conventions;
 using NWheels.Core.Logging;
 using NWheels.Core.Processing;
-using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Logging;
@@ -25,9 +25,8 @@ namespace NWheels.Core.Hosting
         private readonly NodeHostConfig _nodeHostConfig;
         private readonly DynamicModule _dynamicModule;
         private readonly IContainer _baseContainer;
-        private readonly ILogger _logger;
+        private readonly INodeHostLogger _logger;
         private readonly StateMachine<NodeState, NodeTrigger> _stateMachine;
-        //private readonly List<Exception> _nodeHostErrors;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -46,8 +45,7 @@ namespace NWheels.Core.Hosting
                 new StateMachineCodeBehind(this), 
                 _baseContainer.Resolve<Auto<StateMachine<NodeState, NodeTrigger>.ILogger>>());
 
-            _logger = _baseContainer.ResolveAuto<ILogger>();
-            _logger.NodeHostInitializing(config.ApplicationName, config.NodeName, this.GetType().Assembly.GetName().Version).Dispose();
+            _logger = _baseContainer.ResolveAuto<INodeHostLogger>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -182,33 +180,6 @@ namespace NWheels.Core.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private bool ExecuteLoadPhase()
-        {
-            return true;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private bool ExecuteActivatePhase()
-        {
-            return true;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void ExecuteDeactivatePhase()
-        {
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void ExecuteUnloadPhase()
-        {
-        }
-
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         private IContainer BuildBaseContainer()
         {
             var builder = new ContainerBuilder();
@@ -227,12 +198,19 @@ namespace NWheels.Core.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private NodeLifetime CreateNodeLifetime()
+        {
+            return new NodeLifetime(_nodeHostConfig, _baseContainer, _logger);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private class StateMachineCodeBehind : IStateMachineCodeBehind<NodeState, NodeTrigger>
         {
             private readonly NodeHost _owner;
+            private NodeLifetime _lifetime = null;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -279,15 +257,16 @@ namespace NWheels.Core.Hosting
 
             private void LoadingEntered(object sender, StateMachineFeedbackEventArgs<NodeState, NodeTrigger> e)
             {
-                var success = _owner.ExecuteLoadPhase();
+                _lifetime = _owner.CreateNodeLifetime();
+                var success = _lifetime.ExecuteLoadPhase();
                 e.ReceiveFeedack(success ? NodeTrigger.LoadSuccess : NodeTrigger.LoadFailure);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
-            
+
             private void ActivatingEntered(object sender, StateMachineFeedbackEventArgs<NodeState, NodeTrigger> e)
             {
-                var success = _owner.ExecuteActivatePhase();
+                var success = _lifetime.ExecuteActivatePhase();
                 e.ReceiveFeedack(success ? NodeTrigger.ActivateSuccess : NodeTrigger.ActivateFailure);
             }
 
@@ -295,7 +274,7 @@ namespace NWheels.Core.Hosting
 
             private void DeactivatingEntered(object sender, StateMachineFeedbackEventArgs<NodeState, NodeTrigger> e)
             {
-                _owner.ExecuteDeactivatePhase();
+                _lifetime.ExecuteDeactivatePhase();
                 e.ReceiveFeedack(NodeTrigger.DeactivateDone);
             }
 
@@ -303,59 +282,370 @@ namespace NWheels.Core.Hosting
 
             private void UnloadingEntered(object sender, StateMachineFeedbackEventArgs<NodeState, NodeTrigger> e)
             {
-                _owner.ExecuteUnloadPhase();
+                _lifetime.ExecuteUnloadPhase();
                 e.ReceiveFeedack(NodeTrigger.UnloadDone);
+                _lifetime.Dispose();
+                _lifetime = null;
             }
         }
-        
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public interface ILogger : IApplicationEventLogger
+        private class NodeLifetime : IDisposable
         {
-            [LogThread(ThreadTaskType.StartUp)]
-            ILogActivity NodeHostInitializing(string application, string node, Version hostVersion);
+            private readonly NodeHostConfig _nodeHostConfig;
+            private readonly IContainer _baseContainer;
+            private readonly INodeHostLogger _logger;
+            private readonly ILifetimeScope _scopeContainer;
+            private readonly List<ILifecycleEventListener> _lifecycleComponents = null;
+            private readonly RevertableSequence _loadSequence;
+            private readonly RevertableSequence _activateSequence;
 
-            [LogThread(ThreadTaskType.StartUp)]
-            ILogActivity NodeStartingUp();
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            [LogThread(ThreadTaskType.StartUp)]
-            ILogActivity NodeLoading();
-            
-            [LogInfo]
-            void NodeSuccessfullyLoaded();
-            
-            [LogError]
-            NodeHostException NodeHasFailedToLoad();
+            public NodeLifetime(NodeHostConfig nodeHostConfig, IContainer baseContainer, INodeHostLogger logger)
+            {
+                _nodeHostConfig = nodeHostConfig;
+                _baseContainer = baseContainer;
+                _logger = logger;
+                _scopeContainer = _baseContainer.BeginLifetimeScope();
+                _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
+                _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
+            }
 
-            [LogThread(ThreadTaskType.StartUp)]
-            ILogActivity NodeActivating();
-            
-            [LogInfo]
-            void NodeSuccessfullyActivated();
-            
-            [LogError]
-            NodeHostException NodeHasFailedToActivate();
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            [LogThread(ThreadTaskType.ShutDown)]
-            ILogActivity NodeShuttingDown();
+            public void Dispose()
+            {
+                _scopeContainer.Dispose();
+            }
 
-            [LogThread(ThreadTaskType.ShutDown)]
-            ILogActivity NodeDeactivating();
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            [LogError]
-            NodeHostException NodeHasFailedToDeactivate();
-            
-            [LogInfo]
-            void NodeDeactivated();
+            public bool ExecuteLoadPhase()
+            {
+                try
+                {
+                    _loadSequence.Perform();
+                    return true;
+                }
+                catch ( Exception e )
+                {
+                    _logger.NodeLoadError(e);
+                    return false;
+                }
+            }
 
-            [LogThread(ThreadTaskType.ShutDown)]
-            ILogActivity NodeUnloading();
-            
-            [LogInfo]
-            void NodeUnloaded();
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            [LogError]
-            NodeHostException NodeHasFailedToUnload();
+            public bool ExecuteActivatePhase()
+            {
+                try
+                {
+                    _activateSequence.Perform();
+                    return true;
+                }
+                catch ( Exception e )
+                {
+                    _logger.NodeActivationError(e);
+                    return false;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ExecuteDeactivatePhase()
+            {
+                try
+                {
+                    _activateSequence.Revert();
+                }
+                catch ( Exception e )
+                {
+                    _logger.NodeDeactivationError(e);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ExecuteUnloadPhase()
+            {
+                try
+                {
+                    _loadSequence.Revert();
+                }
+                catch ( Exception e )
+                {
+                    _logger.NodeUnloadError(e);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public List<ILifecycleEventListener> LifecycleComponents
+            {
+                get
+                {
+                    return _lifecycleComponents;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public INodeHostLogger Logger
+            {
+                get
+                {
+                    return _logger;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void LoadModules()
+            {
+                using ( _logger.LoadingModules() )
+                {
+                    foreach ( var moduleString in _nodeHostConfig.FrameworkModules.Concat(_nodeHostConfig.ApplicationModules) )
+                    {
+                        _logger.RegisteringModule(moduleString);
+                        var typeString = string.Format("{0}.ModuleLoader, {0}", moduleString);
+
+                        try
+                        {
+                            var moduleType = Type.GetType(typeString);
+                            var moduleUpdater = new ContainerBuilder();
+                            moduleUpdater.RegisterType(moduleType);
+                            moduleUpdater.Update(_scopeContainer.ComponentRegistry);
+
+                            var moduleInstance = (IModule)_scopeContainer.Resolve(moduleType);
+                            moduleUpdater.RegisterModule(moduleInstance);
+                            moduleUpdater.Update(_scopeContainer.ComponentRegistry);
+                        }
+                        catch ( Exception e )
+                        {
+                            _logger.FailedToLoadModule(moduleString, typeString, e);
+                            throw;
+                        }
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void FindLifecycleComponents()
+            {
+                using ( _logger.LookingForLifecycleComponents() )
+                {
+                    try
+                    {
+                        IEnumerable<ILifecycleEventListener> foundComponents;
+
+                        if ( _scopeContainer.TryResolve<IEnumerable<ILifecycleEventListener>>(out foundComponents) )
+                        {
+                            _lifecycleComponents.AddRange(foundComponents);
+
+                            foreach ( var component in _lifecycleComponents )
+                            {
+                                _logger.FoundLifecycleComponent(component.GetType().ToString());
+                            }
+                        }
+                        else
+                        {
+                            _logger.NoLifecycleComponentsFound();
+                        }
+                    }
+                    catch ( Exception e )
+                    {
+                        _logger.FailedToLoadLifecycleComponents(e);
+                        throw;
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class LoadSequenceCodeBehind : IRevertableSequenceCodeBehind
+        {
+            private readonly NodeLifetime _ownerLifetime;
+            private readonly INodeHostLogger _logger;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public LoadSequenceCodeBehind(NodeLifetime ownerLifetime)
+            {
+                _ownerLifetime = ownerLifetime;
+                _logger = _ownerLifetime.Logger;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void BuildSequence(IRevertableSequenceBuilder sequence)
+            {
+                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoading).OnRevert(CallComponentNodeUnloaded);
+                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentLoad).OnRevert(CallComponentUnload);
+                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoaded).OnRevert(CallComponentNodeUnloading);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IList<ILifecycleEventListener> GetLifecycleComponents()
+            {
+                return _ownerLifetime.LifecycleComponents;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallComponentNodeLoading(ILifecycleEventListener component, int index, bool isLast)
+            {
+                using ( _logger.ComponentNodeLoading(component.GetType().FullName) )
+                {
+                    component.NodeLoading();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallComponentLoad(ILifecycleEventListener component, int index, bool isLast)
+            {
+                using ( _logger.ComponentLoading(component.GetType().FullName) )
+                {
+                    component.Load();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallComponentNodeLoaded(ILifecycleEventListener component, int index, bool isLast)
+            {
+                using ( _logger.ComponentNodeLoaded(component.GetType().FullName) )
+                {
+                    component.NodeLoaded();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallComponentNodeUnloading(ILifecycleEventListener component, int index, bool isLast)
+            {
+                using ( _logger.ComponentNodeUnloading(component.GetType().FullName) )
+                {
+                    component.NodeUnloading();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallComponentUnload(ILifecycleEventListener component, int index, bool isLast)
+            {
+                using ( _logger.ComponentUnloading(component.GetType().FullName) )
+                {
+                    component.Unload();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallComponentNodeUnloaded(ILifecycleEventListener component, int index, bool isLast)
+            {
+                using ( _logger.ComponentNodeUnloaded(component.GetType().FullName) )
+                {
+                    component.NodeUnloaded();
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class ActivateSequenceCodeBehind : IRevertableSequenceCodeBehind
+        {
+            private readonly NodeLifetime _ownerLifetime;
+            private readonly INodeHostLogger _logger;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ActivateSequenceCodeBehind(NodeLifetime ownerLifetime)
+            {
+                _ownerLifetime = ownerLifetime;
+                _logger = _ownerLifetime.Logger;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void BuildSequence(IRevertableSequenceBuilder sequence)
+            {
+                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeActivating).OnRevert(CallComponentNodeDeactivated);
+                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentActivate).OnRevert(CallComponentDeactivate);
+                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeActivated).OnRevert(CallComponentNodeDeactivating);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IList<ILifecycleEventListener> GetLifecycleComponents()
+            {
+                return _ownerLifetime.LifecycleComponents;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallComponentNodeActivating(ILifecycleEventListener component, int index, bool isLast)
+            {
+                using ( _logger.ComponentNodeActivating(component.GetType().FullName) )
+                {
+                    component.NodeActivating();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallComponentActivate(ILifecycleEventListener component, int index, bool isLast)
+            {
+                using ( _logger.ComponentActivating(component.GetType().FullName) )
+                {
+                    component.Activate();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallComponentNodeActivated(ILifecycleEventListener component, int index, bool isLast)
+            {
+                using ( _logger.ComponentNodeActivated(component.GetType().FullName) )
+                {
+                    component.NodeActivated();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallComponentNodeDeactivating(ILifecycleEventListener component, int index, bool isLast)
+            {
+                using ( _logger.ComponentNodeDeactivating(component.GetType().FullName) )
+                {
+                    component.NodeDeactivating();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallComponentDeactivate(ILifecycleEventListener component, int index, bool isLast)
+            {
+                using ( _logger.ComponentDeactivating(component.GetType().FullName) )
+                {
+                    component.Deactivate();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallComponentNodeDeactivated(ILifecycleEventListener component, int index, bool isLast)
+            {
+                using ( _logger.ComponentNodeDeactivated(component.GetType().FullName) )
+                {
+                    component.NodeDeactivated();
+                }
+            }
         }
     }
 }

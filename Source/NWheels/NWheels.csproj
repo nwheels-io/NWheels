@@ -65,6 +65,7 @@
     <Compile Include="Extensions\AutofacExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Hosting\ILifecycleEventListener.cs" />
     <Compile Include="Hosting\INodeHost.cs" />
     <Compile Include="Hosting\NodeHostConfig.cs" />
     <Compile Include="Hosting\NodeState.cs" />

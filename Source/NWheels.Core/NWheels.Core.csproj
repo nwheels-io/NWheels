@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Conventions\LoggerObjectFactory.cs" />
+    <Compile Include="Hosting\INodeHostLogger.cs" />
     <Compile Include="Hosting\NodeHost.cs" />
     <Compile Include="Hosting\NodeTrigger.cs" />
     <Compile Include="Logging\ApplicationEventLoggerConvention.cs" />
