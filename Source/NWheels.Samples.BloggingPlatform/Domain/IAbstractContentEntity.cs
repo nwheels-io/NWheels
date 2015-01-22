@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using NWheels.Entities;
 using NWheels.Modules.Auth;
 
-namespace NWheels.Samples.BloggingPlatform
+namespace NWheels.Samples.BloggingPlatform.Domain
 {
     public interface IAbstractContentEntity : IEntityPartId<int>, IEntityPartActiveStatus, IEntityPartAudit
     {

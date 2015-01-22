@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.Samples.BloggingPlatform
+namespace NWheels.Samples.BloggingPlatform.Domain
 {
-    public enum ReplyStatus
+    public interface IAuthorEntity
     {
-        Submitted,
-        Accepted,
-        Rejected
     }
 }

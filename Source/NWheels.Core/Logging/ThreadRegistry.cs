@@ -44,8 +44,6 @@ namespace NWheels.Core.Logging
             {
                 _runningThreads.Add(threadLog);
             }
-
-            PersistLogInXmlFormat(threadLog);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,6 +55,7 @@ namespace NWheels.Core.Logging
                 _runningThreads.Remove(threadLog);
             }
 
+            PersistLogInXmlFormat(threadLog);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using NWheels.Entities;
 using NWheels.Modules.Auth;
 
-namespace NWheels.Samples.BloggingPlatform
+namespace NWheels.Samples.BloggingPlatform.Domain
 {
     public interface IPostEntity : IAbstractContentEntity
     {

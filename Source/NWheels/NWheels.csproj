@@ -52,8 +52,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Auto.cs" />
+    <Compile Include="Configuration\ConfigurationSectionAttribute.cs" />
+    <Compile Include="Conventions\DataTransferObjectAttribute.cs" />
     <Compile Include="Conventions\IAutoObjectFactory.cs" />
+    <Compile Include="Entities\EntityContractAttribute.cs" />
     <Compile Include="Entities\EntityKey.cs" />
+    <Compile Include="Entities\EntityPartContractAttribute.cs" />
     <Compile Include="Entities\IEntityPartActiveStatus.cs" />
     <Compile Include="Entities\IEntityPartCorrelationId.cs" />
     <Compile Include="Entities\IEntityPartId.cs" />
@@ -67,6 +71,7 @@
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Hosting\ILifecycleEventListener.cs" />
     <Compile Include="Hosting\INodeHost.cs" />
+    <Compile Include="Hosting\LifecycleEventListenerBase.cs" />
     <Compile Include="Hosting\NodeHostConfig.cs" />
     <Compile Include="Hosting\NodeState.cs" />
     <Compile Include="IFramework.cs" />
@@ -140,6 +145,7 @@
     <Compile Include="UI\Elements\IUiScreenBuilder.cs" />
     <Compile Include="UI\Elements\IValueUiElementBuilder.cs" />
     <Compile Include="UI\Elements\IVisualUiElementBuilder.cs" />
+    <Compile Include="UI\Endpoints\WebAppEndpoint.cs" />
     <Compile Include="UI\Globalization\InAnyCultureAttribute.cs" />
     <Compile Include="UI\Globalization\InDefaultCultureAttribute.cs" />
     <Compile Include="UI\Globalization\InCultureAttribute.cs" />

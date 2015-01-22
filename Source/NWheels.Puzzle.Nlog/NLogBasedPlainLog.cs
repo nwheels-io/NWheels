@@ -8,19 +8,20 @@ using NLog.Conditions;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
+using NWheels.Core.Logging;
 using NWheels.Logging;
 using NWheels.Utilities;
 using LogLevel = NLog.LogLevel;
 
-namespace NWheels.Core.Logging
+namespace NWheels.Puzzle.Nlog
 {
-    public static class PlainLog
+    public class NLogBasedPlainLog : IPlainLog
     {
-        private static Logger s_Logger;
+        private readonly Logger _logger;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        static PlainLog()
+        private NLogBasedPlainLog()
         {
             var config = new LoggingConfiguration();
 
@@ -37,16 +38,16 @@ namespace NWheels.Core.Logging
             config.LoggingRules.Add(fileRule);
 
             LogManager.Configuration = config;
-            s_Logger = LogManager.GetCurrentClassLogger();
+            _logger = LogManager.GetCurrentClassLogger();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void ConfigureConsoleOutput()
+        public void ConfigureConsoleOutput()
         {
             var consoleTarget = new ColoredConsoleTarget();
 
-            consoleTarget.Layout = @"${date:format=HH\:mm\:ss.fff} ${message}";
+            consoleTarget.Layout = @"${date:universalTime=true:format=HH\:mm\:ss.fff} ${message}";
             consoleTarget.UseDefaultRowHighlightingRules = false;
             consoleTarget.RowHighlightingRules.Clear();
             consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(
@@ -74,76 +75,94 @@ namespace NWheels.Core.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void LogNode(NWheels.Logging.LogNode node)
+        public void LogNode(NWheels.Logging.LogNode node)
         {
             switch ( node.Level )
             {
                 case NWheels.Logging.LogLevel.Debug:
                 case NWheels.Logging.LogLevel.Verbose:
-                    s_Logger.Debug(node.SingleLineText);
+                    _logger.Debug(node.SingleLineText);
                     break;
                 case NWheels.Logging.LogLevel.Info:
-                    s_Logger.Info(node.SingleLineText);
+                    _logger.Info(node.SingleLineText);
                     break;
                 case NWheels.Logging.LogLevel.Warning:
-                    s_Logger.Warn(node.SingleLineText, node.Exception);
+                    _logger.Warn(node.SingleLineText, node.Exception);
                     break;
                 case NWheels.Logging.LogLevel.Error:
-                    s_Logger.Error(node.SingleLineText, node.Exception);
+                    _logger.Error(node.SingleLineText, node.Exception);
                     break;
                 case NWheels.Logging.LogLevel.Critical:
-                    s_Logger.Fatal(node.SingleLineText, node.Exception);
+                    _logger.Fatal(node.SingleLineText, node.Exception);
                     break;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void LogActivity(NWheels.Logging.ActivityLogNode activity)
+        public void LogActivity(NWheels.Logging.ActivityLogNode activity)
         {
             if ( activity.Parent != null )
             {
-                s_Logger.Trace(activity.SingleLineText);
+                _logger.Trace(activity.SingleLineText);
             }
             else
             {
-                s_Logger.Trace("[THREAD:{0}] {1}", activity.TaskType, activity.SingleLineText);
+                _logger.Trace("[THREAD:{0}] {1}", activity.TaskType, activity.SingleLineText);
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void Debug(string format, params object[] args)
+        public void Debug(string format, params object[] args)
         {
-            s_Logger.Debug(format, args);
+            _logger.Debug(format, args);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void Info(string format, params object[] args)
+        public void Info(string format, params object[] args)
         {
-            s_Logger.Info(format, args);
+            _logger.Info(format, args);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void Warning(string format, params object[] args)
+        public void Warning(string format, params object[] args)
         {
-            s_Logger.Warn(format, args);
+            _logger.Warn(format, args);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void Error(string format, params object[] args)
+        public void Error(string format, params object[] args)
         {
-            s_Logger.Error(format, args);
+            _logger.Error(format, args);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void Critical(string format, params object[] args)
+        public void Critical(string format, params object[] args)
         {
-            s_Logger.Fatal(format, args);
+            _logger.Fatal(format, args);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly NLogBasedPlainLog s_Instance;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        static NLogBasedPlainLog()
+        {
+            s_Instance = new NLogBasedPlainLog();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public static NLogBasedPlainLog Instance
+        {
+            get { return s_Instance; }
         }
     }
 }

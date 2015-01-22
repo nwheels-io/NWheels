@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
@@ -30,7 +31,7 @@ namespace NWheels.Core.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NodeHost(NodeHostConfig config)
+        public NodeHost(NodeHostConfig config, Action<ContainerBuilder> registerHostComponents = null)
         {
             _nodeHostConfig = config;
             
@@ -38,24 +39,14 @@ namespace NWheels.Core.Hosting
                 simpleName: "NWheels.RunTimeTypes", 
                 allowSave: true, 
                 saveDirectory: PathUtility.LocalBinPath());
-            
-            _baseContainer = BuildBaseContainer();
+
+            _baseContainer = BuildBaseContainer(registerHostComponents);
             
             _stateMachine = new StateMachine<NodeState, NodeTrigger>(
                 new StateMachineCodeBehind(this), 
                 _baseContainer.Resolve<Auto<StateMachine<NodeState, NodeTrigger>.ILogger>>());
 
             _logger = _baseContainer.ResolveAuto<INodeHostLogger>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void RegisterHostSpecificComponents(Action<ContainerBuilder> registrar)
-        {
-            var builder = new ContainerBuilder();
-            registrar(builder);
-
-            builder.Update(_baseContainer);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -180,7 +171,7 @@ namespace NWheels.Core.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IContainer BuildBaseContainer()
+        private IContainer BuildBaseContainer(Action<ContainerBuilder> registerHostComponents)
         {
             var builder = new ContainerBuilder();
 
@@ -193,6 +184,11 @@ namespace NWheels.Core.Hosting
             builder.RegisterType<RealFramework>().As<IFramework>().SingleInstance();
             builder.RegisterType<LoggerObjectFactory>().As<IAutoObjectFactory>().SingleInstance();
 
+            if ( registerHostComponents != null )
+            {
+                registerHostComponents(builder);
+            }
+
             return builder.Build();
         }
 
@@ -202,8 +198,6 @@ namespace NWheels.Core.Hosting
         {
             return new NodeLifetime(_nodeHostConfig, _baseContainer, _logger);
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -294,10 +288,9 @@ namespace NWheels.Core.Hosting
         private class NodeLifetime : IDisposable
         {
             private readonly NodeHostConfig _nodeHostConfig;
-            private readonly IContainer _baseContainer;
             private readonly INodeHostLogger _logger;
             private readonly ILifetimeScope _scopeContainer;
-            private readonly List<ILifecycleEventListener> _lifecycleComponents = null;
+            private readonly List<ILifecycleEventListener> _lifecycleComponents;
             private readonly RevertableSequence _loadSequence;
             private readonly RevertableSequence _activateSequence;
 
@@ -306,11 +299,14 @@ namespace NWheels.Core.Hosting
             public NodeLifetime(NodeHostConfig nodeHostConfig, IContainer baseContainer, INodeHostLogger logger)
             {
                 _nodeHostConfig = nodeHostConfig;
-                _baseContainer = baseContainer;
                 _logger = logger;
-                _scopeContainer = _baseContainer.BeginLifetimeScope();
+                _scopeContainer = baseContainer.BeginLifetimeScope();
                 _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
                 _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
+                _lifecycleComponents = new List<ILifecycleEventListener>();
+                
+                LoadModules();
+                FindLifecycleComponents();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -406,27 +402,28 @@ namespace NWheels.Core.Hosting
             {
                 using ( _logger.LoadingModules() )
                 {
-                    foreach ( var moduleString in _nodeHostConfig.FrameworkModules.Concat(_nodeHostConfig.ApplicationModules) )
+                    foreach ( var module in _nodeHostConfig.FrameworkModules.Concat(_nodeHostConfig.ApplicationModules) )
                     {
-                        _logger.RegisteringModule(moduleString);
-                        var typeString = string.Format("{0}.ModuleLoader, {0}", moduleString);
+                        _logger.RegisteringModule(module.Name);
 
                         try
                         {
-                            var moduleType = Type.GetType(typeString);
-                            var moduleUpdater = new ContainerBuilder();
-                            moduleUpdater.RegisterType(moduleType);
-                            moduleUpdater.Update(_scopeContainer.ComponentRegistry);
+                            var assembly = Assembly.LoadFrom(PathUtility.LocalBinPath(module.Assembly));
 
-                            var moduleInstance = (IModule)_scopeContainer.Resolve(moduleType);
-                            moduleUpdater.RegisterModule(moduleInstance);
-                            moduleUpdater.Update(_scopeContainer.ComponentRegistry);
+                            var containerUpdater = new ContainerBuilder();
+                            containerUpdater.RegisterAssemblyModules(assembly);
+                            containerUpdater.Update(_scopeContainer.ComponentRegistry);
                         }
                         catch ( Exception e )
                         {
-                            _logger.FailedToLoadModule(moduleString, typeString, e);
+                            _logger.FailedToLoadModule(module.Name, e);
                             throw;
                         }
+                    }
+
+                    if ( !_nodeHostConfig.ApplicationModules.Any() )
+                    {
+                        _logger.NoApplicationModulesRegistered();
                     }
                 }
             }
@@ -451,6 +448,11 @@ namespace NWheels.Core.Hosting
                             }
                         }
                         else
+                        {
+                            _logger.NoLifecycleComponentsFound();
+                        }
+
+                        if ( _lifecycleComponents.Count == 0 )
                         {
                             _logger.NoLifecycleComponentsFound();
                         }

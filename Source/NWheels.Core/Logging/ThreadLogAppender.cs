@@ -14,14 +14,16 @@ namespace NWheels.Core.Logging
         private readonly IFramework _framework;
         private readonly IThreadLogAnchor _anchor;
         private readonly IThreadRegistry _registry;
+        private readonly IPlainLog _plainLog;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ThreadLogAppender(IFramework framework, IThreadLogAnchor anchor, IThreadRegistry registry)
+        public ThreadLogAppender(IFramework framework, IThreadLogAnchor anchor, IThreadRegistry registry, IPlainLog plainLog)
         {
             _framework = framework;
             _anchor = anchor;
             _registry = registry;
+            _plainLog = plainLog;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -43,7 +45,7 @@ namespace NWheels.Core.Logging
                 }
             }
 
-            PlainLog.LogNode(node);
+            _plainLog.LogNode(node);
 
             //if ( node.Level >= LogLevel.Warning )
             //{
@@ -66,7 +68,7 @@ namespace NWheels.Core.Logging
                 StartThreadLogNoCheck(ThreadTaskType.Unspecified, activity);
             }
 
-            PlainLog.LogActivity(activity);
+            _plainLog.LogActivity(activity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -78,7 +80,7 @@ namespace NWheels.Core.Logging
             if ( currentLog != null )
             {
                 currentLog.AppendNode(rootActivity);
-                PlainLog.LogActivity(rootActivity);
+                _plainLog.LogActivity(rootActivity);
             }
             else
             {
@@ -91,7 +93,7 @@ namespace NWheels.Core.Logging
         private void StartThreadLogNoCheck(ThreadTaskType taskType, ActivityLogNode rootActivity)
         {
             _anchor.CurrentThreadLog = new ThreadLog(_framework, new StopwatchClock(), _registry, _anchor, taskType, rootActivity);
-            PlainLog.LogActivity(rootActivity);
+            _plainLog.LogActivity(rootActivity);
         }
     }
 }

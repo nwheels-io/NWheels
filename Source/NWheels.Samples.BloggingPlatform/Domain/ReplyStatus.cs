@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.Samples.BloggingPlatform
+namespace NWheels.Samples.BloggingPlatform.Domain
 {
-    public enum UserRole
+    public enum ReplyStatus
     {
-        Reader = 0,
-        Author = 1,
-        Admin = 2
+        Submitted,
+        Accepted,
+        Rejected
     }
 }

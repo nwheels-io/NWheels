@@ -16,10 +16,10 @@ namespace NWheels.Core.Hosting
         ILogActivity LoadingModules();
 
         [LogCritical]
-        void FailedToLoadModule(string moduleName, string moduleClass, Exception e);
+        void FailedToLoadModule(string name, Exception e);
 
         [LogVerbose]
-        void RegisteringModule(string module);
+        void RegisteringModule(string name);
 
         [LogWarning]
         void NoApplicationModulesRegistered();

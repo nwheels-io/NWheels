@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.Entities;
 
-namespace NWheels.Samples.BloggingPlatform
+namespace NWheels.Samples.BloggingPlatform.Domain
 {
     public interface ITagEntity : IEntityPartId<int>
     {
