@@ -36,6 +36,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
     </Reference>
+    <Reference Include="Autofac.Extras.Multitenant">
+      <HintPath>..\packages\Autofac.Extras.Multitenant.3.1.1\lib\net40\Autofac.Extras.Multitenant.dll</HintPath>
+    </Reference>
     <Reference Include="Hapil">
       <HintPath>..\packages\FelixB.Hapil.0.9.1\lib\net45\Hapil.dll</HintPath>
     </Reference>
@@ -81,6 +84,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

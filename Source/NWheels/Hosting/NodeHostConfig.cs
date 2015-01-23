@@ -84,6 +84,11 @@ namespace NWheels.Hosting
             {
                 module.Name = Path.GetFileNameWithoutExtension(module.Assembly);
             }
+
+            if ( string.IsNullOrEmpty(module.LoaderClass) )
+            {
+                module.LoaderClass = string.Format("{0}.ModuleLoader", Path.GetFileNameWithoutExtension(module.Assembly));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -95,6 +100,8 @@ namespace NWheels.Hosting
             public string Name { get; set; }
             [DataMember(Order = 2, IsRequired = true)]
             public string Assembly { get; set; }
+            [DataMember(Order = 2, IsRequired = false, EmitDefaultValue = false)]
+            public string LoaderClass { get; set; }
         }
     }
 }

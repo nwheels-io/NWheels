@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Builder;
 using Autofac.Core;
+using Autofac.Extras.Multitenant;
 using Hapil;
 using NWheels.Conventions;
 using NWheels.Core.Conventions;
@@ -285,11 +286,11 @@ namespace NWheels.Core.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class NodeLifetime : IDisposable
+        private class NodeLifetime : IDisposable, ITenantIdentificationStrategy
         {
             private readonly NodeHostConfig _nodeHostConfig;
             private readonly INodeHostLogger _logger;
-            private readonly ILifetimeScope _scopeContainer;
+            private readonly ILifetimeScope _lifetimeContainer;
             private readonly List<ILifecycleEventListener> _lifecycleComponents;
             private readonly RevertableSequence _loadSequence;
             private readonly RevertableSequence _activateSequence;
@@ -300,11 +301,11 @@ namespace NWheels.Core.Hosting
             {
                 _nodeHostConfig = nodeHostConfig;
                 _logger = logger;
-                _scopeContainer = baseContainer.BeginLifetimeScope();
+                _lifetimeContainer = baseContainer.BeginLifetimeScope();// new MultitenantContainer(this, baseContainer);
                 _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
                 _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
                 _lifecycleComponents = new List<ILifecycleEventListener>();
-                
+
                 LoadModules();
                 FindLifecycleComponents();
             }
@@ -313,7 +314,15 @@ namespace NWheels.Core.Hosting
 
             public void Dispose()
             {
-                _scopeContainer.Dispose();
+                _lifetimeContainer.Dispose();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            bool ITenantIdentificationStrategy.TryIdentifyTenant(out object tenantId)
+            {
+                tenantId = this;
+                return true;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -398,7 +407,7 @@ namespace NWheels.Core.Hosting
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void LoadModules()
+            private void LoadModules(/*ContainerBuilder builder*/)
             {
                 using ( _logger.LoadingModules() )
                 {
@@ -409,10 +418,17 @@ namespace NWheels.Core.Hosting
                         try
                         {
                             var assembly = Assembly.LoadFrom(PathUtility.LocalBinPath(module.Assembly));
+                            var loaderType = assembly.GetType(module.LoaderClass, throwOnError: true);
 
-                            var containerUpdater = new ContainerBuilder();
-                            containerUpdater.RegisterAssemblyModules(assembly);
-                            containerUpdater.Update(_scopeContainer.ComponentRegistry);
+                            var loaderTypeUpdater = new ContainerBuilder();
+                            loaderTypeUpdater.RegisterType(loaderType);
+                            loaderTypeUpdater.Update(_lifetimeContainer.ComponentRegistry);
+
+                            var loaderInstance = (Autofac.Module)_lifetimeContainer.Resolve(loaderType);
+
+                            var moduleUpdater = new ContainerBuilder();
+                            moduleUpdater.RegisterModule(loaderInstance);
+                            moduleUpdater.Update(_lifetimeContainer.ComponentRegistry);
                         }
                         catch ( Exception e )
                         {
@@ -428,6 +444,37 @@ namespace NWheels.Core.Hosting
                 }
             }
 
+            #if false
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void LoadModules(ContainerBuilder builder)
+            {
+                using ( _logger.LoadingModules() )
+                {
+                    foreach ( var module in _nodeHostConfig.FrameworkModules.Concat(_nodeHostConfig.ApplicationModules) )
+                    {
+                        _logger.RegisteringModule(module.Name);
+
+                        try
+                        {
+                            var assembly = Assembly.LoadFrom(PathUtility.LocalBinPath(module.Assembly));
+                            builder.RegisterAssemblyModules(assembly);
+                        }
+                        catch ( Exception e )
+                        {
+                            _logger.FailedToLoadModule(module.Name, e);
+                            throw;
+                        }
+                    }
+
+                    if ( !_nodeHostConfig.ApplicationModules.Any() )
+                    {
+                        _logger.NoApplicationModulesRegistered();
+                    }
+                }
+            }
+            #endif
+
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private void FindLifecycleComponents()
@@ -438,7 +485,7 @@ namespace NWheels.Core.Hosting
                     {
                         IEnumerable<ILifecycleEventListener> foundComponents;
 
-                        if ( _scopeContainer.TryResolve<IEnumerable<ILifecycleEventListener>>(out foundComponents) )
+                        if ( _lifetimeContainer.TryResolve<IEnumerable<ILifecycleEventListener>>(out foundComponents) )
                         {
                             _lifecycleComponents.AddRange(foundComponents);
 
