@@ -77,5 +77,12 @@ namespace NWheels.Hosting
         public virtual void NodeUnloaded()
         {
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual string ComponentName
+        {
+            get { return this.GetType().Name; }
+        }
     }
 }

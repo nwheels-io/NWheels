@@ -20,5 +20,6 @@ namespace NWheels.Hosting
         void NodeUnloading();
         void Unload();
         void NodeUnloaded();
+        string ComponentName { get; }
     }
 }

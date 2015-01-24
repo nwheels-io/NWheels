@@ -4,32 +4,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.UI.Endpoints
+namespace NWheels.Entities
 {
-    public interface IWebAppEndpoint
+
+    public interface IEntityRepositoryEndpoint
     {
-        IUiApplication Contract { get; }
+        IApplicationEntityRepository Contract { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class WebAppEndpoint<TApp> : IWebAppEndpoint 
-        where TApp : IUiApplication
+    public class EntityRepositoryEndpoint<TRepository> : IEntityRepositoryEndpoint 
+        where TRepository : IApplicationEntityRepository
     {
-        private readonly TApp _app;
+        private readonly TRepository _repository;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public WebAppEndpoint(TApp app)
+        public EntityRepositoryEndpoint(TRepository repository)
         {
-            _app = app;
+            _repository = repository;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IUiApplication Contract
+        public IApplicationEntityRepository Contract
         {
-            get { return _app; }
+            get { return _repository; }
         }
     }
 }

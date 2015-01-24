@@ -9,26 +9,28 @@ using System.Web.OData.Extensions;
 using Autofac;
 using Autofac.Integration.WebApi;
 using Microsoft.Owin.Hosting;
+using NWheels.Entities;
 using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.UI;
 using NWheels.UI.Endpoints;
 using Owin;
+using Microsoft.OData.Edm;
 
 namespace NWheels.Puzzle.OdataOwinWebapi
 {
-    internal class WebApplicationComponent : LifecycleEventListenerBase
+    internal class EntityServiceComponent : LifecycleEventListenerBase
     {
-        private readonly IUiApplication _app;
+        private readonly IApplicationEntityRepository _repository;
         private readonly ILogger _logger;
         private readonly ILifetimeScope _container;
         private IDisposable _host = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public WebApplicationComponent(IWebAppEndpoint endpoint, Auto<ILogger> logger, IComponentContext componentContext)
+        public EntityServiceComponent(IEntityRepositoryEndpoint endpoint, Auto<ILogger> logger, IComponentContext componentContext)
         {
-            _app = endpoint.Contract;
+            _repository = endpoint.Contract;
             _logger = logger.Instance;
             _container = (ILifetimeScope)componentContext;
         }
@@ -41,12 +43,12 @@ namespace NWheels.Puzzle.OdataOwinWebapi
 
             try
             {
-                _host = WebApp.Start(url, ConfigureWebApplication);
-                _logger.WebApplicationStarted(_app.GetType().Name, url);
+                _host = WebApp.Start(url, ConfigureWebService);
+                _logger.EntityServiceStarted(_repository.GetType().Name, url);
             }
             catch ( Exception e )
             {
-                _logger.WebApplicationFailedToStart(_app.GetType().Name, e);
+                _logger.EntityServiceFailedToStart(_repository.GetType().Name, e);
                 throw;
             }
         }
@@ -58,35 +60,23 @@ namespace NWheels.Puzzle.OdataOwinWebapi
             try
             {
                 _host.Dispose();
-                _logger.WebApplicationStopped(_app.GetType().Name);
+                _logger.EntityServiceStopped(_repository.GetType().Name);
             }
             catch ( Exception e )
             {
-                _logger.WebApplicationFailedToStop(_app.GetType().Name, e);
+                _logger.EntityServiceFailedToStop(_repository.GetType().Name, e);
                 throw;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void ConfigureWebApplication(IAppBuilder app)
+        public void ConfigureWebService(IAppBuilder app)
         {
             HttpConfiguration config = new HttpConfiguration();
 
-            //config.Formatters.Clear();
-            config.Formatters.Add(config.Formatters.XmlFormatter);
-            //config.Formatters.Remove(config.Formatters.XmlFormatter);
-
             config.MapHttpAttributeRoutes();
-            //config.Routes.MapHttpRoute(
-            //    name: "DefaultApi",
-            //    routeTemplate: "api/{controller}",
-            //    defaults: new { id = RouteParameter.Optional }
-            //);
-
-            ODataModelBuilder model = new ODataConventionModelBuilder();
-            model.EntitySet<PingItemEntity>("PingItem");
-            config.MapODataServiceRoute(routeName: "odata", routePrefix: "odata", model: model.GetEdmModel());
+            config.MapODataServiceRoute(routeName: "EntityService", routePrefix: "entity", model: BuildEdmModel());
 
             config.DependencyResolver = new AutofacWebApiDependencyResolver(_container);
 
@@ -97,16 +87,30 @@ namespace NWheels.Puzzle.OdataOwinWebapi
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private IEdmModel BuildEdmModel()
+        {
+            var modelBuilder = new ODataConventionModelBuilder();
+
+            foreach ( var entityType in _repository.GetEntityTypesInRepository() )
+            {
+                modelBuilder.AddEntitySet(entityType.Name, modelBuilder.AddEntityType(entityType));
+            }
+
+            return modelBuilder.GetEdmModel();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public interface ILogger : IApplicationEventLogger
         {
             [LogInfo]
-            void WebApplicationStarted(string appName, string Url);
+            void EntityServiceStarted(string repositoryName, string Url);
             [LogError]
-            void WebApplicationFailedToStart(string appName, Exception e);
+            void EntityServiceFailedToStart(string repositoryName, Exception e);
             [LogInfo]
-            void WebApplicationStopped(string appName);
+            void EntityServiceStopped(string repositoryName);
             [LogError]
-            void WebApplicationFailedToStop(string appName, Exception e);
+            void EntityServiceFailedToStop(string repositoryName, Exception e);
         }
     }
 }

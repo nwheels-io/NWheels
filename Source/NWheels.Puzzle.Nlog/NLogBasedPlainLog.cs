@@ -29,7 +29,7 @@ namespace NWheels.Puzzle.Nlog
                 FileName = PathUtility.LocalBinPath("nwheels.log"),
             };
 
-            fileTarget.Layout = @"${date:format=yyyy-MM-dd HH\:mm\:ss.fff}|${level:uppercase=true}|${message}";
+            fileTarget.Layout = @"${date:format=yyyy-MM-dd HH\:mm\:ss.fff}|${level:uppercase=true}|${message}|${exception:format=ToString}";
 
             config.AddTarget("File", fileTarget);
 
@@ -47,7 +47,7 @@ namespace NWheels.Puzzle.Nlog
         {
             var consoleTarget = new ColoredConsoleTarget();
 
-            consoleTarget.Layout = @"${date:universalTime=true:format=HH\:mm\:ss.fff} ${message}";
+            consoleTarget.Layout = @"${date:universalTime=true:format=HH\:mm\:ss.fff} ${message} ${exception:format=Message}";
             consoleTarget.UseDefaultRowHighlightingRules = false;
             consoleTarget.RowHighlightingRules.Clear();
             consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(
