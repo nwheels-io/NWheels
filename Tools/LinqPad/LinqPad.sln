@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataContextDriverDemo", "DataContextDriverDemo\DataContextDriverDemo.csproj", "{2661F1B5-62FB-4783-A1A0-57445F397F9E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqPadODataV4Driver", "LinqPadODataV4Driver\LinqPadODataV4Driver.csproj", "{3EEE78B7-CFAE-4B92-B498-E8B3A04BD875}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqPadODataV4Driver.Tests", "LinqPadODataV4Driver.Tests\LinqPadODataV4Driver.Tests.csproj", "{EDF11D76-EC3A-4981-95E0-C6C84A43B1DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqPadODataV4Driver.ClientExample", "LinqPadODataV4Driver.ClientExample\LinqPadODataV4Driver.ClientExample.csproj", "{239B6135-6D02-451D-9596-491E02E1EB0A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2661F1B5-62FB-4783-A1A0-57445F397F9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2661F1B5-62FB-4783-A1A0-57445F397F9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2661F1B5-62FB-4783-A1A0-57445F397F9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EEE78B7-CFAE-4B92-B498-E8B3A04BD875}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EEE78B7-CFAE-4B92-B498-E8B3A04BD875}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EEE78B7-CFAE-4B92-B498-E8B3A04BD875}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EEE78B7-CFAE-4B92-B498-E8B3A04BD875}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDF11D76-EC3A-4981-95E0-C6C84A43B1DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDF11D76-EC3A-4981-95E0-C6C84A43B1DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDF11D76-EC3A-4981-95E0-C6C84A43B1DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDF11D76-EC3A-4981-95E0-C6C84A43B1DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{239B6135-6D02-451D-9596-491E02E1EB0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{239B6135-6D02-451D-9596-491E02E1EB0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{239B6135-6D02-451D-9596-491E02E1EB0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{239B6135-6D02-451D-9596-491E02E1EB0A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
