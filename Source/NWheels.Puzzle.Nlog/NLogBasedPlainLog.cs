@@ -75,6 +75,22 @@ namespace NWheels.Puzzle.Nlog
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void ConfigureWindowsEventLogOutput(string logName, string sourceName)
+        {
+            var eventLogTarget = new EventLogTarget();
+
+            eventLogTarget.MachineName = ".";
+            eventLogTarget.Log = logName;
+            eventLogTarget.Source = sourceName;
+
+            if ( !eventLogTarget.IsInstalled(null).GetValueOrDefault() )
+            {
+                eventLogTarget.Install(new InstallationContext());
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void LogNode(NWheels.Logging.LogNode node)
         {
             switch ( node.Level )
@@ -164,5 +180,6 @@ namespace NWheels.Puzzle.Nlog
         {
             get { return s_Instance; }
         }
+
     }
 }

@@ -51,6 +51,32 @@ namespace NWheels.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string ToLogString()
+        {
+            var text = new StringBuilder();
+
+            text.AppendFormat("Application Name   - {0}", this.ApplicationName);
+            text.AppendLine();
+            text.AppendFormat("Node Name          - {0}", this.NodeName);
+            text.AppendLine();
+
+            foreach ( var moduleString in this.FrameworkModules )
+            {
+                text.AppendFormat("+ Framework Module   - {0}", moduleString);
+                text.AppendLine();
+            }
+
+            foreach ( var moduleString in this.ApplicationModules )
+            {
+                text.AppendFormat("+ Application Module - {0}", moduleString);
+                text.AppendLine();
+            }
+
+            return text.ToString();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember(Order = 1, IsRequired = true)]
         public string ApplicationName { get; set; }
         [DataMember(Order = 2, IsRequired = true)]

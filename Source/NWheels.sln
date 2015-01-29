@@ -47,6 +47,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Puzzle.OdataOwinWeb
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Samples.RestService", "NWheels.Samples.RestService\NWheels.Samples.RestService.csproj", "{FC22F1C9-8CD7-4183-B527-9FB604E9500E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Hosts.Service", "NWheels.Hosts.Service\NWheels.Hosts.Service.csproj", "{27F27BD0-0854-42F7-8D17-9D1E8AC184B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Puzzle.QuartzNet", "NWheels.Puzzle.QuartzNet\NWheels.Puzzle.QuartzNet.csproj", "{63F44387-BE72-499B-8F7E-B783B1E219F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -101,6 +105,14 @@ Global
 		{FC22F1C9-8CD7-4183-B527-9FB604E9500E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC22F1C9-8CD7-4183-B527-9FB604E9500E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC22F1C9-8CD7-4183-B527-9FB604E9500E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27F27BD0-0854-42F7-8D17-9D1E8AC184B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27F27BD0-0854-42F7-8D17-9D1E8AC184B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27F27BD0-0854-42F7-8D17-9D1E8AC184B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27F27BD0-0854-42F7-8D17-9D1E8AC184B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63F44387-BE72-499B-8F7E-B783B1E219F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63F44387-BE72-499B-8F7E-B783B1E219F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63F44387-BE72-499B-8F7E-B783B1E219F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63F44387-BE72-499B-8F7E-B783B1E219F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -118,5 +130,7 @@ Global
 		{8EC79D0A-B99D-4ED1-9494-7756F29916C7} = {4829A9A2-7B02-4FD7-8581-FC59B4029699}
 		{D793F755-6585-4E09-9F40-3A689FDF4DFF} = {4829A9A2-7B02-4FD7-8581-FC59B4029699}
 		{FC22F1C9-8CD7-4183-B527-9FB604E9500E} = {00E8568A-B862-4A41-83AA-D199339E0B28}
+		{27F27BD0-0854-42F7-8D17-9D1E8AC184B6} = {39E6D6C1-711C-4D16-B5E0-F56093FBE5AA}
+		{63F44387-BE72-499B-8F7E-B783B1E219F2} = {4829A9A2-7B02-4FD7-8581-FC59B4029699}
 	EndGlobalSection
 EndGlobal

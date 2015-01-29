@@ -3,6 +3,7 @@ namespace NWheels.Core.Logging
     public interface IPlainLog
     {
         void ConfigureConsoleOutput();
+        void ConfigureWindowsEventLogOutput(string logName, string sourceName);
         void LogNode(NWheels.Logging.LogNode node);
         void LogActivity(NWheels.Logging.ActivityLogNode activity);
         void Debug(string format, params object[] args);
