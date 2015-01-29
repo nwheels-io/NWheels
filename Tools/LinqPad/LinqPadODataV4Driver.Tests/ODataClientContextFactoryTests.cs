@@ -16,20 +16,25 @@ using NUnit.Framework;
 namespace LinqPadODataV4Driver.Tests
 {
     [TestFixture]
-    public class EntityObjectFactoryTests : NUnitEmittedTypesTestBase
+    public class ODataClientContextFactoryTests : NUnitEmittedTypesTestBase
     {
         [Test]
-        public void CanGenerateEntityClass()
+        public void CanGenerateClientContext()
         {
             //-- Arrange
 
             var model = ParseTestModelEdmx();
-            var entityEdmType = model.SchemaElements.OfType<IEdmEntityType>().First(t => t.Name == "Product");
-            var clrTypeCache = new EntityClrTypeCache(base.Module, model);
+            var clientContextFactory = new ODataClientContextFactory(base.Module);
 
             //-- Act
 
-            var entityClrType = clrTypeCache.GetEntityClrType(entityEdmType);
+            var contextImplementationType = clientContextFactory.ImplementClientContext(model);
+            dynamic contextInstance = Activator.CreateInstance(contextImplementationType, new Uri("http://localhost:9000/entity"));
+
+            //-- Assert
+
+            Assert.That(contextInstance.Product, Is.InstanceOf<IQueryable>());
+            Assert.That(contextInstance.Order, Is.InstanceOf<IQueryable>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

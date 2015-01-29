@@ -19,16 +19,16 @@ namespace LinqPadODataV4Driver
             ref string nameSpace, 
             ref string typeName)
         {
-            File.WriteAllText(@"D:\LinqPadODataV4Driver.log", string.Format(
-                "GetSchemaAndBuildAssembly(assemblyToBuild={0}, nameSpace={1}, typeName={2}", 
-                assemblyToBuild.CodeBase, nameSpace, typeName));
+            //File.WriteAllText(@"D:\LinqPadODataV4Driver.log", string.Format(
+            //    "GetSchemaAndBuildAssembly(assemblyToBuild={0}, nameSpace={1}, typeName={2}", 
+            //    assemblyToBuild.CodeBase, nameSpace, typeName));
 
             var simpleName = Path.GetFileNameWithoutExtension(assemblyToBuild.CodeBase);
             var module = new DynamicModule(simpleName, allowSave: true, saveDirectory: Path.GetDirectoryName(assemblyToBuild.CodeBase));
-            var model = DynamicDataServiceContextBase.LoadModelFromService(new Uri(connectionProperties.Uri + "/$metadata"));
-            var factory = new DynamicDataServiceContextFactory(module, model);
+            var model = ODataClientContextBase.LoadModelFromService(new Uri(connectionProperties.Uri + "/$metadata"));
+            var factory = new ODataClientContextFactory(module);
 
-            var generatedType = factory.BuildDynamicDataServiceContext();
+            var generatedType = factory.ImplementClientContext(model);
 
             nameSpace = generatedType.Namespace;
             typeName = generatedType.Name;
@@ -50,7 +50,7 @@ namespace LinqPadODataV4Driver
             {
                 var entityItem = new ExplorerItem(entityType.Name, ExplorerItemKind.QueryableObject, ExplorerIcon.Table);
 
-                foreach (var property in entityType.Properties())
+                foreach ( var property in entityType.Properties() )
                 {
                     var propertyItem = new ExplorerItem(property.Name, ExplorerItemKind.Property, ExplorerIcon.Column);
 
@@ -64,7 +64,6 @@ namespace LinqPadODataV4Driver
 
                 rootItems.Add(entityItem);
                 Console.WriteLine("{0}{{{1}}}", entityType.Name, string.Join(",", entityType.Properties().Select(p => p.Name).ToArray()));
-
             }
 
             return rootItems;

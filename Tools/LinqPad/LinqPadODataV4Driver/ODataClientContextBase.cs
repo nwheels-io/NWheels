@@ -10,7 +10,7 @@ using Microsoft.OData.Edm.Csdl;
 
 namespace LinqPadODataV4Driver
 {
-    public abstract class DynamicDataServiceContextBase : DataServiceContext
+    public abstract class ODataClientContextBase : DataServiceContext
     {
         private readonly string _localEntityTypesNamespace;
         private string _remoteEntityTypesNamespace;
@@ -18,7 +18,7 @@ namespace LinqPadODataV4Driver
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DynamicDataServiceContextBase(Uri serviceRoot, string localEntityTypesNamespace) : 
+        public ODataClientContextBase(Uri serviceRoot, string localEntityTypesNamespace) : 
             base(serviceRoot, ODataProtocolVersion.V4)
         {
             _localEntityTypesNamespace = localEntityTypesNamespace;
@@ -85,13 +85,6 @@ namespace LinqPadODataV4Driver
                     return EdmxReader.Parse(xmlReader);
                 }
             }
-        }
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static object CreateObjectByTypeName(string fullTypeName)
-        {
-            var type = Type.GetType(fullTypeName);
-            return Activator.CreateInstance(type, null, TrackingMode.None);
         }
     }
 }

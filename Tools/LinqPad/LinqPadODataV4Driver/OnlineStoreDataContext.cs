@@ -7,7 +7,7 @@ using Microsoft.OData.Client;
 
 namespace LinqPadODataV4Driver
 {
-    public class OnlineStoreDataContext : DynamicDataServiceContextBase
+    public class OnlineStoreDataContext : ODataClientContextBase
     {
         private DataServiceQuery<Product> _products;
         private DataServiceQuery<Order> _orders;

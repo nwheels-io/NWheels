@@ -14,70 +14,66 @@ using TT = Hapil.TypeTemplate;
 
 namespace LinqPadODataV4Driver
 {
-    public class DynamicDataServiceContextFactory : ConventionObjectFactory
+    public class ODataClientContextFactory : ConventionObjectFactory
     {
-        private readonly IEdmModel _model;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public DynamicDataServiceContextFactory(DynamicModule module, IEdmModel model)
-            : base(module, new DynamicDataContextConvention(module, model))
+        public ODataClientContextFactory(DynamicModule module)
+            : base(module, new ODataClientContextConvention(module))
         {
-            _model = model;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Type BuildDynamicDataServiceContext()
+        public Type ImplementClientContext(IEdmModel model)
         {
-            return base.GetOrBuildType(new TypeKey()).DynamicType;
+            return base.GetOrBuildType(new EdmModelTypeKey(model)).DynamicType;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class DynamicDataContextConvention : ImplementationConvention
+        public class ODataClientContextConvention : ImplementationConvention
         {
-            private readonly IEdmModel _model;
-            private readonly string _dynamicTypesNamespace;
-            private readonly EntityClrTypeCache _clrTypeCache;
+            private readonly ODataClientEntityFactory _entityFactory;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public DynamicDataContextConvention(DynamicModule module, IEdmModel model) 
+            public ODataClientContextConvention(DynamicModule module) 
                 : base(Will.InspectDeclaration | Will.ImplementBaseClass)
             {
-                _model = model;
-                _dynamicTypesNamespace = model.GetEntityNamespace();
-                _clrTypeCache = new EntityClrTypeCache(module, model);
+                _entityFactory = new ODataClientEntityFactory(module);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected override void OnInspectDeclaration(ObjectFactoryContext context)
             {
-                context.BaseType = typeof(DynamicDataServiceContextBase);
-                context.ClassFullName = _model.GetGeneratedContextClassFullName();
+                var modelTypeKey = (EdmModelTypeKey) context.TypeKey;
+                context.ClassFullName = modelTypeKey.Model.GetGeneratedContextClassFullName();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected override void OnImplementBaseClass(ImplementationClassWriter<TT.TBase> writer)
             {
-                writer.Constructor<Uri>((w, uri) => w.Base<Uri, string>(uri, w.Const(_dynamicTypesNamespace)));
+                var modelTypeKey = (EdmModelTypeKey)base.Context.TypeKey;
+                var model = modelTypeKey.Model;
 
-                var allEntityTypes = _model.SchemaElements.OfType<IEdmEntityType>().ToArray();
+                writer.Constructor<Uri>((w, uri) => w.Base<Uri, string>(uri, w.Const(model.GetEntityNamespace())));
+
+                var allEntityTypes = model.SchemaElements.OfType<IEdmEntityType>().ToArray();
 
                 foreach ( var entityEdmType in allEntityTypes )
                 {
-                    using ( TT.CreateScope<TT.TItem>(_clrTypeCache.GetEntityClrType(entityEdmType)) )
+                    var entityClrType = _entityFactory.ImplementClientEntity(model, entityEdmType);
+
+                    using ( TT.CreateScope<TT.TItem>(entityClrType) )
                     {
                         writer.NewVirtualWritableProperty<DataServiceQuery<TT.TItem>>(entityEdmType.Name).Implement(
                             p => p.Get(w => {
-                                w.If(p.BackingField == w.Const<DataServiceQuery<TT.TItem>>(null)).Then(() => {
+                                w.If(p.BackingField == w.Const<DataServiceQuery<TT.TItem>>(null)).Then(() =>
                                     p.BackingField.Assign(
                                         w.This<DataServiceContext>().Func<string, DataServiceQuery<TT.TItem>>(
-                                            x => x.CreateQuery<TT.TItem>, w.Const(entityEdmType.Name)));
-                                });
+                                            x => x.CreateQuery<TT.TItem>, w.Const(entityEdmType.Name)))
+                                );
                                 w.Return(p.BackingField);
                             }),
                             p => p.Set((w, value) => { }));

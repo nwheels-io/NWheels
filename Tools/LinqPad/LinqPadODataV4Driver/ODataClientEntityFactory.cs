@@ -13,21 +13,22 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Library;
 using Microsoft.Spatial;
 using System.IO;
+using TT = Hapil.TypeTemplate;
 
 namespace LinqPadODataV4Driver
 {
-    public class EntityObjectFactory : ConventionObjectFactory
+    public class ODataClientEntityFactory : ConventionObjectFactory
     {
-        public EntityObjectFactory(EntityClrTypeCache typeCache, DynamicModule module, IEdmModel model, IEdmEntityType entityType)
-            : base(module, new EntityObjectConvention(typeCache, model, entityType))
+        public ODataClientEntityFactory(DynamicModule module)
+            : base(module, new ODataClientEntityConvention())
         {
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Type GetGeneratedEntityClassType()
+        public Type ImplementClientEntity(IEdmModel model, IEdmEntityType entityType)
         {
-            return base.GetOrBuildType(new TypeKey()).DynamicType;
+            return base.GetOrBuildType(new EdmEntityTypeKey(model, entityType)).DynamicType;
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -37,10 +38,9 @@ namespace LinqPadODataV4Driver
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        static EntityObjectFactory()
+        static ODataClientEntityFactory()
         {
             s_CoreModel = EdmCoreModel.Instance;
-            //_defaultAssemblyResolver = new DefaultAssembliesResolver();
             s_BuiltInTypesMapping = new KeyValuePair<Type, IEdmPrimitiveType>[] { 
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(string), GetPrimitiveType(EdmPrimitiveTypeKind.String)), 
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(bool), GetPrimitiveType(EdmPrimitiveTypeKind.Boolean)), 
@@ -85,84 +85,90 @@ namespace LinqPadODataV4Driver
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class EntityObjectConvention : ImplementationConvention
+        public class ODataClientEntityConvention : ImplementationConvention
         {
-            private readonly EntityClrTypeCache _typeCache;
-            private readonly IEdmEntityType _entityType;
-            private readonly IEdmModel _model;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public EntityObjectConvention(EntityClrTypeCache typeCache, IEdmModel model, IEdmEntityType entityType) 
+            public ODataClientEntityConvention() 
                 : base(Will.InspectDeclaration | Will.ImplementBaseClass)
             {
-                _typeCache = typeCache;
-                _model = model;
-                _entityType = entityType;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected override void OnInspectDeclaration(ObjectFactoryContext context)
             {
-                context.ClassFullName = _entityType.FullTypeName();
+                var entityKey = (EdmEntityTypeKey)context.TypeKey;
+                context.ClassFullName = entityKey.EntityType.FullTypeName();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            protected override void OnImplementBaseClass(ImplementationClassWriter<TT.TBase> writer)
             {
-                _typeCache.Update(_entityType, writer.OwnerClass.TypeBuilder);
+                var entityTypeKey = (EdmEntityTypeKey)base.Context.TypeKey;
+                var entityType = entityTypeKey.EntityType;
 
-                writer.Attribute<OriginalNameAttribute>(a => a.Arg(_entityType.Name));
+                WriteEntityAttributes(writer, entityType);
 
-                if ( _entityType.DeclaredKey != null )
+                var initializers = new List<Action<ConstructorWriter>>();
+
+                foreach (var property in entityType.Properties())
                 {
-                    writer.Attribute<KeyAttribute>(a => a.Arg(string.Join(",", _entityType.DeclaredKey.Select(p => p.Name).ToArray())));
+                    WriteEntityProperty(writer, entityTypeKey.Model, property, initializers);
                 }
 
-                var collectionFields = new List<Field<TypeTemplate.TProperty>>();
-                var collectionTypes = new List<Type>();
-
-                foreach ( var property in _entityType.Properties() )
-                {
-                    var propertyClrType = TranslateEdmTypeToClrType(property.Type.Definition);
-
-                    using ( TypeTemplate.CreateScope<TypeTemplate.TProperty>(propertyClrType) )
-                    {
-                        Field<TypeTemplate.TProperty> backingField;
-                        writer.Field<TypeTemplate.TProperty>("_" + property.Name, out backingField);
-
-                        if ( property.Type.IsCollection() )
-                        {
-                            collectionFields.Add(backingField);
-                            collectionTypes.Add(propertyClrType);
-                        }
-
-                        writer.NewVirtualWritableProperty<TypeTemplate.TProperty>(property.Name).ImplementAutomatic(backingField);
-                    }
-                }
-
-                writer.Constructor(w => {
-                    for ( int i = 0 ; i < collectionFields.Count ; i++ )
-                    {
-                        using (TypeTemplate.CreateScope<TypeTemplate.TProperty>(collectionTypes[i]))
-                        {
-                            IOperand op = Static.Func<string, object>(
-                                DynamicDataServiceContextBase.CreateObjectByTypeName,
-                                w.Const(collectionTypes[i].FullName));
-
-                            collectionFields[i].Assign(op.CastTo<TypeTemplate.TProperty>());
-                        }
-                    }
+                writer.Constructor(cw => {
+                    initializers.ForEach(init => init(cw));
                 });
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private Type TranslateEdmTypeToClrType(IEdmType edmType)
+            private static void WriteEntityAttributes(ImplementationClassWriter<TT.TBase> writer, IEdmEntityType entityType)
             {
-                var annotation = _model.GetAnnotationValue<ClrTypeAnnotation>(edmType);
+                writer.Attribute<OriginalNameAttribute>(a => a.Arg(entityType.Name));
+
+                if ( entityType.DeclaredKey != null )
+                {
+                    var commaSeparatedKeyPropertyNames = string.Join(",", entityType.DeclaredKey.Select(p => p.Name).ToArray());
+                    writer.Attribute<KeyAttribute>(a => a.Arg(commaSeparatedKeyPropertyNames));
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void WriteEntityProperty(
+                ImplementationClassWriter<TypeTemplate.TBase> writer, 
+                IEdmModel model,
+                IEdmProperty property, 
+                List<Action<ConstructorWriter>> initializers)
+            {
+                var propertyClrType = TranslateEdmTypeToClrType(model, property.Type.Definition);
+
+                using (TT.CreateScope<TT.TProperty>(propertyClrType))
+                {
+                    var backingField = writer.Field<TT.TProperty>("_" + property.Name);
+
+                    if (property.Type.IsCollection())
+                    {
+                        Type elementClrType = propertyClrType.GetGenericArguments()[0];
+
+                        initializers.Add(cw => {
+                            using (TT.CreateScope<TT.TProperty, TT.TItem>(propertyClrType, elementClrType))
+                            {
+                                backingField.Assign(cw.New<TT.TProperty>(cw.Const<IEnumerable<TT.TItem>>(null), cw.Const(TrackingMode.None)));
+                            }
+                        });
+                    }
+
+                    writer.NewVirtualWritableProperty<TT.TProperty>(property.Name).ImplementAutomatic(backingField);
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private Type TranslateEdmTypeToClrType(IEdmModel model, IEdmType edmType)
+            {
+                var annotation = model.GetAnnotationValue<ClrTypeAnnotation>(edmType);
 
                 if ( annotation != null )
                 {
@@ -173,14 +179,14 @@ namespace LinqPadODataV4Driver
 
                 if ( entityType != null )
                 {
-                    return _typeCache.GetEntityClrType(entityType);
+                    return base.Context.Factory.FindDynamicType(new EdmEntityTypeKey(model, entityType));
                 }
 
                 var collectionType = (edmType as IEdmCollectionType);
 
                 if ( collectionType != null )
                 {
-                    var elementClrType = TranslateEdmTypeToClrType(collectionType.ElementType.Definition);
+                    var elementClrType = TranslateEdmTypeToClrType(model, collectionType.ElementType.Definition);
                     return typeof (DataServiceCollection<>).MakeGenericType(elementClrType);
                 }
 
