@@ -39,17 +39,17 @@
     <Reference Include="Autofac.Extras.Multitenant">
       <HintPath>..\packages\Autofac.Extras.Multitenant.3.1.1\lib\net40\Autofac.Extras.Multitenant.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.1.1, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Hapil, Version=0.9.2.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.1.1\lib\net45\Hapil.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.2.1\lib\net45\Hapil.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil.Applied, Version=0.9.1.1, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Hapil.Applied, Version=0.9.2.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.1.1\lib\net45\Hapil.Applied.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.2.1\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil.Testing.NUnit, Version=0.9.1.1, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Hapil.Testing.NUnit, Version=0.9.2.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.1.1\lib\net45\Hapil.Testing.NUnit.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.2.1\lib\net45\Hapil.Testing.NUnit.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
