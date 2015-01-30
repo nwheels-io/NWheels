@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -77,8 +78,21 @@ namespace LinqPadODataV4Driver
         [Obsolete]
         public override IEnumerable<string> GetAssembliesToAdd()
         {
+            var binPath = Path.GetDirectoryName(typeof (ODataV4Driver).Assembly.Location);
+
             // We need the following assembly for compiliation and autocompletion:
-            return new[] { "Microsoft.OData.Client", "Microsoft.OData.Core", "Microsoft.OData.Edm" };
+            var assemblyNames = new[] {
+                "Microsoft.OData.Client", 
+                "Microsoft.OData.Core", 
+                "Microsoft.OData.Edm", 
+                "System.Web.OData", 
+                "System.Web.Http", 
+                "System.Net.Http", 
+                "Newtonsoft.Json", 
+                "Microsoft.Spatial"
+            };
+
+            return assemblyNames.Select(name => Path.Combine(binPath, name) + ".dll").ToArray();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -19,10 +19,6 @@ namespace LinqPadODataV4Driver
             ref string nameSpace, 
             ref string typeName)
         {
-            //File.WriteAllText(@"D:\LinqPadODataV4Driver.log", string.Format(
-            //    "GetSchemaAndBuildAssembly(assemblyToBuild={0}, nameSpace={1}, typeName={2}", 
-            //    assemblyToBuild.CodeBase, nameSpace, typeName));
-
             var simpleName = Path.GetFileNameWithoutExtension(assemblyToBuild.CodeBase);
             var module = new DynamicModule(simpleName, allowSave: true, saveDirectory: Path.GetDirectoryName(assemblyToBuild.CodeBase));
             var model = ODataClientContextBase.LoadModelFromService(new Uri(connectionProperties.Uri + "/$metadata"));
@@ -42,31 +38,115 @@ namespace LinqPadODataV4Driver
 
         private List<ExplorerItem> BuildSchema(IEdmModel model)
         {
-            List<ExplorerItem> rootItems = new List<ExplorerItem>();
+            var rootItems = new List<ExplorerItem>();
+            var entityItemsByEntityType = new Dictionary<IEdmEntityType, ExplorerItem>();
             
             var allEntityTypes = model.SchemaElements.OfType<IEdmEntityType>().ToArray();
 
             foreach ( var entityType in allEntityTypes )
             {
                 var entityItem = new ExplorerItem(entityType.Name, ExplorerItemKind.QueryableObject, ExplorerIcon.Table);
+                entityItem.ToolTipText = entityType.FullTypeName();
+                entityItem.Children = new List<ExplorerItem>();
+                entityItemsByEntityType.Add(entityType, entityItem);
 
                 foreach ( var property in entityType.Properties() )
                 {
-                    var propertyItem = new ExplorerItem(property.Name, ExplorerItemKind.Property, ExplorerIcon.Column);
+                    string itemText;
+                    string itemTooltip;
+                    ExplorerItemKind itemKind;
+                    ExplorerIcon itemIcon;
+                    SetPropertyItemStyle(entityType, property, out itemText, out itemTooltip, out itemKind, out itemIcon);
 
-                    if ( entityItem.Children == null )
+                    var propertyItem = new ExplorerItem(itemText, itemKind, itemIcon);
+                    var navigationProperty = (property as IEdmNavigationProperty);
+
+                    if ( navigationProperty != null )
                     {
-                        entityItem.Children = new List<ExplorerItem>();
+                        propertyItem.Tag = navigationProperty.ToEntityType();
                     }
 
+                    propertyItem.ToolTipText = itemTooltip;
                     entityItem.Children.Add(propertyItem);
                 }
 
                 rootItems.Add(entityItem);
-                Console.WriteLine("{0}{{{1}}}", entityType.Name, string.Join(",", entityType.Properties().Select(p => p.Name).ToArray()));
             }
 
+            FixupNavigationLinks(rootItems, entityItemsByEntityType);
             return rootItems;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void FixupNavigationLinks(List<ExplorerItem> entityItems, Dictionary<IEdmEntityType, ExplorerItem> entityItemsByEntityType)
+        {
+            foreach (var entityItem in entityItems)
+            {
+                foreach (var propertyItem in entityItem.Children)
+                {
+                    var linkedEntityType = (propertyItem.Tag as IEdmEntityType);
+
+                    if (linkedEntityType != null)
+                    {
+                        ExplorerItem linkedItem;
+
+                        if (entityItemsByEntityType.TryGetValue(linkedEntityType, out linkedItem))
+                        {
+                            propertyItem.HyperlinkTarget = linkedItem;
+                        }
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void SetPropertyItemStyle(
+            IEdmEntityType entityType, 
+            IEdmProperty property, 
+            out string itemText,
+            out string tooltipText,
+            out ExplorerItemKind itemKind, 
+            out ExplorerIcon itemIcon)
+        {
+            var navigationProperty = (property as IEdmNavigationProperty);
+            var structuralProperty = (property as IEdmStructuralProperty);
+            var isCollection = property.Type.IsCollection();
+
+            if ( navigationProperty != null )
+            {
+                itemText = property.Name;
+                tooltipText = property.Type.Definition.FullTypeName();
+                itemKind = (isCollection ? ExplorerItemKind.CollectionLink : ExplorerItemKind.ReferenceLink);
+
+                switch (navigationProperty.TargetMultiplicity())
+                {
+                    case EdmMultiplicity.One:
+                        itemIcon = (isCollection ? ExplorerIcon.ManyToOne : ExplorerIcon.OneToOne);
+                        break;
+                    case EdmMultiplicity.Many:
+                        itemIcon = (isCollection ? ExplorerIcon.ManyToMany : ExplorerIcon.OneToMany);
+                        break;
+                    default:
+                        itemIcon = ExplorerIcon.Column;
+                        break;
+                }
+            }
+            else if (structuralProperty != null && entityType.DeclaredKey.Contains(structuralProperty))
+            {
+                itemText = string.Format("{0} : {1}", property.Name, property.Type.Definition.FullTypeName());
+                tooltipText = "Contained in entity key";
+                itemKind = ExplorerItemKind.Property;
+                itemIcon = ExplorerIcon.Key;
+            }
+            else
+            {
+                itemText = string.Format("{0} : {1}", property.Name, property.Type.Definition.FullTypeName());
+                tooltipText = string.Empty;
+                itemKind = ExplorerItemKind.Property;
+                itemIcon = ExplorerIcon.Column;
+            }
         }
     }
 }
