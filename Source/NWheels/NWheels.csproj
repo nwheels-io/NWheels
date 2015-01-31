@@ -130,6 +130,7 @@
     <Compile Include="Modules\Geo\IEntityPartPostalAddress.cs" />
     <Compile Include="Modules\Geo\IStateCountyEntity.cs" />
     <Compile Include="Modules\Geo\IZipCodeEntity.cs" />
+    <Compile Include="Processing\ApplicationJobBase.cs" />
     <Compile Include="Processing\IApplicationJob.cs" />
     <Compile Include="Processing\IApplicationJobContext.cs" />
     <Compile Include="Processing\IRevertableSequence.cs" />

@@ -9,7 +9,7 @@ using Quartz;
 
 namespace NWheels.Puzzle.QuartzNet
 {
-    internal class QuartzJobContextAdapter : IApplicationJobContext
+    internal class QuartzJobContextAdapter : IApplicationJobContext, IDisposable
     {
         private readonly IJobExecutionContext _quartzContext;
         private readonly CancellationTokenSource _cancellationSource;
@@ -22,6 +22,13 @@ namespace NWheels.Puzzle.QuartzNet
             _quartzContext = quartzContext;
             _cancellationSource = new CancellationTokenSource();
             _cancellationToken = _cancellationSource.Token;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Dispose()
+        {
+            _cancellationSource.Dispose();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

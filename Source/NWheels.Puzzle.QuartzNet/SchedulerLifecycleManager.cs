@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NWheels.Hosting;
-using NWheels.Logging;
 using NWheels.Processing;
 using Quartz;
 using Quartz.Impl;
@@ -13,15 +13,17 @@ namespace NWheels.Puzzle.QuartzNet
 {
     internal class SchedulerLifecycleManager : LifecycleEventListenerBase
     {
-        private readonly ILogger _logger;
+        private readonly IFramework _framework;
+        private readonly IJobLogger _logger;
         private readonly IJobDetail[] _jobDetails;
         private readonly AutofacJobFactory _jobFactory;
         private IScheduler _scheduler;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public SchedulerLifecycleManager(AutofacJobFactory jobFactory, IEnumerable<IJobDetail> jobDetails, Auto<ILogger> logger)
+        public SchedulerLifecycleManager(IFramework framework, AutofacJobFactory jobFactory, IEnumerable<IJobDetail> jobDetails, Auto<IJobLogger> logger)
         {
+            _framework = framework;
             _logger = logger.Instance;
             _jobDetails = jobDetails.ToArray();
             _jobFactory = jobFactory;
@@ -59,21 +61,53 @@ namespace NWheels.Puzzle.QuartzNet
         public override void NodeDeactivating()
         {
             _scheduler.Standby();
+
+            foreach ( var job in _scheduler.GetCurrentlyExecutingJobs() )
+            {
+                var interruptable = (job.JobInstance as IInterruptableJob);
+
+                if ( interruptable != null )
+                {
+                    interruptable.Interrupt();
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void Deactivate()
+        {
+            var deactivationTimeout = TimeSpan.FromSeconds(30);
+            var deactivationStartedAt = _framework.UtcNow;
+
+            while ( true )
+            {
+                var jobsStillRunning = _scheduler.GetCurrentlyExecutingJobs();
+
+                if ( jobsStillRunning.Count == 0 )
+                {
+                    _logger.AllJobsFinished();
+                    break;
+                }
+
+                var runningJobNames = string.Join(",", jobsStillRunning.Select(j => j.JobDetail.Key.Name));
+
+                if ( _framework.UtcNow.Subtract(deactivationStartedAt) > deactivationTimeout )
+                {
+                    _logger.SomeJobsDidNotFinish(runningJobNames);
+                    break;
+                }
+
+                _logger.WaitingForJobsToFinish(runningJobNames);
+                Thread.Sleep(250);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void Unload()
         {
-            _scheduler.Shutdown();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public interface ILogger : IApplicationEventLogger
-        {
-            [LogVerbose]
-            void RegisteringJob(string name);
+            _scheduler.Shutdown(waitForJobsToComplete: false);
         }
     }
 }

@@ -12,11 +12,15 @@ namespace NWheels.Puzzle.QuartzNet
     internal class QuartzJobAdapter : IInterruptableJob
     {
         private readonly IApplicationJob _jobComponent;
+        private readonly IJobLogger _logger;
+        private readonly IJobDetail _jobDetail;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public QuartzJobAdapter(IApplicationJob jobComponent)
+        public QuartzJobAdapter(IJobDetail jobDetail, IApplicationJob jobComponent, Auto<IJobLogger> logger)
         {
+            _jobDetail = jobDetail;
+            _logger = logger.Instance;
             _jobComponent = jobComponent;
         }
 
@@ -24,7 +28,25 @@ namespace NWheels.Puzzle.QuartzNet
 
         public void Execute(IJobExecutionContext context)
         {
+            using ( _logger.ExecutingJob(jobName: context.JobDetail.Key.Name, triggerName: context.Trigger.Key.Name) )
+            {
+                try
+                {
+                    _logger.JobInvocationDetails(context.FireInstanceId, context.FireTimeUtc, context.PreviousFireTimeUtc, context.NextFireTimeUtc);
 
+                    using ( var adaptedContext = new QuartzJobContextAdapter(context) )
+                    {
+                        _jobComponent.Execute(adaptedContext);
+                    }
+
+                    _logger.JobCompleted(context.JobDetail.Key.Name);
+                }
+                catch ( Exception e )
+                {
+                    _logger.JobFailed(context.JobDetail.Key.Name, e);
+                    throw;
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -40,5 +62,9 @@ namespace NWheels.Puzzle.QuartzNet
         {
             get { return _jobComponent; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
     }
 }
