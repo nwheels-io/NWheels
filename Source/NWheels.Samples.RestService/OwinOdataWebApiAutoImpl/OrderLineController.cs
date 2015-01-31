@@ -1,33 +1,36 @@
 ﻿using System.Linq;
+using System.Web.Http;
 using System.Web.OData.Routing;
 using NWheels.Puzzle.OdataOwinWebapi;
 
 namespace NWheels.Samples.RestService.OwinOdataWebApiAutoImpl
 {
-    [ODataRoutePrefix("Product")]
-    public class ProductController : EntityControllerBase<Product>
+    [ODataRoutePrefix("OrderLine")]
+    public class OrderLineController : EntityControllerBase<OrderLine>
     {
         private readonly IMyRestServiceEntityRepository _repository;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ProductController(IMyRestServiceEntityRepository repository)
+        public OrderLineController(IMyRestServiceEntityRepository repository)
         {
             _repository = repository;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IQueryable<Product> Get()
+        //[Queryable(MaxExpansionDepth = 5)]
+        public override IQueryable<OrderLine> Get()
         {
-            return _repository.Products;
+            return _repository.OrderLines;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Product Get(int key)
+        //[Queryable(MaxExpansionDepth = 5)]
+        public OrderLine Get(int key)
         {
-            return _repository.Products.Single(p => p.Id == key);
+            return _repository.OrderLines.Single(o => o.Id == key);
         }
     }
 }

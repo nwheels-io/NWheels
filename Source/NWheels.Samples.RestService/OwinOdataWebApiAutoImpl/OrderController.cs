@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Web.Http;
 using System.Web.OData.Routing;
 using NWheels.Puzzle.OdataOwinWebapi;
 
@@ -21,6 +22,13 @@ namespace NWheels.Samples.RestService.OwinOdataWebApiAutoImpl
         public override IQueryable<Order> Get()
         {
             return _repository.Orders;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Order Get(int key)
+        {
+            return _repository.Orders.Where(o => o.Id == key).Single();
         }
     }
 }

@@ -32,7 +32,8 @@ namespace NWheels.Samples.RestService.EntityFrameworkAutoImpl
         {
             return new Type[] {
                 typeof(Product), 
-                typeof(Order)
+                typeof(Order),
+                typeof(OrderLine)
             };
         }
 
@@ -48,6 +49,13 @@ namespace NWheels.Samples.RestService.EntityFrameworkAutoImpl
         public IQueryable<Order> Orders
         {
             get { return _dbContext.Orders; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IQueryable<OrderLine> OrderLines
+        {
+            get { return _dbContext.OrderLines; }
         }
     }
 }

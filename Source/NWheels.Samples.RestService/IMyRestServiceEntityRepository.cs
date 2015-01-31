@@ -11,5 +11,6 @@ namespace NWheels.Samples.RestService
     {
         IQueryable<Product> Products { get; }
         IQueryable<Order> Orders { get; }
+        IQueryable<OrderLine> OrderLines { get; }
     }
 }

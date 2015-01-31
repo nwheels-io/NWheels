@@ -18,6 +18,7 @@ namespace NWheels.Samples.RestService
             builder.RegisterType<MyRestServiceEntityRepositoryImpl>().As<IMyRestServiceEntityRepository>().InstancePerDependency();
             builder.RegisterType<ProductController>().InstancePerRequest();
             builder.RegisterType<OrderController>().InstancePerRequest();
+            builder.RegisterType<OrderLineController>().InstancePerRequest();
             builder.RegisterType<EntityRepositoryEndpoint<IMyRestServiceEntityRepository>>().As<IEntityRepositoryEndpoint>();
         }
     }
