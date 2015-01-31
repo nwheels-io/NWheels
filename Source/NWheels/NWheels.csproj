@@ -61,6 +61,7 @@
     <Compile Include="Configuration\ConfigurationSectionAttribute.cs" />
     <Compile Include="Conventions\DataTransferObjectAttribute.cs" />
     <Compile Include="Conventions\IAutoObjectFactory.cs" />
+    <Compile Include="Entities\DateTimeUtc.cs" />
     <Compile Include="Entities\EntityContractAttribute.cs" />
     <Compile Include="Entities\EntityKey.cs" />
     <Compile Include="Entities\EntityPartContractAttribute.cs" />

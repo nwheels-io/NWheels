@@ -20,7 +20,18 @@ namespace NWheels.Samples.RestService
         }
     
         public int Id { get; set; }
-        public System.DateTimeOffset DateTime { get; set; }
+
+        public System.DateTime DateTime
+        {
+            get
+            {
+                return _utc;
+            }
+            set
+            {
+                _utc = value;
+            }
+        }
         public string CustomerEmail { get; set; }
     
         public virtual ICollection<OrderLine> OrderLines { get; set; }

@@ -94,6 +94,18 @@ namespace NWheels.Puzzle.OdataOwinWebapi
             foreach ( var entityType in _repository.GetEntityTypesInRepository() )
             {
                 modelBuilder.AddEntitySet(entityType.Name, modelBuilder.AddEntityType(entityType));
+
+                var structuralType = modelBuilder.StructuralTypes.First(t => t.ClrType == entityType);
+
+                foreach ( var utcProperty in entityType.GetProperties().Where(p => p.PropertyType == typeof(DateTimeOffset)) )
+                {
+                    structuralType.AddProperty(utcProperty);                    
+                }
+
+                foreach ( var nonUtcProperty in entityType.GetProperties().Where(p => p.PropertyType == typeof(DateTime)) )
+                {
+                    structuralType.RemoveProperty(nonUtcProperty);
+                }
             }
 
             return modelBuilder.GetEdmModel();

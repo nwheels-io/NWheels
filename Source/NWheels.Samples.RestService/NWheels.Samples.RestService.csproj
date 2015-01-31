@@ -110,6 +110,7 @@
     <Compile Include="Order.cs">
       <DependentUpon>OnlineStoreModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Order.Utc.cs" />
     <Compile Include="OwinOdataWebApiAutoImpl\OrderController.cs" />
     <Compile Include="OrderLine.cs">
       <DependentUpon>OnlineStoreModel.tt</DependentUpon>
