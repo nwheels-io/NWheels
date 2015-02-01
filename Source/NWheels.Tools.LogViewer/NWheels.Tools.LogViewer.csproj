@@ -55,11 +55,24 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\DateTimeDateConverter.cs" />
+    <Compile Include="Converters\LogNodeDetailsTextConverter.cs" />
+    <Compile Include="Converters\EnumStringConverter.cs" />
+    <Compile Include="Converters\IsFirstItemConverter.cs" />
+    <Compile Include="Converters\MoneyStringConverter.cs" />
+    <Compile Include="Converters\PercentageConverter.cs" />
+    <Compile Include="Converters\LogNodeKindImageSourceConverter.cs" />
+    <Compile Include="Converters\ThicknessBindingConverter.cs" />
+    <Compile Include="Converters\TupleConverter.cs" />
     <Compile Include="LogNodeKind.cs" />
     <Compile Include="LogPanelViewModel.cs" />
     <Compile Include="ThreadLogViewModel.cs" />
     <Compile Include="TreeNodeItem.cs" />
     <Compile Include="WinFormsDialogs.cs" />
+    <Page Include="AppResources.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="LogView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -112,6 +125,12 @@
       <Project>{f0ecf554-bf54-4843-b62f-c67c4deb2764}</Project>
       <Name>NWheels</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Graphics\IconCollapsed.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Graphics\IconExpanded.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

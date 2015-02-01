@@ -13,6 +13,7 @@ namespace NWheels.Logging
         ShutDown,
         IncomingRequest,
         QueuedWorkItem,
-        ScheduledJob
+        ScheduledJob,
+        LogProcessing
     }
 }

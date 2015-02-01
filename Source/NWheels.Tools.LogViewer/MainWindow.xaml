@@ -5,11 +5,43 @@
         Title="NWheels Log Viewer" Height="314.104" Width="544.119" Background="WhiteSmoke">
 
     <DockPanel Margin="8" LastChildFill="true">
-        <Border DockPanel.Dock="Top" Padding="3" Background="LightGray">
+        <Border DockPanel.Dock="Top" Padding="3">
+            <Border.Style>
+                <Style>
+                    <Setter Property="Border.Background" Value="LightGray"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsWatching}" Value="true">
+                            <Setter Property="Border.Background" Value="Lime" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
             <DockPanel LastChildFill="True">
-                <ToggleButton Content="Watch" DockPanel.Dock="Left" Padding="3" Margin="0 0 3 0" IsChecked="{Binding IsWatching}" />
-                <Button Content="Folder..." DockPanel.Dock="Left" Padding="3" Margin="0 0 3 0" Click="OnFolderButtonClick"/>
-                <TextBox DockPanel.Dock="Left" HorizontalAlignment="Stretch" Padding="0 3 0 0" Text="{Binding Path=LogFolder}" />
+                <ToggleButton DockPanel.Dock="Left" Padding="3" Margin="0 0 3 0" Width="70" IsChecked="{Binding ShouldWatch}">
+                    <ToggleButton.Style>
+                        <Style TargetType="{x:Type ToggleButton}">
+                            <Setter Property="Content" Value="Watch"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content" Value="Unwatch"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+                <Button Content="Folder..." Width="70" DockPanel.Dock="Left" Padding="3" Margin="0 0 3 0" Click="OnFolderButtonClick"/>
+                <TextBox DockPanel.Dock="Left" HorizontalAlignment="Stretch" Padding="0 3 0 0" Text="{Binding Path=LogFolder}">
+                    <TextBox.Style>
+                        <Style>
+                            <Setter Property="TextBox.Background" Value="LightCoral"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding LogFolderExists}" Value="true">
+                                    <Setter Property="TextBox.Background" Value="LightGreen"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
             </DockPanel>
         </Border>
         <Border Padding="0" Margin ="0 5 0 0">

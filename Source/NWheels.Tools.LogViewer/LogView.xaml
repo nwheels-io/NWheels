@@ -5,7 +5,80 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <ScrollViewer Padding="0">
+
+    <UserControl.Resources>
+        <Style x:Key="Data-ListItem-ExpandHandle-Z2" TargetType="Image">
+            <Setter Property="Height" Value="14" />
+            <Setter Property="Width" Value="14" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Stretch" Value="None" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Source" Value="{Binding Path=ImagePath}" />
+            <Setter Property="Margin" Value="{Binding Path=IndentSize, Converter={StaticResource ThicknessConverter}, ConverterParameter='X,1,5,0'}" />
+            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ItemExpandImage_MouseLeftButtonDown" />
+        </Style>
+
+        <Style x:Key="Data-ListItem-Z2" TargetType="ListViewItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border CornerRadius="2" SnapsToDevicePixels="True"
+                                        BorderThickness="{TemplateBinding BorderThickness}" 
+                                        BorderBrush="{TemplateBinding BorderBrush}" 
+                                        Background="{TemplateBinding Background}">
+                            <Border Name="InnerBorder" CornerRadius="1"   BorderThickness="1">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition MaxHeight="11" />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <Rectangle Name="UpperHighlight" Visibility="Collapsed" Fill="#75FFFFFF" />
+                                    <GridViewRowPresenter Grid.RowSpan="2" 
+                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                </Grid>
+                            </Border>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="LightBlue"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <EventSetter Event="PreviewKeyDown" Handler="ListViewItem_PreviewKeyDown" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=Data.IsRootActivity}" Value="true">
+                    <Setter Property="Background" Value="#FFE2E2E2" />
+                </DataTrigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="SkyBlue" />
+                </Trigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsMouseOver" Value="true" />
+                        <Condition Property="IsSelected" Value="false" />
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Background" Value="#FFC1E3F1" />
+                </MultiTrigger>
+                <DataTrigger Binding="{Binding Path=Data.IsErrorNode}" Value="true">
+                    <Setter Property="Foreground" Value="Red" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=Data.IsWarningNode}" Value="true">
+                    <Setter Property="Foreground" Value="DarkOrange" />
+                </DataTrigger>
+            </Style.Triggers>
+            
+        </Style>
+    </UserControl.Resources>
+    
+    <DockPanel LastChildFill="True">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -14,28 +87,59 @@
             </Grid.RowDefinitions>
             <ListView 
                 Grid.Row="0"
-			    x:Name="lvwCategories" 
+			    x:Name="lvwLogs" 
 			    Background="Transparent" 
 			    BorderThickness="0" 
 			    ScrollViewer.HorizontalScrollBarVisibility="Visible"
-                ItemsSource="{Binding Path=Items}" >
+                ItemContainerStyle="{StaticResource Data-ListItem-Z2}"
+                ItemsSource="{Binding Path=Items}" 
+                SelectionChanged="ListView_SelectionChanged">
                 <ListView.View>
-                    <GridView x:Name="lvwCategoriesGridView">
-                        <GridViewColumn Width="500" Header="Activity/Message" />
-                        <GridViewColumn Width="130" Header="Recorded At" />
-                        <GridViewColumn Width="70" Header="Duration" />
-                        <GridViewColumn Width="70" Header="DB Count" />
-                        <GridViewColumn Width="70" Header="DB Duration" />
-                        <GridViewColumn Width="70" Header="Lock Wait" />
-                        <GridViewColumn Width="70" Header="Lock Hold" />
+                    <GridView x:Name="lvwLogsGridView">
+                        <GridViewColumn Width="500" Header="Activity/Message">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="0">
+                                        <Image Style="{StaticResource Data-ListItem-ExpandHandle-Z2}" />
+                                        <!--Image Width="16" Height="16" Source="{Binding Path=Data.StatusColor, Converter={StaticResource StatusColorImageSourceConverter}}" SnapsToDevicePixels="False" Stretch="None" Margin="3,0,5,0"/-->
+                                        <TextBlock Text="{Binding Path=Data.LogNode.SingleLineText}">
+                                            <TextBlock.Style>
+                                                <Style>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Data.IsErrorNode}" Value="true">
+                                                            <Setter Property="TextBlock.FontWeight" Value="Bold" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="160" Header="Recorded at - UTC"  DisplayMemberBinding="{Binding Path=Data.TimestampText}" />
+                        <GridViewColumn Width="70" Header="Duration" DisplayMemberBinding="{Binding Path=Data.LogNode.MillisecondsDuration}" />
+                        <GridViewColumn Width="70" Header="DB Count" DisplayMemberBinding="{Binding Path=Data.RandomCount}" />
+                        <GridViewColumn Width="70" Header="DB Duration" DisplayMemberBinding="{Binding Path=Data.RandomDuration}" />
+                        <GridViewColumn Width="70" Header="Lock Wait" DisplayMemberBinding="{Binding Path=Data.RandomCount}"/>
+                        <GridViewColumn Width="70" Header="Lock Hold" DisplayMemberBinding="{Binding Path=Data.RandomDuration}"/>
                     </GridView>
                 </ListView.View>
             </ListView>
             <!--this is you Expander-->
             <GridSplitter Grid.Row="1" Height="5" Background="Gray" ResizeDirection="Rows" HorizontalAlignment="Stretch"/>
             <!--this GridSplitter represents the glyph-->
-            <TextBox Grid.Row="2" Background="LightGray" FontFamily="Consolas" FontSize="13">Details</TextBox>
+            <TextBox 
+                Grid.Row="2" 
+                Background="LightGray" 
+                FontFamily="Consolas" 
+                FontSize="13" 
+                IsReadOnly="True"
+                VerticalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Auto"
+                Text="{Binding Path=SelectedNode, Converter={StaticResource LogNodeDetailsTextConverter}}">
+            </TextBox>
         </Grid>
 
-    </ScrollViewer>
+    </DockPanel>
 </UserControl>

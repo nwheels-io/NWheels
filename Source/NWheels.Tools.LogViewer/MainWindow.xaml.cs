@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NWheels.Logging;
 using System.Threading;
+using System.Windows.Threading;
 
 namespace NWheels.Tools.LogViewer
 {
@@ -27,6 +28,7 @@ namespace NWheels.Tools.LogViewer
     {
         private readonly MainViewModel _viewModel;
         private FileSystemWatcher _watcher;
+        private DispatcherTimer _displayTimer;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -35,9 +37,18 @@ namespace NWheels.Tools.LogViewer
             InitializeComponent();
             
             _viewModel = new MainViewModel();
-            _viewModel.IsWatchingChanged += OnIsWatchingChanged;
+            _viewModel.LogFolder = @"C:\Temp\TestLogs";
+            _viewModel.ShouldWatchChanged += OnShouldWatchChanged;
             _viewModel.LogFolderChanged += OnLogFolderChanged;
+
+            _displayTimer = new DispatcherTimer();
+            _displayTimer.Interval = TimeSpan.FromSeconds(2);
+            _displayTimer.Tick += OnDisplayTimerTick;
+            _displayTimer.Start();
+
             this.DataContext = _viewModel;
+
+            OnLogFolderChanged(this, EventArgs.Empty);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -51,7 +62,9 @@ namespace NWheels.Tools.LogViewer
 
             _watcher = null;
 
-            if ( _viewModel.IsWatching && !string.IsNullOrEmpty(_viewModel.LogFolder) && Directory.Exists(_viewModel.LogFolder) )
+            var canWatch = (_viewModel.ShouldWatch && !string.IsNullOrEmpty(_viewModel.LogFolder) && Directory.Exists(_viewModel.LogFolder));
+
+            if ( canWatch )
             {
                 _watcher = new System.IO.FileSystemWatcher();
                 _watcher.Path = _viewModel.LogFolder;
@@ -60,23 +73,31 @@ namespace NWheels.Tools.LogViewer
                 _watcher.Created += new System.IO.FileSystemEventHandler(OnFileCreated);
                 _watcher.EnableRaisingEvents = true;
             }
+            else
+            {
+                _viewModel.ShouldWatch = false;
+            }
+
+            _viewModel.IsWatching = canWatch;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private ThreadLogSnapshot LoadThreadLogFromFile(string filePath)
+        private void OnDisplayTimerTick(object sender, EventArgs e)
         {
-            using ( var file = File.OpenRead(filePath) )
-            {
-                var serializer = new DataContractSerializer(typeof(ThreadLogSnapshot));
-                return (ThreadLogSnapshot)serializer.ReadObject(file);
-            }
+            _viewModel.Logs.DisplayPendingLogs();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         private void OnLogFolderChanged(object sender, EventArgs e)
         {
+            if ( Directory.Exists(_viewModel.LogFolder) )
+            {
+                _viewModel.Logs.Clear();
+                _viewModel.Logs.AddLogsFromFolder(_viewModel.LogFolder);
+            }
+
             ResetFileWatcher();
         }
 
@@ -84,24 +105,15 @@ namespace NWheels.Tools.LogViewer
 
         void OnFileCreated(object sender, System.IO.FileSystemEventArgs e)
         {
-            for ( int retryCount = 0 ; retryCount < 5 ; retryCount++ )
+            if ( e.ChangeType == WatcherChangeTypes.Created )
             {
-                try
-                {
-                    var threadLog = LoadThreadLogFromFile(e.FullPath);
-                    Dispatcher.BeginInvoke(new Action(() => _viewModel.Logs.AddThreadLog(threadLog)));
-                }
-                catch ( IOException )
-                {
-                }
-
-                Thread.Sleep(250);
+                _viewModel.Logs.AddLogFromFile(e.FullPath);
             }
         }
  
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void OnIsWatchingChanged(object sender, EventArgs e)
+        private void OnShouldWatchChanged(object sender, EventArgs e)
         {
             ResetFileWatcher();
         }
@@ -119,6 +131,127 @@ namespace NWheels.Tools.LogViewer
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class MainViewModel : INotifyPropertyChanged
+        {
+            private bool _shouldWatch;
+            private bool _isWatching;
+            private string _logFolder;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public MainViewModel()
+            {
+                this.Logs = new LogPanelViewModel();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool ShouldWatch
+            {
+                get
+                {
+                    return _shouldWatch;
+                }
+                set
+                {
+                    if ( value == _shouldWatch )
+                    {
+                        return;
+                    }
+                 
+                    _shouldWatch = value;
+
+                    if ( ShouldWatchChanged != null )
+                    {
+                        ShouldWatchChanged(this, EventArgs.Empty);
+                    }
+
+                    if ( PropertyChanged != null )
+                    {
+                        PropertyChanged(this, new PropertyChangedEventArgs("ShouldWatch"));
+                    }
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool IsWatching
+            {
+                get
+                {
+                    return _isWatching;
+                }
+                set
+                {
+                    if ( value == _isWatching )
+                    {
+                        return;
+                    }
+
+                    _isWatching = value;
+
+                    if ( PropertyChanged != null )
+                    {
+                        PropertyChanged(this, new PropertyChangedEventArgs("IsWatching"));
+                    }
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string LogFolder
+            {
+                get
+                {
+                    return _logFolder;
+                }
+                set
+                {
+                    if ( value == _logFolder )
+                    {
+                        return;
+                    }
+
+                    _logFolder = value;
+
+                    if ( LogFolderChanged != null )
+                    {
+                        LogFolderChanged(this, EventArgs.Empty);
+                    }
+
+                    if ( PropertyChanged != null )
+                    {
+                        PropertyChanged(this, new PropertyChangedEventArgs("LogFolder"));
+                        PropertyChanged(this, new PropertyChangedEventArgs("LogFolderExists"));
+                    }
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool LogFolderExists
+            {
+                get
+                {
+                    return Directory.Exists(_logFolder);
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public LogPanelViewModel Logs { get; private set; }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public event PropertyChangedEventHandler PropertyChanged;
+            public event EventHandler ShouldWatchChanged;
+            public event EventHandler LogFolderChanged;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #if false
 
         private class MainViewModel : DependencyObject
         {
@@ -190,5 +323,7 @@ namespace NWheels.Tools.LogViewer
                 typeof(MainViewModel),
                 new FrameworkPropertyMetadata(defaultValue: ""));
         }
+
+        #endif
     }
 }

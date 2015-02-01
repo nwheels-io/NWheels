@@ -115,8 +115,8 @@ namespace NWheels.Tools.LogViewer
                         ShowChildrenItems();
                     }
 
-                    ImagePath = "pack://application:,,,/Graphics/TreeExpanded16.png";
-                    HoverImagePath = "pack://application:,,,/Graphics/TreeExpandedHover16.png";
+                    ImagePath = "pack://application:,,,/Graphics/IconExpanded.png";
+                    HoverImagePath = "pack://application:,,,/Graphics/IconExpanded.png";
                 }
                 else
                 {
@@ -125,8 +125,8 @@ namespace NWheels.Tools.LogViewer
                         HideChildrenItems();
                     }
 
-                    ImagePath = "pack://application:,,,/Graphics/TreeCollapsed16.png";
-                    HoverImagePath = "pack://application:,,,/Graphics/TreeCollapsedHover16.png";
+                    ImagePath = "pack://application:,,,/Graphics/IconCollapsed.png";
+                    HoverImagePath = "pack://application:,,,/Graphics/IconCollapsed.png";
                 }
             }
         }

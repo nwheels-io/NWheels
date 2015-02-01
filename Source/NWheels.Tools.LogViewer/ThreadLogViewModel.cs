@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using NWheels.Logging;
 
 namespace NWheels.Tools.LogViewer
@@ -9,7 +10,7 @@ namespace NWheels.Tools.LogViewer
     {
         public ThreadLogViewModel(ThreadLogSnapshot threadLog)
         {
-            this.RootActivity = new NodeItem(threadLog.RootActivity, isRootActivity: true, taskType: threadLog.TaskType);
+            this.RootActivity = new NodeItem(threadLog);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -24,11 +25,28 @@ namespace NWheels.Tools.LogViewer
 
             //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public NodeItem(ThreadLogSnapshot.LogNodeSnapshot logNode, bool isRootActivity = false, ThreadTaskType? taskType = null)
+            public NodeItem(ThreadLogSnapshot threadLog)
             {
+                this.ThreadLog = threadLog;
+                this.ParentNode = null;
+                this.LogNode = threadLog.RootActivity;
+                this.IsRootActivity = true;
+                this.TaskType = threadLog.TaskType;
+                this.TimestampText = threadLog.StartedAtUtc.ToString("yyyy-MM-dd HH:mm:ss.fff");
+
+                SetNodeKind();
+            }
+
+            //---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public NodeItem(ThreadLogSnapshot threadLog, ThreadLogSnapshot.LogNodeSnapshot parentNode, ThreadLogSnapshot.LogNodeSnapshot logNode)
+            {
+                this.ThreadLog = threadLog;
+                this.ParentNode = parentNode;
                 this.LogNode = logNode;
-                this.IsRootActivity = isRootActivity;
-                this.TaskType = taskType;
+                this.IsRootActivity = false;
+                this.TaskType = null;
+                this.TimestampText = "+ " + logNode.MillisecondsTimestamp;
 
                 SetNodeKind();
             }
@@ -43,7 +61,7 @@ namespace NWheels.Tools.LogViewer
 
                     if ( activityNode != null && activityNode.SubNodes != null )
                     {
-                        _subNodeItems = activityNode.SubNodes.Select(node => new NodeItem(node)).ToArray();
+                        _subNodeItems = activityNode.SubNodes.Select(node => new NodeItem(this.ThreadLog, this.LogNode, node)).ToArray();
                     }
                     else
                     {
@@ -63,10 +81,67 @@ namespace NWheels.Tools.LogViewer
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public string GetFullDetailsText()
+            {
+                var log = this.LogNode;
+                var activity = (this.LogNode as ThreadLogSnapshot.ActivityNodeSnapshot);
+                var text = new StringBuilder();
+
+                text.AppendLine("------ Thread ------");
+                text.AppendFormat("ID              = {0}\r\n", this.ThreadLog.LogId);
+                text.AppendFormat("Correlation ID  = {0}\r\n", this.ThreadLog.CorrelationId);
+                text.AppendFormat("Task Type       = {0}\r\n", this.ThreadLog.TaskType);
+                text.AppendFormat("Started at UTC  = {0:yyyy-MM-dd HH:mm:ss.fff}\r\n", this.ThreadLog.StartedAtUtc);
+                text.AppendFormat("------ {0} {1} ------\r\n", activity != null ? "Activity" : "Log", log.Level);
+                text.AppendFormat("Recorded at UTC = {0:yyyy-MM-dd HH:mm:ss.fff} ({1} ms after thread start)\r\n", 
+                    this.ThreadLog.StartedAtUtc.AddMilliseconds(log.MillisecondsTimestamp), log.MillisecondsTimestamp);
+
+                if ( !string.IsNullOrEmpty(log.ExceptionTypeName) )
+                {
+                    text.AppendFormat("Exception       = {0}\r\n", log.ExceptionTypeName);
+                }
+
+                text.AppendLine("------ Text ------");
+                text.AppendLine(log.SingleLineText);
+
+                if ( !string.IsNullOrEmpty(log.FullDetailsText) )
+                {
+                    text.AppendLine("------ Details ------");
+                    text.AppendLine(log.FullDetailsText);
+                }
+
+                return text.ToString();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ThreadLogSnapshot ThreadLog { get; private set; }
+            public ThreadLogSnapshot.LogNodeSnapshot ParentNode { get; private set; }
             public ThreadLogSnapshot.LogNodeSnapshot LogNode { get; private set; }
             public bool IsRootActivity { get; private set; }
             public ThreadTaskType? TaskType { get; private set; }
             public LogNodeKind NodeKind { get; private set; }
+            public string TimestampText { get; private set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool IsErrorNode
+            {
+                get
+                {
+                    return (LogNode.Level >= LogLevel.Error);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool IsWarningNode
+            {
+                get
+                {
+                    return (LogNode.Level == LogLevel.Warning);
+                }
+            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
