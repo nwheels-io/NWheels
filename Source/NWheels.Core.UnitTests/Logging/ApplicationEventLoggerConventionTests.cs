@@ -119,7 +119,7 @@ namespace NWheels.Core.UnitTests.Logging
             Assert.That(log.Length, Is.EqualTo(1));
             Assert.That(log[0].Level, Is.EqualTo(LogLevel.Error));
             Assert.That(log[0].SingleLineText, Is.EqualTo("This is my error message with exception parameter: num=123, str=ABC"));
-            Assert.That(log[0].FullDetailsText, Is.EqualTo(exception.ToString()));
+            Assert.That(log[0].FullDetailsText, Is.EqualTo(exception.ToString() + Environment.NewLine));
             Assert.That(log[0].Exception, Is.SameAs(exception));
         }
 
@@ -199,6 +199,77 @@ namespace NWheels.Core.UnitTests.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void CanUseParametersOfNullableValueTypes()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+            var date1 = new DateTime(2015, 1, 1);
+            var date2 = new DateTimeOffset(new DateTime(2015, 2, 2), TimeSpan.FromHours(-7));
+
+            //-- Act
+
+            logger.AnActivityWithNullableParameterTypes(date1, date2);
+            logger.AnActivityWithNullableParameterTypes(null, null);
+
+            //-- Assert
+
+            Assert.That(_log.GetLogStrings(), Is.EqualTo(new[] {
+                string.Format("An activity with nullable parameter types: date1={0}, date2={1}", date1, date2),
+                "An activity with nullable parameter types: date1=, date2="
+            }));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanSpecifyParameterFormat()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+            var date1 = new DateTime(2015, 1, 1);
+            var date2 = new DateTimeOffset(new DateTime(2015, 2, 2), TimeSpan.FromHours(-7));
+
+            //-- Act
+
+            logger.LogMessageWithFormattedParameters(date1, date2);
+
+            //-- Assert
+
+            Assert.That(_log.GetLogStrings(), Is.EqualTo(new[] {
+                "Log message with formatted parameters: date1=2015-01-01, date2=Feb 02 2015",
+            }));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanMoveParametersIntoFullDetailsText()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+            var dateTime = new DateTime(2015, 1, 1);
+            var dateTimeOffset = new DateTimeOffset(new DateTime(2015, 2, 2), TimeSpan.FromHours(-7));
+
+            //-- Act
+
+            logger.LogMessageWithFormattedAndDetailParameters(123, "ABC", dateTime, dateTimeOffset);
+
+            //-- Assert
+
+            Assert.That(_log.GetLog()[0].SingleLineText, Is.EqualTo(
+                "Log message with formatted and detail parameters: num=123, dateTime=2015-01-01"
+            ));
+            Assert.That(_log.GetLog()[0].FullDetailsText, Is.EqualTo(
+                "Str=ABC" + Environment.NewLine + "DateTimeOffset=Feb 02 2015" + Environment.NewLine
+            ));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private ITestLogger CreateTestLogger()
         {
             return _factory.CreateInstanceOf<ITestLogger>().UsingConstructor<IThreadLogAppender>(_log);
@@ -243,6 +314,21 @@ namespace NWheels.Core.UnitTests.Logging
             
             [LogThread(ThreadTaskType.ScheduledJob)]
             ILogActivity ThisIsMyThread(int num, string str);
+
+            [LogActivity]
+            ILogActivity AnActivityWithNullableParameterTypes(DateTime? date1, DateTimeOffset? date2);
+
+            [LogDebug]
+            void LogMessageWithFormattedParameters(
+                [Format("yyyy-MM-dd")] DateTime? date1, 
+                [Format("MMM dd yyyy")] DateTimeOffset? date2);
+
+            [LogVerbose]
+            void LogMessageWithFormattedAndDetailParameters(
+                int num,
+                [Detail] string str,
+                [Format("yyyy-MM-dd")] DateTime dateTime,
+                [Format("MMM dd yyyy"), Detail] DateTimeOffset? dateTimeOffset);
         }
     
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

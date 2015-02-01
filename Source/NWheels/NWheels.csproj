@@ -85,6 +85,8 @@
     <Compile Include="Hosting\NodeState.cs" />
     <Compile Include="IFramework.cs" />
     <Compile Include="Logging\ActivityLogNode.cs" />
+    <Compile Include="Logging\DetailAttribute.cs" />
+    <Compile Include="Logging\FormatAttribute.cs" />
     <Compile Include="Logging\FormattedActivityLogNode.cs" />
     <Compile Include="Logging\FormattedLogNode.cs" />
     <Compile Include="Logging\IApplicationEventLogger.cs" />

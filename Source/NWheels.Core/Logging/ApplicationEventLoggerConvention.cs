@@ -69,12 +69,15 @@ namespace NWheels.Core.Logging
             private readonly LogAttributeBase _attribute;
             private readonly MethodInfo _declaration;
             private readonly MethodSignature _signature;
+            private readonly ParameterInfo[] _parameters;
             private readonly bool _mustCreateException;
             private readonly List<int> _exceptionArgumentIndex;
             private readonly List<int> _formatArgumentIndex;
+            private readonly List<int> _detailArgumentIndex;
             private string _formatString = null;
             private Local<object[]> _formatObjectArray = null;
             private IOperand<string> _singleLineTextLocal;
+            private Local<StringBuilder> _fullDetailsTextLocal;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -84,10 +87,12 @@ namespace NWheels.Core.Logging
                 _threadLogAppenderField = threadLogAppenderField;
                 _declaration = underlyingWriter.OwnerMethod.MethodDeclaration;
                 _signature = underlyingWriter.OwnerMethod.Signature;
+                _parameters = _declaration.GetParameters();
                 _attribute = _declaration.GetCustomAttribute<LogAttributeBase>();
                 _mustCreateException = _declaration.ReturnType.IsExceptionType();
                 _exceptionArgumentIndex = new List<int>();
                 _formatArgumentIndex = new List<int>();
+                _detailArgumentIndex = new List<int>();
 
                 ValidateSignature();
             }
@@ -96,16 +101,8 @@ namespace NWheels.Core.Logging
 
             public void Write()
             {
-                if ( _formatArgumentIndex.Count > 0 )
-                {
-                    BuildFormatString();
-                    CopyArgumentsToArray();
-                    FormatLogText();
-                }
-                else
-                {
-                    _singleLineTextLocal = _underlyingWriter.Const(_declaration.Name.SplitPascalCase());
-                }
+                BuildSingleLineText();
+                BuildFullDetailsText();
 
                 if ( _attribute.IsActivity )
                 {
@@ -124,6 +121,22 @@ namespace NWheels.Core.Logging
                     {
                         _underlyingWriter.Return(_underlyingWriter.ReturnValueLocal);
                     }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void BuildSingleLineText()
+            {
+                if ( _formatArgumentIndex.Count > 0 )
+                {
+                    BuildFormatString();
+                    CopyArgumentsToArray();
+                    FormatLogText();
+                }
+                else
+                {
+                    _singleLineTextLocal = _underlyingWriter.Const(_declaration.Name.SplitPascalCase());
                 }
             }
 
@@ -152,6 +165,56 @@ namespace NWheels.Core.Logging
             {
                 var m = _underlyingWriter;
                 _singleLineTextLocal = m.Local(initialValue: Static.Func(string.Format, m.Const(_formatString), _formatObjectArray));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void BuildFullDetailsText()
+            {
+                for ( int i = 0 ; i < _detailArgumentIndex.Count ; i++ )
+                {
+                    AppendParameterToFullDetails(_parameters[_detailArgumentIndex[i]]);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void EnsureFullDetailsTextInitialized()
+            {
+                if ( object.ReferenceEquals(_fullDetailsTextLocal, null) )
+                {
+                    var m = _underlyingWriter;
+                    _fullDetailsTextLocal = m.Local(initialValue: m.New<StringBuilder>());
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void AppendParameterToFullDetails(ParameterInfo parameter)
+            {
+                EnsureFullDetailsTextInitialized();
+
+                var m = _underlyingWriter;
+                var formatSpec = FormatAttribute.GetFormatString(parameter);
+                var format = parameter.Name.ToPascalCase() + "=" + (formatSpec == null ? "{0}" : "{0:" + formatSpec + "}");
+
+                using ( TT.CreateScope<TT.TArgument>(parameter.ParameterType) )
+                {
+                    _fullDetailsTextLocal.Func<string, object, StringBuilder>(
+                        x => x.AppendFormat, 
+                        m.Const(format), 
+                        m.Argument<TT.TArgument>(parameter.Position + 1).CastTo<object>());
+
+                    _fullDetailsTextLocal.Func<StringBuilder>(x => x.AppendLine);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void AppendExceptionToFullDetails(IOperand<Exception> exceptionOperand)
+            {
+                EnsureFullDetailsTextInitialized();
+                _fullDetailsTextLocal.Func<string, StringBuilder>(x => x.AppendLine, exceptionOperand.FuncToString());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -187,8 +250,6 @@ namespace NWheels.Core.Logging
             private void AppendLogNode()
             {
                 var m = _underlyingWriter;
-
-                IOperand<string> fullDetailsTextOperand;
                 IOperand<Exception> exceptionOperand;
 
                 if ( _exceptionArgumentIndex.Count > 0  )
@@ -203,19 +264,23 @@ namespace NWheels.Core.Logging
                         exceptionOperand = m.New<AggregateException>(m.NewArray<Exception>(exceptionArguments));
                     }
 
-                    fullDetailsTextOperand = exceptionOperand.FuncToString();
+                    AppendExceptionToFullDetails(exceptionOperand);
                 }
                 else if ( _mustCreateException )
                 {
                     exceptionOperand = m.ReturnValueLocal.CastTo<Exception>();
-                    fullDetailsTextOperand = exceptionOperand.FuncToString();
+                    AppendExceptionToFullDetails(exceptionOperand);
                 }
                 else
                 {
                     exceptionOperand = m.Const<Exception>(null);
-                    fullDetailsTextOperand = m.Const<string>(null);
                 }
-                
+
+                IOperand<string> fullDetailsTextOperand = (
+                    object.ReferenceEquals(_fullDetailsTextLocal, null) ? 
+                    m.Const<string>(null) :
+                    _fullDetailsTextLocal.FuncToString());
+
                 _threadLogAppenderField.Void(x => x.AppendLogNode, m.New<FormattedLogNode>(
                     m.Const(_attribute.Level),
                     _singleLineTextLocal,
@@ -249,6 +314,10 @@ namespace NWheels.Core.Logging
                     {
                         _exceptionArgumentIndex.Add(i);
                     }
+                    else if ( DetailAttribute.IsDefinedOn(_parameters[i]) )
+                    {
+                        _detailArgumentIndex.Add(i);
+                    }
                     else
                     {
                         _formatArgumentIndex.Add(i);
@@ -264,8 +333,14 @@ namespace NWheels.Core.Logging
 
                 for ( int i = 0 ; i < _formatArgumentIndex.Count ; i++ )
                 {
+                    var formatString = FormatAttribute.GetFormatString(_parameters[_formatArgumentIndex[i]]);
+
                     formatStringBuilder.Append(i > 0 ? ", " : ": ");
-                    formatStringBuilder.AppendFormat("{0}={{{1}}}", _signature.ArgumentName[_formatArgumentIndex[i]], i);
+                    formatStringBuilder.AppendFormat(
+                        "{0}={{{1}{2}}}", 
+                        _signature.ArgumentName[_formatArgumentIndex[i]], 
+                        i,
+                        formatString != null ? ":" + formatString : "");
                 }
 
                 _formatString = formatStringBuilder.ToString();
