@@ -5,7 +5,37 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-            
-    </Grid>
+    <ScrollViewer Padding="0">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <ListView 
+                Grid.Row="0"
+			    x:Name="lvwCategories" 
+			    Background="Transparent" 
+			    BorderThickness="0" 
+			    ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                ItemsSource="{Binding Path=Items}" >
+                <ListView.View>
+                    <GridView x:Name="lvwCategoriesGridView">
+                        <GridViewColumn Width="500" Header="Activity/Message" />
+                        <GridViewColumn Width="130" Header="Recorded At" />
+                        <GridViewColumn Width="70" Header="Duration" />
+                        <GridViewColumn Width="70" Header="DB Count" />
+                        <GridViewColumn Width="70" Header="DB Duration" />
+                        <GridViewColumn Width="70" Header="Lock Wait" />
+                        <GridViewColumn Width="70" Header="Lock Hold" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <!--this is you Expander-->
+            <GridSplitter Grid.Row="1" Height="5" Background="Gray" ResizeDirection="Rows" HorizontalAlignment="Stretch"/>
+            <!--this GridSplitter represents the glyph-->
+            <TextBox Grid.Row="2" Background="LightGray" FontFamily="Consolas" FontSize="13">Details</TextBox>
+        </Grid>
+
+    </ScrollViewer>
 </UserControl>
