@@ -88,12 +88,20 @@ namespace NWheels.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string LoadedFromDirectory { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static NodeHostConfig LoadFromFile(string filePath)
         {
             using ( var file = File.OpenRead(filePath) )
             {
                 var serializer = new DataContractSerializer(typeof(NodeHostConfig));
-                return (NodeHostConfig)serializer.ReadObject(file);
+                var config = (NodeHostConfig)serializer.ReadObject(file);
+                
+                config.LoadedFromDirectory = Path.GetDirectoryName(filePath);
+                
+                return config;
             }
         }
 

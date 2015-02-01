@@ -37,11 +37,11 @@ namespace NWheels.Hosts.Console
 
             try
             {
-                LoadNodeHostConfig();
+                LoadNodeHostConfig(args);
             }
             catch ( Exception e )
             {
-                s_Log.Critical("FAILED TO LOAD {0}: {1}", NodeHostConfig.DefaultFileName, e.Message);
+                s_Log.Critical("FAILED TO LOAD CONFIGURATION: {0}", e.Message);
                 return 1;
             }
 
@@ -71,11 +71,13 @@ namespace NWheels.Hosts.Console
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void LoadNodeHostConfig()
+        private static void LoadNodeHostConfig(string[] programArgs)
         {
-            s_Log.Debug("Loading {0}", NodeHostConfig.DefaultFileName);
+            var configFilePath = PathUtility.LocalBinPath(programArgs.Length > 0 ? programArgs[0] : NodeHostConfig.DefaultFileName);
 
-            s_NodeHostConfig = NodeHostConfig.LoadFromFile(PathUtility.LocalBinPath(NodeHostConfig.DefaultFileName));
+            s_Log.Debug("Loading configuration from: {0}", configFilePath);
+
+            s_NodeHostConfig = NodeHostConfig.LoadFromFile(configFilePath);
             s_NodeHostConfig.Validate();
 
             s_Log.Debug("> Application Name   - {0}", s_NodeHostConfig.ApplicationName);
@@ -142,8 +144,7 @@ namespace NWheels.Hosts.Console
         
         private static void GenerateDummyNodeHostConfig()
         {
-            s_NodeHostConfig = new NodeHostConfig()
-            {
+            s_NodeHostConfig = new NodeHostConfig() {
                 ApplicationName = "Test App",
                 NodeName = "Test Node",
                 ApplicationModules = new List<NodeHostConfig.ModuleConfig> {

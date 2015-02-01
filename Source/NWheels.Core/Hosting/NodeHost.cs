@@ -14,6 +14,7 @@ using NWheels.Conventions;
 using NWheels.Core.Conventions;
 using NWheels.Core.Logging;
 using NWheels.Core.Processing;
+using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Logging;
@@ -417,7 +418,7 @@ namespace NWheels.Core.Hosting
 
                         try
                         {
-                            var assembly = Assembly.LoadFrom(PathUtility.LocalBinPath(module.Assembly));
+                            var assembly = LoadModuleAssembly(module);
                             var loaderType = assembly.GetType(module.LoaderClass, throwOnError: true);
 
                             var loaderTypeUpdater = new ContainerBuilder();
@@ -444,7 +445,30 @@ namespace NWheels.Core.Hosting
                 }
             }
 
-            #if false
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private Assembly LoadModuleAssembly(NodeHostConfig.ModuleConfig module)
+            {
+                var coreBinPath = PathUtility.LocalBinPath(module.Assembly);
+                var appBinPath = Path.Combine(_nodeHostConfig.LoadedFromDirectory, module.Assembly);
+
+                if ( File.Exists(coreBinPath) )
+                {
+                    return Assembly.LoadFrom(coreBinPath);
+                }
+                else if ( File.Exists(appBinPath) )
+                {
+                    return Assembly.LoadFrom(appBinPath);
+                }
+                else
+                {
+                    throw new NodeHostConfigException(string.Format(
+                        "Module assembly '{0}' could not be found at any of the probed locations.", 
+                        module.Assembly));
+                }
+            }
+
+#if false
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private void LoadModules(ContainerBuilder builder)
