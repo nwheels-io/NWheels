@@ -3,7 +3,7 @@ using NWheels.Logging;
 
 namespace NWheels.Puzzle.QuartzNet
 {
-    internal interface IJobLogger : IApplicationEventLogger
+    public interface IJobLogger : IApplicationEventLogger
     {
         [LogVerbose]
         void RegisteringJob(string name);
@@ -12,7 +12,11 @@ namespace NWheels.Puzzle.QuartzNet
         ILogActivity ExecutingJob(string jobName, string triggerName);
         
         [LogVerbose]
-        void JobInvocationDetails(string jobInstanceId, DateTimeOffset? triggeredAt, DateTimeOffset? previousRunAt, DateTimeOffset? nextRunAt);
+        void JobInvocationDetails(
+            string jobInstanceId, 
+            [Format("HH:mm:ss"), Detail] DateTimeOffset? triggeredAt,
+            [Format("HH:mm:ss"), Detail] DateTimeOffset? previousRunAt,
+            [Format("HH:mm:ss"), Detail] DateTimeOffset? nextRunAt);
 
         [LogVerbose]
         void JobCompleted(string jobName);

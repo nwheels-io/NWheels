@@ -9,15 +9,16 @@ using Quartz;
 namespace NWheels.Puzzle.QuartzNet
 {
     [DisallowConcurrentExecution]
-    internal class QuartzJobAdapter : IInterruptableJob
+    internal class QuartzJobAdapter<TJob> : IInterruptableJob
+        where TJob : IApplicationJob
     {
-        private readonly IApplicationJob _jobComponent;
+        private readonly TJob _jobComponent;
         private readonly IJobLogger _logger;
         private readonly IJobDetail _jobDetail;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public QuartzJobAdapter(IJobDetail jobDetail, IApplicationJob jobComponent, Auto<IJobLogger> logger)
+        public QuartzJobAdapter(IJobDetail jobDetail, TJob jobComponent, Auto<IJobLogger> logger)
         {
             _jobDetail = jobDetail;
             _logger = logger.Instance;

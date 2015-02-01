@@ -26,10 +26,9 @@ namespace NWheels.Puzzle.QuartzNet
 
         public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
         {
-            var jobComponentInstance = (IApplicationJob)_components.Resolve(bundle.JobDetail.JobType);
-            var jobAdapter = _components.Resolve<QuartzJobAdapter>(
-                new TypedParameter(typeof(IJobDetail), bundle.JobDetail),
-                new TypedParameter(typeof(IApplicationJob), jobComponentInstance));
+            var jobAdapter = (IJob)_components.Resolve(
+                bundle.JobDetail.JobType,
+                new TypedParameter(typeof(IJobDetail), bundle.JobDetail));
 
             return jobAdapter;
         }
@@ -44,7 +43,7 @@ namespace NWheels.Puzzle.QuartzNet
 
         public static IJobDetail CreateJobDetail(IApplicationJob job)
         {
-            var builder = JobBuilder.Create(job.GetType());
+            var builder = JobBuilder.Create(typeof(QuartzJobAdapter<>).MakeGenericType(job.GetType()));
 
             builder.WithIdentity(job.JobId);
             builder.WithDescription(job.Description);

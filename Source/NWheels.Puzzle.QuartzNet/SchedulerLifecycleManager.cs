@@ -36,14 +36,14 @@ namespace NWheels.Puzzle.QuartzNet
             _scheduler = StdSchedulerFactory.GetDefaultScheduler();
             _scheduler.JobFactory = _jobFactory;
 
-            var trigger = TriggerBuilder.Create()
-                .WithIdentity("Timer")
-                .StartNow()
-                .WithSimpleSchedule(x => x.WithIntervalInSeconds(30).RepeatForever())
-                .Build();
-
             foreach ( var job in _jobDetails )
             {
+                var trigger = TriggerBuilder.Create()
+                    .WithIdentity(job.Key.Name + ":Timer")
+                    .StartNow()
+                    .WithSimpleSchedule(x => x.WithIntervalInSeconds(15).RepeatForever())
+                    .Build();
+
                 _logger.RegisteringJob(job.Key.Name);
                 _scheduler.ScheduleJob(job, trigger);
             }

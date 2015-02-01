@@ -17,7 +17,7 @@ namespace NWheels.Puzzle.QuartzNet
             builder.RegisterType<AutofacJobFactory>().SingleInstance();
             builder.RegisterAdapter<IApplicationJob, IJobDetail>(AutofacJobFactory.CreateJobDetail);
             builder.RegisterType<SchedulerLifecycleManager>().As<ILifecycleEventListener>().SingleInstance();
-            builder.RegisterType<QuartzJobAdapter>().InstancePerDependency();
+            builder.RegisterGeneric(typeof(QuartzJobAdapter<>)).InstancePerDependency();
         }
     }
 }
