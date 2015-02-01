@@ -41,15 +41,7 @@
     </Reference>
     <Reference Include="Hapil, Version=0.9.2.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.2.1\lib\net45\Hapil.dll</HintPath>
-    </Reference>
-    <Reference Include="Hapil.Applied, Version=0.9.2.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.2.1\lib\net45\Hapil.Applied.dll</HintPath>
-    </Reference>
-    <Reference Include="Hapil.Testing.NUnit, Version=0.9.2.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.2.1\lib\net45\Hapil.Testing.NUnit.dll</HintPath>
+      <HintPath>..\..\..\Happil\Source\Bin\Hapil.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -63,6 +55,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\ConfigurationSectionBase.cs" />
+    <Compile Include="Configuration\ConfigurationSectionConvention.cs" />
+    <Compile Include="Configuration\IConfigurationLogger.cs" />
     <Compile Include="Conventions\LoggerObjectFactory.cs" />
     <Compile Include="Hosting\INodeHostLogger.cs" />
     <Compile Include="Hosting\NodeHost.cs" />

@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="Auto.cs" />
     <Compile Include="Configuration\ConfigurationSectionAttribute.cs" />
+    <Compile Include="Configuration\IConfigurationSection.cs" />
     <Compile Include="Conventions\DataTransferObjectAttribute.cs" />
     <Compile Include="Conventions\IAutoObjectFactory.cs" />
     <Compile Include="Entities\DateTimeUtc.cs" />
@@ -192,6 +193,7 @@
     <Compile Include="UI\Widgets\ILoggedInUserUiWidgetBuilder.cs" />
     <Compile Include="UI\Widgets\IImageUiWidgetBuilder.cs" />
     <Compile Include="UI\Widgets\IUiWidgetSelector.cs" />
+    <Compile Include="Utilities\ParseUtility.cs" />
     <Compile Include="Utilities\PathUtility.cs" />
   </ItemGroup>
   <ItemGroup>
