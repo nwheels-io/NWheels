@@ -8,5 +8,6 @@ namespace NWheels.Configuration
 {
     public interface IConfigurationSection
     {
+        IConfigurationObject AsConfigurationObject();
     }
 }

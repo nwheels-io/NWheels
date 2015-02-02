@@ -18,7 +18,7 @@ namespace NWheels.Hosts.Console
 {
     class Program
     {
-        private static NodeHostConfig s_NodeHostConfig;
+        private static NodeConfiguration s_NodeHostConfig;
         private static NodeHost s_NodeHost;
         private static ManualResetEvent s_StopRequested;
         private static IPlainLog s_Log;
@@ -73,11 +73,11 @@ namespace NWheels.Hosts.Console
 
         private static void LoadNodeHostConfig(string[] programArgs)
         {
-            var configFilePath = PathUtility.LocalBinPath(programArgs.Length > 0 ? programArgs[0] : NodeHostConfig.DefaultFileName);
+            var configFilePath = PathUtility.LocalBinPath(programArgs.Length > 0 ? programArgs[0] : NodeConfiguration.DefaultNodeConfigFileName);
 
             s_Log.Debug("Loading configuration from: {0}", configFilePath);
 
-            s_NodeHostConfig = NodeHostConfig.LoadFromFile(configFilePath);
+            s_NodeHostConfig = NodeConfiguration.LoadFromFile(configFilePath);
             s_NodeHostConfig.Validate();
 
             s_Log.Debug("> Application Name   - {0}", s_NodeHostConfig.ApplicationName);
@@ -144,18 +144,18 @@ namespace NWheels.Hosts.Console
         
         private static void GenerateDummyNodeHostConfig()
         {
-            s_NodeHostConfig = new NodeHostConfig() {
+            s_NodeHostConfig = new NodeConfiguration() {
                 ApplicationName = "Test App",
                 NodeName = "Test Node",
-                ApplicationModules = new List<NodeHostConfig.ModuleConfig> {
-                    new NodeHostConfig.ModuleConfig {
+                ApplicationModules = new List<NodeConfiguration.ModuleConfig> {
+                    new NodeConfiguration.ModuleConfig {
                         Assembly = "Dummy.Module"
                     }
                 }
             };
 
-            var serializer = new DataContractSerializer(typeof(NodeHostConfig));
-            using ( var file = File.Create(PathUtility.LocalBinPath(NodeHostConfig.DefaultFileName)) )
+            var serializer = new DataContractSerializer(typeof(NodeConfiguration));
+            using ( var file = File.Create(PathUtility.LocalBinPath(NodeConfiguration.DefaultNodeConfigFileName)) )
             {
                 serializer.WriteObject(file, s_NodeHostConfig);
                 file.Flush();

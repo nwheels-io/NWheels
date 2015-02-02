@@ -61,7 +61,9 @@
   <ItemGroup>
     <Compile Include="Configuration\ConfigurationSectionBase.cs" />
     <Compile Include="Configuration\ConfigurationSectionConvention.cs" />
+    <Compile Include="Configuration\XmlConfigurationLoader.cs" />
     <Compile Include="Configuration\IConfigurationLogger.cs" />
+    <Compile Include="Configuration\IInternalConfigurationObject.cs" />
     <Compile Include="Conventions\ConfigurationSectionFactory.cs" />
     <Compile Include="Conventions\LoggerObjectFactory.cs" />
     <Compile Include="Hosting\INodeHostLogger.cs" />

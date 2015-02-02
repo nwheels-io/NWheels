@@ -145,6 +145,12 @@
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>OnlineStoreModel.Designer.cs</LastGenOutput>
     </EntityDeploy>
+    <None Include="load.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="module.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="OnlineStoreModel.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>OnlineStoreModel.Context.cs</LastGenOutput>

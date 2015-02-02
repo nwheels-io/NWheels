@@ -5,11 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Hapil;
+using NWheels.Configuration;
 using NWheels.Utilities;
 
 namespace NWheels.Core.Configuration
 {
-    public abstract class ConfigurationSectionBase
+    public abstract class ConfigurationSectionBase : IConfigurationObject, IConfigurationSection, IInternalConfigurationObject
     {
         private readonly IConfigurationLogger _logger;
         private readonly string _configPath;
@@ -26,21 +27,30 @@ namespace NWheels.Core.Configuration
 
         public void LoadObject(XElement xml)
         {
-            var element = xml.Element(GetXmlName());
+            LoadProperties(xml);
+        }
 
-            if ( element != null )
-            {
-                LoadProperties(element);
-            }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public abstract string GetXmlName();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string GetConfigPath()
+        {
+            return _configPath;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IConfigurationObject AsConfigurationObject()
+        {
+            return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public abstract void LoadProperties(XElement xml);
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public abstract string GetXmlName();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -61,13 +71,6 @@ namespace NWheels.Core.Configuration
                     throw;
                 }
             }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string ConfigPath
-        {
-            get { return _configPath; }
         }
     }
 }

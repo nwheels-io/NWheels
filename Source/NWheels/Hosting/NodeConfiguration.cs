@@ -12,9 +12,10 @@ using System.IO;
 namespace NWheels.Hosting
 {
     [DataContract(Namespace = "NWheels.Hosting")]
-    public class NodeHostConfig
+    public class NodeConfiguration : INodeConfiguration
     {
-        public const string DefaultFileName = "nodehost.config";
+        public const string DefaultNodeConfigFileName = "node.config";
+        public const string DefaultModuleConfigFileName = "module.config";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -47,6 +48,15 @@ namespace NWheels.Hosting
             {
                 ApplicationModules.ForEach(ValidateModule);
             }
+
+            if ( ConfigFiles == null )
+            {
+                ConfigFiles = new List<ConfigFile>();
+            }
+            else
+            {
+                ConfigFiles.ForEach(f => ValidateConfigFile(this.LoadedFromDirectory, f));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -59,16 +69,26 @@ namespace NWheels.Hosting
             text.AppendLine();
             text.AppendFormat("Node Name          - {0}", this.NodeName);
             text.AppendLine();
+            text.AppendFormat("Environment Name   - {0}", this.EnvironmentName);
+            text.AppendLine();
+            text.AppendFormat("Environment Type   - {0}", string.IsNullOrEmpty(this.EnvironmentType) ? "(unspecified)" : this.EnvironmentType);
+            text.AppendLine();
 
-            foreach ( var moduleString in this.FrameworkModules )
+            foreach ( var module in this.FrameworkModules )
             {
-                text.AppendFormat("+ Framework Module   - {0}", moduleString);
+                text.AppendFormat("+ Framework Module   - {0}", module.Assembly);
                 text.AppendLine();
             }
 
-            foreach ( var moduleString in this.ApplicationModules )
+            foreach ( var module in this.ApplicationModules )
             {
-                text.AppendFormat("+ Application Module - {0}", moduleString);
+                text.AppendFormat("+ Application Module - {0}", module.Assembly);
+                text.AppendLine();
+            }
+
+            foreach ( var configFile in this.ConfigFiles )
+            {
+                text.AppendFormat("+ Configuration File - {0}", configFile.Path);
                 text.AppendLine();
             }
 
@@ -77,27 +97,35 @@ namespace NWheels.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [DataMember(Order = 1, IsRequired = true)]
+        [DataMember(Order = 1, Name = "Application", IsRequired = true)]
         public string ApplicationName { get; set; }
-        [DataMember(Order = 2, IsRequired = true)]
+        [DataMember(Order = 2, Name = "Node", IsRequired = true)]
         public string NodeName { get; set; }
-        [DataMember(Order = 3, IsRequired = false, EmitDefaultValue = false)]
-        public List<ModuleConfig> FrameworkModules { get; set; }
+        [DataMember(Order = 3, Name = "Environment", IsRequired = true)]
+        public string EnvironmentName { get; set; }
         [DataMember(Order = 4, IsRequired = false, EmitDefaultValue = false)]
+        public string EnvironmentType { get; set; }
+        [DataMember(Order = 5, IsRequired = false, EmitDefaultValue = false)]
+        public List<ModuleConfig> FrameworkModules { get; set; }
+        [DataMember(Order = 6, IsRequired = false, EmitDefaultValue = false)]
         public List<ModuleConfig> ApplicationModules { get; set; }
+        [DataMember(Order = 7, IsRequired = false, EmitDefaultValue = false)]
+        public List<ConfigFile> ConfigFiles { get; set; }
+
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string InstanceId { get; set; }
         public string LoadedFromDirectory { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static NodeHostConfig LoadFromFile(string filePath)
+        public static NodeConfiguration LoadFromFile(string filePath)
         {
             using ( var file = File.OpenRead(filePath) )
             {
-                var serializer = new DataContractSerializer(typeof(NodeHostConfig));
-                var config = (NodeHostConfig)serializer.ReadObject(file);
+                var serializer = new DataContractSerializer(typeof(NodeConfiguration));
+                var config = (NodeConfiguration)serializer.ReadObject(file);
                 
                 config.LoadedFromDirectory = Path.GetDirectoryName(filePath);
                 
@@ -127,6 +155,26 @@ namespace NWheels.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static void ValidateConfigFile(string baseDirectory, ConfigFile file)
+        {
+            if ( string.IsNullOrEmpty(file.Path) )
+            {
+                throw new NodeHostConfigException("ConfigFile element must specify path to config file in the Path element.");
+            }
+
+            if ( !Path.IsPathRooted(file.Path) )
+            {
+                file.Path = Path.Combine(baseDirectory, file.Path);
+            }
+
+            if ( !File.Exists(file.Path) )
+            {
+                throw new NodeHostConfigException("Config file does not exist: " + file.Path);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataContract(Namespace = "NWheels.Hosting", Name = "Module")]
         public class ModuleConfig
         {
@@ -137,5 +185,15 @@ namespace NWheels.Hosting
             [DataMember(Order = 2, IsRequired = false, EmitDefaultValue = false)]
             public string LoaderClass { get; set; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataContract(Namespace = "NWheels.Hosting", Name = "File")]
+        public class ConfigFile
+        {
+            [DataMember(Order = 1, IsRequired = false, EmitDefaultValue = false)]
+            public string Path { get; set; }
+        }
+
     }
 }

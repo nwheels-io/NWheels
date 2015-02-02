@@ -10,15 +10,15 @@ namespace NWheels.Utilities
     public static class ParseUtility
     {
         private static readonly Dictionary<Type, Delegate> s_ParsersByType = new Dictionary<Type, Delegate> {
+            { typeof(string), new Func<string, string>(s => s) },
             { typeof(Int32), new Func<string, Int32>(Int32.Parse) },
             { typeof(Int64), new Func<string, Int64>(Int64.Parse) },
             { typeof(Guid), new Func<string, Guid>(Guid.Parse) },
             { typeof(decimal), new Func<string, decimal>(Decimal.Parse) },
             { typeof(Type), new Func<string, Type>(s => Type.GetType(s, throwOnError: true)) },
-            { typeof(DateTime), new Func<string, DateTime>(s => DateTime.ParseExact(
-                s, 
-                new[] { "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss" },
-                CultureInfo.CurrentCulture, DateTimeStyles.AssumeUniversal)) },
+            { typeof(DateTime), new Func<string, DateTime>(s => DateTime
+                .ParseExact(s, new[] { "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss" }, CultureInfo.CurrentCulture, DateTimeStyles.AssumeUniversal)
+                .ToUniversalTime()) },
             { typeof(TimeSpan), new Func<string, TimeSpan>(TimeSpan.Parse) }
 
         };
@@ -26,15 +26,15 @@ namespace NWheels.Utilities
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static readonly Dictionary<Type, Func<string, object>> s_NonTypedParsersByType = new Dictionary<Type, Func<string, object>> {
+            { typeof(string), s => s },
             { typeof(Int32), s => Int32.Parse(s) },
             { typeof(Int64), s => Int64.Parse(s) },
             { typeof(Guid), s => Guid.Parse(s) },
             { typeof(decimal), s => Decimal.Parse(s) },
             { typeof(Type), s => Type.GetType(s, throwOnError: true) },
-            { typeof(DateTime), s => DateTime.ParseExact(
-                s, 
-                new[] { "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss" },
-                CultureInfo.CurrentCulture, DateTimeStyles.AssumeUniversal) },
+            { typeof(DateTime), s => DateTime
+                .ParseExact(s, new[] { "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss" }, CultureInfo.CurrentCulture, DateTimeStyles.AssumeUniversal)
+                .ToUniversalTime() },
             { typeof(TimeSpan), s => TimeSpan.Parse(s) }
         };
 

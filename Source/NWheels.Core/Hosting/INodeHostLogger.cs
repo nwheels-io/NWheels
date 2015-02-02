@@ -15,6 +15,9 @@ namespace NWheels.Core.Hosting
         [LogActivity]
         ILogActivity LoadingModules();
 
+        [LogDebug]
+        void ProbedModuleAssemblyLocation(string path);
+
         [LogCritical]
         void FailedToLoadModule(string name, Exception e);
 

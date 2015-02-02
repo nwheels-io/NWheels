@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.Hosting
+namespace NWheels.Configuration
 {
-    public interface INodeHost
+    public interface IConfigurationObject
     {
-        INodeConfiguration Node { get; }
-        NodeState State { get; }
+        string GetXmlName();
+        string GetConfigPath();
     }
 }

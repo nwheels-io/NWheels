@@ -65,7 +65,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoTests.cs" />
-    <Compile Include="ConfigurationSectionConventionTests.cs" />
+    <Compile Include="Configuration\ConfigurationSectionConventionTests.cs" />
+    <Compile Include="Configuration\XmlConfigurationLoaderTest.cs" />
     <Compile Include="Hosting\AutofacRegistrationTests.cs" />
     <Compile Include="Logging\ApplicationEventLoggerConventionTests.cs" />
     <Compile Include="Logging\LoggingBenchmarkTests.cs" />

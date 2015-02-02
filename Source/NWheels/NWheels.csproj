@@ -59,6 +59,8 @@
   <ItemGroup>
     <Compile Include="Auto.cs" />
     <Compile Include="Configuration\ConfigurationSectionAttribute.cs" />
+    <Compile Include="Configuration\ConfigSectionRegistration.cs" />
+    <Compile Include="Configuration\IConfigurationObject.cs" />
     <Compile Include="Configuration\IConfigurationSection.cs" />
     <Compile Include="Conventions\DataTransferObjectAttribute.cs" />
     <Compile Include="Conventions\IAutoObjectFactory.cs" />
@@ -76,13 +78,16 @@
     <Compile Include="Exceptions\ContractConventionException.cs" />
     <Compile Include="Exceptions\NodeHostConfigException.cs" />
     <Compile Include="Exceptions\NodeHostException.cs" />
+    <Compile Include="Exceptions\XmlConfigurationException.cs" />
     <Compile Include="Extensions\AutofacExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="Hosting\ILifecycleEventListener.cs" />
+    <Compile Include="Hosting\INodeConfiguration.cs" />
     <Compile Include="Hosting\INodeHost.cs" />
     <Compile Include="Hosting\LifecycleEventListenerBase.cs" />
-    <Compile Include="Hosting\NodeHostConfig.cs" />
+    <Compile Include="Hosting\NodeConfiguration.cs" />
     <Compile Include="Hosting\NodeState.cs" />
     <Compile Include="IFramework.cs" />
     <Compile Include="Logging\ActivityLogNode.cs" />

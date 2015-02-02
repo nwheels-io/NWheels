@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using NWheels.Configuration;
 using NWheels.UI;
 using NWheels.UI.Endpoints;
+using NWheels.Processing;
 
 namespace NWheels.Extensions
 {
@@ -23,6 +25,22 @@ namespace NWheels.Extensions
             where TApp : IUiApplication
         {
             builder.RegisterType<WebAppEndpoint<TApp>>().As<IWebAppEndpoint>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void RegisterApplicationJob<TJob>(this ContainerBuilder builder) 
+            where TJob : IApplicationJob
+        {
+            builder.RegisterType<TJob>().As<TJob, IApplicationJob>().InstancePerDependency();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void RegisterConfigSection<TSection>(this ContainerBuilder builder)
+            where TSection : class, IConfigurationSection
+        {
+            builder.RegisterType<ConfigSectionRegistration<TSection>>().As<IConfigSectionRegistration>().InstancePerDependency();
         }
     }
 }

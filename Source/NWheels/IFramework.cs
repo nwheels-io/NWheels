@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Hosting;
 
 namespace NWheels
 {
@@ -12,7 +13,8 @@ namespace NWheels
         Guid NewGuid();
         int NewRandomInt32();
         long NewRandomInt64();
-        Guid CorrelationId { get; }
+        INodeConfiguration CurrentNode { get; }
+        Guid CurrentCorrelationId { get; }
         DateTime UtcNow { get; }
     }
 }

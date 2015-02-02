@@ -8,6 +8,13 @@ namespace NWheels.Extensions
 {
     public static class StringExtensions
     {
+        public static bool EqualsIgnoreCase(this string s, string other)
+        {
+            return s.Equals(other, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static string SplitPascalCase(this string s, char delimiter = ' ')
         {
             var output = new StringBuilder(s.Length * 2);

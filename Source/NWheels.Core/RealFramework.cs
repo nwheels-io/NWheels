@@ -6,19 +6,22 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.Core.Logging;
 using NWheels.Extensions;
+using NWheels.Hosting;
 
 namespace NWheels.Core
 {
     internal class RealFramework : IFramework
     {
         private readonly IComponentContext _components;
+        private readonly INodeConfiguration _nodeConfig;
         private readonly IThreadLogAnchor _threadLogAnchor;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public RealFramework(IComponentContext components, IThreadLogAnchor threadLogAnchor)
+        public RealFramework(IComponentContext components, INodeConfiguration nodeConfig, IThreadLogAnchor threadLogAnchor)
         {
             _components = components;
+            _nodeConfig = nodeConfig;
             _threadLogAnchor = threadLogAnchor;
         }
 
@@ -52,7 +55,17 @@ namespace NWheels.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Guid CorrelationId
+        public INodeConfiguration CurrentNode
+        {
+            get
+            {
+                return _nodeConfig;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Guid CurrentCorrelationId
         {
             get
             {

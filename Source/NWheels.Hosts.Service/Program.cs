@@ -15,7 +15,7 @@ namespace NWheels.Hosts.Service
 {
     static class Program
     {
-        private static NodeHostConfig s_NodeHostConfig;
+        private static NodeConfiguration s_NodeHostConfig;
         private static IPlainLog s_Log;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ namespace NWheels.Hosts.Service
             }
             catch ( Exception e )
             {
-                s_Log.Critical("FAILED TO LOAD {0}: {1}", NodeHostConfig.DefaultFileName, e.Message);
+                s_Log.Critical("FAILED TO LOAD {0}: {1}", NodeConfiguration.DefaultNodeConfigFileName, e.Message);
                 return 1;
             }
 
@@ -53,9 +53,9 @@ namespace NWheels.Hosts.Service
 
         private static void LoadNodeHostConfig()
         {
-            s_Log.Debug("Loading {0}", NodeHostConfig.DefaultFileName);
+            s_Log.Debug("Loading {0}", NodeConfiguration.DefaultNodeConfigFileName);
 
-            s_NodeHostConfig = NodeHostConfig.LoadFromFile(PathUtility.LocalBinPath(NodeHostConfig.DefaultFileName));
+            s_NodeHostConfig = NodeConfiguration.LoadFromFile(PathUtility.LocalBinPath(NodeConfiguration.DefaultNodeConfigFileName));
             s_NodeHostConfig.Validate();
 
             s_Log.Info(s_NodeHostConfig.ToLogString());
@@ -63,7 +63,7 @@ namespace NWheels.Hosts.Service
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        public static NodeHostConfig HostConfig
+        public static NodeConfiguration HostConfig
         {
             get { return s_NodeHostConfig; }
         }
