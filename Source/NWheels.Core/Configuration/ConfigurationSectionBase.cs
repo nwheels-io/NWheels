@@ -18,13 +18,29 @@ namespace NWheels.Core.Configuration
 
         protected ConfigurationSectionBase(Auto<IConfigurationLogger> logger, string configPath)
         {
-            _configPath = configPath;
+            _configPath = configPath + "/" + GetXmlName();
             _logger = logger.Instance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public abstract void LoadFrom(XElement xml);
+        public void LoadObject(XElement xml)
+        {
+            var element = xml.Element(GetXmlName());
+
+            if ( element != null )
+            {
+                LoadProperties(element);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public abstract void LoadProperties(XElement xml);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public abstract string GetXmlName();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -45,6 +61,13 @@ namespace NWheels.Core.Configuration
                     throw;
                 }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string ConfigPath
+        {
+            get { return _configPath; }
         }
     }
 }

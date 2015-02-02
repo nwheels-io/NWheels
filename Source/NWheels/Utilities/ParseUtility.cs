@@ -25,6 +25,21 @@ namespace NWheels.Utilities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static readonly Dictionary<Type, Func<string, object>> s_NonTypedParsersByType = new Dictionary<Type, Func<string, object>> {
+            { typeof(Int32), s => Int32.Parse(s) },
+            { typeof(Int64), s => Int64.Parse(s) },
+            { typeof(Guid), s => Guid.Parse(s) },
+            { typeof(decimal), s => Decimal.Parse(s) },
+            { typeof(Type), s => Type.GetType(s, throwOnError: true) },
+            { typeof(DateTime), s => DateTime.ParseExact(
+                s, 
+                new[] { "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss" },
+                CultureInfo.CurrentCulture, DateTimeStyles.AssumeUniversal) },
+            { typeof(TimeSpan), s => TimeSpan.Parse(s) }
+        };
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static T Parse<T>(string s)
         {
             if ( typeof(T).IsEnum )
@@ -35,6 +50,20 @@ namespace NWheels.Utilities
             {
                 Func<string, T> parser = (Func<string, T>)s_ParsersByType[typeof(T)];
                 return parser(s);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static object Parse(string s, Type asType)
+        {
+            if ( asType.IsEnum )
+            {
+                return Enum.Parse(asType, s, ignoreCase: true);
+            }
+            else
+            {
+                return s_NonTypedParsersByType[asType](s);
             }
         }
     }
