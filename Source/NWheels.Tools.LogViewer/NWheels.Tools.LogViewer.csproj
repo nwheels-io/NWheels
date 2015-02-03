@@ -64,6 +64,7 @@
     <Compile Include="Converters\LogNodeKindImageSourceConverter.cs" />
     <Compile Include="Converters\ThicknessBindingConverter.cs" />
     <Compile Include="Converters\TupleConverter.cs" />
+    <Compile Include="GridViewRowPresenterWithGridLines.cs" />
     <Compile Include="LogNodeKind.cs" />
     <Compile Include="LogPanelViewModel.cs" />
     <Compile Include="ThreadLogViewModel.cs" />
