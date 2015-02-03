@@ -37,7 +37,7 @@ namespace NWheels.Tools.LogViewer
             InitializeComponent();
             
             _viewModel = new MainViewModel();
-            _viewModel.LogFolder = @"C:\Temp\TestLogs";
+            _viewModel.LogFolder = @"C:\Temp\ThreadLog";
             _viewModel.ShouldWatchChanged += OnShouldWatchChanged;
             _viewModel.LogFolderChanged += OnLogFolderChanged;
 

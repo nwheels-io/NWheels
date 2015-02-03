@@ -66,12 +66,14 @@
     <Compile Include="Configuration\IInternalConfigurationObject.cs" />
     <Compile Include="Conventions\ConfigurationSectionFactory.cs" />
     <Compile Include="Conventions\LoggerObjectFactory.cs" />
+    <Compile Include="Hosting\IInitializableHostComponent.cs" />
     <Compile Include="Hosting\INodeHostLogger.cs" />
     <Compile Include="Hosting\NodeHost.cs" />
     <Compile Include="Hosting\NodeTrigger.cs" />
     <Compile Include="Logging\ApplicationEventLoggerConvention.cs" />
     <Compile Include="Logging\CrashLog.cs" />
     <Compile Include="Logging\IClock.cs" />
+    <Compile Include="Logging\IFrameworkLoggingConfiguration.cs" />
     <Compile Include="Logging\IPlainLog.cs" />
     <Compile Include="Logging\IThreadLogAnchor.cs" />
     <Compile Include="Logging\IThreadRegistry.cs" />

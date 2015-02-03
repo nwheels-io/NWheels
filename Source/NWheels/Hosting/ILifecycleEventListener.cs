@@ -8,6 +8,7 @@ namespace NWheels.Hosting
 {
     public interface ILifecycleEventListener
     {
+        void NodeConfigured();
         void NodeLoading();
         void Load();
         void NodeLoaded();

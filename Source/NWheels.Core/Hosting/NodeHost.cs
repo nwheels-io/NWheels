@@ -32,6 +32,7 @@ namespace NWheels.Core.Hosting
         private readonly DynamicModule _dynamicModule;
         private readonly IContainer _baseContainer;
         private readonly INodeHostLogger _logger;
+        private readonly IInitializableHostComponent[] _hostComponents;
         private readonly StateMachine<NodeState, NodeTrigger> _stateMachine;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,7 +47,9 @@ namespace NWheels.Core.Hosting
                 saveDirectory: PathUtility.LocalBinPath());
 
             _baseContainer = BuildBaseContainer(registerHostComponents);
-            
+
+            _hostComponents = InitializeHostComponents();
+
             _stateMachine = new StateMachine<NodeState, NodeTrigger>(
                 new StateMachineCodeBehind(this), 
                 _baseContainer.Resolve<Auto<StateMachine<NodeState, NodeTrigger>.ILogger>>());
@@ -60,7 +63,15 @@ namespace NWheels.Core.Hosting
         {
             using ( _logger.NodeLoading() )
             {
-                _stateMachine.ReceiveTrigger(NodeTrigger.Load);
+                try
+                {
+                    _stateMachine.ReceiveTrigger(NodeTrigger.Load);
+                }
+                catch ( Exception e )
+                {
+                    _logger.NodeHasFailedToLoad(e);
+                    throw;
+                }
 
                 if ( _stateMachine.CurrentState != NodeState.Standby )
                 {
@@ -77,7 +88,15 @@ namespace NWheels.Core.Hosting
         {
             using ( _logger.NodeActivating() )
             {
-                _stateMachine.ReceiveTrigger(NodeTrigger.Activate);
+                try
+                {
+                    _stateMachine.ReceiveTrigger(NodeTrigger.Activate);
+                }
+                catch ( Exception e )
+                {
+                    _logger.NodeHasFailedToActivate(e);
+                    throw;
+                }
 
                 if ( _stateMachine.CurrentState != NodeState.Active )
                 {
@@ -175,13 +194,14 @@ namespace NWheels.Core.Hosting
             builder.RegisterInstance(_nodeConfig).As<INodeConfiguration>();
             builder.RegisterGeneric(typeof(Auto<>)).SingleInstance();
             builder.RegisterType<UniversalThreadLogAnchor>().As<IThreadLogAnchor>().SingleInstance();
-            builder.RegisterType<ThreadRegistry>().As<IThreadRegistry>().SingleInstance();
+            builder.RegisterType<ThreadRegistry>().As<IThreadRegistry, IInitializableHostComponent>().SingleInstance();
             builder.RegisterType<ThreadLogAppender>().As<IThreadLogAppender>().SingleInstance();
             builder.RegisterType<RealFramework>().As<IFramework>().WithParameter(new TypedParameter(typeof(NodeConfiguration), _nodeConfig)).SingleInstance();
             builder.RegisterType<LoggerObjectFactory>().As<IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<ConfigurationSectionFactory>().As<IAutoObjectFactory>().SingleInstance();
-            builder.RegisterType<XmlConfigurationLoader>().SingleInstance();
+            builder.RegisterType<XmlConfigurationLoader>().SingleInstance().InstancePerLifetimeScope();
             builder.RegisterAdapter<IConfigSectionRegistration, IConfigurationSection>((ctx, reg) => reg.ResolveFromContainer(ctx)).SingleInstance();
+            builder.RegisterConfigSection<IFrameworkLoggingConfiguration>();
 
             if ( registerHostComponents != null )
             {
@@ -193,9 +213,30 @@ namespace NWheels.Core.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private IInitializableHostComponent[] InitializeHostComponents()
+        {
+            IEnumerable<IInitializableHostComponent> resolved;
+
+            if ( _baseContainer.TryResolve<IEnumerable<IInitializableHostComponent>>(out resolved) )
+            {
+                var initializableComponents = resolved.ToArray();
+
+                foreach ( var component in initializableComponents )
+                {
+                    component.Initializing();
+                }
+
+                return initializableComponents;
+            }
+
+            return new IInitializableHostComponent[0];
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private NodeLifetime CreateNodeLifetime()
         {
-            return new NodeLifetime(_nodeConfig, _baseContainer, _logger);
+            return new NodeLifetime(_nodeConfig, _baseContainer, _hostComponents, _logger);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -288,6 +329,7 @@ namespace NWheels.Core.Hosting
         {
             private readonly NodeConfiguration _nodeConfig;
             private readonly INodeHostLogger _logger;
+            private readonly IInitializableHostComponent[] _hostComponents;
             private readonly ILifetimeScope _lifetimeContainer;
             private readonly List<ILifecycleEventListener> _lifecycleComponents;
             private readonly RevertableSequence _loadSequence;
@@ -295,17 +337,18 @@ namespace NWheels.Core.Hosting
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public NodeLifetime(NodeConfiguration nodeConfig, IContainer baseContainer, INodeHostLogger logger)
+            public NodeLifetime(NodeConfiguration nodeConfig, IContainer baseContainer, IInitializableHostComponent[] hostComponents, INodeHostLogger logger)
             {
                 _nodeConfig = nodeConfig;
                 _logger = logger;
+                _hostComponents = hostComponents;
                 _lifetimeContainer = baseContainer.BeginLifetimeScope();// new MultitenantContainer(this, baseContainer);
                 _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
                 _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
                 _lifecycleComponents = new List<ILifecycleEventListener>();
 
                 LoadModules();
-                FindLifecycleComponents();
+                //FindLifecycleComponents();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -401,6 +444,13 @@ namespace NWheels.Core.Hosting
                 {
                     return _nodeConfig;
                 }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IInitializableHostComponent[] HostComponents
+            {
+                get { return _hostComponents; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -546,6 +596,9 @@ namespace NWheels.Core.Hosting
             public void BuildSequence(IRevertableSequenceBuilder sequence)
             {
                 sequence.Once().OnPerform(LoadConfiguration);
+                sequence.Once().OnPerform(CallHostComponentsConfigured);
+                sequence.Once().OnPerform(FindLifecycleComponents);
+                sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeConfigured);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoading).OnRevert(CallComponentNodeUnloaded);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentLoad).OnRevert(CallComponentUnload);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoaded).OnRevert(CallComponentNodeUnloading);
@@ -561,9 +614,69 @@ namespace NWheels.Core.Hosting
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private void CallHostComponentsConfigured()
+            {
+                foreach ( var component in _ownerLifetime.HostComponents )
+                {
+                    using ( _logger.HostComponentConfigured(component.GetType().FullName) )
+                    {
+                        component.Configured();
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void FindLifecycleComponents()
+            {
+                using ( _logger.LookingForLifecycleComponents() )
+                {
+                    try
+                    {
+                        IEnumerable<ILifecycleEventListener> foundComponents;
+
+                        if ( _ownerLifetime.LifetimeContainer.TryResolve<IEnumerable<ILifecycleEventListener>>(out foundComponents) )
+                        {
+                            _ownerLifetime.LifecycleComponents.AddRange(foundComponents);
+
+                            foreach ( var component in _ownerLifetime.LifecycleComponents )
+                            {
+                                _logger.FoundLifecycleComponent(component.GetType().ToString());
+                            }
+                        }
+                        else
+                        {
+                            _logger.NoLifecycleComponentsFound();
+                        }
+
+                        if ( _ownerLifetime.LifecycleComponents.Count == 0 )
+                        {
+                            _logger.NoLifecycleComponentsFound();
+                        }
+                    }
+                    catch ( Exception e )
+                    {
+                        _logger.FailedToLoadLifecycleComponents(e);
+                        throw;
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private IList<ILifecycleEventListener> GetLifecycleComponents()
             {
                 return _ownerLifetime.LifecycleComponents;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallComponentNodeConfigured(ILifecycleEventListener component, int index, bool isLast)
+            {
+                using ( _logger.ComponentNodeConfigured(component.GetType().FullName) )
+                {
+                    component.NodeConfigured();
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

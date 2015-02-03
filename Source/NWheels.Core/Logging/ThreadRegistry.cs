@@ -7,33 +7,27 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Autofac;
+using NWheels.Core.Hosting;
+using NWheels.Extensions;
+using NWheels.Hosting;
 using NWheels.Utilities;
 
 namespace NWheels.Core.Logging
 {
-    internal class ThreadRegistry : IThreadRegistry
+    internal class ThreadRegistry : IThreadRegistry, IInitializableHostComponent
     {
         private readonly object _syncRoot = new object();
         private readonly HashSet<ThreadLog> _runningThreads = new HashSet<ThreadLog>();
-        private readonly string _logFolder;
+        private readonly IComponentContext _components;
+        private IFrameworkLoggingConfiguration _loggingConfig;
+        private string _threadLogFolder;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ThreadRegistry()
-            : this(PathUtility.LocalBinPath("Logs"))
+        public ThreadRegistry(IComponentContext components)
         {
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public ThreadRegistry(string logFolder)
-        {
-            _logFolder = logFolder;
-
-            if ( !Directory.Exists(_logFolder) )
-            {
-                Directory.CreateDirectory(_logFolder);
-            }
+            _components = components;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -70,12 +64,31 @@ namespace NWheels.Core.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        void IInitializableHostComponent.Initializing()
+        {
+            _loggingConfig = _components.ResolveAuto<IFrameworkLoggingConfiguration>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IInitializableHostComponent.Configured()
+        {
+            _threadLogFolder = PathUtility.LocalBinPath(_loggingConfig.ThreadLogFolder);
+
+            if ( !Directory.Exists(_threadLogFolder) )
+            {
+                Directory.CreateDirectory(_threadLogFolder);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void PersistLogInXmlFormat(ThreadLog log)
         {
             var serializer = new DataContractSerializer(typeof(ThreadLogSnapshot));
             var fileName = log.TaskType.ToString() + "-" + log.LogId.ToString("N") + ".threadlog";
 
-            using ( var file = File.Create(Path.Combine(_logFolder, fileName)) )
+            using ( var file = File.Create(Path.Combine(_threadLogFolder, fileName)) )
             {
                 var writer = XmlWriter.Create(file);
                 serializer.WriteObject(writer, log.TakeSnapshot());

@@ -8,6 +8,12 @@ namespace NWheels.Hosting
 {
     public abstract class LifecycleEventListenerBase : ILifecycleEventListener
     {
+        public virtual void NodeConfigured()
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public virtual void NodeLoading()
         {
         }

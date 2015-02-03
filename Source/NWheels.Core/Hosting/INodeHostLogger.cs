@@ -40,6 +40,12 @@ namespace NWheels.Core.Hosting
         void FailedToLoadLifecycleComponents(Exception e);
 
         [LogActivity]
+        ILogActivity HostComponentConfigured(string component);
+
+        [LogActivity]
+        ILogActivity ComponentNodeConfigured(string component);
+
+        [LogActivity]
         ILogActivity ComponentNodeLoading(string component);
 
         [LogActivity]
@@ -53,6 +59,9 @@ namespace NWheels.Core.Hosting
 
         [LogError]
         NodeHostException NodeHasFailedToLoad();
+
+        [LogError]
+        void NodeHasFailedToLoad(Exception e);
 
         [LogError]
         void NodeLoadError(Exception e);
