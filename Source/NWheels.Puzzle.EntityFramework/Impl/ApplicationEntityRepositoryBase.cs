@@ -1,87 +1,90 @@
-﻿using Autofac;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core.Objects;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NWheels.Core.Logging;
-using NWheels.Extensions;
-using NWheels.Hosting;
 using NWheels.Entities;
 
-namespace NWheels.Core
+namespace NWheels.Puzzle.EntityFramework.Impl
 {
-    internal class RealFramework : IFramework
+    public abstract class ApplicationEntityRepositoryBase : IApplicationEntityRepository
     {
-        private readonly IComponentContext _components;
-        private readonly INodeConfiguration _nodeConfig;
-        private readonly IThreadLogAnchor _threadLogAnchor;
+        private readonly ObjectContextUnitOfWork _unitOfWork;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public RealFramework(IComponentContext components, INodeConfiguration nodeConfig, IThreadLogAnchor threadLogAnchor)
+        protected ApplicationEntityRepositoryBase(ObjectContextUnitOfWork unitOfWork)
         {
-            _components = components;
-            _nodeConfig = nodeConfig;
-            _threadLogAnchor = threadLogAnchor;
+            _unitOfWork = unitOfWork;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TRepository NewUnitOfWork<TRepository>(bool autoCommit) where TRepository : class, IApplicationEntityRepository
+        public void Dispose()
         {
-            return _components.ResolveAuto<TRepository>();
+            _unitOfWork.Dispose();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Guid NewGuid()
+        public abstract Type[] GetEntityTypesInRepository();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void CommitChanges()
         {
-            return Guid.NewGuid();
+            _unitOfWork.CommitChanges();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public int NewRandomInt32()
+        public void RollbackChanges()
         {
-            throw new NotImplementedException();
+            _unitOfWork.RollbackChanges();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public long NewRandomInt64()
-        {
-            throw new NotImplementedException();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public INodeConfiguration CurrentNode
+        public bool IsAutoCommitMode
         {
             get
             {
-                return _nodeConfig;
+                return _unitOfWork.IsAutoCommitMode;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Guid CurrentCorrelationId
+        public UnitOfWorkState UnitOfWorkState
         {
             get
             {
-                var currentThreadLog = _threadLogAnchor.CurrentThreadLog;
-                return (currentThreadLog != null ? currentThreadLog.CorrelationId : Guid.Empty);
+                return _unitOfWork.UnitOfWorkState;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DateTime UtcNow
+        internal void ValidateOperationalState()
+        {
+            _unitOfWork.ValidateOperationalState();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal ObjectSet<T> CreateObjectSet<T>() where T : class
+        {
+            return _unitOfWork.ObjectContext.CreateObjectSet<T>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal ObjectContextUnitOfWork UnitOfWork
         {
             get
             {
-                return DateTime.UtcNow;
+                return _unitOfWork;
             }
         }
     }

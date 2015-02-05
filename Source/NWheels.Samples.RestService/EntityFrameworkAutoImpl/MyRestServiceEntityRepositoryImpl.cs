@@ -57,5 +57,31 @@ namespace NWheels.Samples.RestService.EntityFrameworkAutoImpl
         {
             get { return _dbContext.OrderLines; }
         }
+
+
+        void Entities.IUnitOfWork.CommitChanges()
+        {
+            throw new NotImplementedException();
+        }
+
+        void Entities.IUnitOfWork.RollbackChanges()
+        {
+            throw new NotImplementedException();
+        }
+
+        bool Entities.IUnitOfWork.IsAutoCommitMode
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        Entities.UnitOfWorkState Entities.IUnitOfWork.UnitOfWorkState
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        void IDisposable.Dispose()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -65,6 +65,7 @@
     <Compile Include="ConventionUnitTests.cs" />
     <Compile Include="DatabaseTestBase.cs" />
     <Compile Include="HardCodedExamples.cs" />
+    <Compile Include="HardCodedExamplesTests.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

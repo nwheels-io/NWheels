@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace NWheels.Entities
 {
-    public interface IApplicationEntityRepository : IUnitOfWork
+    public interface IActiveRecord
     {
-        Type[] GetEntityTypesInRepository();
+        void Save();
+        void Delete();
     }
 }

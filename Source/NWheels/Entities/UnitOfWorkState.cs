@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace NWheels.Entities
 {
-    public interface IApplicationEntityRepository : IUnitOfWork
+    public enum UnitOfWorkState
     {
-        Type[] GetEntityTypesInRepository();
+        Pristine,
+        Dirty,
+        Committed,
+        RolledBack
     }
 }

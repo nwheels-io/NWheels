@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NUnit.Framework;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
-    public static class HardCodedExamples
+    [TestFixture]
+    public class HardCodedExamplesTests : DatabaseTestBase
     {
-        public static class Repository1
-        {
-            
 
-        }
     }
 }

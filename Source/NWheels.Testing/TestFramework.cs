@@ -55,7 +55,8 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TInterface New<TInterface>() where TInterface : class
+        public TRepository NewUnitOfWork<TRepository>(bool autoCommit = true) 
+            where TRepository : class, Entities.IApplicationEntityRepository
         {
             throw new NotImplementedException();
         }
