@@ -21,7 +21,7 @@ namespace NWheels.Hosts.Service
 
         public WindowsService()
         {
-            base.ServiceName = Program.HostConfig.ApplicationName + "." + Program.HostConfig.NodeName + ".";
+            base.ServiceName = Program.HostConfig.ApplicationName + "." + Program.HostConfig.NodeName;
             base.AutoLog = true;
             base.CanStop = true;
         }
