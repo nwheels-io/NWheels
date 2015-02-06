@@ -25,7 +25,7 @@ namespace NWheels.Puzzle.OdataOwinWebapi
             builder.RegisterAdapter<IWebAppEndpoint, ILifecycleEventListener>(
                 (context, endpoint) => context.Resolve<WebApplicationComponent>(TypedParameter.From(endpoint)));
 
-            builder.RegisterAdapter<IEntityRepositoryEndpoint, ILifecycleEventListener>(
+            builder.RegisterAdapter<IDataRepositoryEndpoint, ILifecycleEventListener>(
                 (context, endpoint) => context.Resolve<EntityServiceComponent>(TypedParameter.From(endpoint)));
 
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());

@@ -2,22 +2,24 @@
 using System.Collections.Generic;
 using System.Data.Entity.Core.Objects;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.Entity;
 using NWheels.Entities;
 
 namespace NWheels.Puzzle.EntityFramework.Impl
 {
-    public class ObjectContextEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>
+    public class EntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>
         where TEntityContract : class
         where TEntityImpl : class, TEntityContract
     {
-        private readonly ApplicationEntityRepositoryBase _ownerRepo;
+        private readonly ApplicationDataRepositoryBase _ownerRepo;
         private readonly ObjectSet<TEntityImpl> _objectSet;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ObjectContextEntityRepository(ApplicationEntityRepositoryBase ownerRepo)
+        public EntityRepository(ApplicationDataRepositoryBase ownerRepo)
         {
             _ownerRepo = ownerRepo;
             _objectSet = ownerRepo.CreateObjectSet<TEntityImpl>();
@@ -45,6 +47,7 @@ namespace NWheels.Puzzle.EntityFramework.Impl
         {
             get
             {
+                _ownerRepo.ValidateOperationalState();
                 return _objectSet.AsQueryable().ElementType;
             }
         }
@@ -55,6 +58,7 @@ namespace NWheels.Puzzle.EntityFramework.Impl
         {
             get
             {
+                _ownerRepo.ValidateOperationalState();
                 return _objectSet.AsQueryable().Expression;
             }
         }
@@ -65,6 +69,7 @@ namespace NWheels.Puzzle.EntityFramework.Impl
         {
             get
             {
+                _ownerRepo.ValidateOperationalState();
                 return _objectSet.AsQueryable().Provider;
             }
         }
@@ -73,30 +78,52 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         public TEntityContract New()
         {
-            throw new NotImplementedException();
+            _ownerRepo.ValidateOperationalState();
+            return _objectSet.CreateObject<TEntityImpl>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-        public IQueryable<TEntityContract> Include(System.Linq.Expressions.Expression<Func<TEntityContract, object>>[] properties)
+        public IQueryable<TEntityContract> Include(Expression<Func<TEntityContract, object>>[] properties)
         {
-            throw new NotImplementedException();
+            _ownerRepo.ValidateOperationalState();
+            return QueryWithIncludedProperties(_objectSet, properties);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Insert(TEntityContract entity)
         {
-            throw new NotImplementedException();
+            _ownerRepo.ValidateOperationalState();
+            _objectSet.AddObject((TEntityImpl)entity);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Update(TEntityContract entity)
         {
-            throw new NotImplementedException();
+            _ownerRepo.ValidateOperationalState();
+            
+            _objectSet.Attach((TEntityImpl)entity);
+            _ownerRepo.ObjectContext.ObjectStateManager.ChangeObjectState(entity, EntityState.Modified);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Delete(TEntityContract entity)
         {
-            throw new NotImplementedException();
+            _ownerRepo.ValidateOperationalState();
+            _objectSet.DeleteObject((TEntityImpl)entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static IQueryable<TEntityContract> QueryWithIncludedProperties(
+            IQueryable<TEntityContract> query,
+            IEnumerable<Expression<Func<TEntityContract, object>>> propertiesToInclude)
+        {
+            return propertiesToInclude.Aggregate(query, (current, property) => current.Include(property));
         }
     }
 }

@@ -30,7 +30,7 @@ namespace NWheels.Core.Configuration
         {
             if ( ConfigurationSectionAttribute.From(context.TypeKey.PrimaryInterface) == null )
             {
-                throw new ContractConventionException(this.GetType(), context.TypeKey.PrimaryInterface, "Missing ConfigurationSection attribute.");
+                throw new ContractConventionException(this, context.TypeKey.PrimaryInterface, "Missing ConfigurationSection attribute.");
             }
 
             context.BaseType = typeof(ConfigurationSectionBase);

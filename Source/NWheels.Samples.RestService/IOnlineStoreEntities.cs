@@ -7,7 +7,7 @@ using NWheels.Entities;
 
 namespace NWheels.Samples.RestService
 {
-    public interface IOnlineStoreEntities : IApplicationEntityRepository
+    public interface IOnlineStoreEntities : IApplicationDataRepository
     {
         IQueryable<Product> Products { get; }
         IQueryable<Order> Orders { get; }

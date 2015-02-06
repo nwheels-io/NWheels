@@ -28,7 +28,7 @@ namespace NWheels.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TRepository NewUnitOfWork<TRepository>(bool autoCommit) where TRepository : class, IApplicationEntityRepository
+        public TRepository NewUnitOfWork<TRepository>(bool autoCommit) where TRepository : class, IApplicationDataRepository
         {
             return _components.ResolveAuto<TRepository>();
         }

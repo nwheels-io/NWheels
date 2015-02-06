@@ -19,7 +19,7 @@ namespace NWheels.Samples.RestService
             builder.RegisterType<ProductController>().InstancePerRequest();
             builder.RegisterType<OrderController>().InstancePerRequest();
             builder.RegisterType<OrderLineController>().InstancePerRequest();
-            builder.RegisterType<EntityRepositoryEndpoint<IMyRestServiceEntityRepository>>().As<IEntityRepositoryEndpoint>();
+            builder.RegisterType<DataRepositoryEndpoint<IMyRestServiceEntityRepository>>().As<IDataRepositoryEndpoint>();
         }
     }
 }

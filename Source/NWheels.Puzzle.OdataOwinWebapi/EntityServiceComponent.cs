@@ -21,14 +21,14 @@ namespace NWheels.Puzzle.OdataOwinWebapi
 {
     internal class EntityServiceComponent : LifecycleEventListenerBase
     {
-        private readonly IApplicationEntityRepository _repository;
+        private readonly IApplicationDataRepository _repository;
         private readonly ILogger _logger;
         private readonly ILifetimeScope _container;
         private IDisposable _host = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EntityServiceComponent(IEntityRepositoryEndpoint endpoint, Auto<ILogger> logger, IComponentContext componentContext)
+        public EntityServiceComponent(IDataRepositoryEndpoint endpoint, Auto<ILogger> logger, IComponentContext componentContext)
         {
             _repository = endpoint.Contract;
             _logger = logger.Instance;

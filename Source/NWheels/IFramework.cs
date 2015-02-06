@@ -10,7 +10,7 @@ namespace NWheels
 {
     public interface IFramework
     {
-        TRepository NewUnitOfWork<TRepository>(bool autoCommit = true) where TRepository : class, IApplicationEntityRepository;
+        TRepository NewUnitOfWork<TRepository>(bool autoCommit = true) where TRepository : class, IApplicationDataRepository;
         Guid NewGuid();
         int NewRandomInt32();
         long NewRandomInt64();

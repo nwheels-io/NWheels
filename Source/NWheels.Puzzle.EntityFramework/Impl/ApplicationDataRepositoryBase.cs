@@ -5,16 +5,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Entities;
+using NWheels.Puzzle.EntityFramework.Conventions;
 
 namespace NWheels.Puzzle.EntityFramework.Impl
 {
-    public abstract class ApplicationEntityRepositoryBase : IApplicationEntityRepository
+    public abstract class ApplicationDataRepositoryBase : IApplicationDataRepository
     {
-        private readonly ObjectContextUnitOfWork _unitOfWork;
+        private readonly UnitOfWork _unitOfWork;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected ApplicationEntityRepositoryBase(ObjectContextUnitOfWork unitOfWork)
+        protected ApplicationDataRepositoryBase(UnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
@@ -80,11 +81,21 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal ObjectContextUnitOfWork UnitOfWork
+        internal UnitOfWork UnitOfWork
         {
             get
             {
                 return _unitOfWork;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal ObjectContext ObjectContext
+        {
+            get
+            {
+                return _unitOfWork.ObjectContext;
             }
         }
     }

@@ -56,7 +56,7 @@ namespace NWheels.Testing
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TRepository NewUnitOfWork<TRepository>(bool autoCommit = true) 
-            where TRepository : class, Entities.IApplicationEntityRepository
+            where TRepository : class, Entities.IApplicationDataRepository
         {
             throw new NotImplementedException();
         }

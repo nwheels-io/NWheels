@@ -11,22 +11,26 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
     {
         public static class Repository1
         {
-            public interface IRepository
+            public interface IDataRepository : IApplicationDataRepository
             {
-                
+                IEntityRepository<IProduct> Products { get; }
+                IEntityRepository<IOrder> Orders { get; }
             }
+            [EntityContract]
             public interface IProduct
             {
                 int Id { get; set; }
                 string Name { get; set; }
                 decimal Price { get; set; }
             }
+            [EntityContract]
             public interface IOrder
             {
                 int Id { get; set; }
                 DateTime PlacedAt { get; set; }
-                ICollection<IOrderLine> OrderLines { get; set; }
+                ICollection<IOrderLine> OrderLines { get; }
             }
+            [EntityContract]
             public interface IOrderLine
             {
                 int Id { get; set; }

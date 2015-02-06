@@ -9,7 +9,7 @@ using NWheels.Entities;
 
 namespace NWheels.Puzzle.EntityFramework.Impl
 {
-    public class ObjectContextUnitOfWork : IUnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
         private readonly EntityConnection _entityConnection;
         private readonly bool _autoCommit;
@@ -18,10 +18,10 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ObjectContextUnitOfWork(EntityConnection connection, bool autoCommit)
+        public UnitOfWork(EntityConnection connection, bool autoCommit)
         {
             _entityConnection = connection;
-            _objectContext = new ObjectContext(connection);
+            _objectContext = null;//new ObjectContext(connection);
             _autoCommit = autoCommit;
             _currentState = UnitOfWorkState.Pristine;
         }

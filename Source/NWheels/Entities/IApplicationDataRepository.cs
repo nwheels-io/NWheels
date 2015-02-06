@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NWheels.Entities
 {
-    public interface IApplicationEntityRepository : IUnitOfWork
+    public interface IApplicationDataRepository : IUnitOfWork
     {
         Type[] GetEntityTypesInRepository();
     }
