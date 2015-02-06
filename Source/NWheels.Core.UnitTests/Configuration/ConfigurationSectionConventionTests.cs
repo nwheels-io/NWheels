@@ -121,7 +121,9 @@ namespace NWheels.Core.UnitTests.Configuration
                     dateTimeValue2='2014-02-22 15:30:11'
                     enumValue='Monday'
                     guidValue='F3377322-C42E-4DB2-BAF5-07EE7D5647BA'
-                    typeValue1='NWheels.IFramework, NWheels' />");
+                    typeValue1='NWheels.IFramework, NWheels' 
+                    boolValue1='true'
+                    boolValue2='True' />");
 
             //-- Act
 
@@ -228,6 +230,12 @@ namespace NWheels.Core.UnitTests.Configuration
             
             [DefaultValue("System.IO.FileStream")]
             Type TypeValue2 { get; }
+
+            [DefaultValue(false)]
+            bool BoolValue1 { get; }
+
+            [DefaultValue(false)]
+            bool BoolValue2 { get; }
         }
     }
 }

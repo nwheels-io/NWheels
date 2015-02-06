@@ -11,6 +11,7 @@ namespace NWheels.Utilities
     {
         private static readonly Dictionary<Type, Delegate> s_ParsersByType = new Dictionary<Type, Delegate> {
             { typeof(string), new Func<string, string>(s => s) },
+            { typeof(bool), new Func<string, bool>(s => Boolean.Parse(s)) },
             { typeof(Int32), new Func<string, Int32>(Int32.Parse) },
             { typeof(Int64), new Func<string, Int64>(Int64.Parse) },
             { typeof(Guid), new Func<string, Guid>(Guid.Parse) },
@@ -27,6 +28,7 @@ namespace NWheels.Utilities
 
         private static readonly Dictionary<Type, Func<string, object>> s_NonTypedParsersByType = new Dictionary<Type, Func<string, object>> {
             { typeof(string), s => s },
+            { typeof(bool), s => Boolean.Parse(s) },
             { typeof(Int32), s => Int32.Parse(s) },
             { typeof(Int64), s => Int64.Parse(s) },
             { typeof(Guid), s => Guid.Parse(s) },
