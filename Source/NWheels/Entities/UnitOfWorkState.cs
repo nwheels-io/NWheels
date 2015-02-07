@@ -8,7 +8,7 @@ namespace NWheels.Entities
 {
     public enum UnitOfWorkState
     {
-        Pristine,
+        Untouched,
         Dirty,
         Committed,
         RolledBack

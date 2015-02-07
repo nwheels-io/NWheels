@@ -290,24 +290,24 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test, Ignore("WIP")]
-        public void CanCreateApplicationDataRepository()
-        {
-            //-- Arrange
+        //[Test]
+        //public void CanCreateApplicationDataRepository()
+        //{
+        //    //-- Arrange
 
-            var entityFactory = new EntityObjectFactory(base.Module);
-            var repoFactory = new DataRepositoryObjectFactory(base.Module, entityFactory);
-            var unitOfWork = new UnitOfWork(null, false);
+        //    var entityFactory = new EntityObjectFactory(base.Module);
+        //    var repoFactory = new DataRepositoryObjectFactory(base.Module, entityFactory);
+        //    var unitOfWork = new UnitOfWork(null, false);
 
-            //-- Act
+        //    //-- Act
 
-            var repo = repoFactory.CreateInstanceOf<Interfaces.Repository1.IDataRepository>().UsingConstructor(unitOfWork);
+        //    var repo = repoFactory.CreateInstanceOf<Interfaces.Repository1.IDataRepository>().UsingConstructor(unitOfWork);
 
-            //-- Assert
+        //    //-- Assert
 
-            Assert.That(repo.Products, Is.Not.Null);
-            Assert.That(repo.Orders, Is.Not.Null);
-        }
+        //    Assert.That(repo.Products, Is.Not.Null);
+        //    Assert.That(repo.Orders, Is.Not.Null);
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

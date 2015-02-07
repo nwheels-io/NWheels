@@ -1,7 +1,10 @@
-﻿using System;
+﻿#if false
+
+using System;
 using System.Collections.Generic;
 using System.Data.Entity.Core.EntityClient;
 using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,12 +21,12 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UnitOfWork(EntityConnection connection, bool autoCommit)
+        public UnitOfWork(DbCompiledModel model, bool autoCommit)
         {
             _entityConnection = connection;
             _objectContext = null;//new ObjectContext(connection);
             _autoCommit = autoCommit;
-            _currentState = UnitOfWorkState.Pristine;
+            _currentState = UnitOfWorkState.Untouched;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -38,7 +41,7 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         public void CommitChanges()
         {
-            ValidateState(UnitOfWorkState.Pristine, UnitOfWorkState.Dirty);
+            ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
             _objectContext.SaveChanges(SaveOptions.AcceptAllChangesAfterSave);
             _currentState = UnitOfWorkState.Committed;
         }
@@ -47,7 +50,7 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         public void RollbackChanges()
         {
-            ValidateState(UnitOfWorkState.Pristine, UnitOfWorkState.Dirty);
+            ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
             _objectContext.Dispose();
             _entityConnection.Dispose();
             _currentState = UnitOfWorkState.RolledBack;
@@ -57,7 +60,7 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         public void ValidateOperationalState()
         {
-            ValidateState(UnitOfWorkState.Pristine, UnitOfWorkState.Dirty);
+            ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -101,3 +104,5 @@ namespace NWheels.Puzzle.EntityFramework.Impl
         }
     }
 }
+
+#endif

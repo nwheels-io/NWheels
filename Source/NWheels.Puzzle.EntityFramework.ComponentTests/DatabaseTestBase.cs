@@ -26,7 +26,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         public void CreateDatabase()
         {
-            using ( var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["master"].ConnectionString) )
+            using ( var connection = new SqlConnection(this.MasterConnectionString) ) 
             {
                 connection.Open();
 
@@ -54,6 +54,26 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                     DatabaseName);
 
                 cmd.ExecuteNonQuery();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string MasterConnectionString
+        {
+            get
+            {
+                return ConfigurationManager.ConnectionStrings["master"].ConnectionString;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string ConnectionString
+        {
+            get
+            {
+                return ConfigurationManager.ConnectionStrings["test"].ConnectionString;
             }
         }
     }

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
+using System.Data.Entity.Infrastructure;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -69,8 +71,8 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
                     entityTypesInRepository.Add(entityImplementationType);
                 });
 
-                writer.Constructor<UnitOfWork>((cw, unitOfWork) => {
-                    cw.Base(unitOfWork);
+                writer.Constructor<DbConnection, bool>((cw, connection, autoCommit) => {
+                    cw.Base(cw.Const<DbCompiledModel>(null), connection, autoCommit);
                     initializers.ForEach(init => init(cw));
                 });
 
