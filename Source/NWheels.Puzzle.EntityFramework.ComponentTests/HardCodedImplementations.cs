@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using NWheels.Concurrency;
 using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.Impl;
@@ -24,7 +26,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 private IEntityRepository<Interfaces.Repository1.IProduct> m_Products;
 
                 public DataRepositoryObject_DataRepository(DbConnection connection, bool autoCommit)
-                    : base(_s_compiledModel, connection, autoCommit)
+                    : base(GetOrBuildDbCompoledModel(connection), connection, autoCommit)
                 {
                     this.m_Products = new EntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product>(this);
                     this.m_Orders = new EntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order>(this);
@@ -51,18 +53,44 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                     }
                 }
 
-                private static readonly DbCompiledModel _s_compiledModel;
+                private static readonly object _s_compiledModelSyncRoot = new object();
+                private static DbCompiledModel _s_compiledModel;
 
-                static DataRepositoryObject_DataRepository()
+                public static DbCompiledModel CompiledModel
                 {
-                    var modelBuilder = new DbModelBuilder();
+                    get { return _s_compiledModel; }
+                }
 
-                    modelBuilder.Entity<EntityObject_Product>().HasEntitySetName("Product");
-                    modelBuilder.Entity<EntityObject_Order>().HasEntitySetName("Order");
-                    modelBuilder.Entity<EntityObject_OrderLine>().HasEntitySetName("OrderLine");
+                private static DbCompiledModel GetOrBuildDbCompoledModel(DbConnection connection)
+                {
+                    if ( _s_compiledModel == null )
+                    {
+                        lock ( _s_compiledModelSyncRoot )
+                        {
+                            if ( _s_compiledModel == null )
+                            {
+                                var modelBuilder = new DbModelBuilder();
 
-                    var model = modelBuilder.Build(new SqlConnection());
-                    _s_compiledModel = model.Compile();
+                                modelBuilder.Entity<EntityObject_Product>().HasEntitySetName("Product").ToTable("Products");
+                                modelBuilder.Entity<EntityObject_Order>().HasEntitySetName("Order").ToTable("Orders");
+                                modelBuilder.Entity<EntityObject_OrderLine>().HasEntitySetName("OrderLine").ToTable("OrderLines");
+
+                                modelBuilder.Entity<EntityObject_OrderLine>()
+                                    .HasRequired(x => x.Order)
+                                    .WithMany(o => o.OrderLines)
+                                    .Map(m => m.MapKey("OrderId"));
+                                modelBuilder.Entity<EntityObject_OrderLine>()
+                                    .HasRequired(x => x.Product)
+                                    .WithRequiredDependent()
+                                    .Map(m => m.MapKey("ProductId"));
+
+                                var model = modelBuilder.Build(connection);
+                                _s_compiledModel = model.Compile();
+                            }
+                        }
+                    }
+
+                    return _s_compiledModel;
                 }
             }
 
@@ -139,12 +167,14 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                     }
                 }
 
+                [Column(name: "OrderId")]
                 public virtual EntityObject_Order Order
                 {
                     get { return this.m_Order; }
                     set { this.m_Order = value; }
                 }
 
+                [Column(name: "ProductId")]
                 public virtual EntityObject_Product Product
                 {
                     get { return this.m_Product; }

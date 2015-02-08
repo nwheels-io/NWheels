@@ -16,15 +16,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [SetUp]
-        public void BaseSetUp()
-        {
-            CreateDatabase();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void CreateDatabase()
+        public void DropAndCreateTestDatabase()
         {
             using ( var connection = new SqlConnection(this.MasterConnectionString) ) 
             {
@@ -74,6 +66,16 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             get
             {
                 return ConfigurationManager.ConnectionStrings["test"].ConnectionString;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string ConnectionStringProviderName
+        {
+            get
+            {
+                return ConfigurationManager.ConnectionStrings["test"].ProviderName;
             }
         }
     }
