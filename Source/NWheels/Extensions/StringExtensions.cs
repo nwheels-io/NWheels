@@ -15,6 +15,20 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static string FormatIf(this string format, params object[] args)
+        {
+            if ( args != null && args.Length > 0 )
+            {
+                return string.Format(format, args);
+            }
+            else
+            {
+                return format;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static string SplitPascalCase(this string s, char delimiter = ' ')
         {
             var output = new StringBuilder(s.Length * 2);

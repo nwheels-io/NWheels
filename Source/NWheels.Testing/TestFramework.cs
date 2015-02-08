@@ -5,9 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using Hapil;
+using NWheels.Concurrency;
+using NWheels.Core.Concurrency;
 using NWheels.Core.Configuration;
 using NWheels.Core.Conventions;
 using NWheels.Core.Logging;
+using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.Configuration;
@@ -59,6 +62,13 @@ namespace NWheels.Testing
             where TRepository : class, Entities.IApplicationDataRepository
         {
             throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IResourceLock NewLock(ResourceLockMode mode, string resourceNameFormat, params object[] formatArgs)
+        {
+            return new ResourceLock(mode, resourceNameFormat.FormatIf(formatArgs));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Concurrency\ResourceLock.cs" />
     <Compile Include="Configuration\ConfigurationSectionBase.cs" />
     <Compile Include="Configuration\ConfigurationSectionConvention.cs" />
     <Compile Include="Configuration\XmlConfigurationLoader.cs" />

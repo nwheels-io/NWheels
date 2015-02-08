@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Core.Concurrency;
 using NWheels.Core.Logging;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Entities;
+using NWheels.Concurrency;
 
 namespace NWheels.Core
 {
@@ -52,6 +54,13 @@ namespace NWheels.Core
         public long NewRandomInt64()
         {
             throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IResourceLock NewLock(ResourceLockMode mode, string resourceNameFormat, params object[] formatArgs)
+        {
+            return new ResourceLock(mode, resourceNameFormat.FormatIf(formatArgs));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

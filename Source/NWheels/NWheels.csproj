@@ -54,6 +54,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Auto.cs" />
+    <Compile Include="Concurrency\IResourceLock.cs" />
+    <Compile Include="Concurrency\IResourceAccessHolderInfo.cs" />
+    <Compile Include="Concurrency\ResourceAccessType.cs" />
+    <Compile Include="Concurrency\ResourceLockMode.cs" />
     <Compile Include="Configuration\ConfigurationSectionAttribute.cs" />
     <Compile Include="Configuration\ConfigSectionRegistration.cs" />
     <Compile Include="Configuration\IConfigurationObject.cs" />
