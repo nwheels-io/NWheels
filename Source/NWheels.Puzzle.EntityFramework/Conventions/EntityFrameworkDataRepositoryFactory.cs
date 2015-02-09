@@ -17,9 +17,9 @@ using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Puzzle.EntityFramework.Conventions
 {
-    public class DataRepositoryObjectFactory : ConventionObjectFactory
+    public class EntityFrameworkDataRepositoryFactory : ConventionObjectFactory
     {
-        public DataRepositoryObjectFactory(DynamicModule module, EntityObjectFactory entityFactory)
+        public EntityFrameworkDataRepositoryFactory(DynamicModule module, EntityFrameworkEntityObjectFactory entityFactory)
             : base(module, new DataRepositoryConvention(entityFactory))
         {
         }
@@ -28,11 +28,11 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
         private class DataRepositoryConvention : ImplementationConvention
         {
-            private readonly EntityObjectFactory _entityFactory;
+            private readonly EntityFrameworkEntityObjectFactory _entityFactory;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public DataRepositoryConvention(EntityObjectFactory entityFactory)
+            public DataRepositoryConvention(EntityFrameworkEntityObjectFactory entityFactory)
                 : base(Will.InspectDeclaration | Will.ImplementPrimaryInterface)
             {
                 _entityFactory = entityFactory;
@@ -42,7 +42,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
             protected override void OnInspectDeclaration(ObjectFactoryContext context)
             {
-                context.BaseType = typeof(ApplicationDataRepositoryBase);
+                context.BaseType = typeof(EntityFrameworkDataRepositoryBase);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
                         {
                             writer.OwnerClass.GetPropertyBackingField(property)
                                 .AsOperand<IEntityRepository<TT.TContract>>()
-                                .Assign(cw.New<EntityRepository<TT.TContract, TT.TImpl>>(cw.This<ApplicationDataRepositoryBase>()));
+                                .Assign(cw.New<EntityFrameworkEntityRepository<TT.TContract, TT.TImpl>>(cw.This<EntityFrameworkDataRepositoryBase>()));
                         }
                     });
 
@@ -76,7 +76,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
                     initializers.ForEach(init => init(cw));
                 });
 
-                writer.ImplementBase<ApplicationDataRepositoryBase>().Method<IEnumerable<Type>>(x => x.GetEntityTypesInRepository).Implement(m => 
+                writer.ImplementBase<EntityFrameworkDataRepositoryBase>().Method<IEnumerable<Type>>(x => x.GetEntityTypesInRepository).Implement(m => 
                     m.Return(m.NewArray<Type>(constantValues: entityTypesInRepository.ToArray()))
                 );
             }

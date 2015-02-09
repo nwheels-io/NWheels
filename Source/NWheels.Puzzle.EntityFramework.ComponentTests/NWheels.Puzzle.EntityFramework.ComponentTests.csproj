@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssumptionTests.cs" />
+    <Compile Include="CrudOperations.cs" />
     <Compile Include="ConventionUnitTests.cs" />
     <Compile Include="DatabaseTestBase.cs" />
     <Compile Include="HardCodedImplementations.cs" />

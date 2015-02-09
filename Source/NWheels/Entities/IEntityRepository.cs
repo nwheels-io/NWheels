@@ -10,7 +10,7 @@ namespace NWheels.Entities
     public interface IEntityRepository<TEntity> : IQueryable<TEntity>
     {
         TEntity New();
-        IQueryable<TEntity> Include(Expression<Func<TEntity, object>>[] properties);
+        IQueryable<TEntity> Include(params Expression<Func<TEntity, object>>[] properties);
         void Insert(TEntity entity);
         void Update(TEntity entity);
         void Delete(TEntity entity);

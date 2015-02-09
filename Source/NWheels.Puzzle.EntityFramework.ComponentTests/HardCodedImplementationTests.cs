@@ -79,24 +79,51 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
             //-- Act
 
-            using ( var connection = CreateDbConnection() )
-            {
-                connection.Open();
-                var repo = new HR1.DataRepositoryObject_DataRepository(connection, autoCommit: false);
-                _compiledModel = HR1.DataRepositoryObject_DataRepository.CompiledModel;
-            }
-
+            InitializeHardCodedDataRepository(out _compiledModel).Dispose();
             CreateTestDatabaseObjects();
+
+            //-- Assert
 
             var productsTable = SelectFromTable("Products");
             var ordersTable = SelectFromTable("Orders");
             var orderLinesTable = SelectFromTable("OrderLines");
 
-            //-- Assert
-
             Assert.That(GetCommaSeparatedColumnList(productsTable), Is.EqualTo("Id:Int32,Name:String,Price:Decimal"));
-            Assert.That(GetCommaSeparatedColumnList(ordersTable), Is.EqualTo("Id:Int32,PlacedAt:DateTime"));
+            Assert.That(GetCommaSeparatedColumnList(ordersTable), Is.EqualTo("Id:Int32,PlacedAt:DateTime,Status:Int32"));
             Assert.That(GetCommaSeparatedColumnList(orderLinesTable), Is.EqualTo("Id:Int32,Quantity:Int32,OrderId:Int32,ProductId:Int32"));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanPerformBasicCrudOperationsOnHardCodedRepository()
+        {
+            //-- Arrange
+
+            DropAndCreateTestDatabase();
+            InitializeHardCodedDataRepository(out _compiledModel).Dispose();
+            CreateTestDatabaseObjects();
+
+            //-- Act & Assert
+
+            CrudOperations.Repository1.ExecuteBasic(repoFactory: InitializeHardCodedDataRepository);
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanPerformAdvancedRetrievalsOnHardCodedRepository()
+        {
+            //-- Arrange
+
+            DropAndCreateTestDatabase();
+            InitializeHardCodedDataRepository(out _compiledModel).Dispose();
+            CreateTestDatabaseObjects();
+
+            //-- Act & Assert
+
+            CrudOperations.Repository1.ExecuteAdvancedRetrievals(repoFactory: InitializeHardCodedDataRepository);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -120,6 +147,25 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 
                 return table;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Interfaces.Repository1.IOnlineStoreRepository InitializeHardCodedDataRepository()
+        {
+            DbCompiledModel compiledModel;
+            return InitializeHardCodedDataRepository(out compiledModel);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Interfaces.Repository1.IOnlineStoreRepository InitializeHardCodedDataRepository(out DbCompiledModel compiledModel)
+        {
+            var connection = CreateDbConnection();
+            connection.Open();
+            var repo = new HR1.DataRepositoryObject_DataRepository(connection, autoCommit: false);
+            compiledModel = repo.CompiledModel;
+            return repo;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

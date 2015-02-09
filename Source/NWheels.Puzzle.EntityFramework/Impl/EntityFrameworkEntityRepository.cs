@@ -10,19 +10,21 @@ using NWheels.Entities;
 
 namespace NWheels.Puzzle.EntityFramework.Impl
 {
-    public class EntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>
+    public class EntityFrameworkEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>
         where TEntityContract : class
         where TEntityImpl : class, TEntityContract
     {
-        private readonly ApplicationDataRepositoryBase _ownerRepo;
+        private readonly EntityFrameworkDataRepositoryBase _ownerRepo;
         private readonly ObjectSet<TEntityImpl> _objectSet;
+        private InterceptingQueryProvider _queryProvider;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EntityRepository(ApplicationDataRepositoryBase ownerRepo)
+        public EntityFrameworkEntityRepository(EntityFrameworkDataRepositoryBase ownerRepo)
         {
             _ownerRepo = ownerRepo;
             _objectSet = ownerRepo.CreateObjectSet<TEntityImpl>();
+            _queryProvider = null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -70,7 +72,13 @@ namespace NWheels.Puzzle.EntityFramework.Impl
             get
             {
                 _ownerRepo.ValidateOperationalState();
-                return _objectSet.AsQueryable().Provider;
+
+                if ( _queryProvider == null )
+                {
+                    _queryProvider = new InterceptingQueryProvider(this);
+                }
+                
+                return _queryProvider;
             }
         }
 
@@ -119,11 +127,71 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ObjectSet<TEntityImpl> ObjectSet
+        {
+            get
+            {
+                return _objectSet;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static IQueryable<TEntityContract> QueryWithIncludedProperties(
             IQueryable<TEntityContract> query,
             IEnumerable<Expression<Func<TEntityContract, object>>> propertiesToInclude)
         {
             return propertiesToInclude.Aggregate(query, (current, property) => current.Include(property));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class InterceptingQueryProvider : IQueryProvider
+        {
+            private readonly EntityFrameworkEntityRepository<TEntityContract, TEntityImpl> _ownerRepo;
+            private readonly IQueryProvider _actualQueryProvider;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public InterceptingQueryProvider(EntityFrameworkEntityRepository<TEntityContract, TEntityImpl> ownerRepo)
+            {
+                _ownerRepo = ownerRepo;
+                _actualQueryProvider = ownerRepo.ObjectSet.AsQueryable().Provider;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region IQueryProvider Members
+
+            public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
+            {
+                var specializedExpression = QueryExpressionSpecializer.Specialize(expression);
+                return _actualQueryProvider.CreateQuery<TElement>(specializedExpression);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IQueryable CreateQuery(Expression expression)
+            {
+                var specializedExpression = QueryExpressionSpecializer.Specialize(expression);
+                return _actualQueryProvider.CreateQuery(specializedExpression);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TResult Execute<TResult>(Expression expression)
+            {
+                return _actualQueryProvider.Execute<TResult>(expression);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public object Execute(Expression expression)
+            {
+                return _actualQueryProvider.Execute(expression);
+            }
+
+            #endregion
         }
     }
 }

@@ -12,8 +12,9 @@ using NWheels.Puzzle.EntityFramework.Conventions;
 
 namespace NWheels.Puzzle.EntityFramework.Impl
 {
-    public abstract class ApplicationDataRepositoryBase : IApplicationDataRepository
+    public abstract class EntityFrameworkDataRepositoryBase : IApplicationDataRepository
     {
+        private readonly DbCompiledModel _compiledModel;
         private readonly bool _autoCommit;
         private readonly DbConnection _connection;
         private ObjectContext _objectContext;
@@ -21,8 +22,9 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected ApplicationDataRepositoryBase(DbCompiledModel compiledModel, DbConnection connection, bool autoCommit)
+        protected EntityFrameworkDataRepositoryBase(DbCompiledModel compiledModel, DbConnection connection, bool autoCommit)
         {
+            _compiledModel = compiledModel;
             _autoCommit = autoCommit;
             _connection = connection;
             _objectContext = compiledModel.CreateObjectContext<ObjectContext>(connection);
@@ -76,6 +78,16 @@ namespace NWheels.Puzzle.EntityFramework.Impl
             get
             {
                 return _currentState;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DbCompiledModel CompiledModel
+        {
+            get
+            {
+                return _compiledModel;
             }
         }
 

@@ -69,10 +69,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Conventions\DataRepositoryObjectFactory.cs" />
-    <Compile Include="Conventions\EntityObjectFactory.cs" />
-    <Compile Include="Impl\ApplicationDataRepositoryBase.cs" />
-    <Compile Include="Impl\EntityRepository.cs" />
+    <Compile Include="Conventions\EntityFrameworkDataRepositoryFactory.cs" />
+    <Compile Include="Conventions\EntityFrameworkEntityObjectFactory.cs" />
+    <Compile Include="EFConventions\NoUnderscoreForeignKeyNamingConvention.cs" />
+    <Compile Include="Impl\EntityFrameworkDataRepositoryBase.cs" />
+    <Compile Include="Impl\EntityFrameworkEntityRepository.cs" />
+    <Compile Include="Impl\QueryExpressionSpecializer.cs" />
     <Compile Include="Impl\UnitOfWork.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

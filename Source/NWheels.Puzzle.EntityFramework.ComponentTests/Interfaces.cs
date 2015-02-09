@@ -11,8 +11,15 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
     {
         public static class Repository1
         {
-            public interface IDataRepository : IApplicationDataRepository
+            public enum OrderStatus
             {
+                New = 1,
+                PaymentReceived = 2,
+                ProductsShipped = 3
+            }
+            public interface IOnlineStoreRepository : IApplicationDataRepository
+            {
+                IOrderLine NewOrderLine(IOrder order, IProduct product, int quantity);
                 IEntityRepository<IProduct> Products { get; }
                 IEntityRepository<IOrder> Orders { get; }
             }
@@ -29,6 +36,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 int Id { get; set; }
                 DateTime PlacedAt { get; set; }
                 ICollection<IOrderLine> OrderLines { get; }
+                OrderStatus Status { get; set; }
             }
             [EntityContract]
             public interface IOrderLine
