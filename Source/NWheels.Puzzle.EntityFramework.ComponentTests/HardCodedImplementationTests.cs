@@ -96,6 +96,39 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
+        public void CanCustomizeTableAndColumnNames()
+        {
+            //-- Arrange
+
+            DropAndCreateTestDatabase();
+
+            //-- Act
+
+            InitializeDataRepositoryWithCustomNames(out _compiledModel).Dispose();
+            CreateTestDatabaseObjects();
+
+            //-- Assert
+
+            var productsTable = SelectFromTable("MY_PRODUCTS");
+            var ordersTable = SelectFromTable("MY_ORDERS");
+            var orderLinesTable = SelectFromTable("MY_ORDER_LINES");
+
+            Assert.That(
+                GetCommaSeparatedColumnList(productsTable), 
+                Is.EqualTo("Id:Int32,Name:String,MY_SPECIAL_PRICE_COLUMN:Decimal"));
+            
+            Assert.That(
+                GetCommaSeparatedColumnList(ordersTable),
+                Is.EqualTo("MY_SPECIAL_ORDER_ID_COLUMN:Int32,PlacedAt:DateTime,Status:Int32"));
+            
+            Assert.That(
+                GetCommaSeparatedColumnList(orderLinesTable),
+                Is.EqualTo("Id:Int32,Quantity:Int32,OrderId:Int32,MY_SPECIAL_PRODUCT_ID_COLUMN:Int32"));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
         public void CanPerformBasicCrudOperationsOnHardCodedRepository()
         {
             //-- Arrange
@@ -164,6 +197,17 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             var connection = CreateDbConnection();
             connection.Open();
             var repo = new HR1.DataRepositoryObject_DataRepository(connection, autoCommit: false);
+            compiledModel = repo.CompiledModel;
+            return repo;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Interfaces.Repository1.IOnlineStoreRepository InitializeDataRepositoryWithCustomNames(out DbCompiledModel compiledModel)
+        {
+            var connection = CreateDbConnection();
+            connection.Open();
+            var repo = new HR1.DataRepositoryObject_CustomNames(connection, autoCommit: false);
             compiledModel = repo.CompiledModel;
             return repo;
         }

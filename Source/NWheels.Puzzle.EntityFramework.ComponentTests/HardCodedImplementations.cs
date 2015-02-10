@@ -81,9 +81,90 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
                                 modelBuilder.Conventions.Add(new NoUnderscoreForeignKeyNamingConvention());
 
-                                modelBuilder.Entity<EntityObject_Product>().HasEntitySetName("Product").ToTable("Products");
-                                modelBuilder.Entity<EntityObject_Order>().HasEntitySetName("Order").ToTable("Orders");
-                                modelBuilder.Entity<EntityObject_OrderLine>().HasEntitySetName("OrderLine").ToTable("OrderLines");
+                                var objectSetProducts = modelBuilder.Entity<EntityObject_Product>().HasEntitySetName("Product").ToTable("Products");
+                                var objectSetOrders = modelBuilder.Entity<EntityObject_Order>().HasEntitySetName("Order").ToTable("Orders");
+                                var objectSetOrderLines = modelBuilder.Entity<EntityObject_OrderLine>().HasEntitySetName("OrderLine").ToTable("OrderLines");
+
+                                var model = modelBuilder.Build(connection);
+                                _s_compiledModel = model.Compile();
+                            }
+                        }
+                    }
+
+                    return _s_compiledModel;
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class DataRepositoryObject_CustomNames : EntityFrameworkDataRepositoryBase, Interfaces.Repository1.IOnlineStoreRepository
+            {
+                private IEntityRepository<Interfaces.Repository1.IOrder> m_Orders;
+                private IEntityRepository<Interfaces.Repository1.IProduct> m_Products;
+
+                public DataRepositoryObject_CustomNames(DbConnection connection, bool autoCommit)
+                    : base(GetOrBuildDbCompiledModel(connection), connection, autoCommit)
+                {
+                    this.m_Products = new EntityFrameworkEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product>(this);
+                    this.m_Orders = new EntityFrameworkEntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order>(this);
+                }
+
+                public override sealed Type[] GetEntityTypesInRepository()
+                {
+                    return new Type[] { typeof(EntityObject_Product), typeof(EntityObject_Order) };
+                }
+
+                public Interfaces.Repository1.IOrderLine NewOrderLine(
+                    Interfaces.Repository1.IOrder order,
+                    Interfaces.Repository1.IProduct product,
+                    int quantity)
+                {
+                    Interfaces.Repository1.IOrderLine orderLine = new EntityObject_OrderLine();
+                    orderLine.Order = order;
+                    orderLine.Product = product;
+                    orderLine.Quantity = quantity;
+                    return orderLine;
+                }
+
+                public IEntityRepository<Interfaces.Repository1.IOrder> Orders
+                {
+                    get
+                    {
+                        return this.m_Orders;
+                    }
+                }
+
+                public IEntityRepository<Interfaces.Repository1.IProduct> Products
+                {
+                    get
+                    {
+                        return this.m_Products;
+                    }
+                }
+
+                private static readonly object _s_compiledModelSyncRoot = new object();
+                private static DbCompiledModel _s_compiledModel;
+
+                private static DbCompiledModel GetOrBuildDbCompiledModel(DbConnection connection)
+                {
+                    if ( _s_compiledModel == null )
+                    {
+                        lock ( _s_compiledModelSyncRoot )
+                        {
+                            if ( _s_compiledModel == null )
+                            {
+                                var modelBuilder = new DbModelBuilder();
+
+                                modelBuilder.Conventions.Add(new NoUnderscoreForeignKeyNamingConvention());
+
+                                var objectSetProducts = modelBuilder.Entity<EntityObject_Product>().HasEntitySetName("Product").ToTable("MY_PRODUCTS");
+                                var objectSetOrders = modelBuilder.Entity<EntityObject_Order>().HasEntitySetName("Order").ToTable("MY_ORDERS");
+                                var objectSetOrderLines = modelBuilder.Entity<EntityObject_OrderLine>().HasEntitySetName("OrderLine").ToTable("MY_ORDER_LINES");
+
+                                objectSetProducts.Property(p => p.Price).HasColumnName("MY_SPECIAL_PRICE_COLUMN").HasColumnType("MONEY");
+                                objectSetOrderLines.HasRequired(p => p.Product).WithRequiredDependent().Map(m => m.MapKey("MY_SPECIAL_PRODUCT_ID_COLUMN"));
+                                objectSetOrderLines.HasRequired(p => p.Order).WithMany(o => o.OrderLines).Map(m => m.MapKey("OrderId"));
+                                objectSetOrders.Property(p => p.Id).HasColumnName("MY_SPECIAL_ORDER_ID_COLUMN");
 
                                 var model = modelBuilder.Build(connection);
                                 _s_compiledModel = model.Compile();

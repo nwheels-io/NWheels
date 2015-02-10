@@ -75,6 +75,7 @@
     <Compile Include="Entities\IEntityPartCorrelationId.cs" />
     <Compile Include="Entities\IEntityPartId.cs" />
     <Compile Include="Entities\IEntityPartPositionInList.cs" />
+    <Compile Include="Entities\IEntityRelationalMapping.cs" />
     <Compile Include="Entities\IEntityRepository.cs" />
     <Compile Include="Entities\IUnitOfWork.cs" />
     <Compile Include="Entities\UnitOfWorkState.cs" />

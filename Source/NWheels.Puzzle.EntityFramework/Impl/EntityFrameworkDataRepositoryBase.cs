@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
+using System.Reflection;
 
 namespace NWheels.Puzzle.EntityFramework.Impl
 {

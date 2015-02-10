@@ -12,7 +12,7 @@ using NWheels.Puzzle.EntityFramework.Impl;
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
     [TestFixture]
-    public class ConventionUnitTests : NUnitEmittedTypesTestBase
+    public class EntityFrameworkEntityObjectFactoryTests : NUnitEmittedTypesTestBase
     {
         [Test]
         public void CanCreateFlatEntityObject()

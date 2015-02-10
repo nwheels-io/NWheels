@@ -72,7 +72,8 @@
   <ItemGroup>
     <Compile Include="AssumptionTests.cs" />
     <Compile Include="CrudOperations.cs" />
-    <Compile Include="ConventionUnitTests.cs" />
+    <Compile Include="EntityFrameworkDataRepositoryFactoryTests.cs" />
+    <Compile Include="EntityFrameworkEntityObjectFactoryTests.cs" />
     <Compile Include="DatabaseTestBase.cs" />
     <Compile Include="HardCodedImplementations.cs" />
     <Compile Include="HardCodedImplementationTests.cs" />

@@ -32,6 +32,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 InsertOrder2(repoFactory());
                 InsertOrder3(repoFactory());
                 GroupOrderIdsByDate(repoFactory());
+                FindOrdersOfProductsByNamePrefix(repoFactory());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -239,6 +240,24 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                     Assert.That(orderIdsByDate[1].OrderIds.Count(), Is.EqualTo(2));
                     Assert.That(orderIdsByDate[1].OrderIds.First(), Is.EqualTo(2));
                     Assert.That(orderIdsByDate[1].OrderIds.Last(), Is.EqualTo(3));
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static void FindOrdersOfProductsByNamePrefix(Interfaces.Repository1.IOnlineStoreRepository repo)
+            {
+                using ( repo )
+                {
+                    var ordersOfAProducts = (
+                        from o in repo.Orders
+                        where o.OrderLines.Any(ol => ol.Product.Name.StartsWith("A"))
+                        orderby o.Id
+                        select o).ToArray();
+
+                    Assert.That(ordersOfAProducts.Length, Is.EqualTo(2));
+                    Assert.That(ordersOfAProducts[0].Id, Is.EqualTo(1));
+                    Assert.That(ordersOfAProducts[1].Id, Is.EqualTo(2));
                 }
             }
         }

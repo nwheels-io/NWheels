@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using NWheels.Configuration;
+using NWheels.Entities;
 using NWheels.UI;
 using NWheels.UI.Endpoints;
 using NWheels.Processing;
@@ -41,6 +42,15 @@ namespace NWheels.Extensions
             where TSection : class, IConfigurationSection
         {
             builder.RegisterType<ConfigSectionRegistration<TSection>>().As<IConfigSectionRegistration>().InstancePerDependency();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void RegisterEntityRelationalMapping<TEntity>(this ContainerBuilder builder, Action<IEntityRelationalMapping<TEntity>> configurator)
+            where TEntity : class
+        {
+            var configuration = new EntityRelationalMappingConfiguration<TEntity>(configurator);
+            builder.RegisterInstance<EntityRelationalMappingConfiguration<TEntity>>(configuration);
         }
     }
 }

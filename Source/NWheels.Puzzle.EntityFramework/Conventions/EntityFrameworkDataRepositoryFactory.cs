@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using Hapil;
 using Hapil.Writers;
 using NWheels.Entities;
@@ -19,8 +20,8 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 {
     public class EntityFrameworkDataRepositoryFactory : ConventionObjectFactory
     {
-        public EntityFrameworkDataRepositoryFactory(DynamicModule module, EntityFrameworkEntityObjectFactory entityFactory)
-            : base(module, new DataRepositoryConvention(entityFactory))
+        public EntityFrameworkDataRepositoryFactory(IComponentContext components, DynamicModule module, EntityFrameworkEntityObjectFactory entityFactory)
+            : base(module, new DataRepositoryConvention(components, entityFactory))
         {
         }
 
@@ -28,13 +29,15 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
         private class DataRepositoryConvention : ImplementationConvention
         {
+            private readonly IComponentContext _components;
             private readonly EntityFrameworkEntityObjectFactory _entityFactory;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public DataRepositoryConvention(EntityFrameworkEntityObjectFactory entityFactory)
+            public DataRepositoryConvention(IComponentContext components, EntityFrameworkEntityObjectFactory entityFactory)
                 : base(Will.InspectDeclaration | Will.ImplementPrimaryInterface)
             {
+                _components = components;
                 _entityFactory = entityFactory;
             }
 
