@@ -20,8 +20,8 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 {
     public class EntityFrameworkDataRepositoryFactory : ConventionObjectFactory
     {
-        public EntityFrameworkDataRepositoryFactory(IComponentContext components, DynamicModule module, EntityFrameworkEntityObjectFactory entityFactory)
-            : base(module, new DataRepositoryConvention(components, entityFactory))
+        public EntityFrameworkDataRepositoryFactory(DynamicModule module, EntityFrameworkEntityObjectFactory entityFactory)
+            : base(module, new DataRepositoryConvention(entityFactory))
         {
         }
 
@@ -29,15 +29,13 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
         private class DataRepositoryConvention : ImplementationConvention
         {
-            private readonly IComponentContext _components;
             private readonly EntityFrameworkEntityObjectFactory _entityFactory;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public DataRepositoryConvention(IComponentContext components, EntityFrameworkEntityObjectFactory entityFactory)
+            public DataRepositoryConvention(EntityFrameworkEntityObjectFactory entityFactory)
                 : base(Will.InspectDeclaration | Will.ImplementPrimaryInterface)
             {
-                _components = components;
                 _entityFactory = entityFactory;
             }
 

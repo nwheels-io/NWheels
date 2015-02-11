@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Autofac;
 using NWheels.Configuration;
 using NWheels.Entities;
+using NWheels.Entities.Metadata;
 using NWheels.UI;
 using NWheels.UI.Endpoints;
 using NWheels.Processing;
@@ -46,11 +47,11 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void RegisterEntityRelationalMapping<TEntity>(this ContainerBuilder builder, Action<IEntityRelationalMapping<TEntity>> configurator)
+        public static void RegisterRelationalMappingFineTune<TEntity>(this ContainerBuilder builder, Action<IRelationalMappingFineTune<TEntity>> fineTuneAction)
             where TEntity : class
         {
-            var configuration = new EntityRelationalMappingConfiguration<TEntity>(configurator);
-            builder.RegisterInstance<EntityRelationalMappingConfiguration<TEntity>>(configuration);
+            var fineTuner = new RelationalMappingFineTuner<TEntity>(fineTuneAction);
+            builder.RegisterInstance<RelationalMappingFineTuner<TEntity>>(fineTuner);
         }
     }
 }

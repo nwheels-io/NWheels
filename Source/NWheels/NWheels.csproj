@@ -44,6 +44,7 @@
       <HintPath>..\packages\FelixB.Hapil.0.9.2.6\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
@@ -69,15 +70,27 @@
     <Compile Include="Entities\EntityKey.cs" />
     <Compile Include="Entities\EntityPartContractAttribute.cs" />
     <Compile Include="Entities\DataRepositoryEndpoint.cs" />
+    <Compile Include="Entities\Metadata\IFineTuneEntityRelationalMapping.cs" />
+    <Compile Include="Entities\Metadata\EntityKeyKind.cs" />
+    <Compile Include="Entities\Metadata\EntityPropertyKind.cs" />
     <Compile Include="Entities\IActiveRecord.cs" />
     <Compile Include="Entities\IApplicationDataRepository.cs" />
+    <Compile Include="Entities\Metadata\EntityRelationalInheritanceKind.cs" />
+    <Compile Include="Entities\Metadata\EntityRelationKind.cs" />
+    <Compile Include="Entities\Metadata\EntityRelationPartyKind.cs" />
+    <Compile Include="Entities\Metadata\IEntityKeyMetadata.cs" />
+    <Compile Include="Entities\Metadata\IEntityMetadata.cs" />
     <Compile Include="Entities\IEntityPartActiveStatus.cs" />
     <Compile Include="Entities\IEntityPartCorrelationId.cs" />
     <Compile Include="Entities\IEntityPartId.cs" />
     <Compile Include="Entities\IEntityPartPositionInList.cs" />
-    <Compile Include="Entities\IEntityRelationalMapping.cs" />
+    <Compile Include="Entities\Metadata\IEntityPropertyMetadata.cs" />
     <Compile Include="Entities\IEntityRepository.cs" />
     <Compile Include="Entities\IUnitOfWork.cs" />
+    <Compile Include="Entities\Metadata\IEntityPropertyRelationalMapping.cs" />
+    <Compile Include="Entities\Metadata\IEntityPropertyValidationMetadata.cs" />
+    <Compile Include="Entities\Metadata\IEntityRelationalMapping.cs" />
+    <Compile Include="Entities\Metadata\IEntityRelationMetadata.cs" />
     <Compile Include="Entities\UnitOfWorkState.cs" />
     <Compile Include="Exceptions\CodeBehindErrorException.cs" />
     <Compile Include="Exceptions\ContractConventionException.cs" />

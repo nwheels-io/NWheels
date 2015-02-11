@@ -8,12 +8,16 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using NUnit.Framework;
 using NWheels.Concurrency;
 using NWheels.Entities;
+using NWheels.Entities.Metadata;
+using NWheels.Extensions;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.EFConventions;
 using NWheels.Puzzle.EntityFramework.Impl;
+using System.Data.Entity.ModelConfiguration;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
@@ -21,6 +25,23 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
     {
         public static class Repository1
         {
+            public static void RegisterEntityFineTunings(ContainerBuilder builder)
+            {
+                builder.RegisterRelationalMappingFineTune<Interfaces.Repository1.IProduct>(ft => ft
+                    .Table("MY_PRODUCTS")
+                    .Column(p => p.Price, columnName: "MY_SPECIAL_PRICE_COLUMN", dataType: "MONEY"));
+
+                builder.RegisterRelationalMappingFineTune<Interfaces.Repository1.IOrder>(ft => ft
+                    .Table("MY_ORDERS")
+                    .Column(o => o.Id, columnName: "MY_SPECIAL_ORDER_ID_COLUMN"));
+
+                builder.RegisterRelationalMappingFineTune<Interfaces.Repository1.IOrderLine>(ft => ft
+                    .Table("MY_ORDER_LINES")
+                    .Column(ol => ol.Product, columnName: "MY_SPECIAL_PRODUCT_ID_COLUMN"));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public class DataRepositoryObject_DataRepository : EntityFrameworkDataRepositoryBase, Interfaces.Repository1.IOnlineStoreRepository
             {
                 private IEntityRepository<Interfaces.Repository1.IOrder> m_Orders;
@@ -94,8 +115,10 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                     return _s_compiledModel;
                 }
             }
+            
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            #if false
 
             public class DataRepositoryObject_CustomNames : EntityFrameworkDataRepositoryBase, Interfaces.Repository1.IOnlineStoreRepository
             {
@@ -176,7 +199,9 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 }
             }
 
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            #endif
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public class EntityObject_Order : Interfaces.Repository1.IOrder
             {

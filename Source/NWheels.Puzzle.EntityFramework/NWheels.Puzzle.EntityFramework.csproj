@@ -72,9 +72,9 @@
     <Compile Include="Conventions\EntityFrameworkDataRepositoryFactory.cs" />
     <Compile Include="Conventions\EntityFrameworkEntityObjectFactory.cs" />
     <Compile Include="EFConventions\NoUnderscoreForeignKeyNamingConvention.cs" />
+    <Compile Include="Conventions\EntityFrameworkEntityConfigurationWriter.cs" />
     <Compile Include="Impl\EntityFrameworkDataRepositoryBase.cs" />
     <Compile Include="Impl\EntityFrameworkEntityRepository.cs" />
-    <Compile Include="Impl\EntityRelationalMappingBase.cs" />
     <Compile Include="Impl\QueryExpressionSpecializer.cs" />
     <Compile Include="Impl\UnitOfWork.cs" />
     <Compile Include="ModuleLoader.cs" />

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using System.Reflection;
+using Autofac;
 
 namespace NWheels.Puzzle.EntityFramework.Impl
 {

@@ -10,6 +10,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using NUnit.Framework;
 using HR1 = NWheels.Puzzle.EntityFramework.ComponentTests.HardCodedImplementations.Repository1;
 
@@ -20,6 +21,16 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
     public class HardCodedImplementationTests : DatabaseTestBase
     {
         private DbCompiledModel _compiledModel = null;
+        //private Autofac.ContainerBuilder _componentsBuilder = null;
+        //private Autofac.IContainer _components = null;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [SetUp]
+        public void SetUp()
+        {
+            //_componentsBuilder = new ContainerBuilder();
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -95,8 +106,8 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test]
-        public void CanCustomizeTableAndColumnNames()
+        [Test, Ignore("WIP")]
+        public void CanFineTuneEntityConfiguration()
         {
             //-- Arrange
 
@@ -104,7 +115,8 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
             //-- Act
 
-            InitializeDataRepositoryWithCustomNames(out _compiledModel).Dispose();
+            //HR1.RegisterEntityFineTunings(_componentsBuilder);
+            InitializeHardCodedDataRepository(out _compiledModel).Dispose();
             CreateTestDatabaseObjects();
 
             //-- Assert
@@ -194,20 +206,11 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         private Interfaces.Repository1.IOnlineStoreRepository InitializeHardCodedDataRepository(out DbCompiledModel compiledModel)
         {
+            //_components = _componentsBuilder.Build();
+            
             var connection = CreateDbConnection();
             connection.Open();
             var repo = new HR1.DataRepositoryObject_DataRepository(connection, autoCommit: false);
-            compiledModel = repo.CompiledModel;
-            return repo;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private Interfaces.Repository1.IOnlineStoreRepository InitializeDataRepositoryWithCustomNames(out DbCompiledModel compiledModel)
-        {
-            var connection = CreateDbConnection();
-            connection.Open();
-            var repo = new HR1.DataRepositoryObject_CustomNames(connection, autoCommit: false);
             compiledModel = repo.CompiledModel;
             return repo;
         }

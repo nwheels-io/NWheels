@@ -67,6 +67,7 @@
     <Compile Include="Configuration\IInternalConfigurationObject.cs" />
     <Compile Include="Conventions\ConfigurationSectionFactory.cs" />
     <Compile Include="Conventions\LoggerObjectFactory.cs" />
+    <Compile Include="Entities\EntityMetadataBase.cs" />
     <Compile Include="Hosting\IInitializableHostComponent.cs" />
     <Compile Include="Hosting\INodeHostLogger.cs" />
     <Compile Include="Hosting\NodeHost.cs" />
