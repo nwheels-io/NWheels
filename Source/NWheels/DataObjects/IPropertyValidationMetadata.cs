@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace NWheels.Entities.Metadata
+namespace NWheels.DataObjects
 {
-    public interface IEntityPropertyValidationMetadata
+    public interface IPropertyValidationMetadata
     {
         IReadOnlyList<ValidationAttribute> ValidationAttributes { get; }
         DataType SemanticDataType { get; }

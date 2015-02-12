@@ -1,23 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-namespace NWheels.Entities.Metadata
+namespace NWheels.DataObjects
 {
-    public interface IEntityPropertyMetadata
+    public interface IPropertyMetadata
     {
         string Name { get; }
-        EntityPropertyKind Kind { get; }
+        PropertyKind Kind { get; }
         Type ClrType { get; }
         DataType SemanticDataType { get; }
         PropertyInfo ContractPropertyInfo { get; }
         PropertyInfo ImplementationPropertyInfo { get; }
-        IEntityRelationMetadata Relation { get; }
-        IEntityPropertyValidationMetadata Validation { get; }
+        IRelationMetadata Relation { get; }
+        IPropertyValidationMetadata Validation { get; }
         string DefaultDisplayName { get; }
         string DefaultDisplayFormat { get; }
         bool DefaultSortAscending { get; }
-        IEntityPropertyRelationalMapping RelationalMapping { get; }
+        IPropertyRelationalMapping RelationalMapping { get; }
     }
 }

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Autofac;
 using NWheels.Configuration;
 using NWheels.Entities;
-using NWheels.Entities.Metadata;
 using NWheels.UI;
 using NWheels.UI.Endpoints;
 using NWheels.Processing;
