@@ -2,6 +2,6 @@
 {
     public interface IDataTransferObject
     {
-        ITypeMetadata GetMetadata();
+        ITypeMetadata GetTypeMetadata();
     }
 }

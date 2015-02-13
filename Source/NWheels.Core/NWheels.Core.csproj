@@ -48,6 +48,7 @@
       <HintPath>..\packages\FelixB.Hapil.0.9.2.6\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
@@ -67,6 +68,16 @@
     <Compile Include="Configuration\IInternalConfigurationObject.cs" />
     <Compile Include="Conventions\ConfigurationSectionFactory.cs" />
     <Compile Include="Conventions\LoggerObjectFactory.cs" />
+    <Compile Include="DataObjects\CollectionAdapter.cs" />
+    <Compile Include="DataObjects\KeyMetadataBuilder.cs" />
+    <Compile Include="DataObjects\PropertyMetadataBuilder.cs" />
+    <Compile Include="DataObjects\PropertyRelationalMappingBuilder.cs" />
+    <Compile Include="DataObjects\PropertyValidationMetadataBuilder.cs" />
+    <Compile Include="DataObjects\RelationMetadataBuilder.cs" />
+    <Compile Include="DataObjects\TypeMetadataBuilder.cs" />
+    <Compile Include="DataObjects\TypeMetadataBuilderConstructor.cs" />
+    <Compile Include="DataObjects\TypeMetadataCache.cs" />
+    <Compile Include="DataObjects\TypeRelationalMappingBuilder.cs" />
     <Compile Include="Entities\EntityMetadataBase.cs" />
     <Compile Include="Hosting\IInitializableHostComponent.cs" />
     <Compile Include="Hosting\INodeHostLogger.cs" />
@@ -99,9 +110,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DataTransferObjects\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

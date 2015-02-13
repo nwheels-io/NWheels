@@ -17,6 +17,6 @@ namespace NWheels.DataObjects
         string DefaultDisplayFormat { get; }
         IReadOnlyList<IPropertyMetadata> DefaultDisplayProperties { get; }
         IReadOnlyList<IPropertyMetadata> DefaultSortProperties { get; }
-        IRelationalMapping RelationalMapping { get; }
+        ITypeRelationalMapping RelationalMapping { get; }
     }
 }

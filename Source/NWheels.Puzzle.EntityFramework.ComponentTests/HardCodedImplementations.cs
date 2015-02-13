@@ -12,7 +12,6 @@ using Autofac;
 using NUnit.Framework;
 using NWheels.Concurrency;
 using NWheels.Entities;
-using NWheels.Entities.Metadata;
 using NWheels.Extensions;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.EFConventions;
