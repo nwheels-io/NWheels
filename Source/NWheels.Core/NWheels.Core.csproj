@@ -68,6 +68,7 @@
     <Compile Include="Configuration\IInternalConfigurationObject.cs" />
     <Compile Include="Conventions\ConfigurationSectionFactory.cs" />
     <Compile Include="Conventions\LoggerObjectFactory.cs" />
+    <Compile Include="DataObjects\MetadataElement.cs" />
     <Compile Include="DataObjects\CollectionAdapter.cs" />
     <Compile Include="DataObjects\KeyMetadataBuilder.cs" />
     <Compile Include="DataObjects\PropertyMetadataBuilder.cs" />

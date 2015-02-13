@@ -6,7 +6,7 @@ using NWheels.DataObjects;
 
 namespace NWheels.Core.DataObjects
 {
-    public class PropertyRelationalMappingBuilder : IPropertyRelationalMapping
+    public class PropertyRelationalMappingBuilder : MetadataElement<IPropertyRelationalMapping>, IPropertyRelationalMapping
     {
         #region IPropertyRelationalMapping Members
 
@@ -15,5 +15,14 @@ namespace NWheels.Core.DataObjects
         public string DataTypeName { get; set; }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void AcceptVisitor(IMetadataElementVisitor visitor)
+        {
+            TableName = visitor.VisitAttribute("TableName", TableName);
+            ColumnName = visitor.VisitAttribute("ColumnName", ColumnName);
+            DataTypeName = visitor.VisitAttribute("DataTypeName", DataTypeName);
+        }
     }
 }

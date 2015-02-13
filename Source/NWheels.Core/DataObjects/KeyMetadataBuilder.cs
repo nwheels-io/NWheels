@@ -7,7 +7,7 @@ using NWheels.DataObjects;
 
 namespace NWheels.Core.DataObjects
 {
-    public class KeyMetadataBuilder : IKeyMetadata
+    public class KeyMetadataBuilder : MetadataElement<IKeyMetadata>, IKeyMetadata
     {
         private readonly CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _propertiesAdapter;
 
@@ -41,5 +41,14 @@ namespace NWheels.Core.DataObjects
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public List<PropertyMetadataBuilder> Properties { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void AcceptVisitor(IMetadataElementVisitor visitor)
+        {
+            Name = visitor.VisitAttribute("Name", Name);
+            Kind = visitor.VisitAttribute("Kind", Kind);
+            visitor.VisitElementList<IPropertyMetadata, PropertyMetadataBuilder>(Properties);
+        }
     }
 }

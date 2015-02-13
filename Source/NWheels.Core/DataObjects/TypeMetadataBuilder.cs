@@ -7,7 +7,7 @@ using NWheels.DataObjects;
 
 namespace NWheels.Core.DataObjects
 {
-    public class TypeMetadataBuilder : ITypeMetadata
+    public class TypeMetadataBuilder : MetadataElement<ITypeMetadata>, ITypeMetadata
     {
         private readonly CollectionAdapter<TypeMetadataBuilder, ITypeMetadata> _derivedTypesAdapter;
         private readonly CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _propertiesAdapter;
@@ -110,5 +110,29 @@ namespace NWheels.Core.DataObjects
         public List<PropertyMetadataBuilder> DefaultDisplayProperties { get; private set; }
         public List<PropertyMetadataBuilder> DefaultSortProperties { get; private set; }
         public TypeRelationalMappingBuilder RelationalMapping { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void AcceptVisitor(IMetadataElementVisitor visitor)
+        {
+            Name = visitor.VisitAttribute("Name", Name);
+            ContractType = visitor.VisitAttribute("ContractType", ContractType);
+            ImplementationType = visitor.VisitAttribute("ImplementationType", ImplementationType);
+            IsAbstract = visitor.VisitAttribute("IsAbstract", IsAbstract);
+
+            BaseType = visitor.VisitElement<ITypeMetadata, TypeMetadataBuilder>(BaseType);
+
+            visitor.VisitElementList<ITypeMetadata, TypeMetadataBuilder>(DerivedTypes);
+            visitor.VisitElementList<IPropertyMetadata, PropertyMetadataBuilder>(Properties);
+            visitor.VisitElementList<IKeyMetadata, KeyMetadataBuilder>(AllKeys);
+            PrimaryKey = AllKeys.SingleOrDefault(key => key.Kind == KeyKind.Primary);
+
+            DefaultDisplayFormat = visitor.VisitAttribute("DefaultDisplayFormat", DefaultDisplayFormat);
+
+            visitor.VisitElementList<IPropertyMetadata, PropertyMetadataBuilder>("DefaultDisplayProperties", DefaultDisplayProperties);
+            visitor.VisitElementList<IPropertyMetadata, PropertyMetadataBuilder>("DefaultSortProperties", DefaultSortProperties);
+
+            RelationalMapping = visitor.VisitElement<ITypeRelationalMapping, TypeRelationalMappingBuilder>(RelationalMapping);
+        }
     }
 }

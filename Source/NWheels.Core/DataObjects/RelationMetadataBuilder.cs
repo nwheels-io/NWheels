@@ -7,7 +7,7 @@ using NWheels.DataObjects;
 
 namespace NWheels.Core.DataObjects
 {
-    public class RelationMetadataBuilder : IRelationMetadata
+    public class RelationMetadataBuilder : MetadataElement<IRelationMetadata>, IRelationMetadata
     {
         #region IRelationMetadata Members
 
@@ -43,5 +43,18 @@ namespace NWheels.Core.DataObjects
         public KeyMetadataBuilder ThisPartyKey { get; set; }
         public TypeMetadataBuilder RelatedPartyType { get; set; }
         public KeyMetadataBuilder RelatedPartyKey { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void AcceptVisitor(IMetadataElementVisitor visitor)
+        {
+            RelationKind = visitor.VisitAttribute("RelationKind", RelationKind);
+            ThisPartyKind = visitor.VisitAttribute("ThisPartyKind", ThisPartyKind);
+            ThisPartyKey = visitor.VisitElement<IKeyMetadata, KeyMetadataBuilder>(ThisPartyKey);
+
+            RelatedPartyType = visitor.VisitElement<ITypeMetadata, TypeMetadataBuilder>(RelatedPartyType);
+            RelatedPartyKind = visitor.VisitAttribute("RelatedPartyKind", RelatedPartyKind);
+            RelatedPartyKey = visitor.VisitElement<IKeyMetadata, KeyMetadataBuilder>(RelatedPartyKey);
+        }
     }
 }

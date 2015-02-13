@@ -1,6 +1,6 @@
 ﻿namespace NWheels.DataObjects
 {
-    public interface IPropertyRelationalMapping
+    public interface IPropertyRelationalMapping : IMetadataElement
     {
         string TableName { get; }
         string ColumnName { get; }

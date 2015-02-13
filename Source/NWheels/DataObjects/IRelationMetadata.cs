@@ -1,6 +1,6 @@
 ﻿namespace NWheels.DataObjects
 {
-    public interface IRelationMetadata
+    public interface IRelationMetadata : IMetadataElement
     {
         RelationKind RelationKind { get; }
         RelationPartyKind ThisPartyKind { get; }

@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NWheels.Core.DataObjects
 {
-    public class PropertyValidationMetadataBuilder : IPropertyValidationMetadata
+    public class PropertyValidationMetadataBuilder : MetadataElement<IPropertyValidationMetadata>, IPropertyValidationMetadata
     {
         public PropertyValidationMetadataBuilder()
         {
@@ -42,5 +42,20 @@ namespace NWheels.Core.DataObjects
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public List<ValidationAttribute> ValidationAttributes { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void AcceptVisitor(IMetadataElementVisitor visitor)
+        {
+            SemanticDataType = visitor.VisitAttribute("SemanticDataType", SemanticDataType);
+            IsEditable = visitor.VisitAttribute("IsEditable", IsEditable);
+            MinLength = visitor.VisitAttribute("MinLength", MinLength);
+            MaxLength = visitor.VisitAttribute("MaxLength", MaxLength);
+            MinValue = visitor.VisitAttribute("MinValue", MinValue);
+            MaxValue = visitor.VisitAttribute("MaxValue", MaxValue);
+            RegularExpression = visitor.VisitAttribute("RegularExpression", RegularExpression);
+
+            //TODO: visit ValidationAttributes
+        }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NWheels.DataObjects
 {
-    public interface ITypeMetadata
+    public interface ITypeMetadata : IMetadataElement
     {
         string Name { get; }
         Type ContractType { get; }

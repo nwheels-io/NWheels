@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace NWheels.DataObjects
 {
-    public interface IPropertyMetadata
+    public interface IPropertyMetadata : IMetadataElement
     {
         string Name { get; }
         PropertyKind Kind { get; }

@@ -2,7 +2,7 @@
 
 namespace NWheels.DataObjects
 {
-    public interface IKeyMetadata
+    public interface IKeyMetadata : IMetadataElement
     {
         string Name { get; }
         KeyKind Kind { get; }

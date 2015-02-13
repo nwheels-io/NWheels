@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NWheels.DataObjects
 {
-    public interface IPropertyValidationMetadata
+    public interface IPropertyValidationMetadata : IMetadataElement
     {
         IReadOnlyList<ValidationAttribute> ValidationAttributes { get; }
         DataType SemanticDataType { get; }

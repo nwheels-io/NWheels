@@ -6,7 +6,7 @@ using NWheels.DataObjects;
 
 namespace NWheels.Core.DataObjects
 {
-    public class TypeRelationalMappingBuilder : ITypeRelationalMapping
+    public class TypeRelationalMappingBuilder : MetadataElement<ITypeRelationalMapping>, ITypeRelationalMapping
     {
         #region ITypeRelationalMapping Members
 
@@ -14,5 +14,13 @@ namespace NWheels.Core.DataObjects
         public RelationalInheritanceKind? InheritanceKind { get; set; }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void AcceptVisitor(IMetadataElementVisitor visitor)
+        {
+            PrimaryTableName = visitor.VisitAttribute("PrimaryTableName", PrimaryTableName);
+            InheritanceKind = visitor.VisitAttribute("InheritanceKind", InheritanceKind);
+        }
     }
 }
