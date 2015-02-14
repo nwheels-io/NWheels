@@ -16,6 +16,20 @@ namespace NWheels.Core.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region IMetadataElement Members
+
+        public override string ReferenceName
+        {
+            get
+            {
+                return this.GetType().Name;
+            }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region IPropertyValidationMetadata Members
 
         public DataType SemanticDataType { get; set; }

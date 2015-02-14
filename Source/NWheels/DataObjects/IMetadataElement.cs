@@ -10,5 +10,6 @@ namespace NWheels.DataObjects
     {
         void AcceptVisitor(IMetadataElementVisitor visitor);
         Type ElementType { get; }
+        string ReferenceName { get; }
     }
 }

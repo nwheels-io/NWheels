@@ -2,8 +2,9 @@
 {
     public enum KeyKind
     {
-        Primary,
-        Foreign,
-        Index
+        Undefined = 0,
+        Primary = 1,
+        Foreign = 2,
+        Index = 3
     }
 }

@@ -21,6 +21,17 @@ namespace NWheels.Core.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region IMetadataElement Members
+
+        public override string ReferenceName
+        {
+            get { return this.Name; }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region IKeyMetadata Members
 
         public string Name { get; set; }
@@ -48,7 +59,8 @@ namespace NWheels.Core.DataObjects
         {
             Name = visitor.VisitAttribute("Name", Name);
             Kind = visitor.VisitAttribute("Kind", Kind);
-            visitor.VisitElementList<IPropertyMetadata, PropertyMetadataBuilder>(Properties);
+
+            visitor.VisitElementReferenceList<IPropertyMetadata, PropertyMetadataBuilder>("Properties", Properties);
         }
     }
 }

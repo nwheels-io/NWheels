@@ -8,6 +8,17 @@ namespace NWheels.Core.DataObjects
 {
     public class TypeRelationalMappingBuilder : MetadataElement<ITypeRelationalMapping>, ITypeRelationalMapping
     {
+        #region IMetadataElement Members
+
+        public override string ReferenceName
+        {
+            get { return this.PrimaryTableName; }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region ITypeRelationalMapping Members
 
         public string PrimaryTableName { get; set; }

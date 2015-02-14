@@ -9,6 +9,17 @@ namespace NWheels.Core.DataObjects
 {
     public class RelationMetadataBuilder : MetadataElement<IRelationMetadata>, IRelationMetadata
     {
+        #region IMetadataElement Members
+
+        public override string ReferenceName
+        {
+            get { return RelatedPartyType.Name; }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region IRelationMetadata Members
 
         public RelationKind RelationKind { get; set; }
@@ -50,11 +61,11 @@ namespace NWheels.Core.DataObjects
         {
             RelationKind = visitor.VisitAttribute("RelationKind", RelationKind);
             ThisPartyKind = visitor.VisitAttribute("ThisPartyKind", ThisPartyKind);
-            ThisPartyKey = visitor.VisitElement<IKeyMetadata, KeyMetadataBuilder>(ThisPartyKey);
+            ThisPartyKey = visitor.VisitElementReference<IKeyMetadata, KeyMetadataBuilder>("ThisPartyKey", ThisPartyKey);
 
-            RelatedPartyType = visitor.VisitElement<ITypeMetadata, TypeMetadataBuilder>(RelatedPartyType);
+            RelatedPartyType = visitor.VisitElementReference<ITypeMetadata, TypeMetadataBuilder>("RelatedPartyType", RelatedPartyType);
             RelatedPartyKind = visitor.VisitAttribute("RelatedPartyKind", RelatedPartyKind);
-            RelatedPartyKey = visitor.VisitElement<IKeyMetadata, KeyMetadataBuilder>(RelatedPartyKey);
+            RelatedPartyKey = visitor.VisitElementReference<IKeyMetadata, KeyMetadataBuilder>("RelatedPartyKey", RelatedPartyKey);
         }
     }
 }

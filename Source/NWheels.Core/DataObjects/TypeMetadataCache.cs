@@ -21,7 +21,7 @@ namespace NWheels.Core.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal ITypeMetadata FindTypeMetadataAllowIncomplete(Type contract)
+        internal TypeMetadataBuilder FindTypeMetadataAllowIncomplete(Type contract)
         {
             TypeMetadataBuilder metadata;
             var entriesBeingBuilt = _s_entriesBeingBuilt;
@@ -31,7 +31,7 @@ namespace NWheels.Core.DataObjects
                 return metadata;
             }
 
-            return GetTypeMetadata(contract);
+            return (TypeMetadataBuilder)GetTypeMetadata(contract);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ namespace NWheels.Core.DataObjects
                 var builder = new TypeMetadataBuilder();
                 entriesBeingBuilt.Add(contract, builder);
 
-                var constructor = new TypeMetadataBuilderConstructor();
+                var constructor = new TypeMetadataBuilderConstructor(new DataObjectConventions());
                 constructor.ConstructMetadata(contract, builder, cache: this);
 
                 return builder;

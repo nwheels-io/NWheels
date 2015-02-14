@@ -2,6 +2,7 @@
 {
     public enum RelationPartyKind
     {
+        Undefined,
         Principal,
         Dependent
     }

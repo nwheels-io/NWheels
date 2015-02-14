@@ -102,6 +102,7 @@
     <Compile Include="Exceptions\NodeHostException.cs" />
     <Compile Include="Exceptions\XmlConfigurationException.cs" />
     <Compile Include="Extensions\AutofacExtensions.cs" />
+    <Compile Include="Extensions\MemberInfoExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Extensions\XElementExtensions.cs" />

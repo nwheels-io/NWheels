@@ -34,6 +34,17 @@ namespace NWheels.Core.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region IMetadataElement Members
+
+        public override string ReferenceName
+        {
+            get { return this.Name; }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region ITypeMetadata Members
 
         public string Name { get; set; }
@@ -122,10 +133,10 @@ namespace NWheels.Core.DataObjects
 
             BaseType = visitor.VisitElement<ITypeMetadata, TypeMetadataBuilder>(BaseType);
 
-            visitor.VisitElementList<ITypeMetadata, TypeMetadataBuilder>(DerivedTypes);
-            visitor.VisitElementList<IPropertyMetadata, PropertyMetadataBuilder>(Properties);
-            visitor.VisitElementList<IKeyMetadata, KeyMetadataBuilder>(AllKeys);
-            PrimaryKey = AllKeys.SingleOrDefault(key => key.Kind == KeyKind.Primary);
+            visitor.VisitElementList<ITypeMetadata, TypeMetadataBuilder>("DerivedTypes", DerivedTypes);
+            visitor.VisitElementList<IPropertyMetadata, PropertyMetadataBuilder>("Properties", Properties);
+            visitor.VisitElementList<IKeyMetadata, KeyMetadataBuilder>("AllKeys", AllKeys);
+            PrimaryKey = visitor.VisitElementReference<IKeyMetadata, KeyMetadataBuilder>("PrimaryKey", PrimaryKey);
 
             DefaultDisplayFormat = visitor.VisitAttribute("DefaultDisplayFormat", DefaultDisplayFormat);
 

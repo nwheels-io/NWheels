@@ -21,13 +21,19 @@ namespace NWheels.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void VisitElementList<TElement, TElementImpl>(IList<TElementImpl> elementList)
+        TElementImpl VisitElementReference<TElement, TElementImpl>(string name, TElementImpl element)
             where TElement : class, IMetadataElement
             where TElementImpl : class, TElement, new();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void VisitElementList<TElement, TElementImpl>(string listName, IList<TElementImpl> elementList)
+            where TElement : class, IMetadataElement
+            where TElementImpl : class, TElement, new();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void VisitElementReferenceList<TElement, TElementImpl>(string listName, IList<TElementImpl> elementList)
             where TElement : class, IMetadataElement
             where TElementImpl : class, TElement, new();
     }

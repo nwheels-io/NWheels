@@ -8,6 +8,20 @@ namespace NWheels.Core.DataObjects
 {
     public class PropertyRelationalMappingBuilder : MetadataElement<IPropertyRelationalMapping>, IPropertyRelationalMapping
     {
+        #region IMetadataElement Members
+
+        public override string ReferenceName
+        {
+            get
+            {
+                return string.Format("{0}.{1}:{2}", TableName, ColumnName, DataTypeName);
+            }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region IPropertyRelationalMapping Members
 
         public string TableName { get; set; }

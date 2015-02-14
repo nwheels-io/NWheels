@@ -9,6 +9,17 @@ namespace NWheels.Core.DataObjects
 {
     public class PropertyMetadataBuilder : MetadataElement<IPropertyMetadata>, IPropertyMetadata
     {
+        #region IMetadataElement Members
+
+        public override string ReferenceName
+        {
+            get { return this.Name; }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region IPropertyMetadata Members
 
         public string Name { get; set; }
