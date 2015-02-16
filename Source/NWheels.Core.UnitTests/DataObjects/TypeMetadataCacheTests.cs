@@ -13,35 +13,80 @@ namespace NWheels.Core.UnitTests.DataObjects
     public class TypeMetadataCacheTests
     {
         [Test]
-        public void CanBuildMetadataOfFlatType()
+        public void CanBuildScalarProperties()
         {
+            //-- Arrange
+
             var cache = new TypeMetadataCache();
 
-            var metadata = cache.GetTypeMetadata(typeof(TestDataObjects.Repository1.IProduct));
+            //-- Act
 
-            var metadataString = JsonlikeMetadataStringifier.Stringify(metadata);
+            var product = cache.GetTypeMetadata(typeof(TestDataObjects.Repository1.IProduct));
 
-            Console.WriteLine(metadataString);
+            //-- Assert
+
+            Assert.That(
+                product.Properties.Select(p => p.Name).ToArray(), 
+                Is.EqualTo(new[] { "Id", "Name", "Price" }));
+            
+            Assert.That(
+                product.Properties.Select(p => p.ClrType.Name).ToArray(), 
+                Is.EqualTo(new[] { "Int32", "String", "Decimal" }));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void CanBuildMetadataOfInterconnectedTypes()
+        public void CanBuildScalarPrimaryKey()
         {
+            //-- Arrange
+
             var cache = new TypeMetadataCache();
 
+            //-- Act
+
+            var product = cache.GetTypeMetadata(typeof(TestDataObjects.Repository1.IProduct));
+
+            //-- Assert
+
+            Assert.That(product.PrimaryKey.Properties.Single().Name, Is.EqualTo("Id"));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanBuiltRelationsBetweenMutuallyDependentTypes()
+        {
+            //-- Arrange
+
+            var cache = new TypeMetadataCache();
+
+            //-- Act
+
             var orderMetadata = cache.GetTypeMetadata(typeof(TestDataObjects.Repository1.IOrder));
-            var productMetadata = cache.GetTypeMetadata(typeof(TestDataObjects.Repository1.IProduct));
             var orderLineMetadata = cache.GetTypeMetadata(typeof(TestDataObjects.Repository1.IOrderLine));
 
-            var orderMetadataString = JsonlikeMetadataStringifier.Stringify(orderMetadata);
-            var productMetadataString = JsonlikeMetadataStringifier.Stringify(productMetadata);
-            var orderLineMetadataString = JsonlikeMetadataStringifier.Stringify(orderLineMetadata);
+            //-- Assert
 
-            Console.WriteLine(orderMetadataString);
-            Console.WriteLine(productMetadataString);
-            Console.WriteLine(orderLineMetadataString);
+            var orderToOrderLine = orderMetadata.Properties.Single(p => p.Name == "OrderLines").Relation;
+            var orderLineToOrder = orderLineMetadata.Properties.Single(p => p.Name == "Order").Relation;
+            var orderLineToProdyct = orderLineMetadata.Properties.Single(p => p.Name == "Product").Relation;
+
+            Assert.That(Jsonlike.Stringify(orderToOrderLine), Is.EqualTo(
+                "{relationKind:OneToMany,thisPartyKind:Principal,thisPartyKey:PK_Order,relatedPartyType:OrderLine,relatedPartyKind:Dependent,relatedPartyKey:FK_Order}"
+            ));
+
+            Assert.That(Jsonlike.Stringify(orderLineToOrder), Is.EqualTo(
+                "{relationKind:ManyToOne,thisPartyKind:Dependent,thisPartyKey:FK_Order,relatedPartyType:Order,relatedPartyKind:Principal,relatedPartyKey:PK_Order}"
+            ));
+
+            Assert.That(Jsonlike.Stringify(orderLineToProdyct), Is.EqualTo(
+                "{relationKind:ManyToOne,thisPartyKind:Dependent,thisPartyKey:FK_Product,relatedPartyType:Product,relatedPartyKind:Principal,relatedPartyKey:PK_Product}"
+            ));
+
+            //Console.WriteLine(JsonlikeMetadataStringifier.Stringify(orderMetadata));
+            //Console.WriteLine(JsonlikeMetadataStringifier.Stringify(productMetadata));
+            //Console.WriteLine(JsonlikeMetadataStringifier.Stringify(orderLineMetadata));
         }
     }
 }

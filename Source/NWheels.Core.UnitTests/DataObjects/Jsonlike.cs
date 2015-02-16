@@ -9,7 +9,7 @@ using NWheels.DataObjects;
 
 namespace NWheels.Core.UnitTests.DataObjects
 {
-    internal class JsonlikeMetadataStringifier : IMetadataElementVisitor
+    internal class Jsonlike : IMetadataElementVisitor
     {
         private readonly HashSet<Type> _elementTypeFilter;
         private readonly StringBuilder _output = new StringBuilder();
@@ -17,7 +17,7 @@ namespace NWheels.Core.UnitTests.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public JsonlikeMetadataStringifier(Type[] elementTypeFilter)
+        public Jsonlike(Type[] elementTypeFilter)
         {
             if ( elementTypeFilter != null && elementTypeFilter.Length > 0 )
             {
@@ -185,7 +185,7 @@ namespace NWheels.Core.UnitTests.DataObjects
 
         public static string Stringify(IMetadataElement metadata, params Type[] elementTypeFilter)
         {
-            var visitor = new JsonlikeMetadataStringifier(elementTypeFilter);
+            var visitor = new Jsonlike(elementTypeFilter);
 
             metadata.AcceptVisitor(visitor);
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Extensions;
 
 namespace NWheels.Logging
 {
@@ -15,6 +16,14 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public FormattedActivityLogNode(string singleLineText)
+            : this(FormattedLogNode.AdHocFormattedMessageId, singleLineText)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public FormattedActivityLogNode(string messageId, string singleLineText)
+            : base(messageId)
         {
             _singleLineText = singleLineText;
         }
@@ -38,6 +47,15 @@ namespace NWheels.Logging
             {
                 return null;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override string FormatNameValuePairsText(string delimiter)
+        {
+            return (
+                base.FormatNameValuePairsText(delimiter) + delimiter + 
+                FormatNameValuePair("text", _singleLineText));
         }
     }
 }

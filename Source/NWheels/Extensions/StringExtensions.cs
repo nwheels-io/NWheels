@@ -48,5 +48,19 @@ namespace NWheels.Extensions
 
             return output.ToString();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string TruncateAt(this string s, int maxLength)
+        {
+            if ( s == null || s.Length <= maxLength )
+            {
+                return s;
+            }
+            else
+            {
+                return s.Substring(0, maxLength);
+            }
+        }
     }
 }

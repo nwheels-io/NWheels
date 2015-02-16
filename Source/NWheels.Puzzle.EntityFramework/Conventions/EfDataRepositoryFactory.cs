@@ -18,10 +18,10 @@ using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Puzzle.EntityFramework.Conventions
 {
-    public class EntityFrameworkDataRepositoryFactory : ConventionObjectFactory
+    public class EfDataRepositoryFactory : ConventionObjectFactory
     {
-        public EntityFrameworkDataRepositoryFactory(DynamicModule module, EntityFrameworkEntityObjectFactory entityFactory)
-            : base(module, new DataRepositoryConvention(entityFactory))
+        public EfDataRepositoryFactory(DynamicModule module, EfEntityObjectFactory entityFactory)
+            : base(module, context => new IObjectFactoryConvention[] { new DataRepositoryConvention(entityFactory) })
         {
         }
 
@@ -29,11 +29,11 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
         private class DataRepositoryConvention : ImplementationConvention
         {
-            private readonly EntityFrameworkEntityObjectFactory _entityFactory;
+            private readonly EfEntityObjectFactory _entityFactory;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public DataRepositoryConvention(EntityFrameworkEntityObjectFactory entityFactory)
+            public DataRepositoryConvention(EfEntityObjectFactory entityFactory)
                 : base(Will.InspectDeclaration | Will.ImplementPrimaryInterface)
             {
                 _entityFactory = entityFactory;
@@ -71,6 +71,8 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
                     entityTypesInRepository.Add(entityImplementationType);
                 });
+
+                //writer.NewStaticFunction<DbConnection, DbCompiledModel>("GetOrBuildDbCompiledModel").Implement()
 
                 writer.Constructor<DbConnection, bool>((cw, connection, autoCommit) => {
                     cw.Base(cw.Const<DbCompiledModel>(null), connection, autoCommit);

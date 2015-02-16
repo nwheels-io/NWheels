@@ -19,7 +19,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EntityFrameworkEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module);
 
             //-- Act
 
@@ -43,7 +43,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EntityFrameworkEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module);
 
             //-- Act
 
@@ -70,7 +70,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EntityFrameworkEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module);
 
             //-- Act
 
@@ -89,7 +89,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EntityFrameworkEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module);
 
             //-- Act
 
@@ -108,7 +108,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EntityFrameworkEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module);
 
             var productType = factory.NewEntity<Interfaces.Repository1.IProduct>().GetType();
             var orderType = factory.NewEntity<Interfaces.Repository1.IOrder>().GetType();
@@ -140,7 +140,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EntityFrameworkEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module);
 
             var orderImpl = factory.NewEntity<Interfaces.Repository1.IOrder>();
             Interfaces.Repository1.IOrder orderAsContract = (Interfaces.Repository1.IOrder)orderImpl;
@@ -164,7 +164,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EntityFrameworkEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module);
 
             var productImpl = factory.NewEntity<Interfaces.Repository1.IProduct>();
             Interfaces.Repository1.IProduct productAsContract = (Interfaces.Repository1.IProduct)productImpl;
@@ -193,7 +193,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EntityFrameworkEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module);
 
             var product = factory.NewEntity<Interfaces.Repository1.IProduct>();
             var order = factory.NewEntity<Interfaces.Repository1.IOrder>();
@@ -225,7 +225,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EntityFrameworkEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module);
 
             var orderLine1 = factory.NewEntity<Interfaces.Repository1.IOrderLine>();
             var orderLine2 = factory.NewEntity<Interfaces.Repository1.IOrderLine>();
@@ -266,7 +266,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EntityFrameworkEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module);
 
             var productType = factory.NewEntity<Interfaces.Repository1.IProduct>().GetType();
             var orderType = factory.NewEntity<Interfaces.Repository1.IOrder>().GetType();

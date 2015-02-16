@@ -11,6 +11,10 @@ namespace NWheels.Core.Logging
 {
     internal class ThreadLogAppender : IThreadLogAppender
     {
+        public const string UnknownThreadMessageId = "ThreadLog.UnknownThread";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private readonly IFramework _framework;
         private readonly IThreadLogAnchor _anchor;
         private readonly IThreadRegistry _registry;
@@ -38,7 +42,7 @@ namespace NWheels.Core.Logging
             }
             else
             {
-                using ( var unknownThreadActivity = new FormattedActivityLogNode("???") )
+                using ( var unknownThreadActivity = new FormattedActivityLogNode(UnknownThreadMessageId, "???") )
                 { 
                     StartThreadLogNoCheck(ThreadTaskType.Unspecified, unknownThreadActivity);
                     _anchor.CurrentThreadLog.AppendNode(node);

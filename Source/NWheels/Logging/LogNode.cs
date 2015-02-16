@@ -5,22 +5,28 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Hapil;
+using NWheels.Extensions;
 
 namespace NWheels.Logging
 {
     public abstract class LogNode
     {
+        private readonly string _messageId;
         private LogContentTypes _contentTypes;
         private LogLevel _level;
         private long _millisecondsTimestamp;
+        private IThreadLog _threadLog = null;
         private LogNode _nextSibling = null;
         private string _formattedSingleLineText = null;
         private string _formattedFullDetailsText = null;
+        private string _formattedNameValuePairsText = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected LogNode(LogContentTypes contentTypes, LogLevel initialLevel)
+        protected LogNode(string messageId, LogContentTypes contentTypes, LogLevel initialLevel)
         {
+            _messageId = messageId;
             _contentTypes = contentTypes;
             _level = initialLevel;
             _millisecondsTimestamp = -1;
@@ -38,6 +44,16 @@ namespace NWheels.Logging
                 FullDetailsText = this.FullDetailsText,
                 ExceptionTypeName = (this.Exception != null ? this.Exception.GetType().FullName : null)
             };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string MessageId
+        {
+            get
+            {
+                return _messageId;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -102,6 +118,21 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string NameValuePairsText
+        {
+            get
+            {
+                if ( _formattedNameValuePairsText == null )
+                {
+                    _formattedNameValuePairsText = FormatNameValuePairsText(delimiter: " ");
+                }
+
+                return _formattedNameValuePairsText;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string ExceptionTypeName
         {
             get
@@ -144,6 +175,7 @@ namespace NWheels.Logging
 
         internal virtual void AttachToThreadLog(IThreadLog thread, ActivityLogNode parent)
         {
+            _threadLog = thread;
             _millisecondsTimestamp = thread.ElapsedThreadMilliseconds;
         }
 
@@ -163,11 +195,50 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected abstract string FormatSingleLineText();
+        protected string MessageIdToText()
+        {
+            var lastDotPosition = _messageId.LastIndexOf('.');
+
+            if ( lastDotPosition >= 0 && lastDotPosition < _messageId.Length - 1 )
+            {
+                return _messageId.Substring(lastDotPosition + 1).SplitPascalCase();
+            }
+            else
+            {
+                return _messageId.SplitPascalCase();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual string FormatSingleLineText()
+        {
+            return MessageIdToText();
+        }
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected abstract string FormatFullDetailsText();
+        protected virtual string FormatFullDetailsText()
+        {
+            return FormatNameValuePairsText(delimiter: System.Environment.NewLine);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual string FormatNameValuePairsText(string delimiter)
+        {
+            var baseValues =
+                FormatNameValuePair("message", _messageId) + delimiter +
+                FormatNameValuePair("level", _level.ToString()) + delimiter +
+                FormatNameValuePair("logid", _threadLog.LogId.ToString("N"));
+
+            if ( this.Exception != null )
+            {
+                baseValues += delimiter + FormatNameValuePair("exception", this.Exception.GetType().FullName);
+            }
+
+            return baseValues;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -184,6 +255,31 @@ namespace NWheels.Logging
         protected void BubbleContentTypesFrom(LogContentTypes subNodeContentTypes)
         {
             _contentTypes |= subNodeContentTypes;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected string FormatNameValuePair(string name, string value)
+        {
+            name = name.TruncateAt(50);
+            value = value.TruncateAt(50).Replace('"', '\'');
+
+            if ( value.Any(char.IsWhiteSpace) )
+            {
+                value = "\"" + value + "\"";
+            }
+
+            return (name + "=" + value);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal IThreadLog ThreadLog
+        {
+            get
+            {
+                return _threadLog;
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -10,29 +9,12 @@ using System.Xml;
 using NUnit.Framework;
 using NWheels.Core.Logging;
 using NWheels.Logging;
-using NWheels.Testing;
 
 namespace NWheels.Core.UnitTests.Logging
 {
     [TestFixture]
-    public class ThreadLogTests : UnitTestBase
+    public class ThreadLogTests : ThreadLogUnitTestBase
     {
-        private TestClock _clock;
-        private TestThreadRegistry _threadRegistry;
-        private TestThreadLogAnchor _anchor;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [SetUp]
-        public void SetUp()
-        {
-            _clock = new TestClock();
-            _threadRegistry = new TestThreadRegistry();
-            _anchor = new TestThreadLogAnchor();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         [Test]
         public void NewInstance_StartedAtUtc_EqualsUtcNow()
         {
@@ -44,7 +26,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, _threadRegistry, _anchor, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
+                Framework, Clock, Registry, Anchor, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -64,7 +46,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, _threadRegistry, _anchor, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
+                Framework, Clock, Registry, Anchor, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -84,7 +66,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, _threadRegistry, _anchor, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
+                Framework, Clock, Registry, Anchor, ThreadTaskType.Unspecified, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -99,7 +81,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, _threadRegistry, _anchor, ThreadTaskType.QueuedWorkItem, new FormattedActivityLogNode("Test"));
+                Framework, Clock, Registry, Anchor, ThreadTaskType.QueuedWorkItem, new FormattedActivityLogNode("Test"));
 
             //-- Assert
 
@@ -118,7 +100,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var log = new ThreadLog(
-                Framework, _clock, _threadRegistry, _anchor, ThreadTaskType.Unspecified, rootActivity);
+                Framework, Clock, Registry, Anchor, ThreadTaskType.Unspecified, rootActivity);
 
             //-- Assert
 
@@ -327,12 +309,12 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Act
 
-            _clock.ElapsedMilliseconds = 123;
+            Clock.ElapsedMilliseconds = 123;
 
             var rootDuration1 = log.RootActivity.MillisecondsDuration;
             var childDuration1 = activity.MillisecondsDuration;
 
-            _clock.ElapsedMilliseconds = 456;
+            Clock.ElapsedMilliseconds = 456;
 
             var rootDuration2 = log.RootActivity.MillisecondsDuration;
             var childDuration2 = activity.MillisecondsDuration;
@@ -361,11 +343,11 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Act
 
-            _clock.ElapsedMilliseconds = 123;
+            Clock.ElapsedMilliseconds = 123;
 
             activity.Close();
 
-            _clock.ElapsedMilliseconds = 456;
+            Clock.ElapsedMilliseconds = 456;
 
             var rootDuration = log.RootActivity.MillisecondsDuration;
             var childDuration = activity.MillisecondsDuration;
@@ -426,7 +408,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Assert
 
-            Assert.IsTrue(_threadRegistry.GetRunningThreads().Contains(log));
+            Assert.IsTrue(Registry.GetRunningThreads().Contains(log));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -444,7 +426,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Assert
 
-            Assert.IsFalse(_threadRegistry.GetRunningThreads().Contains(log));
+            Assert.IsFalse(Registry.GetRunningThreads().Contains(log));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -501,7 +483,7 @@ namespace NWheels.Core.UnitTests.Logging
         private ThreadLog CreateThreadLog(string rootActivityText = "Root", ThreadTaskType taskType = ThreadTaskType.Unspecified)
         {
             var rootActivity = new FormattedActivityLogNode(rootActivityText);
-            return new ThreadLog(Framework, _clock, _threadRegistry, _anchor, ThreadTaskType.Unspecified, rootActivity);
+            return new ThreadLog(Framework, Clock, Registry, Anchor, ThreadTaskType.Unspecified, rootActivity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -554,48 +536,6 @@ namespace NWheels.Core.UnitTests.Logging
 
             output.Append(":");
             output.Append(node.SingleLineText);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class TestClock : IClock
-        {
-            public long ElapsedMilliseconds { get; set; }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class TestThreadLogAnchor : IThreadLogAnchor
-        {
-            public ThreadLog CurrentThreadLog { get; set; }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class TestThreadRegistry : IThreadRegistry
-        {
-            private readonly HashSet<ThreadLog> _runningThreads = new HashSet<ThreadLog>();
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public void ThreadStarted(ThreadLog threadLog)
-            {
-                _runningThreads.Add(threadLog);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public void ThreadFinished(ThreadLog threadLog)
-            {
-                _runningThreads.Remove(threadLog);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public ThreadLog[] GetRunningThreads()
-            {
-                return _runningThreads.ToArray();
-            }
         }
     }
 }

@@ -4,12 +4,17 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Extensions;
 
 namespace NWheels.Logging
 {
     [DataContract(Namespace = "NWheels.Logging", Name = "Log")]
     public class FormattedLogNode : LogNode
     {
+        public const string AdHocFormattedMessageId = "Formatted.AdHoc";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private readonly string _singleLineText;
         private readonly string _fullDetailsText;
         private readonly Exception _exception;
@@ -18,11 +23,24 @@ namespace NWheels.Logging
 
         public FormattedLogNode(
             LogLevel level, 
-            string singleLineText, 
+            string singleLineText,
             string fullDetailsText = null, 
             LogContentTypes contentTypes = LogContentTypes.Text, 
             Exception exception = null)
-            : base(contentTypes, level)
+            : this(AdHocFormattedMessageId, level, singleLineText, fullDetailsText, contentTypes, exception)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public FormattedLogNode(
+            string messageId,
+            LogLevel level,
+            string singleLineText,
+            string fullDetailsText = null,
+            LogContentTypes contentTypes = LogContentTypes.Text,
+            Exception exception = null)
+            : base(messageId, contentTypes, level)
         {
             _singleLineText = singleLineText;
             _fullDetailsText = fullDetailsText;
@@ -51,6 +69,16 @@ namespace NWheels.Logging
             {
                 return _exception;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override string FormatNameValuePairsText(string delimiter)
+        {
+            return (
+                base.FormatNameValuePairsText(delimiter) + delimiter +
+                FormatNameValuePair("text", _singleLineText) + delimiter + 
+                FormatNameValuePair("details", _fullDetailsText));
         }
     }
 }

@@ -6,7 +6,6 @@ namespace NWheels.Logging
 {
     public abstract class ActivityLogNode : LogNode, ILogActivity
     {
-        private IThreadLog _threadLog;
         private ActivityLogNode _parent;
         private LogNode _firstChild = null;
         private LogNode _lastChild = null;
@@ -16,8 +15,8 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected ActivityLogNode()
-            : base(LogContentTypes.PerformanceMeasurement, LogLevel.Info)
+        protected ActivityLogNode(string messageId)
+            : base(messageId, LogContentTypes.PerformanceMeasurement, LogLevel.Info)
         {
         }
 
@@ -139,7 +138,7 @@ namespace NWheels.Logging
         {
             get
             {
-                return (_finalMillisecondsDuration ?? _threadLog.ElapsedThreadMilliseconds - base.MillisecondsTimestamp);
+                return (_finalMillisecondsDuration ?? ThreadLog.ElapsedThreadMilliseconds - base.MillisecondsTimestamp);
             }
         }
 
@@ -159,7 +158,7 @@ namespace NWheels.Logging
         {
             get
             {
-                return (_threadLog != null ? _threadLog.TaskType : base.TaskType);
+                return (ThreadLog != null ? ThreadLog.TaskType : base.TaskType);
             }
         }
 
@@ -187,9 +186,7 @@ namespace NWheels.Logging
         internal override void AttachToThreadLog(IThreadLog threadLog, ActivityLogNode parent)
         {
             base.AttachToThreadLog(threadLog, parent);
-
             _parent = parent;
-            _threadLog = threadLog;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -226,7 +223,7 @@ namespace NWheels.Logging
 
         internal void Close()
         {
-            _finalMillisecondsDuration = _threadLog.ElapsedThreadMilliseconds - base.MillisecondsTimestamp;
+            _finalMillisecondsDuration = ThreadLog.ElapsedThreadMilliseconds - base.MillisecondsTimestamp;
             _isClosed = true;
 
             if ( _parent != null )
@@ -234,10 +231,19 @@ namespace NWheels.Logging
                 _parent.BubbleActivityResultsFrom(this);
             }
             
-            if ( _threadLog != null )
+            if ( ThreadLog != null )
             {
-                _threadLog.NotifyActivityClosed(this);
+                ThreadLog.NotifyActivityClosed(this);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override string FormatNameValuePairsText(string delimiter)
+        {
+            return 
+                base.FormatNameValuePairsText(delimiter) + delimiter + 
+                FormatNameValuePair("duration", this.MillisecondsDuration.ToString());
         }
     }
 }

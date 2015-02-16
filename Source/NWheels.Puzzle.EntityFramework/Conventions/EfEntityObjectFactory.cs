@@ -12,9 +12,9 @@ using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Puzzle.EntityFramework.Conventions
 {
-    public class EntityFrameworkEntityObjectFactory : ConventionObjectFactory
+    public class EfEntityObjectFactory : ConventionObjectFactory
     {
-        public EntityFrameworkEntityObjectFactory(DynamicModule module)
+        public EfEntityObjectFactory(DynamicModule module)
             : base(module, new EntityObjectConvention())
         {
         }

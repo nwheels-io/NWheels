@@ -6,6 +6,7 @@ namespace NWheels.Logging
     {
         void NotifyActivityClosed(ActivityLogNode activity);
         ThreadTaskType TaskType { get; }
+        Guid LogId { get; }
         Guid CorrelationId { get; }
         DateTime ThreadStartedAtUtc { get; }
         long ElapsedThreadMilliseconds { get; }

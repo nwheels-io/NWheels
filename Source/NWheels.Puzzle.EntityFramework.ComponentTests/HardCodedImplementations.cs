@@ -117,8 +117,6 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            #if false
-
             public class DataRepositoryObject_CustomNames : EntityFrameworkDataRepositoryBase, Interfaces.Repository1.IOnlineStoreRepository
             {
                 private IEntityRepository<Interfaces.Repository1.IOrder> m_Orders;
@@ -198,22 +196,20 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 }
             }
 
-            #endif
-
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public class EntityObject_Order : Interfaces.Repository1.IOrder
             {
                 private int m_Id;
                 private ICollection<EntityObject_OrderLine> m_OrderLines = new HashSet<EntityObject_OrderLine>();
-                private EntityFrameworkEntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine> m_OrderLines_Adapter;
+                private EfEntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine> m_OrderLines_Adapter;
                 private DateTime m_PlacedAt;
                 private Interfaces.Repository1.OrderStatus m_Status;
 
                 public EntityObject_Order()
                 {
                     this.m_OrderLines_Adapter =
-                        new EntityFrameworkEntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine>(this.m_OrderLines);
+                        new EfEntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine>(this.m_OrderLines);
                     this.m_Status = Interfaces.Repository1.OrderStatus.New;
                }
 
@@ -233,7 +229,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                     get { return this.m_OrderLines; }
                     set
                     {
-                        this.m_OrderLines_Adapter = new EntityFrameworkEntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine>(value);
+                        this.m_OrderLines_Adapter = new EfEntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine>(value);
                         this.m_OrderLines = value;
                     }
                 }
