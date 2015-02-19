@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,133 +7,52 @@ using NWheels.Extensions;
 
 namespace NWheels.Logging
 {
-    public class NameValuePairLogNode : LogNode
+    public class NameValuePairActivityLogNode : ActivityLogNode
     {
-        private readonly Exception _exception;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public NameValuePairLogNode(string messageId, LogLevel level, Exception exception)
-            : base(messageId, LogContentTypes.Text, level)
+        public NameValuePairActivityLogNode(string messageId)
+            : base(messageId)
         {
-            _exception = exception;
         }
-
+    
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override Exception Exception
+        protected override string FormatSingleLineText()
         {
-            get
-            {
-                return _exception;
-            }
+            return base.FormatSingleLineText();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override string FormatFullDetailsText()
         {
-            if ( _exception != null )
+            if ( base.Exception != null )
             {
-                return _exception.ToString();
+                return base.FormatFullDetailsText() + System.Environment.NewLine + base.Exception.ToString();
             }
             else
             {
-                return null;
+                return base.FormatFullDetailsText().NullIfEmptyOrWhitespace();
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override string FormatNameValuePairsText(string delimiter)
+        {
+            return base.FormatNameValuePairsText(delimiter);
         }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    internal static class LogNameValuePairHelper
-    {
-        public static string AppendToSingleLineText<T>(this string s, ref LogNameValuePair<T> pair, ref bool anyAppended)
-        {
-            if ( !pair.IsDetail )
-            {
-                var result = s + (anyAppended ? ", " : ": ") + pair.FormatLogString();
-                anyAppended = true;
-                return result;
-            }
-            else
-            {
-                return s;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static string AppendToFullDetailsText<T>(this string s, ref LogNameValuePair<T> pair)
-        {
-            if ( pair.IsDetail )
-            {
-                return (s != "" ? System.Environment.NewLine : "") + pair.FormatLogString() + System.Environment.NewLine;
-            }
-            else
-            {
-                return s;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static string AppendToExceptionMessage<T>(this string s, ref LogNameValuePair<T> pair, ref bool anyAppended)
-        {
-            var result = s + (anyAppended ? ", " : ": ") + pair.FormatLogString();
-            anyAppended = true;
-            return result;
-        }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public struct LogNameValuePair<T>
-    {
-        public string Name;
-        public T Value;
-        public bool IsDetail;
-        public string Format;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Pure]
-        public string FormatValue()
-        {
-            var formattable = Value as IFormattable;
-
-            if ( Format != null && formattable != null )
-            {
-                return formattable.ToString(Format, CultureInfo.CurrentCulture);
-            }
-            else if ( !typeof(T).IsValueType && (object)Value == null )
-            {
-                return "null";
-            }
-            else
-            {
-                return Value.ToString();
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string FormatLogString()
-        {
-            return LogNode.FormatNameValuePair(this.Name, this.FormatValue());
-        }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public class NameValuePairLogNode<T1> : NameValuePairLogNode
+    public class NameValuePairActivityLogNode<T1> : NameValuePairActivityLogNode
     {
         private LogNameValuePair<T1> _value1;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NameValuePairLogNode(string messageId, LogLevel level, Exception exception, LogNameValuePair<T1> value1)
-            : base(messageId, level, exception)
+        public NameValuePairActivityLogNode(string messageId, LogNameValuePair<T1> value1)
+            : base(messageId)
         {
             _value1 = value1;
         }
@@ -170,18 +87,18 @@ namespace NWheels.Logging
                 _value1.FormatLogString();
         }
     }
-
+    
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class NameValuePairLogNode<T1, T2> : NameValuePairLogNode
+    public class NameValuePairActivityLogNode<T1, T2> : NameValuePairActivityLogNode
     {
         private LogNameValuePair<T1> _value1;
         private LogNameValuePair<T2> _value2;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NameValuePairLogNode(string messageId, LogLevel level, Exception exception, LogNameValuePair<T1> value1, LogNameValuePair<T2> value2)
-            : base(messageId, level, exception)
+        public NameValuePairActivityLogNode(string messageId, LogNameValuePair<T1> value1, LogNameValuePair<T2> value2)
+            : base(messageId)
         {
             _value1 = value1;
             _value2 = value2;
@@ -223,7 +140,7 @@ namespace NWheels.Logging
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class NameValuePairLogNode<T1, T2, T3> : NameValuePairLogNode
+    public class NameValuePairActivityLogNode<T1, T2, T3> : NameValuePairActivityLogNode
     {
         private LogNameValuePair<T1> _value1;
         private LogNameValuePair<T2> _value2;
@@ -231,10 +148,10 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NameValuePairLogNode(
-            string messageId, LogLevel level, Exception exception,
+        public NameValuePairActivityLogNode(
+            string messageId,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3)
-            : base(messageId, level, exception)
+            : base(messageId)
         {
             _value1 = value1;
             _value2 = value2;
@@ -247,7 +164,7 @@ namespace NWheels.Logging
         {
             var anyAppended = false;
 
-            return 
+            return
                 MessageIdToText()
                 .AppendToSingleLineText(ref _value1, ref anyAppended)
                 .AppendToSingleLineText(ref _value2, ref anyAppended)
@@ -260,7 +177,7 @@ namespace NWheels.Logging
         {
             return string.Empty
                 .AppendToFullDetailsText(ref _value1)
-                .AppendToFullDetailsText(ref _value2)
+                .AppendToFullDetailsText(ref _value2) 
                 .AppendToFullDetailsText(ref _value3) +
                 base.FormatFullDetailsText()
                 .NullIfEmptyOrWhitespace();
@@ -280,7 +197,7 @@ namespace NWheels.Logging
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class NameValuePairLogNode<T1, T2, T3, T4> : NameValuePairLogNode
+    public class NameValuePairActivityLogNode<T1, T2, T3, T4> : NameValuePairActivityLogNode
     {
         private LogNameValuePair<T1> _value1;
         private LogNameValuePair<T2> _value2;
@@ -289,10 +206,10 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NameValuePairLogNode(
-            string messageId, LogLevel level, Exception exception,
+        public NameValuePairActivityLogNode(
+            string messageId,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4)
-            : base(messageId, level, exception)
+            : base(messageId)
         {
             _value1 = value1;
             _value2 = value2;
@@ -342,7 +259,7 @@ namespace NWheels.Logging
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class NameValuePairLogNode<T1, T2, T3, T4, T5> : NameValuePairLogNode
+    public class NameValuePairActivityLogNode<T1, T2, T3, T4, T5> : NameValuePairActivityLogNode
     {
         private LogNameValuePair<T1> _value1;
         private LogNameValuePair<T2> _value2;
@@ -352,10 +269,10 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NameValuePairLogNode(
-            string messageId, LogLevel level, Exception exception,
+        public NameValuePairActivityLogNode(
+            string messageId,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5)
-            : base(messageId, level, exception)
+            : base(messageId)
         {
             _value1 = value1;
             _value2 = value2;
@@ -409,7 +326,7 @@ namespace NWheels.Logging
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class NameValuePairLogNode<T1, T2, T3, T4, T5, T6> : NameValuePairLogNode
+    public class NameValuePairActivityLogNode<T1, T2, T3, T4, T5, T6> : NameValuePairActivityLogNode
     {
         private LogNameValuePair<T1> _value1;
         private LogNameValuePair<T2> _value2;
@@ -420,10 +337,10 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NameValuePairLogNode(
-            string messageId, LogLevel level, Exception exception,
+        public NameValuePairActivityLogNode(
+            string messageId,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5, LogNameValuePair<T6> value6)
-            : base(messageId, level, exception)
+            : base(messageId)
         {
             _value1 = value1;
             _value2 = value2;
@@ -481,7 +398,7 @@ namespace NWheels.Logging
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class NameValuePairLogNode<T1, T2, T3, T4, T5, T6, T7> : NameValuePairLogNode
+    public class NameValuePairActivityLogNode<T1, T2, T3, T4, T5, T6, T7> : NameValuePairActivityLogNode
     {
         private LogNameValuePair<T1> _value1;
         private LogNameValuePair<T2> _value2;
@@ -493,10 +410,10 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NameValuePairLogNode(
-            string messageId, LogLevel level, Exception exception,
+        public NameValuePairActivityLogNode(
+            string messageId,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5, LogNameValuePair<T6> value6, LogNameValuePair<T7> value7)
-            : base(messageId, level, exception)
+            : base(messageId)
         {
             _value1 = value1;
             _value2 = value2;
@@ -558,7 +475,7 @@ namespace NWheels.Logging
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class NameValuePairLogNode<T1, T2, T3, T4, T5, T6, T7, T8> : NameValuePairLogNode
+    public class NameValuePairActivityLogNode<T1, T2, T3, T4, T5, T6, T7, T8> : NameValuePairActivityLogNode
     {
         private LogNameValuePair<T1> _value1;
         private LogNameValuePair<T2> _value2;
@@ -571,10 +488,10 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NameValuePairLogNode(
-            string messageId, LogLevel level, Exception exception,
+        public NameValuePairActivityLogNode(
+            string messageId,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5, LogNameValuePair<T6> value6, LogNameValuePair<T7> value7, LogNameValuePair<T8> value8)
-            : base(messageId, level, exception)
+            : base(messageId)
         {
             _value1 = value1;
             _value2 = value2;

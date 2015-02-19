@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Hosting;
 using NWheels.Logging;
 
 namespace NWheels.Core.Logging
@@ -14,6 +15,7 @@ namespace NWheels.Core.Logging
         private readonly IThreadRegistry _registry;
         private readonly Guid _logId;
         private readonly Guid _correlationId;
+        private readonly INodeConfiguration _node;
         private readonly ThreadTaskType _taskType;
         private readonly DateTime _startedAtUtc;
         private readonly IClock _clock;
@@ -34,6 +36,7 @@ namespace NWheels.Core.Logging
             _startedAtUtc = framework.UtcNow;
             _logId = framework.NewGuid();
             _correlationId = _logId;
+            _node = framework.CurrentNode;
             _clock = clock;
 
             _rootActivity.AttachToThreadLog(this, parent: null);
@@ -85,6 +88,16 @@ namespace NWheels.Core.Logging
                 TaskType = _taskType,
                 RootActivity = (ThreadLogSnapshot.ActivityNodeSnapshot)_rootActivity.TakeSnapshot()
             };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public NWheels.Hosting.INodeConfiguration Node
+        {
+            get
+            {
+                return _node; 
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

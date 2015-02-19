@@ -62,5 +62,33 @@ namespace NWheels.Extensions
                 return s.Substring(0, maxLength);
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string NullIfEmpty(this string s)
+        {
+            if ( string.IsNullOrEmpty(s) )
+            {
+                return null;
+            }
+            else
+            {
+                return s;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string NullIfEmptyOrWhitespace(this string s)
+        {
+            if ( string.IsNullOrWhiteSpace(s) )
+            {
+                return null;
+            }
+            else
+            {
+                return s;
+            }
+        }
     }
 }

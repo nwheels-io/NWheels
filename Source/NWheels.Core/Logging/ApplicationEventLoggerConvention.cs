@@ -17,6 +17,34 @@ namespace NWheels.Core.Logging
 {
     public class ApplicationEventLoggerConvention : ImplementationConvention
     {
+        private static readonly Type[] _s_activityNodeGenericTypeByValueCount = new Type[] {
+            typeof(NameValuePairActivityLogNode),
+            typeof(NameValuePairActivityLogNode<>),
+            typeof(NameValuePairActivityLogNode<,>),
+            typeof(NameValuePairActivityLogNode<,,>),
+            typeof(NameValuePairActivityLogNode<,,,>),
+            typeof(NameValuePairActivityLogNode<,,,,>),
+            typeof(NameValuePairActivityLogNode<,,,,,>),
+            typeof(NameValuePairActivityLogNode<,,,,,,>),
+            typeof(NameValuePairActivityLogNode<,,,,,,,>)
+        };
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly Type[] _s_logNodeGenericTypeByValueCount = new Type[] {
+            typeof(NameValuePairLogNode),
+            typeof(NameValuePairLogNode<>),
+            typeof(NameValuePairLogNode<,>),
+            typeof(NameValuePairLogNode<,,>),
+            typeof(NameValuePairLogNode<,,,>),
+            typeof(NameValuePairLogNode<,,,,>),
+            typeof(NameValuePairLogNode<,,,,,>),
+            typeof(NameValuePairLogNode<,,,,,,>),
+            typeof(NameValuePairLogNode<,,,,,,,>)
+        };
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
         private Field<IThreadLogAppender> _threadLogAppenderField;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -70,14 +98,14 @@ namespace NWheels.Core.Logging
             private readonly MethodInfo _declaration;
             private readonly MethodSignature _signature;
             private readonly ParameterInfo[] _parameters;
+            private readonly string _messageId;
             private readonly bool _mustCreateException;
             private readonly List<int> _exceptionArgumentIndex;
-            private readonly List<int> _formatArgumentIndex;
-            private readonly List<int> _detailArgumentIndex;
-            private string _formatString = null;
-            private Local<object[]> _formatObjectArray = null;
-            private IOperand<string> _singleLineTextLocal;
-            private Local<StringBuilder> _fullDetailsTextLocal;
+            private readonly string[] _valueArgumentFormat;
+            private readonly bool[] _valueArgumentIsDetail;
+            private readonly bool[] _isValueArgument;
+            private readonly List<IOperand> _nameValuePairLocals;
+            private IOperand<Exception> _exceptionOperand;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -88,11 +116,14 @@ namespace NWheels.Core.Logging
                 _declaration = underlyingWriter.OwnerMethod.MethodDeclaration;
                 _signature = underlyingWriter.OwnerMethod.Signature;
                 _parameters = _declaration.GetParameters();
+                _messageId = GetMessageId(_declaration);
                 _attribute = _declaration.GetCustomAttribute<LogAttributeBase>();
                 _mustCreateException = _declaration.ReturnType.IsExceptionType();
                 _exceptionArgumentIndex = new List<int>();
-                _formatArgumentIndex = new List<int>();
-                _detailArgumentIndex = new List<int>();
+                _isValueArgument = new bool[_signature.ArgumentCount];
+                _valueArgumentFormat = new string[_signature.ArgumentCount];
+                _valueArgumentIsDetail = new bool[_signature.ArgumentCount];
+                _nameValuePairLocals = new List<IOperand>();
 
                 ValidateSignature();
             }
@@ -101,8 +132,7 @@ namespace NWheels.Core.Logging
 
             public void Write()
             {
-                BuildSingleLineText();
-                BuildFullDetailsText();
+                InitializeNameValuePairs();
 
                 if ( _attribute.IsActivity )
                 {
@@ -110,11 +140,6 @@ namespace NWheels.Core.Logging
                 }
                 else
                 {
-                    if ( _mustCreateException )
-                    {
-                        CreateNewException();
-                    }
-
                     AppendLogNode();
 
                     if ( _mustCreateException )
@@ -126,95 +151,43 @@ namespace NWheels.Core.Logging
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void BuildSingleLineText()
+            private void InitializeNameValuePairs()
             {
-                if ( _formatArgumentIndex.Count > 0 )
+                for ( int i = 0 ; i < _isValueArgument.Length ; i++ )
                 {
-                    BuildFormatString();
-                    CopyArgumentsToArray();
-                    FormatLogText();
-                }
-                else
-                {
-                    _singleLineTextLocal = _underlyingWriter.Const(_declaration.Name.SplitPascalCase());
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void CopyArgumentsToArray()
-            {
-                var m = _underlyingWriter;
-
-                _formatObjectArray = m.Local(initialValue: m.NewArray<object>(length: m.Const(_formatArgumentIndex.Count)));
-
-                for ( int i = 0 ; i < _formatArgumentIndex.Count ; i++ )
-                {
-                    var argumentIndex = _formatArgumentIndex[i];
-
-                    using ( TT.CreateScope<TT.TArgument>(_signature.ArgumentType[argumentIndex]) )
+                    if ( _isValueArgument[i] )
                     {
-                        _formatObjectArray.ItemAt(i).Assign(m.Argument<TT.TArgument>(argumentIndex + 1).CastTo<object>());
+                        InitializeNameValuePair(i);
                     }
                 }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void FormatLogText()
+            private void InitializeNameValuePair(int argumentIndex)
             {
                 var m = _underlyingWriter;
-                _singleLineTextLocal = m.Local(initialValue: Static.Func(string.Format, m.Const(_formatString), _formatObjectArray));
-            }
 
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void BuildFullDetailsText()
-            {
-                for ( int i = 0 ; i < _detailArgumentIndex.Count ; i++ )
+                using ( TT.CreateScope<TT.TValue>(_signature.ArgumentType[argumentIndex]) )
                 {
-                    AppendParameterToFullDetails(_parameters[_detailArgumentIndex[i]]);
+                    var pairLocal = m.Local<LogNameValuePair<TT.TValue>>();
+                    pairLocal.Assign(m.New<LogNameValuePair<TT.TValue>>());
+
+                    pairLocal.Field(x => x.Name).Assign(m.Const(_signature.ArgumentName[argumentIndex]));
+                    pairLocal.Field(x => x.Value).Assign(m.Argument<TT.TValue>(argumentIndex + 1));
+
+                    if ( _valueArgumentFormat[argumentIndex] != null )
+                    {
+                        pairLocal.Field(x => x.Format).Assign(m.Const(_valueArgumentFormat[argumentIndex]));
+                    }
+
+                    if ( _valueArgumentIsDetail[argumentIndex] )
+                    {
+                        pairLocal.Field(x => x.IsDetail).Assign(m.Const(true));
+                    }
+
+                    _nameValuePairLocals.Add(pairLocal);
                 }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void EnsureFullDetailsTextInitialized()
-            {
-                if ( object.ReferenceEquals(_fullDetailsTextLocal, null) )
-                {
-                    var m = _underlyingWriter;
-                    _fullDetailsTextLocal = m.Local(initialValue: m.New<StringBuilder>());
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void AppendParameterToFullDetails(ParameterInfo parameter)
-            {
-                EnsureFullDetailsTextInitialized();
-
-                var m = _underlyingWriter;
-                var formatSpec = FormatAttribute.GetFormatString(parameter);
-                var format = parameter.Name.ToPascalCase() + "=" + (formatSpec == null ? "{0}" : "{0:" + formatSpec + "}");
-
-                using ( TT.CreateScope<TT.TArgument>(parameter.ParameterType) )
-                {
-                    _fullDetailsTextLocal.Func<string, object, StringBuilder>(
-                        x => x.AppendFormat, 
-                        m.Const(format), 
-                        m.Argument<TT.TArgument>(parameter.Position + 1).CastTo<object>());
-
-                    _fullDetailsTextLocal.Func<StringBuilder>(x => x.AppendLine);
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void AppendExceptionToFullDetails(IOperand<Exception> exceptionOperand)
-            {
-                EnsureFullDetailsTextInitialized();
-                _fullDetailsTextLocal.Func<string, StringBuilder>(x => x.AppendLine, exceptionOperand.FuncToString());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -222,27 +195,63 @@ namespace NWheels.Core.Logging
             private void CreateNewException()
             {
                 var m = _underlyingWriter;
-                m.ReturnValueLocal = m.Local(initialValue: m.New<TT.TReturn>(_singleLineTextLocal));
+
+                var exceptionMessageLocal = m.Local<string>(initialValueConst: _messageId.SplitPascalCase());
+                var exceptionAnyAppendedLocal = m.Local<bool>();
+                var nameValuePairIndex = 0;
+
+                for ( int i = 0 ; i < _signature.ArgumentCount ; i++ )
+                {
+                    if ( !_isValueArgument[i] )
+                    {
+                        continue;
+                    }
+
+                    using ( TT.CreateScope<TT.TValue>(_signature.ArgumentType[i]) )
+                    {
+                        Static.Func<string, LogNameValuePair<TT.TValue>, bool, string>(
+                            (s, v, b) => LogNameValuePairHelper.AppendToExceptionMessage<TT.TValue>(s, ref v, ref b),
+                            exceptionMessageLocal,
+                            _nameValuePairLocals[nameValuePairIndex].CastTo<LogNameValuePair<TT.TValue>>(),
+                            exceptionAnyAppendedLocal);
+                    }
+
+                    nameValuePairIndex++;
+                }
+
+                if ( _exceptionArgumentIndex.Count > 0 )
+                {
+                    m.ReturnValueLocal = m.Local(initialValue: m.New<TT.TReturn>(exceptionMessageLocal, _exceptionOperand));
+                }
+                else
+                {
+                    m.ReturnValueLocal = m.Local(initialValue: m.New<TT.TReturn>(exceptionMessageLocal));
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private void AppendAndReturnActivityLogNode()
             {
+                var activityType = ConstructGenericLogNodeType(_s_activityNodeGenericTypeByValueCount[_nameValuePairLocals.Count]);
                 var m = _underlyingWriter;
 
-                var activityLocal = m.Local<ActivityLogNode>(initialValue: m.New<FormattedActivityLogNode>(_singleLineTextLocal));
-
-                if ( _attribute.IsThread )
+                using ( TT.CreateScope<TT.TItem>(activityType) )
                 {
-                    _threadLogAppenderField.Void(x => x.StartThreadLog, m.Const(_attribute.TaskType), activityLocal);
-                }
-                else
-                {
-                    _threadLogAppenderField.Void(x => x.AppendActivityNode, activityLocal);
-                }
+                    var constructorArguments = new IOperand[] { m.Const(_messageId) }.Concat(_nameValuePairLocals).ToArray();
+                    var activityLocal = m.Local<TT.TItem>(initialValue: m.New<TT.TItem>(constructorArguments));
 
-                m.Return(activityLocal.CastTo<TT.TReturn>());
+                    if ( _attribute.IsThread )
+                    {
+                        _threadLogAppenderField.Void(x => x.StartThreadLog, m.Const(_attribute.TaskType), activityLocal.CastTo<ActivityLogNode>());
+                    }
+                    else
+                    {
+                        _threadLogAppenderField.Void(x => x.AppendActivityNode, activityLocal.CastTo<ActivityLogNode>());
+                    }
+
+                    m.Return(activityLocal.CastTo<TT.TReturn>());
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -250,43 +259,63 @@ namespace NWheels.Core.Logging
             private void AppendLogNode()
             {
                 var m = _underlyingWriter;
-                IOperand<Exception> exceptionOperand;
 
-                if ( _exceptionArgumentIndex.Count > 0  )
+                if ( _exceptionArgumentIndex.Count > 0 )
                 {
                     if ( _exceptionArgumentIndex.Count == 1 )
                     {
-                        exceptionOperand = m.Argument<Exception>(_exceptionArgumentIndex[0] + 1);
+                        _exceptionOperand = m.Argument<Exception>(_exceptionArgumentIndex[0] + 1);
                     }
                     else
                     {
                         IOperand<Exception>[] exceptionArguments = _exceptionArgumentIndex.Select(i => m.Argument<Exception>(i + 1)).ToArray();
-                        exceptionOperand = m.New<AggregateException>(m.NewArray<Exception>(exceptionArguments));
+                        _exceptionOperand = m.New<AggregateException>(m.NewArray<Exception>(exceptionArguments));
                     }
-
-                    AppendExceptionToFullDetails(exceptionOperand);
-                }
-                else if ( _mustCreateException )
-                {
-                    exceptionOperand = m.ReturnValueLocal.CastTo<Exception>();
-                    AppendExceptionToFullDetails(exceptionOperand);
                 }
                 else
                 {
-                    exceptionOperand = m.Const<Exception>(null);
+                    _exceptionOperand = m.Const<Exception>(null);
+                }
+                
+                if ( _mustCreateException )
+                {
+                    CreateNewException();
                 }
 
-                IOperand<string> fullDetailsTextOperand = (
-                    object.ReferenceEquals(_fullDetailsTextLocal, null) ? 
-                    m.Const<string>(null) :
-                    _fullDetailsTextLocal.FuncToString());
+                var nodeType = ConstructGenericLogNodeType(_s_logNodeGenericTypeByValueCount[_nameValuePairLocals.Count]);
 
-                _threadLogAppenderField.Void(x => x.AppendLogNode, m.New<FormattedLogNode>(
-                    m.Const(_attribute.Level),
-                    _singleLineTextLocal,
-                    fullDetailsTextOperand,
-                    m.Const(LogContentTypes.Text),
-                    exceptionOperand));
+                using ( TT.CreateScope<TT.TItem>(nodeType) )
+                {
+                    var constructorArguments = 
+                        new IOperand[] { m.Const(_messageId), m.Const(_attribute.Level), _exceptionOperand }
+                        .Concat(_nameValuePairLocals).ToArray();
+
+                    var nodeLocal = m.Local<TT.TItem>(initialValue: m.New<TT.TItem>(constructorArguments));
+                    _threadLogAppenderField.Void(x => x.AppendLogNode, nodeLocal.CastTo<LogNode>());
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private Type ConstructGenericLogNodeType(Type genericDefinitionType)
+            {
+                if ( !genericDefinitionType.IsGenericType )
+                {
+                    return genericDefinitionType;
+                }
+
+                var genericArguments = new Type[_nameValuePairLocals.Count];
+                var nextLocalIndex = 0;
+
+                for ( int i = 0 ; i < _isValueArgument.Length ; i++ )
+                {
+                    if ( _isValueArgument[i] )
+                    {
+                        genericArguments[nextLocalIndex++] = _signature.ArgumentType[i];
+                    }
+                }
+
+                return genericDefinitionType.MakeGenericType(genericArguments);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -314,36 +343,46 @@ namespace NWheels.Core.Logging
                     {
                         _exceptionArgumentIndex.Add(i);
                     }
-                    else if ( DetailAttribute.IsDefinedOn(_parameters[i]) )
-                    {
-                        _detailArgumentIndex.Add(i);
-                    }
                     else
                     {
-                        _formatArgumentIndex.Add(i);
+                        _isValueArgument[i] = true;
+                        _valueArgumentFormat[i] = FormatAttribute.GetFormatString(_parameters[i]);
+                        _valueArgumentIsDetail[i] = DetailAttribute.IsDefinedOn(_parameters[i]);
                     }
+                }
+
+                if ( _isValueArgument.Count(v => v) > _s_logNodeGenericTypeByValueCount.Length )
+                {
+                    throw NewContractConventionException(_declaration, string.Format(
+                        "Method has too many values (allowed maximum is {0}, excluding exceptions).", _s_logNodeGenericTypeByValueCount.Length));
                 }
             }
 
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
             
-            private void BuildFormatString()
+            private static string GetMessageId(MethodInfo method)
             {
-                var formatStringBuilder = new StringBuilder(_declaration.Name.SplitPascalCase());
+                string classifier;
 
-                for ( int i = 0 ; i < _formatArgumentIndex.Count ; i++ )
+                if ( method.DeclaringType.IsNested )
                 {
-                    var formatString = FormatAttribute.GetFormatString(_parameters[_formatArgumentIndex[i]]);
-
-                    formatStringBuilder.Append(i > 0 ? ", " : ": ");
-                    formatStringBuilder.AppendFormat(
-                        "{0}={{{1}{2}}}", 
-                        _signature.ArgumentName[_formatArgumentIndex[i]], 
-                        i,
-                        formatString != null ? ":" + formatString : "");
+                    if ( method.DeclaringType.Name == "ILogger" )
+                    {
+                        classifier = method.DeclaringType.DeclaringType.Name.TrimPrefix("I");
+                    }
+                    else 
+                    {
+                        classifier =
+                            method.DeclaringType.DeclaringType.Name.TrimPrefix("I") + "." +
+                            method.DeclaringType.Name.TrimPrefix("I").TrimSuffix("Logger");
+                    }
+                }
+                else
+                {
+                    classifier = method.DeclaringType.Name.TrimPrefix("I");
                 }
 
-                _formatString = formatStringBuilder.ToString();
+                return classifier + "." + method.Name;
             }
         }
     }

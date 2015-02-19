@@ -12,11 +12,11 @@ using NWheels.Testing;
 
 namespace NWheels.Core.UnitTests.Logging
 {
-    [TestFixture]
+    [TestFixture, Ignore("WIP")]
     public class ApplicationEventLoggerConventionTests : NUnitEmittedTypesTestBase
     {
         private ConventionObjectFactory _factory;
-        private TestThreadLogAppender _log;
+        private TestThreadLogAppender _logAppender;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ namespace NWheels.Core.UnitTests.Logging
         [SetUp]
         public void SetUp()
         {
-            _log = new TestThreadLogAppender();
+            _logAppender = new TestThreadLogAppender();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Assert
 
-            var log = _log.TakeLog();
+            var log = _logAppender.TakeLog();
 
             Assert.That(log.Length, Is.EqualTo(1));
             Assert.That(log[0].Level, Is.EqualTo(LogLevel.Debug));
@@ -89,7 +89,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Assert
 
-            var log = _log.TakeLog();
+            var log = _logAppender.TakeLog();
 
             Assert.That(log.Length, Is.EqualTo(1));
             Assert.That(log[0].Level, Is.EqualTo(LogLevel.Debug));
@@ -114,7 +114,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Assert
 
-            var log = _log.TakeLog();
+            var log = _logAppender.TakeLog();
 
             Assert.That(log.Length, Is.EqualTo(1));
             Assert.That(log[0].Level, Is.EqualTo(LogLevel.Error));
@@ -142,7 +142,7 @@ namespace NWheels.Core.UnitTests.Logging
             {
                 //-- Assert
 
-                var log = _log.TakeLog();
+                var log = _logAppender.TakeLog();
 
                 Assert.That(e.Message, Is.EqualTo("This is my error message that creates exception"));
                 Assert.That(log.Length, Is.EqualTo(1));
@@ -169,8 +169,8 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Assert
 
-            Assert.IsFalse(_log.StartedThreadTaskType.HasValue);
-            Assert.IsFalse(_log.StartedThreadLogIndex.HasValue);
+            Assert.IsFalse(_logAppender.StartedThreadTaskType.HasValue);
+            Assert.IsFalse(_logAppender.StartedThreadLogIndex.HasValue);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -190,11 +190,11 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Assert
 
-            Assert.That(_log.StartedThreadTaskType, Is.EqualTo(ThreadTaskType.ScheduledJob));
-            Assert.That(_log.StartedThreadLogIndex, Is.EqualTo(1));
+            Assert.That(_logAppender.StartedThreadTaskType, Is.EqualTo(ThreadTaskType.ScheduledJob));
+            Assert.That(_logAppender.StartedThreadLogIndex, Is.EqualTo(1));
             
-            Assert.That(_log.GetLog()[1], Is.InstanceOf<ActivityLogNode>());
-            Assert.That(_log.GetLog()[1].SingleLineText, Is.EqualTo("This is my thread: num=123, str=ABC"));
+            Assert.That(_logAppender.GetLog()[1], Is.InstanceOf<ActivityLogNode>());
+            Assert.That(_logAppender.GetLog()[1].SingleLineText, Is.EqualTo("This is my thread: num=123, str=ABC"));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -215,7 +215,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Assert
 
-            Assert.That(_log.GetLogStrings(), Is.EqualTo(new[] {
+            Assert.That(_logAppender.GetLogStrings(), Is.EqualTo(new[] {
                 string.Format("An activity with nullable parameter types: date1={0}, date2={1}", date1, date2),
                 "An activity with nullable parameter types: date1=, date2="
             }));
@@ -238,7 +238,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Assert
 
-            Assert.That(_log.GetLogStrings(), Is.EqualTo(new[] {
+            Assert.That(_logAppender.GetLogStrings(), Is.EqualTo(new[] {
                 "Log message with formatted parameters: date1=2015-01-01, date2=Feb 02 2015",
             }));
         }
@@ -260,10 +260,10 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Assert
 
-            Assert.That(_log.GetLog()[0].SingleLineText, Is.EqualTo(
+            Assert.That(_logAppender.GetLog()[0].SingleLineText, Is.EqualTo(
                 "Log message with formatted and detail parameters: num=123, dateTime=2015-01-01"
             ));
-            Assert.That(_log.GetLog()[0].FullDetailsText, Is.EqualTo(
+            Assert.That(_logAppender.GetLog()[0].FullDetailsText, Is.EqualTo(
                 "Str=ABC" + Environment.NewLine + "DateTimeOffset=Feb 02 2015" + Environment.NewLine
             ));
         }
@@ -272,7 +272,7 @@ namespace NWheels.Core.UnitTests.Logging
 
         private ITestLogger CreateTestLogger()
         {
-            return _factory.CreateInstanceOf<ITestLogger>().UsingConstructor<IThreadLogAppender>(_log);
+            return _factory.CreateInstanceOf<ITestLogger>().UsingConstructor<IThreadLogAppender>(_logAppender);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -339,6 +339,140 @@ namespace NWheels.Core.UnitTests.Logging
                 : base(message)
             {
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class CompiledExample : ITestLogger
+        {
+            private IThreadLogAppender _threadLogAppender;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public CompiledExample(IThreadLogAppender appender)
+            {
+                this._threadLogAppender = appender;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region ITestLogger Members
+
+            public void ThisIsMyEmptyDebugMessage()
+            {
+                var node = new NameValuePairLogNode("ThisIsMyEmptyDebugMessage", LogLevel.Debug, exception: null);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ThisIsMyDebugMessage(int num, string str)
+            {
+                LogNameValuePair<int> pair1;
+                pair1 = new LogNameValuePair<int> {
+                    Name = "num",
+                    Value = num
+                };
+                LogNameValuePair<string> pair2;
+                pair2 = new LogNameValuePair<string> {
+                    Name = "str",
+                    Value = str
+                };
+                var node = new NameValuePairLogNode<int, string>("ApplicationEventLoggerConventionTests.Test.ThisIsMyDebugMessage", LogLevel.Debug, null, pair1, pair2);
+                this._threadLogAppender.AppendLogNode(node);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ThisIsMyVerboseMessageWithCollection(DayOfWeek day, IEnumerable<DateTime> dates)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ThisIsMyInfoMessageWithDefaultParameters(string first, string second = null, int third = 12345)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ThisIsMyEmptyErrorMessage()
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ThisIsMyErrorMessageWithExceptionParameter(int num, string str, Exception e)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TestErrorException ThisIsMyErrorMessageThatCreatesException()
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ThisIsMyCriticalMessage()
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TestErrorException ThisIsMyCriticalMessageThatCreatesException()
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ILogActivity ThisIsMyActivity()
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ILogActivity ThisIsMyActivityWithParameters(int num, string str)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ILogActivity ThisIsMyThread(int num, string str)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ILogActivity AnActivityWithNullableParameterTypes(DateTime? date1, DateTimeOffset? date2)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void LogMessageWithFormattedParameters(DateTime? date1, DateTimeOffset? date2)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void LogMessageWithFormattedAndDetailParameters(int num, string str, DateTime dateTime, DateTimeOffset? dateTimeOffset)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
     }
 }

@@ -227,7 +227,13 @@ namespace NWheels.Logging
 
         protected virtual string FormatNameValuePairsText(string delimiter)
         {
+            var node = _threadLog.Node;
+
             var baseValues =
+                FormatNameValuePair("app", node.ApplicationName) + delimiter +
+                FormatNameValuePair("node", node.NodeName) + delimiter +
+                FormatNameValuePair("instance", node.InstanceId) + delimiter +
+                FormatNameValuePair("env", node.EnvironmentName) + delimiter +
                 FormatNameValuePair("message", _messageId) + delimiter +
                 FormatNameValuePair("level", _level.ToString()) + delimiter +
                 FormatNameValuePair("logid", _threadLog.LogId.ToString("N"));
@@ -259,27 +265,27 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected string FormatNameValuePair(string name, string value)
-        {
-            name = name.TruncateAt(50);
-            value = value.TruncateAt(50).Replace('"', '\'');
-
-            if ( value.Any(char.IsWhiteSpace) )
-            {
-                value = "\"" + value + "\"";
-            }
-
-            return (name + "=" + value);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         internal IThreadLog ThreadLog
         {
             get
             {
                 return _threadLog;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string FormatNameValuePair(string name, string value)
+        {
+            name = name.TruncateAt(50);
+            value = value.TruncateAt(50).Replace('"', '\'');
+
+            if ( value.Any(c => char.IsWhiteSpace(c) || c == '=') )
+            {
+                value = "\"" + value + "\"";
+            }
+
+            return (name + "=" + value);
         }
     }
 }
