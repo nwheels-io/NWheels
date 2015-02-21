@@ -72,9 +72,12 @@ namespace NWheels.Logging
 
         protected override string FormatFullDetailsText()
         {
-            return string.Empty
-                .AppendToFullDetailsText(ref _value1) +
-                base.FormatFullDetailsText()
+            bool anyAppended = false;
+
+            return (
+                string.Empty
+                .AppendToFullDetailsText(ref _value1, ref anyAppended) +
+                base.FormatFullDetailsText())
                 .NullIfEmptyOrWhitespace();
         }
 
@@ -120,10 +123,13 @@ namespace NWheels.Logging
 
         protected override string FormatFullDetailsText()
         {
-            return string.Empty
-                .AppendToFullDetailsText(ref _value1)
-                .AppendToFullDetailsText(ref _value2) +
-                base.FormatFullDetailsText()
+            bool anyAppended = false;
+
+            return (
+                string.Empty
+                .AppendToFullDetailsText(ref _value1, ref anyAppended)
+                .AppendToFullDetailsText(ref _value2, ref anyAppended) +
+                base.FormatFullDetailsText())
                 .NullIfEmptyOrWhitespace();
         }
 
@@ -175,11 +181,14 @@ namespace NWheels.Logging
 
         protected override string FormatFullDetailsText()
         {
-            return string.Empty
-                .AppendToFullDetailsText(ref _value1)
-                .AppendToFullDetailsText(ref _value2) 
-                .AppendToFullDetailsText(ref _value3) +
-                base.FormatFullDetailsText()
+            bool anyAppended = false;
+
+            return (
+                string.Empty
+                .AppendToFullDetailsText(ref _value1, ref anyAppended)
+                .AppendToFullDetailsText(ref _value2, ref anyAppended) 
+                .AppendToFullDetailsText(ref _value3, ref anyAppended) +
+                base.FormatFullDetailsText())
                 .NullIfEmptyOrWhitespace();
         }
 
@@ -235,12 +244,15 @@ namespace NWheels.Logging
 
         protected override string FormatFullDetailsText()
         {
-            return string.Empty
-                .AppendToFullDetailsText(ref _value1)
-                .AppendToFullDetailsText(ref _value2)
-                .AppendToFullDetailsText(ref _value3)
-                .AppendToFullDetailsText(ref _value4) +
-                base.FormatFullDetailsText()
+            bool anyAppended = false;
+
+            return (
+                string.Empty
+                .AppendToFullDetailsText(ref _value1, ref anyAppended)
+                .AppendToFullDetailsText(ref _value2, ref anyAppended)
+                .AppendToFullDetailsText(ref _value3, ref anyAppended)
+                .AppendToFullDetailsText(ref _value4, ref anyAppended) +
+                base.FormatFullDetailsText())
                 .NullIfEmptyOrWhitespace();
         }
 
@@ -300,13 +312,16 @@ namespace NWheels.Logging
 
         protected override string FormatFullDetailsText()
         {
-            return string.Empty
-                .AppendToFullDetailsText(ref _value1)
-                .AppendToFullDetailsText(ref _value2)
-                .AppendToFullDetailsText(ref _value3)
-                .AppendToFullDetailsText(ref _value4)
-                .AppendToFullDetailsText(ref _value5) +
-                base.FormatFullDetailsText()
+            bool anyAppended = false;
+
+            return (
+                string.Empty
+                .AppendToFullDetailsText(ref _value1, ref anyAppended)
+                .AppendToFullDetailsText(ref _value2, ref anyAppended)
+                .AppendToFullDetailsText(ref _value3, ref anyAppended)
+                .AppendToFullDetailsText(ref _value4, ref anyAppended)
+                .AppendToFullDetailsText(ref _value5, ref anyAppended) +
+                base.FormatFullDetailsText())
                 .NullIfEmptyOrWhitespace();
         }
 
@@ -370,14 +385,17 @@ namespace NWheels.Logging
 
         protected override string FormatFullDetailsText()
         {
-            return string.Empty
-                .AppendToFullDetailsText(ref _value1)
-                .AppendToFullDetailsText(ref _value2)
-                .AppendToFullDetailsText(ref _value3)
-                .AppendToFullDetailsText(ref _value4)
-                .AppendToFullDetailsText(ref _value5)
-                .AppendToFullDetailsText(ref _value6) +
-                base.FormatFullDetailsText()
+            bool anyAppended = false;
+
+            return (
+                string.Empty
+                .AppendToFullDetailsText(ref _value1, ref anyAppended)
+                .AppendToFullDetailsText(ref _value2, ref anyAppended)
+                .AppendToFullDetailsText(ref _value3, ref anyAppended)
+                .AppendToFullDetailsText(ref _value4, ref anyAppended)
+                .AppendToFullDetailsText(ref _value5, ref anyAppended)
+                .AppendToFullDetailsText(ref _value6, ref anyAppended) +
+                base.FormatFullDetailsText())
                 .NullIfEmptyOrWhitespace();
         }
 
@@ -445,15 +463,18 @@ namespace NWheels.Logging
 
         protected override string FormatFullDetailsText()
         {
-            return string.Empty
-                .AppendToFullDetailsText(ref _value1)
-                .AppendToFullDetailsText(ref _value2)
-                .AppendToFullDetailsText(ref _value3)
-                .AppendToFullDetailsText(ref _value4)
-                .AppendToFullDetailsText(ref _value5)
-                .AppendToFullDetailsText(ref _value6)
-                .AppendToFullDetailsText(ref _value7) +
-                base.FormatFullDetailsText()
+            bool anyAppended = false;
+
+            return (
+                string.Empty
+                .AppendToFullDetailsText(ref _value1, ref anyAppended)
+                .AppendToFullDetailsText(ref _value2, ref anyAppended)
+                .AppendToFullDetailsText(ref _value3, ref anyAppended)
+                .AppendToFullDetailsText(ref _value4, ref anyAppended)
+                .AppendToFullDetailsText(ref _value5, ref anyAppended)
+                .AppendToFullDetailsText(ref _value6, ref anyAppended)
+                .AppendToFullDetailsText(ref _value7, ref anyAppended) +
+                base.FormatFullDetailsText())
                 .NullIfEmptyOrWhitespace();
         }
 
@@ -525,16 +546,19 @@ namespace NWheels.Logging
 
         protected override string FormatFullDetailsText()
         {
-            return string.Empty
-                .AppendToFullDetailsText(ref _value1)
-                .AppendToFullDetailsText(ref _value2)
-                .AppendToFullDetailsText(ref _value3)
-                .AppendToFullDetailsText(ref _value4)
-                .AppendToFullDetailsText(ref _value5)
-                .AppendToFullDetailsText(ref _value6)
-                .AppendToFullDetailsText(ref _value7)
-                .AppendToFullDetailsText(ref _value8) +
-                base.FormatFullDetailsText()
+            bool anyAppended = false;
+
+            return (
+                string.Empty
+                .AppendToFullDetailsText(ref _value1, ref anyAppended)
+                .AppendToFullDetailsText(ref _value2, ref anyAppended)
+                .AppendToFullDetailsText(ref _value3, ref anyAppended)
+                .AppendToFullDetailsText(ref _value4, ref anyAppended)
+                .AppendToFullDetailsText(ref _value5, ref anyAppended)
+                .AppendToFullDetailsText(ref _value6, ref anyAppended)
+                .AppendToFullDetailsText(ref _value7, ref anyAppended)
+                .AppendToFullDetailsText(ref _value8, ref anyAppended) +
+                base.FormatFullDetailsText())
                 .NullIfEmptyOrWhitespace();
         }
 

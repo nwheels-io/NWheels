@@ -1,0 +1,7 @@
+[ NWheels ]
+MAX_TIMESTAMP_LOOKAHEAD=23
+NO_BINARY_CHECK=true
+SHOULD_LINEMERGE=false
+TZ=UTC
+disabled=false
+pulldown_type=true

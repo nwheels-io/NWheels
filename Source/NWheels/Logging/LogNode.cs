@@ -197,16 +197,7 @@ namespace NWheels.Logging
 
         protected string MessageIdToText()
         {
-            var lastDotPosition = _messageId.LastIndexOf('.');
-
-            if ( lastDotPosition >= 0 && lastDotPosition < _messageId.Length - 1 )
-            {
-                return _messageId.Substring(lastDotPosition + 1).SplitPascalCase();
-            }
-            else
-            {
-                return _messageId.SplitPascalCase();
-            }
+            return LogMessageHelper.GetTextFromMessageId(_messageId);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -230,6 +221,7 @@ namespace NWheels.Logging
             var node = _threadLog.Node;
 
             var baseValues =
+                _threadLog.ThreadStartedAtUtc.AddMilliseconds(_millisecondsTimestamp).ToString("yyyy-MM-dd HH:mm:ss.fff") + delimiter +
                 FormatNameValuePair("app", node.ApplicationName) + delimiter +
                 FormatNameValuePair("node", node.NodeName) + delimiter +
                 FormatNameValuePair("instance", node.InstanceId) + delimiter +
@@ -278,7 +270,7 @@ namespace NWheels.Logging
         public static string FormatNameValuePair(string name, string value)
         {
             name = name.TruncateAt(50);
-            value = value.TruncateAt(50).Replace('"', '\'');
+            value = (value != null ? value.TruncateAt(50).Replace('"', '\'') : "null");
 
             if ( value.Any(c => char.IsWhiteSpace(c) || c == '=') )
             {

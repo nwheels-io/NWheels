@@ -15,8 +15,8 @@ namespace NWheels.Core.UnitTests.Logging
         private const string TestLogId = 
             "e99f7886838e4c37b433888132ef5f86";
 
-        private const string ExpectedBaseNameValuePairs = 
-            "app=A1 node=N1 instance=I1 env=E1 message=Test.MessageOne level=Info logid=e99f7886838e4c37b433888132ef5f86 duration=0";
+        private const string ExpectedBaseNameValuePairs =
+            "2015-01-30 15:22:54.345 app=A1 node=N1 instance=I1 env=E1 message=Test.MessageOne level=Info logid=e99f7886838e4c37b433888132ef5f86 duration=0";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -32,6 +32,7 @@ namespace NWheels.Core.UnitTests.Logging
             Framework.NodeConfiguration.NodeName = "N1";
             Framework.NodeConfiguration.InstanceId = "I1";
             Framework.NodeConfiguration.EnvironmentName = "E1";
+            Framework.PresetUtcNow = new DateTime(2015, 1, 30, 15, 22, 54, 345);
 
             _rootActivity = new FormattedActivityLogNode("root");
 

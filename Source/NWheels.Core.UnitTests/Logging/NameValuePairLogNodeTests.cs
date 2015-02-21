@@ -16,7 +16,7 @@ namespace NWheels.Core.UnitTests.Logging
             "e99f7886838e4c37b433888132ef5f86";
 
         private const string ExpectedBaseNameValuePairs = 
-            "app=A1 node=N1 instance=I1 env=E1 message=Test.MessageOne level=Info logid=e99f7886838e4c37b433888132ef5f86";
+            "2015-01-30 15:22:54.345 app=A1 node=N1 instance=I1 env=E1 message=Test.MessageOne level=Info logid=e99f7886838e4c37b433888132ef5f86";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -32,6 +32,7 @@ namespace NWheels.Core.UnitTests.Logging
             Framework.NodeConfiguration.NodeName = "N1";
             Framework.NodeConfiguration.InstanceId = "I1";
             Framework.NodeConfiguration.EnvironmentName = "E1";
+            Framework.PresetUtcNow = new DateTime(2015, 1, 30, 15, 22, 54, 345);
 
             _rootActivity = new FormattedActivityLogNode("root");
 
@@ -109,7 +110,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Assert
 
             Assert.That(singleLineText, Is.EqualTo("Message one: accountId=ABCD1234"));
-            Assert.That(fullDetailsText, Is.EqualTo(""));
+            Assert.That(fullDetailsText, Is.Null);
             Assert.That(nameValuePairs, Is.EqualTo(ExpectedBaseNameValuePairs + " accountId=ABCD1234"));
         }
 
@@ -180,7 +181,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             Assert.That(singleLineText, Is.EqualTo("Message one: P1=ABC, P2=123, P3=Monday"));
 
-            Assert.That(fullDetailsText, Is.EqualTo(string.Empty));
+            Assert.That(fullDetailsText, Is.Null);
 
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +
@@ -213,7 +214,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             Assert.That(singleLineText, Is.EqualTo("Message one: P1=ABC, P2=123, P3=Monday, P4=01:00:00"));
 
-            Assert.That(fullDetailsText, Is.EqualTo(string.Empty));
+            Assert.That(fullDetailsText, Is.Null);
 
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +
@@ -247,7 +248,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             Assert.That(singleLineText, Is.EqualTo("Message one: P1=ABC, P2=123, P3=Monday, P4=01:00:00, P5=2015-01-31"));
 
-            Assert.That(fullDetailsText, Is.EqualTo(string.Empty));
+            Assert.That(fullDetailsText, Is.Null);
 
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +
@@ -282,7 +283,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             Assert.That(singleLineText, Is.EqualTo("Message one: P1=ABC, P2=123, P3=Monday, P4=01:00:00, P5=2015-01-31, P6=True"));
 
-            Assert.That(fullDetailsText, Is.EqualTo(string.Empty));
+            Assert.That(fullDetailsText, Is.Null);
 
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +
@@ -318,7 +319,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             Assert.That(singleLineText, Is.EqualTo("Message one: P1=ABC, P2=123, P3=Monday, P4=01:00:00, P5=2015-01-31, P6=True, P7=8b8a46a5fbb14258ab1fb2eed584d8c9"));
 
-            Assert.That(fullDetailsText, Is.EqualTo(string.Empty));
+            Assert.That(fullDetailsText, Is.Null);
 
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +
@@ -355,7 +356,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             Assert.That(singleLineText, Is.EqualTo("Message one: P1=ABC, P2=123, P3=Monday, P4=01:00:00, P5=2015-01-31, P6=True, P7=null, P8=1,234"));
 
-            Assert.That(fullDetailsText, Is.EqualTo(string.Empty));
+            Assert.That(fullDetailsText, Is.Null);
 
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +

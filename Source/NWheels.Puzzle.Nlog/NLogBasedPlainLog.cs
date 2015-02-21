@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +9,9 @@ using NLog.Conditions;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
+using NWheels.Core.Hosting;
 using NWheels.Core.Logging;
+using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.Utilities;
 using LogLevel = NLog.LogLevel;
@@ -17,7 +20,17 @@ namespace NWheels.Puzzle.Nlog
 {
     public class NLogBasedPlainLog : IPlainLog
     {
-        private readonly Logger _logger;
+        public const string PlainTextLoggerName = "PlainText";
+        public const string NameValuePairLoggerName = "NameValuePairs";
+        public const string PlainTextFileTargetName = "PlainTextFile";
+        public const string PlainTextConsoleTargetName = "PlainTextConsole";
+        public const string PlainTextEventLogTargetName = "PlainTextEventLog";
+        public const string NameValuePairFileTargetName = "NameValuePairsFile";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private readonly Logger _plainTextLogger;
+        private readonly Logger _nameValuePairLogger;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -25,20 +38,13 @@ namespace NWheels.Puzzle.Nlog
         {
             var config = new LoggingConfiguration();
 
-            var fileTarget = new FileTarget() {
-                FileName = PathUtility.LocalBinPath("nwheels.log"),
-            };
-
-            fileTarget.Layout = @"${date:format=yyyy-MM-dd HH\:mm\:ss.fff}|${level:uppercase=true}|${message}|${exception:format=ToString}";
-
-            config.AddTarget("File", fileTarget);
-
-            var fileRule = new LoggingRule("*", LogLevel.Trace, fileTarget);
-
-            config.LoggingRules.Add(fileRule);
+            ConfigureTextFileOutput(config);
+            ConfigureNameValuePairOutput(config);
 
             LogManager.Configuration = config;
-            _logger = LogManager.GetCurrentClassLogger();
+
+            _plainTextLogger = LogManager.GetLogger(PlainTextLoggerName);
+            _nameValuePairLogger = LogManager.GetLogger(NameValuePairLoggerName);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,9 +71,9 @@ namespace NWheels.Puzzle.Nlog
             consoleTarget.RowHighlightingRules.Add(new ConsoleRowHighlightingRule(
                 "level >= LogLevel.Error", ConsoleOutputColor.Red, ConsoleOutputColor.Black));
 
-            LogManager.Configuration.AddTarget("Console", consoleTarget);
+            LogManager.Configuration.AddTarget(PlainTextConsoleTargetName, consoleTarget);
 
-            var consoleRule = new LoggingRule("*", LogLevel.Trace, consoleTarget);
+            var consoleRule = new LoggingRule(PlainTextLoggerName, LogLevel.Trace, consoleTarget);
 
             LogManager.Configuration.LoggingRules.Add(consoleRule);
             LogManager.ReconfigExistingLoggers();
@@ -97,19 +103,23 @@ namespace NWheels.Puzzle.Nlog
             {
                 case NWheels.Logging.LogLevel.Debug:
                 case NWheels.Logging.LogLevel.Verbose:
-                    _logger.Debug(node.SingleLineText);
+                    _plainTextLogger.Debug(node.SingleLineText);
                     break;
                 case NWheels.Logging.LogLevel.Info:
-                    _logger.Info(node.SingleLineText);
+                    _plainTextLogger.Info(node.SingleLineText);
+                    _nameValuePairLogger.Info(node.NameValuePairsText);
                     break;
                 case NWheels.Logging.LogLevel.Warning:
-                    _logger.Warn(node.SingleLineText, node.Exception);
+                    _plainTextLogger.Warn(node.SingleLineText, node.Exception);
+                    _nameValuePairLogger.Warn(node.NameValuePairsText);
                     break;
                 case NWheels.Logging.LogLevel.Error:
-                    _logger.Error(node.SingleLineText, node.Exception);
+                    _plainTextLogger.Error(node.SingleLineText, node.Exception);
+                    _nameValuePairLogger.Error(node.NameValuePairsText);
                     break;
                 case NWheels.Logging.LogLevel.Critical:
-                    _logger.Fatal(node.SingleLineText, node.Exception);
+                    _plainTextLogger.Fatal(node.SingleLineText, node.Exception);
+                    _nameValuePairLogger.Fatal(node.NameValuePairsText);
                     break;
             }
         }
@@ -120,11 +130,11 @@ namespace NWheels.Puzzle.Nlog
         {
             if ( activity.Parent != null )
             {
-                _logger.Trace(activity.SingleLineText);
+                _plainTextLogger.Trace(activity.SingleLineText);
             }
             else
             {
-                _logger.Trace("[THREAD:{0}] {1}", activity.TaskType, activity.SingleLineText);
+                _plainTextLogger.Trace("[THREAD:{0}] {1}", activity.TaskType, activity.SingleLineText);
             }
         }
 
@@ -132,35 +142,84 @@ namespace NWheels.Puzzle.Nlog
 
         public void Debug(string format, params object[] args)
         {
-            _logger.Debug(format, args);
+            _plainTextLogger.Debug(format, args);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Info(string format, params object[] args)
         {
-            _logger.Info(format, args);
+            _plainTextLogger.Info(format, args);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Warning(string format, params object[] args)
         {
-            _logger.Warn(format, args);
+            _plainTextLogger.Warn(format, args);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Error(string format, params object[] args)
         {
-            _logger.Error(format, args);
+            _plainTextLogger.Error(format, args);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Critical(string format, params object[] args)
         {
-            _logger.Fatal(format, args);
+            _plainTextLogger.Fatal(format, args);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ConfigureTextFileOutput(LoggingConfiguration config)
+        {
+            var target = new FileTarget() {
+                Name = PlainTextFileTargetName,
+                FileName = PathUtility.LocalBinPath("..\\Logs", "plain.log"),
+                CreateDirs = true,
+                ArchiveEvery = FileArchivePeriod.Hour,
+                ArchiveNumbering = ArchiveNumberingMode.Sequence,
+                ArchiveFileName = PathUtility.LocalBinPath("..\\Logs", @"${date:universalTime=True:format=yyyyMMdd}-{####}.plain.log"),
+                MaxArchiveFiles = 10,
+                EnableFileDelete = true,
+                ConcurrentWrites = false,
+                KeepFileOpen = false,
+            };
+
+            target.Layout = @"${date:format=yyyy-MM-dd HH\:mm\:ss.fff}|${level:uppercase=true}|${message}|${exception:format=ToString}";
+            config.AddTarget(PlainTextFileTargetName, target);
+
+            var plainTextFileRule = new LoggingRule(PlainTextLoggerName, LogLevel.Trace, target);
+            config.LoggingRules.Add(plainTextFileRule);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ConfigureNameValuePairOutput(LoggingConfiguration config)
+        {
+            var target = new FileTarget() {
+                Name = NameValuePairFileTargetName,
+                FileName = PathUtility.LocalBinPath("..\\Logs", "nvp.log"),
+                CreateDirs = true,
+                ArchiveEvery = FileArchivePeriod.Day,
+                ArchiveNumbering = ArchiveNumberingMode.Sequence,
+                ArchiveFileName = PathUtility.LocalBinPath("..\\Logs", @"${date:universalTime=True:format=yyyyMMdd}-{####}.nvp.log"),
+                MaxArchiveFiles = 10,
+                EnableFileDelete = true,
+                ConcurrentWrites = false,
+                KeepFileOpen = false,
+            };
+
+            target.Layout = @"${message}";
+
+            config.AddTarget(NameValuePairFileTargetName, target);
+
+            var rule = new LoggingRule(NameValuePairLoggerName, LogLevel.Info, target);
+            config.LoggingRules.Add(rule);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -180,6 +239,5 @@ namespace NWheels.Puzzle.Nlog
         {
             get { return s_Instance; }
         }
-
     }
 }

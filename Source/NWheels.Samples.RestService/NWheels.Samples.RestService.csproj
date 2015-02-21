@@ -87,7 +87,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="IMyRestServiceEntityRepository.cs" />
     <Compile Include="IOnlineStoreEntities.cs" />
     <Compile Include="ModuleLoader.cs" />
@@ -145,7 +144,7 @@
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>OnlineStoreModel.Designer.cs</LastGenOutput>
     </EntityDeploy>
-    <None Include="load.config">
+    <None Include="boot.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="module.config">

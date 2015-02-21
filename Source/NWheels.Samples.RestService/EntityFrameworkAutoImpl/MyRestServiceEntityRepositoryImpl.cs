@@ -81,7 +81,6 @@ namespace NWheels.Samples.RestService.EntityFrameworkAutoImpl
 
         void IDisposable.Dispose()
         {
-            throw new NotImplementedException();
         }
     }
 }

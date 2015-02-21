@@ -12,7 +12,7 @@ using NWheels.Testing;
 
 namespace NWheels.Core.UnitTests.Logging
 {
-    [TestFixture, Ignore("WIP")]
+    [TestFixture]
     public class ApplicationEventLoggerConventionTests : NUnitEmittedTypesTestBase
     {
         private ConventionObjectFactory _factory;
@@ -119,7 +119,7 @@ namespace NWheels.Core.UnitTests.Logging
             Assert.That(log.Length, Is.EqualTo(1));
             Assert.That(log[0].Level, Is.EqualTo(LogLevel.Error));
             Assert.That(log[0].SingleLineText, Is.EqualTo("This is my error message with exception parameter: num=123, str=ABC"));
-            Assert.That(log[0].FullDetailsText, Is.EqualTo(exception.ToString() + Environment.NewLine));
+            Assert.That(log[0].FullDetailsText, Is.EqualTo(exception.ToString()));
             Assert.That(log[0].Exception, Is.SameAs(exception));
         }
 
@@ -216,7 +216,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Assert
 
             Assert.That(_logAppender.GetLogStrings(), Is.EqualTo(new[] {
-                string.Format("An activity with nullable parameter types: date1={0}, date2={1}", date1, date2),
+                string.Format("An activity with nullable parameter types: date1=\"{0}\", date2=\"{1}\"", date1, date2),
                 "An activity with nullable parameter types: date1=, date2="
             }));
         }
@@ -239,7 +239,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Assert
 
             Assert.That(_logAppender.GetLogStrings(), Is.EqualTo(new[] {
-                "Log message with formatted parameters: date1=2015-01-01, date2=Feb 02 2015",
+                "Log message with formatted parameters: date1=2015-01-01, date2=\"Feb 02 2015\"",
             }));
         }
 
@@ -264,9 +264,33 @@ namespace NWheels.Core.UnitTests.Logging
                 "Log message with formatted and detail parameters: num=123, dateTime=2015-01-01"
             ));
             Assert.That(_logAppender.GetLog()[0].FullDetailsText, Is.EqualTo(
-                "Str=ABC" + Environment.NewLine + "DateTimeOffset=Feb 02 2015" + Environment.NewLine
+                "str=ABC" + Environment.NewLine + "dateTimeOffset=\"Feb 02 2015\"" + Environment.NewLine
             ));
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //[Test, Ignore("LogMethod is not yet supported")]
+        //public void CanLogVoidMethodCallAsActivity()
+        //{
+        //    //-- Arrange
+
+        //    var logger = CreateTestLogger();
+        //    var callCount = 0;
+
+        //    //-- Act
+
+        //    logger.ThisIsMyVoidMethod(() => callCount++);
+
+        //    //-- Assert
+
+        //    var log = _logAppender.TakeLog();
+
+        //    Assert.That(callCount, Is.EqualTo(1));
+        //    Assert.That(log.Length, Is.EqualTo(1));
+        //    Assert.That(log[0].SingleLineText, Is.EqualTo("This is my void method"));
+        //    Assert.That(log[0].FullDetailsText, Is.Null);
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -329,6 +353,25 @@ namespace NWheels.Core.UnitTests.Logging
                 [Detail] string str,
                 [Format("yyyy-MM-dd")] DateTime dateTime,
                 [Format("MMM dd yyyy"), Detail] DateTimeOffset? dateTimeOffset);
+
+            //[LogMethod]
+            //void ThisIsMyVoidMethod(Action method);
+
+            //[LogMethod]
+            //void ThisIsMyVoidMethodWithParameters(
+            //    Action<string, int, decimal> method, 
+            //    string str, 
+            //    int num, 
+            //    [Detail, Format("#,##0.00")] decimal value);
+
+            //[LogMethod]
+            //bool ThisIsMyFunction(Func<bool> method);
+
+            //[LogMethod]
+            //string ThisIsMyFunctionWithParameters(
+            //    Func<int, decimal, string> method, 
+            //    int num,
+            //    [Detail, Format("#,##0.00")] decimal value);
         }
     
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -470,6 +513,87 @@ namespace NWheels.Core.UnitTests.Logging
             public void LogMessageWithFormattedAndDetailParameters(int num, string str, DateTime dateTime, DateTimeOffset? dateTimeOffset)
             {
                 throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ThisIsMyVoidMethod(Action method)
+            {
+                using ( ILogActivity activity = new NameValuePairActivityLogNode("Test.ThisIsMyVoidMethod") )
+                {
+                    try
+                    {
+                        method();
+                    }
+                    catch ( Exception e )
+                    {
+                        activity.Fail(e);
+                        throw;
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public void ThisIsMyVoidMethodWithParameters(Action<string, int, decimal> method, string str, int num, decimal value)
+            {
+                var pair1 = new LogNameValuePair<string> { Name = "str", Value = str };
+                var pair2 = new LogNameValuePair<int> { Name = "num", Value = num };
+                var pair3 = new LogNameValuePair<decimal> { Name = "value", Value = value };
+
+                using ( ILogActivity activity =
+                    new NameValuePairActivityLogNode<string, int, decimal>("Test.ThisIsMyVoidMethodWithParameters", pair1, pair2, pair3) )
+                {
+                    try
+                    {
+                        method(str, num, value);
+                    }
+                    catch ( Exception e )
+                    {
+                        activity.Fail(e);
+                        throw;
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool ThisIsMyFunction(Func<bool> method)
+            {
+                using ( ILogActivity activity = new NameValuePairActivityLogNode("Test.ThisIsMyFunction") )
+                {
+                    try
+                    {
+                        return method();
+                    }
+                    catch ( Exception e )
+                    {
+                        activity.Fail(e);
+                        throw;
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public string ThisIsMyFunctionWithParameters(Func<int, decimal, string> method, int num, decimal value)
+            {
+                var pair1 = new LogNameValuePair<int> { Name = "num", Value = num };
+                var pair2 = new LogNameValuePair<decimal> { Name = "value", Value = value };
+
+                using ( ILogActivity activity =
+                    new NameValuePairActivityLogNode<int, decimal>("Test.ThisIsMyFunctionWithParameters", pair1, pair2) )
+                {
+                    try
+                    {
+                        return method(num, value);
+                    }
+                    catch ( Exception e )
+                    {
+                        activity.Fail(e);
+                        throw;
+                    }
+                }
             }
 
             #endregion

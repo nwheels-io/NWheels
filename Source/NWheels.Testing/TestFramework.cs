@@ -47,7 +47,7 @@ namespace NWheels.Testing
             this.PresetGuids = new Queue<Guid>();
             this.PresetRandomInt32 = new Queue<int>();
             this.PresetRandomInt64 = new Queue<long>();
-            this.NodeConfiguration = new NodeConfiguration {
+            this.NodeConfiguration = new BootConfiguration {
                 ApplicationName = "TEST-APP",
                 NodeName = "TEST-NODE",
                 InstanceId = "TEST-INSTANCE",
@@ -206,7 +206,7 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NodeConfiguration NodeConfiguration { get; private set; }
+        public BootConfiguration NodeConfiguration { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         

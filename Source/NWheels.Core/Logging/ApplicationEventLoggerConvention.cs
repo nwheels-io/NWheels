@@ -45,6 +45,34 @@ namespace NWheels.Core.Logging
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static readonly Type[] _s_genericActionTypeByValueCount = new Type[] {
+            typeof(Action),
+            typeof(Action<>),
+            typeof(Action<,>),
+            typeof(Action<,,>),
+            typeof(Action<,,,>),
+            typeof(Action<,,,,>),
+            typeof(Action<,,,,,>),
+            typeof(Action<,,,,,,>),
+            typeof(Action<,,,,,,,>)
+        };
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly Type[] _s_genericFuncTypeByValueCount = new Type[] {
+            typeof(Func<>),
+            typeof(Func<,>),
+            typeof(Func<,,>),
+            typeof(Func<,,,>),
+            typeof(Func<,,,,>),
+            typeof(Func<,,,,,>),
+            typeof(Func<,,,,,,>),
+            typeof(Func<,,,,,,,>),
+            typeof(Func<,,,,,,,,>)
+        };
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
         private Field<IThreadLogAppender> _threadLogAppenderField;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -196,7 +224,7 @@ namespace NWheels.Core.Logging
             {
                 var m = _underlyingWriter;
 
-                var exceptionMessageLocal = m.Local<string>(initialValueConst: _messageId.SplitPascalCase());
+                var exceptionMessageLocal = m.Local<string>(initialValueConst: LogMessageHelper.GetTextFromMessageId(_messageId));
                 var exceptionAnyAppendedLocal = m.Local<bool>();
                 var nameValuePairIndex = 0;
 
@@ -210,7 +238,7 @@ namespace NWheels.Core.Logging
                     using ( TT.CreateScope<TT.TValue>(_signature.ArgumentType[i]) )
                     {
                         Static.Func<string, LogNameValuePair<TT.TValue>, bool, string>(
-                            (s, v, b) => LogNameValuePairHelper.AppendToExceptionMessage<TT.TValue>(s, ref v, ref b),
+                            (s, v, b) => LogMessageHelper.AppendToExceptionMessage<TT.TValue>(s, ref v, ref b),
                             exceptionMessageLocal,
                             _nameValuePairLocals[nameValuePairIndex].CastTo<LogNameValuePair<TT.TValue>>(),
                             exceptionAnyAppendedLocal);
@@ -227,6 +255,8 @@ namespace NWheels.Core.Logging
                 {
                     m.ReturnValueLocal = m.Local(initialValue: m.New<TT.TReturn>(exceptionMessageLocal));
                 }
+
+                _exceptionOperand = m.ReturnValueLocal.CastTo<Exception>();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -327,6 +357,38 @@ namespace NWheels.Core.Logging
                     throw NewContractConventionException(_declaration, "Log attribute is missing");
                 }
 
+                if ( _attribute.IsMethodCall )
+                {
+                    ValidateMethodCallSignature();
+                }
+                else
+                {
+                    ValidateNonMethodCallSignature();
+                }
+
+                if ( _isValueArgument.Count(v => v) > _s_logNodeGenericTypeByValueCount.Length )
+                {
+                    throw NewContractConventionException(_declaration, string.Format(
+                        "Method has too many values (allowed maximum is {0}, excluding exceptions).", _s_logNodeGenericTypeByValueCount.Length));
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ValidateMethodCallSignature()
+            {
+                throw new NotSupportedException("LogMethod is not yet supported in this version.");
+
+                //if ( _signature.ArgumentCount < 1 )
+                //{
+                //    throw NewContractConventionException(_declaration, "First parameter must be System.Action<...> or System.Func<...> delegate");
+                //}
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ValidateNonMethodCallSignature()
+            {
                 if ( !_declaration.IsVoid() && _declaration.ReturnType != typeof(ILogActivity) && !_declaration.ReturnType.IsExceptionType() )
                 {
                     throw NewContractConventionException(_declaration, "Method must either be void, return ILogActivity, or return an exception type");
@@ -349,12 +411,6 @@ namespace NWheels.Core.Logging
                         _valueArgumentFormat[i] = FormatAttribute.GetFormatString(_parameters[i]);
                         _valueArgumentIsDetail[i] = DetailAttribute.IsDefinedOn(_parameters[i]);
                     }
-                }
-
-                if ( _isValueArgument.Count(v => v) > _s_logNodeGenericTypeByValueCount.Length )
-                {
-                    throw NewContractConventionException(_declaration, string.Format(
-                        "Method has too many values (allowed maximum is {0}, excluding exceptions).", _s_logNodeGenericTypeByValueCount.Length));
                 }
             }
 
