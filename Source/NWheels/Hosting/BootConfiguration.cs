@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,10 +12,10 @@ using System.IO;
 
 namespace NWheels.Hosting
 {
-    [DataContract(Namespace = "NWheels.Hosting")]
-    public class NodeConfiguration : INodeConfiguration
+    [DataContract(Namespace = "NWheels.Hosting", Name = "Boot.Config")]
+    public class BootConfiguration : INodeConfiguration
     {
-        public const string DefaultNodeConfigFileName = "node.config";
+        public const string DefaultBootConfigFileName = "boot.config";
         public const string DefaultModuleConfigFileName = "module.config";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -99,16 +100,22 @@ namespace NWheels.Hosting
 
         [DataMember(Order = 1, Name = "Application", IsRequired = true)]
         public string ApplicationName { get; set; }
+
         [DataMember(Order = 2, Name = "Node", IsRequired = true)]
         public string NodeName { get; set; }
+
         [DataMember(Order = 3, Name = "Environment", IsRequired = true)]
         public string EnvironmentName { get; set; }
+
         [DataMember(Order = 4, IsRequired = false, EmitDefaultValue = false)]
         public string EnvironmentType { get; set; }
+
         [DataMember(Order = 5, IsRequired = false, EmitDefaultValue = false)]
         public List<ModuleConfig> FrameworkModules { get; set; }
+
         [DataMember(Order = 6, IsRequired = false, EmitDefaultValue = false)]
         public List<ModuleConfig> ApplicationModules { get; set; }
+
         [DataMember(Order = 7, IsRequired = false, EmitDefaultValue = false)]
         public List<ConfigFile> ConfigFiles { get; set; }
 
@@ -120,15 +127,15 @@ namespace NWheels.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static NodeConfiguration LoadFromFile(string filePath)
+        public static BootConfiguration LoadFromFile(string filePath)
         {
             using ( var file = File.OpenRead(filePath) )
             {
-                var serializer = new DataContractSerializer(typeof(NodeConfiguration));
-                var config = (NodeConfiguration)serializer.ReadObject(file);
-                
+                var serializer = new DataContractSerializer(typeof(BootConfiguration));
+                var config = (BootConfiguration)serializer.ReadObject(file);
+
                 config.LoadedFromDirectory = Path.GetDirectoryName(filePath);
-                
+
                 return config;
             }
         }
@@ -169,7 +176,14 @@ namespace NWheels.Hosting
 
             if ( !File.Exists(file.Path) )
             {
-                throw new NodeHostConfigException("Config file does not exist: " + file.Path);
+                if ( file.IsOptional )
+                {
+                    file.IsOptionalAndMissing = true;
+                }
+                else
+                {
+                    throw new NodeHostConfigException("Config file does not exist: " + file.Path);
+                }
             }
         }
 
@@ -180,8 +194,10 @@ namespace NWheels.Hosting
         {
             [DataMember(Order = 1, IsRequired = false, EmitDefaultValue = false)]
             public string Name { get; set; }
+
             [DataMember(Order = 2, IsRequired = true)]
             public string Assembly { get; set; }
+
             [DataMember(Order = 2, IsRequired = false, EmitDefaultValue = false)]
             public string LoaderClass { get; set; }
         }
@@ -193,7 +209,11 @@ namespace NWheels.Hosting
         {
             [DataMember(Order = 1, IsRequired = false, EmitDefaultValue = false)]
             public string Path { get; set; }
-        }
 
+            [DataMember(Order = 2, IsRequired = false, EmitDefaultValue = false)]
+            public bool IsOptional { get; set; }
+
+            public bool IsOptionalAndMissing { get; set; }
+        }
     }
 }

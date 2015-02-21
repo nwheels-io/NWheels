@@ -9,6 +9,8 @@ using NWheels.Configuration;
 using System.Runtime.Serialization;
 using NWheels.Exceptions;
 using NWheels.Extensions;
+using System.IO;
+using NWheels.Hosting;
 
 namespace NWheels.Core.Configuration
 {
@@ -47,31 +49,37 @@ namespace NWheels.Core.Configuration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void LoadConfiguration(IEnumerable<string> configFilePaths)
+        public void LoadConfiguration(IEnumerable<BootConfiguration.ConfigFile> configFiles)
         {
             using ( _logger.LoadingConfiguration() )
             {
-                foreach ( var filePath in configFilePaths )
+                foreach ( var file in configFiles )
                 {
-                    LoadConfigurationFile(filePath);
+                    LoadConfigurationFile(file);
                 }
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void LoadConfigurationFile(string filePath)
+        private void LoadConfigurationFile(BootConfiguration.ConfigFile file)
         {
-            using ( _logger.LoadingConfigurationFile(filePath) )
+            if ( file.IsOptionalAndMissing )
+            {
+                _logger.OptionalFileNotPresentSkipping(file.Path);
+                return;
+            }
+
+            using ( _logger.LoadingConfigurationFile(file.Path) )
             {
                 try
                 {
-                    var document = XDocument.Load(filePath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
+                    var document = XDocument.Load(file.Path, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
                     LoadConfigurationDocument(document);
                 }
                 catch ( Exception e )
                 {
-                    _logger.FailedToLoadConfigurationFile(filePath, e);
+                    _logger.FailedToLoadConfigurationFile(file.Path, e);
                     throw;
                 }
             }

@@ -28,7 +28,7 @@ namespace NWheels.Core.Hosting
 {
     public class NodeHost : INodeHost
     {
-        private readonly NodeConfiguration _nodeConfig;
+        private readonly BootConfiguration _bootConfig;
         private readonly DynamicModule _dynamicModule;
         private readonly IContainer _baseContainer;
         private readonly INodeHostLogger _logger;
@@ -37,9 +37,9 @@ namespace NWheels.Core.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NodeHost(NodeConfiguration nodeConfig, Action<ContainerBuilder> registerHostComponents = null)
+        public NodeHost(BootConfiguration bootConfig, Action<ContainerBuilder> registerHostComponents = null)
         {
-            _nodeConfig = nodeConfig;
+            _bootConfig = bootConfig;
             
             _dynamicModule = new DynamicModule(
                 simpleName: "NWheels.RunTimeTypes", 
@@ -169,7 +169,7 @@ namespace NWheels.Core.Hosting
         {
             get
             {
-                return _nodeConfig;
+                return _bootConfig;
             }
         }
 
@@ -191,12 +191,12 @@ namespace NWheels.Core.Hosting
 
             builder.RegisterInstance<NodeHost>(this);
             builder.RegisterInstance<DynamicModule>(_dynamicModule);
-            builder.RegisterInstance(_nodeConfig).As<INodeConfiguration>();
+            builder.RegisterInstance(_bootConfig).As<INodeConfiguration>();
             builder.RegisterGeneric(typeof(Auto<>)).SingleInstance();
             builder.RegisterType<UniversalThreadLogAnchor>().As<IThreadLogAnchor>().SingleInstance();
             builder.RegisterType<ThreadRegistry>().As<IThreadRegistry, IInitializableHostComponent>().SingleInstance();
             builder.RegisterType<ThreadLogAppender>().As<IThreadLogAppender>().SingleInstance();
-            builder.RegisterType<RealFramework>().As<IFramework>().WithParameter(new TypedParameter(typeof(NodeConfiguration), _nodeConfig)).SingleInstance();
+            builder.RegisterType<RealFramework>().As<IFramework>().WithParameter(new TypedParameter(typeof(BootConfiguration), _bootConfig)).SingleInstance();
             builder.RegisterType<LoggerObjectFactory>().As<IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<ConfigurationSectionFactory>().As<IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<XmlConfigurationLoader>().SingleInstance().InstancePerLifetimeScope();
@@ -236,7 +236,7 @@ namespace NWheels.Core.Hosting
 
         private NodeLifetime CreateNodeLifetime()
         {
-            return new NodeLifetime(_nodeConfig, _baseContainer, _hostComponents, _logger);
+            return new NodeLifetime(_bootConfig, _baseContainer, _hostComponents, _logger);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -327,7 +327,7 @@ namespace NWheels.Core.Hosting
 
         private class NodeLifetime : IDisposable, ITenantIdentificationStrategy
         {
-            private readonly NodeConfiguration _nodeConfig;
+            private readonly BootConfiguration _nodeConfig;
             private readonly INodeHostLogger _logger;
             private readonly IInitializableHostComponent[] _hostComponents;
             private readonly ILifetimeScope _lifetimeContainer;
@@ -337,7 +337,7 @@ namespace NWheels.Core.Hosting
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public NodeLifetime(NodeConfiguration nodeConfig, IContainer baseContainer, IInitializableHostComponent[] hostComponents, INodeHostLogger logger)
+            public NodeLifetime(BootConfiguration nodeConfig, IContainer baseContainer, IInitializableHostComponent[] hostComponents, INodeHostLogger logger)
             {
                 _nodeConfig = nodeConfig;
                 _logger = logger;
@@ -438,7 +438,7 @@ namespace NWheels.Core.Hosting
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public NodeConfiguration NodeConfig
+            public BootConfiguration NodeConfig
             {
                 get
                 {
@@ -514,7 +514,7 @@ namespace NWheels.Core.Hosting
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private Assembly LoadModuleAssembly(NodeConfiguration.ModuleConfig module)
+            private Assembly LoadModuleAssembly(BootConfiguration.ModuleConfig module)
             {
                 var coreBinPath = PathUtility.LocalBinPath(module.Assembly);
                 var appBinPath = Path.Combine(_nodeConfig.LoadedFromDirectory, module.Assembly);
@@ -535,43 +535,6 @@ namespace NWheels.Core.Hosting
                     throw new NodeHostConfigException(string.Format(
                         "Module assembly '{0}' could not be found at any of the probed locations.", 
                         module.Assembly));
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void FindLifecycleComponents()
-            {
-                using ( _logger.LookingForLifecycleComponents() )
-                {
-                    try
-                    {
-                        IEnumerable<ILifecycleEventListener> foundComponents;
-
-                        if ( _lifetimeContainer.TryResolve<IEnumerable<ILifecycleEventListener>>(out foundComponents) )
-                        {
-                            _lifecycleComponents.AddRange(foundComponents);
-
-                            foreach ( var component in _lifecycleComponents )
-                            {
-                                _logger.FoundLifecycleComponent(component.GetType().ToString());
-                            }
-                        }
-                        else
-                        {
-                            _logger.NoLifecycleComponentsFound();
-                        }
-
-                        if ( _lifecycleComponents.Count == 0 )
-                        {
-                            _logger.NoLifecycleComponentsFound();
-                        }
-                    }
-                    catch ( Exception e )
-                    {
-                        _logger.FailedToLoadLifecycleComponents(e);
-                        throw;
-                    }
                 }
             }
         }
@@ -609,7 +572,7 @@ namespace NWheels.Core.Hosting
             private void LoadConfiguration()
             {
                 var loader = _ownerLifetime.LifetimeContainer.Resolve<XmlConfigurationLoader>();
-                loader.LoadConfiguration(_ownerLifetime.NodeConfig.ConfigFiles.Select(cf => cf.Path));
+                loader.LoadConfiguration(_ownerLifetime.NodeConfig.ConfigFiles);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

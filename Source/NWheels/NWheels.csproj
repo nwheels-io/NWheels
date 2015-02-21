@@ -110,7 +110,7 @@
     <Compile Include="Hosting\INodeConfiguration.cs" />
     <Compile Include="Hosting\INodeHost.cs" />
     <Compile Include="Hosting\LifecycleEventListenerBase.cs" />
-    <Compile Include="Hosting\NodeConfiguration.cs" />
+    <Compile Include="Hosting\BootConfiguration.cs" />
     <Compile Include="Hosting\NodeState.cs" />
     <Compile Include="IFramework.cs" />
     <Compile Include="Logging\ActivityLogNode.cs" />

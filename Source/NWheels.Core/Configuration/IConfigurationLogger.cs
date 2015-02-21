@@ -28,6 +28,9 @@ namespace NWheels.Core.Configuration
         [LogError]
         void FailedToLoadConfigurationFile(string path, Exception error);
 
+        [LogVerbose]
+        void OptionalFileNotPresentSkipping(string path);
+
         [LogDebug]
         void EvaluatingXmlIfScope(string comment, bool matched);
 

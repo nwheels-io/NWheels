@@ -15,7 +15,7 @@ namespace NWheels.Hosts.Service
 {
     static class Program
     {
-        private static NodeConfiguration s_NodeHostConfig;
+        private static BootConfiguration s_BootConfig;
         private static IPlainLog s_Log;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,11 +33,11 @@ namespace NWheels.Hosts.Service
             try
             {
                 LoadNodeHostConfig();
-                s_Log.ConfigureWindowsEventLogOutput(logName: "Application", sourceName: s_NodeHostConfig.ApplicationName + "." + s_NodeHostConfig.NodeName);
+                s_Log.ConfigureWindowsEventLogOutput(logName: "Application", sourceName: s_BootConfig.ApplicationName + "." + s_BootConfig.NodeName);
             }
             catch ( Exception e )
             {
-                s_Log.Critical("FAILED TO LOAD {0}: {1}", NodeConfiguration.DefaultNodeConfigFileName, e.Message);
+                s_Log.Critical("FAILED TO LOAD {0}: {1}", BootConfiguration.DefaultBootConfigFileName, e.Message);
                 return 1;
             }
 
@@ -53,19 +53,19 @@ namespace NWheels.Hosts.Service
 
         private static void LoadNodeHostConfig()
         {
-            s_Log.Debug("Loading {0}", NodeConfiguration.DefaultNodeConfigFileName);
+            s_Log.Debug("Loading {0}", BootConfiguration.DefaultBootConfigFileName);
 
-            s_NodeHostConfig = NodeConfiguration.LoadFromFile(PathUtility.LocalBinPath(NodeConfiguration.DefaultNodeConfigFileName));
-            s_NodeHostConfig.Validate();
+            s_BootConfig = BootConfiguration.LoadFromFile(PathUtility.LocalBinPath(BootConfiguration.DefaultBootConfigFileName));
+            s_BootConfig.Validate();
 
-            s_Log.Info(s_NodeHostConfig.ToLogString());
+            s_Log.Info(s_BootConfig.ToLogString());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        public static NodeConfiguration HostConfig
+        public static BootConfiguration HostConfig
         {
-            get { return s_NodeHostConfig; }
+            get { return s_BootConfig; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

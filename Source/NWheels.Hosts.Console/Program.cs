@@ -18,30 +18,29 @@ namespace NWheels.Hosts.Console
 {
     class Program
     {
-        private static NodeConfiguration s_NodeHostConfig;
-        private static NodeHost s_NodeHost;
-        private static ManualResetEvent s_StopRequested;
-        private static IPlainLog s_Log;
+        private static BootConfiguration _s_bootConfig;
+        private static NodeHost _s_nodeHost;
+        private static ManualResetEvent _s_stopRequested;
+        private static IPlainLog _s_log;
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         static int Main(string[] args)
         {
-            //GenerateDummyNodeHostConfig();
             CrashLog.RegisterUnhandledExceptionHandler();
 
-            s_Log = NLogBasedPlainLog.Instance;
-            s_Log.ConfigureConsoleOutput();
+            _s_log = NLogBasedPlainLog.Instance;
+            _s_log.ConfigureConsoleOutput();
             
-            s_Log.Info("NWheels Console Host version {0}", typeof(Program).Assembly.GetName().Version);
+            _s_log.Info("NWheels Console Host version {0}", typeof(Program).Assembly.GetName().Version);
 
             try
             {
-                LoadNodeHostConfig(args);
+                LoadBootConfig(args);
             }
             catch ( Exception e )
             {
-                s_Log.Critical("FAILED TO LOAD CONFIGURATION: {0}", e.Message);
+                _s_log.Critical("FAILED TO LOAD BOOT CONFIG: {0}", e.Message);
                 return 1;
             }
 
@@ -51,11 +50,11 @@ namespace NWheels.Hosts.Console
             }
             catch ( Exception e )
             {
-                s_Log.Critical("NODE FAILED TO START! {0}", e.ToString());
+                _s_log.Critical("NODE FAILED TO START! {0}", e.ToString());
                 return 2;
             }
 
-            WaitUntilStopRequested();
+            BlockUntilStopRequested();
 
             try
             {
@@ -63,7 +62,7 @@ namespace NWheels.Hosts.Console
             }
             catch ( Exception e )
             {
-                s_Log.Warning("NODE WAS NOT CORRECTLY STOPPED! {0}", e.ToString());
+                _s_log.Warning("NODE WAS NOT CORRECTLY STOPPED! {0}", e.ToString());
             }
 
             return 0;
@@ -71,26 +70,26 @@ namespace NWheels.Hosts.Console
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void LoadNodeHostConfig(string[] programArgs)
+        private static void LoadBootConfig(string[] programArgs)
         {
-            var configFilePath = PathUtility.LocalBinPath(programArgs.Length > 0 ? programArgs[0] : NodeConfiguration.DefaultNodeConfigFileName);
+            var configFilePath = PathUtility.LocalBinPath(programArgs.Length > 0 ? programArgs[0] : BootConfiguration.DefaultBootConfigFileName);
 
-            s_Log.Debug("Loading configuration from: {0}", configFilePath);
+            _s_log.Debug("Loading configuration from: {0}", configFilePath);
 
-            s_NodeHostConfig = NodeConfiguration.LoadFromFile(configFilePath);
-            s_NodeHostConfig.Validate();
+            _s_bootConfig = BootConfiguration.LoadFromFile(configFilePath);
+            _s_bootConfig.Validate();
 
-            s_Log.Debug("> Application Name   - {0}", s_NodeHostConfig.ApplicationName);
-            s_Log.Debug("> Node Name          - {0}", s_NodeHostConfig.NodeName);
+            _s_log.Debug("> Application Name   - {0}", _s_bootConfig.ApplicationName);
+            _s_log.Debug("> Node Name          - {0}", _s_bootConfig.NodeName);
 
-            foreach ( var moduleString in s_NodeHostConfig.FrameworkModules )
+            foreach ( var module in _s_bootConfig.FrameworkModules )
             {
-                s_Log.Debug("> Framework Module   - {0}", moduleString);
+                _s_log.Debug("> Framework Module   - {0}", module.Name);
             }
 
-            foreach ( var moduleString in s_NodeHostConfig.ApplicationModules )
+            foreach ( var module in _s_bootConfig.ApplicationModules )
             {
-                s_Log.Debug("> Application Module - {0}", moduleString);
+                _s_log.Debug("> Application Module - {0}", module.Name);
             }
         }
 
@@ -98,10 +97,10 @@ namespace NWheels.Hosts.Console
         
         private static void StartNodeHost()
         {
-            s_NodeHost = new NodeHost(s_NodeHostConfig, RegisterHostComponents);
-            s_NodeHost.LoadAndActivate();
+            _s_nodeHost = new NodeHost(_s_bootConfig, RegisterHostComponents);
+            _s_nodeHost.LoadAndActivate();
 
-            s_StopRequested = new ManualResetEvent(initialState: false);
+            _s_stopRequested = new ManualResetEvent(initialState: false);
             System.Console.CancelKeyPress += Console_CancelKeyPress;
         }
 
@@ -116,12 +115,12 @@ namespace NWheels.Hosts.Console
 
         private static void StopNodeHost()
         {
-            s_NodeHost.DeactivateAndUnload();
+            _s_nodeHost.DeactivateAndUnload();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void WaitUntilStopRequested()
+        private static void BlockUntilStopRequested()
         {
             System.Console.ForegroundColor = ConsoleColor.Green;
             System.Console.WriteLine();
@@ -129,7 +128,7 @@ namespace NWheels.Hosts.Console
             System.Console.WriteLine();
             System.Console.ForegroundColor = ConsoleColor.Gray;
 
-            s_StopRequested.WaitOne();
+            _s_stopRequested.WaitOne();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -137,32 +136,31 @@ namespace NWheels.Hosts.Console
         private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
             e.Cancel = true;
-            s_StopRequested.Set();
+            _s_stopRequested.Set();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         private static void GenerateDummyNodeHostConfig()
         {
-            s_NodeHostConfig = new NodeConfiguration() {
+            _s_bootConfig = new BootConfiguration() {
                 ApplicationName = "Test App",
                 NodeName = "Test Node",
-                ApplicationModules = new List<NodeConfiguration.ModuleConfig> {
-                    new NodeConfiguration.ModuleConfig {
+                ApplicationModules = new List<BootConfiguration.ModuleConfig> {
+                    new BootConfiguration.ModuleConfig {
                         Assembly = "Dummy.Module"
                     }
                 }
             };
 
-            var serializer = new DataContractSerializer(typeof(NodeConfiguration));
-            using ( var file = File.Create(PathUtility.LocalBinPath(NodeConfiguration.DefaultNodeConfigFileName)) )
+            var serializer = new DataContractSerializer(typeof(BootConfiguration));
+            using ( var file = File.Create(PathUtility.LocalBinPath(BootConfiguration.DefaultBootConfigFileName)) )
             {
-                serializer.WriteObject(file, s_NodeHostConfig);
+                serializer.WriteObject(file, _s_bootConfig);
                 file.Flush();
             }
 
-            s_NodeHostConfig = null;
+            _s_bootConfig = null;
         }
-
     }
 }
