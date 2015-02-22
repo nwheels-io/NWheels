@@ -38,11 +38,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Puzzle", "Puzzle", "{4829A9
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Puzzle.Nlog", "NWheels.Puzzle.Nlog\NWheels.Puzzle.Nlog.csproj", "{8EC79D0A-B99D-4ED1-9494-7756F29916C7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DBFBF987-2236-4A08-ABE8-8BB3826B9DA2}"
-	ProjectSection(SolutionItems) = preProject
-		FelixB.NWheels.nuspec = FelixB.NWheels.nuspec
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Puzzle.OdataOwinWebapi", "NWheels.Puzzle.OdataOwinWebapi\NWheels.Puzzle.OdataOwinWebapi.csproj", "{D793F755-6585-4E09-9F40-3A689FDF4DFF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Samples.RestService", "NWheels.Samples.RestService\NWheels.Samples.RestService.csproj", "{FC22F1C9-8CD7-4183-B527-9FB604E9500E}"
@@ -62,6 +57,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Quartz.Net", "Quartz.Net", "{D67834AA-369D-4F31-98EF-532DF0E9B520}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OData.Owin.WebApi", "OData.Owin.WebApi", "{DFC55177-01FC-402D-A66C-0B9F900E16A8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuSpec", "NuSpec", "{B699AC18-7BE9-477C-9007-848CFEF270B3}"
+	ProjectSection(SolutionItems) = preProject
+		FelixB.NWheels.FullStack.Init.ps1 = FelixB.NWheels.FullStack.Init.ps1
+		FelixB.NWheels.FullStack.nuspec = FelixB.NWheels.FullStack.nuspec
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

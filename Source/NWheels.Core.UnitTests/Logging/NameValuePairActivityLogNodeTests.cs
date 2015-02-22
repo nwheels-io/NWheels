@@ -16,7 +16,7 @@ namespace NWheels.Core.UnitTests.Logging
             "e99f7886838e4c37b433888132ef5f86";
 
         private const string ExpectedBaseNameValuePairs =
-            "2015-01-30 15:22:54.345 app=A1 node=N1 instance=I1 env=E1 message=Test.MessageOne level=Info logid=e99f7886838e4c37b433888132ef5f86 duration=0";
+            "2015-01-30_15:22:54.345 app=A1 node=N1 instance=I1 env=E1 message=Test.MessageOne level=Info logid=e99f7886838e4c37b433888132ef5f86 duration=0";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -59,8 +59,8 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Assert
 
             Assert.That(singleLineText, Is.EqualTo("Message one"));
-            Assert.That(fullDetailsText, Is.EqualTo(ExpectedBaseNameValuePairs.Replace(" ", System.Environment.NewLine)));
-            Assert.That(nameValuePairs, Is.EqualTo(ExpectedBaseNameValuePairs));
+            Assert.That(fullDetailsText, Is.EqualTo(ExpectedBaseNameValuePairs.Replace(" ", System.Environment.NewLine).Replace("_", " ")));
+            Assert.That(nameValuePairs, Is.EqualTo(ExpectedBaseNameValuePairs.Replace("_", " ")));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -84,13 +84,18 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-- Assert
 
-            const string expectedNameValuePairs = 
-                "app=A1 node=N1 instance=I1 env=E1 message=Test.MessageOne level=Error " +
+            const string expectedNameValuePairs =
+                "2015-01-30_15:22:54.345 app=A1 node=N1 instance=I1 env=E1 message=Test.MessageOne level=Error " +
                 "logid=e99f7886838e4c37b433888132ef5f86 exception=System.DivideByZeroException duration=0";
 
             Assert.That(singleLineText, Is.EqualTo("Message one"));
-            Assert.That(fullDetailsText, Is.EqualTo(expectedNameValuePairs.Replace(" ", System.Environment.NewLine) + System.Environment.NewLine + exception));
-            Assert.That(nameValuePairs, Is.EqualTo(expectedNameValuePairs));
+            Assert.That(fullDetailsText, Is.EqualTo(
+                expectedNameValuePairs
+                .Replace(" ", System.Environment.NewLine)
+                .Replace("_", " ") + 
+                System.Environment.NewLine + 
+                exception));
+            Assert.That(nameValuePairs, Is.EqualTo(expectedNameValuePairs.Replace("_", " ")));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -116,7 +121,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             Assert.That(singleLineText, Is.EqualTo("Message one: accountId=ABCD1234"));
             //Assert.That(fullDetailsText, Is.EqualTo(ExpectedBaseNameValuePairs.Replace(" ", System.Environment.NewLine)));
-            Assert.That(nameValuePairs, Is.EqualTo(ExpectedBaseNameValuePairs + " accountId=ABCD1234"));
+            Assert.That(nameValuePairs, Is.EqualTo(ExpectedBaseNameValuePairs.Replace("_", " ") + " accountId=ABCD1234"));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
