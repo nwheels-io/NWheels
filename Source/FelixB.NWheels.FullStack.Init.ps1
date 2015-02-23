@@ -18,6 +18,18 @@ if (!(test-path $runtimeTarget)) {
 
 Copy-Item "$runtimeSource/*" $runtimeTarget -Recurse -Force
 
+# set Copy Local to false on references to assemblies in this package
+
+$asms = $package.AssemblyReferences | %{$_.Name}
+
+foreach ($reference in $project.Object.References)
+{
+    if ($asms -contains $reference.Name + ".dll")
+    {
+        $reference.CopyLocal = $false;
+    }
+}
+
 # get the active solution
 #$solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
 

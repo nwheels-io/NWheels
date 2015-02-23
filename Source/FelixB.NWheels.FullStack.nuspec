@@ -15,7 +15,7 @@
       - Tailor technology stack ("the puzzle") to your requirements by choosing from a set of pieces provided out-of-the-box, and wherever necessary, bring pieces of your own.
       This Full Stack package installs the core framework and the default puzzle, which sets you up and running. Recommended unless you assemble a custom puzzle.
     </description>
-    <summary>NWheels is aimed to become an A-to-Z architectural recipe and implementation framework for enterprise-scale application development on .NET platform</summary>
+    <summary>A-to-Z architectural recipe and implementation framework for enterprise-scale application development on .NET platform</summary>
     <copyright>Copyright © 2014 Felix Berman</copyright>
     <tags>Fullstack Enterprise Architecture Productivity RAD</tags>
     <dependencies>
