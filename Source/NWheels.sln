@@ -64,6 +64,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuSpec", "NuSpec", "{B699AC
 		FelixB.NWheels.FullStack.nuspec = FelixB.NWheels.FullStack.nuspec
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Tools.LogViewerWeb", "NWheels.Tools.LogViewerWeb\NWheels.Tools.LogViewerWeb.csproj", "{40AA597B-9B84-4A74-A160-302D9B8AA615}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -134,6 +136,10 @@ Global
 		{5BC24A16-7B3B-4F81-B97E-FD8F2B60BB95}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5BC24A16-7B3B-4F81-B97E-FD8F2B60BB95}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5BC24A16-7B3B-4F81-B97E-FD8F2B60BB95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40AA597B-9B84-4A74-A160-302D9B8AA615}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40AA597B-9B84-4A74-A160-302D9B8AA615}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40AA597B-9B84-4A74-A160-302D9B8AA615}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40AA597B-9B84-4A74-A160-302D9B8AA615}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -159,5 +165,6 @@ Global
 		{059A31CF-8359-42CD-BD77-5B11A7D5A0FE} = {4829A9A2-7B02-4FD7-8581-FC59B4029699}
 		{D67834AA-369D-4F31-98EF-532DF0E9B520} = {4829A9A2-7B02-4FD7-8581-FC59B4029699}
 		{DFC55177-01FC-402D-A66C-0B9F900E16A8} = {4829A9A2-7B02-4FD7-8581-FC59B4029699}
+		{40AA597B-9B84-4A74-A160-302D9B8AA615} = {CE3F724B-60C0-4274-B3F3-1C2CDD3D8531}
 	EndGlobalSection
 EndGlobal

@@ -1,0 +1,71 @@
+﻿<html>
+<head>
+    <meta charset="utf-8">
+    <title>Thread Log View - LOADING . . .</title>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <link rel="stylesheet" type="text/css" href="/content/angular-ui-tree.min.css">
+</head>
+<body ng-app="logViewerApp">
+
+    <script type="text/ng-template" id="items_renderer.html">
+        <tr>
+            <td>
+                <img src="/content/icon_collapsed.png" ng-click="toggle()">
+                {{$item.singleLineText}}
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tbody ui-tree-nodes="treeOptions" ng-model="item.subNodes">
+        <tbody ng-repeat="item in item.items" ui-tree-node ng-include="'items_renderer.html'"></tbody>
+        </tbody>
+    </script>
+
+    <table width="100%" ng-controller="threadLogController">
+        <thead>
+            <tr>
+                <th>Activity/Message</th>
+                <th>Timestamp</th>
+                <th>Duration</th>
+                <th>CPU</th>
+                <th>DB Count</th>
+                <th>DB Duration</th>
+                <th>Lock Wait Count</th>
+                <th>Lock Wait Duration</th>
+                <th>Lock Hold Count</th>
+                <th>Lock Hold Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <img src="/content/icon_collapsed.png" ng-click="toggle()">
+                    {{rootActivity.singleLineText}}
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        <tbody ui-tree-nodes="treeOptions" ng-model="item.subNodes">
+        <tbody ng-repeat="item in rootActivity.subNodes" ui-tree-node ng-include="'items_renderer.html'"></tbody>
+        </tbody>
+    </table>
+
+    <script src="/content/angular.min.js"></script>
+    <script src="/content/angular-ui-tree.min.js"></script>
+    <script src="/app.js"></script>
+</body>
+</html>
