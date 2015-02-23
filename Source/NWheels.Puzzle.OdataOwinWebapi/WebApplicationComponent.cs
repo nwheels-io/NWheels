@@ -20,6 +20,7 @@ namespace NWheels.Puzzle.OdataOwinWebapi
     internal class WebApplicationComponent : LifecycleEventListenerBase
     {
         private readonly IUiApplication _app;
+        private readonly string _address;
         private readonly ILogger _logger;
         private readonly ILifetimeScope _container;
         private IDisposable _host = null;
@@ -29,6 +30,7 @@ namespace NWheels.Puzzle.OdataOwinWebapi
         public WebApplicationComponent(IWebAppEndpoint endpoint, Auto<ILogger> logger, IComponentContext componentContext)
         {
             _app = endpoint.Contract;
+            _address = endpoint.Address;
             _logger = logger.Instance;
             _container = (ILifetimeScope)componentContext;
         }
@@ -37,12 +39,10 @@ namespace NWheels.Puzzle.OdataOwinWebapi
 
         public override void Activate()
         {
-            const string url = "http://localhost:9000/";
-
             try
             {
-                _host = WebApp.Start(url, ConfigureWebApplication);
-                _logger.WebApplicationStarted(_app.GetType().Name, url);
+                _host = WebApp.Start(_address, ConfigureWebApplication);
+                _logger.WebApplicationStarted(_app.GetType().Name, _address);
             }
             catch ( Exception e )
             {
@@ -73,21 +73,7 @@ namespace NWheels.Puzzle.OdataOwinWebapi
         {
             HttpConfiguration config = new HttpConfiguration();
 
-            //config.Formatters.Clear();
-            config.Formatters.Add(config.Formatters.XmlFormatter);
-            //config.Formatters.Remove(config.Formatters.XmlFormatter);
-
             config.MapHttpAttributeRoutes();
-            //config.Routes.MapHttpRoute(
-            //    name: "DefaultApi",
-            //    routeTemplate: "api/{controller}",
-            //    defaults: new { id = RouteParameter.Optional }
-            //);
-
-            ODataModelBuilder model = new ODataConventionModelBuilder();
-            model.EntitySet<PingItemEntity>("PingItem");
-            config.MapODataServiceRoute(routeName: "odata", routePrefix: "odata", model: model.GetEdmModel());
-
             config.DependencyResolver = new AutofacWebApiDependencyResolver(_container);
 
             app.UseAutofacMiddleware(_container);

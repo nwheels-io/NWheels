@@ -102,6 +102,9 @@
     <Compile Include="Processing\StateMachine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RealFramework.cs" />
+    <Compile Include="UI\UiApplication.cs" />
+    <Compile Include="UI\Web\IWebAppClientSide.cs" />
+    <Compile Include="UI\Web\IWebAppServerSide.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels\NWheels.csproj">
