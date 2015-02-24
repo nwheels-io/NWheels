@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Owin.Hosting;
+using Nancy.Json;
 using Owin;
 
 namespace NWheels.Tools.LogViewerWeb
@@ -13,6 +14,9 @@ namespace NWheels.Tools.LogViewerWeb
         static void Main(string[] args)
         {
             var url = "http://+:8999";
+
+            JsonSettings.MaxJsonLength = Int32.MaxValue;
+            JsonSettings.MaxRecursions = Int32.MaxValue;
 
             using ( WebApp.Start<Startup>(url) )
             {

@@ -1,1 +1,77 @@
-﻿THIS IS STYLE.CSS
+﻿body {
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	font-size: 10pt;
+	background-color:white;
+}
+
+.view_header { 
+	position:fixed;
+	height:75px; 
+	z-index:100;
+}
+
+.header_params {
+	padding:5px;
+	font-size:11pt;
+	color:#7DA0BD;
+	background-color:white;
+}
+
+.marker {
+	font-size:11pt;
+	background-color:#FBFFA6; 
+	padding:2px;
+	border-radius:3px;
+}
+
+.view_body { position:absolute;top:75px; }
+
+.col_message { width:600px; }
+.col_timestamp { width:160px; text-align:right; font-size:9pt; }
+.col_duration { width:100px;text-align:right; font-size:9pt;}
+.col_counter { width:70px; }
+
+.grid_row {
+	margin:0;
+	width:1400px;
+}
+
+.view_body .grid_row {
+	border-bottom:1px solid #DAE2E8;
+}
+
+.grid_cell {
+	margin:0;
+	padding:3px;
+	border-right:1px solid #B7D2E8;
+	overflow: hidden;
+	float:left;
+}
+
+.grid_cell img { margin-bottom:3px; }
+
+.non_expandable { 
+	padding-left:16px;
+}
+
+.header_cell {
+	height:45px;
+	background-color:#6DB84F;
+	color:white;
+	font-size: 10pt !important;
+}
+
+.body_cell {
+	height:22px;
+}
+
+.activity_node {	background-color:#f2f2f2;}
+.level_debug { color:#aaa;}
+.level_verbose { color:#999;}
+.level_info { color:navy;}
+.level_warning { color:#DEAA00;}
+.level_error { color:#DE4E4E;}
+.level_critical { color:red;font-weight:bold;}
+
+
+
