@@ -46,7 +46,10 @@
 					}">
 					<div class="grid_cell body_cell col_message" ng-style="{'width': 600 - 20 * (depth()-1)}">
 						<a data-nodrag ng-click="toggle(this)" ng-if="node.subNodes.length"><img src="/content/icon-collapsed.png" ng-hide="collapsed"/><img src="/content/icon-expanded.png" ng-show="collapsed"/></a>
-						<span ng-class="{non_expandable: !node.subNodes.length}">{{node.singleLineText}}</span>
+						<span ng-class="{non_expandable: !node.subNodes.length}">
+							<a ng-if="node.fullDetailsText" ng-click="toggleDetails(this)">{{node.singleLineText}}</a>
+							<span !ng-if="node.fullDetailsText">{{node.singleLineText}}</span>
+						</span>
 					</div>
 					<div class="grid_cell body_cell col_timestamp">
 						<span ng-if="depth() === 1">{{threadLog.startedAtUtc.substring(0,23)}}</span>
@@ -62,6 +65,9 @@
 					<div class="grid_cell body_cell col_counter"></div>
 					<div class="grid_cell body_cell col_counter"></div>
 					<div class="grid_cell body_cell col_counter"></div>
+					<div class="clearfix full_details" ng-show="detailsExpanded">
+						{{node.fullDetailsText}}
+					</div>
                 </div>
 				<ol ui-tree-nodes="" ng-model="node.subNodes" ng-class="{hidden: !collapsed}">
 					<li ng-repeat="node in node.subNodes" ui-tree-node ng-include="'nodes_renderer.html'">
