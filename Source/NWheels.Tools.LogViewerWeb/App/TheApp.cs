@@ -24,6 +24,7 @@ namespace NWheels.Tools.LogViewerWeb.App
 
             base.Get["/app.js"] = _ => Response.AsText(LoadResource("app.js"), contentType: "application/javascript");
             base.Get["/style.css"] = _ => Response.AsText(LoadResource("style.css"), contentType: "text/css");
+            base.Get["/"] = _ => Response.AsText(LoadResource("index.html"), contentType: "text/html");
             base.Get["/threadlog/{logId:guid}"] = _ => Response.AsText(LoadResource("index.html"), contentType: "text/html");
             base.Get["/threadlog/{logId:guid}/json"] = _ => ServeThreadLog(_.logId);
         }

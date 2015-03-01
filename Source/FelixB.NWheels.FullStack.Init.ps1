@@ -17,34 +17,3 @@ if (!(test-path $runtimeTarget)) {
 # copy everything in there
 
 Copy-Item "$runtimeSource/*" $runtimeTarget -Recurse -Force
-
-# set Copy Local to false on references to assemblies in this package
-
-$asms = $package.AssemblyReferences | %{$_.Name}
-
-foreach ($reference in $project.Object.References)
-{
-    if ($asms -contains $reference.Name + ".dll")
-    {
-        $reference.CopyLocal = $false;
-    }
-}
-
-# get the active solution
-#$solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
-
-# create a runtime solution folder if it doesn't exist
-
-#$runtimeFolder = $solution.Projects | where-object { $_.ProjectName -eq "runtime" } | select -first 1
-
-#if(!$runtimeFolder) {
-	#$runtimeFolder = $solution.AddSolutionFolder("runtime")
-#}
-
-# add all our support runtime scripts to our Support solution folder
-
-#$folderItems = Get-Interface $runtimeFolder.ProjectItems ([EnvDTE.ProjectItems])
-
-#ls $runtimeTarget | foreach-object { 
-#	$folderItems.AddFromFile($_.FullName) > $null
-#} > $null
