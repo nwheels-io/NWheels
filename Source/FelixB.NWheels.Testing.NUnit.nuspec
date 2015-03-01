@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>FelixB.NWheels.Testing.NUnit</id>
-    <version>0.9.1.0</version>
+    <version>0.9.1.1</version>
     <title>NWheels.Testing.NUnit</title>
     <authors>Felix Berman</authors>
     <licenseUrl>https://github.com/felix-b/NWheels/blob/master/LICENSE</licenseUrl>
