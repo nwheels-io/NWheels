@@ -19,14 +19,16 @@
 
 .marker {
 	font-size:11pt;
-	background-color:#FBFFA6; 
+	background-color:#FDE9A8; 
 	padding:2px;
 	border-radius:3px;
 }
 
-.view_body { position:absolute;top:75px; }
+.view_body { position:absolute;top:106px; }
 
 .col_message { width:600px; }
+.body_cell.col_message { border-right:none; }
+.col_ellipsis { width:23px; }
 .col_timestamp { width:160px; text-align:right; font-size:9pt; }
 .col_duration { width:100px;text-align:right; font-size:9pt;}
 .col_counter { width:70px; }
@@ -37,11 +39,11 @@
 }
 
 .grid_row:hover {
-	background-color:#DBF5D5;
+	background-color:#FDE9A8;
 }
 
 .view_body .grid_row {
-	border-bottom:1px solid #DAE2E8;
+	border-bottom:1px solid #CED8E0;
 }
 
 .grid_cell {
@@ -54,28 +56,63 @@
 
 .grid_cell img { margin-bottom:3px; }
 
+.grid_cell a, .full_details a { 
+	cursor:pointer; 
+}
+
 .non_expandable { 
 	padding-left:16px;
 }
 
 .header_cell {
 	height:45px;
-	background-color:#6DB84F;
+	background-color:#65A637;
 	color:white;
 	font-size: 10pt !important;
 }
 
 .body_cell {
 	height:22px;
+	white-space:nowrap;
 }
 
-.activity_node {	background-color:#f2f2f2;}
-.level_debug { color:#aaa;}
-.level_verbose { color:#999;}
+.activity_node {	background-color:#F0F0F0;}
+.level_debug { color:#9D9D9D;}
+.level_verbose { color:#8C8C8C;}
 .level_info { color:navy;}
 .level_warning { color:#DEAA00;}
-.level_error { color:#DE4E4E;}
+.level_error { color:#DA3939;}
 .level_critical { color:red;font-weight:bold;}
 
-.full_details { background-color:#FBFFA6; font-family:Consolas, "Courier New", Courier; }
+.full_details { background-color:#FEF1CB; font-family:Consolas, "Courier New", Courier; border-right: 1px solid #B7D2E8; }
+.full_details pre { border:none; background-color:inherit; padding:3px 3px 0px 20px; margin:0; }
+.close_full_details { margin:0; padding:8px 3px 0 3px; }
+.close_full_details img { margin:0;}
 
+.view_selector {
+	float:left;
+	margin-right:5px;
+}
+
+.multiSelect > button{
+	min-height:30px !important;
+	min-width:100px;
+}
+
+.multiSelect .buttonLabel {
+	padding:0;
+}
+
+.toggle-switch {
+	height:29px;
+	border-radius:4px;
+	border-color:#bbb;
+	margin-top:1px;
+	font-variant: small-caps;
+}
+
+.toggle-switch .switch-left {
+	color: #FDE9A8;
+	font-weight:bold;
+	background-color:#65A637;
+}

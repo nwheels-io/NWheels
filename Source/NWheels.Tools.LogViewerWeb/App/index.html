@@ -5,85 +5,148 @@
     <link rel="stylesheet" type="text/css" href="/content/normalize.min.css">
     <link rel="stylesheet" type="text/css" href="/content/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/content/angular-ui-tree.min.css">
+	<link rel="stylesheet" type="text/css" href="/content/isteven-multi-select.css">
+	<link rel="stylesheet" type="text/css" href="/content/angular-toggle-switch.css">
     <link rel="stylesheet" type="text/css"  href="/style.css">
 </head>
-<body ng-app="logViewerApp">
+<body ng-app="logViewerApp" ng-controller="threadLogController">
 
-	<div ng-controller="threadLogController">
-		<div class="view_header">
-			<div class="header_params" ng-show="threadLog">
-				Log ID <span class="marker">{{threadLog.logId}}</span>
-				thread started at <span class="marker">{{threadLog.startedAtUtc}}</span> UTC
+	<div class="view_header">
+		<div class="clearfix header_params">
+			<div class="view_selector">
+				Capture:<br/>
+				<toggle-switch ng-model="isCaptureOn"><toggle-switch>
 			</div>
-			<div class="header_params" ng-hide="threadLog">
-				LOADING . . .
+			<div class="view_selector">
+				Environments:
+				<div
+					isteven-multi-select
+					input-model="availableEnvironments"
+					output-model="selectedEnvironments"
+					button-label="name"
+					helper-elements="all none"
+					item-label="name"
+					tick-property="selected">
+				</div>		
 			</div>
-			<div class="clearfix grid_row">
-				<div class="grid_cell header_cell col_message">Activity/Message</div>
-				<div class="grid_cell header_cell col_timestamp">Timestamp</div>
-				<div class="grid_cell header_cell col_duration">Duration</div>
-				<div class="grid_cell header_cell col_counter">CPU</div>
-				<div class="grid_cell header_cell col_counter">DB Count</div>
-				<div class="grid_cell header_cell col_counter">DB Duration</div>
-				<div class="grid_cell header_cell col_counter">Lock Wait Count</div>
-				<div class="grid_cell header_cell col_counter">Lock Wait Duration</div>
-				<div class="grid_cell header_cell col_counter">Lock Hold Count</div>
-				<div class="grid_cell header_cell col_counter">Lock Hold Duration</div>
+			<div class="view_selector">
+				Nodes:
+				<div
+					isteven-multi-select
+					input-model="availableNodes"
+					output-model="selectedNodes"
+					button-label="name"
+					helper-elements="all none"
+					item-label="name"
+					max-labels="2"
+					tick-property="selected">
+				</div>		
+			</div>
+			<div class="view_selector">
+				Task Types:
+				<div
+					isteven-multi-select
+					input-model="availableThreads"
+					output-model="selectedThreads"
+					button-label="name"
+					helper-elements="all none"
+					item-label="name"
+					max-labels="1"
+					tick-property="selected">
+				</div>		
+			</div>
+			<div class="view_selector">
+				Threads With:
+				<div
+					isteven-multi-select
+					input-model="availableLogLevels"
+					output-model="selectedLogLevels"
+					button-label="name"
+					helper-elements="all none"
+					item-label="name"
+					max-labels="3"
+					tick-property="selected"
+					translation="logLevelSelectorLabels">
+				</div>		
 			</div>
 		</div>
-		<div ng-if="rootNodes" class="view_body">
-			<!-- Nested node template -->
-			<script type="text/ng-template" id="nodes_renderer.html">
-				<div class="clearfix grid_row" ng-style="{'width': 1350 - 20 * (depth()-1)}" 
-					ng-class="{
-						activity_node: node.subNodes, 
-						level_debug: node.level==0, 
-						level_verbose: node.level==10, 
-						level_info: node.level==20, 
-						level_warning: node.level==30, 
-						level_error: node.level==40, 
-						level_critical: node.level==50
-					}">
-					<div class="grid_cell body_cell col_message" ng-style="{'width': 600 - 20 * (depth()-1)}">
-						<a data-nodrag ng-click="toggle(this)" ng-if="node.subNodes.length"><img src="/content/icon-collapsed.png" ng-hide="collapsed"/><img src="/content/icon-expanded.png" ng-show="collapsed"/></a>
-						<span ng-class="{non_expandable: !node.subNodes.length}">
-							<a ng-if="node.fullDetailsText" ng-click="toggleDetails(this)">{{node.singleLineText}}</a>
-							<span !ng-if="node.fullDetailsText">{{node.singleLineText}}</span>
-						</span>
-					</div>
-					<div class="grid_cell body_cell col_timestamp">
-						<span ng-if="depth() === 1">{{threadLog.startedAtUtc.substring(0,23)}}</span>
-						<span ng-if="depth() !== 1">+ {{node.millisecondsTimestamp | number}}</span>
-					</div>
-					<div class="grid_cell body_cell col_duration">
-						{{node.millisecondsDuration | number}}
-					</div>
-					<div class="grid_cell body_cell col_counter"></div>
-					<div class="grid_cell body_cell col_counter"></div>
-					<div class="grid_cell body_cell col_counter"></div>
-					<div class="grid_cell body_cell col_counter"></div>
-					<div class="grid_cell body_cell col_counter"></div>
-					<div class="grid_cell body_cell col_counter"></div>
-					<div class="grid_cell body_cell col_counter"></div>
-					<div class="clearfix full_details" ng-show="detailsExpanded">
-						{{node.fullDetailsText}}
-					</div>
-                </div>
-				<ol ui-tree-nodes="" ng-model="node.subNodes" ng-class="{hidden: !collapsed}">
-					<li ng-repeat="node in node.subNodes" ui-tree-node ng-include="'nodes_renderer.html'">
-					</li>
-				</ol>
-			</script>
-			<div ui-tree data-drag-enabled="false">
-			  <ol ui-tree-nodes="" ng-model="rootNodes" id="tree-root">
-				<li ng-repeat="node in rootNodes" ui-tree-node ng-include="'nodes_renderer.html'"></li>
-			  </ol>
+		<!--div class="header_params" ng-show="threadLog">
+			Log ID <span class="marker">{{threadLog.logId}}</span>
+			thread started at <span class="marker">{{threadLog.startedAtUtc}}</span> UTC
+		</div-->
+		<div class="header_params" ng-hide="threadLog">
+			LOADING . . .
+		</div>
+		<div class="clearfix grid_row">
+			<div class="grid_cell header_cell col_message">Activity/Message</div>
+			<div class="grid_cell header_cell col_timestamp">Timestamp<br/>+offset</div>
+			<div class="grid_cell header_cell col_duration">Duration</div>
+			<div class="grid_cell header_cell col_counter">CPU</div>
+			<div class="grid_cell header_cell col_counter">DB Count</div>
+			<div class="grid_cell header_cell col_counter">DB Duration</div>
+			<div class="grid_cell header_cell col_counter">Lock Wait Count</div>
+			<div class="grid_cell header_cell col_counter">Lock Wait Duration</div>
+			<div class="grid_cell header_cell col_counter">Lock Hold Count</div>
+			<div class="grid_cell header_cell col_counter">Lock Hold Duration</div>
+		</div>
+	</div>
+	<div ng-if="rootNodes" class="view_body">
+		<!-- Nested node template -->
+		<script type="text/ng-template" id="nodes_renderer.html">
+			<div class="clearfix grid_row" ng-style="{'width': 1350 - 20 * (depth()-1)}" 
+				ng-class="{
+					activity_node: node.subNodes, 
+					level_debug: node.level==0, 
+					level_verbose: node.level==10, 
+					level_info: node.level==20, 
+					level_warning: node.level==30, 
+					level_error: node.level==40, 
+					level_critical: node.level==50
+				}">
+				<div class="grid_cell body_cell col_message" ng-style="{'width': 577 - 20 * (depth()-1)}">
+					<a data-nodrag ng-click="toggle(this)" ng-if="node.subNodes.length"><img src="/content/icon-collapsed.png" ng-hide="collapsed"/><img src="/content/icon-expanded.png" ng-show="collapsed"/></a>
+					<span ng-class="{non_expandable: !node.subNodes.length}">
+						{{node.singleLineText}}
+					</span>
+				</div>
+				<div class="grid_cell body_cell col_ellipsis">
+					<a ng-click="toggleDetails(this)"><img src="/content/icon-ellipsis.png"></a>
+				</div>
+				<div class="grid_cell body_cell col_timestamp">
+					<span ng-if="depth() === 1">{{threadLog.startedAtUtc.substring(0,23).replace('T',' ')}}</span>
+					<span ng-if="depth() !== 1">+ {{node.millisecondsTimestamp | number}}</span>
+				</div>
+				<div class="grid_cell body_cell col_duration">
+					{{node.millisecondsDuration | number}}
+				</div>
+				<div class="grid_cell body_cell col_counter"></div>
+				<div class="grid_cell body_cell col_counter"></div>
+				<div class="grid_cell body_cell col_counter"></div>
+				<div class="grid_cell body_cell col_counter"></div>
+				<div class="grid_cell body_cell col_counter"></div>
+				<div class="grid_cell body_cell col_counter"></div>
+				<div class="grid_cell body_cell col_counter"></div>
+				<div class="clearfix full_details" ng-show="fullDetailsVisible(this)">
+					<pre>{{node.fullDetailsText || 'No details available'}}</pre>
+					<a class="close_full_details" ng-click="toggleDetails(this)"><img src="/content/icon-close-details.png"></a>
+				</div>
 			</div>
+			<ol ui-tree-nodes="" ng-model="node.subNodes" ng-class="{hidden: !collapsed}">
+				<li ng-repeat="node in node.subNodes" ui-tree-node ng-include="'nodes_renderer.html'">
+				</li>
+			</ol>
+		</script>
+		<div ui-tree data-drag-enabled="false">
+		  <ol ui-tree-nodes="" ng-model="rootNodes">
+			<li ng-repeat="node in rootNodes" ui-tree-node ng-include="'nodes_renderer.html'"></li>
+		  </ol>
 		</div>
 	</div>
 
     <script src="/content/angular.min.js"></script>
     <script src="/content/angular-ui-tree.min.js"></script>
+	<script src="/content/isteven-multi-select.js"></script>    
+	<script src="/content/angular-toggle-switch.min.js"></script>    
     <script src="/app.js"></script>
 </body>
 </html>
