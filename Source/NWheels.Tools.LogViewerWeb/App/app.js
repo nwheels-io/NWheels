@@ -5,7 +5,9 @@
 
 	//-----------------------------------------------------------------------------------------------------------------
     
-	app.controller('threadLogController', ['$http', '$location', '$document', '$scope', function ($http, $location, $document, $scope) {
+	app.controller('threadLogController', 
+	['$http', '$location', '$document', '$scope', '$interval', '$anchorScroll',
+	function ($http, $location, $document, $scope, $interval, $anchorScroll) {
 
         $scope.treeOptions = {
 			dataDragEnabled: false
@@ -67,19 +69,71 @@
 			nothingSelected : "All Threads"
 		};
 		
+		$scope.isCaptureOn = false;
 		$scope.rootNodes = [];
+
+		var captureTimer;
+		var lastCaptureId = 0;
 		
-        $http.get($location.absUrl() + '/json').then(function(result) {
-			$document[0].title = 'Thread ' + result.data.logId;
-            $scope.threadLog = result.data;
-            $scope.rootNodes.push(result.data.rootActivity);
+		$scope.startCapture = function() {
+			if(angular.isDefined(captureTimer)) {
+				return;
+			}
+
+			$location.hash('autoScroll');
+			
+			captureTimer = $interval(function() {
+				var request = {
+					lastCaptureId: lastCaptureId
+				};
+				$http.post('/capture', request).then(function(result) {
+					console.log(result.data);
+					
+					lastCaptureId = result.data.lastCaptureId;
+					
+					for (var i in result.data.logs) {
+						$scope.rootNodes.push(result.data.logs[i].rootActivity);
+					}
+
+					$anchorScroll();
+					
+					if(result.data.logs.length > 0) {
+					}
+				});
+			}, 1000);
+		};
+
+		$scope.stopCapture = function() {
+			if (angular.isDefined(captureTimer)) {
+				$interval.cancel(captureTimer);
+				captureTimer = undefined;
+			}
+		};
+
+		$scope.$on('$destroy', function() {
+			$scope.stopCapture();
         });
-        
-        $http.get($location.absUrl() + '/json').then(function(result) {
-			$document[0].title = 'Thread ' + result.data.logId;
-            $scope.threadLog = result.data;
-            $scope.rootNodes.push(result.data.rootActivity);
-        });
+
+		$scope.$watch('isCaptureOn', function (newVal, oldVal) {
+			if(newVal===true) {
+				$scope.startCapture();
+			}
+			else {
+				$scope.stopCapture();
+			}
+		});
+
+	    if ($location.path().toUpperCase().indexOf('/THREADLOG/') > 0) {
+	        $http.get($location.absUrl() + '/json').then(function(result) {
+	            $scope.rootNodes.push(result.data.rootActivity);
+	        });
+	    }
+		
+	    //$http.get($location.absUrl() + '/json').then(function(result) {
+		//	$document[0].title = 'Thread ' + result.data.logId;
+        //    $scope.threadLog = result.data;
+        //    $scope.rootNodes.push(result.data.rootActivity);
+        //});
     }]);
 	
 })();

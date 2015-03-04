@@ -86,7 +86,7 @@ namespace NWheels.Core.Logging
         private void PersistLogInXmlFormat(ThreadLog log)
         {
             var serializer = new DataContractSerializer(typeof(ThreadLogSnapshot));
-            var fileName = log.TaskType.ToString() + "-" + log.LogId.ToString("N") + ".threadlog";
+            var fileName = log.LogId.ToString("N") + ".threadlog";
 
             using ( var file = File.Create(Path.Combine(_threadLogFolder, fileName)) )
             {

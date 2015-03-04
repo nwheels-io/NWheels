@@ -62,7 +62,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App\FetchRequest.cs" />
+    <Compile Include="App\FetchResponse.cs" />
     <Compile Include="App\TheApp.cs" />
+    <Compile Include="App\LogFolderWatcher.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -90,8 +93,12 @@
     <Content Include="App\style.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\angular-toggle-switch.css" />
-    <Content Include="Content\angular-toggle-switch.min.js" />
+    <Content Include="Content\angular-toggle-switch.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\angular-toggle-switch.min.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\angular-ui-tree.min.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

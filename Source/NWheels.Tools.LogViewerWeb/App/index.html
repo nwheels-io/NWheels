@@ -1,7 +1,7 @@
 ﻿<html>
 <head>
     <meta charset="utf-8">
-    <title>LOADING . . .</title>
+    <title>NWheels Log Viewer</title>
     <link rel="stylesheet" type="text/css" href="/content/normalize.min.css">
     <link rel="stylesheet" type="text/css" href="/content/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/content/angular-ui-tree.min.css">
@@ -18,7 +18,7 @@
 				<toggle-switch ng-model="isCaptureOn"><toggle-switch>
 			</div>
 			<div class="view_selector">
-				Environments:
+				Environments
 				<div
 					isteven-multi-select
 					input-model="availableEnvironments"
@@ -30,7 +30,7 @@
 				</div>		
 			</div>
 			<div class="view_selector">
-				Nodes:
+				Nodes
 				<div
 					isteven-multi-select
 					input-model="availableNodes"
@@ -43,7 +43,7 @@
 				</div>		
 			</div>
 			<div class="view_selector">
-				Task Types:
+				Task Types
 				<div
 					isteven-multi-select
 					input-model="availableThreads"
@@ -56,7 +56,7 @@
 				</div>		
 			</div>
 			<div class="view_selector">
-				Threads With:
+				Threads With
 				<div
 					isteven-multi-select
 					input-model="availableLogLevels"
@@ -69,13 +69,10 @@
 					translation="logLevelSelectorLabels">
 				</div>		
 			</div>
-		</div>
-		<!--div class="header_params" ng-show="threadLog">
-			Log ID <span class="marker">{{threadLog.logId}}</span>
-			thread started at <span class="marker">{{threadLog.startedAtUtc}}</span> UTC
-		</div-->
-		<div class="header_params" ng-hide="threadLog">
-			LOADING . . .
+			<div class="view_selector">
+				Actions<br/>
+				<button type="button" class="btn btn-sm btn-danger" ng-click="rootNodes.length=0">Clear</button>
+			</div>
 		</div>
 		<div class="clearfix grid_row">
 			<div class="grid_cell header_cell col_message">Activity/Message</div>
@@ -110,7 +107,7 @@
 					</span>
 				</div>
 				<div class="grid_cell body_cell col_ellipsis">
-					<a ng-click="toggleDetails(this)"><img src="/content/icon-ellipsis.png"></a>
+					<a ng-click="toggleDetails(this)">...<img src="/content/icon-ellipsis.png" style="display:none;"></a>
 				</div>
 				<div class="grid_cell body_cell col_timestamp">
 					<span ng-if="depth() === 1">{{threadLog.startedAtUtc.substring(0,23).replace('T',' ')}}</span>
@@ -141,8 +138,11 @@
 			<li ng-repeat="node in rootNodes" ui-tree-node ng-include="'nodes_renderer.html'"></li>
 		  </ol>
 		</div>
+		<div class="clearfix">
+			<a ng-show="isCaptureOn" id="autoScroll"><img src="/content/spinner.gif"/></a>
+		</div>
 	</div>
-
+	
     <script src="/content/angular.min.js"></script>
     <script src="/content/angular-ui-tree.min.js"></script>
 	<script src="/content/isteven-multi-select.js"></script>    

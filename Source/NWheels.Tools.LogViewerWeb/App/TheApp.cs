@@ -9,43 +9,52 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Collections.Concurrent;
 using System.Configuration;
+using Nancy.ModelBinding;
 
 namespace NWheels.Tools.LogViewerWeb.App
 {
     public class TheApp : NancyModule
     {
-        private readonly List<string> _configuredFolderPaths = new List<string>();
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public TheApp()
         {
-            PopulateConfiguredFolderPaths();
-
             base.Get["/app.js"] = _ => Response.AsText(LoadResource("app.js"), contentType: "application/javascript");
             base.Get["/style.css"] = _ => Response.AsText(LoadResource("style.css"), contentType: "text/css");
             base.Get["/"] = _ => Response.AsText(LoadResource("index.html"), contentType: "text/html");
             base.Get["/threadlog/{logId:guid}"] = _ => Response.AsText(LoadResource("index.html"), contentType: "text/html");
             base.Get["/threadlog/{logId:guid}/json"] = _ => ServeThreadLog(_.logId);
+            base.Post["/capture"] = _ => ServeCapturedLogs(this.Bind<FetchRequest>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void PopulateConfiguredFolderPaths()
+        private Response ServeCapturedLogs(FetchRequest request)
         {
-            for ( int i = 1 ; i < 100 ; i++ )
-            {
-                var path = ConfigurationManager.AppSettings["path." + i];
+            Console.WriteLine("Serving captured thread logs for Last Capture ID = {0}", request.LastCaptureId);
 
-                if ( !string.IsNullOrWhiteSpace(path) )
+            long responseCaptureId = 0;
+            var responseLogs = new List<ThreadLogSnapshot>();
+
+            foreach ( var folder in Program.FolderWatchers )
+            {
+                var lastCaptureId = request.LastCaptureId;
+                var logsFromFolder = folder.GetCapturedLogs(ref lastCaptureId);
+                
+                responseLogs.AddRange(logsFromFolder);
+
+                if ( lastCaptureId > responseCaptureId )
                 {
-                    _configuredFolderPaths.Add(path);
+                    responseCaptureId = lastCaptureId;
                 }
-                else
-                {
-                    break;
-                }
+
+                Console.WriteLine("> CAPTURED {0} new logs in: {1}", logsFromFolder.Length, folder.FolderPath);
             }
+
+            responseLogs.Sort((x, y) => x.StartedAtUtc.CompareTo(y.StartedAtUtc));
+
+            return Response.AsJson(new FetchResponse {
+                LastCaptureId = responseCaptureId,
+                Logs = responseLogs.ToArray()
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,23 +63,16 @@ namespace NWheels.Tools.LogViewerWeb.App
         {
             Console.WriteLine("Serving thread log ID {0}", logId);
 
-            foreach ( var folderPath in _configuredFolderPaths )
+            foreach ( var folder in Program.FolderWatchers )
             {
-                var filePath = Path.Combine(folderPath, logId.ToString("N") + ".threadlog");
+                Console.WriteLine("> trying: {0}", folder.FolderPath);
 
-                Console.WriteLine("> trying: {0}", filePath);
+                ThreadLogSnapshot log;
 
-                if ( File.Exists(filePath) )
+                if ( folder.TryGetLogById(logId, out log) )
                 {
                     Console.WriteLine("> FOUND - serving.");
-
-                    var serializer = new DataContractSerializer(typeof(ThreadLogSnapshot));
-
-                    using ( var file = File.OpenRead(filePath) )
-                    {
-                        var snapshot = (ThreadLogSnapshot)serializer.ReadObject(file);
-                        return Response.AsJson(snapshot);
-                    }
+                    return Response.AsJson(log);
                 }
             }
 
