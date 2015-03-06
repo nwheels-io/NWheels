@@ -119,6 +119,7 @@ namespace NWheels.Logging
         public T Value;
         public bool IsDetail;
         public string Format;
+        public LogContentTypes ContentType;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -161,6 +162,7 @@ namespace NWheels.Logging
             : base(messageId, level, exception)
         {
             _value1 = value1;
+            base.BubbleContentTypesFrom(_value1.ContentType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -210,6 +212,8 @@ namespace NWheels.Logging
         {
             _value1 = value1;
             _value2 = value2;
+            
+            base.BubbleContentTypesFrom(_value1.ContentType | _value2.ContentType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -266,6 +270,8 @@ namespace NWheels.Logging
             _value1 = value1;
             _value2 = value2;
             _value3 = value3;
+
+            base.BubbleContentTypesFrom(_value1.ContentType | _value2.ContentType | _value3.ContentType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -328,6 +334,8 @@ namespace NWheels.Logging
             _value2 = value2;
             _value3 = value3;
             _value4 = value4;
+
+            base.BubbleContentTypesFrom(_value1.ContentType | _value2.ContentType | _value3.ContentType | _value4.ContentType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -395,6 +403,10 @@ namespace NWheels.Logging
             _value3 = value3;
             _value4 = value4;
             _value5 = value5;
+
+            base.BubbleContentTypesFrom(
+                _value1.ContentType | _value2.ContentType | _value3.ContentType | _value4.ContentType | 
+                _value5.ContentType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -467,6 +479,10 @@ namespace NWheels.Logging
             _value4 = value4;
             _value5 = value5;
             _value6 = value6;
+
+            base.BubbleContentTypesFrom(
+                _value1.ContentType | _value2.ContentType | _value3.ContentType | _value4.ContentType | 
+                _value5.ContentType | _value6.ContentType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -544,6 +560,10 @@ namespace NWheels.Logging
             _value5 = value5;
             _value6 = value6;
             _value7 = value7;
+
+            base.BubbleContentTypesFrom(
+                _value1.ContentType | _value2.ContentType | _value3.ContentType | _value4.ContentType | 
+                _value5.ContentType | _value6.ContentType | _value7.ContentType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -626,6 +646,10 @@ namespace NWheels.Logging
             _value6 = value6;
             _value7 = value7;
             _value8 = value8;
+
+            base.BubbleContentTypesFrom(
+                _value1.ContentType | _value2.ContentType | _value3.ContentType | _value4.ContentType |
+                _value5.ContentType | _value6.ContentType | _value7.ContentType | _value8.ContentType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

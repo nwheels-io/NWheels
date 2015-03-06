@@ -270,7 +270,7 @@ namespace NWheels.Logging
         public static string FormatNameValuePair(string name, string value)
         {
             name = name.TruncateAt(50);
-            value = (value != null ? value./*TruncateAt(1024).*/Replace('"', '\'') : "null");
+            value = (value != null ? value.TruncateAt(255).Replace('"', '\'') : "null");
 
             if ( value.Any(c => char.IsWhiteSpace(c) || c == '=') )
             {
