@@ -8,10 +8,18 @@ using System.Threading.Tasks;
 namespace NWheels.Logging
 {
     [DataContract(Namespace = "NWheels.Logging", Name = "ThreadLog")]
-    [KnownType(typeof(LogNodeSnapshot))]
-    [KnownType(typeof(ActivityNodeSnapshot))]
     public class ThreadLogSnapshot
     {
+        [DataMember]
+        public string EnvironmentName { get; set; }
+        [DataMember]
+        public string NodeName { get; set; }
+        [DataMember]
+        public string NodeInstance { get; set; }
+        [DataMember]
+        public string MachineName { get; set; }
+        [DataMember]
+        public int ProcessId { get; set; }
         [DataMember]
         public Guid LogId { get; set; }
         [DataMember]
@@ -21,13 +29,15 @@ namespace NWheels.Logging
         [DataMember]
         public ThreadTaskType TaskType { get; set; }
         [DataMember]
-        public ActivityNodeSnapshot RootActivity { get; set; }
+        public LogNodeSnapshot RootActivity { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [DataContract(Namespace = "NWheels.Logging", Name = "Log")]
+        [DataContract(Namespace = "NWheels.Logging", Name = "Node")]
         public class LogNodeSnapshot
         {
+            [DataMember]
+            public bool IsActivity { get; set; }
             [DataMember]
             public LogContentTypes ContentTypes { get; set; }
             [DataMember]
@@ -35,22 +45,22 @@ namespace NWheels.Logging
             [DataMember]
             public long MillisecondsTimestamp { get; set; }
             [DataMember]
-            public string SingleLineText { get; set; }
-            [DataMember]
-            public string FullDetailsText { get; set; }
-            [DataMember]
             public string ExceptionTypeName { get; set; }
+            [DataMember]
+            public IList<NameValuePairSnapshot> NameValuePairs { get; set; }
+            [DataMember]
+            public IList<LogNodeSnapshot> SubNodes { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [DataContract(Namespace = "NWheels.Logging", Name = "Activity")]
-        public class ActivityNodeSnapshot : LogNodeSnapshot
+        [DataContract(Namespace = "NWheels.Logging", Name = "Pair")]
+        public class NameValuePairSnapshot
         {
             [DataMember]
-            public long MillisecondsDuration { get; set; }
+            public string Name { get; set; }
             [DataMember]
-            public LogNodeSnapshot[] SubNodes { get; set; }
+            public string Value { get; set; }
         }
     }
 }

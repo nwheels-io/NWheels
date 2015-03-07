@@ -126,6 +126,8 @@
     <Compile Include="Logging\LogLevel.cs" />
     <Compile Include="Logging\LogContentTypes.cs" />
     <Compile Include="Logging\LogLevelExtensions.cs" />
+    <Compile Include="Logging\LogMessageHelper.cs" />
+    <Compile Include="Logging\LogNameValuePair.cs" />
     <Compile Include="Logging\LogNode.cs" />
     <Compile Include="Logging\NameValuePairActivityLogNode.cs" />
     <Compile Include="Logging\NameValuePairLogNode.cs" />

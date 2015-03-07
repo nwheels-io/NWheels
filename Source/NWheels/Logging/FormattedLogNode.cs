@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Hapil;
 using NWheels.Extensions;
 
 namespace NWheels.Logging
@@ -73,12 +74,12 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string FormatNameValuePairsText(string delimiter)
+        protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            return (
-                base.FormatNameValuePairsText(delimiter) + delimiter +
-                FormatNameValuePair("text", _singleLineText) + delimiter + 
-                FormatNameValuePair("details", _fullDetailsText));
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
+                new LogNameValuePair<string> { Name = "text", Value = _singleLineText },
+                new LogNameValuePair<string> { Name = "details", Value = _fullDetailsText, IsDetail = true }
+            });
         }
     }
 }

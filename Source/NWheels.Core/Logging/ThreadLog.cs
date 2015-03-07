@@ -82,11 +82,16 @@ namespace NWheels.Core.Logging
         public ThreadLogSnapshot TakeSnapshot()
         {
             return new ThreadLogSnapshot {
+                EnvironmentName = _node.EnvironmentName,
+                NodeName = _node.NodeName,
+                NodeInstance = _node.InstanceId,
+                MachineName = _s_machineName,
+                ProcessId = _s_processId,
                 LogId = _logId,
                 CorrelationId = _correlationId,
                 StartedAtUtc = _startedAtUtc,
                 TaskType = _taskType,
-                RootActivity = (ThreadLogSnapshot.ActivityNodeSnapshot)_rootActivity.TakeSnapshot()
+                RootActivity = _rootActivity.TakeSnapshot()
             };
         }
 
@@ -177,6 +182,11 @@ namespace NWheels.Core.Logging
             _anchor.CurrentThreadLog = null;
             _registry.ThreadFinished(this);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private readonly static string _s_machineName = System.Environment.MachineName;
+        private readonly static int _s_processId = System.Diagnostics.Process.GetCurrentProcess().Id;
     }
 }
 

@@ -54,8 +54,6 @@ namespace NWheels.Samples.RestService
             void ThisIsASampleDebugMessage();
             [LogInfo]
             void ThisIsASampleInfoMessage();
-            [LogMessage]
-            void ThisIsASampleInfoMessage();
         }
     }
 }

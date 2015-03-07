@@ -18,6 +18,7 @@ namespace NWheels.Logging
         private long _millisecondsTimestamp;
         private IThreadLog _threadLog = null;
         private LogNode _nextSibling = null;
+        private ILogNameValuePair[] _listedNameValuePairs = null;
         private string _formattedSingleLineText = null;
         private string _formattedFullDetailsText = null;
         private string _formattedNameValuePairsText = null;
@@ -36,14 +37,28 @@ namespace NWheels.Logging
 
         public virtual ThreadLogSnapshot.LogNodeSnapshot TakeSnapshot()
         {
-            return new ThreadLogSnapshot.LogNodeSnapshot {
+            var pairs = this.NameValuePairs;
+
+            var snapshot = new ThreadLogSnapshot.LogNodeSnapshot {
                 MillisecondsTimestamp = _millisecondsTimestamp,
                 Level = _level,
                 ContentTypes = _contentTypes,
-                SingleLineText = this.SingleLineText,
-                FullDetailsText = this.FullDetailsText,
+                NameValuePairs = new List<ThreadLogSnapshot.NameValuePairSnapshot>(capacity: pairs.Length),
                 ExceptionTypeName = (this.Exception != null ? this.Exception.GetType().FullName : null)
             };
+
+            for ( int i = 0 ; i < pairs.Length ; i++ )
+            {
+                if ( !pairs[i].IsBaseValue() )
+                {
+                    snapshot.NameValuePairs.Add(new ThreadLogSnapshot.NameValuePairSnapshot {
+                        Name = pairs[i].FormatName(),
+                        Value = pairs[i].FormatValue()
+                    });
+                }
+            }
+
+            return snapshot;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,6 +98,21 @@ namespace NWheels.Logging
             get
             {
                 return _contentTypes;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ILogNameValuePair[] NameValuePairs
+        {
+            get
+            {
+                if ( _listedNameValuePairs == null )
+                {
+                    _listedNameValuePairs = ListNameValuePairs().ToArray();
+                }
+
+                return _listedNameValuePairs;
             }
         }
 
@@ -204,7 +234,11 @@ namespace NWheels.Logging
 
         protected virtual string FormatSingleLineText()
         {
-            return MessageIdToText();
+            var valuesInSingleLineText = string.Join(
+                ", ", 
+                this.NameValuePairs.Where(p => p.IsIncludedInSingleLineText()).Select(p => p.FormatLogString()));
+
+            return MessageIdToText() + (string.IsNullOrEmpty(valuesInSingleLineText) ? string.Empty : ": " + valuesInSingleLineText);
         }
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -218,24 +252,57 @@ namespace NWheels.Logging
 
         protected virtual string FormatNameValuePairsText(string delimiter)
         {
+            return string.Join(delimiter, this.NameValuePairs.Select(p => p.FormatLogString()));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual IEnumerable<ILogNameValuePair> ListNameValuePairs()
+        {
             var node = _threadLog.Node;
 
-            var baseValues =
-                _threadLog.ThreadStartedAtUtc.AddMilliseconds(_millisecondsTimestamp).ToString("yyyy-MM-dd HH:mm:ss.fff") + delimiter +
-                FormatNameValuePair("app", node.ApplicationName) + delimiter +
-                FormatNameValuePair("node", node.NodeName) + delimiter +
-                FormatNameValuePair("instance", node.InstanceId) + delimiter +
-                FormatNameValuePair("env", node.EnvironmentName) + delimiter +
-                FormatNameValuePair("message", _messageId) + delimiter +
-                FormatNameValuePair("level", _level.ToString()) + delimiter +
-                FormatNameValuePair("logid", _threadLog.LogId.ToString("N"));
+            var baseValues = new ILogNameValuePair[] {
+                new LogNameValuePair<DateTime> {
+                    Name = "$$time", 
+                    Value = _threadLog.ThreadStartedAtUtc.AddMilliseconds(_millisecondsTimestamp), 
+                    Format = "yyyy-MM-dd HH:mm:ss.fff"
+                },
+                new LogNameValuePair<string> {
+                    Name = "$app", 
+                    Value = node.ApplicationName
+                },
+                new LogNameValuePair<string> {
+                    Name = "$node", 
+                    Value = node.NodeName
+                },
+                new LogNameValuePair<string> {
+                    Name = "$instance", 
+                    Value = node.InstanceId
+                },
+                new LogNameValuePair<string> {
+                    Name = "$env", 
+                    Value = node.EnvironmentName
+                },
+                new LogNameValuePair<string> {
+                    Name = "$message", 
+                    Value = _messageId
+                },
+                new LogNameValuePair<LogLevel> {
+                    Name = "$level", 
+                    Value = _level
+                },
+                new LogNameValuePair<Guid> {
+                    Name = "$logid", 
+                    Value = _threadLog.LogId
+                },
+            };
 
-            if ( this.Exception != null )
-            {
-                baseValues += delimiter + FormatNameValuePair("exception", this.Exception.GetType().FullName);
-            }
-
-            return baseValues;
+            return baseValues.ConcatIf(
+                this.Exception != null,
+                () => new LogNameValuePair<string> {
+                    Name = "$exception",
+                    Value = this.Exception.GetType().FullName
+                });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -263,21 +330,6 @@ namespace NWheels.Logging
             {
                 return _threadLog;
             }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static string FormatNameValuePair(string name, string value)
-        {
-            name = name.TruncateAt(50);
-            value = (value != null ? value.TruncateAt(255).Replace('"', '\'') : "null");
-
-            if ( value.Any(c => char.IsWhiteSpace(c) || c == '=') )
-            {
-                value = "\"" + value + "\"";
-            }
-
-            return (name + "=" + value);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace NWheels.Logging
@@ -63,23 +64,18 @@ namespace NWheels.Logging
 
         public override ThreadLogSnapshot.LogNodeSnapshot TakeSnapshot()
         {
-            var subNodes = new List<ThreadLogSnapshot.LogNodeSnapshot>();
+            var snapshot = base.TakeSnapshot();
+            var subNodes = new List<ThreadLogSnapshot.LogNodeSnapshot>(capacity: 16);
 
             for ( var child = _firstChild ; child != null ; child = child.NextSibling )
             {
                 subNodes.Add(child.TakeSnapshot());
             }
 
-            return new ThreadLogSnapshot.ActivityNodeSnapshot {
-                MillisecondsTimestamp = base.MillisecondsTimestamp,
-                Level = base.Level,
-                ContentTypes = base.ContentTypes,
-                SingleLineText = this.SingleLineText,
-                FullDetailsText = this.FullDetailsText,
-                ExceptionTypeName = (this.Exception != null ? this.Exception.GetType().FullName : null),
-                MillisecondsDuration = this.MillisecondsDuration,
-                SubNodes = subNodes.ToArray()
-            };
+            snapshot.SubNodes = subNodes;
+            snapshot.IsActivity = true;
+
+            return snapshot;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -239,11 +235,11 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string FormatNameValuePairsText(string delimiter)
+        protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            return 
-                base.FormatNameValuePairsText(delimiter) + delimiter + 
-                FormatNameValuePair("duration", this.MillisecondsDuration.ToString());
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
+                new LogNameValuePair<long> { Name = "duration", Value = this.MillisecondsDuration }
+            });
         }
     }
 }

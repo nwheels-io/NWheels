@@ -130,7 +130,7 @@ namespace NWheels.Core.Logging
             private readonly bool _mustCreateException;
             private readonly List<int> _exceptionArgumentIndex;
             private readonly string[] _valueArgumentFormat;
-            private readonly bool[] _valueArgumentIsDetail;
+            private readonly DetailAttribute[] _valueArgumentDetails;
             private readonly bool[] _isValueArgument;
             private readonly List<IOperand> _nameValuePairLocals;
             private IOperand<Exception> _exceptionOperand;
@@ -150,7 +150,7 @@ namespace NWheels.Core.Logging
                 _exceptionArgumentIndex = new List<int>();
                 _isValueArgument = new bool[_signature.ArgumentCount];
                 _valueArgumentFormat = new string[_signature.ArgumentCount];
-                _valueArgumentIsDetail = new bool[_signature.ArgumentCount];
+                _valueArgumentDetails = new DetailAttribute[_signature.ArgumentCount];
                 _nameValuePairLocals = new List<IOperand>();
 
                 ValidateSignature();
@@ -209,9 +209,17 @@ namespace NWheels.Core.Logging
                         pairLocal.Field(x => x.Format).Assign(m.Const(_valueArgumentFormat[argumentIndex]));
                     }
 
-                    if ( _valueArgumentIsDetail[argumentIndex] )
+                    var details = _valueArgumentDetails[argumentIndex];
+
+                    if ( details != null )
                     {
-                        pairLocal.Field(x => x.IsDetail).Assign(m.Const(true));
+                        if ( !details.IncludeInSingleLineText )
+                        {
+                            pairLocal.Field(x => x.IsDetail).Assign(m.Const(true));
+                        }
+
+                        pairLocal.Field(x => x.MaxStringLength).Assign(m.Const(details.MaxStringLength));
+                        pairLocal.Field(x => x.ContentTypes).Assign(m.Const(details.ContentTypes));
                     }
 
                     _nameValuePairLocals.Add(pairLocal);
@@ -409,7 +417,7 @@ namespace NWheels.Core.Logging
                     {
                         _isValueArgument[i] = true;
                         _valueArgumentFormat[i] = FormatAttribute.GetFormatString(_parameters[i]);
-                        _valueArgumentIsDetail[i] = DetailAttribute.IsDefinedOn(_parameters[i]);
+                        _valueArgumentDetails[i] = DetailAttribute.FromParameter(_parameters[i]);
                     }
                 }
             }

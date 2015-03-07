@@ -1,4 +1,5 @@
-﻿using Hapil;
+﻿using System.Xml.Linq;
+using Hapil;
 using Hapil.Testing.NUnit;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using NWheels.Core.Logging;
+using NWheels.DataObjects;
 using NWheels.Logging;
 using NWheels.Testing;
 
@@ -270,6 +272,31 @@ namespace NWheels.Core.UnitTests.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void CanSpecifySpecialContentTypes()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+            var messageXml = XElement.Parse("<Envelope><Header from='foo' to='bar' /><Body><Data value='12345' /></Body></Envelope>");
+
+            //-- Act
+
+            logger.ThisIsMyCommunicationMessageDump(123, "ABC", messageXml);
+
+            //-- Assert
+
+            Assert.That(_logAppender.GetLog()[0].SingleLineText, Is.EqualTo(
+                "This is my communication message dump: num=123"
+            ));
+            Assert.That(_logAppender.GetLog()[0].FullDetailsText, Is.EqualTo(
+                "str=ABC" + Environment.NewLine + "messageContents=\"" + messageXml.ToString().Replace("\"", "'") + "\"" + Environment.NewLine
+            ));
+            Assert.That(_logAppender.GetLog()[0].ContentTypes, Is.EqualTo(LogContentTypes.Text | LogContentTypes.CommunicationMessage));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         //[Test, Ignore("LogMethod is not yet supported")]
         //public void CanLogVoidMethodCallAsActivity()
         //{
@@ -353,6 +380,18 @@ namespace NWheels.Core.UnitTests.Logging
                 [Detail] string str,
                 [Format("yyyy-MM-dd")] DateTime dateTime,
                 [Format("MMM dd yyyy"), Detail] DateTimeOffset? dateTimeOffset);
+
+            [LogVerbose]
+            void ThisIsMyCommunicationMessageDump(
+                int num,
+                [Detail] string str,
+                [CommunicationMessageDetail] XElement messageContents);
+
+            [LogVerbose]
+            void ThisIsMyDataEntityDump(
+                int num,
+                [Detail] string str,
+                [DataEntityDetail] XElement entityContents);
 
             //[LogMethod]
             //void ThisIsMyVoidMethod(Action method);
@@ -511,6 +550,20 @@ namespace NWheels.Core.UnitTests.Logging
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public void LogMessageWithFormattedAndDetailParameters(int num, string str, DateTime dateTime, DateTimeOffset? dateTimeOffset)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ThisIsMyCommunicationMessageDump(int num, string str, XElement messageContents)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ThisIsMyDataEntityDump(int num, string str, XElement entityContents)
             {
                 throw new NotImplementedException();
             }
