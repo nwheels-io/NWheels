@@ -74,6 +74,7 @@ namespace NWheels.Logging
 
             snapshot.SubNodes = subNodes;
             snapshot.IsActivity = true;
+            snapshot.Duration = this.MillisecondsDuration;
 
             return snapshot;
         }
@@ -238,7 +239,7 @@ namespace NWheels.Logging
         protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
             return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
-                new LogNameValuePair<long> { Name = "duration", Value = this.MillisecondsDuration }
+                new LogNameValuePair<long> { Name = "$duration", Value = this.MillisecondsDuration }
             });
         }
     }

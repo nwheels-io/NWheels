@@ -57,7 +57,7 @@ namespace NWheels.Tools.LogViewer
             {
                 if ( _subNodeItems == null )
                 {
-                    var activityNode = (this.LogNode as ThreadLogSnapshot.ActivityNodeSnapshot);
+                    var activityNode = (this.LogNode as ThreadLogSnapshot.LogNodeSnapshot);
 
                     if ( activityNode != null && activityNode.SubNodes != null )
                     {
@@ -84,15 +84,16 @@ namespace NWheels.Tools.LogViewer
             public string GetFullDetailsText()
             {
                 var log = this.LogNode;
-                var activity = (this.LogNode as ThreadLogSnapshot.ActivityNodeSnapshot);
                 var text = new StringBuilder();
 
+                text.AppendLine("------ Message ------");
+                text.AppendFormat("ID              = {0}\r\n", log.MessageId);
                 text.AppendLine("------ Thread ------");
-                text.AppendFormat("ID              = {0}\r\n", this.ThreadLog.LogId);
+                text.AppendFormat("Log ID          = {0}\r\n", this.ThreadLog.LogId);
                 text.AppendFormat("Correlation ID  = {0}\r\n", this.ThreadLog.CorrelationId);
                 text.AppendFormat("Task Type       = {0}\r\n", this.ThreadLog.TaskType);
                 text.AppendFormat("Started at UTC  = {0:yyyy-MM-dd HH:mm:ss.fff}\r\n", this.ThreadLog.StartedAtUtc);
-                text.AppendFormat("------ {0} {1} ------\r\n", activity != null ? "Activity" : "Log", log.Level);
+                text.AppendFormat("------ {0} {1} ------\r\n", log.IsActivity ? "Activity" : "Log", log.Level);
                 text.AppendFormat("Recorded at UTC = {0:yyyy-MM-dd HH:mm:ss.fff} ({1} ms after thread start)\r\n", 
                     this.ThreadLog.StartedAtUtc.AddMilliseconds(log.MillisecondsTimestamp), log.MillisecondsTimestamp);
 
@@ -101,13 +102,11 @@ namespace NWheels.Tools.LogViewer
                     text.AppendFormat("Exception       = {0}\r\n", log.ExceptionTypeName);
                 }
 
-                text.AppendLine("------ Text ------");
-                text.AppendLine(log.SingleLineText);
+                text.AppendLine("------ Details ------");
 
-                if ( !string.IsNullOrEmpty(log.FullDetailsText) )
+                foreach ( var pair in log.NameValuePairs )
                 {
-                    text.AppendLine("------ Details ------");
-                    text.AppendLine(log.FullDetailsText);
+                    text.AppendFormat("{0} = {1}\r\n", pair.Name, pair.Value);
                 }
 
                 return text.ToString();
@@ -147,22 +146,20 @@ namespace NWheels.Tools.LogViewer
 
             private void SetNodeKind()
             {
-                var activityNode = (this.LogNode as ThreadLogSnapshot.ActivityNodeSnapshot);
-
-                if ( activityNode != null )
+                if ( this.LogNode.IsActivity )
                 {
                     if ( IsRootActivity )
                     {
                         this.NodeKind = (
-                            activityNode.Level < LogLevel.Warning ? LogNodeKind.ThreadSuccess : 
-                            activityNode.Level > LogLevel.Warning ? LogNodeKind.ThreadFailure : 
+                            this.LogNode.Level < LogLevel.Warning ? LogNodeKind.ThreadSuccess :
+                            this.LogNode.Level > LogLevel.Warning ? LogNodeKind.ThreadFailure : 
                             LogNodeKind.ThreadWarning);
                     }
                     else
                     {
                         this.NodeKind = (
-                            activityNode.Level < LogLevel.Warning ? LogNodeKind.ActivitySuccess : 
-                            activityNode.Level > LogLevel.Warning ? LogNodeKind.ActivityFailure : 
+                            this.LogNode.Level < LogLevel.Warning ? LogNodeKind.ActivitySuccess :
+                            this.LogNode.Level > LogLevel.Warning ? LogNodeKind.ActivityFailure : 
                             LogNodeKind.ActivityWarning);
                     }
                 }

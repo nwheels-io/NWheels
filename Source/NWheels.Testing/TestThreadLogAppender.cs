@@ -10,12 +10,23 @@ namespace NWheels.Testing
     public class TestThreadLogAppender : IThreadLogAppender
     {
         private readonly List<LogNode> _logNodes = new List<LogNode>();
+        private readonly TestFramework _framework;
+        private readonly TestThreadLog _threadLog;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TestThreadLogAppender(TestFramework framework)
+        {
+            _framework = framework;
+            _threadLog = new TestThreadLog(framework);
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AppendLogNode(LogNode node)
         {
             _logNodes.Add(node);
+            node.AttachToThreadLog(_threadLog, parent: null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -23,6 +34,7 @@ namespace NWheels.Testing
         public void AppendActivityNode(ActivityLogNode activity)
         {
             _logNodes.Add(activity);
+            activity.AttachToThreadLog(_threadLog, parent: null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -73,5 +85,107 @@ namespace NWheels.Testing
 
         public int? StartedThreadLogIndex { get; private set; }
         public ThreadTaskType? StartedThreadTaskType { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class TestThreadLog : IThreadLog
+        {
+            private readonly TestFramework _framework;
+            private readonly Guid _logId;
+            private readonly DateTime _startedAtUtc;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TestThreadLog(TestFramework framework)
+            {
+                _framework = framework;
+                _logId = framework.NewGuid();
+                _startedAtUtc = framework.UtcNow;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region IThreadLog Members
+
+            public void NotifyActivityClosed(ActivityLogNode activity)
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Hosting.INodeConfiguration Node
+            {
+                get
+                {
+                    return _framework.NodeConfiguration;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ThreadTaskType TaskType
+            {
+                get
+                {
+                    return ThreadTaskType.Unspecified;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Guid LogId
+            {
+                get
+                {
+                    return _logId;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Guid CorrelationId
+            {
+                get
+                {
+                    return _framework.CurrentCorrelationId;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public DateTime ThreadStartedAtUtc
+            {
+                get
+                {
+                    return _startedAtUtc;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public long ElapsedThreadMilliseconds
+            {
+                get
+                {
+                    return 0;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ActivityLogNode RootActivity
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ActivityLogNode CurrentActivity
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
+        }
     }
 }

@@ -168,12 +168,15 @@ namespace NWheels.Tools.LogViewer
             _pendingThreadLogs.Enqueue(new ThreadLogSnapshot {
                 StartedAtUtc = DateTime.UtcNow,
                 TaskType = ThreadTaskType.LogProcessing,
-                RootActivity = new ThreadLogSnapshot.ActivityNodeSnapshot {
+                RootActivity = new ThreadLogSnapshot.LogNodeSnapshot() {
+                    MessageId = "FailedToLoadFile",
+                    IsActivity = true,
                     ContentTypes = LogContentTypes.Text | LogContentTypes.Exception,
-                    SingleLineText = "Failed to load file: " + filePath,
-                    FullDetailsText = exception.ToString(),
                     ExceptionTypeName = exception.GetType().Name,
-                    Level = LogLevel.Error
+                    Level = LogLevel.Error,
+                    NameValuePairs = new ThreadLogSnapshot.NameValuePairSnapshot[] {
+                        new ThreadLogSnapshot.NameValuePairSnapshot { Name = "filePath", Value = filePath }
+                    }
                 }
             });
         }

@@ -37,13 +37,6 @@ namespace NWheels.Testing
 
         public TestFramework(DynamicModule dynamicModule)
         {
-            _dynamicModule = dynamicModule;
-            _logAppender = new TestThreadLogAppender();
-            _loggerFactory = new LoggerObjectFactory(_dynamicModule, _logAppender);
-            
-            _components = BuildComponentContainer();
-            _configurationFactory = new ConfigurationSectionFactory(_components, _dynamicModule);
-
             this.PresetGuids = new Queue<Guid>();
             this.PresetRandomInt32 = new Queue<int>();
             this.PresetRandomInt64 = new Queue<long>();
@@ -54,6 +47,13 @@ namespace NWheels.Testing
                 EnvironmentName = "TEST-ENV",
                 EnvironmentType = "TEST-ENV-TYPE"
             };
+
+            _dynamicModule = dynamicModule;
+            _logAppender = new TestThreadLogAppender(this);
+            _loggerFactory = new LoggerObjectFactory(_dynamicModule, _logAppender);
+
+            _components = BuildComponentContainer();
+            _configurationFactory = new ConfigurationSectionFactory(_components, _dynamicModule);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

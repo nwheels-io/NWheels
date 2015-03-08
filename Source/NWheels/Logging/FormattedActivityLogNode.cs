@@ -56,7 +56,7 @@ namespace NWheels.Logging
         {
             return base.ListNameValuePairs()
                 .ConcatIf(true, new LogNameValuePair<string> { Name = "text", Value = _singleLineText })
-                .ConcatIf(base.Exception != null, new LogNameValuePair<string> { Name = "exception", Value = base.Exception.ToString(), IsDetail = true });
+                .ConcatIf(base.Exception != null, () => new LogNameValuePair<string> { Name = "exception", Value = base.Exception.ToString(), IsDetail = true });
         }
     }
 }

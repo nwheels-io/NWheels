@@ -40,6 +40,7 @@ namespace NWheels.Logging
             var pairs = this.NameValuePairs;
 
             var snapshot = new ThreadLogSnapshot.LogNodeSnapshot {
+                MessageId = _messageId,
                 MillisecondsTimestamp = _millisecondsTimestamp,
                 Level = _level,
                 ContentTypes = _contentTypes,
@@ -53,7 +54,8 @@ namespace NWheels.Logging
                 {
                     snapshot.NameValuePairs.Add(new ThreadLogSnapshot.NameValuePairSnapshot {
                         Name = pairs[i].FormatName(),
-                        Value = pairs[i].FormatValue()
+                        Value = pairs[i].FormatValue(),
+                        IsDetail = pairs[i].IsBaseValue() || !pairs[i].IsIncludedInSingleLineText()
                     });
                 }
             }
@@ -293,7 +295,8 @@ namespace NWheels.Logging
                 },
                 new LogNameValuePair<Guid> {
                     Name = "$logid", 
-                    Value = _threadLog.LogId
+                    Value = _threadLog.LogId,
+                    Format = "N"
                 },
             };
 

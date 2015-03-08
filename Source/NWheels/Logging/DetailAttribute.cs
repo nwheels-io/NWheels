@@ -13,6 +13,7 @@ namespace NWheels.Logging
         public DetailAttribute()
         {
             MaxStringLength = 255;
+            ContentTypes = LogContentTypes.Text;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -53,13 +53,11 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var singleLineText = node.SingleLineText;
-            var fullDetailsText = node.FullDetailsText;
             var nameValuePairs = node.NameValuePairsText;
 
             //-- Assert
 
             Assert.That(singleLineText, Is.EqualTo("Message one"));
-            Assert.That(fullDetailsText, Is.Null);
             Assert.That(nameValuePairs, Is.EqualTo(ExpectedBaseNameValuePairs));
         }
 
@@ -83,7 +81,7 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Assert
 
             Assert.That(singleLineText, Is.EqualTo("Message one"));
-            Assert.That(fullDetailsText, Is.EqualTo(exception.ToString()));
+            Assert.That(fullDetailsText.Contains(exception.ToString()));
             Assert.That(nameValuePairs, Is.EqualTo(ExpectedBaseNameValuePairs + " exception=System.DivideByZeroException"));
         }
 
@@ -104,13 +102,11 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var singleLineText = node.SingleLineText;
-            var fullDetailsText = node.FullDetailsText;
             var nameValuePairs = node.NameValuePairsText;
 
             //-- Assert
 
             Assert.That(singleLineText, Is.EqualTo("Message one: accountId=ABCD1234"));
-            Assert.That(fullDetailsText, Is.Null);
             Assert.That(nameValuePairs, Is.EqualTo(ExpectedBaseNameValuePairs + " accountId=ABCD1234"));
         }
 
@@ -146,11 +142,9 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Assert
 
             Assert.That(singleLineText, Is.EqualTo("Message one: accountId=ABCD1234"));
-            
-            Assert.That(fullDetailsText, Is.EqualTo(
-                "balance=1,234,567,890.00" + System.Environment.NewLine + 
-                exception.ToString()));
-            
+
+            Assert.That(fullDetailsText.Contains(exception.ToString()));
+
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +
                 " exception=System.DivideByZeroException accountId=ABCD1234 balance=1,234,567,890.00"));
@@ -174,14 +168,11 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var singleLineText = node.SingleLineText;
-            var fullDetailsText = node.FullDetailsText;
             var nameValuePairs = node.NameValuePairsText;
 
             //-- Assert
 
             Assert.That(singleLineText, Is.EqualTo("Message one: P1=ABC, P2=123, P3=Monday"));
-
-            Assert.That(fullDetailsText, Is.Null);
 
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +
@@ -207,14 +198,11 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var singleLineText = node.SingleLineText;
-            var fullDetailsText = node.FullDetailsText;
             var nameValuePairs = node.NameValuePairsText;
 
             //-- Assert
 
             Assert.That(singleLineText, Is.EqualTo("Message one: P1=ABC, P2=123, P3=Monday, P4=01:00:00"));
-
-            Assert.That(fullDetailsText, Is.Null);
 
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +
@@ -241,14 +229,11 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var singleLineText = node.SingleLineText;
-            var fullDetailsText = node.FullDetailsText;
             var nameValuePairs = node.NameValuePairsText;
 
             //-- Assert
 
             Assert.That(singleLineText, Is.EqualTo("Message one: P1=ABC, P2=123, P3=Monday, P4=01:00:00, P5=2015-01-31"));
-
-            Assert.That(fullDetailsText, Is.Null);
 
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +
@@ -276,14 +261,11 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var singleLineText = node.SingleLineText;
-            var fullDetailsText = node.FullDetailsText;
             var nameValuePairs = node.NameValuePairsText;
 
             //-- Assert
 
             Assert.That(singleLineText, Is.EqualTo("Message one: P1=ABC, P2=123, P3=Monday, P4=01:00:00, P5=2015-01-31, P6=True"));
-
-            Assert.That(fullDetailsText, Is.Null);
 
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +
@@ -312,14 +294,11 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var singleLineText = node.SingleLineText;
-            var fullDetailsText = node.FullDetailsText;
             var nameValuePairs = node.NameValuePairsText;
 
             //-- Assert
 
             Assert.That(singleLineText, Is.EqualTo("Message one: P1=ABC, P2=123, P3=Monday, P4=01:00:00, P5=2015-01-31, P6=True, P7=8b8a46a5fbb14258ab1fb2eed584d8c9"));
-
-            Assert.That(fullDetailsText, Is.Null);
 
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +
@@ -349,14 +328,11 @@ namespace NWheels.Core.UnitTests.Logging
             //-- Act
 
             var singleLineText = node.SingleLineText;
-            var fullDetailsText = node.FullDetailsText;
             var nameValuePairs = node.NameValuePairsText;
 
             //-- Assert
 
             Assert.That(singleLineText, Is.EqualTo("Message one: P1=ABC, P2=123, P3=Monday, P4=01:00:00, P5=2015-01-31, P6=True, P7=null, P8=1,234"));
-
-            Assert.That(fullDetailsText, Is.Null);
 
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +

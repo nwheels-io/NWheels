@@ -37,6 +37,8 @@ namespace NWheels.Logging
         public class LogNodeSnapshot
         {
             [DataMember]
+            public string MessageId { get; set; }
+            [DataMember]
             public bool IsActivity { get; set; }
             [DataMember]
             public LogContentTypes ContentTypes { get; set; }
@@ -44,6 +46,8 @@ namespace NWheels.Logging
             public LogLevel Level { get; set; }
             [DataMember]
             public long MillisecondsTimestamp { get; set; }
+            [DataMember]
+            public long Duration { get; set; }
             [DataMember]
             public string ExceptionTypeName { get; set; }
             [DataMember]
@@ -61,6 +65,8 @@ namespace NWheels.Logging
             public string Name { get; set; }
             [DataMember]
             public string Value { get; set; }
+            [DataMember]
+            public bool IsDetail { get; set; }
         }
     }
 }

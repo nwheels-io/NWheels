@@ -21,6 +21,14 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected NameValuePairLogNode(string messageId, LogLevel level, Exception exception, LogContentTypes contentTypes)
+            : base(messageId, contentTypes, level)
+        {
+            _exception = exception;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override Exception Exception
         {
             get
@@ -48,7 +56,9 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairLogNode(string messageId, LogLevel level, Exception exception, LogNameValuePair<T1> value1)
-            : base(messageId, level, exception)
+            : base(
+                messageId, level, exception, 
+                value1.ContentTypes)
         {
             _value1 = value1;
         }
@@ -57,9 +67,9 @@ namespace NWheels.Logging
 
         protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            return new ILogNameValuePair[] {
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
                 _value1  
-            };
+            });
         }
     }
 
@@ -73,7 +83,9 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairLogNode(string messageId, LogLevel level, Exception exception, LogNameValuePair<T1> value1, LogNameValuePair<T2> value2)
-            : base(messageId, level, exception)
+            : base(
+                messageId, level, exception, 
+                value1.ContentTypes | value2.ContentTypes)
         {
             _value1 = value1;
             _value2 = value2;
@@ -83,10 +95,10 @@ namespace NWheels.Logging
 
         protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            return new ILogNameValuePair[] {
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
                 _value1,
                 _value2
-            };
+            });
         }
     }
 
@@ -103,7 +115,9 @@ namespace NWheels.Logging
         public NameValuePairLogNode(
             string messageId, LogLevel level, Exception exception,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3)
-            : base(messageId, level, exception)
+            : base(
+                messageId, level, exception,
+                value1.ContentTypes | value2.ContentTypes | value3.ContentTypes)
         {
             _value1 = value1;
             _value2 = value2;
@@ -114,11 +128,11 @@ namespace NWheels.Logging
 
         protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            return new ILogNameValuePair[] {
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
                 _value1,
                 _value2,
                 _value3
-            };
+            });
         }
     }
 
@@ -136,7 +150,9 @@ namespace NWheels.Logging
         public NameValuePairLogNode(
             string messageId, LogLevel level, Exception exception,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4)
-            : base(messageId, level, exception)
+            : base(
+                messageId, level, exception,
+                value1.ContentTypes | value2.ContentTypes | value3.ContentTypes | value4.ContentTypes)
         {
             _value1 = value1;
             _value2 = value2;
@@ -148,12 +164,12 @@ namespace NWheels.Logging
 
         protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            return new ILogNameValuePair[] {
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
                 _value1,
                 _value2,
                 _value3,
                 _value4
-            };
+            });
         }
     }
 
@@ -172,7 +188,9 @@ namespace NWheels.Logging
         public NameValuePairLogNode(
             string messageId, LogLevel level, Exception exception,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5)
-            : base(messageId, level, exception)
+            : base(
+                messageId, level, exception,
+                value1.ContentTypes | value2.ContentTypes | value3.ContentTypes | value4.ContentTypes | value5.ContentTypes)
         {
             _value1 = value1;
             _value2 = value2;
@@ -185,13 +203,13 @@ namespace NWheels.Logging
 
         protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            return new ILogNameValuePair[] {
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
                 _value1,
                 _value2,
                 _value3,
                 _value4,
                 _value5
-            };
+            });
         }
     }
 
@@ -211,7 +229,9 @@ namespace NWheels.Logging
         public NameValuePairLogNode(
             string messageId, LogLevel level, Exception exception,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5, LogNameValuePair<T6> value6)
-            : base(messageId, level, exception)
+            : base(
+                messageId, level, exception,
+                value1.ContentTypes | value2.ContentTypes | value3.ContentTypes | value4.ContentTypes | value5.ContentTypes | value6.ContentTypes)
         {
             _value1 = value1;
             _value2 = value2;
@@ -225,14 +245,14 @@ namespace NWheels.Logging
 
         protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            return new ILogNameValuePair[] {
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
                 _value1,
                 _value2,
                 _value3,
                 _value4,
                 _value5,
                 _value6
-            };
+            });
         }
     }
 
@@ -253,7 +273,10 @@ namespace NWheels.Logging
         public NameValuePairLogNode(
             string messageId, LogLevel level, Exception exception,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5, LogNameValuePair<T6> value6, LogNameValuePair<T7> value7)
-            : base(messageId, level, exception)
+            : base(
+                messageId, level, exception,
+                value1.ContentTypes | value2.ContentTypes | value3.ContentTypes | value4.ContentTypes | 
+                value5.ContentTypes | value6.ContentTypes | value7.ContentTypes)
         {
             _value1 = value1;
             _value2 = value2;
@@ -268,7 +291,7 @@ namespace NWheels.Logging
 
         protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            return new ILogNameValuePair[] {
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
                 _value1,
                 _value2,
                 _value3,
@@ -276,7 +299,7 @@ namespace NWheels.Logging
                 _value5,
                 _value6,
                 _value7
-            };
+            });
         }
     }
 
@@ -298,7 +321,10 @@ namespace NWheels.Logging
         public NameValuePairLogNode(
             string messageId, LogLevel level, Exception exception,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5, LogNameValuePair<T6> value6, LogNameValuePair<T7> value7, LogNameValuePair<T8> value8)
-            : base(messageId, level, exception)
+            : base(
+                messageId, level, exception,
+                value1.ContentTypes | value2.ContentTypes | value3.ContentTypes | value4.ContentTypes | 
+                value5.ContentTypes | value6.ContentTypes | value7.ContentTypes | value8.ContentTypes)
         {
             _value1 = value1;
             _value2 = value2;
@@ -314,7 +340,7 @@ namespace NWheels.Logging
 
         protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            return new ILogNameValuePair[] {
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
                 _value1,
                 _value2,
                 _value3,
@@ -323,7 +349,7 @@ namespace NWheels.Logging
                 _value6,
                 _value7,
                 _value8
-            };
+            });
         }
     }
 }

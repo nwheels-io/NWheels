@@ -35,7 +35,7 @@ namespace NWheels.Core.UnitTests.Logging
         [SetUp]
         public void SetUp()
         {
-            _logAppender = new TestThreadLogAppender();
+            _logAppender = new TestThreadLogAppender(new TestFramework(base.Module));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ namespace NWheels.Core.UnitTests.Logging
             Assert.That(log.Length, Is.EqualTo(1));
             Assert.That(log[0].Level, Is.EqualTo(LogLevel.Debug));
             Assert.That(log[0].SingleLineText, Is.EqualTo("This is my empty debug message"));
-            Assert.That(log[0].FullDetailsText, Is.Null);
+            Assert.That(log[0].NameValuePairs.All(pair => pair.IsBaseValue()));
             Assert.That(log[0].Exception, Is.Null);
         }
 
@@ -96,7 +96,7 @@ namespace NWheels.Core.UnitTests.Logging
             Assert.That(log.Length, Is.EqualTo(1));
             Assert.That(log[0].Level, Is.EqualTo(LogLevel.Debug));
             Assert.That(log[0].SingleLineText, Is.EqualTo("This is my debug message: num=123, str=ABC"));
-            Assert.That(log[0].FullDetailsText, Is.Null);
+            Assert.That(log[0].NameValuePairs.Where(p => !p.IsIncludedInSingleLineText()).All(p => p.IsBaseValue()));
             Assert.That(log[0].Exception, Is.Null);
         }
 
@@ -121,7 +121,7 @@ namespace NWheels.Core.UnitTests.Logging
             Assert.That(log.Length, Is.EqualTo(1));
             Assert.That(log[0].Level, Is.EqualTo(LogLevel.Error));
             Assert.That(log[0].SingleLineText, Is.EqualTo("This is my error message with exception parameter: num=123, str=ABC"));
-            Assert.That(log[0].FullDetailsText, Is.EqualTo(exception.ToString()));
+            Assert.That(log[0].FullDetailsText.Contains(exception.ToString()));
             Assert.That(log[0].Exception, Is.SameAs(exception));
         }
 
@@ -150,7 +150,7 @@ namespace NWheels.Core.UnitTests.Logging
                 Assert.That(log.Length, Is.EqualTo(1));
                 Assert.That(log[0].Level, Is.EqualTo(LogLevel.Error));
                 Assert.That(log[0].SingleLineText, Is.EqualTo("This is my error message that creates exception"));
-                Assert.That(e.ToString().StartsWith(log[0].FullDetailsText));
+                Assert.That(log[0].FullDetailsText.Contains(e.ToString()));
                 Assert.That(log[0].Exception, Is.SameAs(e));
             }
         }
@@ -265,8 +265,11 @@ namespace NWheels.Core.UnitTests.Logging
             Assert.That(_logAppender.GetLog()[0].SingleLineText, Is.EqualTo(
                 "Log message with formatted and detail parameters: num=123, dateTime=2015-01-01"
             ));
-            Assert.That(_logAppender.GetLog()[0].FullDetailsText, Is.EqualTo(
-                "str=ABC" + Environment.NewLine + "dateTimeOffset=\"Feb 02 2015\"" + Environment.NewLine
+            Assert.That(_logAppender.GetLog()[0].FullDetailsText.Contains(
+                Environment.NewLine + "str=ABC"
+            ));
+            Assert.That(_logAppender.GetLog()[0].FullDetailsText.Contains(
+                Environment.NewLine + "dateTimeOffset=\"Feb 02 2015\""
             ));
         }
 
@@ -289,8 +292,11 @@ namespace NWheels.Core.UnitTests.Logging
             Assert.That(_logAppender.GetLog()[0].SingleLineText, Is.EqualTo(
                 "This is my communication message dump: num=123"
             ));
-            Assert.That(_logAppender.GetLog()[0].FullDetailsText, Is.EqualTo(
-                "str=ABC" + Environment.NewLine + "messageContents=\"" + messageXml.ToString().Replace("\"", "'") + "\"" + Environment.NewLine
+            Assert.That(_logAppender.GetLog()[0].FullDetailsText.Contains(
+                Environment.NewLine + "str=ABC"
+            ));
+            Assert.That(_logAppender.GetLog()[0].FullDetailsText.Contains(
+                Environment.NewLine + "messageContents=\"" + messageXml.ToString().Replace("\"", "'") + "\""
             ));
             Assert.That(_logAppender.GetLog()[0].ContentTypes, Is.EqualTo(LogContentTypes.Text | LogContentTypes.CommunicationMessage));
         }

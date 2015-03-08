@@ -11,6 +11,7 @@ namespace NWheels.Logging
         string FormatName();
         string FormatValue();
         string FormatLogString();
+        LogContentTypes GetContentTypes();
         bool IsBaseValue();
         bool IsIncludedInSingleLineText();
     }
@@ -60,15 +61,16 @@ namespace NWheels.Logging
         [Pure]
         public string FormatLogString()
         {
+            var unprefixedName = UnprefixBaseName(this.Name);
             var namePart = (
-                !string.IsNullOrEmpty(this.Name) ?
-                UnprefixBaseName(this.Name).TruncateAt(50) + "=" :
+                !string.IsNullOrEmpty(unprefixedName) ?
+                unprefixedName.TruncateAt(50) + "=" :
                 string.Empty);
 
             var valueMaxLength = (this.MaxStringLength > 0 ? this.MaxStringLength : 255);
             var valuePart = (FormatValue() ?? string.Empty).TruncateAt(valueMaxLength).Replace('"', '\'');
 
-            if ( valuePart.Any(c => char.IsWhiteSpace(c) || c == '=') )
+            if ( unprefixedName != null && valuePart.Any(c => char.IsWhiteSpace(c) || c == '=') )
             {
                 valuePart = "\"" + valuePart + "\"";
             }
@@ -87,25 +89,33 @@ namespace NWheels.Logging
 
         public bool IsIncludedInSingleLineText()
         {
-            return !this.IsDetail;
+            return (!this.IsDetail && !this.IsBaseValue());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public LogContentTypes GetContentTypes()
+        {
+            return this.ContentTypes;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static string UnprefixBaseName(string name)
         {
-            if ( name.Length >= 2 && name[0] == '$' && name[1] == '$' )
+            if ( name != null )
             {
-                return null;
+                if ( name.Length >= 2 && name[0] == '$' && name[1] == '$' )
+                {
+                    return null;
+                }
+                else if ( name.Length >= 1 && name[0] == '$' )
+                {
+                    return name.Substring(1);
+                }
             }
-            else if ( name.Length >= 1 && name[0] == '$' )
-            {
-                return name.Substring(1);
-            }
-            else
-            {
-                return name;
-            }
+
+            return name;
         }
     }
 }
