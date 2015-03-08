@@ -32,7 +32,7 @@ namespace NWheels.Tools.LogViewerWeb.App
             Console.WriteLine("Serving captured thread logs for Last Capture ID = {0}", request.LastCaptureId);
 
             long responseCaptureId = 0;
-            var responseLogs = new List<ThreadLogSnapshot>();
+            var responseLogs = new List<ThreadNodeViewModel>();
 
             foreach ( var folder in Program.FolderWatchers )
             {
@@ -49,7 +49,7 @@ namespace NWheels.Tools.LogViewerWeb.App
                 Console.WriteLine("> CAPTURED {0} new logs in: {1}", logsFromFolder.Length, folder.FolderPath);
             }
 
-            responseLogs.Sort((x, y) => x.StartedAtUtc.CompareTo(y.StartedAtUtc));
+            responseLogs.Sort((x, y) => x.TimestampValue.CompareTo(y.TimestampValue));
 
             return Response.AsJson(new FetchResponse {
                 LastCaptureId = responseCaptureId,
@@ -67,7 +67,7 @@ namespace NWheels.Tools.LogViewerWeb.App
             {
                 Console.WriteLine("> trying: {0}", folder.FolderPath);
 
-                ThreadLogSnapshot log;
+                ThreadNodeViewModel log;
 
                 if ( folder.TryGetLogById(logId, out log) )
                 {

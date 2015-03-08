@@ -10,6 +10,6 @@ namespace NWheels.Tools.LogViewerWeb.App
     public class FetchResponse
     {
         public long LastCaptureId { get; set; }
-        public ThreadLogSnapshot[] Logs { get; set; }
+        public ThreadNodeViewModel[] Logs { get; set; }
     }
 }

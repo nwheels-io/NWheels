@@ -48,10 +48,10 @@ namespace NWheels.Tools.LogViewerWeb.App
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ThreadLogSnapshot[] GetCapturedLogs(ref long lastCaptureId)
+        public ThreadNodeViewModel[] GetCapturedLogs(ref long lastCaptureId)
         {
             FileCapture[] currentCaptures;
-            var newCaptures = new List<ThreadLogSnapshot>();
+            var newCaptures = new List<ThreadNodeViewModel>();
 
             lock ( _capturedFilesSyncRoot )
             {
@@ -72,7 +72,7 @@ namespace NWheels.Tools.LogViewerWeb.App
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool TryGetLogById(Guid id, out ThreadLogSnapshot log)
+        public bool TryGetLogById(Guid id, out ThreadNodeViewModel log)
         {
             var filePath = Path.Combine(_folderPath, id.ToString("N") + ".threadlog");
 
@@ -159,7 +159,7 @@ namespace NWheels.Tools.LogViewerWeb.App
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static ThreadLogSnapshot LoadFileContents(string filePath)
+        private static ThreadNodeViewModel LoadFileContents(string filePath)
         {
             var retryCountDown = 5;
 
@@ -170,7 +170,10 @@ namespace NWheels.Tools.LogViewerWeb.App
                     using ( var file = File.OpenRead(filePath) )
                     {
                         var serializer = new DataContractSerializer(typeof(ThreadLogSnapshot));
-                        return (ThreadLogSnapshot)serializer.ReadObject(file);
+                        var snapshot = (ThreadLogSnapshot)serializer.ReadObject(file);
+                        var contents = new ThreadNodeViewModel();
+                        contents.PopulateFrom(snapshot);
+                        return contents;
                     }
                 }
                 catch ( IOException )
@@ -195,7 +198,7 @@ namespace NWheels.Tools.LogViewerWeb.App
 
         private class FileCapture
         {
-            private ThreadLogSnapshot _deserializedContents = null;
+            private ThreadNodeViewModel _deserializedContents = null;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -214,7 +217,7 @@ namespace NWheels.Tools.LogViewerWeb.App
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ThreadLogSnapshot DeserializedContents
+            public ThreadNodeViewModel DeserializedContents
             {
                 get
                 {
