@@ -6,7 +6,13 @@ param($installPath, $toolsPath, $package)
 $rootDir = (Get-Item $installPath).parent.parent.fullname
 $runtimeTarget = "$rootDir\Runtime"
 
-# create our runtime support directory if it doesn't exist yet
+# cleanup Runtime folder installed by previous version, if any
+
+if (test-path $runtimeTarget) {
+	Remove-Item "$runtimeTarget/*" -recurse -force
+}
+
+# create Runtime folder if it doesn't exist yet
 
 $runtimeSource = join-path $installPath 'lib/net45/runtime'
 
@@ -14,6 +20,6 @@ if (!(test-path $runtimeTarget)) {
 	mkdir $runtimeTarget
 }
 
-# copy everything in there
+# copy contents of the Runtime folder
 
 Copy-Item "$runtimeSource/*" $runtimeTarget -Recurse -Force
