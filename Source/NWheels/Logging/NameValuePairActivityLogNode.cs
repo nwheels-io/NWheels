@@ -16,30 +16,11 @@ namespace NWheels.Logging
     
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string FormatSingleLineText()
-        {
-            return base.FormatSingleLineText();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         protected override string FormatFullDetailsText()
         {
-            if ( base.Exception != null )
-            {
-                return base.FormatFullDetailsText() + System.Environment.NewLine + base.Exception.ToString();
-            }
-            else
-            {
-                return base.FormatFullDetailsText().NullIfEmptyOrWhitespace();
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatNameValuePairsText(string delimiter)
-        {
-            return base.FormatNameValuePairsText(delimiter);
+            return
+                base.FormatFullDetailsText() +
+                (base.Exception != null ? Environment.NewLine + base.Exception.ToString() : string.Empty);
         }
     }
 
@@ -47,7 +28,7 @@ namespace NWheels.Logging
 
     public class NameValuePairActivityLogNode<T1> : NameValuePairActivityLogNode
     {
-        private LogNameValuePair<T1> _value1;
+        private readonly LogNameValuePair<T1> _value1;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -59,35 +40,11 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string FormatSingleLineText()
+        protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            var anyAppended = false;
-
-            return
-                MessageIdToText()
-                .AppendToSingleLineText(ref _value1, ref anyAppended);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatFullDetailsText()
-        {
-            bool anyAppended = false;
-
-            return (
-                string.Empty
-                .AppendToFullDetailsText(ref _value1, ref anyAppended) +
-                base.FormatFullDetailsText())
-                .NullIfEmptyOrWhitespace();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatNameValuePairsText(string delimiter)
-        {
-            return
-                base.FormatNameValuePairsText(delimiter) + delimiter +
-                _value1.FormatLogString();
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
+                _value1  
+            });
         }
     }
     
@@ -95,8 +52,8 @@ namespace NWheels.Logging
 
     public class NameValuePairActivityLogNode<T1, T2> : NameValuePairActivityLogNode
     {
-        private LogNameValuePair<T1> _value1;
-        private LogNameValuePair<T2> _value2;
+        private readonly LogNameValuePair<T1> _value1;
+        private readonly LogNameValuePair<T2> _value2;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -109,38 +66,12 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string FormatSingleLineText()
+        protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            var anyAppended = false;
-
-            return
-                MessageIdToText()
-                .AppendToSingleLineText(ref _value1, ref anyAppended)
-                .AppendToSingleLineText(ref _value2, ref anyAppended);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatFullDetailsText()
-        {
-            bool anyAppended = false;
-
-            return (
-                string.Empty
-                .AppendToFullDetailsText(ref _value1, ref anyAppended)
-                .AppendToFullDetailsText(ref _value2, ref anyAppended) +
-                base.FormatFullDetailsText())
-                .NullIfEmptyOrWhitespace();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatNameValuePairsText(string delimiter)
-        {
-            return
-                base.FormatNameValuePairsText(delimiter) + delimiter +
-                _value1.FormatLogString() + delimiter +
-                _value2.FormatLogString();
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
+                _value1,
+                _value2
+            });
         }
     }
 
@@ -148,9 +79,9 @@ namespace NWheels.Logging
 
     public class NameValuePairActivityLogNode<T1, T2, T3> : NameValuePairActivityLogNode
     {
-        private LogNameValuePair<T1> _value1;
-        private LogNameValuePair<T2> _value2;
-        private LogNameValuePair<T3> _value3;
+        private readonly LogNameValuePair<T1> _value1;
+        private readonly LogNameValuePair<T2> _value2;
+        private readonly LogNameValuePair<T3> _value3;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -166,41 +97,13 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string FormatSingleLineText()
+        protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            var anyAppended = false;
-
-            return
-                MessageIdToText()
-                .AppendToSingleLineText(ref _value1, ref anyAppended)
-                .AppendToSingleLineText(ref _value2, ref anyAppended)
-                .AppendToSingleLineText(ref _value3, ref anyAppended);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatFullDetailsText()
-        {
-            bool anyAppended = false;
-
-            return (
-                string.Empty
-                .AppendToFullDetailsText(ref _value1, ref anyAppended)
-                .AppendToFullDetailsText(ref _value2, ref anyAppended) 
-                .AppendToFullDetailsText(ref _value3, ref anyAppended) +
-                base.FormatFullDetailsText())
-                .NullIfEmptyOrWhitespace();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatNameValuePairsText(string delimiter)
-        {
-            return
-                base.FormatNameValuePairsText(delimiter) + delimiter +
-                _value1.FormatLogString() + delimiter +
-                _value2.FormatLogString() + delimiter +
-                _value3.FormatLogString();
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
+                _value1,
+                _value2,
+                _value3
+            });
         }
     }
 
@@ -208,10 +111,10 @@ namespace NWheels.Logging
 
     public class NameValuePairActivityLogNode<T1, T2, T3, T4> : NameValuePairActivityLogNode
     {
-        private LogNameValuePair<T1> _value1;
-        private LogNameValuePair<T2> _value2;
-        private LogNameValuePair<T3> _value3;
-        private LogNameValuePair<T4> _value4;
+        private readonly LogNameValuePair<T1> _value1;
+        private readonly LogNameValuePair<T2> _value2;
+        private readonly LogNameValuePair<T3> _value3;
+        private readonly LogNameValuePair<T4> _value4;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -228,44 +131,14 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string FormatSingleLineText()
+        protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            var anyAppended = false;
-
-            return
-                MessageIdToText()
-                .AppendToSingleLineText(ref _value1, ref anyAppended)
-                .AppendToSingleLineText(ref _value2, ref anyAppended)
-                .AppendToSingleLineText(ref _value3, ref anyAppended)
-                .AppendToSingleLineText(ref _value4, ref anyAppended);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatFullDetailsText()
-        {
-            bool anyAppended = false;
-
-            return (
-                string.Empty
-                .AppendToFullDetailsText(ref _value1, ref anyAppended)
-                .AppendToFullDetailsText(ref _value2, ref anyAppended)
-                .AppendToFullDetailsText(ref _value3, ref anyAppended)
-                .AppendToFullDetailsText(ref _value4, ref anyAppended) +
-                base.FormatFullDetailsText())
-                .NullIfEmptyOrWhitespace();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatNameValuePairsText(string delimiter)
-        {
-            return
-                base.FormatNameValuePairsText(delimiter) + delimiter +
-                _value1.FormatLogString() + delimiter +
-                _value2.FormatLogString() + delimiter +
-                _value3.FormatLogString() + delimiter +
-                _value4.FormatLogString();
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
+                _value1,
+                _value2,
+                _value3,
+                _value4
+            });
         }
     }
 
@@ -273,11 +146,11 @@ namespace NWheels.Logging
 
     public class NameValuePairActivityLogNode<T1, T2, T3, T4, T5> : NameValuePairActivityLogNode
     {
-        private LogNameValuePair<T1> _value1;
-        private LogNameValuePair<T2> _value2;
-        private LogNameValuePair<T3> _value3;
-        private LogNameValuePair<T4> _value4;
-        private LogNameValuePair<T5> _value5;
+        private readonly LogNameValuePair<T1> _value1;
+        private readonly LogNameValuePair<T2> _value2;
+        private readonly LogNameValuePair<T3> _value3;
+        private readonly LogNameValuePair<T4> _value4;
+        private readonly LogNameValuePair<T5> _value5;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -295,47 +168,15 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string FormatSingleLineText()
+        protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            var anyAppended = false;
-
-            return
-                MessageIdToText()
-                .AppendToSingleLineText(ref _value1, ref anyAppended)
-                .AppendToSingleLineText(ref _value2, ref anyAppended)
-                .AppendToSingleLineText(ref _value3, ref anyAppended)
-                .AppendToSingleLineText(ref _value4, ref anyAppended)
-                .AppendToSingleLineText(ref _value5, ref anyAppended);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatFullDetailsText()
-        {
-            bool anyAppended = false;
-
-            return (
-                string.Empty
-                .AppendToFullDetailsText(ref _value1, ref anyAppended)
-                .AppendToFullDetailsText(ref _value2, ref anyAppended)
-                .AppendToFullDetailsText(ref _value3, ref anyAppended)
-                .AppendToFullDetailsText(ref _value4, ref anyAppended)
-                .AppendToFullDetailsText(ref _value5, ref anyAppended) +
-                base.FormatFullDetailsText())
-                .NullIfEmptyOrWhitespace();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatNameValuePairsText(string delimiter)
-        {
-            return
-                base.FormatNameValuePairsText(delimiter) + delimiter +
-                _value1.FormatLogString() + delimiter +
-                _value2.FormatLogString() + delimiter +
-                _value3.FormatLogString() + delimiter +
-                _value4.FormatLogString() + delimiter +
-                _value5.FormatLogString();
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
+                _value1,
+                _value2,
+                _value3,
+                _value4,
+                _value5
+            });
         }
     }
 
@@ -343,12 +184,12 @@ namespace NWheels.Logging
 
     public class NameValuePairActivityLogNode<T1, T2, T3, T4, T5, T6> : NameValuePairActivityLogNode
     {
-        private LogNameValuePair<T1> _value1;
-        private LogNameValuePair<T2> _value2;
-        private LogNameValuePair<T3> _value3;
-        private LogNameValuePair<T4> _value4;
-        private LogNameValuePair<T5> _value5;
-        private LogNameValuePair<T6> _value6;
+        private readonly LogNameValuePair<T1> _value1;
+        private readonly LogNameValuePair<T2> _value2;
+        private readonly LogNameValuePair<T3> _value3;
+        private readonly LogNameValuePair<T4> _value4;
+        private readonly LogNameValuePair<T5> _value5;
+        private readonly LogNameValuePair<T6> _value6;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -367,50 +208,16 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string FormatSingleLineText()
+        protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            var anyAppended = false;
-
-            return
-                MessageIdToText()
-                .AppendToSingleLineText(ref _value1, ref anyAppended)
-                .AppendToSingleLineText(ref _value2, ref anyAppended)
-                .AppendToSingleLineText(ref _value3, ref anyAppended)
-                .AppendToSingleLineText(ref _value4, ref anyAppended)
-                .AppendToSingleLineText(ref _value5, ref anyAppended)
-                .AppendToSingleLineText(ref _value6, ref anyAppended);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatFullDetailsText()
-        {
-            bool anyAppended = false;
-
-            return (
-                string.Empty
-                .AppendToFullDetailsText(ref _value1, ref anyAppended)
-                .AppendToFullDetailsText(ref _value2, ref anyAppended)
-                .AppendToFullDetailsText(ref _value3, ref anyAppended)
-                .AppendToFullDetailsText(ref _value4, ref anyAppended)
-                .AppendToFullDetailsText(ref _value5, ref anyAppended)
-                .AppendToFullDetailsText(ref _value6, ref anyAppended) +
-                base.FormatFullDetailsText())
-                .NullIfEmptyOrWhitespace();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatNameValuePairsText(string delimiter)
-        {
-            return
-                base.FormatNameValuePairsText(delimiter) + delimiter +
-                _value1.FormatLogString() + delimiter +
-                _value2.FormatLogString() + delimiter +
-                _value3.FormatLogString() + delimiter +
-                _value4.FormatLogString() + delimiter +
-                _value5.FormatLogString() + delimiter +
-                _value6.FormatLogString();
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
+                _value1,
+                _value2,
+                _value3,
+                _value4,
+                _value5,
+                _value6
+            });
         }
     }
 
@@ -418,13 +225,13 @@ namespace NWheels.Logging
 
     public class NameValuePairActivityLogNode<T1, T2, T3, T4, T5, T6, T7> : NameValuePairActivityLogNode
     {
-        private LogNameValuePair<T1> _value1;
-        private LogNameValuePair<T2> _value2;
-        private LogNameValuePair<T3> _value3;
-        private LogNameValuePair<T4> _value4;
-        private LogNameValuePair<T5> _value5;
-        private LogNameValuePair<T6> _value6;
-        private LogNameValuePair<T7> _value7;
+        private readonly LogNameValuePair<T1> _value1;
+        private readonly LogNameValuePair<T2> _value2;
+        private readonly LogNameValuePair<T3> _value3;
+        private readonly LogNameValuePair<T4> _value4;
+        private readonly LogNameValuePair<T5> _value5;
+        private readonly LogNameValuePair<T6> _value6;
+        private readonly LogNameValuePair<T7> _value7;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -444,53 +251,17 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string FormatSingleLineText()
+        protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            var anyAppended = false;
-
-            return
-                MessageIdToText()
-                .AppendToSingleLineText(ref _value1, ref anyAppended)
-                .AppendToSingleLineText(ref _value2, ref anyAppended)
-                .AppendToSingleLineText(ref _value3, ref anyAppended)
-                .AppendToSingleLineText(ref _value4, ref anyAppended)
-                .AppendToSingleLineText(ref _value5, ref anyAppended)
-                .AppendToSingleLineText(ref _value6, ref anyAppended)
-                .AppendToSingleLineText(ref _value7, ref anyAppended);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatFullDetailsText()
-        {
-            bool anyAppended = false;
-
-            return (
-                string.Empty
-                .AppendToFullDetailsText(ref _value1, ref anyAppended)
-                .AppendToFullDetailsText(ref _value2, ref anyAppended)
-                .AppendToFullDetailsText(ref _value3, ref anyAppended)
-                .AppendToFullDetailsText(ref _value4, ref anyAppended)
-                .AppendToFullDetailsText(ref _value5, ref anyAppended)
-                .AppendToFullDetailsText(ref _value6, ref anyAppended)
-                .AppendToFullDetailsText(ref _value7, ref anyAppended) +
-                base.FormatFullDetailsText())
-                .NullIfEmptyOrWhitespace();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatNameValuePairsText(string delimiter)
-        {
-            return
-                base.FormatNameValuePairsText(delimiter) + delimiter +
-                _value1.FormatLogString() + delimiter +
-                _value2.FormatLogString() + delimiter +
-                _value3.FormatLogString() + delimiter +
-                _value4.FormatLogString() + delimiter +
-                _value5.FormatLogString() + delimiter +
-                _value6.FormatLogString() + delimiter +
-                _value7.FormatLogString();
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
+                _value1,
+                _value2,
+                _value3,
+                _value4,
+                _value5,
+                _value6,
+                _value7
+            });
         }
     }
 
@@ -498,14 +269,14 @@ namespace NWheels.Logging
 
     public class NameValuePairActivityLogNode<T1, T2, T3, T4, T5, T6, T7, T8> : NameValuePairActivityLogNode
     {
-        private LogNameValuePair<T1> _value1;
-        private LogNameValuePair<T2> _value2;
-        private LogNameValuePair<T3> _value3;
-        private LogNameValuePair<T4> _value4;
-        private LogNameValuePair<T5> _value5;
-        private LogNameValuePair<T6> _value6;
-        private LogNameValuePair<T7> _value7;
-        private LogNameValuePair<T8> _value8;
+        private readonly LogNameValuePair<T1> _value1;
+        private readonly LogNameValuePair<T2> _value2;
+        private readonly LogNameValuePair<T3> _value3;
+        private readonly LogNameValuePair<T4> _value4;
+        private readonly LogNameValuePair<T5> _value5;
+        private readonly LogNameValuePair<T6> _value6;
+        private readonly LogNameValuePair<T7> _value7;
+        private readonly LogNameValuePair<T8> _value8;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -526,56 +297,18 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string FormatSingleLineText()
+        protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
-            var anyAppended = false;
-
-            return
-                MessageIdToText()
-                .AppendToSingleLineText(ref _value1, ref anyAppended)
-                .AppendToSingleLineText(ref _value2, ref anyAppended)
-                .AppendToSingleLineText(ref _value3, ref anyAppended)
-                .AppendToSingleLineText(ref _value4, ref anyAppended)
-                .AppendToSingleLineText(ref _value5, ref anyAppended)
-                .AppendToSingleLineText(ref _value6, ref anyAppended)
-                .AppendToSingleLineText(ref _value7, ref anyAppended)
-                .AppendToSingleLineText(ref _value8, ref anyAppended);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatFullDetailsText()
-        {
-            bool anyAppended = false;
-
-            return (
-                string.Empty
-                .AppendToFullDetailsText(ref _value1, ref anyAppended)
-                .AppendToFullDetailsText(ref _value2, ref anyAppended)
-                .AppendToFullDetailsText(ref _value3, ref anyAppended)
-                .AppendToFullDetailsText(ref _value4, ref anyAppended)
-                .AppendToFullDetailsText(ref _value5, ref anyAppended)
-                .AppendToFullDetailsText(ref _value6, ref anyAppended)
-                .AppendToFullDetailsText(ref _value7, ref anyAppended)
-                .AppendToFullDetailsText(ref _value8, ref anyAppended) +
-                base.FormatFullDetailsText())
-                .NullIfEmptyOrWhitespace();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string FormatNameValuePairsText(string delimiter)
-        {
-            return
-                base.FormatNameValuePairsText(delimiter) + delimiter +
-                _value1.FormatLogString() + delimiter +
-                _value2.FormatLogString() + delimiter +
-                _value3.FormatLogString() + delimiter +
-                _value4.FormatLogString() + delimiter +
-                _value5.FormatLogString() + delimiter +
-                _value6.FormatLogString() + delimiter +
-                _value7.FormatLogString() + delimiter +
-                _value8.FormatLogString();
+            return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
+                _value1,
+                _value2,
+                _value3,
+                _value4,
+                _value5,
+                _value6,
+                _value7,
+                _value8
+            });
         }
     }
 }

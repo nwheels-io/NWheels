@@ -10,19 +10,23 @@ namespace NWheels.Tools.LogViewerWeb.App
 {
     public class LogNodeViewModel
     {
-        public void PopulateFrom(ThreadLogSnapshot.LogNodeSnapshot source)
+        public void PopulateFrom(ThreadLogSnapshot.LogNodeSnapshot source, DateTime threadStartedAt, ref int nodeId)
         {
+            this.Id = nodeId++;
             this.Type = (source.IsActivity ? LogNodeType.Activity : LogNodeType.Log);
             this.Icon = LogNodeIcon.None;//TODO
             this.Level = source.Level;
-            this.Message = GetTextFromMessageId(source.MessageId);
+            this.MessageId = source.MessageId;
+            this.Text = GetTextFromMessageId(source.MessageId);
 
             if ( source.NameValuePairs != null && source.NameValuePairs.Any(p => !p.IsDetail) )
             {
-                this.Message += ": " + string.Join(", ", source.NameValuePairs.Where(p => !p.IsDetail).Select(p => p.Name + "=" + p.Value));
+                this.Text += ": " + string.Join(", ", source.NameValuePairs.Where(p => !p.IsDetail).Select(p => p.Name + "=" + p.Value));
             }
 
-            this.Timestamp = "+ " + source.MillisecondsTimestamp.ToString();
+            this.TimeText = "+ " + source.MillisecondsTimestamp.ToString();
+            this.Timestamp = threadStartedAt.AddMilliseconds(source.MillisecondsTimestamp).ToString("yyyy-MM-dd HH:mm:ss.fff");
+            this.NameValuePairs = source.NameValuePairs;
 
             if ( source.IsActivity )
             {
@@ -31,21 +35,28 @@ namespace NWheels.Tools.LogViewerWeb.App
 
             if ( source.SubNodes != null )
             {
+                var subNodeId = nodeId;
+
                 this.SubNodes = source.SubNodes.Select(subSource => {
                     var subModel = new LogNodeViewModel();
-                    subModel.PopulateFrom(subSource);
+                    subModel.PopulateFrom(subSource, threadStartedAt, ref subNodeId);
                     return subModel;
                 }).ToArray();
+
+                nodeId = subNodeId;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public int Id { get; set; }
         public LogNodeType Type { get; set; }
         public LogNodeIcon Icon { get; set; }
         public LogLevel Level { get; set; }
-        public string Message { get; set; }
+        public string MessageId { get; set; }
+        public string Text { get; set; }
         public string Timestamp { get; set; }
+        public string TimeText { get; set; }
         public int? Duration { get; set; }
         public int? CpuTime { get; set; }
         public int? DbCount { get; set; }
@@ -54,7 +65,8 @@ namespace NWheels.Tools.LogViewerWeb.App
         public int? LockWaitDuration { get; set; }
         public int? LockHoldCount { get; set; }
         public int? LockHoldDuration { get; set; }
-        public LogNodeViewModel[] SubNodes { get; set; }
+        public IList<ThreadLogSnapshot.NameValuePairSnapshot> NameValuePairs { get; set; }
+        public IList<LogNodeViewModel> SubNodes { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -83,12 +95,14 @@ namespace NWheels.Tools.LogViewerWeb.App
             this.Environment = source.EnvironmentName;
             this.Node = source.NodeName;
             this.LogId = source.LogId.ToString("N");
-            this.ThreadType = source.TaskType.ToString().SplitPascalCase();
+            this.ThreadType = source.TaskType;
             this.CorrelationId = source.CorrelationId.ToString("N");
 
-            PopulateFrom(source.RootActivity);
+            int nodeId = 1;
+            PopulateFrom(source.RootActivity, source.StartedAtUtc, ref nodeId);
 
             this.Type = LogNodeType.Thread;
+            this.TimeText = source.StartedAtUtc.ToString("yyyy-MM-dd HH:mm:ss.fff");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -97,7 +111,7 @@ namespace NWheels.Tools.LogViewerWeb.App
         public string Environment { get; set; }
         public string Node { get; set; }
         public string LogId { get; set; }
-        public string ThreadType { get; set; }
+        public ThreadTaskType ThreadType { get; set; }
         public string CorrelationId { get; set; }
     }
 

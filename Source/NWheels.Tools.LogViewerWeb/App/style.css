@@ -76,7 +76,8 @@
 	white-space:nowrap;
 }
 
-.activity_node {	background-color:#F0F0F0;}
+.thread_node { background-color:#EAEAEA; }
+.activity_node {	background-color:#F5F5F5;}
 .level_debug { color:#9D9D9D;}
 .level_verbose { color:#8C8C8C;}
 .level_info { color:navy;}
@@ -84,8 +85,22 @@
 .level_error { color:#DA3939;}
 .level_critical { color:red;font-weight:bold;}
 
-.full_details { background-color:#FEF1CB; font-family:Consolas, "Courier New", Courier; border-right: 1px solid #B7D2E8; }
-.full_details pre { border:none; background-color:inherit; padding:3px 3px 0px 20px; margin:0; }
+.full_details { background-color:#FEF7E4; font-family:Consolas, "Courier New", Courier; font-size:9pt; border-right: 1px solid #B7D2E8; }
+.full_details table { 
+    margin-left: 20px;
+    margin-top: 8px;
+    border-spacing: 1px;
+    border-collapse: separate !important;
+    font-size: 9pt;
+}
+.full_details table td { 
+	padding:3px;
+}
+.full_details table td.value { 
+	background-color:#FDE9A8;
+	border-radius:3px;
+}
+
 .close_full_details { margin:0; padding:8px 3px 0 3px; }
 .close_full_details img { margin:0;}
 
@@ -120,4 +135,26 @@
 .angular-ui-tree-empty {
 	min-height:0px !important;
 	border:none !important;
+}
+
+.label-thread {
+	position: relative;
+	bottom: 2px;
+}
+.label-info {
+	background-color: #1473C7;
+}
+.label-inverse {
+	background-color:black;
+}
+.label-environment {
+	background-color: #C2C2C2;
+	color: rgb(96, 96, 96);
+}
+.label-node {
+	background-color: rgb(170, 155, 107);
+	color: rgb(235, 238, 222);
+}
+.label-verbose {
+	background-color: #C7C7C7;
 }

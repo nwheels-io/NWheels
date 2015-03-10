@@ -92,29 +92,37 @@
 		<script type="text/ng-template" id="nodes_renderer.html">
 			<div class="clearfix grid_row" ng-style="{'width': 1350 - 20 * (depth()-1)}" 
 				ng-class="{
-					activity_node: node.subNodes, 
-					level_debug: node.level==0, 
-					level_verbose: node.level==10, 
-					level_info: node.level==20, 
-					level_warning: node.level==30, 
-					level_error: node.level==40, 
-					level_critical: node.level==50
+					thread_node: node.type===0, 
+					activity_node: node.type===1, 
+					level_debug: node.level===0, 
+					level_verbose: node.level===10, 
+					level_info: node.level===20, 
+					level_warning: node.level===30, 
+					level_error: node.level===40, 
+					level_critical: node.level===50
 				}">
 				<div class="grid_cell body_cell col_message" ng-style="{'width': 577 - 20 * (depth()-1)}">
 					<a data-nodrag ng-click="toggle(this)" ng-if="node.subNodes.length"><img src="/content/icon-collapsed.png" ng-hide="collapsed"/><img src="/content/icon-expanded.png" ng-show="collapsed"/></a>
+					<span ng-if="node.type===0" class="label label-thread label-environment">{{node.environment}}</span>
+					<span ng-if="node.type===0" class="label label-thread label-node">{{node.node}}</span>
+					<span ng-if="node.type===0" class="label label-thread" ng-class="{
+						'label-verbose': node.level < 20, 
+						'label-info': node.level===20, 
+						'label-warning': node.level===30, 
+						'label-important': node.level >= 40
+					}">{{node.threadType | threadType}}</span>
 					<span ng-class="{non_expandable: !node.subNodes.length}">
-						{{node.singleLineText}}
+						{{node.text}}
 					</span>
 				</div>
 				<div class="grid_cell body_cell col_ellipsis">
-					<a ng-click="toggleDetails(this)">...<img src="/content/icon-ellipsis.png" style="display:none;"></a>
+					<a ng-show="node.nameValuePairs.length" ng-click="toggleDetails(this)">...<!--img src="/content/icon-ellipsis.png" style="display:none;"--></a>
 				</div>
 				<div class="grid_cell body_cell col_timestamp">
-					<span ng-if="depth() === 1">{{threadLog.startedAtUtc.substring(0,23).replace('T',' ')}}</span>
-					<span ng-if="depth() !== 1">+ {{node.millisecondsTimestamp | number}}</span>
+					<span>{{node.timeText}}</span>
 				</div>
 				<div class="grid_cell body_cell col_duration">
-					{{node.millisecondsDuration | number}}
+					{{node.duration | number}}
 				</div>
 				<div class="grid_cell body_cell col_counter"></div>
 				<div class="grid_cell body_cell col_counter"></div>
@@ -124,18 +132,36 @@
 				<div class="grid_cell body_cell col_counter"></div>
 				<div class="grid_cell body_cell col_counter"></div>
 				<div class="clearfix full_details" ng-show="fullDetailsVisible(this)">
-					<pre>{{node.fullDetailsText || 'No details available'}}</pre>
+					<table>
+						<tr>
+							<td>timestamp</td>
+							<td class="value">{{node.timestamp}}</td>
+						</tr>
+						<tr ng-if="node.type===0">
+							<td>logId</td>
+							<td class="value">{{node.logId}}</td>
+						</tr>
+						<tr ng-if="node.type===0">
+							<td>correlationId</td>
+							<td class="value">{{node.correlationId}}</td>
+						</tr>
+						<tr ng-repeat="pair in node.nameValuePairs track by $index">
+							<td>{{pair.name}}</td>
+							<td class="value">{{pair.value}}</td>
+						</tr>
+					</table>
+					<span ng-hide="node.nameValuePairs.length">No details available</span>
 					<a class="close_full_details" ng-click="toggleDetails(this)"><img src="/content/icon-close-details.png"></a>
 				</div>
 			</div>
 			<ol ui-tree-nodes="" ng-model="node.subNodes" ng-class="{hidden: !collapsed}">
-				<li ng-repeat="node in node.subNodes" ui-tree-node ng-include="'nodes_renderer.html'">
+				<li ng-repeat="node in node.subNodes track by $index" ui-tree-node ng-include="'nodes_renderer.html'">
 				</li>
 			</ol>
 		</script>
 		<div ui-tree data-drag-enabled="false">
 		  <ol ui-tree-nodes="" ng-model="rootNodes">
-			<li ng-repeat="node in rootNodes" ui-tree-node ng-include="'nodes_renderer.html'"></li>
+			<li ng-repeat="node in rootNodes track by $index" ui-tree-node ng-include="'nodes_renderer.html'"></li>
 		  </ol>
 		</div>
 		<div class="clearfix">

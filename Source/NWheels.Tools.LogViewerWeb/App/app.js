@@ -92,7 +92,7 @@
 					lastCaptureId = result.data.lastCaptureId;
 					
 					for (var i in result.data.logs) {
-						$scope.rootNodes.push(result.data.logs[i].rootActivity);
+						$scope.rootNodes.push(result.data.logs[i]);
 					}
 
 					$anchorScroll();
@@ -135,5 +135,19 @@
         //    $scope.rootNodes.push(result.data.rootActivity);
         //});
     }]);
+	
+	app.filter('threadType', function() {
+		return function (value) {
+			switch(value) {
+				case 1:return 'START-UP';
+				case 2:return 'SHUT-DOWN';
+				case 3:return 'REQ';
+				case 4:return 'QUE';
+				case 5:return 'JOB';
+				case 6:return 'LOG';
+				default:return '???';
+			}
+		};
+	});
 	
 })();
