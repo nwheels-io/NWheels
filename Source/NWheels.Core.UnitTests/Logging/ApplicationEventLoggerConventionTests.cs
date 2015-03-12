@@ -158,6 +158,36 @@ namespace NWheels.Core.UnitTests.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
+        public void CanAppendErrorMessageWithValuesAndThrow()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+
+            //-- Act
+
+            try
+            {
+                throw logger.ThisIsMyCriticalMessageThatCreatesException("ABC", 123);
+            }
+            catch ( TestErrorException e )
+            {
+                //-- Assert
+
+                var log = _logAppender.TakeLog();
+
+                Assert.That(e.Message, Is.EqualTo("This is my critical message that creates exception: str=ABC, num=123"));
+                Assert.That(log.Length, Is.EqualTo(1));
+                Assert.That(log[0].Level, Is.EqualTo(LogLevel.Critical));
+                Assert.That(log[0].SingleLineText, Is.EqualTo("This is my critical message that creates exception: str=ABC, num=123"));
+                Assert.That(log[0].FullDetailsText.Contains(e.ToString()));
+                Assert.That(log[0].Exception, Is.SameAs(e));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
         public void RegularLogsAndActivitiesDoNotStartThreadLog()
         {
             //-- Arrange
@@ -361,7 +391,7 @@ namespace NWheels.Core.UnitTests.Logging
             void ThisIsMyCriticalMessage();
             
             [LogCritical]
-            TestErrorException ThisIsMyCriticalMessageThatCreatesException();
+            TestErrorException ThisIsMyCriticalMessageThatCreatesException(string str, int num);
             
             [LogActivity]
             ILogActivity ThisIsMyActivity();
@@ -513,7 +543,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public TestErrorException ThisIsMyCriticalMessageThatCreatesException()
+            public TestErrorException ThisIsMyCriticalMessageThatCreatesException(string str, int num)
             {
                 throw new NotImplementedException();
             }

@@ -6,8 +6,8 @@
 	//-----------------------------------------------------------------------------------------------------------------
     
 	app.controller('threadLogController', 
-	['$http', '$location', '$document', '$scope', '$interval', '$anchorScroll',
-	function ($http, $location, $document, $scope, $interval, $anchorScroll) {
+	['$http', '$location', '$document', '$scope', '$timeout', '$interval', '$anchorScroll',
+	function ($http, $location, $document, $scope, $timeout, $interval, $anchorScroll) {
 
         $scope.treeOptions = {
 			dataDragEnabled: false
@@ -80,8 +80,6 @@
 				return;
 			}
 
-			$location.hash('autoScroll');
-			
 			captureTimer = $interval(function() {
 				var request = {
 					lastCaptureId: lastCaptureId
@@ -94,10 +92,14 @@
 					for (var i in result.data.logs) {
 						$scope.rootNodes.push(result.data.logs[i]);
 					}
-
-					$anchorScroll();
 					
 					if(result.data.logs.length > 0) {
+						$timeout(function() {
+							//var documentHeight = $(document).height(); 
+							//var windowHeight = $(window).height(); 
+							//var scrollTopValue = documentHeight - windowHeight;
+							$('body').animate({ scrollTop: $(document).height() - $(window).height() }, 300); //scrollTop($(document).height() - $(window).height());
+						}, 300);
 					}
 				});
 			}, 1000);
@@ -123,9 +125,9 @@
 			}
 		});
 
-	    if ($location.path().toUpperCase().indexOf('/THREADLOG/') > 0) {
+	    if ($location.absUrl().toUpperCase().indexOf('/THREADLOG/') > 0) {
 	        $http.get($location.absUrl() + '/json').then(function(result) {
-	            $scope.rootNodes.push(result.data.rootActivity);
+	            $scope.rootNodes.push(result.data);
 	        });
 	    }
 		

@@ -16,7 +16,7 @@ namespace NWheels.Core.UnitTests.Logging
             "e99f7886838e4c37b433888132ef5f86";
 
         private const string ExpectedBaseNameValuePairs =
-            "2015-01-30_15:22:54.345 app=A1 node=N1 instance=I1 env=E1 message=Test.MessageOne level=Info logid=e99f7886838e4c37b433888132ef5f86 duration=0";
+            "2015-01-30_15:22:54.345 app=A1 node=N1 instance=I1 env=E1 message=Test.MessageOne level=Verbose logid=e99f7886838e4c37b433888132ef5f86 duration=0";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -86,7 +86,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             const string expectedNameValuePairs =
                 "2015-01-30_15:22:54.345 app=A1 node=N1 instance=I1 env=E1 message=Test.MessageOne level=Error " +
-                "logid=e99f7886838e4c37b433888132ef5f86 exception=System.DivideByZeroException duration=0";
+                "logid=e99f7886838e4c37b433888132ef5f86 exceptionType=System.DivideByZeroException exception=\"Attempted_to_divide_by_zero.\" duration=0";
 
             Assert.That(singleLineText, Is.EqualTo("Message one"));
             Assert.That(fullDetailsText, Is.EqualTo(

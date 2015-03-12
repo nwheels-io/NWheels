@@ -18,13 +18,14 @@ namespace NWheels.Tools.LogViewerWeb.App
             this.Level = source.Level;
             this.MessageId = source.MessageId;
             this.Text = GetTextFromMessageId(source.MessageId);
+            this.ExceptionDetails = source.ExceptionDetails;
 
             if ( source.NameValuePairs != null && source.NameValuePairs.Any(p => !p.IsDetail) )
             {
                 this.Text += ": " + string.Join(", ", source.NameValuePairs.Where(p => !p.IsDetail).Select(p => p.Name + "=" + p.Value));
             }
 
-            this.TimeText = "+ " + source.MillisecondsTimestamp.ToString();
+            this.TimeText = "+ " + source.MillisecondsTimestamp.ToString("#,###");
             this.Timestamp = threadStartedAt.AddMilliseconds(source.MillisecondsTimestamp).ToString("yyyy-MM-dd HH:mm:ss.fff");
             this.NameValuePairs = source.NameValuePairs;
 
@@ -55,6 +56,7 @@ namespace NWheels.Tools.LogViewerWeb.App
         public LogLevel Level { get; set; }
         public string MessageId { get; set; }
         public string Text { get; set; }
+        public string ExceptionDetails { get; set; }
         public string Timestamp { get; set; }
         public string TimeText { get; set; }
         public int? Duration { get; set; }
@@ -107,6 +109,7 @@ namespace NWheels.Tools.LogViewerWeb.App
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public long CaptureId { get; set; }
         public long TimestampValue { get; set; }
         public string Environment { get; set; }
         public string Node { get; set; }

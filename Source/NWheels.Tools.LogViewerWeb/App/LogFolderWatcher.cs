@@ -48,7 +48,7 @@ namespace NWheels.Tools.LogViewerWeb.App
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ThreadNodeViewModel[] GetCapturedLogs(ref long lastCaptureId)
+        public ThreadNodeViewModel[] GetCapturedLogs(long lastCaptureId)
         {
             FileCapture[] currentCaptures;
             var newCaptures = new List<ThreadNodeViewModel>();
@@ -63,7 +63,6 @@ namespace NWheels.Tools.LogViewerWeb.App
                 if ( capture.CaptureId > lastCaptureId )
                 {
                     newCaptures.Add(capture.DeserializedContents);
-                    lastCaptureId = capture.CaptureId;
                 }
             }
 
@@ -78,7 +77,7 @@ namespace NWheels.Tools.LogViewerWeb.App
 
             if ( File.Exists(filePath) )
             {
-                log = LoadFileContents(filePath);
+                log = LoadFileContents(filePath, captureId: -1);
                 return true;
             }
             else
@@ -127,39 +126,43 @@ namespace NWheels.Tools.LogViewerWeb.App
         {
             if ( e.ChangeType == WatcherChangeTypes.Created )
             {
+                List<FileCapture> releasedList;
+
                 lock ( _capturedFilesSyncRoot )
                 {
                     var now = DateTime.Now;
 
                     _captures.Enqueue(new FileCapture(e.FullPath, now));
-                    PurgeExpiredCaptures(now);
+                    releasedList = ReleaseExpiredCaptures(now);
                 }
 
                 Console.WriteLine("> CAPTURED: {0}", e.FullPath);
+
+                foreach ( var released in releasedList )
+                {
+                    Console.WriteLine("> released: {0}", released.Path);
+                }
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void PurgeExpiredCaptures(DateTime now)
+        private List<FileCapture> ReleaseExpiredCaptures(DateTime now)
         {
             var minRetentionTime = now.Subtract(_captureExpiration);
-            var purgedList = new List<FileCapture>();
+            var releasedList = new List<FileCapture>();
 
-            while ( _captures.Count > 1 && (_captures.Count > 100 || _captures.Peek().CapturedAt < minRetentionTime) )
+            while ( _captures.Count > 1 && (_captures.Count > _maxStoredCaptures || _captures.Peek().CapturedAt < minRetentionTime) )
             {
-                purgedList.Add(_captures.Dequeue());
+                releasedList.Add(_captures.Dequeue());
             }
 
-            foreach ( var purged in purgedList )
-            {
-                Console.WriteLine("> purged: {0}", purged.Path);
-            }
+            return releasedList;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static ThreadNodeViewModel LoadFileContents(string filePath)
+        private static ThreadNodeViewModel LoadFileContents(string filePath, long captureId)
         {
             var retryCountDown = 5;
 
@@ -173,6 +176,7 @@ namespace NWheels.Tools.LogViewerWeb.App
                         var snapshot = (ThreadLogSnapshot)serializer.ReadObject(file);
                         var contents = new ThreadNodeViewModel();
                         contents.PopulateFrom(snapshot);
+                        contents.CaptureId = captureId;
                         return contents;
                     }
                 }
@@ -223,7 +227,7 @@ namespace NWheels.Tools.LogViewerWeb.App
                 {
                     if ( _deserializedContents == null )
                     {
-                        _deserializedContents = LoadFileContents(this.Path);
+                        _deserializedContents = LoadFileContents(this.Path, this.CaptureId);
                     }
 
                     return _deserializedContents;

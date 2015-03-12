@@ -45,6 +45,7 @@ namespace NWheels.Testing
             this.StartedThreadTaskType = taskType;
 
             _logNodes.Add(rootActivity);
+            rootActivity.AttachToThreadLog(_threadLog, parent: null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

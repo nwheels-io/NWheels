@@ -102,21 +102,21 @@
 					level_critical: node.level===50
 				}">
 				<div class="grid_cell body_cell col_message" ng-style="{'width': 577 - 20 * (depth()-1)}">
-					<a data-nodrag ng-click="toggle(this)" ng-if="node.subNodes.length"><img src="/content/icon-collapsed.png" ng-hide="collapsed"/><img src="/content/icon-expanded.png" ng-show="collapsed"/></a>
+					<a data-nodrag ng-click="toggle(this)" ng-if="node.subNodes.length"><img src="/content/icon-collapsed.png" ng-show="collapsed"/><img src="/content/icon-expanded.png" ng-hide="collapsed"/></a>
 					<span ng-if="node.type===0" class="label label-thread label-environment">{{node.environment}}</span>
 					<span ng-if="node.type===0" class="label label-thread label-node">{{node.node}}</span>
 					<span ng-if="node.type===0" class="label label-thread" ng-class="{
 						'label-verbose': node.level < 20, 
 						'label-info': node.level===20, 
 						'label-warning': node.level===30, 
-						'label-important': node.level >= 40
+						'label-danger': node.level >= 40
 					}">{{node.threadType | threadType}}</span>
 					<span ng-class="{non_expandable: !node.subNodes.length}">
 						{{node.text}}
 					</span>
 				</div>
 				<div class="grid_cell body_cell col_ellipsis">
-					<a ng-show="node.nameValuePairs.length" ng-click="toggleDetails(this)">...<!--img src="/content/icon-ellipsis.png" style="display:none;"--></a>
+					<a ng-show="node.nameValuePairs.length" ng-click="toggleDetails(this)"><img src="/content/icon-ellipsis.png"></a>
 				</div>
 				<div class="grid_cell body_cell col_timestamp">
 					<span>{{node.timeText}}</span>
@@ -145,23 +145,31 @@
 							<td>correlationId</td>
 							<td class="value">{{node.correlationId}}</td>
 						</tr>
+                        <tr>
+                            <td>messageId</td>
+                            <td class="value">{{node.messageId}}</td>
+                        </tr>
 						<tr ng-repeat="pair in node.nameValuePairs track by $index">
 							<td>{{pair.name}}</td>
 							<td class="value">{{pair.value}}</td>
 						</tr>
+                        <tr ng-if="node.exceptionDetails">
+                            <td>exception</td>
+                            <td class="value error"><pre>{{node.exceptionDetails}}</pre></td>
+                        </tr>
 					</table>
 					<span ng-hide="node.nameValuePairs.length">No details available</span>
 					<a class="close_full_details" ng-click="toggleDetails(this)"><img src="/content/icon-close-details.png"></a>
 				</div>
 			</div>
-			<ol ui-tree-nodes="" ng-model="node.subNodes" ng-class="{hidden: !collapsed}">
-				<li ng-repeat="node in node.subNodes track by $index" ui-tree-node ng-include="'nodes_renderer.html'">
+			<ol ui-tree-nodes="" ng-model="node.subNodes" ng-class="{hidden: collapsed}">
+				<li ng-repeat="node in node.subNodes track by $index" ui-tree-node ng-include="'nodes_renderer.html'" collapsed="true">
 				</li>
 			</ol>
 		</script>
 		<div ui-tree data-drag-enabled="false">
 		  <ol ui-tree-nodes="" ng-model="rootNodes">
-			<li ng-repeat="node in rootNodes track by $index" ui-tree-node ng-include="'nodes_renderer.html'"></li>
+			<li ng-repeat="node in rootNodes track by $index" ui-tree-node ng-include="'nodes_renderer.html'" collapsed="true"></li>
 		  </ol>
 		</div>
 		<div class="clearfix">
@@ -169,6 +177,8 @@
 		</div>
 	</div>
 	
+
+	<script src="/content/jquery-2.1.3.min.js"></script>
     <script src="/content/angular.min.js"></script>
     <script src="/content/angular-ui-tree.min.js"></script>
 	<script src="/content/isteven-multi-select.js"></script>    

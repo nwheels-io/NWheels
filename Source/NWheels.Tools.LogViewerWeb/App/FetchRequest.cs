@@ -14,5 +14,6 @@ namespace NWheels.Tools.LogViewerWeb.App
         public string[] NodeNames { get; set; }
         public ThreadTaskType[] ThreadTypes { get; set; }
         public LogLevel[] LogLevels { get; set; }
+        public int? MaxNumberOfCaptures { get; set; }
     }
 }

@@ -82,7 +82,8 @@
 .level_verbose { color:#8C8C8C;}
 .level_info { color:navy;}
 .level_warning { color:#DEAA00;}
-.level_error { color:#DA3939;}
+.level_error { color:#B81E1E;}
+.level_error.thread_node { font-weight:bold;}
 .level_critical { color:red;font-weight:bold;}
 
 .full_details { background-color:#FEF7E4; font-family:Consolas, "Courier New", Courier; font-size:9pt; border-right: 1px solid #B7D2E8; }
@@ -95,10 +96,23 @@
 }
 .full_details table td { 
 	padding:3px;
+	vertical-align: top;
 }
 .full_details table td.value { 
 	background-color:#FDE9A8;
 	border-radius:3px;
+}
+.full_details table td.value.error { 
+	background-color:#FFBEBE
+}
+
+.full_details table td.value pre { 
+	font-family:inherit !important;
+	font-size:inherit !important;
+	background-color: inherit !important;
+	border:0;
+	margin:0;
+	padding:0;
 }
 
 .close_full_details { margin:0; padding:8px 3px 0 3px; }

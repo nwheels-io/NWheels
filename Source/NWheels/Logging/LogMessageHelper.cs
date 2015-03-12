@@ -2,7 +2,7 @@
 
 namespace NWheels.Logging
 {
-    internal static class LogMessageHelper
+    public static class LogMessageHelper
     {
         public static string GetTextFromMessageId(string messageId)
         {

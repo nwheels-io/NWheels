@@ -51,6 +51,8 @@ namespace NWheels.Logging
             [DataMember]
             public string ExceptionTypeName { get; set; }
             [DataMember]
+            public string ExceptionDetails { get; set; }
+            [DataMember]
             public IList<NameValuePairSnapshot> NameValuePairs { get; set; }
             [DataMember]
             public IList<LogNodeSnapshot> SubNodes { get; set; }

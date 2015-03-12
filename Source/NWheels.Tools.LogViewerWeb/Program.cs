@@ -53,7 +53,7 @@ namespace NWheels.Tools.LogViewerWeb
 
                 if ( !string.IsNullOrWhiteSpace(path) )
                 {
-                    _s_folderWatchers.Add(new LogFolderWatcher(path, captureExpiration: TimeSpan.FromMinutes(3), maxStoredCaptures: 500));
+                    _s_folderWatchers.Add(new LogFolderWatcher(path, captureExpiration: TimeSpan.FromMinutes(3), maxStoredCaptures: 100));
                 }
                 else
                 {

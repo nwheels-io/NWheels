@@ -45,7 +45,8 @@ namespace NWheels.Logging
                 Level = _level,
                 ContentTypes = _contentTypes,
                 NameValuePairs = new List<ThreadLogSnapshot.NameValuePairSnapshot>(capacity: pairs.Length),
-                ExceptionTypeName = (this.Exception != null ? this.Exception.GetType().FullName : null)
+                ExceptionTypeName = (this.Exception != null ? this.Exception.GetType().FullName : null),
+                ExceptionDetails = (this.Exception != null ? this.Exception.ToString() : null),
             };
 
             for ( int i = 0 ; i < pairs.Length ; i++ )
@@ -300,11 +301,14 @@ namespace NWheels.Logging
                 },
             };
 
-            return baseValues.ConcatIf(
-                this.Exception != null,
-                () => new LogNameValuePair<string> {
-                    Name = "$exception",
+            return baseValues
+                .ConcatIf(this.Exception != null, () => new LogNameValuePair<string> {
+                    Name = "$exceptionType",
                     Value = this.Exception.GetType().FullName
+                })
+                .ConcatIf(this.Exception != null, () => new LogNameValuePair<string> {
+                    Name = "$exception",
+                    Value = this.Exception.Message
                 });
         }
 

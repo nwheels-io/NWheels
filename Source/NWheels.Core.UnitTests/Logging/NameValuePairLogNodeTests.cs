@@ -82,7 +82,9 @@ namespace NWheels.Core.UnitTests.Logging
 
             Assert.That(singleLineText, Is.EqualTo("Message one"));
             Assert.That(fullDetailsText.Contains(exception.ToString()));
-            Assert.That(nameValuePairs, Is.EqualTo(ExpectedBaseNameValuePairs + " exception=System.DivideByZeroException"));
+            Assert.That(nameValuePairs, Is.EqualTo(
+                ExpectedBaseNameValuePairs + " exceptionType=System.DivideByZeroException exception=\"Attempted to divide by zero.\""
+            ));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -147,7 +149,7 @@ namespace NWheels.Core.UnitTests.Logging
 
             Assert.That(nameValuePairs, Is.EqualTo(
                 ExpectedBaseNameValuePairs +
-                " exception=System.DivideByZeroException accountId=ABCD1234 balance=1,234,567,890.00"));
+                " exceptionType=System.DivideByZeroException exception=\"Attempted to divide by zero.\" accountId=ABCD1234 balance=1,234,567,890.00"));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

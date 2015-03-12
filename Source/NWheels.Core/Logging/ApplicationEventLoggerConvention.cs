@@ -245,11 +245,11 @@ namespace NWheels.Core.Logging
 
                     using ( TT.CreateScope<TT.TValue>(_signature.ArgumentType[i]) )
                     {
-                        Static.Func<string, LogNameValuePair<TT.TValue>, bool, string>(
+                        exceptionMessageLocal.Assign(Static.GenericFunc<string, LogNameValuePair<TT.TValue>, bool, string>(
                             (s, v, b) => LogMessageHelper.AppendToExceptionMessage<TT.TValue>(s, ref v, ref b),
                             exceptionMessageLocal,
                             _nameValuePairLocals[nameValuePairIndex].CastTo<LogNameValuePair<TT.TValue>>(),
-                            exceptionAnyAppendedLocal);
+                            exceptionAnyAppendedLocal));
                     }
 
                     nameValuePairIndex++;

@@ -31,30 +31,24 @@ namespace NWheels.Tools.LogViewerWeb.App
         {
             Console.WriteLine("Serving captured thread logs for Last Capture ID = {0}", request.LastCaptureId);
 
-            long responseCaptureId = 0;
             var responseLogs = new List<ThreadNodeViewModel>();
 
             foreach ( var folder in Program.FolderWatchers )
             {
-                var lastCaptureId = request.LastCaptureId;
-                var logsFromFolder = folder.GetCapturedLogs(ref lastCaptureId);
-                
+                var logsFromFolder = folder.GetCapturedLogs(request.LastCaptureId);
                 responseLogs.AddRange(logsFromFolder);
-
-                if ( lastCaptureId > responseCaptureId )
-                {
-                    responseCaptureId = lastCaptureId;
-                }
-
+                
                 Console.WriteLine("> CAPTURED {0} new logs in: {1}", logsFromFolder.Length, folder.FolderPath);
             }
 
             responseLogs.Sort((x, y) => x.TimestampValue.CompareTo(y.TimestampValue));
 
-            return Response.AsJson(new FetchResponse {
-                LastCaptureId = responseCaptureId,
-                Logs = responseLogs.ToArray()
-            });
+            var response = new FetchResponse {
+                Logs = responseLogs.Take(request.MaxNumberOfCaptures.GetValueOrDefault(100)).ToArray()
+            };
+            response.LastCaptureId = (response.Logs.Length > 0 ? response.Logs.Max(log => log.CaptureId) : request.LastCaptureId);
+
+            return Response.AsJson(response);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
