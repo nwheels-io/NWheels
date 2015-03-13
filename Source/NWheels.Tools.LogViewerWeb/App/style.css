@@ -81,7 +81,7 @@
 .level_debug { color:#9D9D9D;}
 .level_verbose { color:#8C8C8C;}
 .level_info { color:navy;}
-.level_warning { color:#DEAA00;}
+.level_warning { color:#DE6900;}
 .level_error { color:#B81E1E;}
 .level_error.thread_node { font-weight:bold;}
 .level_critical { color:red;font-weight:bold;}
