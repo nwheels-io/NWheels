@@ -8,7 +8,7 @@ using NWheels.DataObjects;
 
 namespace NWheels.Core.DataObjects
 {
-    public class TypeMetadataCache
+    public class TypeMetadataCache : ITypeMetadataCache
     {
         private readonly ConcurrentDictionary<Type, TypeMetadataBuilder> _metadataByContractType = new ConcurrentDictionary<Type, TypeMetadataBuilder>();
 

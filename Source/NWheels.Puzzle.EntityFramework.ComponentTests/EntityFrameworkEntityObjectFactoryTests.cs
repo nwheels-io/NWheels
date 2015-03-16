@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
+using NWheels.Core.DataObjects;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.Impl;
 
@@ -19,7 +20,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
 
             //-- Act
 
@@ -43,7 +44,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
 
             //-- Act
 
@@ -70,7 +71,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
 
             //-- Act
 
@@ -89,7 +90,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
 
             //-- Act
 
@@ -108,7 +109,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
 
             var productType = factory.NewEntity<Interfaces.Repository1.IProduct>().GetType();
             var orderType = factory.NewEntity<Interfaces.Repository1.IOrder>().GetType();
@@ -140,7 +141,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
 
             var orderImpl = factory.NewEntity<Interfaces.Repository1.IOrder>();
             Interfaces.Repository1.IOrder orderAsContract = (Interfaces.Repository1.IOrder)orderImpl;
@@ -164,7 +165,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
 
             var productImpl = factory.NewEntity<Interfaces.Repository1.IProduct>();
             Interfaces.Repository1.IProduct productAsContract = (Interfaces.Repository1.IProduct)productImpl;
@@ -193,7 +194,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
 
             var product = factory.NewEntity<Interfaces.Repository1.IProduct>();
             var order = factory.NewEntity<Interfaces.Repository1.IOrder>();
@@ -225,7 +226,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
 
             var orderLine1 = factory.NewEntity<Interfaces.Repository1.IOrderLine>();
             var orderLine2 = factory.NewEntity<Interfaces.Repository1.IOrderLine>();
@@ -266,7 +267,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module);
+            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
 
             var productType = factory.NewEntity<Interfaces.Repository1.IProduct>().GetType();
             var orderType = factory.NewEntity<Interfaces.Repository1.IOrder>().GetType();

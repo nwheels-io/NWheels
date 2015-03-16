@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
+using NWheels.Core.DataObjects;
 using NWheels.Entities;
 using TT = Hapil.TypeTemplate;
 
@@ -14,9 +15,14 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 {
     public class EfEntityObjectFactory : ConventionObjectFactory
     {
-        public EfEntityObjectFactory(DynamicModule module)
+        private readonly TypeMetadataCache _metadataCache;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public EfEntityObjectFactory(DynamicModule module, TypeMetadataCache metadataCache) 
             : base(module, new EntityObjectConvention())
         {
+            _metadataCache = metadataCache;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -30,7 +36,10 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
         public Type GetOrBuildEntityImplementation(Type entityContractInterface) 
         {
-            return base.GetOrBuildType(new TypeKey(primaryInterface: entityContractInterface)).DynamicType;
+            var implementationType =base.GetOrBuildType(new TypeKey(primaryInterface: entityContractInterface)).DynamicType;
+            var typeMetadata = (TypeMetadataBuilder)_metadataCache.GetTypeMetadata(entityContractInterface);
+            typeMetadata.ImplementationType = implementationType;
+            return implementationType;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

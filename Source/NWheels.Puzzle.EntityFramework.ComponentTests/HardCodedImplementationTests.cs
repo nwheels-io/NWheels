@@ -17,7 +17,7 @@ using HR1 = NWheels.Puzzle.EntityFramework.ComponentTests.HardCodedImplementatio
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
     [TestFixture]
-    [Ignore("Not unit tests")]
+    //[Ignore("Not unit tests")]
     public class HardCodedImplementationTests : DatabaseTestBase
     {
         private DbCompiledModel _compiledModel = null;
@@ -233,16 +233,6 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                     command.ExecuteNonQuery();
                 }
             }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private DbConnection CreateDbConnection()
-        {
-            var dbFactory = DbProviderFactories.GetFactory(base.ConnectionStringProviderName);
-            var connection = dbFactory.CreateConnection();
-            connection.ConnectionString = base.ConnectionString;
-            return connection;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

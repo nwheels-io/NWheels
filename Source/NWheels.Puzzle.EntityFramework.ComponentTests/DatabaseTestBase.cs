@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Data.Common;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -47,6 +48,16 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
                 cmd.ExecuteNonQuery();
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DbConnection CreateDbConnection()
+        {
+            var dbFactory = DbProviderFactories.GetFactory(this.ConnectionStringProviderName);
+            var connection = dbFactory.CreateConnection();
+            connection.ConnectionString = this.ConnectionString;
+            return connection;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
