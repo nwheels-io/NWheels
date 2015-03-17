@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace NWheels.DataObjects
 {
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
-    public abstract class DataTransferObjectAttribute : Attribute
+    public abstract class DataObjectContractAttribute : Attribute
     {
     }
 }

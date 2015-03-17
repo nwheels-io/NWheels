@@ -42,6 +42,8 @@ namespace NWheels.Core.DataObjects
             FindProperties();
             FindPrimaryKey();
             FindRelations();
+
+            builder.EndBuild();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

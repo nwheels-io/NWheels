@@ -9,7 +9,7 @@ using NWheels.DataObjects;
 namespace NWheels.Entities
 {
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
-    public class EntityPartContractAttribute : DataTransferObjectAttribute
+    public class EntityPartContractAttribute : DataObjectContractAttribute
     {
     }
 }

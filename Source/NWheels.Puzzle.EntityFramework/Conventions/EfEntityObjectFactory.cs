@@ -36,9 +36,11 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
         public Type GetOrBuildEntityImplementation(Type entityContractInterface) 
         {
-            var implementationType =base.GetOrBuildType(new TypeKey(primaryInterface: entityContractInterface)).DynamicType;
+            var implementationType = base.GetOrBuildType(new TypeKey(primaryInterface: entityContractInterface)).DynamicType;
             var typeMetadata = (TypeMetadataBuilder)_metadataCache.GetTypeMetadata(entityContractInterface);
-            typeMetadata.ImplementationType = implementationType;
+            
+            typeMetadata.UpdateImplementation(implementationType);
+
             return implementationType;
         }
 

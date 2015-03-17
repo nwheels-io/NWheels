@@ -42,8 +42,8 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
             {
                 var typeConfig = _method.Local(initialValue: _model.Func<EntityTypeConfiguration<TT.TImpl>>(x => x.Entity<TT.TImpl>));
 
-                typeConfig.Func<string, EntityTypeConfiguration<TT.TImpl>>(x => x.ToTable, m.Const(_metadata.Name));// m.Const(_metadata.RelationalMapping.PrimaryTableName));
-                typeConfig.Func<string, EntityTypeConfiguration<TT.TImpl>>(x => x.HasEntitySetName, m.Const(_metadata.Name));// m.Const(_metadata.RelationalMapping.PrimaryTableName));
+                typeConfig.Func<string, EntityTypeConfiguration<TT.TImpl>>(x => x.ToTable, m.Const(_metadata.RelationalMapping.PrimaryTableName));
+                typeConfig.Func<string, EntityTypeConfiguration<TT.TImpl>>(x => x.HasEntitySetName, m.Const(_metadata.Name));
 
                 //foreach ( var property in _metadata.Properties )
                 //{

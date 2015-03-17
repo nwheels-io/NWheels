@@ -46,6 +46,37 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static void RegisterPascalCaseRelationalMappingConvention(this ContainerBuilder builder, bool usePluralTableNames = true)
+        {
+            builder.RegisterInstance(new RelationalMappingConventionDefault(RelationalMappingConventionDefault.ConventionType.PascalCase, usePluralTableNames));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void RegisterUnderscoreRelationalMappingConvention(this ContainerBuilder builder, bool usePluralTableNames = true)
+        {
+            builder.RegisterInstance(new RelationalMappingConventionDefault(RelationalMappingConventionDefault.ConventionType.Underscore, usePluralTableNames));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void RegisterCustomRelationalMappingConvention<TConvention>(this ContainerBuilder builder, bool singleInstance = true)
+            where TConvention : IRelationalMappingConvention
+        {
+            var registration = builder.RegisterType<TConvention>().As<IRelationalMappingConvention>();
+
+            if ( singleInstance )
+            {
+                registration.SingleInstance();
+            }
+            else
+            {
+                registration.InstancePerDependency();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static void RegisterRelationalMappingFineTune<TEntity>(this ContainerBuilder builder, Action<IRelationalMappingFineTune<TEntity>> fineTuneAction)
             where TEntity : class
         {

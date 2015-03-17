@@ -20,7 +20,6 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
     //[Ignore("Not unit tests")]
     public class HardCodedImplementationTests : DatabaseTestBase
     {
-        private DbCompiledModel _compiledModel = null;
         //private Autofac.ContainerBuilder _componentsBuilder = null;
         //private Autofac.IContainer _components = null;
 
@@ -41,7 +40,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
             using ( var connection = CreateDbConnection() )
             {
-                var objectContext = _compiledModel.CreateObjectContext<ObjectContext>(connection);
+                var objectContext = base.CompiledModel.CreateObjectContext<ObjectContext>(connection);
                 var productObjectSet = objectContext.CreateObjectSet<HR1.EntityObject_Product>();
                 var orderObjectSet = objectContext.CreateObjectSet<HR1.EntityObject_Order>();
             }
@@ -56,7 +55,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
             using ( var connection = CreateDbConnection() )
             {
-                var objectContext = _compiledModel.CreateObjectContext<ObjectContext>(connection);
+                var objectContext = base.CompiledModel.CreateObjectContext<ObjectContext>(connection);
                 var script = objectContext.CreateDatabaseScript();
 
                 Assert.That(string.IsNullOrEmpty(script), Is.False);
@@ -90,7 +89,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
             //-- Act
 
-            InitializeHardCodedDataRepository(out _compiledModel).Dispose();
+            InitializeHardCodedDataRepository().Dispose();
             CreateTestDatabaseObjects();
 
             //-- Assert
@@ -116,7 +115,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             //-- Act
 
             //HR1.RegisterEntityFineTunings(_componentsBuilder);
-            InitializeHardCodedDataRepository(out _compiledModel).Dispose();
+            InitializeHardCodedDataRepository().Dispose();
             CreateTestDatabaseObjects();
 
             //-- Assert
@@ -146,14 +145,13 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             //-- Arrange
 
             DropAndCreateTestDatabase();
-            InitializeHardCodedDataRepository(out _compiledModel).Dispose();
+            InitializeHardCodedDataRepository().Dispose();
             CreateTestDatabaseObjects();
 
             //-- Act & Assert
 
             CrudOperations.Repository1.ExecuteBasic(repoFactory: InitializeHardCodedDataRepository);
         }
-
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -163,7 +161,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             //-- Arrange
 
             DropAndCreateTestDatabase();
-            InitializeHardCodedDataRepository(out _compiledModel).Dispose();
+            InitializeHardCodedDataRepository().Dispose();
             CreateTestDatabaseObjects();
 
             //-- Act & Assert
@@ -173,73 +171,22 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private string GetCommaSeparatedColumnList(DataTable table)
-        {
-            return string.Join(",", table.Columns.Cast<DataColumn>().Select(c => c.ColumnName + ":" + c.DataType.Name).ToArray());
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private DataTable SelectFromTable(string tableName)
-        {
-            using ( var connection = (SqlConnection)CreateDbConnection() )
-            {
-                connection.Open();
-
-                var adapter = new SqlDataAdapter("SELECT * FROM " + tableName, connection);
-                var table = new DataTable();
-                adapter.Fill(table);
-                
-                return table;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         private Interfaces.Repository1.IOnlineStoreRepository InitializeHardCodedDataRepository()
-        {
-            DbCompiledModel compiledModel;
-            return InitializeHardCodedDataRepository(out compiledModel);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private Interfaces.Repository1.IOnlineStoreRepository InitializeHardCodedDataRepository(out DbCompiledModel compiledModel)
         {
             //_components = _componentsBuilder.Build();
             
             var connection = CreateDbConnection();
             connection.Open();
             var repo = new HR1.DataRepositoryObject_DataRepository(connection, autoCommit: false);
-            compiledModel = repo.CompiledModel;
+            base.CompiledModel = repo.CompiledModel;
             return repo;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void CreateTestDatabaseObjects()
-        {
-            using ( var connection = CreateDbConnection() )
-            {
-                var objectContext = _compiledModel.CreateObjectContext<ObjectContext>(connection);
-                var script = objectContext.CreateDatabaseScript();
-
-                using ( var command = connection.CreateCommand() )
-                {
-                    command.CommandType = CommandType.Text;
-                    command.CommandText = script;
-
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                }
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private void EnsureDbCompiledModel()
         {
-            if ( _compiledModel != null )
+            if ( base.CompiledModel != null )
             {
                 return;
             }
@@ -256,7 +203,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             {
                 connection.ConnectionString = base.ConnectionString;
                 var model = modelBuilder.Build(connection);
-                _compiledModel = model.Compile();
+                base.CompiledModel = model.Compile();
             }
         }
     }

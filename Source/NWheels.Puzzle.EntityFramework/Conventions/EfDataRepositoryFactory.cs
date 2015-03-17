@@ -15,6 +15,7 @@ using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Exceptions;
+using NWheels.Extensions;
 using NWheels.Puzzle.EntityFramework.EFConventions;
 using NWheels.Puzzle.EntityFramework.Impl;
 using System.Reflection;
@@ -47,6 +48,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
             private readonly ITypeMetadataCache _metadataCache;
             private readonly List<Action<ConstructorWriter>> _initializers;
             private readonly List<EntityInRepository> _entitiesInRepository;
+            private readonly HashSet<Type> _entityContractsInRepository;
             private MethodMember _methodGetOrBuildDbCompieldModel;
             private Field<DbCompiledModel> _compiledModelField;
             private Field<object> _compiledModelSyncRootField;
@@ -60,6 +62,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
                 _entityFactory = entityFactory;
                 _initializers = new List<Action<ConstructorWriter>>();
                 _entitiesInRepository = new List<EntityInRepository>();
+                _entityContractsInRepository = new HashSet<Type>();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -80,8 +83,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
                 ImplementGetOrBuildDbCompiledModel(writer);
                 ImplementConstructor(writer);
                 ImplementGetEntityTypesInRepository(writer);
-
-                writer.AllMethods(m => m.DeclaringType == TT.Resolve<TT.TInterface>()).Throw<NotImplementedException>();
+                ImplementNewEntityMethods(writer);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -89,15 +91,34 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
             private void FindEntitiesInRepository(ImplementationClassWriter<TT.TInterface> writer)
             {
                 writer.AllProperties(MustImplementProperty).ForEach(property => {
-                    _entitiesInRepository.Add(new EntityInRepository(property, this));
+                    var entity = new EntityInRepository(property, this);
+                    _entitiesInRepository.Add(entity);
+                    FindEntityContractsInRepository(entity.Metadata);
                 });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void FindEntityContractsInRepository(ITypeMetadata type)
+            {
+                if ( !_entityContractsInRepository.Add(type.ContractType) )
+                {
+                    return;
+                }
+
+                foreach ( var property in type.Properties )
+                {
+                    if ( property.Relation != null )
+                    {
+                        FindEntityContractsInRepository(property.Relation.RelatedPartyType);
+                    }
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private void ImplementGetOrBuildDbCompiledModel(ImplementationClassWriter<TT.TInterface> writer)
             {
-
                 writer.NewStaticFunction<DbConnection, DbCompiledModel>("GetOrBuildDbCompiledModel", "connection").Implement((m, connection) => {
                     _methodGetOrBuildDbCompieldModel = m.OwnerMethod;
 
@@ -189,9 +210,54 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private void ImplementNewEntityMethods(ImplementationClassWriter<TT.TInterface> writer)
+            {
+                writer.AllMethods(IsNewEntityMethod).Implement(m => {
+                    var entity = FindEntityInRepositoryByContract(m.OwnerMethod.Signature.ReturnType);
+                    var entityImplementationType = _entityFactory.FindDynamicType(new TypeKey(primaryInterface: entity.ContractType));
+
+                    using ( TT.CreateScope<TT.TImpl>(entityImplementationType) )
+                    {
+                        var enttityObjectLocal = m.Local<TT.TReturn>(initialValue: m.New<TT.TImpl>().CastTo<TT.TReturn>());
+
+                        m.ForEachArgument(arg => {
+                            var property = entity.FindEntityContractPropertyOrThrow(arg.Name, arg.OperandType);
+                            enttityObjectLocal.Prop<TT.TArgument>(property).Assign(arg);
+                        });
+
+                        m.Return(enttityObjectLocal);
+                    }
+                });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private EntityInRepository FindEntityInRepositoryByContract(Type contractType)
+            {
+                var entity = _entitiesInRepository.FirstOrDefault(e => e.ContractType == contractType);
+
+                if ( entity == null )
+                {
+                    entity = new EntityInRepository(contractType, this);
+                    _entitiesInRepository.Add(entity);
+                }
+                
+                return entity;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private bool MustImplementProperty(PropertyInfo property)
             {
                 return (property.DeclaringType != typeof(IApplicationDataRepository) && property.DeclaringType != typeof(IUnitOfWork));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool IsNewEntityMethod(MethodInfo method)
+            {
+                var result = (method.Name.StartsWith("New") && _entityContractsInRepository.Contains(method.ReturnType));
+                return result;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -229,15 +295,51 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
             {
                 private readonly Type _contractType;
                 private readonly Type _implementationType;
+                private readonly DataRepositoryConvention _ownerConvention;
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-                public EntityInRepository(PropertyInfo property, DataRepositoryConvention owner)
+                public EntityInRepository(PropertyInfo property, DataRepositoryConvention ownerConvention)
                 {
-                    owner.ValidateContractProperty(property, out _contractType, out _implementationType);
+                    _ownerConvention = ownerConvention;
+                    ownerConvention.ValidateContractProperty(property, out _contractType, out _implementationType);
 
                     this.RepositoryProperty = property;
-                    this.Metadata = owner._metadataCache.GetTypeMetadata(_contractType);
+                    this.Metadata = ownerConvention._metadataCache.GetTypeMetadata(_contractType);
+
+                    ownerConvention._metadataCache.EnsureRelationalMapping(this.Metadata);
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                public EntityInRepository(Type contractType, DataRepositoryConvention ownerConvention)
+                {
+                    _contractType = contractType;
+                    _ownerConvention = ownerConvention;
+
+                    this.RepositoryProperty = null;
+                    this.Metadata = ownerConvention._metadataCache.GetTypeMetadata(_contractType);
+
+                    _implementationType = this.Metadata.ImplementationType;
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                public PropertyInfo FindEntityContractPropertyOrThrow(string argumentName, Type argumentType)
+                {
+                    var property = this.Metadata.Properties.FirstOrDefault(p => 
+                        p.Name.EqualsIgnoreCase(argumentName) && 
+                        p.ClrType.IsAssignableFrom(argumentType));
+
+                    if ( property != null )
+                    {
+                        return property.ContractPropertyInfo;
+                    }
+
+                    throw new ContractConventionException(
+                        _ownerConvention,
+                        _contractType,
+                        string.Format("No property matches NewXXXX() method argument '{0}':{1}", argumentName, argumentType.Name));
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------

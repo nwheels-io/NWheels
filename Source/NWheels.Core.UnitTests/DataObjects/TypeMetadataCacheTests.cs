@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using NWheels.Core.DataObjects;
+using NWheels.Core.Entities;
 using NWheels.DataObjects;
 
 namespace NWheels.Core.UnitTests.DataObjects
@@ -17,7 +18,7 @@ namespace NWheels.Core.UnitTests.DataObjects
         {
             //-- Arrange
 
-            var cache = new TypeMetadataCache();
+            var cache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
 
             //-- Act
 
@@ -41,7 +42,7 @@ namespace NWheels.Core.UnitTests.DataObjects
         {
             //-- Arrange
 
-            var cache = new TypeMetadataCache();
+            var cache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
 
             //-- Act
 
@@ -59,7 +60,7 @@ namespace NWheels.Core.UnitTests.DataObjects
         {
             //-- Arrange
 
-            var cache = new TypeMetadataCache();
+            var cache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
 
             //-- Act
 

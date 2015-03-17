@@ -1,4 +1,7 @@
-﻿using System.Data.Common;
+﻿using System.Data;
+using System.Data.Common;
+using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Infrastructure;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -14,6 +17,14 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
     public abstract class DatabaseTestBase
     {
         public const string DatabaseName = "NWheelsEFTests";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [SetUp]
+        public void BaseSetUp()
+        {
+            this.CompiledModel = null;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -89,5 +100,52 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 return ConfigurationManager.ConnectionStrings["test"].ProviderName;
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected string GetCommaSeparatedColumnList(DataTable table)
+        {
+            return string.Join(",", table.Columns.Cast<DataColumn>().Select(c => c.ColumnName + ":" + c.DataType.Name).ToArray());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected DataTable SelectFromTable(string tableName)
+        {
+            using ( var connection = (SqlConnection)CreateDbConnection() )
+            {
+                connection.Open();
+
+                var adapter = new SqlDataAdapter("SELECT * FROM " + tableName, connection);
+                var table = new DataTable();
+                adapter.Fill(table);
+                
+                return table;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected void CreateTestDatabaseObjects()
+        {
+            using ( var connection = CreateDbConnection() )
+            {
+                var objectContext = CompiledModel.CreateObjectContext<ObjectContext>(connection);
+                var script = objectContext.CreateDatabaseScript();
+
+                using ( var command = connection.CreateCommand() )
+                {
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = script;
+
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected DbCompiledModel CompiledModel { get; set; }
     }
 }

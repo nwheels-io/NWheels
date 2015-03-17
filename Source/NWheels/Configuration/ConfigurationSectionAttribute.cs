@@ -10,7 +10,7 @@ using NWheels.DataObjects;
 namespace NWheels.Configuration
 {
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
-    public class ConfigurationSectionAttribute : DataTransferObjectAttribute
+    public class ConfigurationSectionAttribute : DataObjectContractAttribute
     {
         public string XmlName { get; set; }
 

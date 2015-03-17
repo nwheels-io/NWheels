@@ -9,5 +9,6 @@ namespace NWheels.DataObjects
     public interface ITypeMetadataCache
     {
         ITypeMetadata GetTypeMetadata(Type contract);
+        void EnsureRelationalMapping(ITypeMetadata type);
     }
 }

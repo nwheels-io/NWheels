@@ -50,6 +50,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity.Design" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
@@ -68,7 +69,6 @@
     <Compile Include="Configuration\IInternalConfigurationObject.cs" />
     <Compile Include="Conventions\ConfigurationSectionFactory.cs" />
     <Compile Include="Conventions\LoggerObjectFactory.cs" />
-    <Compile Include="DataObjects\DataObjectContractAttribute.cs" />
     <Compile Include="DataObjects\DataObjectConventions.cs" />
     <Compile Include="DataObjects\MetadataElement.cs" />
     <Compile Include="DataObjects\CollectionAdapter.cs" />
@@ -81,7 +81,9 @@
     <Compile Include="DataObjects\TypeMetadataBuilderConstructor.cs" />
     <Compile Include="DataObjects\TypeMetadataCache.cs" />
     <Compile Include="DataObjects\TypeRelationalMappingBuilder.cs" />
-    <Compile Include="Entities\EntityMetadataBase.cs" />
+    <Compile Include="Entities\PascalCaseRelationalMappingConvention.cs" />
+    <Compile Include="Entities\RelationalMappingConventionBase.cs" />
+    <Compile Include="Entities\UnderscoreRelationalMappingConvention.cs" />
     <Compile Include="Hosting\IInitializableHostComponent.cs" />
     <Compile Include="Hosting\INodeHostLogger.cs" />
     <Compile Include="Hosting\NodeHost.cs" />

@@ -5,18 +5,37 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
+using NWheels.Entities;
 
 namespace NWheels.Core.DataObjects
 {
     public class TypeMetadataCache : ITypeMetadataCache
     {
+        private readonly DataObjectConventions _dataObjectConventions;
+        private readonly IRelationalMappingConvention _relationalMappingConvention;
         private readonly ConcurrentDictionary<Type, TypeMetadataBuilder> _metadataByContractType = new ConcurrentDictionary<Type, TypeMetadataBuilder>();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TypeMetadataCache(DataObjectConventions dataObjectConventions, IRelationalMappingConvention relationalMappingConvention)
+        {
+            _dataObjectConventions = dataObjectConventions;
+            _relationalMappingConvention = relationalMappingConvention;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ITypeMetadata GetTypeMetadata(Type contract)
         {
             return _metadataByContractType.GetOrAdd(contract, BuildTypeMetadata);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void EnsureRelationalMapping(ITypeMetadata type)
+        {
+            var metadata = (TypeMetadataBuilder)type;
+            metadata.EnsureRelationalMapping(_relationalMappingConvention);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

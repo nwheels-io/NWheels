@@ -5,6 +5,7 @@ namespace NWheels.DataObjects
 {
     public interface ITypeMetadata : IMetadataElement
     {
+        IPropertyMetadata GetPropertyByName(string name);
         string Name { get; }
         Type ContractType { get; }
         Type ImplementationType { get; }

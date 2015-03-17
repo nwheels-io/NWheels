@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
 using NWheels.Core.DataObjects;
+using NWheels.Core.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.Impl;
 
@@ -20,7 +21,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
+            var factory = CreateEntityObjectFactory();
 
             //-- Act
 
@@ -44,7 +45,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
+            var factory = CreateEntityObjectFactory();
 
             //-- Act
 
@@ -71,7 +72,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
+            var factory = CreateEntityObjectFactory();
 
             //-- Act
 
@@ -90,7 +91,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
+            var factory = CreateEntityObjectFactory();
 
             //-- Act
 
@@ -109,7 +110,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
+            var factory = CreateEntityObjectFactory();
 
             var productType = factory.NewEntity<Interfaces.Repository1.IProduct>().GetType();
             var orderType = factory.NewEntity<Interfaces.Repository1.IOrder>().GetType();
@@ -141,7 +142,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
+            var factory = CreateEntityObjectFactory();
 
             var orderImpl = factory.NewEntity<Interfaces.Repository1.IOrder>();
             Interfaces.Repository1.IOrder orderAsContract = (Interfaces.Repository1.IOrder)orderImpl;
@@ -165,7 +166,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
+            var factory = CreateEntityObjectFactory();
 
             var productImpl = factory.NewEntity<Interfaces.Repository1.IProduct>();
             Interfaces.Repository1.IProduct productAsContract = (Interfaces.Repository1.IProduct)productImpl;
@@ -194,7 +195,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
+            var factory = CreateEntityObjectFactory();
 
             var product = factory.NewEntity<Interfaces.Repository1.IProduct>();
             var order = factory.NewEntity<Interfaces.Repository1.IOrder>();
@@ -226,7 +227,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
+            var factory = CreateEntityObjectFactory();
 
             var orderLine1 = factory.NewEntity<Interfaces.Repository1.IOrderLine>();
             var orderLine2 = factory.NewEntity<Interfaces.Repository1.IOrderLine>();
@@ -267,7 +268,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var factory = new EfEntityObjectFactory(base.Module, new TypeMetadataCache());
+            var factory = CreateEntityObjectFactory();
 
             var productType = factory.NewEntity<Interfaces.Repository1.IProduct>().GetType();
             var orderType = factory.NewEntity<Interfaces.Repository1.IOrder>().GetType();
@@ -287,6 +288,14 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             Assert.That(isPropertyVirtual(orderLinesPropertyOfOrder), Is.True);
             Assert.That(isPropertyVirtual(orderPropertyOfOrderLine), Is.True);
             Assert.That(isPropertyVirtual(productPropertyOfOrderLine), Is.True);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private EfEntityObjectFactory CreateEntityObjectFactory()
+        {
+            var metadataCache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
+            return new EfEntityObjectFactory(base.Module, metadataCache);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -16,6 +16,7 @@ using NWheels.Conventions;
 using NWheels.Core.Conventions;
 using NWheels.Core.Logging;
 using NWheels.Core.Processing;
+using NWheels.Entities;
 using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Hosting;
@@ -23,6 +24,7 @@ using NWheels.Logging;
 using NWheels.Processing;
 using NWheels.Utilities;
 using NWheels.Core.Configuration;
+using NWheels.Core.Entities;
 
 namespace NWheels.Core.Hosting
 {
@@ -201,6 +203,7 @@ namespace NWheels.Core.Hosting
             builder.RegisterType<ConfigurationSectionFactory>().As<IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<XmlConfigurationLoader>().SingleInstance().InstancePerLifetimeScope();
             builder.RegisterAdapter<IConfigSectionRegistration, IConfigurationSection>((ctx, reg) => reg.ResolveFromContainer(ctx)).SingleInstance();
+            builder.RegisterAdapter<RelationalMappingConventionDefault, IRelationalMappingConvention>(RelationalMappingConventionBase.FromDefault).SingleInstance();
             builder.RegisterConfigSection<IFrameworkLoggingConfiguration>();
 
             if ( registerHostComponents != null )

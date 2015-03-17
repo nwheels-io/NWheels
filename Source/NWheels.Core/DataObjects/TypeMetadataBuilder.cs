@@ -1,19 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
+using NWheels.Entities;
 
 namespace NWheels.Core.DataObjects
 {
     public class TypeMetadataBuilder : MetadataElement<ITypeMetadata>, ITypeMetadata
     {
+        private readonly object _relationalMappingSyncRoot = new object();
         private readonly CollectionAdapter<TypeMetadataBuilder, ITypeMetadata> _derivedTypesAdapter;
         private readonly CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _propertiesAdapter;
         private readonly CollectionAdapter<KeyMetadataBuilder, IKeyMetadata> _allKeysAdapter;
         private readonly CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultDisplayPropertiesAdapter;
         private readonly CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultSortPropertiesAdapter;
+        private Dictionary<string, PropertyMetadataBuilder> _propertyByName;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -144,6 +148,58 @@ namespace NWheels.Core.DataObjects
             visitor.VisitElementList<IPropertyMetadata, PropertyMetadataBuilder>("DefaultSortProperties", DefaultSortProperties);
 
             RelationalMapping = visitor.VisitElement<ITypeRelationalMapping, TypeRelationalMappingBuilder>(RelationalMapping);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void EnsureRelationalMapping(IRelationalMappingConvention convention)
+        {
+            if ( this.RelationalMapping == null )
+            {
+                lock ( _relationalMappingSyncRoot )
+                {
+                    if ( this.RelationalMapping == null )
+                    {
+                        convention.ApplyToType(this);
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IPropertyMetadata GetPropertyByName(string name)
+        {
+            return _propertyByName[name];
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void UpdateImplementation(Type implementationType)
+        {
+            this.ImplementationType = implementationType;
+
+            var implementationProperties = implementationType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            var implementationPropertyInfoByGetterMethod = implementationProperties.ToDictionary(p => p.GetMethod);
+
+            var map = implementationType.GetInterfaceMap(this.ContractType);
+
+            for ( int i = 0 ; i < map.InterfaceMethods.Length ; i++ )
+            {
+                if ( map.InterfaceMethods[i].IsSpecialName && map.InterfaceMethods[i].Name.StartsWith("get_") )
+                {
+                    var implementationPropertyInfo = implementationPropertyInfoByGetterMethod[map.TargetMethods[i]];
+                    var metadataProperty = _propertyByName[implementationPropertyInfo.Name.Split('.').Last()];
+                    metadataProperty.ImplementationPropertyInfo = implementationPropertyInfo;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal void EndBuild()
+        {
+            _propertyByName = this.Properties.ToDictionary(p => p.Name);
         }
     }
 }
