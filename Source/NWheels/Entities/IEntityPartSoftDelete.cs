@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace NWheels.Entities
 {
-    public interface IEntityPartActiveStatus
+    public interface IEntityPartSoftDelete
     {
-        bool IsActive { get; set; }
+        DateTime? DeletedAt { get; set; }
     }
 }

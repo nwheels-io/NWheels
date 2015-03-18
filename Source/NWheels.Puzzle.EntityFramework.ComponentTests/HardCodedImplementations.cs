@@ -41,7 +41,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public class DataRepositoryObject_DataRepository : EntityFrameworkDataRepositoryBase, Interfaces.Repository1.IOnlineStoreRepository
+            public class DataRepositoryObject_DataRepository : EfDataRepositoryBase, Interfaces.Repository1.IOnlineStoreRepository
             {
                 private IEntityRepository<Interfaces.Repository1.IOrder> m_Orders;
                 private IEntityRepository<Interfaces.Repository1.IProduct> m_Products;
@@ -49,8 +49,8 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 public DataRepositoryObject_DataRepository(DbConnection connection, bool autoCommit)
                     : base(GetOrBuildDbCompoledModel(connection), connection, autoCommit)
                 {
-                    this.m_Products = new EntityFrameworkEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product>(this);
-                    this.m_Orders = new EntityFrameworkEntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order>(this);
+                    this.m_Products = new EfEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product>(this);
+                    this.m_Orders = new EfEntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order>(this);
                 }
 
                 public override sealed Type[] GetEntityTypesInRepository()
@@ -117,7 +117,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public class DataRepositoryObject_CustomNames : EntityFrameworkDataRepositoryBase, Interfaces.Repository1.IOnlineStoreRepository
+            public class DataRepositoryObject_CustomNames : EfDataRepositoryBase, Interfaces.Repository1.IOnlineStoreRepository
             {
                 private IEntityRepository<Interfaces.Repository1.IOrder> m_Orders;
                 private IEntityRepository<Interfaces.Repository1.IProduct> m_Products;
@@ -125,8 +125,8 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 public DataRepositoryObject_CustomNames(DbConnection connection, bool autoCommit)
                     : base(GetOrBuildDbCompiledModel(connection), connection, autoCommit)
                 {
-                    this.m_Products = new EntityFrameworkEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product>(this);
-                    this.m_Orders = new EntityFrameworkEntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order>(this);
+                    this.m_Products = new EfEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product>(this);
+                    this.m_Orders = new EfEntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order>(this);
                 }
 
                 public override sealed Type[] GetEntityTypesInRepository()

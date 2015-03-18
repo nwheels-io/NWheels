@@ -73,8 +73,8 @@
     <Compile Include="Conventions\EfEntityObjectFactory.cs" />
     <Compile Include="EFConventions\NoUnderscoreForeignKeyNamingConvention.cs" />
     <Compile Include="Conventions\EfEntityConfigurationWriter.cs" />
-    <Compile Include="Impl\EntityFrameworkDataRepositoryBase.cs" />
-    <Compile Include="Impl\EntityFrameworkEntityRepository.cs" />
+    <Compile Include="Impl\EfDataRepositoryBase.cs" />
+    <Compile Include="Impl\EfEntityRepository.cs" />
     <Compile Include="Impl\QueryExpressionSpecializer.cs" />
     <Compile Include="Impl\UnitOfWork.cs" />
     <Compile Include="ModuleLoader.cs" />

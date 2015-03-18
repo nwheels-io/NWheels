@@ -10,17 +10,17 @@ using NWheels.Entities;
 
 namespace NWheels.Puzzle.EntityFramework.Impl
 {
-    public class EntityFrameworkEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>
+    public class EfEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>
         where TEntityContract : class
         where TEntityImpl : class, TEntityContract
     {
-        private readonly EntityFrameworkDataRepositoryBase _ownerRepo;
+        private readonly EfDataRepositoryBase _ownerRepo;
         private readonly ObjectSet<TEntityImpl> _objectSet;
         private InterceptingQueryProvider _queryProvider;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EntityFrameworkEntityRepository(EntityFrameworkDataRepositoryBase ownerRepo)
+        public EfEntityRepository(EfDataRepositoryBase ownerRepo)
         {
             _ownerRepo = ownerRepo;
             _objectSet = ownerRepo.CreateObjectSet<TEntityImpl>();
@@ -148,12 +148,12 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         private class InterceptingQueryProvider : IQueryProvider
         {
-            private readonly EntityFrameworkEntityRepository<TEntityContract, TEntityImpl> _ownerRepo;
+            private readonly EfEntityRepository<TEntityContract, TEntityImpl> _ownerRepo;
             private readonly IQueryProvider _actualQueryProvider;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public InterceptingQueryProvider(EntityFrameworkEntityRepository<TEntityContract, TEntityImpl> ownerRepo)
+            public InterceptingQueryProvider(EfEntityRepository<TEntityContract, TEntityImpl> ownerRepo)
             {
                 _ownerRepo = ownerRepo;
                 _actualQueryProvider = ownerRepo.ObjectSet.AsQueryable().Provider;

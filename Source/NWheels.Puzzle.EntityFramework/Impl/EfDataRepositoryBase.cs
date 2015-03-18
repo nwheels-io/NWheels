@@ -14,7 +14,7 @@ using Autofac;
 
 namespace NWheels.Puzzle.EntityFramework.Impl
 {
-    public abstract class EntityFrameworkDataRepositoryBase : IApplicationDataRepository
+    public abstract class EfDataRepositoryBase : IApplicationDataRepository
     {
         private readonly DbCompiledModel _compiledModel;
         private readonly bool _autoCommit;
@@ -24,7 +24,7 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected EntityFrameworkDataRepositoryBase(DbCompiledModel compiledModel, DbConnection connection, bool autoCommit)
+        protected EfDataRepositoryBase(DbCompiledModel compiledModel, DbConnection connection, bool autoCommit)
         {
             _compiledModel = compiledModel;
             _autoCommit = autoCommit;

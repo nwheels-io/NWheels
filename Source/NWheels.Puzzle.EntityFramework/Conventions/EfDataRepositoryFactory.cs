@@ -69,7 +69,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
             protected override void OnInspectDeclaration(ObjectFactoryContext context)
             {
-                context.BaseType = typeof(EntityFrameworkDataRepositoryBase);
+                context.BaseType = typeof(EfDataRepositoryBase);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -194,7 +194,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
                     {
                         writer.OwnerClass.GetPropertyBackingField(entity.RepositoryProperty)
                             .AsOperand<IEntityRepository<TT.TContract>>()
-                            .Assign(cw.New<EntityFrameworkEntityRepository<TT.TContract, TT.TImpl>>(cw.This<EntityFrameworkDataRepositoryBase>()));
+                            .Assign(cw.New<EfEntityRepository<TT.TContract, TT.TImpl>>(cw.This<EfDataRepositoryBase>()));
                     }
                 });
             }
@@ -203,7 +203,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
             private void ImplementGetEntityTypesInRepository(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
-                writer.ImplementBase<EntityFrameworkDataRepositoryBase>()
+                writer.ImplementBase<EfDataRepositoryBase>()
                     .Method<IEnumerable<Type>>(x => x.GetEntityTypesInRepository)
                     .Implement(m => m.Return(m.NewArray<Type>(constantValues: _entitiesInRepository.Select(e => e.ImplementationType).ToArray())));
             }

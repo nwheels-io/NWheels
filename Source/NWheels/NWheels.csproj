@@ -86,7 +86,7 @@
     <Compile Include="DataObjects\RelationPartyKind.cs" />
     <Compile Include="DataObjects\IKeyMetadata.cs" />
     <Compile Include="DataObjects\ITypeMetadata.cs" />
-    <Compile Include="Entities\IEntityPartActiveStatus.cs" />
+    <Compile Include="Entities\IEntityPartSoftDelete.cs" />
     <Compile Include="Entities\IEntityPartCorrelationId.cs" />
     <Compile Include="Entities\IEntityPartId.cs" />
     <Compile Include="Entities\IEntityPartPositionInList.cs" />
