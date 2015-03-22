@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -39,6 +40,7 @@ namespace NWheels.Core.UnitTests.DataObjects
                 string CustomerEmail { get; set; }
                 [Required]
                 ICollection<IOrderLine> OrderLines { get; }
+                [DefaultValue(OrderStatus.New)]
                 OrderStatus Status { get; set; }
             }
             [TestDataContract]
@@ -64,6 +66,22 @@ namespace NWheels.Core.UnitTests.DataObjects
 
         public static class Repository2
         {
+            [TestDataContract]
+            public interface IPrimaryContract
+            {
+                string PrimaryProperty { get; set; }
+            }
+            [TestDataContract]
+            public interface IFirstMixinContract
+            {
+                int FirstMixinProperty { get; set; }
+            }
+            [TestDataContract]
+            public interface ISecondMixinContract
+            {
+                TimeSpan SecondMixinPropertyA { get; set; }
+                DateTime SecondMixinPropertyB { get; set; }
+            }
         }
     }
 }

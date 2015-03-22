@@ -43,17 +43,17 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\packages\EntityFramework.6.1.2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.3.1, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil, Version=0.9.3.2, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.3.1\lib\net45\Hapil.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.3.2\lib\net45\Hapil.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil.Applied, Version=0.9.3.1, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil.Applied, Version=0.9.3.2, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.3.1\lib\net45\Hapil.Applied.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.3.2\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil.Testing.NUnit, Version=0.9.3.1, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil.Testing.NUnit, Version=0.9.3.2, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.Testing.NUnit.0.9.3.1\lib\net45\Hapil.Testing.NUnit.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.Testing.NUnit.0.9.3.2\lib\net45\Hapil.Testing.NUnit.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssumptionTests.cs" />
+    <Compile Include="UserAccountDataRepositoryTests.cs" />
     <Compile Include="BlogDataRepositoryTests.cs" />
     <Compile Include="CrudOperations.cs" />
     <Compile Include="EfDataRepositoryFactoryTests.cs" />
@@ -93,6 +94,10 @@
     <ProjectReference Include="..\NWheels.Puzzle.EntityFramework\NWheels.Puzzle.EntityFramework.csproj">
       <Project>{fa1fd78f-2906-477e-ad2f-55bb8ae19a75}</Project>
       <Name>NWheels.Puzzle.EntityFramework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NWheels.Testing\NWheels.Testing.csproj">
+      <Project>{cd358c0a-e2b8-43e1-8f3e-618e56effe0f}</Project>
+      <Name>NWheels.Testing</Name>
     </ProjectReference>
     <ProjectReference Include="..\NWheels\NWheels.csproj">
       <Project>{f0ecf554-bf54-4843-b62f-c67c4deb2764}</Project>

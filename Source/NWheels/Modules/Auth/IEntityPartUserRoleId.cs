@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Entities;
 
-namespace NWheels.Entities
+namespace NWheels.Modules.Auth
 {
     [EntityPartContract]
-    public interface IEntityPartPositionInList
+    public interface IEntityPartUserRoleId<TRoleId>
     {
-        int PositionInList { get; set; }
+        TRoleId RoleId { get; set; }
     }
 }

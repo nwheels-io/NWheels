@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace NWheels.Entities
 {
+    [EntityPartContract]
     public interface IEntityPartSoftDelete
     {
         DateTime? DeletedAt { get; set; }

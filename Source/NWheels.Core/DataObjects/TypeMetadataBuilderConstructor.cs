@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
@@ -14,8 +15,9 @@ namespace NWheels.Core.DataObjects
     internal class TypeMetadataBuilderConstructor
     {
         private readonly DataObjectConventions _conventions;
-        private Type _contract;
-        private TypeMemberCache _members;
+        private Type _primaryContract;
+        private Type[] _mixinContracts;
+        private HashSet<PropertyInfo> _allProperties;
         private TypeMetadataBuilder _thisType;
         private TypeMetadataCache _cache;
 
@@ -28,18 +30,20 @@ namespace NWheels.Core.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void ConstructMetadata(Type contract, TypeMetadataBuilder builder, TypeMetadataCache cache)
+        public void ConstructMetadata(Type primaryContract, Type[] mixinContracts, TypeMetadataBuilder builder, TypeMetadataCache cache)
         {
-            _contract = contract;
+            _mixinContracts = mixinContracts;
+            _primaryContract = primaryContract;
             _thisType = builder;
             _cache = cache;
+            
+            _allProperties = UnionPropertiesInAllContracts(primaryContract, mixinContracts);
 
-            _members = TypeMemberCache.Of(contract);
+            builder.Name = primaryContract.Name.TrimPrefix("I");
+            builder.ContractType = primaryContract;
+            builder.MixinContractTypes.AddRange(mixinContracts);
 
-            builder.Name = contract.Name.TrimPrefix("I");
-            builder.ContractType = contract;
-
-            FindProperties();
+            CreateProperties();
             FindPrimaryKey();
             FindRelations();
 
@@ -48,15 +52,11 @@ namespace NWheels.Core.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void FindProperties()
+        private void CreateProperties()
         {
-            foreach ( var propertyInfo in _members.ImplementableProperties )
+            foreach ( var propertyInfo in _allProperties )
             {
-                _thisType.Properties.Add(new PropertyMetadataBuilder {
-                    Name = propertyInfo.Name,
-                    ClrType = propertyInfo.PropertyType,
-                    ContractPropertyInfo = propertyInfo
-                });
+                _thisType.Properties.Add(CreatePropertyMetadata(propertyInfo));
             }
         }
 
@@ -141,6 +141,38 @@ namespace NWheels.Core.DataObjects
                     RelatedPartyKey = relatedKey
                 };
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private PropertyMetadataBuilder CreatePropertyMetadata(PropertyInfo declaration)
+        {
+            var property = new PropertyMetadataBuilder {
+                Name = declaration.Name,
+                ClrType = declaration.PropertyType,
+                ContractPropertyInfo = declaration
+            };
+
+            var defaultValueAttribute = declaration.GetCustomAttribute<DefaultValueAttribute>();
+            property.DefaultValue = (defaultValueAttribute != null ? defaultValueAttribute.Value : null);
+
+            return property;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static HashSet<PropertyInfo> UnionPropertiesInAllContracts(Type primaryContract, Type[] mixinContracts)
+        {
+            var result = new HashSet<PropertyInfo>();
+
+            result.UnionWith(TypeMemberCache.Of(primaryContract).ImplementableProperties);
+
+            foreach ( var contract in mixinContracts )
+            {
+                result.UnionWith(TypeMemberCache.Of(contract).ImplementableProperties);
+            }
+
+            return result;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

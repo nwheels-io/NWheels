@@ -7,6 +7,7 @@ using NUnit.Framework;
 using NWheels.Core.DataObjects;
 using NWheels.Core.Entities;
 using NWheels.DataObjects;
+using NWheels.Testing.DataObjects;
 
 namespace NWheels.Core.UnitTests.DataObjects
 {
@@ -38,6 +39,25 @@ namespace NWheels.Core.UnitTests.DataObjects
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
+        public void CanIncludePropertyDefaultValue()
+        {
+            //-- Arrange
+
+            var cache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
+
+            //-- Act
+
+            var orderType = cache.GetTypeMetadata(typeof(TestDataObjects.Repository1.IOrder));
+            var statusProperty = orderType.GetPropertyByName("Status");
+
+            //-- Assert
+
+            Assert.That(statusProperty.DefaultValue, Is.EqualTo(TestDataObjects.Repository1.OrderStatus.New));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
         public void CanBuildScalarPrimaryKey()
         {
             //-- Arrange
@@ -56,7 +76,7 @@ namespace NWheels.Core.UnitTests.DataObjects
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void CanBuiltRelationsBetweenMutuallyDependentTypes()
+        public void CanBuildRelationsBetweenMutuallyDependentTypes()
         {
             //-- Arrange
 
@@ -88,6 +108,40 @@ namespace NWheels.Core.UnitTests.DataObjects
             //Console.WriteLine(JsonlikeMetadataStringifier.Stringify(orderMetadata));
             //Console.WriteLine(JsonlikeMetadataStringifier.Stringify(productMetadata));
             //Console.WriteLine(JsonlikeMetadataStringifier.Stringify(orderLineMetadata));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanIncludeMixinContracts()
+        {
+            //-- Arrange
+
+            var cache = new TypeMetadataCache(
+                new DataObjectConventions(), 
+                new PascalCaseRelationalMappingConvention(usePluralTableNames: true),
+                new[] {
+                    new MixinRegistration(typeof(TestDataObjects.Repository2.IPrimaryContract), typeof(TestDataObjects.Repository2.IFirstMixinContract)),
+                    new MixinRegistration(typeof(TestDataObjects.Repository2.IPrimaryContract), typeof(TestDataObjects.Repository2.ISecondMixinContract))
+                });
+
+            //-- Act
+
+            var primaryContractMetadata = cache.GetTypeMetadata(typeof(TestDataObjects.Repository2.IPrimaryContract));
+
+            //-- Assert
+
+            Assert.That(primaryContractMetadata.ContractType, Is.EqualTo(typeof(TestDataObjects.Repository2.IPrimaryContract)));
+            Assert.That(primaryContractMetadata.MixinContractTypes, Is.EquivalentTo(new[] {
+                typeof(TestDataObjects.Repository2.IFirstMixinContract),
+                typeof(TestDataObjects.Repository2.ISecondMixinContract)
+            }));
+
+            var propertyNames = primaryContractMetadata.Properties.Select(p => p.Name).ToArray();
+
+            Assert.That(propertyNames, Is.EquivalentTo(new[] {
+                "PrimaryProperty", "FirstMixinProperty", "SecondMixinPropertyA", "SecondMixinPropertyB"
+            }));
         }
     }
 }

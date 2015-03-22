@@ -35,13 +35,13 @@
     <Reference Include="Autofac">
       <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.3.1, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil, Version=0.9.3.2, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.3.1\lib\net45\Hapil.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.3.2\lib\net45\Hapil.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil.Applied, Version=0.9.3.1, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil.Applied, Version=0.9.3.2, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.3.1\lib\net45\Hapil.Applied.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.3.2\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -69,6 +69,7 @@
     <Compile Include="DataObjects\IMetadataElement.cs" />
     <Compile Include="DataObjects\IMetadataElementVisitor.cs" />
     <Compile Include="DataObjects\ITypeMetadataCache.cs" />
+    <Compile Include="DataObjects\MixinRegistration.cs" />
     <Compile Include="Entities\DateTimeUtc.cs" />
     <Compile Include="Entities\RelationalMappingConventionDefault.cs" />
     <Compile Include="Entities\EntityContractAttribute.cs" />
@@ -135,6 +136,7 @@
     <Compile Include="Logging\NameValuePairLogNode.cs" />
     <Compile Include="Logging\ThreadLogSnapshot.cs" />
     <Compile Include="Logging\ThreadTaskType.cs" />
+    <Compile Include="Modules\Auth\IEntityPartUserRoleId.cs" />
     <Compile Include="Modules\Auth\UI\IUserAccountApi.cs" />
     <Compile Include="Modules\Auth\IAuditEntryEntity.cs" />
     <Compile Include="Modules\Auth\IEntityPartAudit.cs" />

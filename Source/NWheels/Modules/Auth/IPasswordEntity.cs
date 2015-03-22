@@ -7,6 +7,7 @@ using NWheels.Entities;
 
 namespace NWheels.Modules.Auth
 {
+    [EntityContract]
     public interface IPasswordEntity
     {
         IUserAccountEntity User { get; set; }

@@ -7,6 +7,7 @@ using NWheels.Entities;
 
 namespace NWheels.Modules.Auth
 {
+    [EntityContract]
     public interface IUserAccountEntity
     {
         string LoginName { get; set; }
@@ -15,8 +16,8 @@ namespace NWheels.Modules.Auth
         string EmailAddress { get; set; }
         bool IsEmailVerified { get; set; }
         IPasswordEntity CurrentPassword { get; set; }
-        IQueryable<IPasswordEntity> PasswordHistory { get; }
-        ISet<IUserRoleEntity> Roles { get; }
+        ICollection<IPasswordEntity> PasswordHistory { get; }
+        ICollection<IUserRoleEntity> Roles { get; }
         DateTime LastLoginAt { get; set; }
         int FailedLoginCount { get; set; }
         bool IsLockedOut { get; set; }

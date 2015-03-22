@@ -13,21 +13,35 @@ namespace NWheels.Core.DataObjects
     {
         private readonly DataObjectConventions _dataObjectConventions;
         private readonly IRelationalMappingConvention _relationalMappingConvention;
+        private readonly Dictionary<Type, MixinRegistration[]> _mixinsByPrimaryContract;
         private readonly ConcurrentDictionary<Type, TypeMetadataBuilder> _metadataByContractType = new ConcurrentDictionary<Type, TypeMetadataBuilder>();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeMetadataCache(DataObjectConventions dataObjectConventions, IRelationalMappingConvention relationalMappingConvention)
+        public TypeMetadataCache(
+            DataObjectConventions dataObjectConventions,
+            IRelationalMappingConvention relationalMappingConvention,
+            IEnumerable<MixinRegistration> mixinRegistrations)
         {
             _dataObjectConventions = dataObjectConventions;
             _relationalMappingConvention = relationalMappingConvention;
+            _mixinsByPrimaryContract = mixinRegistrations.GroupBy(r => r.TargetContract).ToDictionary(g => g.Key, g => g.ToArray());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ITypeMetadata GetTypeMetadata(Type contract)
+        public TypeMetadataCache(
+            DataObjectConventions dataObjectConventions, 
+            IRelationalMappingConvention relationalMappingConvention)
+            : this(dataObjectConventions, relationalMappingConvention, mixinRegistrations: new MixinRegistration[0])
         {
-            return _metadataByContractType.GetOrAdd(contract, BuildTypeMetadata);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ITypeMetadata GetTypeMetadata(Type primaryContract)
+        {
+            return _metadataByContractType.GetOrAdd(primaryContract, BuildTypeMetadata);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,7 +69,26 @@ namespace NWheels.Core.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private TypeMetadataBuilder BuildTypeMetadata(Type contract)
+        private TypeMetadataBuilder BuildTypeMetadata(Type primaryContract)
+        {
+            MixinRegistration[] mixinRegistrations;
+            Type[] mixinContracts;
+
+            if ( _mixinsByPrimaryContract.TryGetValue(primaryContract, out mixinRegistrations) )
+            {
+                mixinContracts = mixinRegistrations.Select(r => r.MixinContract).ToArray();
+            }
+            else
+            {
+                mixinContracts = Type.EmptyTypes;
+            }
+
+            return BuildTypeMetadata(primaryContract, mixinContracts);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private TypeMetadataBuilder BuildTypeMetadata(Type primaryContract, Type[] mixinContracts)
         {
             var entriesBeingBuilt = _s_entriesBeingBuilt;
             var ownEntriesBeingBuilt = (entriesBeingBuilt == null);
@@ -69,10 +102,10 @@ namespace NWheels.Core.DataObjects
             try
             {
                 var builder = new TypeMetadataBuilder();
-                entriesBeingBuilt.Add(contract, builder);
+                entriesBeingBuilt.Add(primaryContract, builder);
 
                 var constructor = new TypeMetadataBuilderConstructor(new DataObjectConventions());
-                constructor.ConstructMetadata(contract, builder, cache: this);
+                constructor.ConstructMetadata(primaryContract, mixinContracts, builder, cache: this);
 
                 return builder;
             }
@@ -84,7 +117,7 @@ namespace NWheels.Core.DataObjects
                 }
                 else
                 {
-                    entriesBeingBuilt.Remove(contract);
+                    entriesBeingBuilt.Remove(primaryContract);
                 }
             }
         }

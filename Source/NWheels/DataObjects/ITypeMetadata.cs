@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace NWheels.DataObjects
 {
     public interface ITypeMetadata : IMetadataElement
     {
         IPropertyMetadata GetPropertyByName(string name);
+        IPropertyMetadata GetPropertyByDeclaration(PropertyInfo declarationInContract);
         string Name { get; }
         Type ContractType { get; }
+        IReadOnlyList<Type> MixinContractTypes { get; }
         Type ImplementationType { get; }
         bool IsAbstract { get; }
         ITypeMetadata BaseType { get; }

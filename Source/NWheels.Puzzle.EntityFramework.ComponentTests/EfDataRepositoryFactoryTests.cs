@@ -10,6 +10,7 @@ using NUnit.Framework;
 using NWheels.Core.DataObjects;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Core.Entities;
+using NWheels.Puzzle.EntityFramework.Impl;
 using IR1 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository1;
 using HR1 = NWheels.Puzzle.EntityFramework.ComponentTests.HardCodedImplementations.Repository1;
 
@@ -123,11 +124,14 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         private Interfaces.Repository1.IOnlineStoreRepository InitializeDataRepository()
         {
-            var connection = CreateDbConnection();
-            connection.Open();
-            var repo = new HR1.DataRepositoryObject_DataRepository(connection, autoCommit: false);
-            base.CompiledModel = repo.CompiledModel;
-            return repo;
+            var repoFactory = CreateDataRepositoryFactory();
+
+            var connection = base.CreateDbConnection();
+            var repo = repoFactory.CreateDataRepository<IR1.IOnlineStoreRepository>(connection, autoCommit: true);
+
+            base.CompiledModel = ((EfDataRepositoryBase)repo).CompiledModel;
+
+            return (IR1.IOnlineStoreRepository)repo;
         }
     }
 }

@@ -8,6 +8,7 @@ using NWheels.Entities;
 
 namespace NWheels.Modules.Auth
 {
+    [EntityPartContract]
     public interface IEntityPartAudit
     {
         DateTime CreatedAt { get; set; }
@@ -20,6 +21,7 @@ namespace NWheels.Modules.Auth
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    [EntityPartContract]
     public interface IEntityPartAuditSoftDelete : IEntityPartAudit, IEntityPartSoftDelete
     {
         IUserAccountEntity DeletedBy { get; set; }

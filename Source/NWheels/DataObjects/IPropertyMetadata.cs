@@ -14,6 +14,7 @@ namespace NWheels.DataObjects
         PropertyInfo ImplementationPropertyInfo { get; }
         IRelationMetadata Relation { get; }
         IPropertyValidationMetadata Validation { get; }
+        object DefaultValue { get; }
         string DefaultDisplayName { get; }
         string DefaultDisplayFormat { get; }
         bool DefaultSortAscending { get; }

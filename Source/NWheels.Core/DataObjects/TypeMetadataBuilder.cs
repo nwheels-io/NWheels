@@ -18,12 +18,14 @@ namespace NWheels.Core.DataObjects
         private readonly CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultDisplayPropertiesAdapter;
         private readonly CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultSortPropertiesAdapter;
         private Dictionary<string, PropertyMetadataBuilder> _propertyByName;
+        private Dictionary<PropertyInfo, PropertyMetadataBuilder> _propertyByDeclaration;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TypeMetadataBuilder()
         {
             this.DerivedTypes = new List<TypeMetadataBuilder>();
+            this.MixinContractTypes = new List<Type>();
             this.Properties = new List<PropertyMetadataBuilder>();
             this.AllKeys = new List<KeyMetadataBuilder>();
             this.DefaultDisplayProperties = new List<PropertyMetadataBuilder>();
@@ -69,6 +71,13 @@ namespace NWheels.Core.DataObjects
         IReadOnlyList<ITypeMetadata> ITypeMetadata.DerivedTypes
         {
             get { return _derivedTypesAdapter; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IReadOnlyList<Type> ITypeMetadata.MixinContractTypes
+        {
+            get { return this.MixinContractTypes; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -119,6 +128,7 @@ namespace NWheels.Core.DataObjects
 
         public TypeMetadataBuilder BaseType { get; set; }
         public List<TypeMetadataBuilder> DerivedTypes { get; private set; }
+        public List<Type> MixinContractTypes { get; private set; }
         public List<PropertyMetadataBuilder> Properties { get; private set; }
         public KeyMetadataBuilder PrimaryKey { get; set; }
         public List<KeyMetadataBuilder> AllKeys { get; private set; }
@@ -170,7 +180,58 @@ namespace NWheels.Core.DataObjects
 
         public IPropertyMetadata GetPropertyByName(string name)
         {
-            return _propertyByName[name];
+            if ( _propertyByName != null )
+            {
+                return _propertyByName[name];
+            }
+            else
+            {
+                return this.Properties.First(p => p.Name == name);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IPropertyMetadata GetPropertyByDeclaration(PropertyInfo declarationInContract)
+        {
+            if ( _propertyByDeclaration != null )
+            {
+                return _propertyByDeclaration[declarationInContract];
+            }
+            else
+            {
+                return this.Properties.First(p => p.ContractPropertyInfo == declarationInContract);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool TryGetPropertyByName(string name, out PropertyMetadataBuilder property)
+        {
+            if ( _propertyByName != null )
+            {
+                return _propertyByName.TryGetValue(name, out property);
+            }
+            else
+            {
+                property = this.Properties.FirstOrDefault(p => p.Name == name);
+                return (property != null);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool TryGetPropertyByDeclaration(PropertyInfo declarationInContract, out PropertyMetadataBuilder property)
+        {
+            if ( _propertyByDeclaration != null )
+            {
+                return _propertyByDeclaration.TryGetValue(declarationInContract, out property);
+            }
+            else
+            {
+                property = this.Properties.FirstOrDefault(p => p.ContractPropertyInfo == declarationInContract);
+                return (property != null);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -200,6 +261,7 @@ namespace NWheels.Core.DataObjects
         internal void EndBuild()
         {
             _propertyByName = this.Properties.ToDictionary(p => p.Name);
+            _propertyByDeclaration = this.Properties.ToDictionary(p => p.ContractPropertyInfo);
         }
     }
 }

@@ -12,6 +12,7 @@ using Autofac;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
+using NWheels.Core.DataObjects;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Exceptions;
@@ -95,6 +96,11 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
                     _entitiesInRepository.Add(entity);
                     FindEntityContractsInRepository(entity.Metadata);
                 });
+
+                foreach ( var contractType in _entityContractsInRepository )
+                {
+                    FindEntityInRepositoryByContract(contractType);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -133,6 +139,8 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
                                 foreach ( var entity in _entitiesInRepository )
                                 {
+                                    entity.EnsureImplementationType();
+
                                     var entityConfigurationWriter = new EfEntityConfigurationWriter(entity.Metadata, m, modelBuilderLocal);
                                     entityConfigurationWriter.WriteEntityTypeConfiguration();
                                 }
@@ -177,7 +185,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
             private void ImplementEntityRepositoryProperties(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
-                foreach ( var entity in _entitiesInRepository )
+                foreach ( var entity in _entitiesInRepository.Where(e => e.RepositoryProperty != null) )
                 {
                     ImplementEntityRepositoryProperty(writer, entity);
                 }
@@ -293,9 +301,9 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
             private class EntityInRepository
             {
-                private readonly Type _contractType;
-                private readonly Type _implementationType;
                 private readonly DataRepositoryConvention _ownerConvention;
+                private readonly Type _contractType;
+                private Type _implementationType;
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -340,6 +348,20 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
                         _ownerConvention,
                         _contractType,
                         string.Format("No property matches NewXXXX() method argument '{0}':{1}", argumentName, argumentType.Name));
+                }
+
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+                
+                public void EnsureImplementationType()
+                {
+                    if ( _implementationType == null )
+                    {
+                        var implementationTypeKey = new TypeKey(primaryInterface: _contractType);
+                        _implementationType = _ownerConvention._entityFactory.FindDynamicType(implementationTypeKey);
+                        ((TypeMetadataBuilder)this.Metadata).UpdateImplementation(_implementationType);
+                        _ownerConvention._metadataCache.EnsureRelationalMapping(this.Metadata);
+                   }
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------

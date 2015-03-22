@@ -8,6 +8,7 @@ using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.Core.DataObjects;
+using NWheels.DataObjects;
 using NWheels.Entities;
 using TT = Hapil.TypeTemplate;
 
@@ -19,14 +20,14 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EfEntityObjectFactory(DynamicModule module, TypeMetadataCache metadataCache) 
-            : base(module, new EntityObjectConvention())
+        public EfEntityObjectFactory(DynamicModule module, TypeMetadataCache metadataCache)
+            : base(module, context => new[] { new EntityObjectConvention(metadataCache) })
         {
             _metadataCache = metadataCache;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
+        
         public TEntityContract NewEntity<TEntityContract>() where TEntityContract : class
         {
             return CreateInstanceOf<TEntityContract>().UsingDefaultConstructor();
@@ -48,32 +49,51 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
         private class EntityObjectConvention : ImplementationConvention
         {
-            public EntityObjectConvention()
-                : base(Will.ImplementPrimaryInterface)
+            private readonly TypeMetadataCache _metadataCache;
+            private readonly List<Action<ConstructorWriter>> _initializers;
+            private ITypeMetadata _entityMetadata;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public EntityObjectConvention(TypeMetadataCache metadataCache)
+                : base(Will.InspectDeclaration | Will.ImplementAnyInterface | Will.FinalizeImplementation)
             {
+                _metadataCache = metadataCache;
+                _initializers = new List<Action<ConstructorWriter>>();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected override void OnImplementPrimaryInterface(ImplementationClassWriter<TypeTemplate.TInterface> writer)
+            protected override void OnInspectDeclaration(ObjectFactoryContext context)
+            {
+                _entityMetadata = _metadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override void OnImplementAnyInterface(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
                 writer.AllProperties(IsScalarProperty).ImplementAutomatic();
 
-                var initializers = new List<Action<ConstructorWriter>>();
                 var explicitImpl = writer.ImplementInterfaceExplicitly<TypeTemplate.TInterface>();
 
-                explicitImpl.AllProperties(IsSingleNavigationProperty).ForEach(p => ImplementSingleNavigationProperty(explicitImpl, p, initializers));
-                explicitImpl.AllProperties(IsNavigationCollectionProperty).ForEach(p => ImplementNavigationCollectionProperty(explicitImpl, p, initializers));
+                explicitImpl.AllProperties(IsSingleNavigationProperty).ForEach(p => ImplementSingleNavigationProperty(explicitImpl, p));
+                explicitImpl.AllProperties(IsNavigationCollectionProperty).ForEach(p => ImplementNavigationCollectionProperty(explicitImpl, p));
+            }
 
-                writer.Constructor(cw => initializers.ForEach(init => init(cw)));
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override void OnFinalizeImplementation(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            {
+                AddDefaultValueInitializers(writer);
+                writer.Constructor(cw => _initializers.ForEach(init => init(cw)));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private void ImplementSingleNavigationProperty(
                 ImplementationClassWriter<TypeTemplate.TInterface> explicitImplementation,
-                PropertyInfo property,
-                List<Action<ConstructorWriter>> initializers)
+                PropertyInfo property)
             {
                 var entityTypeKey = new TypeKey(primaryInterface: property.PropertyType);
                 var entityType = base.Context.Factory.FindDynamicType(entityTypeKey);
@@ -94,8 +114,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
             private void ImplementNavigationCollectionProperty(
                 ImplementationClassWriter<TypeTemplate.TInterface> explicitImplementation,
-                PropertyInfo property,
-                List<Action<ConstructorWriter>> initializers)
+                PropertyInfo property)
             {
                 Type entityContractType;
                 property.PropertyType.IsCollectionType(out entityContractType);
@@ -108,7 +127,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
                     var backingField = explicitImplementation.Field<ICollection<TT.TValue>>("m_" + property.Name);
                     var adapterField = explicitImplementation.Field<CollectionAdapter<TT.TValue, TT.TItem>>("m_" + property.Name + "_Adapter");
 
-                    initializers.Add(new Action<ConstructorWriter>(cw => {
+                    _initializers.Add(new Action<ConstructorWriter>(cw => {
                         using ( TT.CreateScope<TT.TValue, TT.TItem>(entityType, entityContractType) )
                         {
                             backingField.Assign(cw.New<HashSet<TT.TValue>>());
@@ -131,9 +150,40 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private void AddDefaultValueInitializers(ImplementationClassWriter<TT.TBase> writer)
+            {
+                foreach ( var property in _entityMetadata.Properties.Where(IsScalarProperty).Cast<PropertyMetadataBuilder>() )
+                {
+                    if ( property.DefaultValue != null )
+                    {
+                        _initializers.Add(cw => {
+                            using ( TT.CreateScope<TT.TProperty>(property.ClrType) )
+                            {
+                                IOperand<TT.TProperty> defaultValue;
+
+                                if ( property.TryGetDefaultValueOperand(cw, out defaultValue) )
+                                {
+                                    var backingField = writer.OwnerClass.GetPropertyBackingField(property.ContractPropertyInfo).AsOperand<TT.TProperty>();
+                                    backingField.Assign(defaultValue);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private bool IsScalarProperty(PropertyInfo property)
             {
-                return (!property.PropertyType.IsCollectionType() && !IsEntityContract(property.PropertyType));
+                return (_entityMetadata.GetPropertyByDeclaration(property).Kind == PropertyKind.Scalar);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool IsScalarProperty(IPropertyMetadata property)
+            {
+                return (property.Kind == PropertyKind.Scalar);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

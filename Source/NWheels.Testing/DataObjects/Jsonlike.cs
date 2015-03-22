@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Hapil;
 using NWheels.DataObjects;
 
-namespace NWheels.Core.UnitTests.DataObjects
+namespace NWheels.Testing.DataObjects
 {
-    internal class Jsonlike : IMetadataElementVisitor
+    public class Jsonlike : IMetadataElementVisitor
     {
         private readonly HashSet<Type> _elementTypeFilter;
         private readonly StringBuilder _output = new StringBuilder();
