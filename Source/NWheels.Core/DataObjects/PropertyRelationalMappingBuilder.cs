@@ -38,5 +38,15 @@ namespace NWheels.Core.DataObjects
             ColumnName = visitor.VisitAttribute("ColumnName", ColumnName);
             DataTypeName = visitor.VisitAttribute("DataTypeName", DataTypeName);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string ToString()
+        {
+            return 
+                (string.IsNullOrEmpty(TableName) ? "" : "TABLE(" + TableName + ").") +
+                (string.IsNullOrEmpty(ColumnName) ? "" : "COLUMN(" + ColumnName + ")") +
+                (string.IsNullOrEmpty(DataTypeName) ? "" : ".DATATYPE(" + DataTypeName + ")");
+        }
     }
 }

@@ -172,6 +172,11 @@ namespace NWheels.Core.DataObjects
                     {
                         convention.ApplyToType(this);
                     }
+
+                    foreach ( var property in this.Properties.Where(p => p.Kind == PropertyKind.Relation) )
+                    {
+                        property.Relation.RelatedPartyType.EnsureRelationalMapping(convention);
+                    }
                 }
             }
         }
@@ -254,6 +259,13 @@ namespace NWheels.Core.DataObjects
                     metadataProperty.ImplementationPropertyInfo = implementationPropertyInfo;
                 }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string ToString()
+        {
+            return Name + (BaseType != null ? " : " + BaseType.Name : "");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

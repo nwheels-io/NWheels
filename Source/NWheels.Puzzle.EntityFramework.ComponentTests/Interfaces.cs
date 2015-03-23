@@ -180,7 +180,6 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 [Required]
                 IUserAccountEntity ModifiedBy { get; set; }
             }
-
             public interface IMyDataRepository : IApplicationDataRepository
             {
                 IEntityRepository<IUserAccountEntity> UserAccounts { get; }

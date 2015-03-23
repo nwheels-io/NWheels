@@ -39,13 +39,13 @@
     <Reference Include="Autofac.Extras.Multitenant">
       <HintPath>..\packages\Autofac.Extras.Multitenant.3.1.1\lib\net40\Autofac.Extras.Multitenant.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.3.2, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil, Version=0.9.3.3, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.3.2\lib\net45\Hapil.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.3.3\lib\net45\Hapil.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil.Applied, Version=0.9.3.2, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil.Applied, Version=0.9.3.3, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.3.2\lib\net45\Hapil.Applied.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.3.3\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />

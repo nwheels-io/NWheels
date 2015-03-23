@@ -314,8 +314,6 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
                     this.RepositoryProperty = property;
                     this.Metadata = ownerConvention._metadataCache.GetTypeMetadata(_contractType);
-
-                    ownerConvention._metadataCache.EnsureRelationalMapping(this.Metadata);
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -360,8 +358,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
                         var implementationTypeKey = new TypeKey(primaryInterface: _contractType);
                         _implementationType = _ownerConvention._entityFactory.FindDynamicType(implementationTypeKey);
                         ((TypeMetadataBuilder)this.Metadata).UpdateImplementation(_implementationType);
-                        _ownerConvention._metadataCache.EnsureRelationalMapping(this.Metadata);
-                   }
+                    }
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------

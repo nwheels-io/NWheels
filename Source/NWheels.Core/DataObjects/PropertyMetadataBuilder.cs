@@ -126,5 +126,12 @@ namespace NWheels.Core.DataObjects
             valueOperand = null;
             return false;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string ToString()
+        {
+            return Name + " : " + ClrType.FriendlyName();
+        }
     }
 }

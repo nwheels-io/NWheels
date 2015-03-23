@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
+using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.Core.DataObjects;
@@ -37,12 +38,16 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
         public Type GetOrBuildEntityImplementation(Type entityContractInterface) 
         {
-            var implementationType = base.GetOrBuildType(new TypeKey(primaryInterface: entityContractInterface)).DynamicType;
-            var typeMetadata = (TypeMetadataBuilder)_metadataCache.GetTypeMetadata(entityContractInterface);
-            
-            typeMetadata.UpdateImplementation(implementationType);
+            var typeKey = new TypeKey(primaryInterface: entityContractInterface);
+            return base.GetOrBuildType(typeKey).DynamicType;
+        }
 
-            return implementationType;
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnClassTypeCreated(TypeKey key, TypeEntry type)
+        {
+            var entityMetadata = (TypeMetadataBuilder)_metadataCache.GetTypeMetadata(key.PrimaryInterface);
+            entityMetadata.UpdateImplementation(type.DynamicType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -56,7 +61,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public EntityObjectConvention(TypeMetadataCache metadataCache)
-                : base(Will.InspectDeclaration | Will.ImplementAnyInterface | Will.FinalizeImplementation)
+                : base(Will.InspectDeclaration | Will.ImplementBaseClass | Will.FinalizeImplementation)
             {
                 _metadataCache = metadataCache;
                 _initializers = new List<Action<ConstructorWriter>>();
@@ -67,18 +72,19 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
             protected override void OnInspectDeclaration(ObjectFactoryContext context)
             {
                 _entityMetadata = _metadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
+                _metadataCache.EnsureRelationalMapping(_entityMetadata);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected override void OnImplementAnyInterface(ImplementationClassWriter<TypeTemplate.TInterface> writer)
+            protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
             {
-                writer.AllProperties(IsScalarProperty).ImplementAutomatic();
+                ImplementEntityContract(writer, _entityMetadata.ContractType);
 
-                var explicitImpl = writer.ImplementInterfaceExplicitly<TypeTemplate.TInterface>();
-
-                explicitImpl.AllProperties(IsSingleNavigationProperty).ForEach(p => ImplementSingleNavigationProperty(explicitImpl, p));
-                explicitImpl.AllProperties(IsNavigationCollectionProperty).ForEach(p => ImplementNavigationCollectionProperty(explicitImpl, p));
+                foreach ( var mixinType in _entityMetadata.MixinContractTypes )
+                {
+                    ImplementEntityContract(writer, mixinType);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -87,6 +93,23 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
             {
                 AddDefaultValueInitializers(writer);
                 writer.Constructor(cw => _initializers.ForEach(init => init(cw)));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementEntityContract(ImplementationClassWriter<TypeTemplate.TBase> writer, Type contractType)
+            {
+                using ( TT.CreateScope<TT.TInterface>(contractType) )
+                {
+                    var implicitImpl = writer.ImplementInterface<TypeTemplate.TInterface>();
+
+                    implicitImpl.AllProperties(IsScalarProperty).ImplementAutomatic();
+
+                    var explicitImpl = writer.ImplementInterfaceExplicitly<TypeTemplate.TInterface>();
+
+                    explicitImpl.AllProperties(IsSingleNavigationProperty).ForEach(p => ImplementSingleNavigationProperty(explicitImpl, p));
+                    explicitImpl.AllProperties(IsNavigationCollectionProperty).ForEach(p => ImplementNavigationCollectionProperty(explicitImpl, p));
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

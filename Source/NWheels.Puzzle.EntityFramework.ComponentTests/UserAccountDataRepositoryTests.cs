@@ -47,7 +47,10 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var metadataCache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
+            var metadataCache = new TypeMetadataCache(
+                new DataObjectConventions(), 
+                new PascalCaseRelationalMappingConvention(usePluralTableNames: true),
+                GetRepositoryMixinsRegistrations());
 
             //-- Act
 
@@ -65,7 +68,11 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var metadataCache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
+            var metadataCache = new TypeMetadataCache(
+                new DataObjectConventions(),
+                new PascalCaseRelationalMappingConvention(usePluralTableNames: true),
+                GetRepositoryMixinsRegistrations());
+
             var entityObjectFactory = new EfEntityObjectFactory(_dynamicModule, metadataCache);
 
             //-- Act
@@ -133,7 +140,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 new MixinRegistration(typeof(IR3.IUserAccountEntity), typeof(IEntityPartId<int>)),
                 new MixinRegistration(typeof(IR3.IPasswordEntity), typeof(IEntityPartId<int>)),
                 new MixinRegistration(typeof(IR3.IUserRoleEntity), typeof(IEntityPartId<int>)),
-                new MixinRegistration(typeof(IR3.IUserAccountEntity), typeof(IR3.IEntityPartUserRoleId<IR3.MyUserRole>))
+                new MixinRegistration(typeof(IR3.IUserRoleEntity), typeof(IR3.IEntityPartUserRoleId<IR3.MyUserRole>))
             };
         }
     }

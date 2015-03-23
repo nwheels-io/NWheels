@@ -33,5 +33,12 @@ namespace NWheels.Core.DataObjects
             PrimaryTableName = visitor.VisitAttribute("PrimaryTableName", PrimaryTableName);
             InheritanceKind = visitor.VisitAttribute("InheritanceKind", InheritanceKind);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string ToString()
+        {
+            return "TABLE(" + PrimaryTableName + ")";
+        }
     }
 }

@@ -7,9 +7,12 @@ using Hapil;
 using NUnit.Framework;
 using NWheels.Core.DataObjects;
 using NWheels.Core.Entities;
+using NWheels.DataObjects;
+using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.Impl;
 using IR2 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository2;
+using IR3 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
@@ -42,9 +45,42 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         [Test]
         public void CanCreateBlogEntitiesMetadata()
         {
+            //-- Act
+
+            var metadataCache = new TypeMetadataCache(
+                new DataObjectConventions(), 
+                new PascalCaseRelationalMappingConvention(usePluralTableNames: true),
+                GetRepositoryMixinsRegistrations());
+
+            //-- Assert
+
+            //TODO
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanCreateBlogEntities()
+        {
             //-- Arrange
 
-            var metadataCache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
+            var metadataCache = new TypeMetadataCache(
+                new DataObjectConventions(), 
+                new PascalCaseRelationalMappingConvention(usePluralTableNames: true),
+                GetRepositoryMixinsRegistrations());
+
+            var entityFactory = new EfEntityObjectFactory(_dynamicModule, metadataCache);
+
+            //-- Act
+
+            var author = entityFactory.NewEntity<IR2.IAuthorEntity>();
+            var article = entityFactory.NewEntity<IR2.IArticleEntity>();
+            var post = entityFactory.NewEntity<IR2.IPostEntity>();
+            var tag = entityFactory.NewEntity<IR2.ITagEntity>();
+
+            //-- Assert
+
+            //TODO
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -64,7 +100,11 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         private EfDataRepositoryFactory CreateDataRepositoryFactory()
         {
-            var metadataCache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
+            var metadataCache = new TypeMetadataCache(
+                new DataObjectConventions(), 
+                new PascalCaseRelationalMappingConvention(usePluralTableNames: true),
+                GetRepositoryMixinsRegistrations());
+
             var entityFactory = new EfEntityObjectFactory(_dynamicModule, metadataCache);
             var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache);
             return repoFactory;
@@ -82,6 +122,19 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             base.CompiledModel = ((EfDataRepositoryBase)repo).CompiledModel;
 
             return (IR2.IBlogDataRepository)repo;
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private MixinRegistration[] GetRepositoryMixinsRegistrations()
+        {
+            return new[] {
+                new MixinRegistration(typeof(IR3.IUserAccountEntity), typeof(IEntityPartId<int>)),
+                new MixinRegistration(typeof(IR3.IPasswordEntity), typeof(IEntityPartId<int>)),
+                new MixinRegistration(typeof(IR3.IUserRoleEntity), typeof(IEntityPartId<int>)),
+                new MixinRegistration(typeof(IR3.IUserRoleEntity), typeof(IR3.IEntityPartUserRoleId<IR2.UserRole>))
+            };
         }
     }
 }
