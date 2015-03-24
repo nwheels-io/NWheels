@@ -519,6 +519,34 @@ namespace NWheels.Core.Hosting
 
             private Assembly LoadModuleAssembly(BootConfiguration.ModuleConfig module)
             {
+                var simpleAssemblyName = Path.GetFileNameWithoutExtension(module.Assembly);
+                var loadedAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(asm => asm.GetName().Name.EqualsIgnoreCase(simpleAssemblyName));
+
+                if ( loadedAssembly != null )
+                {
+                    _logger.AssemblyAlreadyLoaded(simpleAssemblyName);
+                    return loadedAssembly;
+                }
+
+                try
+                {
+                    var assemblyName = new AssemblyName() {
+                        Name = simpleAssemblyName
+                    };
+                    return Assembly.Load(assemblyName);
+                }
+                catch ( Exception e )
+                {
+                    _logger.AssemblyLoadByNameFailed(simpleAssemblyName, e);
+                }
+
+                return LoadModuleAssemblyByFilePath(module);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private Assembly LoadModuleAssemblyByFilePath(BootConfiguration.ModuleConfig module)
+            {
                 var coreBinPath = PathUtility.LocalBinPath(module.Assembly);
                 var appBinPath = Path.Combine(_nodeConfig.LoadedFromDirectory, module.Assembly);
 
@@ -535,9 +563,7 @@ namespace NWheels.Core.Hosting
                     _logger.ProbedModuleAssemblyLocation(coreBinPath);
                     _logger.ProbedModuleAssemblyLocation(appBinPath);
 
-                    throw new NodeHostConfigException(string.Format(
-                        "Module assembly '{0}' could not be found at any of the probed locations.", 
-                        module.Assembly));
+                    throw new NodeHostConfigException(string.Format("Module assembly '{0}' could not be found at any of the probed locations.", module.Assembly));
                 }
             }
         }

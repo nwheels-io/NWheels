@@ -22,16 +22,29 @@ using NWheels.Puzzle.EntityFramework.Impl;
 using System.Reflection;
 using TT = Hapil.TypeTemplate;
 using Hapil.Members;
+using NWheels.Conventions;
 
 // ReSharper disable ConvertToLambdaExpression
 
 namespace NWheels.Puzzle.EntityFramework.Conventions
 {
-    public class EfDataRepositoryFactory : ConventionObjectFactory
+    public class EfDataRepositoryFactory : ConventionObjectFactory, IAutoObjectFactory
     {
-        public EfDataRepositoryFactory(DynamicModule module, EfEntityObjectFactory entityFactory, ITypeMetadataCache metadataCache)
+        private readonly DbProviderFactory _dbProvider;
+        private readonly IDatabaseConfig _config;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public EfDataRepositoryFactory(
+            DynamicModule module, 
+            EfEntityObjectFactory entityFactory, 
+            ITypeMetadataCache metadataCache, 
+            DbProviderFactory dbProvider = null,
+            Auto<IDatabaseConfig> config = null)
             : base(module, context => new IObjectFactoryConvention[] { new DataRepositoryConvention(entityFactory, metadataCache) })
         {
+            _dbProvider = dbProvider;
+            _config = config.Instance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,6 +52,29 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
         public IApplicationDataRepository CreateDataRepository<TRepo>(DbConnection connection, bool autoCommit) where TRepo : IApplicationDataRepository
         {
             return CreateInstanceOf<TRepo>().UsingConstructor(connection, autoCommit);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TService CreateService<TService>() where TService : class
+        {
+            const bool autoCommit = false;
+            
+            var connection = _dbProvider.CreateConnection();
+            connection.ConnectionString = _config.ConnectionString;
+            connection.Open();
+
+            return CreateInstanceOf<TService>().UsingConstructor<DbConnection, bool>(connection, autoCommit);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Type ServiceAncestorMarkerType
+        {
+            get
+            {
+                return typeof(IApplicationDataRepository);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -28,37 +28,9 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void DropAndCreateTestDatabase()
+        public virtual void DropAndCreateTestDatabase()
         {
-            using ( var connection = new SqlConnection(this.MasterConnectionString) ) 
-            {
-                connection.Open();
-
-                var cmd = new SqlCommand();
-                cmd.Connection = connection;
-                cmd.CommandText = string.Format(@"
-	                IF EXISTS(SELECT * FROM sys.databases WHERE name='{0}')
-	                BEGIN
-		                ALTER DATABASE [{0}]
-		                SET SINGLE_USER
-		                WITH ROLLBACK IMMEDIATE
-		                DROP DATABASE [{0}]
-	                END
-
-	                DECLARE @FILENAME AS VARCHAR(255)
-
-	                SET @FILENAME = CONVERT(VARCHAR(255), SERVERPROPERTY('instancedefaultdatapath')) + '{0}';
-
-	                EXEC ('CREATE DATABASE [{0}] ON PRIMARY 
-		                (NAME = [{0}], 
-		                FILENAME =''' + @FILENAME + ''', 
-		                SIZE = 25MB, 
-		                MAXSIZE = 50MB, 
-		                FILEGROWTH = 5MB )')", 
-                    DatabaseName);
-
-                cmd.ExecuteNonQuery();
-            }
+            DropAndCreateSqlServerTestDatabase();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -73,7 +45,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string MasterConnectionString
+        public virtual string MasterConnectionString
         {
             get
             {
@@ -83,7 +55,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string ConnectionString
+        public virtual string ConnectionString
         {
             get
             {
@@ -93,7 +65,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string ConnectionStringProviderName
+        public virtual string ConnectionStringProviderName
         {
             get
             {
@@ -112,11 +84,17 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         protected DataTable SelectFromTable(string tableName)
         {
-            using ( var connection = (SqlConnection)CreateDbConnection() )
+            var factory = DbProviderFactories.GetFactory(ConnectionStringProviderName);
+
+            using ( var connection = CreateDbConnection() )
             {
                 connection.Open();
 
-                var adapter = new SqlDataAdapter("SELECT * FROM " + tableName, connection);
+                var adapter = factory.CreateDataAdapter();
+                adapter.SelectCommand = factory.CreateCommand();
+                adapter.SelectCommand.CommandText = "SELECT * FROM " + tableName;
+                adapter.SelectCommand.Connection = connection;
+
                 var table = new DataTable();
                 adapter.Fill(table);
                 
@@ -147,5 +125,40 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected DbCompiledModel CompiledModel { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void DropAndCreateSqlServerTestDatabase()
+        {
+            using ( var connection = new SqlConnection(this.MasterConnectionString) )
+            {
+                connection.Open();
+
+                var cmd = new SqlCommand();
+                cmd.Connection = connection;
+                cmd.CommandText = string.Format(@"
+	                IF EXISTS(SELECT * FROM sys.databases WHERE name='{0}')
+	                BEGIN
+		                ALTER DATABASE [{0}]
+		                SET SINGLE_USER
+		                WITH ROLLBACK IMMEDIATE
+		                DROP DATABASE [{0}]
+	                END
+
+	                DECLARE @FILENAME AS VARCHAR(255)
+
+	                SET @FILENAME = CONVERT(VARCHAR(255), SERVERPROPERTY('instancedefaultdatapath')) + '{0}';
+
+	                EXEC ('CREATE DATABASE [{0}] ON PRIMARY 
+		                (NAME = [{0}], 
+		                FILENAME =''' + @FILENAME + ''', 
+		                SIZE = 25MB, 
+		                MAXSIZE = 50MB, 
+		                FILEGROWTH = 5MB )')",
+                    DatabaseName);
+
+                cmd.ExecuteNonQuery();
+            }
+        }
     }
 }

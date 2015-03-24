@@ -71,6 +71,7 @@
     <Compile Include="DataObjects\ITypeMetadataCache.cs" />
     <Compile Include="DataObjects\MixinRegistration.cs" />
     <Compile Include="Entities\DateTimeUtc.cs" />
+    <Compile Include="Entities\IDatabaseConfig.cs" />
     <Compile Include="Entities\RelationalMappingConventionDefault.cs" />
     <Compile Include="Entities\EntityContractAttribute.cs" />
     <Compile Include="Entities\EntityKey.cs" />

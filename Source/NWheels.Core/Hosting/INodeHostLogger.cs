@@ -16,6 +16,12 @@ namespace NWheels.Core.Hosting
         ILogActivity LoadingModules();
 
         [LogDebug]
+        void AssemblyAlreadyLoaded(string simpleName);
+
+        [LogDebug]
+        void AssemblyLoadByNameFailed(string simpleName, Exception error);
+
+        [LogDebug]
         void ProbedModuleAssemblyLocation(string path);
 
         [LogCritical]
