@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
+using MySql.Data.MySqlClient;
 using NUnit.Framework;
 using NWheels.Core.DataObjects;
 using NWheels.Core.Entities;
@@ -106,7 +108,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 GetRepositoryMixinsRegistrations());
 
             var entityFactory = new EfEntityObjectFactory(_dynamicModule, metadataCache);
-            var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache);
+            var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, ResolveAuto<IDatabaseConfig>());
             return repoFactory;
         }
 

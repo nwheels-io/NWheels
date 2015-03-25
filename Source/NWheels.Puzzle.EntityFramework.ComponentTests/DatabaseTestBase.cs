@@ -10,18 +10,19 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Testing;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
     [TestFixture]
-    public abstract class DatabaseTestBase
+    public abstract class DatabaseTestBase : UnitTestBase
     {
         public const string DatabaseName = "NWheelsEFTests";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [SetUp]
-        public void BaseSetUp()
+        public void DatabaseTestSetUp()
         {
             this.CompiledModel = null;
         }

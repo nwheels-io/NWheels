@@ -488,18 +488,7 @@ namespace NWheels.Core.Hosting
 
                         try
                         {
-                            var assembly = LoadModuleAssembly(module);
-                            var loaderType = assembly.GetType(module.LoaderClass, throwOnError: true);
-
-                            var loaderTypeUpdater = new ContainerBuilder();
-                            loaderTypeUpdater.RegisterType(loaderType);
-                            loaderTypeUpdater.Update(_lifetimeContainer.ComponentRegistry);
-
-                            var loaderInstance = (Autofac.Module)_lifetimeContainer.Resolve(loaderType);
-
-                            var moduleUpdater = new ContainerBuilder();
-                            moduleUpdater.RegisterModule(loaderInstance);
-                            moduleUpdater.Update(_lifetimeContainer.ComponentRegistry);
+                            RegisterModuleLoaderTypes(module);
                         }
                         catch ( Exception e )
                         {
@@ -513,6 +502,33 @@ namespace NWheels.Core.Hosting
                         _logger.NoApplicationModulesRegistered();
                     }
                 }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void RegisterModuleLoaderTypes(BootConfiguration.ModuleConfig module)
+            {
+                var assembly = LoadModuleAssembly(module);
+                var moduleLoaderType = assembly.GetType(module.LoaderClass, throwOnError: true);
+
+                var loaderTypeUpdater = new ContainerBuilder();
+                loaderTypeUpdater.RegisterType(moduleLoaderType);
+
+                foreach ( var feature in module.Features )
+                {
+                    _logger.RegisteringFeature(feature.Name);
+
+                    var featureLoaderType = assembly.GetType(feature.LoaderClass, throwOnError: true);
+                    loaderTypeUpdater.RegisterType(featureLoaderType);
+                }
+
+                loaderTypeUpdater.Update(_lifetimeContainer.ComponentRegistry);
+
+                var loaderInstance = (Autofac.Module)_lifetimeContainer.Resolve(moduleLoaderType);
+
+                var moduleUpdater = new ContainerBuilder();
+                moduleUpdater.RegisterModule(loaderInstance);
+                moduleUpdater.Update(_lifetimeContainer.ComponentRegistry);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

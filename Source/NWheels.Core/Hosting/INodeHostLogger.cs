@@ -30,6 +30,9 @@ namespace NWheels.Core.Hosting
         [LogVerbose]
         void RegisteringModule(string name);
 
+        [LogVerbose]
+        void RegisteringFeature(string name);
+
         [LogWarning]
         void NoApplicationModulesRegistered();
 

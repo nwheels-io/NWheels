@@ -71,7 +71,7 @@
   <ItemGroup>
     <Compile Include="Conventions\EfDataRepositoryFactory.cs" />
     <Compile Include="Conventions\EfEntityObjectFactory.cs" />
-    <Compile Include="DbAutoBuildModuleLoader.cs" />
+    <Compile Include="DbAutoBuildFeatureLoader.cs" />
     <Compile Include="EFConventions\NoUnderscoreForeignKeyNamingConvention.cs" />
     <Compile Include="Conventions\EfEntityConfigurationWriter.cs" />
     <Compile Include="Impl\EfDataRepositoryBase.cs" />
@@ -79,7 +79,7 @@
     <Compile Include="Impl\QueryExpressionSpecializer.cs" />
     <Compile Include="Impl\UnitOfWork.cs" />
     <Compile Include="ModuleLoader.cs" />
-    <Compile Include="MySqlSupportModuleLoader.cs" />
+    <Compile Include="MySqlFeatureLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

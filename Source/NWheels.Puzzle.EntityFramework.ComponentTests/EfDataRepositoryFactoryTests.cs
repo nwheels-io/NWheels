@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using Hapil;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
 using NWheels.Core.DataObjects;
+using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Core.Entities;
 using NWheels.Puzzle.EntityFramework.Impl;
@@ -116,7 +118,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             var metadataCache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
             var entityFactory = new EfEntityObjectFactory(_dyamicModule, metadataCache);
-            var repoFactory = new EfDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache);
+            var repoFactory = new EfDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, ResolveAuto<IDatabaseConfig>());
             return repoFactory;
         }
 

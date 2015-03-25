@@ -10,6 +10,7 @@ using Hapil.Testing.NUnit;
 using MySql.Data.MySqlClient;
 using NUnit.Framework;
 using NWheels.Core.DataObjects;
+using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Core.Entities;
 using NWheels.Puzzle.EntityFramework.Impl;
@@ -155,7 +156,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             var metadataCache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
             var entityFactory = new EfEntityObjectFactory(_dyamicModule, metadataCache);
-            var repoFactory = new EfDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache);
+            var repoFactory = new EfDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache, new MySqlClientFactory(), ResolveAuto<IDatabaseConfig>());
             return repoFactory;
         }
 

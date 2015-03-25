@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -113,7 +114,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 mixinRegistrations);
 
             var entityFactory = new EfEntityObjectFactory(_dynamicModule, metadataCache);
-            var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache);
+            var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, ResolveAuto<IDatabaseConfig>());
 
             return repoFactory;
         }

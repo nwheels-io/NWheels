@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Hapil;
 using NWheels.Exceptions;
 using NWheels.Utilities;
 using System.IO;
@@ -78,12 +79,14 @@ namespace NWheels.Hosting
             foreach ( var module in this.FrameworkModules )
             {
                 text.AppendFormat("+ Framework Module   - {0}", module.Assembly);
+                FeatureListToLogString(module.Features, text);
                 text.AppendLine();
             }
 
             foreach ( var module in this.ApplicationModules )
             {
                 text.AppendFormat("+ Application Module - {0}", module.Assembly);
+                FeatureListToLogString(module.Features, text);
                 text.AppendLine();
             }
 
@@ -94,6 +97,17 @@ namespace NWheels.Hosting
             }
 
             return text.ToString();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void FeatureListToLogString(List<FeatureConfig> featureList, StringBuilder text)
+        {
+            foreach ( var feature in featureList )
+            {
+                text.AppendLine();
+                text.AppendFormat("++ Feature           - {0}", feature.Name);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -158,6 +172,35 @@ namespace NWheels.Hosting
             {
                 module.LoaderClass = string.Format("{0}.ModuleLoader", Path.GetFileNameWithoutExtension(module.Assembly));
             }
+
+            if ( module.Features == null )
+            {
+                module.Features = new List<FeatureConfig>();
+            }
+            else
+            {
+                module.Features.ForEach(feature => ValidateFeature(module, feature));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void ValidateFeature(ModuleConfig module, FeatureConfig feature)
+        {
+            if ( string.IsNullOrWhiteSpace(feature.Name) && string.IsNullOrWhiteSpace(feature.LoaderClass) )
+            {
+                throw new NodeHostConfigException("At least one of Name or LoaderClass must be specified in Feature element.");
+            }
+
+            if ( string.IsNullOrWhiteSpace(feature.LoaderClass) )
+            {
+                feature.LoaderClass = string.Format("{0}.{1}FeatureLoader", Path.GetFileNameWithoutExtension(module.Assembly), feature.Name);
+            }
+
+            if ( string.IsNullOrWhiteSpace(feature.Name) )
+            {
+                feature.Name = feature.LoaderClass.TrimPrefix(Path.GetFileNameWithoutExtension(module.Assembly) + ".").TrimSuffix("FeatureLoader");
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -197,6 +240,21 @@ namespace NWheels.Hosting
 
             [DataMember(Order = 2, IsRequired = true)]
             public string Assembly { get; set; }
+
+            [DataMember(Order = 3, IsRequired = false, EmitDefaultValue = false)]
+            public string LoaderClass { get; set; }
+
+            [DataMember(Order = 4, IsRequired = false, EmitDefaultValue = false)]
+            public List<FeatureConfig> Features { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataContract(Namespace = "NWheels.Hosting", Name = "Feature")]
+        public class FeatureConfig
+        {
+            [DataMember(Order = 1, IsRequired = false, EmitDefaultValue = false)]
+            public string Name { get; set; }
 
             [DataMember(Order = 2, IsRequired = false, EmitDefaultValue = false)]
             public string LoaderClass { get; set; }
