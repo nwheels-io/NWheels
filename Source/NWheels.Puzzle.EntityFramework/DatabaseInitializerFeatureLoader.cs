@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NWheels.Puzzle.EntityFramework
 {
-    public class DbAutoBuildFeatureLoader : Module
+    public class DatabaseInitializerFeatureLoader : Module
     {
         protected override void Load(ContainerBuilder builder)
         {

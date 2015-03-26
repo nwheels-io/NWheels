@@ -185,5 +185,9 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 IEntityRepository<IUserAccountEntity> UserAccounts { get; }
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
     }
 }

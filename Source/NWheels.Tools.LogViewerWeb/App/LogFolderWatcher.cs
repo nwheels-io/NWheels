@@ -48,7 +48,7 @@ namespace NWheels.Tools.LogViewerWeb.App
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ThreadNodeViewModel[] GetCapturedLogs(long lastCaptureId)
+        public ThreadNodeViewModel[] GetCapturedLogs(FetchRequest request)
         {
             FileCapture[] currentCaptures;
             var newCaptures = new List<ThreadNodeViewModel>();
@@ -60,9 +60,14 @@ namespace NWheels.Tools.LogViewerWeb.App
 
             foreach ( var capture in currentCaptures )
             {
-                if ( capture.CaptureId > lastCaptureId )
+                if ( capture.CaptureId > request.LastCaptureId )
                 {
-                    newCaptures.Add(capture.DeserializedContents);
+                    var threadLogViewModel = capture.DeserializedContents;
+
+                    if ( request.Match(threadLogViewModel) )
+                    {
+                        newCaptures.Add(threadLogViewModel);
+                    }
                 }
             }
 

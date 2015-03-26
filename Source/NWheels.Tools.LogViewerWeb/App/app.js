@@ -31,42 +31,43 @@
         };
 
         $scope.availableEnvironments = [
-			{name:'QA2', type:'QA', selected: true},
-			{name:'QA1', type:'QA', selected: true},
-			{name:'PROD', type:'PROD', selected: true}
+			{name:'QA2', type:'QA'},
+			{name:'QA1', type:'QA'},
+			{name:'PROD', type:'PROD'},
+			{name:'Local', type:'DEV'}
 		];
         $scope.availableThreads = [
 			{name:'StartUp', value:1},
 			{name:'ShutDown', value:2},
-			{name:'IncomingRequest', value:3, selected:true},
-			{name:'QueuedWorkItem', value:4, selected:true},
-			{name:'ScheduledJob', value:5, selected:true},
+			{name:'IncomingRequest', value:3},
+			{name:'QueuedWorkItem', value:4},
+			{name:'ScheduledJob', value:5},
 			{name:'LogProcessing', value:6},
 			{name:'Unspecified', value:0}
 		];
         $scope.availableNodes = [
-			{name:'Backend', selected: true},
-			{name:'AdvertiserApp'}
+			{name:'Backend'},
+			{name:'AdvertiserWebApp'}
 		];
         $scope.availableLogLevels = [
 			{name:'Debug'},
 			{name:'Verbose'},
-			{name:'Info', selected: true},
-			{name:'Warning', selected: true},
-			{name:'Error', selected: true},
-			{name:'Critical', selected: true}
+			{name:'Info'},
+			{name:'Warning'},
+			{name:'Error'},
+			{name:'Critical'}
 		];
         $scope.selectedEnvironments = [];
         $scope.selectedThreads = [];
         $scope.selectedNodes = [];
         $scope.selectedLogLevels = [];
 
-		$scope.logLevelSelectorLabels = {
-			selectAll       : "All",
-			selectNone      : "None",
+		$scope.filterSelectorLabels = {
+			selectAll       : "Any",
+			selectNone      : "Any",
 			reset           : "Undo",
 			search          : "Type here to search...",
-			nothingSelected : "All Threads"
+			nothingSelected : "Any"
 		};
 		
 		$scope.isCaptureOn = false;
@@ -74,40 +75,55 @@
 
 		var captureTimer;
 		var lastCaptureId = 0;
+		var scrollPending = false;
+
+		$scope.postRefresh = function() {
+			if (scrollPending) {
+				scrollPending = false;
+				$('body').animate({ scrollTop: $(document).height() - $(window).height() }, 300);
+			}
+			if ($scope.isCaptureOn) {
+				captureTimer = $timeout($scope.runRequest, 300);
+			}
+		};
+
+		$scope.runRequest = function() {
+			captureTimer = undefined;
+			var request = {
+				lastCaptureId: lastCaptureId,
+				environmentNames: $linq($scope.selectedEnvironments).select(function(x) { return x.name; }).toArray(),
+				nodeNames: $linq($scope.selectedNodes).select(function(x) { return x.name; }).toArray(),
+				threadTypes: $linq($scope.selectedThreads).select(function(x) { return x.value; }).toArray(),
+				logLevels: $linq($scope.selectedLogLevels).select(function(x) { return x.name; }).toArray(),
+				maxNumberOfCaptures: 10
+			};
+			$http.post('/capture', request).then(function(result) {
+				console.log(result.data);
+				lastCaptureId = result.data.lastCaptureId;
+				
+				if (result.data.logs.length > 0) {
+					scrollPending = true;
+					for (var i in result.data.logs) {
+						$scope.rootNodes.push(result.data.logs[i]);
+					}
+					captureTimer = $timeout($scope.postRefresh, 0);
+				} else if ($scope.isCaptureOn) {
+					captureTimer = $timeout($scope.runRequest, 1000);
+				};
+			});
+		};
 		
 		$scope.startCapture = function() {
 			if(angular.isDefined(captureTimer)) {
 				return;
 			}
-
-			captureTimer = $interval(function() {
-				var request = {
-					lastCaptureId: lastCaptureId
-				};
-				$http.post('/capture', request).then(function(result) {
-					console.log(result.data);
-					
-					lastCaptureId = result.data.lastCaptureId;
-					
-					for (var i in result.data.logs) {
-						$scope.rootNodes.push(result.data.logs[i]);
-					}
-					
-					if(result.data.logs.length > 0) {
-						$timeout(function() {
-							//var documentHeight = $(document).height(); 
-							//var windowHeight = $(window).height(); 
-							//var scrollTopValue = documentHeight - windowHeight;
-							$('body').animate({ scrollTop: $(document).height() - $(window).height() }, 300); //scrollTop($(document).height() - $(window).height());
-						}, 300);
-					}
-				});
-			}, 1000);
+			$scope.runRequest();
 		};
-
+		
 		$scope.stopCapture = function() {
 			if (angular.isDefined(captureTimer)) {
 				$interval.cancel(captureTimer);
+				$scope.isCaptureOn = false;
 				captureTimer = undefined;
 			}
 		};

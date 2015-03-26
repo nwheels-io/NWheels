@@ -35,7 +35,7 @@ namespace NWheels.Tools.LogViewerWeb.App
 
             foreach ( var folder in Program.FolderWatchers )
             {
-                var logsFromFolder = folder.GetCapturedLogs(request.LastCaptureId);
+                var logsFromFolder = folder.GetCapturedLogs(request);
                 responseLogs.AddRange(logsFromFolder);
                 
                 Console.WriteLine("> CAPTURED {0} new logs in: {1}", logsFromFolder.Length, folder.FolderPath);

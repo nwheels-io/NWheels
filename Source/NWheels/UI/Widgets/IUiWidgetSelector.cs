@@ -139,6 +139,7 @@ namespace NWheels.UI.Widgets
             return selector.CreateChildBuilder<ILogoUiWidgetBuilder<TModel, TState>>();
         }
 
+#if false
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static ILoggedInUserUiWidgetBuilder<TModel, TState> WidgetLoggedInUser<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)
@@ -152,7 +153,7 @@ namespace NWheels.UI.Widgets
         {
             return selector.CreateChildBuilder<IMapUiWidgetBuilder<TModel, TState>>();
         }
-
+#endif
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static IFormUiWidgetBuilder<TModel, TState> WidgetForm<TModel, TState>(this IUiWidgetSelector<TModel, TState> selector)

@@ -70,6 +70,7 @@
     <Compile Include="DataObjects\IMetadataElementVisitor.cs" />
     <Compile Include="DataObjects\ITypeMetadataCache.cs" />
     <Compile Include="DataObjects\MixinRegistration.cs" />
+    <Compile Include="DataObjects\MustMixInAttribute.cs" />
     <Compile Include="Entities\DateTimeUtc.cs" />
     <Compile Include="Entities\IDatabaseConfig.cs" />
     <Compile Include="Entities\RelationalMappingConventionDefault.cs" />
@@ -137,39 +138,6 @@
     <Compile Include="Logging\NameValuePairLogNode.cs" />
     <Compile Include="Logging\ThreadLogSnapshot.cs" />
     <Compile Include="Logging\ThreadTaskType.cs" />
-    <Compile Include="Modules\Auth\IEntityPartUserRoleId.cs" />
-    <Compile Include="Modules\Auth\UI\IUserAccountApi.cs" />
-    <Compile Include="Modules\Auth\IAuditEntryEntity.cs" />
-    <Compile Include="Modules\Auth\IEntityPartAudit.cs" />
-    <Compile Include="Modules\Auth\IPasswordEntity.cs" />
-    <Compile Include="Modules\Auth\IUserAccountEntity.cs" />
-    <Compile Include="Modules\Auth\IUserRoleEntity.cs" />
-    <Compile Include="Modules\Auth\UI\IUserSignInFormUiWidgetBuilder.cs" />
-    <Compile Include="Modules\Auth\UI\IUserSignInRequest.cs" />
-    <Compile Include="Modules\Auth\UI\IUserSignInReply.cs" />
-    <Compile Include="Modules\Auth\UI\IUserSignInUiState.cs" />
-    <Compile Include="Modules\Crm\CustomerEmailAddressType.cs" />
-    <Compile Include="Modules\Crm\CustomerPhoneType.cs" />
-    <Compile Include="Modules\Crm\CustomerPostalAddressType.cs" />
-    <Compile Include="Modules\Crm\IAbstractContactDetailEntity.cs" />
-    <Compile Include="Modules\Crm\IAbstractCustomerActivityEntity.cs" />
-    <Compile Include="Modules\Crm\IEmailContactDetailEntity.cs" />
-    <Compile Include="Modules\Crm\IPhoneContactDetailEntity.cs" />
-    <Compile Include="Modules\Crm\ICustomerEntity.cs" />
-    <Compile Include="Modules\Crm\IPostalContactDetailEntity.cs" />
-    <Compile Include="Modules\Crm\IOrganizationEntity.cs" />
-    <Compile Include="Modules\Crm\IOrganizationUnitEntity.cs" />
-    <Compile Include="Modules\Crm\ICustomerRelationshipEntity.cs" />
-    <Compile Include="Modules\Crm\ICustomerRelationshipTypeEntity.cs" />
-    <Compile Include="Modules\Geo\GeoUnitConversion.cs" />
-    <Compile Include="Modules\Geo\ICityEntity.cs" />
-    <Compile Include="Modules\Geo\ICityZipCodeEntity.cs" />
-    <Compile Include="Modules\Geo\ICountryEntity.cs" />
-    <Compile Include="Modules\Geo\ICountryStateEntity.cs" />
-    <Compile Include="Modules\Geo\IEntityPartGeoCoordinate.cs" />
-    <Compile Include="Modules\Geo\IEntityPartPostalAddress.cs" />
-    <Compile Include="Modules\Geo\IStateCountyEntity.cs" />
-    <Compile Include="Modules\Geo\IZipCodeEntity.cs" />
     <Compile Include="Processing\ApplicationJobBase.cs" />
     <Compile Include="Processing\IApplicationJob.cs" />
     <Compile Include="Processing\IApplicationJobContext.cs" />
@@ -208,7 +176,6 @@
     <Compile Include="UI\Layouts\IGridUiContainerLayout.cs" />
     <Compile Include="UI\Layouts\IStackUiContainerLayout.cs" />
     <Compile Include="UI\Layouts\IDockUiContainerLayout.cs" />
-    <Compile Include="Modules\Auth\UI\ISignInUiScreenTemplate.cs" />
     <Compile Include="UI\Layouts\IUiLayoutBuilder.cs" />
     <Compile Include="UI\Templates\IAdminUiScreenTemplate.cs" />
     <Compile Include="UI\IUiApplication.cs" />
@@ -233,9 +200,7 @@
     <Compile Include="Utilities\ParseUtility.cs" />
     <Compile Include="Utilities\PathUtility.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Modules\Merchant\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

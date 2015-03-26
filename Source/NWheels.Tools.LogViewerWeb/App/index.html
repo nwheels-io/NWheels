@@ -24,9 +24,10 @@
 					input-model="availableEnvironments"
 					output-model="selectedEnvironments"
 					button-label="name"
-					helper-elements="all none"
+					helper-elements="none"
 					item-label="name"
-					tick-property="selected">
+					tick-property="selected"
+					translation="filterSelectorLabels">
 				</div>		
 			</div>
 			<div class="view_selector">
@@ -36,10 +37,11 @@
 					input-model="availableNodes"
 					output-model="selectedNodes"
 					button-label="name"
-					helper-elements="all none"
+					helper-elements="none"
 					item-label="name"
 					max-labels="2"
-					tick-property="selected">
+					tick-property="selected"
+					translation="filterSelectorLabels">
 				</div>		
 			</div>
 			<div class="view_selector">
@@ -49,10 +51,11 @@
 					input-model="availableThreads"
 					output-model="selectedThreads"
 					button-label="name"
-					helper-elements="all none"
+					helper-elements="none"
 					item-label="name"
 					max-labels="1"
-					tick-property="selected">
+					tick-property="selected"
+					translation="filterSelectorLabels">
 				</div>		
 			</div>
 			<div class="view_selector">
@@ -62,11 +65,11 @@
 					input-model="availableLogLevels"
 					output-model="selectedLogLevels"
 					button-label="name"
-					helper-elements="all none"
+					helper-elements="none"
 					item-label="name"
 					max-labels="3"
 					tick-property="selected"
-					translation="logLevelSelectorLabels">
+					translation="filterSelectorLabels">
 				</div>		
 			</div>
 			<div class="view_selector">
@@ -173,12 +176,13 @@
 		  </ol>
 		</div>
 		<div class="clearfix">
-			<a ng-show="isCaptureOn" id="autoScroll"><img src="/content/spinner.gif"/></a>
+			<a ng-show="isCaptureOn" id="autoScroll"><img src="/content/spinner.gif" style="margin:5px;"/></a>
 		</div>
 	</div>
 	
 
 	<script src="/content/jquery-2.1.3.min.js"></script>
+	<script src="/content/jslinq.min.js"></script>
     <script src="/content/angular.min.js"></script>
     <script src="/content/angular-ui-tree.min.js"></script>
 	<script src="/content/isteven-multi-select.js"></script>    
