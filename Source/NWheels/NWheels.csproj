@@ -68,9 +68,13 @@
     <Compile Include="DataObjects\IDataTransferObject.cs" />
     <Compile Include="DataObjects\IMetadataElement.cs" />
     <Compile Include="DataObjects\IMetadataElementVisitor.cs" />
+    <Compile Include="DataObjects\ISemanticDataType.cs" />
     <Compile Include="DataObjects\ITypeMetadataCache.cs" />
     <Compile Include="DataObjects\MixinRegistration.cs" />
     <Compile Include="DataObjects\MustMixInAttribute.cs" />
+    <Compile Include="DataObjects\PropertyContractAttribute.cs" />
+    <Compile Include="DataObjects\SemanticDataTypeAttribute.cs" />
+    <Compile Include="DataObjects\SemanticType.cs" />
     <Compile Include="Entities\DateTimeUtc.cs" />
     <Compile Include="Entities\IDatabaseConfig.cs" />
     <Compile Include="Entities\RelationalMappingConventionDefault.cs" />

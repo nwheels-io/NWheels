@@ -16,18 +16,20 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\Bin\Core\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\Bin\Core\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autofac">
@@ -49,30 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IDataAuditJournalEntryEntity.cs" />
-    <Compile Include="IEntityPartAudit.cs" />
-    <Compile Include="IEntityPartUserRoleId.cs" />
-    <Compile Include="IPasswordEntity.cs" />
-    <Compile Include="IUserAccountEntity.cs" />
-    <Compile Include="IUserRoleEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\ISignInUiScreenTemplate.cs" />
-    <Compile Include="UI\IUserAccountApi.cs" />
-    <Compile Include="UI\IUserSignInFormUiWidgetBuilder.cs" />
-    <Compile Include="UI\IUserSignInReply.cs" />
-    <Compile Include="UI\IUserSignInRequest.cs" />
-    <Compile Include="UI\IUserSigninUiState.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NWheels.Core\NWheels.Core.csproj">
-      <Project>{b00952f0-e6c7-4c8e-9181-7367fd48caf4}</Project>
-      <Name>NWheels.Core</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\NWheels\NWheels.csproj">
-      <Project>{f0ecf554-bf54-4843-b62f-c67c4deb2764}</Project>
-      <Name>NWheels</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -80,6 +59,18 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Domain\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NWheels.Core\NWheels.Core.csproj">
+      <Project>{b00952f0-e6c7-4c8e-9181-7367fd48caf4}</Project>
+      <Name>NWheels.Core</Name>
+      <Private>True</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\NWheels\NWheels.csproj">
+      <Project>{f0ecf554-bf54-4843-b62f-c67c4deb2764}</Project>
+      <Name>NWheels</Name>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

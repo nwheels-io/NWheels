@@ -11,7 +11,6 @@ namespace NWheels.Core.DataObjects
     {
         public PropertyValidationMetadataBuilder()
         {
-            this.ValidationAttributes = new List<ValidationAttribute>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,44 +31,26 @@ namespace NWheels.Core.DataObjects
 
         #region IPropertyValidationMetadata Members
 
-        public DataType SemanticDataType { get; set; }
         public bool IsRequired { get; set; }
-        public bool IsEditable { get; set; }
+        public bool IsReadOnly { get; set; }
         public int? MinLength { get; set; }
         public int? MaxLength { get; set; }
         public decimal? MinValue { get; set; }
         public decimal? MaxValue { get; set; }
         public string RegularExpression { get; set; }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        IReadOnlyList<ValidationAttribute> IPropertyValidationMetadata.ValidationAttributes
-        {
-            get
-            {
-                return this.ValidationAttributes;
-            }
-        }
-
         #endregion
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public List<ValidationAttribute> ValidationAttributes { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void AcceptVisitor(IMetadataElementVisitor visitor)
         {
-            SemanticDataType = visitor.VisitAttribute("SemanticDataType", SemanticDataType);
-            IsEditable = visitor.VisitAttribute("IsEditable", IsEditable);
+            IsReadOnly = visitor.VisitAttribute("IsEditable", IsReadOnly);
             MinLength = visitor.VisitAttribute("MinLength", MinLength);
             MaxLength = visitor.VisitAttribute("MaxLength", MaxLength);
             MinValue = visitor.VisitAttribute("MinValue", MinValue);
             MaxValue = visitor.VisitAttribute("MaxValue", MaxValue);
             RegularExpression = visitor.VisitAttribute("RegularExpression", RegularExpression);
-
-            //TODO: visit ValidationAttributes
         }
     }
 }

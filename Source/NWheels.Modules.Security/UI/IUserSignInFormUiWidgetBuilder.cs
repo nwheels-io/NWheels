@@ -7,7 +7,7 @@ using NWheels.UI;
 using NWheels.UI.Behaviors;
 using NWheels.UI.Widgets;
 
-namespace NWheels.Modules.Auth.UI
+namespace NWheels.Modules.Security.UI
 {
     public interface IUserSignInFormUiWidgetBuilder : IFormUiWidgetBuilder<IUserSignInRequest, IUserSignInUiState>
     {

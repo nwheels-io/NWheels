@@ -31,7 +31,8 @@ namespace NWheels.Core.DataObjects
         public string Name { get; set; }
         public PropertyKind Kind { get; set; }
         public Type ClrType { get; set; }
-        public System.ComponentModel.DataAnnotations.DataType SemanticDataType { get; set; }
+        public ISemanticDataType SemanticType { get; set; }
+        public PropertyContractAttribute ContractAttribute { get; set; }
         public System.Reflection.PropertyInfo ContractPropertyInfo { get; set; }
         public System.Reflection.PropertyInfo ImplementationPropertyInfo { get; set; }
         public object DefaultValue { get; set; }
@@ -75,7 +76,8 @@ namespace NWheels.Core.DataObjects
             Name = visitor.VisitAttribute("Name", Name);
             Kind = visitor.VisitAttribute("Kind", Kind);
             ClrType = visitor.VisitAttribute("ClrType", ClrType);
-            SemanticDataType = visitor.VisitAttribute("SemanticDataType", SemanticDataType);
+            SemanticType = visitor.VisitAttribute("SemanticType", SemanticType);
+            ContractAttribute = visitor.VisitAttribute("ContractAttribute", ContractAttribute);
             ContractPropertyInfo = visitor.VisitAttribute("ContractPropertyInfo", ContractPropertyInfo);
             ImplementationPropertyInfo = visitor.VisitAttribute("ImplementationPropertyInfo", ImplementationPropertyInfo);
             DefaultDisplayName = visitor.VisitAttribute("DefaultDisplayName", DefaultDisplayName);

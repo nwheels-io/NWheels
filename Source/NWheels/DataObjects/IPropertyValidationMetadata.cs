@@ -1,14 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace NWheels.DataObjects
 {
     public interface IPropertyValidationMetadata : IMetadataElement
     {
-        IReadOnlyList<ValidationAttribute> ValidationAttributes { get; }
-        DataType SemanticDataType { get; }
         bool IsRequired { get; }
-        bool IsEditable { get; }
+        bool IsReadOnly { get; }
         int? MinLength { get; }
         int? MaxLength { get; }
         decimal? MinValue { get; }

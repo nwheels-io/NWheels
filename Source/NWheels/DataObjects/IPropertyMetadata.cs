@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
 namespace NWheels.DataObjects
@@ -9,7 +8,8 @@ namespace NWheels.DataObjects
         string Name { get; }
         PropertyKind Kind { get; }
         Type ClrType { get; }
-        DataType SemanticDataType { get; }
+        ISemanticDataType SemanticType { get; }
+        PropertyContractAttribute ContractAttribute { get; }
         PropertyInfo ContractPropertyInfo { get; }
         PropertyInfo ImplementationPropertyInfo { get; }
         IRelationMetadata Relation { get; }

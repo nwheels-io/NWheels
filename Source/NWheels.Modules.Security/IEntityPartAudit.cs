@@ -1,21 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.DataObjects;
 using NWheels.Entities;
 
-namespace NWheels.Modules.Auth
+namespace NWheels.Modules.Security
 {
     [EntityPartContract]
     public interface IEntityPartAudit
     {
         DateTime CreatedAt { get; set; }
-        [Required]
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract(IsRequired = true)]
         IUserAccountEntity CreatedBy { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         DateTime ModifiedAt { get; set; }
-        [Required]
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract(IsRequired = true)]
         IUserAccountEntity ModifiedBy { get; set; }
     }
 

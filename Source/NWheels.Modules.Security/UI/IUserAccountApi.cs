@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.Modules.Auth.UI
+namespace NWheels.Modules.Security.UI
 {
     public interface IUserAccountApi
     {

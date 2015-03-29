@@ -1,56 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.DataObjects;
 using NWheels.Entities;
 
-namespace NWheels.Modules.Auth
+namespace NWheels.Modules.Security
 {
-    [EntityContract]
-    public interface IUserAccountEntity
+    public interface IDataAuditJournalEntryEntity : IEntityPartCorrelationId
     {
-        [Required]
-        string LoginName { get; set; }
+        [PropertyContract(IsRequired = true)]
+        IUserAccountEntity Who { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        string FullName { get; set; }
+        DateTime When { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Required, EmailAddress]
-        string EmailAddress { get; set; }
+        [PropertyContract(IsRequired = true)]
+        string ModuleName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        bool IsEmailVerified { get; set; }
+        string ComponentName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Required]
-        IPasswordEntity CurrentPassword { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        ICollection<IPasswordEntity> PasswordHistory { get; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        [Required]
-        ICollection<IUserRoleEntity> Roles { get; }
+        string OperationName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        DateTime? LastLoginAt { get; set; }
+        [PropertyContract(IsRequired = true)]
+        string AffectedEntityName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        int FailedLoginCount { get; set; }
+        [PropertyContract(IsRequired = true)]
+        string AffectedEntityId { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        bool IsLockedOut { get; set; }
+
+        [PropertyContract(IsRequired = true)]
+        string[] AffectedPropertyNames { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract(IsRequired = true)]
+        string[] OldPropertyValues { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract(IsRequired = true)]
+        string[] NewPropertyValues { get; set; }
     }
 }

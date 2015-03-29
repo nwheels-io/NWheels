@@ -8,7 +8,7 @@ using NWheels.UI.Elements;
 using NWheels.UI.Layouts;
 using NWheels.UI;
 
-namespace NWheels.Modules.Auth.UI
+namespace NWheels.Modules.Security.UI
 {
     public interface ISignInUiScreenTemplate<TModel, TState> : IUiContainerBuilder<TModel, TState, ISignInUiScreenTemplate<TModel, TState>>
     {

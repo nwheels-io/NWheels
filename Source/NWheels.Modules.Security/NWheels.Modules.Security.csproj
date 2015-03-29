@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B00952F0-E6C7-4C8E-9181-7367FD48CAF4}</ProjectGuid>
+    <ProjectGuid>{2BFA1102-E3C2-41A3-8052-744C4DFE3EEC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NWheels.Core</RootNamespace>
-    <AssemblyName>NWheels.Core</AssemblyName>
+    <RootNamespace>NWheels.Modules.Security</RootNamespace>
+    <AssemblyName>NWheels.Modules.Security</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -36,9 +36,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="Autofac.Extras.Multitenant">
-      <HintPath>..\packages\Autofac.Extras.Multitenant.3.1.1\lib\net40\Autofac.Extras.Multitenant.dll</HintPath>
-    </Reference>
     <Reference Include="Hapil, Version=0.9.3.3, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\FelixB.Hapil.0.9.3.3\lib\net45\Hapil.dll</HintPath>
@@ -49,10 +46,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data.Entity.Design" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -60,54 +53,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Concurrency\ResourceLock.cs" />
-    <Compile Include="Configuration\ConfigurationSectionBase.cs" />
-    <Compile Include="Configuration\ConfigurationSectionConvention.cs" />
-    <Compile Include="Configuration\XmlConfigurationLoader.cs" />
-    <Compile Include="Configuration\IConfigurationLogger.cs" />
-    <Compile Include="Configuration\IInternalConfigurationObject.cs" />
-    <Compile Include="Conventions\ConfigurationSectionFactory.cs" />
-    <Compile Include="Conventions\LoggerObjectFactory.cs" />
-    <Compile Include="DataObjects\DataObjectConventions.cs" />
-    <Compile Include="DataObjects\MetadataElement.cs" />
-    <Compile Include="DataObjects\CollectionAdapter.cs" />
-    <Compile Include="DataObjects\KeyMetadataBuilder.cs" />
-    <Compile Include="DataObjects\PropertyMetadataBuilder.cs" />
-    <Compile Include="DataObjects\PropertyRelationalMappingBuilder.cs" />
-    <Compile Include="DataObjects\PropertyValidationMetadataBuilder.cs" />
-    <Compile Include="DataObjects\RelationMetadataBuilder.cs" />
-    <Compile Include="DataObjects\TypeMetadataBuilder.cs" />
-    <Compile Include="DataObjects\TypeMetadataBuilderConstructor.cs" />
-    <Compile Include="DataObjects\TypeMetadataCache.cs" />
-    <Compile Include="DataObjects\TypeRelationalMappingBuilder.cs" />
-    <Compile Include="Entities\PascalCaseRelationalMappingConvention.cs" />
-    <Compile Include="Entities\RelationalMappingConventionBase.cs" />
-    <Compile Include="Entities\UnderscoreRelationalMappingConvention.cs" />
-    <Compile Include="Hosting\IInitializableHostComponent.cs" />
-    <Compile Include="Hosting\INodeHostLogger.cs" />
-    <Compile Include="Hosting\NodeHost.cs" />
-    <Compile Include="Hosting\NodeTrigger.cs" />
-    <Compile Include="Logging\ApplicationEventLoggerConvention.cs" />
-    <Compile Include="Logging\CrashLog.cs" />
-    <Compile Include="Logging\IClock.cs" />
-    <Compile Include="Logging\IFrameworkLoggingConfiguration.cs" />
-    <Compile Include="Logging\IPlainLog.cs" />
-    <Compile Include="Logging\IThreadLogAnchor.cs" />
-    <Compile Include="Logging\IThreadRegistry.cs" />
-    <Compile Include="Logging\StopwatchClock.cs" />
-    <Compile Include="Logging\ThreadLog.cs" />
-    <Compile Include="Logging\ThreadLogAppender.cs" />
-    <Compile Include="Logging\ThreadRegistry.cs" />
-    <Compile Include="Logging\UniversalThreadLogAnchor.cs" />
-    <Compile Include="Processing\RevertableSequence.cs" />
-    <Compile Include="Processing\StateMachine.cs" />
+    <Compile Include="Domain\LoginNameDataType.cs" />
+    <Compile Include="Domain\PasswordDataType.cs" />
+    <Compile Include="IDataAuditJournalEntryEntity.cs" />
+    <Compile Include="IEntityPartAudit.cs" />
+    <Compile Include="IEntityPartUserRoleId.cs" />
+    <Compile Include="IPasswordEntity.cs" />
+    <Compile Include="IUserAccountEntity.cs" />
+    <Compile Include="IUserRoleEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RealFramework.cs" />
-    <Compile Include="UI\UiApplication.cs" />
-    <Compile Include="UI\Web\IWebAppClientSide.cs" />
-    <Compile Include="UI\Web\IWebAppServerSide.cs" />
+    <Compile Include="UI\ISignInUiScreenTemplate.cs" />
+    <Compile Include="UI\IUserAccountApi.cs" />
+    <Compile Include="UI\IUserSignInFormUiWidgetBuilder.cs" />
+    <Compile Include="UI\IUserSignInReply.cs" />
+    <Compile Include="UI\IUserSignInRequest.cs" />
+    <Compile Include="UI\IUserSigninUiState.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NWheels.Core\NWheels.Core.csproj">
+      <Project>{b00952f0-e6c7-4c8e-9181-7367fd48caf4}</Project>
+      <Name>NWheels.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NWheels\NWheels.csproj">
       <Project>{f0ecf554-bf54-4843-b62f-c67c4deb2764}</Project>
       <Name>NWheels</Name>

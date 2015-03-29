@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.Modules.Auth.UI
+namespace NWheels.Modules.Security.UI
 {
-    public interface IUserSignInReply
+    public interface IUserSignInRequest
     {
         string UserName { get; set; }
-        string FullName { get; set; }
-        string Email { get; set; }
+        string Password { get; set; }
     }
 }

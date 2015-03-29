@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.DataObjects;
 using NWheels.Entities;
 
-namespace NWheels.Modules.Auth
+namespace NWheels.Modules.Security
 {
     [EntityContract]
     public interface IPasswordEntity
     {
-        [Required]
+        [PropertyContract(IsRequired = true)]
         IUserAccountEntity User { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        [Required]
+        [PropertyContract(IsRequired = true)]
         byte[] Hash { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.UI.Behaviors;
 
-namespace NWheels.Modules.Auth.UI
+namespace NWheels.Modules.Security.UI
 {
     public interface IUserSignInUiState
     {
