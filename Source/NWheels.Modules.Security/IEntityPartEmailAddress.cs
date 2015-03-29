@@ -8,16 +8,14 @@ using NWheels.Entities;
 
 namespace NWheels.Modules.Security
 {
-    [EntityContract]
-    [MustHaveMixin(typeof(IEntityPartId<>))]
-    public interface IUserRoleEntity<TRole>
+    [EntityPartContract]
+    public interface IEntityPartEmailAddress
     {
-        [PropertyContract.Required, PropertyContract.Unique]
-        string Name { get; set; }
+        [PropertyContract.Required, PropertyContract.Semantic.EmailAddress]
+        string EmailAddress { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        [PropertyContract.Required]
-        TRole Role { get; set; }
+
+        bool IsEmailVerified { get; set; }
     }
 }

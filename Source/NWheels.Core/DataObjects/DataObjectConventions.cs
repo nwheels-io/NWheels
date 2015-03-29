@@ -28,7 +28,7 @@ namespace NWheels.Core.DataObjects
 
         public bool IsKeyProperty(IPropertyMetadata property)
         {
-            return (property.Name.EqualsIgnoreCase("Id") || property.ContractAttribute.IsKey);
+            return (property.Name.EqualsIgnoreCase("Id") || property.HasContractAttribute<PropertyContract.KeyAttribute>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

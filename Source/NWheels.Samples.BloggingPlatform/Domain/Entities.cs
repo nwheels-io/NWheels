@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.DataObjects;
 using NWheels.Entities;
-using NWheels.Modules.Auth;
+using NWheels.Modules.Security;
 
 namespace NWheels.Samples.BloggingPlatform.Domain
 {
     public interface IBlogDataRepository : IApplicationDataRepository
     {
-        IEntityRepository<IUserAccountEntity> AllUsers { get; }
-        IEntityRepository<IAuthorEntity> Authors { get; }
-        IEntityRepository<IArticleEntity> Articles { get; }
-        IEntityRepository<IPostEntity> Posts { get; }
-        IEntityRepository<ITagEntity> Tags { get; }
+        IEntityRepository<IBlogEntity> Blogs { get; }
+        IEntityRepository<IBlogUserAccountEntity> Users { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -38,24 +36,74 @@ namespace NWheels.Samples.BloggingPlatform.Domain
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IAuthorEntity : IUserAccountEntity
+    public interface IBlogEntity : IEntityPartId<int>
     {
-        ICollection<ITopLevelContentEntity> AuthoredContents { get; }
+        IEntityRepository<IArticleEntity> Articles { get; }
+        IEntityRepository<IPostEntity> Posts { get; }
+        IEntityRepository<ITagEntity> Tags { get; }
+        IEntityRepository<IBlogUserAuthorizationEntity> Authorizations { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IAbstractContentEntity : IEntityPartId<int>, IEntityPartAudit
+    public interface IBlogUserAuthorizationEntity :
+        IEntityPartId<int>
     {
+        [PropertyContract.Required]
+        IBlogEntity Blog { get; set; }
+        
+        [PropertyContract.Required]
+        IBlogUserAccountEntity User { get; set; }
+        
+        [PropertyContract.Required]
+        IBlogUserRoleEntity Role { get; set; } 
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityContract]
+    public interface IBlogUserAccountEntity : 
+        IUserAccountEntity, 
+        IEntityPartId<int>
+    {
+        ICollection<IBlogUserAuthorizationEntity> Authorizations { get; }
+        ICollection<IMainContentEntity> AuthoredContents { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityContract]
+    public interface IBlogUserRoleEntity : 
+        IUserRoleEntity<BlogUserRole>, 
+        IEntityPartId<int>
+    {
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityContract]
+    public interface IAbstractContentEntity : 
+        IEntityPartId<int>, 
+        IEntityPartAudit
+    {
+        [PropertyContract.Required]
+        IBlogUserAccountEntity Author { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Required]
         string Markdown { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         ICollection<ITagEntity> Tags { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface ITopLevelContentEntity : IAbstractContentEntity
+    public interface IMainContentEntity : IAbstractContentEntity
     {
         string Title { get; set; }
         ICollection<IReplyEntity> Replies { get; }
@@ -64,14 +112,14 @@ namespace NWheels.Samples.BloggingPlatform.Domain
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IArticleEntity : ITopLevelContentEntity
+    public interface IArticleEntity : IMainContentEntity
     {
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IPostEntity : ITopLevelContentEntity
+    public interface IPostEntity : IMainContentEntity
     {
     }
 

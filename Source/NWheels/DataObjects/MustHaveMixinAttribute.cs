@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace NWheels.DataObjects
 {
-    [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
-    public class MustMixInAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Interface, AllowMultiple = true)]
+    public class MustHaveMixinAttribute : Attribute
     {
-        public MustMixInAttribute(Type contractType)
+        public MustHaveMixinAttribute(Type contractType)
         {
             this.ContractType = contractType;
         }

@@ -9,9 +9,9 @@ using NWheels.Entities;
 namespace NWheels.Modules.Security
 {
     [EntityPartContract]
-    public interface IEntityPartUserRoleId<TRoleId>
+    public interface IEntityPartGlobalRoles<TRole>
     {
-        [PropertyContract(IsRequired = true)]
-        TRoleId RoleId { get; set; }
+        [PropertyContract.Relation.ManyToMany]
+        ICollection<IUserRoleEntity<TRole>> GlobalRoles { get; }
     }
 }

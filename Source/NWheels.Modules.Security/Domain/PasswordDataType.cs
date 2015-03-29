@@ -9,7 +9,15 @@ namespace NWheels.Modules.Security.Domain
 {
     public class PasswordDataType : ISemanticDataType
     {
-        #region ISemanticDataType Members
+        public System.ComponentModel.DataAnnotations.DataType GetDataTypeAnnotation()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPropertyValidationMetadata GetDefaultValidation()
+        {
+            throw new NotImplementedException();
+        }
 
         public string Name
         {
@@ -22,31 +30,6 @@ namespace NWheels.Modules.Security.Domain
         }
 
         public object DefaultValue
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public int? MinStringLength
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public int? MaxStringLength
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public decimal? MinNumericValue
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public decimal? MaxNumericValue
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public string RegularExpression
         {
             get { throw new NotImplementedException(); }
         }
@@ -65,17 +48,5 @@ namespace NWheels.Modules.Security.Domain
         {
             get { throw new NotImplementedException(); }
         }
-
-        public SemanticType SemanticType
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public System.ComponentModel.DataAnnotations.DataType DataTypeAnnotation
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        #endregion
     }
 }

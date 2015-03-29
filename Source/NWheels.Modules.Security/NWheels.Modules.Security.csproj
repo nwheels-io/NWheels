@@ -45,6 +45,7 @@
       <HintPath>..\packages\FelixB.Hapil.0.9.3.3\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -53,11 +54,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuthorizationException.cs" />
     <Compile Include="Domain\LoginNameDataType.cs" />
     <Compile Include="Domain\PasswordDataType.cs" />
     <Compile Include="IDataAuditJournalEntryEntity.cs" />
     <Compile Include="IEntityPartAudit.cs" />
-    <Compile Include="IEntityPartUserRoleId.cs" />
+    <Compile Include="IEntityPartEmailAddress.cs" />
+    <Compile Include="IEntityPartGlobalRoles.cs" />
     <Compile Include="IPasswordEntity.cs" />
     <Compile Include="IUserAccountEntity.cs" />
     <Compile Include="IUserRoleEntity.cs" />

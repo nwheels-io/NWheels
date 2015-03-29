@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
@@ -12,32 +13,18 @@ namespace NWheels.Modules.Security
     [EntityContract]
     public interface IUserAccountEntity
     {
-        [PropertyContract(typeof(LoginNameDataType), IsRequired = true)]
+        [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Semantic.DataType(typeof(LoginNameDataType))]
         string LoginName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract(typeof(PasswordDataType), IsRequired = true)]
+        [PropertyContract.Required, PropertyContract.Validation.Length(min: 2, max: 100)]
         string FullName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract(SemanticType.EmailAddress, IsRequired = true)]
-        string EmailAddress { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        bool IsEmailVerified { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [PropertyContract(IsRequired = true)]
+        [PropertyContract.Required]
         ICollection<IPasswordEntity> Passwords { get; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [PropertyContract(IsRequired = true)]
-        ICollection<IUserRoleEntity> Roles { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -45,6 +32,7 @@ namespace NWheels.Modules.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [PropertyContract.Validation.MinValue(0)]
         int FailedLoginCount { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

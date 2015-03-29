@@ -35,7 +35,7 @@ namespace NWheels.Core.DataObjects
         #region IKeyMetadata Members
 
         public string Name { get; set; }
-        public KeyKind Kind{ get; set; }
+        public KeyKind Kind { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

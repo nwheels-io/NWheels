@@ -28,17 +28,38 @@ namespace NWheels.Core.DataObjects
 
         #region IPropertyMetadata Members
 
+        public bool HasContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute
+        {
+            return this.ContractAttributes.OfType<TAttribute>().Any();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TAttribute TryGetContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute
+        {
+            return this.ContractAttributes.OfType<TAttribute>().FirstOrDefault();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string Name { get; set; }
         public PropertyKind Kind { get; set; }
         public Type ClrType { get; set; }
         public ISemanticDataType SemanticType { get; set; }
-        public PropertyContractAttribute ContractAttribute { get; set; }
+        public List<PropertyContractAttribute> ContractAttributes { get; set; }
         public System.Reflection.PropertyInfo ContractPropertyInfo { get; set; }
         public System.Reflection.PropertyInfo ImplementationPropertyInfo { get; set; }
         public object DefaultValue { get; set; }
         public string DefaultDisplayName { get; set; }
         public string DefaultDisplayFormat { get; set; }
         public bool DefaultSortAscending { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IReadOnlyList<PropertyContractAttribute> IPropertyMetadata.ContractAttributes
+        {
+            get { return this.ContractAttributes; }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -77,7 +98,7 @@ namespace NWheels.Core.DataObjects
             Kind = visitor.VisitAttribute("Kind", Kind);
             ClrType = visitor.VisitAttribute("ClrType", ClrType);
             SemanticType = visitor.VisitAttribute("SemanticType", SemanticType);
-            ContractAttribute = visitor.VisitAttribute("ContractAttribute", ContractAttribute);
+            ContractAttributes = visitor.VisitAttribute("ContractAttributes", ContractAttributes);
             ContractPropertyInfo = visitor.VisitAttribute("ContractPropertyInfo", ContractPropertyInfo);
             ImplementationPropertyInfo = visitor.VisitAttribute("ImplementationPropertyInfo", ImplementationPropertyInfo);
             DefaultDisplayName = visitor.VisitAttribute("DefaultDisplayName", DefaultDisplayName);

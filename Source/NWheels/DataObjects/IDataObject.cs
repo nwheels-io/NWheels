@@ -1,7 +1,8 @@
 ﻿namespace NWheels.DataObjects
 {
-    public interface IDataTransferObject
+    public interface IDataObject
     {
         ITypeMetadata GetTypeMetadata();
+        IDataObjectKey GetKey();
     }
 }

@@ -26,9 +26,9 @@ namespace NWheels.Core.UnitTests.DataObjects
             public interface IProduct
             {
                 int Id { get; set; }
-                [Required, MaxLength(100)]
+                [PropertyContract.Required, PropertyContract.Validation.MaxLength(100)]
                 string Name { get; set; }
-                [Range(0, 1000000)]
+                [PropertyContract.Validation.Range(0, 1000000)]
                 decimal Price { get; set; }
             }
             [TestDataContract]
@@ -36,9 +36,9 @@ namespace NWheels.Core.UnitTests.DataObjects
             {
                 int Id { get; set; }
                 DateTime PlacedAt { get; set; }
-                [Required, EmailAddress]
+                [PropertyContract.Required, PropertyContract.Semantic.EmailAddress]
                 string CustomerEmail { get; set; }
-                [Required]
+                [PropertyContract.Required]
                 ICollection<IOrderLine> OrderLines { get; }
                 [DefaultValue(OrderStatus.New)]
                 OrderStatus Status { get; set; }
@@ -47,11 +47,11 @@ namespace NWheels.Core.UnitTests.DataObjects
             public interface IOrderLine
             {
                 int Id { get; set; }
-                [Required]
+                [PropertyContract.Required]
                 IOrder Order { get; set; }
-                [Required]
+                [PropertyContract.Required]
                 IProduct Product { get; set; }
-                [Range(1, 1000)]
+                [PropertyContract.Validation.Range(1, 1000)]
                 int Quantity { get; set; }
             }
             public enum OrderStatus

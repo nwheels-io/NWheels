@@ -8,9 +8,10 @@ using NWheels.Entities;
 
 namespace NWheels.Modules.Security
 {
-    public interface IDataAuditJournalEntryEntity : IEntityPartCorrelationId
+    [EntityContract, EntityKeyGenerator.Sequential]
+    public interface IDataAuditJournalEntryEntity : IEntityPartId<long>, IEntityPartCorrelationId
     {
-        [PropertyContract(IsRequired = true)]
+        [PropertyContract.Required]
         IUserAccountEntity Who { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -19,40 +20,42 @@ namespace NWheels.Modules.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract(IsRequired = true)]
+        [PropertyContract.Required, PropertyContract.Validation.MaxLength(100)]
         string ModuleName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [PropertyContract.Validation.MaxLength(100)]
         string ComponentName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [PropertyContract.Validation.MaxLength(100)]
         string OperationName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract(IsRequired = true)]
+        [PropertyContract.Required]
         string AffectedEntityName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract(IsRequired = true)]
+        [PropertyContract.Required]
         string AffectedEntityId { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract(IsRequired = true)]
+        [PropertyContract.Required]
         string[] AffectedPropertyNames { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract(IsRequired = true)]
+        [PropertyContract.Required]
         string[] OldPropertyValues { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract(IsRequired = true)]
+        [PropertyContract.Required]
         string[] NewPropertyValues { get; set; }
     }
 }

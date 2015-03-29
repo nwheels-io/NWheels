@@ -15,7 +15,7 @@ namespace NWheels.Modules.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract(IsRequired = true)]
+        [PropertyContract.Required]
         IUserAccountEntity CreatedBy { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ namespace NWheels.Modules.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract(IsRequired = true)]
+        [PropertyContract.Required]
         IUserAccountEntity ModifiedBy { get; set; }
     }
 

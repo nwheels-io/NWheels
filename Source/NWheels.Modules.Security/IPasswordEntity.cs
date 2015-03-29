@@ -11,12 +11,17 @@ namespace NWheels.Modules.Security
     [EntityContract]
     public interface IPasswordEntity
     {
-        [PropertyContract(IsRequired = true)]
+        [PropertyContract.Required]
         IUserAccountEntity User { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        [PropertyContract(IsRequired = true)]
+
+        [PropertyContract.Required, PropertyContract.WriteOnly, PropertyContract.Security.Sensitive]
+        string ClearText { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Required, PropertyContract.ReadOnly, PropertyContract.Security.Sensitive]
         byte[] Hash { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
