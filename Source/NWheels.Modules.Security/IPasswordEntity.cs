@@ -21,7 +21,7 @@ namespace NWheels.Modules.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Required, PropertyContract.ReadOnly, PropertyContract.Security.Sensitive]
+        [PropertyContract.Required, PropertyContract.SearchOnly, PropertyContract.Security.Sensitive]
         byte[] Hash { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

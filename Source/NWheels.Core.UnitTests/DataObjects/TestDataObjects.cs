@@ -40,7 +40,7 @@ namespace NWheels.Core.UnitTests.DataObjects
                 string CustomerEmail { get; set; }
                 [PropertyContract.Required]
                 ICollection<IOrderLine> OrderLines { get; }
-                [DefaultValue(OrderStatus.New)]
+                [PropertyContract.DefaultValue(OrderStatus.New)]
                 OrderStatus Status { get; set; }
             }
             [TestDataContract]

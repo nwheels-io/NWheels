@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.DataObjects;
 using NWheels.Entities;
 using IR1 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository1;
 using IR2 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository2;
@@ -42,7 +43,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 int Id { get; set; }
                 DateTime PlacedAt { get; set; }
                 ICollection<IOrderLine> OrderLines { get; }
-                [DefaultValue(OrderStatus.New)]
+                [PropertyContract.DefaultValue(OrderStatus.New)]
                 OrderStatus Status { get; set; }
             }
             [EntityContract]
@@ -174,10 +175,10 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             public interface IEntityPartAudit
             {
                 DateTime CreatedAt { get; set; }
-                [Required]
+                [PropertyContract.Required]
                 IUserAccountEntity CreatedBy { get; set; }
                 DateTime ModifiedAt { get; set; }
-                [Required]
+                [PropertyContract.Required]
                 IUserAccountEntity ModifiedBy { get; set; }
             }
             public interface IMyDataRepository : IApplicationDataRepository

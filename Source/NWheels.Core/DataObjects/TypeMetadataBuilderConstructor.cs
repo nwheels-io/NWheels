@@ -108,9 +108,10 @@ namespace NWheels.Core.DataObjects
 
             var thisKey = FindOrAddForeignKey(_thisType, property);
             var relatedType = _cache.FindTypeMetadataAllowIncomplete(property.ClrType);
+            var isOneToOne = property.HasContractAttribute<PropertyContract.Relation.OneToOneAttribute>();
 
             property.Relation = new RelationMetadataBuilder {
-                RelationKind = RelationKind.ManyToOne,
+                RelationKind = isOneToOne ? RelationKind.OneToOne : RelationKind.ManyToOne,
                 ThisPartyKey = thisKey,
                 ThisPartyKind = RelationPartyKind.Dependent,
                 RelatedPartyKind = RelationPartyKind.Principal,
@@ -127,21 +128,19 @@ namespace NWheels.Core.DataObjects
 
             var relatedType = _cache.FindTypeMetadataAllowIncomplete(relatedContract);
             var relatedProperty = relatedType.Properties.FirstOrDefault(p => p.ClrType == _thisType.ContractType);
+            var isManyToMany = property.HasContractAttribute<PropertyContract.Relation.ManyToManyAttribute>();
 
-            if ( relatedProperty != null )
-            {
-                var relatedKey = FindOrAddForeignKey(relatedType, relatedProperty);
+            var relatedKey = (relatedProperty != null ? FindOrAddForeignKey(relatedType, relatedProperty) : null);
 
-                property.Relation = new RelationMetadataBuilder {
-                    RelationKind = RelationKind.OneToMany,
-                    ThisPartyKey = _thisType.PrimaryKey,
-                    ThisPartyKind = RelationPartyKind.Principal,
-                    RelatedPartyKind = RelationPartyKind.Dependent,
-                    RelatedPartyType = relatedType,
-                    RelatedPartyKey = relatedKey
-                };
-            }
-        }
+            property.Relation = new RelationMetadataBuilder {
+                RelationKind = isManyToMany ? RelationKind.ManyToMany : RelationKind.OneToMany,
+                ThisPartyKey = _thisType.PrimaryKey,
+                ThisPartyKind = RelationPartyKind.Principal,
+                RelatedPartyKind = RelationPartyKind.Dependent,
+                RelatedPartyType = relatedType,
+                RelatedPartyKey = relatedKey
+            };
+       }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -153,7 +152,7 @@ namespace NWheels.Core.DataObjects
                 ContractPropertyInfo = declaration
             };
 
-            var defaultValueAttribute = declaration.GetCustomAttribute<DefaultValueAttribute>();
+            var defaultValueAttribute = declaration.GetCustomAttribute<PropertyContract.DefaultValueAttribute>();
             property.DefaultValue = (defaultValueAttribute != null ? defaultValueAttribute.Value : null);
 
             return property;

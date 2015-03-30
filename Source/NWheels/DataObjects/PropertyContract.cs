@@ -19,13 +19,18 @@ namespace NWheels.DataObjects
 
         public class WriteOnlyAttribute : PropertyContractAttribute { }
 
+        public class SearchOnlyAttribute : PropertyContractAttribute { }
+
         public class UniqueAttribute : PropertyContractAttribute { }
 
         public class DefaultValueAttribute : PropertyContractAttribute
         {
             public DefaultValueAttribute(object value)
             {
+                this.Value = value;
             }
+
+            public object Value { get; private set; }
         }
         
         public static class Semantic

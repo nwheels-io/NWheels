@@ -136,8 +136,13 @@ namespace NWheels.Samples.BloggingPlatform.Domain
     [EntityContract]
     public interface ITagEntity : IEntityPartId<int>
     {
+        [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Validation.Length(3, 50)]
         string Name { get; set; }
+
+        [PropertyContract.Required, PropertyContract.Validation.Length(3, 100)]
         string Description { get; set; }
+
+        [PropertyContract.Relation.ManyToMany]
         ICollection<IAbstractContentEntity> RelatedContents { get; }
     }
 }

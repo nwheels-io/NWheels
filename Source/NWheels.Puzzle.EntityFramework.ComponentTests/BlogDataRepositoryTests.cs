@@ -87,7 +87,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test]
+        [Test, Ignore("WIP")]
         public void CanCreateDataRepositoryObject()
         {
             var repoFactory = CreateDataRepositoryFactory();

@@ -69,6 +69,7 @@
     <Compile Include="Conventions\ConfigurationSectionFactory.cs" />
     <Compile Include="Conventions\LoggerObjectFactory.cs" />
     <Compile Include="DataObjects\DataObjectConventions.cs" />
+    <Compile Include="DataObjects\IMetadataConstructor.cs" />
     <Compile Include="DataObjects\MetadataElement.cs" />
     <Compile Include="DataObjects\CollectionAdapter.cs" />
     <Compile Include="DataObjects\KeyMetadataBuilder.cs" />

@@ -11,6 +11,7 @@ using NWheels.Modules.Security.Domain;
 namespace NWheels.Modules.Security
 {
     [EntityContract]
+    [MustHaveMixin(typeof(IEntityPartId<>))]
     public interface IUserAccountEntity
     {
         [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Semantic.DataType(typeof(LoginNameDataType))]

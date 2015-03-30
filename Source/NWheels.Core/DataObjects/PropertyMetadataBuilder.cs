@@ -15,6 +15,13 @@ namespace NWheels.Core.DataObjects
 {
     public class PropertyMetadataBuilder : MetadataElement<IPropertyMetadata>, IPropertyMetadata
     {
+        public PropertyMetadataBuilder()
+        {
+            this.ContractAttributes = new List<PropertyContractAttribute>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region IMetadataElement Members
 
         public override string ReferenceName

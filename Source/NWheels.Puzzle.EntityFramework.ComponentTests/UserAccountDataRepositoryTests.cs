@@ -17,7 +17,7 @@ using IR3 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
-    [TestFixture]
+    [TestFixture, Ignore("WIP")]
     public class UserAccountDataRepositoryTests : DatabaseTestBase
     {
         private Hapil.DynamicModule _dynamicModule;

@@ -6,27 +6,7 @@ using System.Threading.Tasks;
 
 namespace NWheels.DataObjects
 {
-    public abstract class PropertyContractAttribute : Attribute, IMetadataElement
+    public abstract class PropertyContractAttribute : Attribute
     {
-        public virtual void AcceptVisitor(IMetadataElementVisitor visitor)
-        {
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public Type ElementType
-        {
-            get { return typeof(PropertyContractAttribute); }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string ReferenceName
-        {
-            get
-            {
-                return this.GetType().Name;
-            }
-        }
     }
 }
