@@ -12,7 +12,6 @@ namespace NWheels.Core.UnitTests.DataObjects
 {
     public static class TestDataObjects
     {
-
         [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
         public class TestDataContractAttribute : DataObjectContractAttribute
         {

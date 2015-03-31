@@ -49,7 +49,6 @@
     <Compile Include="Apps\BlogApp.cs" />
     <Compile Include="Domain\BlogAuthorizationContext.cs" />
     <Compile Include="Domain\Entities.cs" />
-    <Compile Include="Domain\IAuthorizationContext.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

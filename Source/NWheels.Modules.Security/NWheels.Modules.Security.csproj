@@ -54,10 +54,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuthorizationContextBase.cs" />
     <Compile Include="AuthorizationException.cs" />
+    <Compile Include="Domain\EntityAccessRuleBuilder.cs" />
     <Compile Include="Domain\LoginNameDataType.cs" />
     <Compile Include="Domain\PasswordDataType.cs" />
+    <Compile Include="IEntityAccessControlBuilder.cs" />
+    <Compile Include="IAuthorizationContext.cs" />
     <Compile Include="IDataAuditJournalEntryEntity.cs" />
+    <Compile Include="IEntityAccessRule.cs" />
     <Compile Include="IEntityPartAudit.cs" />
     <Compile Include="IEntityPartEmailAddress.cs" />
     <Compile Include="IEntityPartGlobalRoles.cs" />

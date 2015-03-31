@@ -38,10 +38,10 @@ namespace NWheels.Samples.BloggingPlatform.Domain
     [EntityContract]
     public interface IBlogEntity : IEntityPartId<int>
     {
-        IEntityRepository<IArticleEntity> Articles { get; }
-        IEntityRepository<IPostEntity> Posts { get; }
-        IEntityRepository<ITagEntity> Tags { get; }
-        IEntityRepository<IBlogUserAuthorizationEntity> Authorizations { get; }
+        ICollection<IArticleEntity> Articles { get; }
+        ICollection<IPostEntity> Posts { get; }
+        ICollection<ITagEntity> Tags { get; }
+        ICollection<IBlogUserAuthorizationEntity> Authorizations { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
