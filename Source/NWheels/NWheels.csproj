@@ -65,12 +65,14 @@
     <Compile Include="Configuration\IConfigurationSection.cs" />
     <Compile Include="DataObjects\DataObjectContractAttribute.cs" />
     <Compile Include="Conventions\IAutoObjectFactory.cs" />
+    <Compile Include="DataObjects\DataObjectPartContractAttribute.cs" />
     <Compile Include="DataObjects\IDataObject.cs" />
     <Compile Include="DataObjects\IMetadataElement.cs" />
     <Compile Include="DataObjects\IMetadataElementVisitor.cs" />
     <Compile Include="DataObjects\IPropertyValueValidator.cs" />
     <Compile Include="DataObjects\ISemanticDataType.cs" />
     <Compile Include="DataObjects\ITypeMetadataCache.cs" />
+    <Compile Include="DataObjects\PropertyAccess.cs" />
     <Compile Include="Entities\EntityKeyGenerator.cs" />
     <Compile Include="DataObjects\MixinRegistration.cs" />
     <Compile Include="DataObjects\MustHaveMixinAttribute.cs" />

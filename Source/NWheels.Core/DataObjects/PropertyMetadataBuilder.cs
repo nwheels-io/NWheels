@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
@@ -18,6 +19,17 @@ namespace NWheels.Core.DataObjects
         public PropertyMetadataBuilder()
         {
             this.ContractAttributes = new List<PropertyContractAttribute>();
+            this.Validation = new PropertyValidationMetadataBuilder();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public PropertyMetadataBuilder(PropertyInfo declaration) 
+            : this()
+        {
+            this.Name = declaration.Name;
+            this.ClrType = declaration.PropertyType;
+            this.ContractPropertyInfo = declaration;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -51,8 +63,11 @@ namespace NWheels.Core.DataObjects
 
         public string Name { get; set; }
         public PropertyKind Kind { get; set; }
+        public bool IsKey { get; set; }
         public Type ClrType { get; set; }
         public ISemanticDataType SemanticType { get; set; }
+        public PropertyAccess Access { get; set; }
+        public bool IsSensitive { get; set; }
         public List<PropertyContractAttribute> ContractAttributes { get; set; }
         public System.Reflection.PropertyInfo ContractPropertyInfo { get; set; }
         public System.Reflection.PropertyInfo ImplementationPropertyInfo { get; set; }
@@ -103,8 +118,10 @@ namespace NWheels.Core.DataObjects
         {
             Name = visitor.VisitAttribute("Name", Name);
             Kind = visitor.VisitAttribute("Kind", Kind);
+            IsKey = visitor.VisitAttribute("IsKey", IsKey);
             ClrType = visitor.VisitAttribute("ClrType", ClrType);
             SemanticType = visitor.VisitAttribute("SemanticType", SemanticType);
+            Access = visitor.VisitAttribute("Access", Access);
             ContractAttributes = visitor.VisitAttribute("ContractAttributes", ContractAttributes);
             ContractPropertyInfo = visitor.VisitAttribute("ContractPropertyInfo", ContractPropertyInfo);
             ImplementationPropertyInfo = visitor.VisitAttribute("ImplementationPropertyInfo", ImplementationPropertyInfo);

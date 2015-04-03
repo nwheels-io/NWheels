@@ -162,7 +162,7 @@ namespace NWheels.Core.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void EnsureRelationalMapping(IRelationalMappingConvention convention)
+        public void EnsureRelationalMapping(MetadataConventionSet conventions)
         {
             if ( this.RelationalMapping == null )
             {
@@ -170,12 +170,12 @@ namespace NWheels.Core.DataObjects
                 {
                     if ( this.RelationalMapping == null )
                     {
-                        convention.ApplyToType(this);
+                        conventions.ApplyRelationalMappingConventions(this);
                     }
 
                     foreach ( var property in this.Properties.Where(p => p.Kind == PropertyKind.Relation) )
                     {
-                        property.Relation.RelatedPartyType.EnsureRelationalMapping(convention);
+                        property.Relation.RelatedPartyType.EnsureRelationalMapping(conventions);
                     }
                 }
             }
@@ -275,5 +275,11 @@ namespace NWheels.Core.DataObjects
             _propertyByName = this.Properties.ToDictionary(p => p.Name);
             _propertyByDeclaration = this.Properties.ToDictionary(p => p.ContractPropertyInfo);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal bool MetadataConventionsPreviewed { get; set; }
+        internal bool MetadataConventionsApplied { get; set; }
+        internal bool MetadataConventionsFinalized { get; set; }
     }
 }

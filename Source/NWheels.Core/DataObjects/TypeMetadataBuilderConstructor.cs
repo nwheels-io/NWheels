@@ -14,7 +14,7 @@ namespace NWheels.Core.DataObjects
 {
     internal class TypeMetadataBuilderConstructor
     {
-        private readonly DataObjectConventions _conventions;
+        private readonly MetadataConventionSet _conventions;
         private Type _primaryContract;
         private Type[] _mixinContracts;
         private HashSet<PropertyInfo> _allProperties;
@@ -23,7 +23,7 @@ namespace NWheels.Core.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeMetadataBuilderConstructor(DataObjectConventions conventions)
+        public TypeMetadataBuilderConstructor(MetadataConventionSet conventions)
         {
             _conventions = conventions;
         }
@@ -43,11 +43,18 @@ namespace NWheels.Core.DataObjects
             builder.ContractType = primaryContract;
             builder.MixinContractTypes.AddRange(mixinContracts);
 
-            CreateProperties();
-            FindPrimaryKey();
-            FindRelations();
+            ConstructProperties();
 
             builder.EndBuild();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ConstructProperties()
+        {
+            CreateProperties();
+            ApplyConventions();
+            ValidateProperties();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -56,106 +63,22 @@ namespace NWheels.Core.DataObjects
         {
             foreach ( var propertyInfo in _allProperties )
             {
-                _thisType.Properties.Add(CreatePropertyMetadata(propertyInfo));
+                _thisType.Properties.Add(new PropertyMetadataBuilder(propertyInfo));
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void FindPrimaryKey()
+        private void ApplyConventions()
         {
-            foreach ( var property in _thisType.Properties.Where(p => _conventions.IsKeyProperty(p)) )
-            {
-                if ( _thisType.PrimaryKey == null )
-                {
-                    _thisType.PrimaryKey = new KeyMetadataBuilder {
-                        Kind = KeyKind.Primary,
-                        Name = "PK_" + _thisType.Name
-                    };
-
-                    _thisType.AllKeys.Add(_thisType.PrimaryKey);
-                }
-
-                _thisType.PrimaryKey.Properties.Add(property);
-            }
+            _conventions.ApplyTypeConventions(_thisType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void FindRelations()
+        private void ValidateProperties()
         {
-            foreach ( var property in _thisType.Properties )
-            {
-                if ( _conventions.IsToOneRelationProperty(property) )
-                {
-                    AddToOneRelation(property);
-                }
-
-                Type relatedContract;
-
-                if ( _conventions.IsToManyRelationProperty(property, out relatedContract) )
-                {
-                    AddToManyRelation(property, relatedContract);
-                }
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        private void AddToOneRelation(PropertyMetadataBuilder property)
-        {
-            property.Kind = PropertyKind.Relation;
-
-            var thisKey = FindOrAddForeignKey(_thisType, property);
-            var relatedType = _cache.FindTypeMetadataAllowIncomplete(property.ClrType);
-            var isOneToOne = property.HasContractAttribute<PropertyContract.Relation.OneToOneAttribute>();
-
-            property.Relation = new RelationMetadataBuilder {
-                RelationKind = isOneToOne ? RelationKind.OneToOne : RelationKind.ManyToOne,
-                ThisPartyKey = thisKey,
-                ThisPartyKind = RelationPartyKind.Dependent,
-                RelatedPartyKind = RelationPartyKind.Principal,
-                RelatedPartyType = relatedType,
-                RelatedPartyKey = relatedType.PrimaryKey
-            };
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void AddToManyRelation(PropertyMetadataBuilder property, Type relatedContract)
-        {
-            property.Kind = PropertyKind.Relation;
-
-            var relatedType = _cache.FindTypeMetadataAllowIncomplete(relatedContract);
-            var relatedProperty = relatedType.Properties.FirstOrDefault(p => p.ClrType == _thisType.ContractType);
-            var isManyToMany = property.HasContractAttribute<PropertyContract.Relation.ManyToManyAttribute>();
-
-            var relatedKey = (relatedProperty != null ? FindOrAddForeignKey(relatedType, relatedProperty) : null);
-
-            property.Relation = new RelationMetadataBuilder {
-                RelationKind = isManyToMany ? RelationKind.ManyToMany : RelationKind.OneToMany,
-                ThisPartyKey = _thisType.PrimaryKey,
-                ThisPartyKind = RelationPartyKind.Principal,
-                RelatedPartyKind = RelationPartyKind.Dependent,
-                RelatedPartyType = relatedType,
-                RelatedPartyKey = relatedKey
-            };
-       }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private PropertyMetadataBuilder CreatePropertyMetadata(PropertyInfo declaration)
-        {
-            var property = new PropertyMetadataBuilder {
-                Name = declaration.Name,
-                ClrType = declaration.PropertyType,
-                ContractPropertyInfo = declaration
-            };
-
-            var defaultValueAttribute = declaration.GetCustomAttribute<PropertyContract.DefaultValueAttribute>();
-            property.DefaultValue = (defaultValueAttribute != null ? defaultValueAttribute.Value : null);
-
-            return property;
+            //TODO
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -172,28 +95,6 @@ namespace NWheels.Core.DataObjects
             }
 
             return result;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static KeyMetadataBuilder FindOrAddForeignKey(TypeMetadataBuilder type, PropertyMetadataBuilder relationProperty)
-        {
-            var existingKey = type.AllKeys.FirstOrDefault(k => k.Properties.SingleOrDefault() == relationProperty);
-
-            if ( existingKey != null )
-            {
-                return existingKey;
-            }
-
-            var newKey = new KeyMetadataBuilder {
-                Kind = KeyKind.Foreign,
-                Name = "FK_" + relationProperty.Name
-            };
-
-            newKey.Properties.Add(relationProperty);
-            type.AllKeys.Add(newKey);
-
-            return newKey;
         }
     }
 }

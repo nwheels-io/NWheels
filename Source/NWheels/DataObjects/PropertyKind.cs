@@ -2,6 +2,7 @@
 {
     public enum PropertyKind
     {
+        Unknown,
         Scalar,
         Part,
         Relation

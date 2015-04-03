@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CoreUnitTestBase.cs" />
     <Compile Include="DataObjects\Jsonlike.cs" />
     <Compile Include="TestFramework.cs" />
     <Compile Include="TestThreadLogAppender.cs" />

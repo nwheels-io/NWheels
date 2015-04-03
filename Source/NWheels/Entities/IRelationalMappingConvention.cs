@@ -9,6 +9,8 @@ namespace NWheels.Entities
 {
     public interface IRelationalMappingConvention
     {
-        void ApplyToType(ITypeMetadata type);
+        void Preview(ITypeMetadata type);
+        void Apply(ITypeMetadata type);
+        void Finalize(ITypeMetadata type);
     }
 }

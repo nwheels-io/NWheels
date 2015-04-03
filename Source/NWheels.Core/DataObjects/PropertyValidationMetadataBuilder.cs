@@ -32,11 +32,14 @@ namespace NWheels.Core.DataObjects
         #region IPropertyValidationMetadata Members
 
         public bool IsRequired { get; set; }
-        public bool IsReadOnly { get; set; }
+        public bool IsUnique { get; set; }
+        public bool IsEmptyAllowed { get; set; }
         public int? MinLength { get; set; }
         public int? MaxLength { get; set; }
-        public decimal? MinValue { get; set; }
-        public decimal? MaxValue { get; set; }
+        public object MinValue { get; set; }
+        public object MaxValue { get; set; }
+        public bool MinValueExclusive { get; set; }
+        public bool MaxValueExclusive { get; set; }
         public string RegularExpression { get; set; }
 
         #endregion
@@ -45,7 +48,9 @@ namespace NWheels.Core.DataObjects
 
         public override void AcceptVisitor(IMetadataElementVisitor visitor)
         {
-            IsReadOnly = visitor.VisitAttribute("IsEditable", IsReadOnly);
+            IsRequired = visitor.VisitAttribute("IsRequired", IsRequired);
+            IsUnique = visitor.VisitAttribute("IsUnique", IsUnique);
+            IsEmptyAllowed = visitor.VisitAttribute("IsEmptyAllowed", IsEmptyAllowed);
             MinLength = visitor.VisitAttribute("MinLength", MinLength);
             MaxLength = visitor.VisitAttribute("MaxLength", MaxLength);
             MinValue = visitor.VisitAttribute("MinValue", MinValue);

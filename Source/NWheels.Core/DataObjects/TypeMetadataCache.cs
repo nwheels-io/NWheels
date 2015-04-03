@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
@@ -11,29 +12,28 @@ namespace NWheels.Core.DataObjects
 {
     public class TypeMetadataCache : ITypeMetadataCache
     {
-        private readonly DataObjectConventions _dataObjectConventions;
-        private readonly IRelationalMappingConvention _relationalMappingConvention;
+        private readonly MetadataConventionSet _conventions;
         private readonly Dictionary<Type, MixinRegistration[]> _mixinsByPrimaryContract;
         private readonly ConcurrentDictionary<Type, TypeMetadataBuilder> _metadataByContractType = new ConcurrentDictionary<Type, TypeMetadataBuilder>();
+        private readonly ConcurrentDictionary<Type, ISemanticDataType> _semanticDataTypes;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TypeMetadataCache(
-            DataObjectConventions dataObjectConventions,
-            IRelationalMappingConvention relationalMappingConvention,
+            MetadataConventionSet conventions,
             IEnumerable<MixinRegistration> mixinRegistrations)
         {
-            _dataObjectConventions = dataObjectConventions;
-            _relationalMappingConvention = relationalMappingConvention;
+            _conventions = conventions;
+            _conventions.InjectCache(this);
+
+            _semanticDataTypes = new ConcurrentDictionary<Type, ISemanticDataType>();
             _mixinsByPrimaryContract = mixinRegistrations.GroupBy(r => r.TargetContract).ToDictionary(g => g.Key, g => g.ToArray());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeMetadataCache(
-            DataObjectConventions dataObjectConventions, 
-            IRelationalMappingConvention relationalMappingConvention)
-            : this(dataObjectConventions, relationalMappingConvention, mixinRegistrations: new MixinRegistration[0])
+        public TypeMetadataCache(MetadataConventionSet conventions)
+            : this(conventions, mixinRegistrations: new MixinRegistration[0])
         {
         }
 
@@ -49,7 +49,21 @@ namespace NWheels.Core.DataObjects
         public void EnsureRelationalMapping(ITypeMetadata type)
         {
             var metadata = (TypeMetadataBuilder)type;
-            metadata.EnsureRelationalMapping(_relationalMappingConvention);
+            metadata.EnsureRelationalMapping(_conventions);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ISemanticDataType GetSemanticTypeInstance(Type semanticDataType)
+        {
+            return _semanticDataTypes.GetOrAdd(semanticDataType, key => (ISemanticDataType)Activator.CreateInstance(key));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MetadataConventionSet Conventions
+        {
+            get { return _conventions; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -104,7 +118,7 @@ namespace NWheels.Core.DataObjects
                 var builder = new TypeMetadataBuilder();
                 entriesBeingBuilt.Add(primaryContract, builder);
 
-                var constructor = new TypeMetadataBuilderConstructor(new DataObjectConventions());
+                var constructor = new TypeMetadataBuilderConstructor(_conventions);
                 constructor.ConstructMetadata(primaryContract, mixinContracts, builder, cache: this);
 
                 return builder;

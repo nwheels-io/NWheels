@@ -67,6 +67,7 @@
     <Compile Include="Configuration\ConfigurationSectionConventionTests.cs" />
     <Compile Include="Configuration\XmlConfigurationLoaderTest.cs" />
     <Compile Include="DataObjects\TestDataObjects.cs" />
+    <Compile Include="DataObjects\TypeMetadataBuilderConstructorTests.cs" />
     <Compile Include="DataObjects\TypeMetadataCacheTests.cs" />
     <Compile Include="Hosting\AutofacRegistrationTests.cs" />
     <Compile Include="Logging\ApplicationEventLoggerConventionTests.cs" />

@@ -1,16 +1,25 @@
 ﻿using System;
 using Autofac;
 using NUnit.Framework;
+using NWheels.DataObjects;
+using NWheels.Core.DataObjects;
+using NWheels.Core.DataObjects.Conventions;
+using NWheels.Core.Entities;
+using NWheels.Entities;
 
 namespace NWheels.Testing
 {
     [TestFixture]
     public abstract class UnitTestBase
     {
+        private TestFramework _framework;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [SetUp]
         public void BaseSetUp()
         {
-            s_Framework = new TestFramework();
+            _framework = new TestFramework();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -18,7 +27,7 @@ namespace NWheels.Testing
         [TearDown]
         public void BaseTearDown()
         {
-            s_Framework = null;
+            _framework = null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -38,18 +47,13 @@ namespace NWheels.Testing
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
+            
         protected TestFramework Framework
         {
             get
             {
-                return s_Framework;
+                return _framework;
             }
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [ThreadStatic]
-        private static TestFramework s_Framework;
     }
 }

@@ -48,10 +48,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var metadataCache = new TypeMetadataCache(
-                new DataObjectConventions(), 
-                new PascalCaseRelationalMappingConvention(usePluralTableNames: true),
-                GetRepositoryMixinsRegistrations());
+            var metadataCache = base.CreateMetadataCache(GetRepositoryMixinsRegistrations());
 
             //-- Act
 
@@ -69,11 +66,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var metadataCache = new TypeMetadataCache(
-                new DataObjectConventions(),
-                new PascalCaseRelationalMappingConvention(usePluralTableNames: true),
-                GetRepositoryMixinsRegistrations());
-
+            var metadataCache = base.CreateMetadataCache(GetRepositoryMixinsRegistrations());
             var entityObjectFactory = new EfEntityObjectFactory(_dynamicModule, metadataCache);
 
             //-- Act
@@ -106,13 +99,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         private EfDataRepositoryFactory CreateDataRepositoryFactory()
         {
-            var mixinRegistrations = GetRepositoryMixinsRegistrations();
-
-            var metadataCache = new TypeMetadataCache(
-                new DataObjectConventions(), 
-                new PascalCaseRelationalMappingConvention(usePluralTableNames: true), 
-                mixinRegistrations);
-
+            var metadataCache = base.CreateMetadataCache(GetRepositoryMixinsRegistrations());
             var entityFactory = new EfEntityObjectFactory(_dynamicModule, metadataCache);
             var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, ResolveAuto<IDatabaseConfig>());
 

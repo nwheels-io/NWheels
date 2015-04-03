@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 namespace NWheels.DataObjects
 {
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
-    public abstract class DataObjectContractAttribute : Attribute
+    public abstract class DataObjectPartContractAttribute : Attribute
     {
-        public static bool IsDataObjectContract(Type type)
+        public static bool IsDataObjectPartContract(Type type)
         {
-            return (type.IsInterface && type.GetCustomAttribute<DataObjectContractAttribute>() != null);
+            return (type.IsInterface && type.GetCustomAttribute<DataObjectPartContractAttribute>() != null);
         }
     }
 }

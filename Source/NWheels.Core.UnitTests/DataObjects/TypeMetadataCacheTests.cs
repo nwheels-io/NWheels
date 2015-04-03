@@ -8,6 +8,8 @@ using NWheels.Core.DataObjects;
 using NWheels.Core.Entities;
 using NWheels.DataObjects;
 using NWheels.Testing.DataObjects;
+using NWheels.Core.DataObjects.Conventions;
+using NWheels.Entities;
 
 namespace NWheels.Core.UnitTests.DataObjects
 {
@@ -19,7 +21,7 @@ namespace NWheels.Core.UnitTests.DataObjects
         {
             //-- Arrange
 
-            var cache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
+            var cache = new TypeMetadataCache(CreateMetadataConventionSet());
 
             //-- Act
 
@@ -29,11 +31,11 @@ namespace NWheels.Core.UnitTests.DataObjects
 
             Assert.That(
                 product.Properties.Select(p => p.Name).ToArray(), 
-                Is.EqualTo(new[] { "Id", "Name", "Price" }));
+                Is.EqualTo(new[] { "Id", "Name", "Price", "Description" }));
             
             Assert.That(
                 product.Properties.Select(p => p.ClrType.Name).ToArray(), 
-                Is.EqualTo(new[] { "Int32", "String", "Decimal" }));
+                Is.EqualTo(new[] { "Int32", "String", "Decimal", "String" }));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -43,7 +45,7 @@ namespace NWheels.Core.UnitTests.DataObjects
         {
             //-- Arrange
 
-            var cache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
+            var cache = new TypeMetadataCache(CreateMetadataConventionSet());
 
             //-- Act
 
@@ -62,7 +64,7 @@ namespace NWheels.Core.UnitTests.DataObjects
         {
             //-- Arrange
 
-            var cache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
+            var cache = new TypeMetadataCache(CreateMetadataConventionSet());
 
             //-- Act
 
@@ -80,7 +82,7 @@ namespace NWheels.Core.UnitTests.DataObjects
         {
             //-- Arrange
 
-            var cache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
+            var cache = new TypeMetadataCache(CreateMetadataConventionSet());
 
             //-- Act
 
@@ -91,7 +93,7 @@ namespace NWheels.Core.UnitTests.DataObjects
 
             var orderToOrderLine = orderMetadata.Properties.Single(p => p.Name == "OrderLines").Relation;
             var orderLineToOrder = orderLineMetadata.Properties.Single(p => p.Name == "Order").Relation;
-            var orderLineToProdyct = orderLineMetadata.Properties.Single(p => p.Name == "Product").Relation;
+            var orderLineToProduct = orderLineMetadata.Properties.Single(p => p.Name == "Product").Relation;
 
             Assert.That(Jsonlike.Stringify(orderToOrderLine), Is.EqualTo(
                 "{relationKind:OneToMany,thisPartyKind:Principal,thisPartyKey:PK_Order,relatedPartyType:OrderLine,relatedPartyKind:Dependent,relatedPartyKey:FK_Order}"
@@ -101,7 +103,7 @@ namespace NWheels.Core.UnitTests.DataObjects
                 "{relationKind:ManyToOne,thisPartyKind:Dependent,thisPartyKey:FK_Order,relatedPartyType:Order,relatedPartyKind:Principal,relatedPartyKey:PK_Order}"
             ));
 
-            Assert.That(Jsonlike.Stringify(orderLineToProdyct), Is.EqualTo(
+            Assert.That(Jsonlike.Stringify(orderLineToProduct), Is.EqualTo(
                 "{relationKind:ManyToOne,thisPartyKind:Dependent,thisPartyKey:FK_Product,relatedPartyType:Product,relatedPartyKind:Principal,relatedPartyKey:PK_Product}"
             ));
 
@@ -118,8 +120,7 @@ namespace NWheels.Core.UnitTests.DataObjects
             //-- Arrange
 
             var cache = new TypeMetadataCache(
-                new DataObjectConventions(), 
-                new PascalCaseRelationalMappingConvention(usePluralTableNames: true),
+                CreateMetadataConventionSet(), 
                 new[] {
                     new MixinRegistration(typeof(TestDataObjects.Repository2.IPrimaryContract), typeof(TestDataObjects.Repository2.IFirstMixinContract)),
                     new MixinRegistration(typeof(TestDataObjects.Repository2.IPrimaryContract), typeof(TestDataObjects.Repository2.ISecondMixinContract))
@@ -142,6 +143,15 @@ namespace NWheels.Core.UnitTests.DataObjects
             Assert.That(propertyNames, Is.EquivalentTo(new[] {
                 "PrimaryProperty", "FirstMixinProperty", "SecondMixinPropertyA", "SecondMixinPropertyB"
             }));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private MetadataConventionSet CreateMetadataConventionSet()
+        {
+            return new MetadataConventionSet(
+                new IMetadataConvention[] { new ContractMetadataConvention(), new AttributeMetadataConvention(), new RelationMetadataConvention()  }, 
+                new IRelationalMappingConvention[] { new PascalCaseRelationalMappingConvention(usePluralTableNames: true)  });
         }
     }
 }

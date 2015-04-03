@@ -15,6 +15,7 @@ using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.Configuration;
 using NWheels.Conventions;
+using NWheels.DataObjects;
 
 namespace NWheels.Testing
 {

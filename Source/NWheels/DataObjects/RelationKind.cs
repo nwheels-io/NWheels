@@ -2,6 +2,7 @@
 {
     public enum RelationKind
     {
+        None,
         OneToOne,
         OneToMany,
         ManyToOne,

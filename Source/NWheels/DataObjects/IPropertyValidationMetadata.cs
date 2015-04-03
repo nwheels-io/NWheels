@@ -5,11 +5,14 @@ namespace NWheels.DataObjects
     public interface IPropertyValidationMetadata : IMetadataElement
     {
         bool IsRequired { get; }
-        bool IsReadOnly { get; }
+        bool IsUnique { get; }
+        bool IsEmptyAllowed { get; }
         int? MinLength { get; }
         int? MaxLength { get; }
-        decimal? MinValue { get; }
-        decimal? MaxValue { get; }
+        object MinValue { get; }
+        object MaxValue { get; }
+        bool MinValueExclusive { get; }
+        bool MaxValueExclusive { get; }
         string RegularExpression { get; }
     }
 }

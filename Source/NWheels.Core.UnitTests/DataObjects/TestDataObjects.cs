@@ -25,34 +25,53 @@ namespace NWheels.Core.UnitTests.DataObjects
             public interface IProduct
             {
                 int Id { get; set; }
+                
                 [PropertyContract.Required, PropertyContract.Validation.MaxLength(100)]
                 string Name { get; set; }
+                
                 [PropertyContract.Validation.Range(0, 1000000)]
                 decimal Price { get; set; }
+
+                [PropertyContract.Validation.MaxLength(1000)]
+                string Description { get; set; }
             }
+            
             [TestDataContract]
             public interface IOrder
             {
-                int Id { get; set; }
+                [PropertyContract.Key]
+                int OrderNumber { get; set; }
+
                 DateTime PlacedAt { get; set; }
+                
                 [PropertyContract.Required, PropertyContract.Semantic.EmailAddress]
                 string CustomerEmail { get; set; }
+                
                 [PropertyContract.Required]
                 ICollection<IOrderLine> OrderLines { get; }
+                
                 [PropertyContract.DefaultValue(OrderStatus.New)]
                 OrderStatus Status { get; set; }
+
+                [PropertyContract.Validation.MaxLength(1000)]
+                string SpecialRequest { get; set; }
             }
+
             [TestDataContract]
             public interface IOrderLine
             {
                 int Id { get; set; }
+                
                 [PropertyContract.Required]
                 IOrder Order { get; set; }
+                
                 [PropertyContract.Required]
                 IProduct Product { get; set; }
+                
                 [PropertyContract.Validation.Range(1, 1000)]
                 int Quantity { get; set; }
             }
+
             public enum OrderStatus
             {
                 New = 1,

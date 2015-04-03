@@ -10,6 +10,7 @@ using NWheels.Core.DataObjects;
 using NWheels.Core.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.Impl;
+using NWheels.Testing;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
@@ -294,7 +295,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         private EfEntityObjectFactory CreateEntityObjectFactory()
         {
-            var metadataCache = new TypeMetadataCache(new DataObjectConventions(), new PascalCaseRelationalMappingConvention(usePluralTableNames: true));
+            var metadataCache = CoreUnitTestBase.CreateMetadataCacheWithDefaultConventions();
             return new EfEntityObjectFactory(base.Module, metadataCache);
         }
 

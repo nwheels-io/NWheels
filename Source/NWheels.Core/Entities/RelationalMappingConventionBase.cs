@@ -19,12 +19,38 @@ namespace NWheels.Core.Entities
 
         #region IRelationalMappingConvention Members
 
-        void IRelationalMappingConvention.ApplyToType(ITypeMetadata type)
+        void IRelationalMappingConvention.Preview(ITypeMetadata type)
+        {
+            PreviewType((TypeMetadataBuilder)type);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IRelationalMappingConvention.Apply(ITypeMetadata type)
         {
             ApplyToType((TypeMetadataBuilder)type);
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IRelationalMappingConvention.Finalize(ITypeMetadata type)
+        {
+            FinalizeType((TypeMetadataBuilder)type);
+        }
+
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void PreviewType(TypeMetadataBuilder type)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void FinalizeType(TypeMetadataBuilder type)
+        {
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

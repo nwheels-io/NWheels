@@ -68,8 +68,11 @@
     <Compile Include="Configuration\IInternalConfigurationObject.cs" />
     <Compile Include="Conventions\ConfigurationSectionFactory.cs" />
     <Compile Include="Conventions\LoggerObjectFactory.cs" />
-    <Compile Include="DataObjects\DataObjectConventions.cs" />
-    <Compile Include="DataObjects\IMetadataConstructor.cs" />
+    <Compile Include="DataObjects\Conventions\RelationMetadataConvention.cs" />
+    <Compile Include="DataObjects\MetadataConventionSet.cs" />
+    <Compile Include="DataObjects\Conventions\ContractMetadataConvention.cs" />
+    <Compile Include="DataObjects\Conventions\AttributeMetadataConvention.cs" />
+    <Compile Include="DataObjects\Conventions\IMetadataConvention.cs" />
     <Compile Include="DataObjects\MetadataElement.cs" />
     <Compile Include="DataObjects\CollectionAdapter.cs" />
     <Compile Include="DataObjects\KeyMetadataBuilder.cs" />
