@@ -59,9 +59,11 @@
     <Compile Include="Concurrency\IResourceAccessHolderInfo.cs" />
     <Compile Include="Concurrency\ResourceAccessType.cs" />
     <Compile Include="Concurrency\ResourceLockMode.cs" />
+    <Compile Include="Configuration\ConfigurationElementAttribute.cs" />
     <Compile Include="Configuration\ConfigurationSectionAttribute.cs" />
     <Compile Include="Configuration\ConfigSectionRegistration.cs" />
     <Compile Include="Configuration\IConfigurationObject.cs" />
+    <Compile Include="Configuration\IConfigurationElement.cs" />
     <Compile Include="Configuration\IConfigurationSection.cs" />
     <Compile Include="DataObjects\DataObjectContractAttribute.cs" />
     <Compile Include="Conventions\IAutoObjectFactory.cs" />
@@ -120,6 +122,7 @@
     <Compile Include="Extensions\MemberInfoExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Extensions\ValueTypeExtensions.cs" />
     <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="Hosting\ILifecycleEventListener.cs" />
     <Compile Include="Hosting\INodeConfiguration.cs" />

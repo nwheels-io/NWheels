@@ -10,15 +10,18 @@ using NWheels.DataObjects;
 namespace NWheels.Configuration
 {
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
-    public class ConfigurationSectionAttribute : DataObjectContractAttribute
+    public class ConfigurationSectionAttribute : ConfigurationElementAttribute
     {
-        public string XmlName { get; set; }
+        public static new ConfigurationSectionAttribute From(Type interfaceType)
+        {
+            return interfaceType.GetCustomAttribute<ConfigurationSectionAttribute>();
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static ConfigurationSectionAttribute From(Type interfaceType)
+        public static bool IsConfigSection(Type type)
         {
-            return interfaceType.GetCustomAttribute<ConfigurationSectionAttribute>();
+            return (type.IsInterface && type.GetCustomAttribute<ConfigurationSectionAttribute>() != null);
         }
     }
 }

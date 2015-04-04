@@ -136,6 +136,8 @@ namespace NWheels.Core.DataObjects.Conventions
                 prop.Validation.IsUnique = true);
             AddPropertyAttribute<PropertyContract.DefaultValueAttribute>((attr, prop) => 
                 prop.DefaultValue = attr.Value);
+            AddPropertyAttribute<System.ComponentModel.DefaultValueAttribute>((attr, prop) =>
+                prop.DefaultValue = attr.Value);
             AddPropertyAttribute<PropertyContract.Semantic.DataTypeAttribute>((attr, prop) => 
                 prop.SemanticType = _cache.GetSemanticTypeInstance(attr.Type));
             AddPropertyAttribute<PropertyContract.Validation.FutureAttribute>((attr, prop) => 

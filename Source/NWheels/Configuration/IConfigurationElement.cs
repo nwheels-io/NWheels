@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace NWheels.Configuration
 {
-    public interface IConfigurationSection : IConfigurationElement
+    public interface IConfigurationElement
     {
+        IConfigurationObject AsConfigurationObject();
     }
 }

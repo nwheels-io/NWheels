@@ -9,7 +9,11 @@ using NWheels.Concurrency;
 using NWheels.Core.Concurrency;
 using NWheels.Core.Configuration;
 using NWheels.Core.Conventions;
+using NWheels.Core.DataObjects;
+using NWheels.Core.DataObjects.Conventions;
+using NWheels.Core.Entities;
 using NWheels.Core.Logging;
+using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Logging;
@@ -25,7 +29,8 @@ namespace NWheels.Testing
         private readonly DynamicModule _dynamicModule;
         private readonly TestThreadLogAppender _logAppender;
         private readonly LoggerObjectFactory _loggerFactory;
-        private readonly ConfigurationSectionFactory _configurationFactory;
+        private readonly ConfigurationObjectFactory _configurationFactory;
+        private readonly TypeMetadataCache _metadataCache;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -49,12 +54,13 @@ namespace NWheels.Testing
                 EnvironmentType = "TEST-ENV-TYPE"
             };
 
+            _metadataCache = CreateMetadataCacheWithDefaultConventions();
             _dynamicModule = dynamicModule;
             _logAppender = new TestThreadLogAppender(this);
             _loggerFactory = new LoggerObjectFactory(_dynamicModule, _logAppender);
 
             _components = BuildComponentContainer();
-            _configurationFactory = new ConfigurationSectionFactory(_components, _dynamicModule);
+            _configurationFactory = new ConfigurationObjectFactory(_components, _dynamicModule, _metadataCache);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -210,6 +216,13 @@ namespace NWheels.Testing
         public BootConfiguration NodeConfiguration { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ITypeMetadataCache MetadataCache
+        {
+            get { return _metadataCache; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         private IContainer BuildComponentContainer()
         {
@@ -227,5 +240,16 @@ namespace NWheels.Testing
         private static readonly DynamicModule s_DefaultDynamicModule = new DynamicModule(
             simpleName: "UnitTestDynamicTypes." + Guid.NewGuid().ToString("N"),
             allowSave: false);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static TypeMetadataCache CreateMetadataCacheWithDefaultConventions(params MixinRegistration[] mixinRegistrations)
+        {
+            var conventions = new MetadataConventionSet(
+                new IMetadataConvention[] { new ContractMetadataConvention(), new AttributeMetadataConvention(), new RelationMetadataConvention() },
+                new IRelationalMappingConvention[] { new PascalCaseRelationalMappingConvention(usePluralTableNames: true) });
+
+            return new TypeMetadataCache(conventions, mixinRegistrations);
+        }
     }
 }

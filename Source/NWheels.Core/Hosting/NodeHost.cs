@@ -200,7 +200,7 @@ namespace NWheels.Core.Hosting
             builder.RegisterType<ThreadLogAppender>().As<IThreadLogAppender>().SingleInstance();
             builder.RegisterType<RealFramework>().As<IFramework>().WithParameter(new TypedParameter(typeof(BootConfiguration), _bootConfig)).SingleInstance();
             builder.RegisterType<LoggerObjectFactory>().As<IAutoObjectFactory>().SingleInstance();
-            builder.RegisterType<ConfigurationSectionFactory>().As<IAutoObjectFactory>().SingleInstance();
+            builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<XmlConfigurationLoader>().SingleInstance().InstancePerLifetimeScope();
             builder.RegisterAdapter<IConfigSectionRegistration, IConfigurationSection>((ctx, reg) => reg.ResolveFromContainer(ctx)).SingleInstance();
             builder.RegisterAdapter<RelationalMappingConventionDefault, IRelationalMappingConvention>(RelationalMappingConventionBase.FromDefault).SingleInstance();
