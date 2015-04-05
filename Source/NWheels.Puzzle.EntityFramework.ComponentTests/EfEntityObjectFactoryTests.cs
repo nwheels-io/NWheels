@@ -295,7 +295,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         private EfEntityObjectFactory CreateEntityObjectFactory()
         {
-            var metadataCache = CoreUnitTestBase.CreateMetadataCacheWithDefaultConventions();
+            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions();
             return new EfEntityObjectFactory(base.Module, metadataCache);
         }
 

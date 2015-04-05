@@ -124,6 +124,9 @@ namespace NWheels.Core.DataObjects.Conventions
                 prop.Validation.IsRequired = true;
                 prop.Validation.IsEmptyAllowed = attr.AllowEmpty;
             });
+            AddPropertyAttribute<System.ComponentModel.DataAnnotations.RequiredAttribute>((attr, prop) => {
+                prop.Validation.IsRequired = true;
+            });
             AddPropertyAttribute<PropertyContract.ReadOnlyAttribute>((attr, prop) => 
                 prop.Access = PropertyAccess.ReadOnly);
             AddPropertyAttribute<PropertyContract.WriteOnlyAttribute>((attr, prop) => 

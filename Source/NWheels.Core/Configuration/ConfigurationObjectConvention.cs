@@ -139,9 +139,16 @@ namespace NWheels.Core.Configuration
                 {
                     using ( TT.CreateScope<TT.TContract, TT.TImpl>(elementContractType, elementImplementationType) )
                     {
-                        cw.OwnerClass.GetPropertyBackingField(property)
-                            .AsOperand<TT.TProperty>()
-                            .Assign(cw.New<CollectionAdapter<TT.TImpl, TT.TContract>>(cw.New<List<TT.TImpl>>()).CastTo<TT.TProperty>());
+                        var backingFieldOperand = cw.OwnerClass.GetPropertyBackingField(property).AsOperand<TT.TProperty>();
+
+                        if ( IsNamedElementCollectionProperty(property) )
+                        {
+                            backingFieldOperand.Assign(cw.New<NamedElementCollectionAdapter<TT.TImpl, TT.TContract>>(cw.New<List<TT.TImpl>>()).CastTo<TT.TProperty>());
+                        }
+                        else
+                        {
+                            backingFieldOperand.Assign(cw.New<CollectionAdapter<TT.TImpl, TT.TContract>>(cw.New<List<TT.TImpl>>()).CastTo<TT.TProperty>());
+                        }
                     }
                 }
             });
@@ -251,6 +258,15 @@ namespace NWheels.Core.Configuration
                 propertyMetadata.Kind == PropertyKind.Relation &&
                 (propertyMetadata.Relation.RelationKind == RelationKind.OneToMany ||
                 propertyMetadata.Relation.RelationKind == RelationKind.ManyToMany));
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool IsNamedElementCollectionProperty(PropertyInfo property)
+        {
+            return (
+                IsNestedElementCollectionProperty(property) && 
+                property.PropertyType.GetGenericTypeDefinition() == typeof(INamedElementCollection<>));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
