@@ -143,11 +143,19 @@ namespace NWheels.Core.Configuration
 
                         if ( IsNamedElementCollectionProperty(property) )
                         {
-                            backingFieldOperand.Assign(cw.New<NamedElementCollectionAdapter<TT.TImpl, TT.TContract>>(cw.New<List<TT.TImpl>>()).CastTo<TT.TProperty>());
+                            backingFieldOperand.Assign(cw.New<NamedObjectCollectionAdapter<TT.TImpl, TT.TContract>>(
+                                cw.New<List<TT.TImpl>>(),
+                                cw.MakeDelegate<ConfigurationElementBase, Func<TT.TImpl>>(
+                                    cw.This<ConfigurationElementBase>(), x => x.CreateNestedElement<TT.TContract, TT.TImpl>))
+                                .CastTo<TT.TProperty>());
                         }
                         else
                         {
-                            backingFieldOperand.Assign(cw.New<CollectionAdapter<TT.TImpl, TT.TContract>>(cw.New<List<TT.TImpl>>()).CastTo<TT.TProperty>());
+                            backingFieldOperand.Assign(cw.New<ObjectCollectionAdapter<TT.TImpl, TT.TContract>>(
+                                cw.New<List<TT.TImpl>>(), 
+                                cw.MakeDelegate<ConfigurationElementBase, Func<TT.TImpl>>(
+                                    cw.This<ConfigurationElementBase>(), x => x.CreateNestedElement<TT.TContract, TT.TImpl>))
+                                .CastTo<TT.TProperty>());
                         }
                     }
                 }
@@ -216,12 +224,23 @@ namespace NWheels.Core.Configuration
                         else if ( property.Kind == PropertyKind.Relation && property.Relation.RelationKind.IsIn(RelationKind.OneToMany, RelationKind.ManyToMany) )
                         {
                             using ( TT.CreateScope<TT.TItem>(property.Relation.RelatedPartyType.ContractType) )
-                            { 
-                                m.This<ConfigurationElementBase>().Void<XElement, string, ICollection<TT.TItem>>(
-                                    x => (a, b, c) => x.ReadNestedElementCollection<TT.TItem>(a, b, c),
-                                    xml,
-                                    m.Const(property.Name),
-                                    backingField.CastTo<ICollection<TT.TItem>>());
+                            {
+                                if ( property.ClrType.GetGenericTypeDefinition() == typeof(INamedObjectCollection<>) )
+                                {
+                                    m.This<ConfigurationElementBase>().Void<XElement, string, INamedObjectCollection<TT.TItem>>(
+                                        x => (a, b, c) => x.ReadNestedNamedElementCollection<TT.TItem>(a, b, c),
+                                        xml,
+                                        m.Const(property.Name),
+                                        backingField.CastTo<INamedObjectCollection<TT.TItem>>());
+                                }
+                                else
+                                {
+                                    m.This<ConfigurationElementBase>().Void<XElement, string, ICollection<TT.TItem>>(
+                                        x => (a, b, c) => x.ReadNestedElementCollection<TT.TItem>(a, b, c),
+                                        xml,
+                                        m.Const(property.Name),
+                                        backingField.CastTo<ICollection<TT.TItem>>());
+                                }
                             }
                         }
                     }
@@ -266,7 +285,7 @@ namespace NWheels.Core.Configuration
         {
             return (
                 IsNestedElementCollectionProperty(property) && 
-                property.PropertyType.GetGenericTypeDefinition() == typeof(INamedElementCollection<>));
+                property.PropertyType.GetGenericTypeDefinition() == typeof(INamedObjectCollection<>));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

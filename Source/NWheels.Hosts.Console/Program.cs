@@ -122,13 +122,29 @@ namespace NWheels.Hosts.Console
 
         private static void BlockUntilStopRequested()
         {
+            var stopRequestFilePath = PathUtility.LocalBinPath(fileName: "stop.request");
+
             System.Console.ForegroundColor = ConsoleColor.Green;
             System.Console.WriteLine();
             System.Console.WriteLine("{0:HH:mm:ss.fff} UP AND RUNNING. PRESS CTRL + BREAK TO STOP", DateTime.UtcNow);
             System.Console.WriteLine();
             System.Console.ForegroundColor = ConsoleColor.Gray;
 
+            if ( File.Exists(stopRequestFilePath) )
+            {
+                File.Delete(stopRequestFilePath);
+            }
+
+            var stopRequestPollingTimer = new Timer(state => {
+                if ( File.Exists(stopRequestFilePath) )
+                {
+                    _s_stopRequested.Set();
+                }
+            }, state:null, dueTime: 1000, period: 1000);
+
             _s_stopRequested.WaitOne();
+
+            stopRequestPollingTimer.Dispose();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

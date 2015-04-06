@@ -65,7 +65,7 @@
     <Compile Include="Configuration\ConfigurationElementBase.cs" />
     <Compile Include="Configuration\ConfigurationSectionBase.cs" />
     <Compile Include="Configuration\ConfigurationObjectConvention.cs" />
-    <Compile Include="Configuration\NamedElementCollectionAdapter.cs" />
+    <Compile Include="Configuration\NamedObjectCollectionAdapter.cs" />
     <Compile Include="Configuration\XmlConfigurationLoader.cs" />
     <Compile Include="Configuration\IConfigurationLogger.cs" />
     <Compile Include="Configuration\IInternalConfigurationObject.cs" />
@@ -80,6 +80,7 @@
     <Compile Include="DataObjects\MetadataElement.cs" />
     <Compile Include="DataObjects\CollectionAdapter.cs" />
     <Compile Include="DataObjects\KeyMetadataBuilder.cs" />
+    <Compile Include="DataObjects\ObjectCollectionAdapter.cs" />
     <Compile Include="DataObjects\PropertyMetadataBuilder.cs" />
     <Compile Include="DataObjects\PropertyRelationalMappingBuilder.cs" />
     <Compile Include="DataObjects\PropertyValidationMetadataBuilder.cs" />

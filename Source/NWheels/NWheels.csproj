@@ -66,13 +66,14 @@
     <Compile Include="Configuration\IConfigurationObject.cs" />
     <Compile Include="Configuration\IConfigurationElement.cs" />
     <Compile Include="Configuration\IConfigurationSection.cs" />
-    <Compile Include="Configuration\INamedElementCollection.cs" />
+    <Compile Include="Configuration\INamedObjectCollection.cs" />
     <Compile Include="DataObjects\DataObjectContractAttribute.cs" />
     <Compile Include="Conventions\IAutoObjectFactory.cs" />
     <Compile Include="DataObjects\DataObjectPartContractAttribute.cs" />
     <Compile Include="DataObjects\IDataObject.cs" />
     <Compile Include="DataObjects\IMetadataElement.cs" />
     <Compile Include="DataObjects\IMetadataElementVisitor.cs" />
+    <Compile Include="DataObjects\IObjectCollection.cs" />
     <Compile Include="DataObjects\IPropertyValueValidator.cs" />
     <Compile Include="DataObjects\ISemanticDataType.cs" />
     <Compile Include="DataObjects\ITypeMetadataCache.cs" />

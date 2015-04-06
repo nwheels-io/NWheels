@@ -157,7 +157,7 @@ namespace NWheels.Core.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ValidateInnerList()
+        protected void ValidateInnerList()
         {
             if ( _innerList == null )
             {

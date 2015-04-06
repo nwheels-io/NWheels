@@ -16,8 +16,7 @@ using HR1 = NWheels.Puzzle.EntityFramework.ComponentTests.HardCodedImplementatio
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
-    [TestFixture]
-    //[Ignore("Not unit tests")]
+    [TestFixture, Category("Integration")]
     public class HardCodedImplementationTests : DatabaseTestBase
     {
         //private Autofac.ContainerBuilder _componentsBuilder = null;

@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using Hapil;
 using NWheels.Configuration;
 using NWheels.Core.Conventions;
+using NWheels.Extensions;
 using NWheels.Utilities;
 
 namespace NWheels.Core.Configuration
@@ -116,6 +117,40 @@ namespace NWheels.Core.Configuration
                     //TODO: add support for location modifiers (top/bottom/midde) + collection modifiers (clear all/remove specific item(s))
                 }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void ReadNestedNamedElementCollection<T>(XElement xml, string propertyName, INamedObjectCollection<T> collection)
+        {
+            var collectionElementName = propertyName.ToPascalCase();
+            var collectionElementXml = xml.Element(collectionElementName);
+
+            if ( collectionElementXml != null )
+            {
+                foreach ( var collectionItemXml in collectionElementXml.Elements() )
+                {
+                    T itemElement;
+                    var name = collectionItemXml.GetAttributeIgnoreCase("name") ?? string.Empty;
+
+                    if ( !collection.TryGetElementByName(name, out itemElement) )
+                    {
+                        itemElement = _factory.CreateConfigurationElement<T>(this, collectionItemXml.Name.LocalName);
+                        collection.Add(itemElement);
+                        //TODO: add support for location modifiers (top/bottom/midde) + collection modifiers (clear all/remove specific item(s))
+                    }
+
+                    ((IInternalConfigurationObject)itemElement).LoadObject(collectionItemXml);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TElementImpl CreateNestedElement<TElementContract, TElementImpl>()
+            where TElementImpl : TElementContract
+        {
+            return (TElementImpl)_factory.CreateConfigurationElement<TElementContract>(this, xmlElementName: null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

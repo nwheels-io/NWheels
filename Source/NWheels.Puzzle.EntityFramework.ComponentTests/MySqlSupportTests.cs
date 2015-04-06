@@ -20,7 +20,7 @@ using HR1 = NWheels.Puzzle.EntityFramework.ComponentTests.HardCodedImplementatio
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
-    [TestFixture]
+    [TestFixture, Category("Integration")]
     public class MySqlSupportTests : DatabaseTestBase
     {
         private Hapil.DynamicModule _dyamicModule;

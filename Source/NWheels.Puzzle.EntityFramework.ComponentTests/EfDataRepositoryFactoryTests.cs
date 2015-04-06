@@ -18,7 +18,7 @@ using HR1 = NWheels.Puzzle.EntityFramework.ComponentTests.HardCodedImplementatio
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
-    [TestFixture]
+    [TestFixture, Category("Integration")]
     public class EfDataRepositoryFactoryTests : DatabaseTestBase
     {
         private Hapil.DynamicModule _dyamicModule;

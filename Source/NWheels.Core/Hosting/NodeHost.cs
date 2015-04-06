@@ -24,7 +24,10 @@ using NWheels.Logging;
 using NWheels.Processing;
 using NWheels.Utilities;
 using NWheels.Core.Configuration;
+using NWheels.Core.DataObjects;
+using NWheels.Core.DataObjects.Conventions;
 using NWheels.Core.Entities;
+using NWheels.DataObjects;
 
 namespace NWheels.Core.Hosting
 {
@@ -205,6 +208,13 @@ namespace NWheels.Core.Hosting
             builder.RegisterAdapter<IConfigSectionRegistration, IConfigurationSection>((ctx, reg) => reg.ResolveFromContainer(ctx)).SingleInstance();
             builder.RegisterAdapter<RelationalMappingConventionDefault, IRelationalMappingConvention>(RelationalMappingConventionBase.FromDefault).SingleInstance();
             builder.RegisterConfigSection<IFrameworkLoggingConfiguration>();
+
+            builder.RegisterType<ContractMetadataConvention>().As<IMetadataConvention>().SingleInstance();
+            builder.RegisterType<AttributeMetadataConvention>().As<IMetadataConvention>().SingleInstance();
+            builder.RegisterType<RelationMetadataConvention>().As<IMetadataConvention>().SingleInstance();
+            builder.RegisterInstance(new PascalCaseRelationalMappingConvention(usePluralTableNames: true)).As<IRelationalMappingConvention>();
+            builder.RegisterType<MetadataConventionSet>().SingleInstance();
+            builder.RegisterType<TypeMetadataCache>().As<ITypeMetadataCache>().SingleInstance();
 
             if ( registerHostComponents != null )
             {

@@ -302,6 +302,169 @@ namespace NWheels.Core.UnitTests.Configuration
             Assert.That(eights[0].StringValue, Is.EqualTo("E1"));
             Assert.That(eights[1].IntValue, Is.EqualTo(82));
             Assert.That(eights[1].StringValue, Is.EqualTo("E2"));
+
+            Assert.That(eights[0].GetType(), Is.SameAs(eights[1].GetType()));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanCreateSectionWithNamedElementCollection()
+        {
+            //-- Arrange
+
+            var factory = CreateFactoryUnderTest();
+
+            //-- Act
+
+            var section = factory.CreateService<ITestSectionNine>();
+
+            //-- Assert
+
+            Assert.That(section.Tens, Is.Not.Null);
+            Assert.That(section.Tens.Count, Is.EqualTo(0));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanAddNamedElementsToCollection()
+        {
+            //-- Arrange
+
+            var factory = CreateFactoryUnderTest();
+            var section = factory.CreateService<ITestSectionNine>();
+
+            //-- Act
+
+            var ten1 = section.Tens.Add("AAA");
+            var ten2 = section.Tens.Add("BBB");
+
+            //-- Assert
+
+            Assert.That(section.Tens, Is.Not.Null);
+            Assert.That(section.Tens.Count, Is.EqualTo(2));
+            Assert.That(section.Tens, Is.EquivalentTo(new[] { ten1, ten2 }));
+            Assert.That(ten1.GetType(), Is.SameAs(ten2.GetType()));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanGetElementsByName()
+        {
+            //-- Arrange
+
+            var factory = CreateFactoryUnderTest();
+            var section = factory.CreateService<ITestSectionNine>();
+
+            //-- Act
+
+            var ten1 = section.Tens.Add("AAA");
+            var ten2 = section.Tens.Add("BBB");
+
+            //-- Assert
+
+            Assert.That(section.Tens["AAA"], Is.SameAs(ten1));
+            Assert.That(section.Tens["BBB"], Is.SameAs(ten2));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void NameLookupIsCaseInsensitive()
+        {
+            //-- Arrange
+
+            var factory = CreateFactoryUnderTest();
+            var section = factory.CreateService<ITestSectionNine>();
+
+            //-- Act
+
+            var ten1 = section.Tens.Add("AAA");
+            var ten2 = section.Tens.Add("BBB");
+
+            //-- Assert
+
+            Assert.That(section.Tens["aaa"], Is.SameAs(ten1));
+            Assert.That(section.Tens["bbb"], Is.SameAs(ten2));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test, ExpectedException(typeof(KeyNotFoundException))]
+        public void AttemptToGetElementWithNonExistentNameThrows()
+        {
+            //-- Arrange
+
+            var factory = CreateFactoryUnderTest();
+            var section = factory.CreateService<ITestSectionNine>();
+
+            //-- Act
+
+            section.Tens.Add("AAA");
+            section.Tens.Add("BBB");
+
+            //-- Assert
+
+            var ten3 = section.Tens["zzz"];
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test, ExpectedException(typeof(InvalidOperationException))]
+        public void AttemptToAddElementWithDuplicateNameThrows()
+        {
+            //-- Arrange
+
+            var factory = CreateFactoryUnderTest();
+            var section = factory.CreateService<ITestSectionNine>();
+
+            //-- Act
+
+            section.Tens.Add("AAA");
+            section.Tens.Add("AAA");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanOverrideNamedElementsInCollectionThroughXml()
+        {
+            //-- Arrange
+
+            var factory = CreateFactoryUnderTest();
+            var xml = XElement.Parse(
+                @"<Nine dayOfWeek='Tuesday'>
+                    <Tens>
+                        <Ten name='BBB' intValue='222' />
+                        <Ten name='CCC' intValue='333' />
+                    </Tens>
+                </Nine>"
+            );
+
+            var section = factory.CreateService<ITestSectionNine>();
+            
+            section.DayOfWeek = DayOfWeek.Friday;
+
+            var ten1 = section.Tens.Add("AAA");
+            ten1.IntValue = 11;
+            
+            var ten2 = section.Tens.Add("BBB");
+            ten2.IntValue = 22;
+
+            //-- Act
+
+            (section as IInternalConfigurationObject).LoadObject(xml);
+            
+            //-- Assert
+
+            Assert.That(section.Tens.Count, Is.EqualTo(3));
+            Assert.That(section.Tens["AAA"].IntValue, Is.EqualTo(11));
+            Assert.That(section.Tens["BBB"].IntValue, Is.EqualTo(222));
+            Assert.That(section.Tens["CCC"].IntValue, Is.EqualTo(333));
+
+            Assert.That(section.DayOfWeek, Is.EqualTo(DayOfWeek.Tuesday));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -314,7 +477,6 @@ namespace NWheels.Core.UnitTests.Configuration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-
         [ConfigurationSection(XmlName = "One")]
         public interface ITestSectionOne : IConfigurationSection
         {
@@ -323,7 +485,6 @@ namespace NWheels.Core.UnitTests.Configuration
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
 
         [ConfigurationSection(XmlName = "Two")]
         public interface ITestSectionTwo : IConfigurationSection
@@ -408,6 +569,21 @@ namespace NWheels.Core.UnitTests.Configuration
         {
             int IntValue { get; }
             string StringValue { get; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ConfigurationSection(XmlName = "Nine")]
+        public interface ITestSectionNine : IConfigurationSection
+        {
+            DayOfWeek DayOfWeek { get; set; }
+            INamedObjectCollection<ITestElementTen> Tens { get; }
+        }
+        [ConfigurationElement(XmlName = "Ten")]
+        public interface ITestElementTen : INamedConfigurationElement
+        {
+            int IntValue { get; set; }
+            string StringValue { get; set; }
         }
     }
 }
