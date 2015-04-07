@@ -12,6 +12,7 @@ using NWheels.Core.Configuration;
 using NWheels.Core.Conventions;
 using System.IO;
 using System.Xml.Linq;
+using NWheels.DataObjects;
 using NWheels.Testing;
 
 namespace NWheels.Core.UnitTests.Configuration
@@ -455,7 +456,7 @@ namespace NWheels.Core.UnitTests.Configuration
 
             //-- Act
 
-            (section as IInternalConfigurationObject).LoadObject(xml);
+            section.AsInternalConfigurationObject().LoadObject(xml);
             
             //-- Assert
 
@@ -465,6 +466,82 @@ namespace NWheels.Core.UnitTests.Configuration
             Assert.That(section.Tens["CCC"].IntValue, Is.EqualTo(333));
 
             Assert.That(section.DayOfWeek, Is.EqualTo(DayOfWeek.Tuesday));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanRememberOverrideHistory()
+        {
+            //-- Arrange
+
+            var xml1 = 
+                @"<Nine dayOfWeek='Tuesday'>
+                    <Tens>
+                        <Ten name='BBB' intValue='222' />
+                        <Ten name='CCC' intValue='333' />
+                    </Tens>
+                </Nine>";
+            var xml2 =
+                @"<Nine timeSpan='12:13:14' dayOfWeek='Wednesday'>
+                    <Tens>
+                        <Ten name='AAA' intValue='777' />
+                        <Ten name='CCC' intValue='999' />
+                    </Tens>
+                </Nine>";
+
+            var factory = CreateFactoryUnderTest();
+            var section = factory.CreateService<ITestSectionNine>();
+
+            //-- Act
+
+            section.Tens.Add("AAA").IntValue = 123;
+
+            using ( ConfigurationSourceInfo.UseSource(ConfigurationSourceLevel.Code, "XML-1") )
+            {
+                section.AsInternalConfigurationObject().LoadObject(LoadXmlWithLineInfoFromString(xml1));
+            }
+
+            using ( ConfigurationSourceInfo.UseSource(ConfigurationSourceLevel.Code, "XML-2") )
+            {
+                section.AsInternalConfigurationObject().LoadObject(LoadXmlWithLineInfoFromString(xml2));
+            }
+
+            var nineHistory = section.AsInternalConfigurationObject().GetOverrideHistory();
+            var aaaHistory = section.Tens["AAA"].AsInternalConfigurationObject().GetOverrideHistory();
+            var bbbHistory = section.Tens["BBB"].AsInternalConfigurationObject().GetOverrideHistory();
+            var cccHistory = section.Tens["CCC"].AsInternalConfigurationObject().GetOverrideHistory();
+
+            //-- Assert
+
+            Assert.That(nineHistory.Select(h => h.Source.Name), Is.EquivalentTo(new[] { "XML-1", "XML-2" }));
+
+            Assert.That(nineHistory["TimeSpan"].Select(h => h.Value), Is.EqualTo(new[] { "11:12:13", "12:13:14" }));
+            Assert.That(nineHistory["TimeSpan"].Select(h => h.Source.Name), Is.EqualTo(new[] { "Default", "XML-2" }));
+
+            //TODO: changes done to configuration objects through code are not reflected in the override history
+            //Assert.That(aaaHistory.Select(h => h.Source.Name), Is.EquivalentTo(new[] { "Program", "XML-2" }));
+            //Assert.That(aaaHistory["IntValue"].Select(h => h.Value), Is.EquivalentTo(new[] { "123", "777" }));
+            //Assert.That(aaaHistory["IntValue"].Select(h => h.Source.Name), Is.EquivalentTo(new[] { "Program", "XML-2" }));
+
+            Assert.That(cccHistory.Select(h => h.Source.Name), Is.EquivalentTo(new[] { "XML-1", "XML-2" }));
+
+            Assert.That(cccHistory["IntValue"].Select(h => h.Value), Is.EquivalentTo(new[] { "333", "999" }));
+            Assert.That(cccHistory["IntValue"].Select(h => h.Source.Name), Is.EquivalentTo(new[] { "XML-1", "XML-2" }));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private XElement LoadXmlWithLineInfoFromString(string xmlString)
+        {
+            XDocument xml;
+
+            using ( TextReader reader = new StringReader(xmlString) )
+            {
+                xml = XDocument.Load(reader, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
+            }
+
+            return xml.Root;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -577,6 +654,10 @@ namespace NWheels.Core.UnitTests.Configuration
         public interface ITestSectionNine : IConfigurationSection
         {
             DayOfWeek DayOfWeek { get; set; }
+            
+            [PropertyContract.DefaultValue("11:12:13")]
+            TimeSpan TimeSpan { get; set; }
+            
             INamedObjectCollection<ITestElementTen> Tens { get; }
         }
         [ConfigurationElement(XmlName = "Ten")]

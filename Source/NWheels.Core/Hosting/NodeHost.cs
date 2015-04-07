@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
 using Autofac;
 using Autofac.Builder;
 using Autofac.Core;
@@ -628,6 +630,31 @@ namespace NWheels.Core.Hosting
             {
                 var loader = _ownerLifetime.LifetimeContainer.Resolve<XmlConfigurationLoader>();
                 loader.LoadConfiguration(_ownerLifetime.NodeConfig.ConfigFiles);
+
+                WriteEffectiveConfigurationXml(loader);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static void WriteEffectiveConfigurationXml(XmlConfigurationLoader loader)
+            {
+                var effectiveConfigurationXml = new XDocument();
+                loader.WriteConfigurationDocument(effectiveConfigurationXml, new ConfigurationXmlOptions() { IncludeOverrideHistory = true });
+
+                var settings = new XmlWriterSettings {
+                    Indent = true,
+                    IndentChars = "\t",
+                    NewLineOnAttributes = true
+                };
+
+                StringBuilder effectiveConfigurationXmlText = new StringBuilder();
+
+                using ( XmlWriter writer = XmlWriter.Create(effectiveConfigurationXmlText, settings) )
+                {
+                    effectiveConfigurationXml.WriteTo(writer);
+                }
+
+                File.WriteAllText(PathUtility.LocalBinPath("effective-config-dump.xml"), effectiveConfigurationXmlText.ToString());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

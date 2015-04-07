@@ -65,6 +65,20 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static string EmptyIfNull(this string s)
+        {
+            if ( s == null )
+            {
+                return string.Empty;
+            }
+            else
+            {
+                return s;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static string NullIfEmpty(this string s)
         {
             if ( string.IsNullOrEmpty(s) )

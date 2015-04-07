@@ -56,6 +56,7 @@ namespace NWheels.Core.Configuration
             }
 
             ImplementLoadPropertiesMethod(writer);
+            ImplementSavePropertiesMethod(writer);
             ImplementGetXmlNameMethod(writer);
             ImplementConstructors(writer);
         }
@@ -86,17 +87,25 @@ namespace NWheels.Core.Configuration
 
             if ( propertyMetadata.DefaultValue != null )
             {
-                _initializers.Add(cw => {
-                    using ( TT.CreateScope<TT.TProperty>(property.PropertyType) )
-                    {
-                        IOperand<TT.TProperty> defaultValue;
-                        if ( propertyMetadata.TryGetDefaultValueOperand(cw, out defaultValue) )
-                        {
-                            cw.OwnerClass.GetPropertyBackingField(property).AsOperand<TT.TProperty>().Assign(defaultValue);
-                        }
-                    }
-                });
+                ImplementPropertyDefaultValue(property, propertyMetadata);
             }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementPropertyDefaultValue(PropertyInfo property, PropertyMetadataBuilder propertyMetadata)
+        {
+            _initializers.Add(cw => {
+                using ( TT.CreateScope<TT.TProperty>(property.PropertyType) )
+                {
+                    IOperand<TT.TProperty> defaultValue;
+                    if ( propertyMetadata.TryGetDefaultValueOperand(cw, out defaultValue) )
+                    {
+                        cw.OwnerClass.GetPropertyBackingField(property).AsOperand<TT.TProperty>().Assign(defaultValue);
+                        cw.This<ConfigurationElementBase>().Void(x => x.PushPropertyOverrideHistory, cw.Const(property.Name), defaultValue.CastTo<object>());
+                    }
+                }
+            });
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -166,17 +175,27 @@ namespace NWheels.Core.Configuration
 
         private void ImplementConstructors(ImplementationClassWriter<TypeTemplate.TBase> writer)
         {
+            //TODO:bug in Hapil? when passing ConfigurationSourceInfo.UseSource() directly to Using, two calls to ConfigurationSourceInfo.UseSource are generated instead of one.
+
             if ( !IsSectionObject )
             {
                 writer.Constructor<ConfigurationElementBase>((cw, parent) => {
                     cw.Base(parent);
-                    _initializers.ForEach(init => init(cw));
+                    //workaround: initialize a local and then pass the local to Using
+                    var sourceUseScopeLocal = cw.Local(initialValue: Static.Func(ConfigurationSourceInfo.UseSource, Static.Prop(() => ConfigurationSourceInfo.Default)));
+                    cw.Using(sourceUseScopeLocal).Do(() => { 
+                        _initializers.ForEach(init => init(cw));
+                    });
                 });
             }
 
             writer.Constructor<IConfigurationObjectFactory, Auto<IConfigurationLogger>, string>((cw, factory, logger, path) => {
                 cw.Base(factory, logger, path);
-                _initializers.ForEach(init => init(cw));
+                //workaround: initialize a local and then pass the local to Using
+                var sourceUseScopeLocal = cw.Local(initialValue: Static.Func(ConfigurationSourceInfo.UseSource, Static.Prop(() => ConfigurationSourceInfo.Default)));
+                cw.Using(sourceUseScopeLocal).Do(() => {
+                    _initializers.ForEach(init => init(cw));
+                });
             });
         }
 
@@ -241,6 +260,50 @@ namespace NWheels.Core.Configuration
                                         m.Const(property.Name),
                                         backingField.CastTo<ICollection<TT.TItem>>());
                                 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementSavePropertiesMethod(ClassWriterBase classWriter)
+        {
+            classWriter.ImplementBase<ConfigurationSectionBase>().Method<XElement>(x => x.SaveProperties).Implement((m, xml) =>
+            {
+                foreach ( var property in _objectMetadata.Properties )
+                {
+                    using ( TT.CreateScope<TT.TProperty>(property.ClrType) )
+                    {
+                        var backingField = classWriter.OwnerClass.GetPropertyBackingField(property.ContractPropertyInfo).AsOperand<TT.TProperty>();
+
+                        if ( property.Kind == PropertyKind.Scalar )
+                        {
+                            m.This<ConfigurationElementBase>().Void<XElement, string, TT.TProperty>(
+                                x => (a, b, c) => x.WriteScalarValue<TT.TProperty>(a, b, ref c),
+                                xml,
+                                m.Const(property.Name),
+                                backingField);
+                        }
+                        else if ( property.Kind == PropertyKind.Relation && property.Relation.RelationKind.IsIn(RelationKind.OneToOne, RelationKind.ManyToOne) )
+                        {
+                            m.This<ConfigurationElementBase>().Void<XElement, string, IConfigurationElement>(
+                                x => x.WriteNestedElement,
+                                xml,
+                                m.Const(property.Name),
+                                backingField.CastTo<IConfigurationElement>());
+                        }
+                        else if ( property.Kind == PropertyKind.Relation && property.Relation.RelationKind.IsIn(RelationKind.OneToMany, RelationKind.ManyToMany) )
+                        {
+                            using ( TT.CreateScope<TT.TItem>(property.Relation.RelatedPartyType.ContractType) )
+                            {
+                                m.This<ConfigurationElementBase>().Void<XElement, string, INamedObjectCollection<TT.TItem>>(
+                                    x => (a, b, c) => x.WriteNestedElementCollection<TT.TItem>(a, b, c),
+                                    xml,
+                                    m.Const(property.Name),
+                                    backingField.CastTo<INamedObjectCollection<TT.TItem>>());
                             }
                         }
                     }

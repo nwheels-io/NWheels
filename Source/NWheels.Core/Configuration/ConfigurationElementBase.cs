@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using Hapil;
 using NWheels.Configuration;
@@ -17,6 +18,8 @@ namespace NWheels.Core.Configuration
         private readonly IConfigurationObjectFactory _factory;
         private readonly IConfigurationLogger _logger;
         private readonly string _configPath;
+        private readonly OverrideHistory _overrideHistory = new OverrideHistory();
+        private ConfigurationXmlOptions _currentSaveOptions;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -40,12 +43,37 @@ namespace NWheels.Core.Configuration
 
         public void LoadObject(XElement xml)
         {
+            _overrideHistory.PushElementOverride(xml);
             LoadProperties(xml);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public abstract string GetXmlName();
+        public void SaveXml(XElement xml, ConfigurationXmlOptions options)
+        {
+            _currentSaveOptions = options ?? ConfigurationXmlOptions.Default;
+
+            try
+            {
+                if ( _currentSaveOptions.IncludeOverrideHistory )
+                {
+                    WriteOverrideHistoryXml(xml, string.Empty, _overrideHistory);
+                }
+
+                SaveProperties(xml);
+            }
+            finally
+            {
+                _currentSaveOptions = null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IOverrideHistory GetOverrideHistory()
+        {
+            return _overrideHistory;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -63,7 +91,9 @@ namespace NWheels.Core.Configuration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public abstract string GetXmlName();
         public abstract void LoadProperties(XElement xml);
+        public abstract void SaveProperties(XElement xml);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -77,12 +107,28 @@ namespace NWheels.Core.Configuration
                 try
                 {
                     value = ParseUtility.Parse<T>(attribute.Value);
+                    _overrideHistory.PushPropertyOverride(propertyName, attribute.Value, lineInfo: xml);
                 }
                 catch ( Exception e )
                 {
                     _logger.BadPropertyValue(_configPath, propertyName, e);
                     throw;
                 }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void WriteScalarValue<T>(XElement xml, string propertyName, ref T value)
+        {
+            if ( ShouldWriteToXml(_overrideHistory[propertyName]) && !object.ReferenceEquals(null, value) )
+            {
+                if ( _currentSaveOptions.IncludeOverrideHistory )
+                {
+                    WriteOverrideHistoryXml(xml, propertyName, _overrideHistory[propertyName]);
+                }
+
+                xml.SetAttributeValue(propertyName.ToCamelCase(), value.ToString());
             }
         }
 
@@ -96,6 +142,18 @@ namespace NWheels.Core.Configuration
             if ( elementXml != null )
             {
                 ((IInternalConfigurationObject)element).LoadObject(elementXml);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void WriteNestedElement(XElement xml, string propertyName, IConfigurationElement element)
+        {
+            if ( ShouldWriteToXml(element.AsConfigurationObject().GetOverrideHistory()) )
+            {
+                var nestedElement = new XElement(propertyName.ToPascalCase());
+                xml.Add(nestedElement);
+                element.AsConfigurationObject().SaveXml(nestedElement, _currentSaveOptions);
             }
         }
 
@@ -116,6 +174,27 @@ namespace NWheels.Core.Configuration
 
                     //TODO: add support for location modifiers (top/bottom/midde) + collection modifiers (clear all/remove specific item(s))
                 }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void WriteNestedElementCollection<T>(XElement xml, string propertyName, ICollection<T> collection)
+        {
+            var itemsToWrite = collection.Cast<IConfigurationObject>().Where(obj => ShouldWriteToXml(obj.GetOverrideHistory())).ToArray();
+
+            if ( itemsToWrite.Length > 0 )
+            {
+                var collectionElement = new XElement(propertyName.ToPascalCase());
+
+                foreach ( var item in itemsToWrite )
+                {
+                    var itemElement = new XElement(item.GetXmlName());
+                    collectionElement.Add(itemElement);
+                    item.SaveXml(itemElement, _currentSaveOptions);
+                }
+
+                xml.Add(collectionElement);
             }
         }
 
@@ -155,6 +234,13 @@ namespace NWheels.Core.Configuration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal protected void PushPropertyOverrideHistory(string propertyName, object value)
+        {
+            _overrideHistory.PushPropertyOverride(propertyName, value.ToStringOrNull(), lineInfo: null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected IConfigurationObjectFactory Factory
         {
             get
@@ -180,6 +266,31 @@ namespace NWheels.Core.Configuration
             get
             {
                 return _configPath;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        private bool ShouldWriteToXml(IEnumerable<IOverrideHistoryEntry> overrideHistory)
+        {
+            return (
+                !_currentSaveOptions.OverrideLevel.HasValue ||
+                _overrideHistory.Any(h => h.Source.Level >= _currentSaveOptions.OverrideLevel.Value));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void WriteOverrideHistoryXml(XElement xml, string propertyName, IEnumerable<IOverrideHistoryEntry> history)
+        {
+            foreach ( var entry in history )
+            {
+                var commentText = string.Format(
+                    "{0}{1} {2}", 
+                    xml.Name,
+                    string.IsNullOrEmpty(propertyName) ? string.Empty : "." + propertyName + " =", 
+                    entry.ToString());
+
+                xml.AddBeforeSelf(new XComment(commentText));
             }
         }
     }

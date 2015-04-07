@@ -60,8 +60,12 @@
     <Compile Include="Concurrency\ResourceAccessType.cs" />
     <Compile Include="Concurrency\ResourceLockMode.cs" />
     <Compile Include="Configuration\ConfigurationElementAttribute.cs" />
+    <Compile Include="Configuration\ConfigurationXmlOptions.cs" />
     <Compile Include="Configuration\ConfigurationSectionAttribute.cs" />
     <Compile Include="Configuration\ConfigSectionRegistration.cs" />
+    <Compile Include="Configuration\ConfigurationSourceInfo.cs" />
+    <Compile Include="Configuration\ConfigurationSourceLevel.cs" />
+    <Compile Include="Configuration\IOverrideHistory.cs" />
     <Compile Include="Configuration\INamedConfigurationElement.cs" />
     <Compile Include="Configuration\IConfigurationObject.cs" />
     <Compile Include="Configuration\IConfigurationElement.cs" />
@@ -123,6 +127,7 @@
     <Compile Include="Exceptions\XmlConfigurationException.cs" />
     <Compile Include="Extensions\AutofacExtensions.cs" />
     <Compile Include="Extensions\MemberInfoExtensions.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Extensions\ValueTypeExtensions.cs" />

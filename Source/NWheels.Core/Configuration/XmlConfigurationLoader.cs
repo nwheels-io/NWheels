@@ -72,21 +72,24 @@ namespace NWheels.Core.Configuration
 
             using ( _logger.LoadingConfigurationFile(file.Path) )
             {
-                try
+                using ( ConfigurationSourceInfo.UseSource(ConfigurationSourceLevel.Deployment, file.Path) )
                 {
-                    var document = XDocument.Load(file.Path, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
-                    LoadConfigurationDocument(document);
-                }
-                catch ( Exception e )
-                {
-                    _logger.FailedToLoadConfigurationFile(file.Path, e);
-                    throw;
+                    try
+                    {
+                        var document = XDocument.Load(file.Path, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
+                        LoadConfigurationDocument(document);
+                    }
+                    catch ( Exception e )
+                    {
+                        _logger.FailedToLoadConfigurationFile(file.Path, e);
+                        throw;
+                    }
                 }
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
+        
         public void LoadConfigurationDocument(XDocument document)
         {
             if ( !document.Root.NameEqualsIgnoreCase(ConfigurationElementName) )
@@ -116,6 +119,40 @@ namespace NWheels.Core.Configuration
                 {
                     throw new XmlConfigurationException("Only IF and ALWAYS elements are allowed under the root element.");
                 }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void WriteConfigurationDocument(XDocument document, ConfigurationXmlOptions options)
+        {
+            var rootElement = new XElement(ConfigurationElementName.ToUpper());
+            var scopeElement = new XElement(
+                IfElementName.ToUpper(),
+                new XAttribute(NodeAttributeName, _framework.CurrentNode.NodeName.EmptyIfNull()),
+                new XAttribute(InstanceIdAttributeName, _framework.CurrentNode.InstanceId.EmptyIfNull()),
+                new XAttribute(EnvironmentAttributeName, _framework.CurrentNode.EnvironmentName.EmptyIfNull()),
+                new XAttribute(EnvironmentTypeAttributeName, _framework.CurrentNode.EnvironmentType.EmptyIfNull()));
+            
+            rootElement.Add(scopeElement);
+            document.Add(rootElement);
+
+            var delimiterText = new string('|', 100);
+
+            foreach ( var section in _sectionsByXmlName.Values.OrderBy(s => s.GetXmlName(), StringComparer.InvariantCultureIgnoreCase) )
+            {
+                if ( options.IncludeOverrideHistory )
+                {
+                    scopeElement.Add(new XComment(delimiterText));
+                    scopeElement.Add(new XComment(delimiterText));
+                    scopeElement.Add(new XComment(delimiterText));
+                    scopeElement.Add(new XComment(string.Format(" {0,-99}", section.GetXmlName())));
+                    scopeElement.Add(new XComment(delimiterText));
+                }
+
+                var sectionElement = new XElement(section.GetXmlName());
+                scopeElement.Add(sectionElement);
+                section.SaveXml(sectionElement, options);
             }
         }
 
