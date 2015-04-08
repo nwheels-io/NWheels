@@ -14,6 +14,7 @@ namespace NWheels.Core.DataObjects
     {
         private readonly MetadataConventionSet _conventions;
         private readonly Dictionary<Type, MixinRegistration[]> _mixinsByPrimaryContract;
+        private readonly Dictionary<Type, ConcretizationRegistration> _concretizationsByPrimaryContract;
         private readonly ConcurrentDictionary<Type, TypeMetadataBuilder> _metadataByContractType = new ConcurrentDictionary<Type, TypeMetadataBuilder>();
         private readonly ConcurrentDictionary<Type, ISemanticDataType> _semanticDataTypes;
 
@@ -21,19 +22,21 @@ namespace NWheels.Core.DataObjects
 
         public TypeMetadataCache(
             MetadataConventionSet conventions,
-            IEnumerable<MixinRegistration> mixinRegistrations)
+            IEnumerable<MixinRegistration> mixinRegistrations,
+            IEnumerable<ConcretizationRegistration> concretizationRegistrations)
         {
             _conventions = conventions;
             _conventions.InjectCache(this);
 
             _semanticDataTypes = new ConcurrentDictionary<Type, ISemanticDataType>();
             _mixinsByPrimaryContract = mixinRegistrations.GroupBy(r => r.TargetContract).ToDictionary(g => g.Key, g => g.ToArray());
+            _concretizationsByPrimaryContract = concretizationRegistrations.ToDictionary(r => r.GeneralContract);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TypeMetadataCache(MetadataConventionSet conventions)
-            : this(conventions, mixinRegistrations: new MixinRegistration[0])
+            : this(conventions, new MixinRegistration[0], new ConcretizationRegistration[0])
         {
         }
 
@@ -85,18 +88,7 @@ namespace NWheels.Core.DataObjects
 
         private TypeMetadataBuilder BuildTypeMetadata(Type primaryContract)
         {
-            MixinRegistration[] mixinRegistrations;
-            Type[] mixinContracts;
-
-            if ( _mixinsByPrimaryContract.TryGetValue(primaryContract, out mixinRegistrations) )
-            {
-                mixinContracts = mixinRegistrations.Select(r => r.MixinContract).ToArray();
-            }
-            else
-            {
-                mixinContracts = Type.EmptyTypes;
-            }
-
+            var mixinContracts = GetRegisteredMixinContracts(primaryContract);
             return BuildTypeMetadata(primaryContract, mixinContracts);
         }
 
@@ -118,8 +110,19 @@ namespace NWheels.Core.DataObjects
                 var builder = new TypeMetadataBuilder();
                 entriesBeingBuilt.Add(primaryContract, builder);
 
-                var constructor = new TypeMetadataBuilderConstructor(_conventions);
-                constructor.ConstructMetadata(primaryContract, mixinContracts, builder, cache: this);
+                ConcretizationRegistration concretization;
+                if ( _concretizationsByPrimaryContract.TryGetValue(primaryContract, out concretization) && concretization.ConcreteContract != primaryContract )
+                {
+                    var concretizationMixinContracts = GetRegisteredMixinContracts(concretization.ConcreteContract);
+                    return BuildTypeMetadata(
+                        concretization.ConcreteContract, 
+                        mixinContracts.Union(concretizationMixinContracts).ToArray());
+                }
+                else
+                {
+                    var constructor = new TypeMetadataBuilderConstructor(_conventions);
+                    constructor.ConstructMetadata(primaryContract, mixinContracts, builder, cache: this);
+                }
 
                 return builder;
             }
@@ -133,6 +136,22 @@ namespace NWheels.Core.DataObjects
                 {
                     entriesBeingBuilt.Remove(primaryContract);
                 }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Type[] GetRegisteredMixinContracts(Type primaryContract)
+        {
+            MixinRegistration[] mixinRegistrations;
+
+            if ( _mixinsByPrimaryContract.TryGetValue(primaryContract, out mixinRegistrations) )
+            {
+                return mixinRegistrations.Select(r => r.MixinContract).ToArray();
+            }
+            else
+            {
+                return Type.EmptyTypes;
             }
         }
 

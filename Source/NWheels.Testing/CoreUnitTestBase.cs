@@ -36,11 +36,7 @@ namespace NWheels.Testing
 
         protected TypeMetadataCache CreateMetadataCache(params MixinRegistration[] mixinRegistrations)
         {
-            var conventions = new MetadataConventionSet(
-                new IMetadataConvention[] { new ContractMetadataConvention(), new AttributeMetadataConvention(), new RelationMetadataConvention() },
-                new IRelationalMappingConvention[] { new PascalCaseRelationalMappingConvention(usePluralTableNames: true) });
-
-            _metadataCache = new TypeMetadataCache(conventions, mixinRegistrations);
+            _metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(mixinRegistrations);
             return _metadataCache;
         }
 
@@ -50,7 +46,5 @@ namespace NWheels.Testing
         {
             get { return _metadataCache; }
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
     }
 }

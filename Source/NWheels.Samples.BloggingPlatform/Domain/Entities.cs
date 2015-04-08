@@ -105,7 +105,9 @@ namespace NWheels.Samples.BloggingPlatform.Domain
     [EntityContract]
     public interface IMainContentEntity : IAbstractContentEntity
     {
+        [PropertyContract.Required, PropertyContract.Validation.Length(3, 100)]
         string Title { get; set; }
+        
         ICollection<IReplyEntity> Replies { get; }
     }
 

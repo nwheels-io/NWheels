@@ -71,6 +71,7 @@
     <Compile Include="Configuration\IConfigurationElement.cs" />
     <Compile Include="Configuration\IConfigurationSection.cs" />
     <Compile Include="Configuration\INamedObjectCollection.cs" />
+    <Compile Include="DataObjects\ConcretizationRegistration.cs" />
     <Compile Include="DataObjects\DataObjectContractAttribute.cs" />
     <Compile Include="Conventions\IAutoObjectFactory.cs" />
     <Compile Include="DataObjects\DataObjectPartContractAttribute.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="Entities\DateTimeUtc.cs" />
     <Compile Include="Entities\IDatabaseConfig.cs" />
     <Compile Include="DataObjects\IDataObjectKeyGenerator.cs" />
+    <Compile Include="Entities\ApplicationDataRepositoryRegistration.cs" />
     <Compile Include="Entities\RelationalMappingConventionDefault.cs" />
     <Compile Include="Entities\EntityContractAttribute.cs" />
     <Compile Include="DataObjects\IDataObjectKey.cs" />
@@ -146,6 +148,7 @@
     <Compile Include="Logging\FormattedLogNode.cs" />
     <Compile Include="Logging\IApplicationEventLogger.cs" />
     <Compile Include="Logging\ILogActivity.cs" />
+    <Compile Include="Logging\ILoggableObject.cs" />
     <Compile Include="Logging\IThreadLog.cs" />
     <Compile Include="Logging\IThreadLogAppender.cs" />
     <Compile Include="Logging\LogAttributeBase.cs" />

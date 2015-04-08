@@ -14,7 +14,7 @@ using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.Impl;
 using IR2 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository2;
-using IR3 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3;
+using IR3 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3A;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
@@ -124,7 +124,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 new MixinRegistration(typeof(IR3.IUserAccountEntity), typeof(IEntityPartId<int>)),
                 new MixinRegistration(typeof(IR3.IPasswordEntity), typeof(IEntityPartId<int>)),
                 new MixinRegistration(typeof(IR3.IUserRoleEntity), typeof(IEntityPartId<int>)),
-                new MixinRegistration(typeof(IR3.IUserRoleEntity), typeof(IR3.IEntityPartUserRoleId<IR2.UserRole>))
+                new MixinRegistration(typeof(IR3.IUserRoleEntity), typeof(IR3.IEntityPartUserRole<IR2.UserRole>))
             };
         }
     }

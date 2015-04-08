@@ -13,7 +13,8 @@ using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.Impl;
 using NWheels.Testing.DataObjects;
-using IR3 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3;
+using IR3A = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3A;
+using IR3B = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3B;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
@@ -52,7 +53,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
             //-- Act
 
-            var userAccountMetadata = metadataCache.GetTypeMetadata(typeof(IR3.IUserAccountEntity));
+            var userAccountMetadata = metadataCache.GetTypeMetadata(typeof(IR3A.IUserAccountEntity));
 
             //-- Assert
 
@@ -71,9 +72,9 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
             //-- Act
 
-            var password = entityObjectFactory.NewEntity<IR3.IPasswordEntity>();
-            var role = entityObjectFactory.NewEntity<IR3.IUserRoleEntity>();
-            var userAccount = entityObjectFactory.NewEntity<IR3.IUserAccountEntity>();
+            var password = entityObjectFactory.NewEntity<IR3A.IPasswordEntity>();
+            var role = entityObjectFactory.NewEntity<IR3A.IUserRoleEntity>();
+            var userAccount = entityObjectFactory.NewEntity<IR3A.IUserAccountEntity>();
 
             //-- Assert
 
@@ -91,7 +92,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
             using ( var connection = base.CreateDbConnection() )
             {
-                repoFactory.CreateDataRepository<IR3.IMyDataRepository>(connection, autoCommit: true);
+                repoFactory.CreateDataRepository<IR3B.IMyAppDataRepository>(connection, autoCommit: true);
             }
         }
 
@@ -108,16 +109,16 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IR3.IMyDataRepository InitializeDataRepository()
+        private IR3B.IMyAppDataRepository InitializeDataRepository()
         {
             var repoFactory = CreateDataRepositoryFactory();
 
             var connection = base.CreateDbConnection();
-            var repo = repoFactory.CreateDataRepository<IR3.IMyDataRepository>(connection, autoCommit: true);
+            var repo = repoFactory.CreateDataRepository<IR3B.IMyAppDataRepository>(connection, autoCommit: true);
 
             base.CompiledModel = ((EfDataRepositoryBase)repo).CompiledModel;
 
-            return (IR3.IMyDataRepository)repo;
+            return (IR3B.IMyAppDataRepository)repo;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -125,10 +126,10 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         private MixinRegistration[] GetRepositoryMixinsRegistrations()
         {
             return new[] {
-                new MixinRegistration(typeof(IR3.IUserAccountEntity), typeof(IEntityPartId<int>)),
-                new MixinRegistration(typeof(IR3.IPasswordEntity), typeof(IEntityPartId<int>)),
-                new MixinRegistration(typeof(IR3.IUserRoleEntity), typeof(IEntityPartId<int>)),
-                new MixinRegistration(typeof(IR3.IUserRoleEntity), typeof(IR3.IEntityPartUserRoleId<IR3.MyUserRole>))
+                new MixinRegistration(typeof(IR3A.IUserAccountEntity), typeof(IEntityPartId<int>)),
+                new MixinRegistration(typeof(IR3A.IPasswordEntity), typeof(IEntityPartId<int>)),
+                new MixinRegistration(typeof(IR3A.IUserRoleEntity), typeof(IEntityPartId<int>)),
+                new MixinRegistration(typeof(IR3A.IUserRoleEntity), typeof(IR3A.IEntityPartUserRole<IR3B.MyAppUserRole>))
             };
         }
     }

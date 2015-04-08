@@ -101,7 +101,7 @@ namespace NWheels.Core.UnitTests.DataObjects
                 new IMetadataConvention[] { new ContractMetadataConvention(), new AttributeMetadataConvention(), new RelationMetadataConvention() },
                 new IRelationalMappingConvention[] { new PascalCaseRelationalMappingConvention(usePluralTableNames: true) });
 
-            metadataCache = new TypeMetadataCache(conventions, mixinRegistrations);
+            metadataCache = new TypeMetadataCache(conventions, mixinRegistrations, new ConcretizationRegistration[0]);
             var metadataConstructor = new TypeMetadataBuilderConstructor(conventions);
             
             return metadataConstructor;

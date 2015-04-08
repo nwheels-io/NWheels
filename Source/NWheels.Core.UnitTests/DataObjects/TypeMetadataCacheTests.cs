@@ -124,7 +124,8 @@ namespace NWheels.Core.UnitTests.DataObjects
                 new[] {
                     new MixinRegistration(typeof(TestDataObjects.Repository2.IPrimaryContract), typeof(TestDataObjects.Repository2.IFirstMixinContract)),
                     new MixinRegistration(typeof(TestDataObjects.Repository2.IPrimaryContract), typeof(TestDataObjects.Repository2.ISecondMixinContract))
-                });
+                },
+                new ConcretizationRegistration[0]);
 
             //-- Act
 

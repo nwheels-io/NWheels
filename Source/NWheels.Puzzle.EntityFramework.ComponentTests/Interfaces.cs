@@ -9,8 +9,8 @@ using NWheels.DataObjects;
 using NWheels.Entities;
 using IR1 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository1;
 using IR2 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository2;
-using IR3 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3;
-
+using IR3A = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3A;
+using IR3B = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3B;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
@@ -62,7 +62,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             public interface IBlogDataRepository : IApplicationDataRepository
             {
-                IEntityRepository<IR3.IUserAccountEntity> AllUsers { get; }
+                IEntityRepository<IR3A.IUserAccountEntity> AllUsers { get; }
                 IEntityRepository<IAuthorEntity> Authors { get; }
                 IEntityRepository<IArticleEntity> Articles { get; }
                 IEntityRepository<IPostEntity> Posts { get; }
@@ -84,13 +84,13 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             }
 
             [EntityContract]
-            public interface IAuthorEntity : IR3.IUserAccountEntity
+            public interface IAuthorEntity : IR3A.IUserAccountEntity
             {
                 ICollection<ITopLevelContentEntity> AuthoredContents { get; }
             }
 
             [EntityContract]
-            public interface IAbstractContentEntity : IEntityPartId<int>, IR3.IEntityPartAudit
+            public interface IAbstractContentEntity : IEntityPartId<int>, IR3A.IEntityPartAudit
             {
                 string Markdown { get; set; }
                 ICollection<ITagEntity> Tags { get; }
@@ -130,65 +130,114 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static class Repository3
+        public static class Repository3A
         {
-            public enum MyUserRole
-            {
-                MyGuest = 0,
-                MyPower = 1,
-                MyAdmin = 2
-            }
             [EntityContract]
+            [MustHaveMixin(typeof(IEntityPartId<>))]
             public interface IUserAccountEntity
             {
+                [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Validation.Length(4, 50)]
                 string LoginName { get; set; }
+                
+                [PropertyContract.Validation.MaxLength(50)]
                 string NickName { get; set; }
+
+                [PropertyContract.Validation.MaxLength(50)]
                 string FullName { get; set; }
+                
+                [PropertyContract.Required, PropertyContract.Semantic.EmailAddress]
                 string EmailAddress { get; set; }
+                
                 bool IsEmailVerified { get; set; }
-                IPasswordEntity CurrentPassword { get; set; }
-                ICollection<IPasswordEntity> PasswordHistory { get; }
+                
+                [PropertyContract.Required]
+                ICollection<IPasswordEntity> Passwords { get; }
+                
                 ICollection<IUserRoleEntity> Roles { get; }
+                
                 DateTime LastLoginAt { get; set; }
+                
+                [PropertyContract.Validation.MinValue(0)]
                 int FailedLoginCount { get; set; }
+                
                 bool IsLockedOut { get; set; }
             }
+
             [EntityContract]
+            [MustHaveMixin(typeof(IEntityPartId<>))]
+            [MustHaveMixin(typeof(IEntityPartUserRole<>))]
             public interface IUserRoleEntity
             {
+                [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Validation.MaxLength(50)]
                 string Name { get; set; }
             }
+
             [EntityPartContract]
-            public interface IEntityPartUserRoleId<TRoleId>
+            public interface IEntityPartUserRole<TRole>
             {
-                TRoleId RoleId { get; set; }
+                [PropertyContract.Required]
+                TRole Role { get; set; }
             }
+
             [EntityContract]
+            [MustHaveMixin(typeof(IEntityPartId<>))]
             public interface IPasswordEntity
             {
+                [PropertyContract.Required]
                 IUserAccountEntity User { get; set; }
+
+                [PropertyContract.WriteOnly, PropertyContract.Security.Sensitive]
+                string ClearText { get; set; }
+
+                [PropertyContract.Required, PropertyContract.SearchOnly, PropertyContract.Security.Sensitive]
                 byte[] Hash { get; set; }
+
                 DateTime Expiration { get; set; }
+
                 bool MustChange { get; set; }
             }
+            
             [EntityPartContract]
             public interface IEntityPartAudit
             {
+                [PropertyContract.Validation.Past("00:00:00")]
                 DateTime CreatedAt { get; set; }
+
                 [PropertyContract.Required]
                 IUserAccountEntity CreatedBy { get; set; }
+
+                [PropertyContract.Validation.Past("00:00:00")]
                 DateTime ModifiedAt { get; set; }
+
                 [PropertyContract.Required]
                 IUserAccountEntity ModifiedBy { get; set; }
-            }
-            public interface IMyDataRepository : IApplicationDataRepository
-            {
-                IEntityRepository<IUserAccountEntity> UserAccounts { get; }
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static class Repository3B
+        {
+            public enum MyAppUserRole
+            {
+                MyGuest = 0,
+                MyPower = 1,
+                MyAdmin = 2
+            }
 
+            public interface IMyAppUserAccountEntity : IR3A.IUserAccountEntity, IEntityPartId<int>
+            {
+                new ICollection<IMyAppUserRoleEntity> Roles { get; }
+            }
+
+            public interface IMyAppUserRoleEntity : IR3A.IUserRoleEntity, IEntityPartId<int>, IR3A.IEntityPartUserRole<MyAppUserRole>
+            {
+            }
+
+            public interface IMyAppDataRepository : IApplicationDataRepository
+            {
+                IEntityRepository<IMyAppUserAccountEntity> Users { get; }
+            }
+        }
     }
 }

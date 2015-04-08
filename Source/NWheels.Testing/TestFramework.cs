@@ -249,7 +249,7 @@ namespace NWheels.Testing
                 new IMetadataConvention[] { new ContractMetadataConvention(), new AttributeMetadataConvention(), new RelationMetadataConvention() },
                 new IRelationalMappingConvention[] { new PascalCaseRelationalMappingConvention(usePluralTableNames: true) });
 
-            return new TypeMetadataCache(conventions, mixinRegistrations);
+            return new TypeMetadataCache(conventions, mixinRegistrations, concretizationRegistrations: new ConcretizationRegistration[0]);
         }
     }
 }
