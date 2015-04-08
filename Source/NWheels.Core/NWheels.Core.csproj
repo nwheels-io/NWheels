@@ -98,6 +98,7 @@
     <Compile Include="Hosting\NodeHost.cs" />
     <Compile Include="Hosting\NodeTrigger.cs" />
     <Compile Include="Logging\ApplicationEventLoggerConvention.cs" />
+    <Compile Include="Logging\CallLoggingAspectFactory.cs" />
     <Compile Include="Logging\CrashLog.cs" />
     <Compile Include="Logging\IClock.cs" />
     <Compile Include="Logging\IFrameworkLoggingConfiguration.cs" />

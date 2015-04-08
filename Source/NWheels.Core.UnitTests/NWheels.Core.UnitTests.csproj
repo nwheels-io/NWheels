@@ -71,6 +71,7 @@
     <Compile Include="DataObjects\TypeMetadataCacheTests.cs" />
     <Compile Include="Hosting\AutofacRegistrationTests.cs" />
     <Compile Include="Logging\ApplicationEventLoggerConventionTests.cs" />
+    <Compile Include="Logging\CallLoggingAspectFactoryTest.cs" />
     <Compile Include="Logging\LoggingBenchmarkTests.cs" />
     <Compile Include="Logging\LogNameValuePairTests.cs" />
     <Compile Include="Logging\NameValuePairActivityLogNodeTests.cs" />
