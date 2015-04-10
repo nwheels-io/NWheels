@@ -12,6 +12,10 @@ namespace NWheels.Logging
 {
     public abstract class LogNode
     {
+        public const char PreserveMessageIdPrefix = '!';
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private readonly string _messageId;
         private LogContentTypes _contentTypes;
         private LogLevel _level;
@@ -230,7 +234,14 @@ namespace NWheels.Logging
 
         protected string MessageIdToText()
         {
-            return LogMessageHelper.GetTextFromMessageId(_messageId);
+            if ( _messageId[0] != PreserveMessageIdPrefix )
+            {
+                return LogMessageHelper.GetTextFromMessageId(_messageId);
+            }
+            else
+            {
+                return _messageId.Substring(1);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -288,7 +299,7 @@ namespace NWheels.Logging
                 },
                 new LogNameValuePair<string> {
                     Name = "$message", 
-                    Value = _messageId
+                    Value = (_messageId[0] == PreserveMessageIdPrefix ? _messageId.Substring(1) : _messageId)
                 },
                 new LogNameValuePair<LogLevel> {
                     Name = "$level", 

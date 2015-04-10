@@ -22,9 +22,16 @@ namespace NWheels.Core.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static readonly string LoggingCallOutputsMessageId = "CallLoggingAspect.LoggingCallOutputs";
+        public static readonly string CallOutputReturnValueName = "return";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class AspectConvention : DecorationConvention
         {
+            private readonly Dictionary<string, Field<string>> _staticStringFields;
             private TypeKey _typeKey;
+            private DecoratingClassWriter _classWriter;
             private Field<IThreadLogAppender> _threadLogAppenderField;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,6 +39,7 @@ namespace NWheels.Core.Logging
             public AspectConvention()
                 : base(Will.DecorateClass | Will.DecorateMethods)
             {
+                _staticStringFields = new Dictionary<string, Field<string>>();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,6 +54,7 @@ namespace NWheels.Core.Logging
 
             protected override void OnClass(ClassType classType, DecoratingClassWriter classWriter)
             {
+                _classWriter = classWriter;
                 _threadLogAppenderField = classWriter.DependencyField<IThreadLogAppender>("_threadLogAppender");
             }
 
@@ -53,22 +62,72 @@ namespace NWheels.Core.Logging
 
             protected override void OnMethod(MethodMember member, Func<MethodDecorationBuilder> decorate)
             {
-                var messageId = _typeKey.PrimaryInterface.Name.TrimPrefix("I") + "::" + member.Name;
-                Local<NameValuePairActivityLogNode> activity = null;
+                var messageId = LogNode.PreserveMessageIdPrefix + _typeKey.PrimaryInterface.Name.TrimPrefix("I") + "." + member.Name;
+                var inputLogNodeBuilder = new NameValuePairLogNodeBuilder(shouldBuildActivity: true);
+                var outputLogNodeBuilder = new NameValuePairLogNodeBuilder(shouldBuildActivity: false);
+                
+                Local<ActivityLogNode> activityLocal = null;
 
                 decorate()
                     .OnBefore(w => {
-                        activity = w.Local<NameValuePairActivityLogNode>();
-                        activity.Assign(w.New<NameValuePairActivityLogNode>(w.Const(messageId)));
-                        _threadLogAppenderField.Void(x => x.AppendActivityNode, activity);
+                        activityLocal = w.Local<ActivityLogNode>();
+                    })
+                    .OnInputArgument((w, arg) => {
+                        inputLogNodeBuilder.AddNameValuePair(w.Const(arg.Name), arg.OperandType, arg, isDetail: true);
+                    })
+                    .OnInspectedInputArguments(w => {
+                        activityLocal.Assign(inputLogNodeBuilder.GetNewLogNodeOperand(w, GetStaticStringOperand(messageId)).CastTo<ActivityLogNode>());
+                        _threadLogAppenderField.Void(x => x.AppendActivityNode, activityLocal);
                     })
                     .OnException<Exception>((w, exception) => {
-                        activity.CastTo<ILogActivity>().Void(x => x.Fail, exception);
+                        activityLocal.CastTo<ILogActivity>().Void(x => x.Fail, exception);
                         w.Throw();
                     })
+                    .OnOutputArgument((w, arg) => {
+                        outputLogNodeBuilder.AddNameValuePair(w.Const(arg.Name), arg.OperandType, arg, isDetail: true);
+                    })
+                    .OnReturnValue((w, retVal) => {
+                        outputLogNodeBuilder.AddNameValuePair(
+                            Static.Prop(() => CallOutputReturnValueName), w.OwnerMethod.Signature.ReturnType, retVal, isDetail: true);
+                    })
+                    .OnSuccess(w => {
+                        if ( outputLogNodeBuilder.NameValuePairCount > 0 )
+                        {
+                            var logNodeOperand = outputLogNodeBuilder.GetNewLogNodeOperand(
+                                w, GetStaticStringOperand(LoggingCallOutputsMessageId), w.Const(LogLevel.Debug), w.Const<Exception>(null));
+                            _threadLogAppenderField.Void(x => x.AppendLogNode, logNodeOperand);
+                        }
+                    })
                     .OnAfter(w => {
-                        activity.CastTo<ILogActivity>().Void(x => x.Dispose);     
+                        activityLocal.CastTo<ILogActivity>().Void(x => x.Dispose);     
                     });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override void OnFinalizeDecoration(ClassType classType, DecoratingClassWriter classWriter)
+            {
+                classWriter.ImplementBase<object>().StaticConstructor(cw => {
+                    foreach ( var staticString in _staticStringFields )
+                    {
+                        staticString.Value.Assign(staticString.Key);
+                    }
+                });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IOperand<string> GetStaticStringOperand(string s)
+            {
+                Field<string> field;
+
+                if ( !_staticStringFields.TryGetValue(s, out field) )
+                {
+                    field = _classWriter.StaticField<string>("_s_string_" + new string(s.Where(c => char.IsLetter(c) || char.IsDigit(c)).ToArray()));
+                    _staticStringFields.Add(s, field);
+                }
+
+                return field;
             }
         }
     }

@@ -6,11 +6,6 @@ namespace NWheels.Logging
     {
         public static string GetTextFromMessageId(string messageId)
         {
-            if ( messageId.Contains("::") )
-            {
-                return messageId;
-            }
-
             var lastDotPosition = messageId.LastIndexOf('.');
 
             if ( lastDotPosition >= 0 && lastDotPosition < messageId.Length - 1 )
