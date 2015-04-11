@@ -123,11 +123,6 @@
     <Compile Include="SampleLogGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NWheels.Core\NWheels.Core.csproj">
-      <Project>{b00952f0-e6c7-4c8e-9181-7367fd48caf4}</Project>
-      <Name>NWheels.Core</Name>
-      <Private>False</Private>
-    </ProjectReference>
     <ProjectReference Include="..\NWheels.Puzzle.OdataOwinWebapi\NWheels.Puzzle.OdataOwinWebapi.csproj">
       <Project>{d793f755-6585-4e09-9f40-3a689fdf4dff}</Project>
       <Name>NWheels.Puzzle.OdataOwinWebapi</Name>

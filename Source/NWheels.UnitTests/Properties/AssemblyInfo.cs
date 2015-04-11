@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("NWheels.Core")]
+[assembly: AssemblyTitle("NWheels.UnitTests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("NWheels.Core")]
+[assembly: AssemblyProduct("NWheels.Core.UnitTests")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("6f4760a6-e340-4b2f-8514-ed8253c896b9")]
+[assembly: Guid("8d7a825b-590f-4933-b146-046a648bf492")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -34,7 +34,3 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("0.9.1.7")]
 [assembly: AssemblyFileVersion("0.9.1.7")]
-
-[assembly: InternalsVisibleTo("NWheels.Testing")]
-[assembly: InternalsVisibleTo("NWheels.Core.UnitTests")]
-[assembly: InternalsVisibleTo("NWheels.RunTimeTypes")]

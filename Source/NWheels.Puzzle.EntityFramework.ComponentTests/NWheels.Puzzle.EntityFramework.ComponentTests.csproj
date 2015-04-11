@@ -95,10 +95,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NWheels.Core\NWheels.Core.csproj">
-      <Project>{b00952f0-e6c7-4c8e-9181-7367fd48caf4}</Project>
-      <Name>NWheels.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NWheels.Puzzle.EntityFramework\NWheels.Puzzle.EntityFramework.csproj">
       <Project>{fa1fd78f-2906-477e-ad2f-55bb8ae19a75}</Project>
       <Name>NWheels.Puzzle.EntityFramework</Name>

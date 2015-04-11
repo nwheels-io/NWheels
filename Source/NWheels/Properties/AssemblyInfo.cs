@@ -36,5 +36,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("0.9.1.7")]
 
 [assembly: InternalsVisibleTo("NWheels.Testing")]
-[assembly: InternalsVisibleTo("NWheels.Core")]
-[assembly: InternalsVisibleTo("NWheels.Core.UnitTests")]
+[assembly: InternalsVisibleTo("NWheels.UnitTests")]
