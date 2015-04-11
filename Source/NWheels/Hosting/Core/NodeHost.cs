@@ -15,6 +15,7 @@ using Autofac.Extras.Multitenant;
 using Hapil;
 using NWheels.Configuration;
 using NWheels.Conventions;
+using NWheels.Core;
 using NWheels.Core.Conventions;
 using NWheels.Core.Logging;
 using NWheels.Core.Processing;

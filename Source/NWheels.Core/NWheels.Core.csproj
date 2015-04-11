@@ -61,63 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Concurrency\ResourceLock.cs" />
-    <Compile Include="Configuration\ConfigurationElementBase.cs" />
-    <Compile Include="Configuration\ConfigurationSectionBase.cs" />
-    <Compile Include="Configuration\ConfigurationObjectConvention.cs" />
-    <Compile Include="Configuration\NamedObjectCollectionAdapter.cs" />
-    <Compile Include="Configuration\OverrideHistory.cs" />
-    <Compile Include="Configuration\XmlConfigurationLoader.cs" />
-    <Compile Include="Configuration\IConfigurationLogger.cs" />
-    <Compile Include="Configuration\IInternalConfigurationObject.cs" />
-    <Compile Include="Conventions\ConfigurationObjectFactory.cs" />
-    <Compile Include="Conventions\IConfigurationObjectFactory.cs" />
-    <Compile Include="Conventions\LoggerObjectFactory.cs" />
-    <Compile Include="DataObjects\Conventions\RelationMetadataConvention.cs" />
-    <Compile Include="DataObjects\MetadataConventionSet.cs" />
-    <Compile Include="DataObjects\Conventions\ContractMetadataConvention.cs" />
-    <Compile Include="DataObjects\Conventions\AttributeMetadataConvention.cs" />
-    <Compile Include="DataObjects\Conventions\IMetadataConvention.cs" />
-    <Compile Include="DataObjects\MetadataElement.cs" />
-    <Compile Include="DataObjects\CollectionAdapter.cs" />
-    <Compile Include="DataObjects\KeyMetadataBuilder.cs" />
-    <Compile Include="DataObjects\ObjectCollectionAdapter.cs" />
-    <Compile Include="DataObjects\PropertyMetadataBuilder.cs" />
-    <Compile Include="DataObjects\PropertyRelationalMappingBuilder.cs" />
-    <Compile Include="DataObjects\PropertyValidationMetadataBuilder.cs" />
-    <Compile Include="DataObjects\RelationMetadataBuilder.cs" />
-    <Compile Include="DataObjects\TypeMetadataBuilder.cs" />
-    <Compile Include="DataObjects\TypeMetadataBuilderConstructor.cs" />
-    <Compile Include="DataObjects\TypeMetadataCache.cs" />
-    <Compile Include="DataObjects\TypeRelationalMappingBuilder.cs" />
-    <Compile Include="Entities\PascalCaseRelationalMappingConvention.cs" />
-    <Compile Include="Entities\RelationalMappingConventionBase.cs" />
-    <Compile Include="Entities\UnderscoreRelationalMappingConvention.cs" />
-    <Compile Include="Hosting\IInitializableHostComponent.cs" />
-    <Compile Include="Hosting\INodeHostLogger.cs" />
-    <Compile Include="Hosting\NodeHost.cs" />
-    <Compile Include="Hosting\NodeTrigger.cs" />
-    <Compile Include="Logging\ApplicationEventLoggerConvention.cs" />
-    <Compile Include="Logging\CallLoggingAspectFactory.cs" />
-    <Compile Include="Logging\CrashLog.cs" />
-    <Compile Include="Logging\IClock.cs" />
-    <Compile Include="Logging\IFrameworkLoggingConfiguration.cs" />
-    <Compile Include="Logging\IPlainLog.cs" />
-    <Compile Include="Logging\IThreadLogAnchor.cs" />
-    <Compile Include="Logging\IThreadRegistry.cs" />
-    <Compile Include="Logging\NameValuePairLogNodeBuilder.cs" />
-    <Compile Include="Logging\StopwatchClock.cs" />
-    <Compile Include="Logging\ThreadLog.cs" />
-    <Compile Include="Logging\ThreadLogAppender.cs" />
-    <Compile Include="Logging\ThreadRegistry.cs" />
-    <Compile Include="Logging\UniversalThreadLogAnchor.cs" />
-    <Compile Include="Processing\RevertableSequence.cs" />
-    <Compile Include="Processing\StateMachine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RealFramework.cs" />
-    <Compile Include="UI\UiApplication.cs" />
-    <Compile Include="UI\Web\IWebAppClientSide.cs" />
-    <Compile Include="UI\Web\IWebAppServerSide.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels\NWheels.csproj">
@@ -129,7 +73,17 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Concurrency\" />
+    <Folder Include="Configuration\" />
+    <Folder Include="Conventions\" />
+    <Folder Include="DataObjects\" />
+    <Folder Include="Entities\" />
+    <Folder Include="Hosting\" />
+    <Folder Include="Logging\" />
+    <Folder Include="Processing\" />
+    <Folder Include="UI\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

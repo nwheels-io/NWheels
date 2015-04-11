@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Hapil;
 using NWheels.Concurrency;
-using NWheels.Core.Concurrency;
+using NWheels.Concurrency.Core;
 using NWheels.Core.Configuration;
 using NWheels.Core.Conventions;
 using NWheels.Core.DataObjects;

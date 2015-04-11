@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NWheels.Core.Concurrency;
+using NWheels.Concurrency.Core;
 using NWheels.Core.Logging;
 using NWheels.Extensions;
 using NWheels.Hosting;
