@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NWheels.Utilities;
 
-namespace NWheels.Core.Logging
+namespace NWheels.Logging.Core
 {
     public static class CrashLog
     {

@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Hapil;
 using Hapil.Members;
-using NWheels.DataObjects;
 
-namespace NWheels.Core.DataObjects
+namespace NWheels.DataObjects.Core
 {
     internal class TypeMetadataBuilderConstructor
     {

@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.Entities;
-using NWheels.DataObjects;
-using NWheels.Core.DataObjects;
+﻿using NWheels.DataObjects.Core;
 
-namespace NWheels.Core.Entities
+namespace NWheels.Entities.Core
 {
     public class PascalCaseRelationalMappingConvention : RelationalMappingConventionBase
     {

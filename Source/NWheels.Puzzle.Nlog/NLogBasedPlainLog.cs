@@ -9,10 +9,9 @@ using NLog.Conditions;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
-using NWheels.Core.Hosting;
-using NWheels.Core.Logging;
 using NWheels.Hosting;
 using NWheels.Logging;
+using NWheels.Logging.Core;
 using NWheels.Utilities;
 using LogLevel = NLog.LogLevel;
 

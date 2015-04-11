@@ -7,8 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using NUnit.Framework;
-using NWheels.Core.Logging;
 using NWheels.Logging;
+using NWheels.Logging.Core;
 
 namespace NWheels.Core.UnitTests.Logging
 {

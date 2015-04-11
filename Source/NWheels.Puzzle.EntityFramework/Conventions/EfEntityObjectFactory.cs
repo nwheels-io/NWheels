@@ -8,8 +8,8 @@ using Hapil;
 using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
-using NWheels.Core.DataObjects;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Entities;
 using TT = Hapil.TypeTemplate;
 

@@ -1,4 +1,4 @@
-﻿namespace NWheels.Core.Logging
+﻿namespace NWheels.Logging.Core
 {
     internal interface IThreadRegistry
     {

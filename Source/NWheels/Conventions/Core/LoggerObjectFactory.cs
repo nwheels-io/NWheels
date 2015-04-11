@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Hapil;
-using NWheels.Conventions;
-using NWheels.Core.Logging;
 using NWheels.Logging;
+using NWheels.Logging.Core;
 
-namespace NWheels.Core.Conventions
+namespace NWheels.Conventions.Core
 {
     internal class LoggerObjectFactory : ConventionObjectFactory, IAutoObjectFactory
     {

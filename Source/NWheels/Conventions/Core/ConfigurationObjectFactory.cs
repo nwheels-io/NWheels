@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autofac;
 using Hapil;
 using NWheels.Configuration;
-using NWheels.Conventions;
-using NWheels.Core.Configuration;
-using NWheels.Core.DataObjects;
+using NWheels.Configuration.Core;
 using NWheels.DataObjects;
-using NWheels.Extensions;
 
-namespace NWheels.Core.Conventions
+namespace NWheels.Conventions.Core
 {
     internal class ConfigurationObjectFactory : ConventionObjectFactory, IConfigurationObjectFactory, IAutoObjectFactory
     {

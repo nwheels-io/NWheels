@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
-using System.Xml.Linq;
-using NWheels.Configuration;
 
-namespace NWheels.Core.Configuration
+namespace NWheels.Configuration.Core
 {
     public class OverrideHistory : IOverrideHistory
     {

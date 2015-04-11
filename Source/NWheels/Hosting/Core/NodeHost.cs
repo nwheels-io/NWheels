@@ -3,36 +3,32 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using Autofac;
-using Autofac.Builder;
-using Autofac.Core;
 using Autofac.Extras.Multitenant;
 using Hapil;
 using NWheels.Configuration;
+using NWheels.Configuration.Core;
 using NWheels.Conventions;
+using NWheels.Conventions.Core;
 using NWheels.Core;
-using NWheels.Core.Conventions;
-using NWheels.Core.Logging;
 using NWheels.Core.Processing;
+using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
+using NWheels.DataObjects.Core.Conventions;
 using NWheels.Entities;
+using NWheels.Entities.Core;
 using NWheels.Exceptions;
 using NWheels.Extensions;
-using NWheels.Hosting;
 using NWheels.Logging;
+using NWheels.Logging.Core;
 using NWheels.Processing;
+using NWheels.Processing.Core;
 using NWheels.Utilities;
-using NWheels.Core.Configuration;
-using NWheels.Core.DataObjects;
-using NWheels.Core.DataObjects.Conventions;
-using NWheels.Core.Entities;
-using NWheels.DataObjects;
 
-namespace NWheels.Core.Hosting
+namespace NWheels.Hosting.Core
 {
     public class NodeHost : INodeHost
     {

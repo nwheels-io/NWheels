@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
 using NWheels.Configuration;
-using NWheels.Core.Configuration;
-using NWheels.Core.Conventions;
 using System.IO;
 using System.Xml.Linq;
+using NWheels.Configuration.Core;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.Testing;
 

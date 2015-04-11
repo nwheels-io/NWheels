@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using NWheels.Hosting;
-using NWheels.Logging;
 
-namespace NWheels.Core.Logging
+namespace NWheels.Logging.Core
 {
     internal class ThreadLog : IThreadLog
     {

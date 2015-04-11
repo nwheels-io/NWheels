@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.Core.DataObjects;
+﻿using NWheels.DataObjects.Core;
 using NWheels.Extensions;
 
-namespace NWheels.Core.Entities
+namespace NWheels.Entities.Core
 {
     public class UnderscoreRelationalMappingConvention : RelationalMappingConventionBase
     {

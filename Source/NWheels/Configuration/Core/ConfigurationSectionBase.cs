@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Hapil;
-using NWheels.Configuration;
-using NWheels.Core.Conventions;
-using NWheels.Utilities;
+﻿using NWheels.Conventions.Core;
 
-namespace NWheels.Core.Configuration
+namespace NWheels.Configuration.Core
 {
     public abstract class ConfigurationSectionBase : ConfigurationElementBase, IConfigurationSection
     {

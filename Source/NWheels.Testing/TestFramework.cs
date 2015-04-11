@@ -7,19 +7,18 @@ using Autofac;
 using Hapil;
 using NWheels.Concurrency;
 using NWheels.Concurrency.Core;
-using NWheels.Core.Configuration;
-using NWheels.Core.Conventions;
-using NWheels.Core.DataObjects;
-using NWheels.Core.DataObjects.Conventions;
-using NWheels.Core.Entities;
-using NWheels.Core.Logging;
 using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.Configuration;
 using NWheels.Conventions;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
+using NWheels.DataObjects.Core.Conventions;
+using NWheels.Entities.Core;
+using NWheels.Logging.Core;
 
 namespace NWheels.Testing
 {

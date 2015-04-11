@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
-using NWheels.Core.Logging;
+using NWheels.Logging.Core;
 using NWheels.Testing;
 
 namespace NWheels.Core.UnitTests.Logging

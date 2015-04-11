@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Linq;
 using Hapil;
-using NWheels.Configuration;
-using NWheels.Core.Conventions;
+using NWheels.Conventions.Core;
 using NWheels.Extensions;
 using NWheels.Utilities;
 
-namespace NWheels.Core.Configuration
+namespace NWheels.Configuration.Core
 {
     public abstract class ConfigurationElementBase : IConfigurationObject, IConfigurationElement, IInternalConfigurationObject
     {

@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using NWheels.Core.Logging;
 using NWheels.DataObjects;
 using NWheels.Logging;
+using NWheels.Logging.Core;
 using NWheels.Testing;
 
 namespace NWheels.Core.UnitTests.Logging

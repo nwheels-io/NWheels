@@ -2,7 +2,7 @@
 using NWheels.Exceptions;
 using NWheels.Logging;
 
-namespace NWheels.Core.Hosting
+namespace NWheels.Hosting.Core
 {
     public interface INodeHostLogger : IApplicationEventLogger
     {

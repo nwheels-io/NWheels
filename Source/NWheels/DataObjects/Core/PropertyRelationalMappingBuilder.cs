@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NWheels.DataObjects;
-
-namespace NWheels.Core.DataObjects
+﻿namespace NWheels.DataObjects.Core
 {
     public class PropertyRelationalMappingBuilder : MetadataElement<IPropertyRelationalMapping>, IPropertyRelationalMapping
     {

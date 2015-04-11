@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using NWheels.Configuration;
 using System.Xml.Linq;
 
-namespace NWheels.Core.Configuration
+namespace NWheels.Configuration.Core
 {
     internal interface IInternalConfigurationObject : IConfigurationObject
     {

@@ -12,7 +12,6 @@ using Autofac;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
-using NWheels.Core.DataObjects;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Exceptions;
@@ -23,6 +22,7 @@ using System.Reflection;
 using TT = Hapil.TypeTemplate;
 using Hapil.Members;
 using NWheels.Conventions;
+using NWheels.DataObjects.Core;
 
 // ReSharper disable ConvertToLambdaExpression
 

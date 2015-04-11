@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NWheels.Core.DataObjects;
 using NWheels.DataObjects;
 
 namespace NWheels.Core.UnitTests.DataObjects

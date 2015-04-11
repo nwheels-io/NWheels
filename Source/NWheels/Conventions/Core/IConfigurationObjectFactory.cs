@@ -1,7 +1,6 @@
-using NWheels.Configuration;
-using NWheels.Core.Configuration;
+using NWheels.Configuration.Core;
 
-namespace NWheels.Core.Conventions
+namespace NWheels.Conventions.Core
 {
     public interface IConfigurationObjectFactory
     {

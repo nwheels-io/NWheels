@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.Configuration;
-using NWheels.Core.DataObjects;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Extensions;
 
-namespace NWheels.Core.Configuration
+namespace NWheels.Configuration.Core
 {
     public class NamedObjectCollectionAdapter<TConcrete, TAbstract> : CollectionAdapter<TConcrete, TAbstract>, INamedObjectCollection<TAbstract>
         where TAbstract : class

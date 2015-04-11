@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using NWheels.Core.Processing;
 using NWheels.Processing;
+using NWheels.Processing.Core;
 using NWheels.Testing;
 
 namespace NWheels.Core.UnitTests.Processing

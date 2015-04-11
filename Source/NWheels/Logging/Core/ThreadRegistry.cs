@@ -1,19 +1,14 @@
-﻿using NWheels.Logging;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using Autofac;
-using NWheels.Core.Hosting;
 using NWheels.Extensions;
-using NWheels.Hosting;
+using NWheels.Hosting.Core;
 using NWheels.Utilities;
 
-namespace NWheels.Core.Logging
+namespace NWheels.Logging.Core
 {
     internal class ThreadRegistry : IThreadRegistry, IInitializableHostComponent
     {

@@ -2,18 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Hapil;
 using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.Exceptions;
 using NWheels.Extensions;
-using NWheels.Logging;
 using TT = Hapil.TypeTemplate;
 
-namespace NWheels.Core.Logging
+namespace NWheels.Logging.Core
 {
     public class ApplicationEventLoggerConvention : ImplementationConvention
     {

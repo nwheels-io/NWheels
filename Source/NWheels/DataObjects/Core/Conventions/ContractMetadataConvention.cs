@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Hapil;
-using NWheels.DataObjects;
-using NWheels.Entities;
 using NWheels.Extensions;
 
-namespace NWheels.Core.DataObjects.Conventions
+namespace NWheels.DataObjects.Core.Conventions
 {
     public class ContractMetadataConvention : IMetadataConvention
     {

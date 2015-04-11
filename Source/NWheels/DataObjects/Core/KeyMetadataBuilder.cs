@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.DataObjects;
+﻿using System.Collections.Generic;
 
-namespace NWheels.Core.DataObjects
+namespace NWheels.DataObjects.Core
 {
     public class KeyMetadataBuilder : MetadataElement<IKeyMetadata>, IKeyMetadata
     {

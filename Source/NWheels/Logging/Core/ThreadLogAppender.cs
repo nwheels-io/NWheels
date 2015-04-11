@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autofac;
-using NWheels.Extensions;
-using NWheels.Logging;
-
-namespace NWheels.Core.Logging
+﻿namespace NWheels.Logging.Core
 {
     internal class ThreadLogAppender : IThreadLogAppender
     {

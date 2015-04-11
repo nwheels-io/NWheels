@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
 using NWheels.Configuration;
-using NWheels.Core.Configuration;
-using NWheels.Core.Conventions;
 using NWheels.Testing;
 using System.Xml.Linq;
+using NWheels.Configuration.Core;
 
 namespace NWheels.Core.UnitTests.Configuration
 {

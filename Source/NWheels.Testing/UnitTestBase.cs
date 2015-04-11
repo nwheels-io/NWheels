@@ -2,9 +2,6 @@
 using Autofac;
 using NUnit.Framework;
 using NWheels.DataObjects;
-using NWheels.Core.DataObjects;
-using NWheels.Core.DataObjects.Conventions;
-using NWheels.Core.Entities;
 using NWheels.Entities;
 
 namespace NWheels.Testing

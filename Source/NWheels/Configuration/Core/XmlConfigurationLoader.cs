@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using Autofac;
-using NWheels.Configuration;
-using System.Runtime.Serialization;
 using NWheels.Exceptions;
 using NWheels.Extensions;
-using System.IO;
 using NWheels.Hosting;
 
-namespace NWheels.Core.Configuration
+namespace NWheels.Configuration.Core
 {
     internal class XmlConfigurationLoader
     {

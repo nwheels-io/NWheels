@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 using NWheels.Configuration;
-using System.ComponentModel;
-using NWheels.Logging;
 
-namespace NWheels.Core.Logging
+namespace NWheels.Logging.Core
 {
     [ConfigurationSection(XmlName = "Framework.Logging")]
     public interface IFrameworkLoggingConfiguration : IConfigurationSection

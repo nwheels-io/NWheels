@@ -1,25 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 using System.Xml.Linq;
 using Hapil;
-using Hapil.Writers;
-using Hapil.Members;
 using Hapil.Operands;
-using NWheels.Configuration;
-using NWheels.Core.DataObjects;
+using Hapil.Writers;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Utilities;
 using TT = Hapil.TypeTemplate;
-using System.Reflection;
-using NWheels.Core.Conventions;
 
-namespace NWheels.Core.Configuration
+namespace NWheels.Configuration.Core
 {
     public class ConfigurationObjectConvention : ImplementationConvention
     {

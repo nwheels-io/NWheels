@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NWheels.DataObjects;
-using System.ComponentModel.DataAnnotations;
-
-namespace NWheels.Core.DataObjects
+﻿namespace NWheels.DataObjects.Core
 {
     public class PropertyValidationMetadataBuilder : MetadataElement<IPropertyValidationMetadata>, IPropertyValidationMetadata
     {

@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using Hapil;
 using MySql.Data.MySqlClient;
 using NUnit.Framework;
-using NWheels.Core.DataObjects;
-using NWheels.Core.Entities;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;

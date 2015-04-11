@@ -8,9 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Autofac;
-using NWheels.Core.Hosting;
-using NWheels.Core.Logging;
 using NWheels.Hosting;
+using NWheels.Hosting.Core;
+using NWheels.Logging.Core;
 using NWheels.Puzzle.Nlog;
 using NWheels.Utilities;
 

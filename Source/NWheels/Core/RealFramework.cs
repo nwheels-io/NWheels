@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Concurrency.Core;
-using NWheels.Core.Logging;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Entities;
 using NWheels.Concurrency;
+using NWheels.Logging.Core;
 
 namespace NWheels.Core
 {

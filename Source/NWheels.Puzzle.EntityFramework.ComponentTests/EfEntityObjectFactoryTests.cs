@@ -6,8 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
-using NWheels.Core.DataObjects;
-using NWheels.Core.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.Impl;
 using NWheels.Testing;

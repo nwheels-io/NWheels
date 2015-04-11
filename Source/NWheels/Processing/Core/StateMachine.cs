@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Hapil.Applied.ApiContracts;
+using NWheels.Core.Processing;
 using NWheels.Exceptions;
 using NWheels.Logging;
-using NWheels.Processing;
 
-namespace NWheels.Core.Processing
+namespace NWheels.Processing.Core
 {
     public class StateMachine<TState, TTrigger> : IStateMachine<TState, TTrigger>, IStateMachineBuilder<TState, TTrigger>
     {

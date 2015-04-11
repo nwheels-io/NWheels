@@ -6,8 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Hapil;
 using NUnit.Framework;
-using NWheels.Core.DataObjects;
-using NWheels.Core.Entities;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;

@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
-using NWheels.Logging;
 using TT = Hapil.TypeTemplate;
 
-namespace NWheels.Core.Logging
+namespace NWheels.Logging.Core
 {
     internal class NameValuePairLogNodeBuilder
     {

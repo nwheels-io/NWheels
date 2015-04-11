@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Hapil;
 using Hapil.Applied.Conventions;
 using Hapil.Decorators;
 using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
-using NWheels.Logging;
 
-namespace NWheels.Core.Logging
+namespace NWheels.Logging.Core
 {
     public class CallLoggingAspectFactory : ConventionObjectFactory
     {

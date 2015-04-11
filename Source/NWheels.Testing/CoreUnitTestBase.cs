@@ -4,10 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using NWheels.Core.DataObjects;
-using NWheels.Core.DataObjects.Conventions;
-using NWheels.Core.Entities;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Entities;
 
 namespace NWheels.Testing

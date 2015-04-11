@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using System.Data.Entity.Design.PluralizationServices;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.Core.DataObjects;
 using NWheels.DataObjects;
-using NWheels.Entities;
+using NWheels.DataObjects.Core;
 
-namespace NWheels.Core.Entities
+namespace NWheels.Entities.Core
 {
     public abstract class RelationalMappingConventionBase : IRelationalMappingConvention
     {

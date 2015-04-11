@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.Core.Processing;
 using NWheels.Logging;
+using NWheels.Processing.Core;
 
 namespace NWheels.Core.UnitTests.Processing
 {

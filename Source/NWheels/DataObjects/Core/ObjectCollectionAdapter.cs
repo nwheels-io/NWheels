@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.DataObjects;
 
-namespace NWheels.Core.DataObjects
+namespace NWheels.DataObjects.Core
 {
     public class ObjectCollectionAdapter<TConcrete, TAbstract> : CollectionAdapter<TConcrete, TAbstract>, IObjectCollection<TAbstract>
         where TConcrete : TAbstract

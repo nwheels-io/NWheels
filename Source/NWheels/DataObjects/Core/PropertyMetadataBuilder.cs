@@ -2,17 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
-using NWheels.DataObjects;
 using NWheels.Exceptions;
 using NWheels.Utilities;
 using TT = Hapil.TypeTemplate;
 
-namespace NWheels.Core.DataObjects
+namespace NWheels.DataObjects.Core
 {
     public class PropertyMetadataBuilder : MetadataElement<IPropertyMetadata>, IPropertyMetadata
     {

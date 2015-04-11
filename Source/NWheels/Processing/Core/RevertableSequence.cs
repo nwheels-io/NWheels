@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.Processing;
 using NWheels.Processing.Fluent.RevertableSequence;
 
-namespace NWheels.Core.Processing
+namespace NWheels.Processing.Core
 {
     internal class RevertableSequence : IRevertableSequence, IRevertableSequenceBuilder
     {
