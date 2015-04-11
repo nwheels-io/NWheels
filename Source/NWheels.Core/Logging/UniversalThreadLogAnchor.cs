@@ -18,7 +18,7 @@ namespace NWheels.Core.Logging
 
                 if ( (httpContext = System.Web.HttpContext.Current) != null )
                 {
-                    return (ThreadLog)httpContext.Items[s_HttpContextKey];
+                    return (ThreadLog)httpContext.Items[_s_httpContextKey];
                 }
                 else if ( (operationContext = System.ServiceModel.OperationContext.Current) != null )
                 {
@@ -27,7 +27,7 @@ namespace NWheels.Core.Logging
                 }
                 else
                 {
-                    return s_CurrentThreadLog;
+                    return _s_currentThreadLog;
                 }
             }
             set
@@ -37,7 +37,7 @@ namespace NWheels.Core.Logging
 
                 if ( (httpContext = System.Web.HttpContext.Current) != null )
                 {
-                    httpContext.Items[s_HttpContextKey] = value;
+                    httpContext.Items[_s_httpContextKey] = value;
                 }
                 else if ( (operationContext = System.ServiceModel.OperationContext.Current) != null )
                 {
@@ -53,7 +53,7 @@ namespace NWheels.Core.Logging
                 }
                 else
                 {
-                    s_CurrentThreadLog = value;
+                    _s_currentThreadLog = value;
                 }
             }
         }
@@ -61,11 +61,11 @@ namespace NWheels.Core.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ThreadStatic]
-        private static ThreadLog s_CurrentThreadLog;
+        private static ThreadLog _s_currentThreadLog;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static readonly object s_HttpContextKey = new object();
+        private static readonly object _s_httpContextKey = new object();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
