@@ -1,13 +1,9 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using NUnit.Framework;
 using NWheels.Logging;
 using NWheels.Logging.Core;
 
-namespace NWheels.Core.UnitTests.Logging
+namespace NWheels.UnitTests.Logging
 {
     [TestFixture]
     public class NameValuePairActivityLogNodeTests : ThreadLogUnitTestBase

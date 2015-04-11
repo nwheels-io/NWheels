@@ -1,16 +1,12 @@
-﻿using NUnit.Framework;
-using NWheels.Processing;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.Core.Processing;
-using NWheels.Logging;
+using NUnit.Framework;
+using NWheels.Processing;
 using NWheels.Processing.Core;
 
-namespace NWheels.Core.UnitTests.Processing
+namespace NWheels.UnitTests.Processing
 {
     [TestFixture]
     public class RevertableSequenceTests

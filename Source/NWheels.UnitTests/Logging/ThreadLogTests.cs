@@ -3,14 +3,12 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Xml;
 using NUnit.Framework;
 using NWheels.Logging;
 using NWheels.Logging.Core;
 
-namespace NWheels.Core.UnitTests.Logging
+namespace NWheels.UnitTests.Logging
 {
     [TestFixture]
     public class ThreadLogTests : ThreadLogUnitTestBase

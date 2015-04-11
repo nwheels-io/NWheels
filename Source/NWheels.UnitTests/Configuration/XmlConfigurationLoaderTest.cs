@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.Xml.Linq;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
 using NWheels.Configuration;
-using NWheels.Testing;
-using System.Xml.Linq;
 using NWheels.Configuration.Core;
+using NWheels.Testing;
 
-namespace NWheels.Core.UnitTests.Configuration
+namespace NWheels.UnitTests.Configuration
 {
     [TestFixture]
     public class XmlConfigurationLoaderTest : NUnitEmittedTypesTestBase

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autofac;
-using Autofac.Builder;
+﻿using Autofac;
 using NUnit.Framework;
 
-namespace NWheels.Core.UnitTests.Hosting
+namespace NWheels.UnitTests.Hosting
 {
     [TestFixture]
     public class AutofacRegistrationTests

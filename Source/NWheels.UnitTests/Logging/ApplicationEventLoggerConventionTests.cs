@@ -1,18 +1,15 @@
-﻿using System.Xml.Linq;
-using Hapil;
-using Hapil.Testing.NUnit;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Xml.Linq;
+using Hapil;
+using Hapil.Testing.NUnit;
 using NUnit.Framework;
-using NWheels.DataObjects;
 using NWheels.Logging;
 using NWheels.Logging.Core;
 using NWheels.Testing;
 
-namespace NWheels.Core.UnitTests.Logging
+namespace NWheels.UnitTests.Logging
 {
     [TestFixture]
     public class ApplicationEventLoggerConventionTests : NUnitEmittedTypesTestBase

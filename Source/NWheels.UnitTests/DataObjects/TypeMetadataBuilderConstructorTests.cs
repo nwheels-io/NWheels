@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
@@ -11,7 +7,7 @@ using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Testing;
 
-namespace NWheels.Core.UnitTests.DataObjects
+namespace NWheels.UnitTests.DataObjects
 {
     [TestFixture]
     public class TypeMetadataBuilderConstructorTests : UnitTestBase

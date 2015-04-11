@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using NWheels.Logging;
 
-namespace NWheels.Core.UnitTests.Logging
+namespace NWheels.UnitTests.Logging
 {
     [TestFixture]
     public class LogNameValuePairTests

@@ -4,7 +4,7 @@ using NUnit.Framework;
 using NWheels.Logging.Core;
 using NWheels.Testing;
 
-namespace NWheels.Core.UnitTests.Logging
+namespace NWheels.UnitTests.Logging
 {
     public class ThreadLogUnitTestBase : UnitTestBase
     {

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using Hapil;
 using Hapil.Testing.NUnit;
@@ -12,7 +9,7 @@ using NWheels.Logging;
 using NWheels.Logging.Core;
 using NWheels.Testing;
 
-namespace NWheels.Core.UnitTests.Logging
+namespace NWheels.UnitTests.Logging
 {
     [TestFixture]
     public class CallLoggingAspectFactoryTests : NUnitEmittedTypesTestBase

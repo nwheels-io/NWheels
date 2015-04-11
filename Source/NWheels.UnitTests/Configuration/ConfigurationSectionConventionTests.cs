@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Xml.Linq;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
 using NWheels.Configuration;
-using System.IO;
-using System.Xml.Linq;
 using NWheels.Configuration.Core;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.Testing;
 
-namespace NWheels.Core.UnitTests.Configuration
+namespace NWheels.UnitTests.Configuration
 {
     [TestFixture]
     public class ConfigurationSectionConventionTests : NUnitEmittedTypesTestBase

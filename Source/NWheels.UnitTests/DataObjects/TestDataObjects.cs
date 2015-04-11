@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NWheels.DataObjects;
 
-namespace NWheels.Core.UnitTests.DataObjects
+namespace NWheels.UnitTests.DataObjects
 {
     public static class TestDataObjects
     {
