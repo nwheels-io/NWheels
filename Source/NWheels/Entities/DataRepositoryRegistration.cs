@@ -6,38 +6,41 @@ using System.Threading.Tasks;
 
 namespace NWheels.Entities
 {
-    public abstract class ApplicationDataRepositoryRegistration
+    public interface IDataRepositoryRegistration
     {
-        public abstract Type DataRepositoryType { get; }
-        public abstract bool InitializeOnStartup { get; }
+        Type DataRepositoryType { get; }
+        bool InitializeStorageOnStartup { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class ApplicationDataRepositoryRegistration<TRepo> : ApplicationDataRepositoryRegistration
+    public class DataRepositoryRegistration<TRepo> : IDataRepositoryRegistration
         where TRepo : class, IApplicationDataRepository
     {
-        private readonly bool _initializeStorageOnStartup;
+        private bool _initializeStorageOnStartup;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ApplicationDataRepositoryRegistration(bool initializeStorageOnStartup)
+        bool IDataRepositoryRegistration.InitializeStorageOnStartup
         {
-            _initializeStorageOnStartup = initializeStorageOnStartup;
+            get
+            {
+                return _initializeStorageOnStartup;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override Type DataRepositoryType
+        public void WithInitializeStorageOnStartup()
+        {
+            _initializeStorageOnStartup = true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Type DataRepositoryType
         {
             get { return typeof(TRepo); }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public override bool InitializeOnStartup
-        {
-            get { return _initializeStorageOnStartup; }
         }
     }
 }

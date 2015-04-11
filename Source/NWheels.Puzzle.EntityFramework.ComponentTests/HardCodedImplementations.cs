@@ -26,15 +26,15 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             public static void RegisterEntityFineTunings(ContainerBuilder builder)
             {
-                builder.RegisterRelationalMappingFineTune<Interfaces.Repository1.IProduct>(ft => ft
+                builder.NWheelsFeatures().Entities().RegisterRelationalMappingFineTune<Interfaces.Repository1.IProduct>(ft => ft
                     .Table("MY_PRODUCTS")
                     .Column(p => p.Price, columnName: "MY_SPECIAL_PRICE_COLUMN", dataType: "MONEY"));
 
-                builder.RegisterRelationalMappingFineTune<Interfaces.Repository1.IOrder>(ft => ft
+                builder.NWheelsFeatures().Entities().RegisterRelationalMappingFineTune<Interfaces.Repository1.IOrder>(ft => ft
                     .Table("MY_ORDERS")
                     .Column(o => o.Id, columnName: "MY_SPECIAL_ORDER_ID_COLUMN"));
 
-                builder.RegisterRelationalMappingFineTune<Interfaces.Repository1.IOrderLine>(ft => ft
+                builder.NWheelsFeatures().Entities().RegisterRelationalMappingFineTune<Interfaces.Repository1.IOrderLine>(ft => ft
                     .Table("MY_ORDER_LINES")
                     .Column(ol => ol.Product, columnName: "MY_SPECIAL_PRODUCT_ID_COLUMN"));
             }

@@ -8,16 +8,16 @@ namespace NWheels.Extensions
 {
     public static class ObjectExtensions
     {
-        public static string ToStringOrNull<T>(this T value) where T : class
+        public static string ToStringOrDefault<T>(this T value, string defaultValue = null) where T : class
         {
-            return (value != null ? value.ToString() : null);
+            return (value != null ? value.ToString() : defaultValue);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static string ToStringOrNull<T>(this T? value) where T : struct
+        public static string ToStringOrDefault<T>(this T? value, string defaultValue = null) where T : struct
         {
-            return (value.HasValue ? value.Value.ToString() : null);
+            return (value.HasValue ? value.Value.ToString() : defaultValue);
         }
     }
 }

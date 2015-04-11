@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using Autofac.Builder;
 using NWheels.Configuration;
 using NWheels.DataObjects;
 using NWheels.Entities;
@@ -15,35 +16,6 @@ namespace NWheels.Extensions
 {
     public static class AutofacExtensions
     {
-        public static AutofacExtensions.NWheelsFeatureRegistrations NWheelsFeatures(this ContainerBuilder builder)
-        {
-            return new NWheelsFeatureRegistrations(builder);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static EntityFeatureRegistrations Entities(this NWheelsFeatureRegistrations features)
-        {
-            return new EntityFeatureRegistrations(((IHaveContainerBuilder)features).Builder);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static UIFeatureRegistrations UI(this NWheelsFeatureRegistrations features)
-        {
-            return new UIFeatureRegistrations(((IHaveContainerBuilder)features).Builder);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static void WebEndpoint<TApp>(this UIAppEndpointRegistrations<TApp> registration) 
-            where TApp : class, IUiApplication
-        {
-            ((IHaveContainerBuilder)registration).Builder.RegisterType<WebAppEndpoint<TApp>>().As<IWebAppEndpoint>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public static TService ResolveAuto<TService>(this IComponentContext container)
             where TService : class
         {
@@ -52,7 +24,7 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void RegisterApplicationJob<TJob>(this ContainerBuilder builder) 
+        public static void RegisterApplicationJob<TJob>(this ContainerBuilder builder)
             where TJob : IApplicationJob
         {
             builder.RegisterType<TJob>().As<TJob, IApplicationJob>().InstancePerDependency();
@@ -66,67 +38,73 @@ namespace NWheels.Extensions
             builder.RegisterType<ConfigSectionRegistration<TSection>>().As<IConfigSectionRegistration>().InstancePerDependency();
         }
 
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //public static IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> AspectLog<TLimit, TActivatorData, TRegistrationStyle>(
+        //    this IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> registration)
+        //{
+        //    registration.RegistrationData.ActivatingHandlers.Add((sender, e) => {
+        //        var factory = e.Context.Resolve<CallLoggingAspectFactory>();
+        //    });
+        //}
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void RegisterPascalCaseRelationalMappingConvention(this ContainerBuilder builder, bool usePluralTableNames = true)
+        public static AutofacExtensions.NWheelsFeatureRegistrations NWheelsFeatures(this ContainerBuilder builder)
         {
-            builder.RegisterInstance(new RelationalMappingConventionDefault(RelationalMappingConventionDefault.ConventionType.PascalCase, usePluralTableNames));
+            return new NWheelsFeatureRegistrations(builder);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void RegisterUnderscoreRelationalMappingConvention(this ContainerBuilder builder, bool usePluralTableNames = true)
+        public static ContractFeature Contracts(this NWheelsFeatureRegistrations features)
         {
-            builder.RegisterInstance(new RelationalMappingConventionDefault(RelationalMappingConventionDefault.ConventionType.Underscore, usePluralTableNames));
+            return new ContractFeature(((IHaveContainerBuilder)features).Builder);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void RegisterCustomRelationalMappingConvention<TConvention>(this ContainerBuilder builder, bool singleInstance = true)
-            where TConvention : IRelationalMappingConvention
+        public static EntityFeature Entities(this NWheelsFeatureRegistrations features)
         {
-            var registration = builder.RegisterType<TConvention>().As<IRelationalMappingConvention>();
-
-            if ( singleInstance )
-            {
-                registration.SingleInstance();
-            }
-            else
-            {
-                registration.InstancePerDependency();
-            }
+            return new EntityFeature(((IHaveContainerBuilder)features).Builder);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void RegisterRelationalMappingFineTune<TEntity>(this ContainerBuilder builder, Action<IRelationalMappingFineTune<TEntity>> fineTuneAction)
-            where TEntity : class
+        public static UIFeature UI(this NWheelsFeatureRegistrations features)
         {
-            var fineTuner = new RelationalMappingFineTuner<TEntity>(fineTuneAction);
-            builder.RegisterInstance<RelationalMappingFineTuner<TEntity>>(fineTuner);
+            return new UIFeature(((IHaveContainerBuilder)features).Builder);
         }
 
-        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void WithWebEndpoint<TApp>(this UIAppEndpointRegistrations<TApp> registration) 
+            where TApp : class, IUiApplication
+        {
+            ((IHaveContainerBuilder)registration).Builder.RegisterType<WebAppEndpoint<TApp>>().As<IWebAppEndpoint>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public interface IHaveContainerBuilder
         {
             ContainerBuilder Builder { get; }
         }
 
-        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class NWheelsFeatureRegistrations : IHaveContainerBuilder
         {
             private readonly ContainerBuilder _builder;
 
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public NWheelsFeatureRegistrations(ContainerBuilder builder)
             {
                 _builder = builder;
             }
 
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             ContainerBuilder IHaveContainerBuilder.Builder
             {
@@ -134,50 +112,133 @@ namespace NWheels.Extensions
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ContractFeature
+        {
+            private readonly ContainerBuilder _builder;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ContractFeature(ContainerBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ContractConcretizationRegistration<TGeneral> Concretize<TGeneral>() where TGeneral : class
+            {
+                return new ContractConcretizationRegistration<TGeneral>(_builder);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ContractMixinRegistration<TPart> Mix<TPart>() where TPart : class
+            {
+                return new ContractMixinRegistration<TPart>(_builder);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class EntityFeature
+        {
+            private readonly ContainerBuilder _builder;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public EntityFeature(ContainerBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public DataRepositoryRegistration<TRepo> RegisterDataRepository<TRepo>() where TRepo : class, IApplicationDataRepository
+            {
+                var registration = new DataRepositoryRegistration<TRepo>();
+                _builder.RegisterInstance(registration).As<IDataRepositoryRegistration>();
+                return registration;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void UsePascalCaseRelationalMappingConvention(bool usePluralTableNames = true)
+            {
+                _builder.RegisterInstance(new RelationalMappingConventionDefault(
+                    RelationalMappingConventionDefault.ConventionType.PascalCase, 
+                    usePluralTableNames));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void UseUnderscoreRelationalMappingConvention(bool usePluralTableNames = true)
+            {
+                _builder.RegisterInstance(new RelationalMappingConventionDefault(
+                    RelationalMappingConventionDefault.ConventionType.Underscore, 
+                    usePluralTableNames));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RegisterCustomRelationalMappingConvention<TConvention>(bool singleInstance = true)
+                where TConvention : IRelationalMappingConvention
+            {
+                var registration = _builder.RegisterType<TConvention>().As<IRelationalMappingConvention>();
+
+                if ( singleInstance )
+                {
+                    registration.SingleInstance();
+                }
+                else
+                {
+                    registration.InstancePerDependency();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RegisterRelationalMappingFineTune<TEntity>(Action<IRelationalMappingFineTune<TEntity>> fineTuneAction)
+                where TEntity : class
+            {
+                var fineTuner = new RelationalMappingFineTuner<TEntity>(fineTuneAction);
+                _builder.RegisterInstance<RelationalMappingFineTuner<TEntity>>(fineTuner);
+            }
+
+        }
+
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class EntityFeatureRegistrations
+        public class UIFeature
         {
             private readonly ContainerBuilder _builder;
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public EntityFeatureRegistrations(ContainerBuilder builder)
+            public UIFeature(ContainerBuilder builder)
             {
                 _builder = builder;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public EntityConcretizationRegistration<TGeneral> Concretize<TGeneral>() where TGeneral : class
+            public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp>() where TApp : class, IUiApplication
             {
-                return new EntityConcretizationRegistration<TGeneral>(_builder);
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public EntityMixinRegistration<TPart> Mix<TPart>() where TPart : class
-            {
-                return new EntityMixinRegistration<TPart>(_builder);
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public void DataRepository<TRepo>(bool initializeStorageOnStartup = false) where TRepo : class, IApplicationDataRepository
-            {
-                _builder.RegisterInstance(new ApplicationDataRepositoryRegistration<TRepo>(initializeStorageOnStartup)).As<ApplicationDataRepositoryRegistration>();
+                _builder.RegisterType<TApp>().As<TApp, IUiApplication>();
+                return new UIAppEndpointRegistrations<TApp>(_builder);
             }
         }
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class EntityConcretizationRegistration<TGeneral> where TGeneral : class
+        public class ContractConcretizationRegistration<TGeneral> where TGeneral : class
         {
             private readonly ContainerBuilder _builder;
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public EntityConcretizationRegistration(ContainerBuilder builder)
+            public ContractConcretizationRegistration(ContainerBuilder builder)
             {
                 _builder = builder;
             }
@@ -193,45 +254,23 @@ namespace NWheels.Extensions
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class EntityMixinRegistration<TPart> where TPart : class
+        public class ContractMixinRegistration<TPart> where TPart : class
         {
             private readonly ContainerBuilder _builder;
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public EntityMixinRegistration(ContainerBuilder builder)
+            public ContractMixinRegistration(ContainerBuilder builder)
             {
                 _builder = builder;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void Into<TEntity>() where TEntity : class
+            public void Into<TContract>() where TContract : class
             {
-                var mixin = new MixinRegistration(typeof(TEntity), typeof(TPart));
+                var mixin = new MixinRegistration(typeof(TContract), typeof(TPart));
                 _builder.RegisterInstance(mixin).As<MixinRegistration>();
-            }
-        }
-
-        //---------------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        public class UIFeatureRegistrations
-        {
-            private readonly ContainerBuilder _builder;
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public UIFeatureRegistrations(ContainerBuilder builder)
-            {
-                _builder = builder;
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public UIAppEndpointRegistrations<TApp> Application<TApp>() where TApp : class, IUiApplication
-            {
-                _builder.RegisterType<TApp>().As<TApp, IUiApplication>();
-                return new UIAppEndpointRegistrations<TApp>(_builder);
             }
         }
 

@@ -93,7 +93,7 @@
     <Compile Include="Entities\DateTimeUtc.cs" />
     <Compile Include="Entities\IDatabaseConfig.cs" />
     <Compile Include="DataObjects\IDataObjectKeyGenerator.cs" />
-    <Compile Include="Entities\ApplicationDataRepositoryRegistration.cs" />
+    <Compile Include="Entities\DataRepositoryRegistration.cs" />
     <Compile Include="Entities\RelationalMappingConventionDefault.cs" />
     <Compile Include="Entities\EntityContractAttribute.cs" />
     <Compile Include="DataObjects\IDataObjectKey.cs" />

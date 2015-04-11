@@ -71,7 +71,6 @@
   <ItemGroup>
     <Compile Include="Conventions\EfDataRepositoryFactory.cs" />
     <Compile Include="Conventions\EfEntityObjectFactory.cs" />
-    <Compile Include="DatabaseInitializerFeatureLoader.cs" />
     <Compile Include="EFConventions\NoUnderscoreForeignKeyNamingConvention.cs" />
     <Compile Include="Conventions\EfEntityConfigurationWriter.cs" />
     <Compile Include="Impl\EfDataRepositoryBase.cs" />

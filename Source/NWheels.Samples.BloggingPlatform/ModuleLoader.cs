@@ -17,9 +17,9 @@ namespace NWheels.Samples.BloggingPlatform
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.NWheelsFeatures().Entities().Concretize<IUserAccountEntity>().With<IBlogUserAccountEntity>();
-            builder.NWheelsFeatures().Entities().DataRepository<IBlogDataRepository>(initializeStorageOnStartup: true);
-            builder.NWheelsFeatures().UI().Application<BlogApp>().WebEndpoint();
+            builder.NWheelsFeatures().Contracts().Concretize<IUserAccountEntity>().With<IBlogUserAccountEntity>();
+            builder.NWheelsFeatures().Entities().RegisterDataRepository<IBlogDataRepository>().WithInitializeStorageOnStartup();
+            builder.NWheelsFeatures().UI().RegisterApplication<BlogApp>().WithWebEndpoint();
         }
     }
 }

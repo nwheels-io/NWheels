@@ -236,7 +236,7 @@ namespace NWheels.Core.Configuration
 
         internal protected void PushPropertyOverrideHistory(string propertyName, object value)
         {
-            _overrideHistory.PushPropertyOverride(propertyName, value.ToStringOrNull(), lineInfo: null);
+            _overrideHistory.PushPropertyOverride(propertyName, value.ToStringOrDefault(), lineInfo: null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
