@@ -79,6 +79,7 @@
     <Compile Include="Logging\ThreadLogTests.cs" />
     <Compile Include="Logging\ThreadLogUnitTestBase.cs" />
     <Compile Include="Processing\RevertableSequenceTests.cs" />
+    <Compile Include="Processing\Spikes\AsyncAwaitAssumptionTests.cs" />
     <Compile Include="Processing\StateMachineTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

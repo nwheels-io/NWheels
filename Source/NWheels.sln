@@ -68,6 +68,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Modules.Security", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.UnitTests", "NWheels.UnitTests\NWheels.UnitTests.csproj", "{F7A81508-54D8-4301-8B39-0CA7ACFB431B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Tools.TestBoard", "NWheels.Tools.TestBoard\NWheels.Tools.TestBoard.csproj", "{DE79E762-2173-4232-BB9A-A8437B1AA013}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -142,6 +144,10 @@ Global
 		{F7A81508-54D8-4301-8B39-0CA7ACFB431B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7A81508-54D8-4301-8B39-0CA7ACFB431B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7A81508-54D8-4301-8B39-0CA7ACFB431B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE79E762-2173-4232-BB9A-A8437B1AA013}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE79E762-2173-4232-BB9A-A8437B1AA013}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE79E762-2173-4232-BB9A-A8437B1AA013}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE79E762-2173-4232-BB9A-A8437B1AA013}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -168,5 +174,6 @@ Global
 		{40AA597B-9B84-4A74-A160-302D9B8AA615} = {CE3F724B-60C0-4274-B3F3-1C2CDD3D8531}
 		{2BFA1102-E3C2-41A3-8052-744C4DFE3EEC} = {7399D5EE-A002-44BC-B006-3E8A67700F2C}
 		{F7A81508-54D8-4301-8B39-0CA7ACFB431B} = {28191429-D848-4658-B8C2-8061E8990274}
+		{DE79E762-2173-4232-BB9A-A8437B1AA013} = {CE3F724B-60C0-4274-B3F3-1C2CDD3D8531}
 	EndGlobalSection
 EndGlobal
