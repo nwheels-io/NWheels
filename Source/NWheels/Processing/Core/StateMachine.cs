@@ -16,8 +16,15 @@ namespace NWheels.Processing.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public StateMachine(IStateMachineCodeBehind<TState, TTrigger> codeBehind, Auto<ILogger> logger)
+            : this(codeBehind, logger.Instance)
         {
-            _logger = logger.Instance;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public StateMachine(IStateMachineCodeBehind<TState, TTrigger> codeBehind, ILogger logger)
+        {
+            _logger = logger;
             _codeBehind = codeBehind;
             _states = new Dictionary<TState, MachineState>();
 

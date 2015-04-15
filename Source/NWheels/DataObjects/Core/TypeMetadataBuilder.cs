@@ -266,6 +266,18 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TypeRelationalMappingBuilder SafeGetRelationalMapping()
+        {
+            if ( this.RelationalMapping == null )
+            {
+                this.RelationalMapping = new TypeRelationalMappingBuilder();
+            }
+
+            return this.RelationalMapping;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal void EndBuild()
         {
             _propertyByName = this.Properties.ToDictionary(p => p.Name);

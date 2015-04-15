@@ -60,7 +60,7 @@ namespace NWheels.DataObjects.Core
 
         public string Name { get; set; }
         public PropertyKind Kind { get; set; }
-        public bool IsKey { get; set; }
+        public PropertyRole Role { get; set; }
         public Type ClrType { get; set; }
         public ISemanticDataType SemanticType { get; set; }
         public PropertyAccess Access { get; set; }
@@ -115,7 +115,7 @@ namespace NWheels.DataObjects.Core
         {
             Name = visitor.VisitAttribute("Name", Name);
             Kind = visitor.VisitAttribute("Kind", Kind);
-            IsKey = visitor.VisitAttribute("IsKey", IsKey);
+            Role = visitor.VisitAttribute("Role", Role);
             ClrType = visitor.VisitAttribute("ClrType", ClrType);
             SemanticType = visitor.VisitAttribute("SemanticType", SemanticType);
             Access = visitor.VisitAttribute("Access", Access);
@@ -176,6 +176,30 @@ namespace NWheels.DataObjects.Core
         public override string ToString()
         {
             return Name + " : " + ClrType.FriendlyName();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public RelationMetadataBuilder SafeGetRelation()
+        {
+            if ( this.Relation == null )
+            {
+                this.Relation = new RelationMetadataBuilder();
+            }
+
+            return this.Relation;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public PropertyRelationalMappingBuilder SafeGetRelationalMapping()
+        {
+            if ( this.RelationalMapping == null )
+            {
+                this.RelationalMapping = new PropertyRelationalMappingBuilder();
+            }
+
+            return this.RelationalMapping;
         }
     }
 }

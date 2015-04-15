@@ -23,15 +23,16 @@ using TT = Hapil.TypeTemplate;
 using Hapil.Members;
 using NWheels.Conventions;
 using NWheels.DataObjects.Core;
+using System.Data;
 
 // ReSharper disable ConvertToLambdaExpression
 
 namespace NWheels.Puzzle.EntityFramework.Conventions
 {
-    public class EfDataRepositoryFactory : ConventionObjectFactory, IAutoObjectFactory
+    public class EfDataRepositoryFactory : ConventionObjectFactory, IDataRepositoryFactory, IAutoObjectFactory
     {
         private readonly DbProviderFactory _dbProvider;
-        private readonly IDatabaseConfig _config;
+        private readonly IFrameworkDatabaseConfig _config;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -40,7 +41,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
             EfEntityObjectFactory entityFactory, 
             ITypeMetadataCache metadataCache, 
             DbProviderFactory dbProvider = null,
-            Auto<IDatabaseConfig> config = null)
+            Auto<IFrameworkDatabaseConfig> config = null)
             : base(module, context => new IObjectFactoryConvention[] { new DataRepositoryConvention(entityFactory, metadataCache) })
         {
             _dbProvider = dbProvider;
@@ -52,6 +53,28 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
         public IApplicationDataRepository CreateDataRepository<TRepo>(DbConnection connection, bool autoCommit) where TRepo : IApplicationDataRepository
         {
             return CreateInstanceOf<TRepo>().UsingConstructor(connection, autoCommit);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public IApplicationDataRepository NewUnitOfWork(Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
+        {
+            var connection = _dbProvider.CreateConnection();
+            connection.ConnectionString = _config.ConnectionString;
+            connection.Open();
+
+            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor<DbConnection, bool>(connection, autoCommit);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TRepository NewUnitOfWork<TRepository>(bool autoCommit, IsolationLevel? isolationLevel = null) where TRepository : class, IApplicationDataRepository
+        {
+            var connection = _dbProvider.CreateConnection();
+            connection.ConnectionString = _config.ConnectionString;
+            connection.Open();
+
+            return CreateInstanceOf<TRepository>().UsingConstructor<DbConnection, bool>(connection, autoCommit);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

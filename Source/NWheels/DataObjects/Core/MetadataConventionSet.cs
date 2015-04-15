@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NWheels.DataObjects.Core.Conventions;
 using NWheels.Entities;
 
@@ -7,8 +8,8 @@ namespace NWheels.DataObjects.Core
 {
     public class MetadataConventionSet
     {
-        private readonly IEnumerable<IMetadataConvention> _metadataConventions;
-        private readonly IEnumerable<IRelationalMappingConvention> _relationalMappingConventions;
+        private readonly IMetadataConvention[]_metadataConventions;
+        private readonly IRelationalMappingConvention[] _relationalMappingConventions;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -16,8 +17,8 @@ namespace NWheels.DataObjects.Core
             IEnumerable<IMetadataConvention> metadataConventions,
             IEnumerable<IRelationalMappingConvention> relationalMappingConventions)
         {
-            _metadataConventions = metadataConventions;
-            _relationalMappingConventions = relationalMappingConventions;
+            _metadataConventions = metadataConventions.ToArray();
+            _relationalMappingConventions = relationalMappingConventions.ToArray();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -69,6 +70,20 @@ namespace NWheels.DataObjects.Core
             {
                 convention.Finalize(type);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEnumerable<IMetadataConvention> MetadataConventions
+        {
+            get { return _metadataConventions; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEnumerable<IRelationalMappingConvention> RelationalMappingConventions
+        {
+            get { return _relationalMappingConventions; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

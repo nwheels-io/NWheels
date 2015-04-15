@@ -29,7 +29,7 @@ namespace NWheels.Conventions.Core
         {
             return base.CreateInstanceOf<TService>().UsingConstructor(
                 (IConfigurationObjectFactory)this, 
-                _components.Resolve<Auto<IConfigurationLogger>>(), 
+                _components.Resolve<IConfigurationLogger>(), 
                 string.Empty);
         }
 

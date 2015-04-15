@@ -1,4 +1,6 @@
 using System;
+using NWheels.DataObjects.Core;
+using NWheels.DataObjects.Core.StorageTypes;
 
 namespace NWheels.DataObjects
 {
@@ -6,6 +8,11 @@ namespace NWheels.DataObjects
     {
         [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
         public class KeyAttribute : PropertyContractAttribute
+        {
+        }
+
+        [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+        public class VersionAttribute : PropertyContractAttribute
         {
         }
 
@@ -69,6 +76,43 @@ namespace NWheels.DataObjects
             public class HtmlAttribute : DataTypeAttribute { public HtmlAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class XmlAttribute : DataTypeAttribute { public XmlAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class JsonAttribute : DataTypeAttribute { public JsonAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
+        }
+
+        public static class Storage
+        {
+            public class StorageTypeAttribute : PropertyContractAttribute
+            {
+                public StorageTypeAttribute(Type type)
+                {
+                    this.Type = type;
+                }
+                public Type Type { get; private set; }
+            }
+            public class JsonAttribute : StorageTypeAttribute { public JsonAttribute() : base(typeof(JsonStorageType<>)) { } }
+
+            public class RelationalMappingAttribute : PropertyContractAttribute
+            {
+                public void ApplyTo(PropertyMetadataBuilder metadata)
+                {
+                    var mapping = metadata.SafeGetRelationalMapping();
+
+                    if ( !string.IsNullOrWhiteSpace(Table) )
+                    {
+                        mapping.TableName = Table;
+                    }
+                    if ( !string.IsNullOrWhiteSpace(Column) )
+                    {
+                        mapping.ColumnName = Column;
+                    }
+                    if ( !string.IsNullOrWhiteSpace(ColumnType) )
+                    {
+                        mapping.DataTypeName = ColumnType;
+                    }
+                }
+                public string Table { get; set; }
+                public string Column { get; set; }
+                public string ColumnType { get; set; }
+            }
         } 
 
         public static class Validation

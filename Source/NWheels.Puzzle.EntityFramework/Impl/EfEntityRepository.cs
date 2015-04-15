@@ -193,5 +193,11 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
             #endregion
         }
+
+
+        public TEntityContract CheckOutOne<TState>(Expression<Func<TEntityContract, bool>> where, Expression<Func<TEntityContract, TState>> stateProperty, TState newStateValue)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

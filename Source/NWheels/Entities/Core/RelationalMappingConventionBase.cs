@@ -53,10 +53,7 @@ namespace NWheels.Entities.Core
 
         protected virtual void ApplyToType(TypeMetadataBuilder type)
         {
-            type.RelationalMapping = new TypeRelationalMappingBuilder() {
-                PrimaryTableName = NameTypePrimaryTable(type),
-                InheritanceKind = GetInheritanceKind(type)
-            };
+            SetTypeDefaultMapping(type);
 
             var keyProperties = new HashSet<PropertyMetadataBuilder>();
 
@@ -65,22 +62,13 @@ namespace NWheels.Entities.Core
                 foreach ( var property in key.Properties )
                 {
                     keyProperties.Add(property);
-
-                    property.RelationalMapping = new PropertyRelationalMappingBuilder() {
-                        TableName = NameKeyPropertyColumnTable(type, key, property),
-                        ColumnName = NameKeyPropertyColumn(type, key, property),
-                        DataTypeName = NameKeyPropertyColumnDataType(type, key, property)
-                    };
+                    SetKeyPropertyDefaultMapping(type, property, key);
                 }
             }
 
             foreach ( var property in type.Properties.Where(p => !keyProperties.Contains(p)) )
             {
-                property.RelationalMapping = new PropertyRelationalMappingBuilder() {
-                    TableName = NamePropertyColumnTable(type, property),
-                    ColumnName = NamePropertyColumn(type, property),
-                    DataTypeName = NamePropertyColumnDataType(type, property)
-                };
+                SetNonKeyPropertyDefaultMapping(type, property);
             }
         }
 
@@ -131,6 +119,67 @@ namespace NWheels.Entities.Core
                 }
 
                 return _pluralizationService;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void SetTypeDefaultMapping(TypeMetadataBuilder type)
+        {
+            var mapping = type.SafeGetRelationalMapping();
+
+            if ( string.IsNullOrWhiteSpace(mapping.PrimaryTableName) )
+            {
+                mapping.PrimaryTableName = NameTypePrimaryTable(type);
+            }
+
+            if ( !mapping.InheritanceKind.HasValue )
+            {
+                mapping.InheritanceKind = GetInheritanceKind(type);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void SetNonKeyPropertyDefaultMapping(TypeMetadataBuilder type, PropertyMetadataBuilder property)
+        {
+            SetPropertyDefaultMapping(
+                property,
+                defaultTableName: NamePropertyColumnTable(type, property),
+                defaultColumnName: NamePropertyColumn(type, property),
+                defaultDataTypeName: NamePropertyColumnDataType(type, property));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void SetKeyPropertyDefaultMapping(TypeMetadataBuilder type, PropertyMetadataBuilder property, KeyMetadataBuilder key)
+        {
+            SetPropertyDefaultMapping(
+                property,
+                defaultTableName: NameKeyPropertyColumnTable(type, key, property),
+                defaultColumnName: NameKeyPropertyColumn(type, key, property),
+                defaultDataTypeName: NameKeyPropertyColumnDataType(type, key, property));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void SetPropertyDefaultMapping(PropertyMetadataBuilder property, string defaultTableName, string defaultColumnName, string defaultDataTypeName)
+        {
+            var mapping = property.SafeGetRelationalMapping();
+
+            if ( string.IsNullOrWhiteSpace(mapping.TableName) )
+            {
+                mapping.TableName = defaultTableName;
+            }
+
+            if ( string.IsNullOrWhiteSpace(mapping.ColumnName) )
+            {
+                mapping.TableName = defaultColumnName;
+            }
+
+            if ( string.IsNullOrWhiteSpace(mapping.DataTypeName) )
+            {
+                mapping.TableName = defaultDataTypeName;
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,9 +31,10 @@ namespace NWheels.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TRepository NewUnitOfWork<TRepository>(bool autoCommit) where TRepository : class, IApplicationDataRepository
+        public TRepository NewUnitOfWork<TRepository>(bool autoCommit, IsolationLevel? isolationLevel = null) where TRepository : class, IApplicationDataRepository
         {
-            return _components.ResolveAuto<TRepository>();
+            var factory = _components.Resolve<IDataRepositoryFactory>();
+            return factory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

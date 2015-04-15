@@ -47,8 +47,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\FelixB.Hapil.0.9.3.6\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\git\source\Adstrix.Platform\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Entity.Design" />
     <Reference Include="System.Runtime.Serialization" />
@@ -104,6 +109,7 @@
     <Compile Include="DataObjects\Core\PropertyRelationalMappingBuilder.cs" />
     <Compile Include="DataObjects\Core\PropertyValidationMetadataBuilder.cs" />
     <Compile Include="DataObjects\Core\RelationMetadataBuilder.cs" />
+    <Compile Include="DataObjects\Core\StorageTypes\JsonStorageType.cs" />
     <Compile Include="DataObjects\Core\TypeMetadataBuilder.cs" />
     <Compile Include="DataObjects\Core\TypeMetadataBuilderConstructor.cs" />
     <Compile Include="DataObjects\Core\TypeMetadataCache.cs" />
@@ -117,8 +123,14 @@
     <Compile Include="DataObjects\IObjectCollection.cs" />
     <Compile Include="DataObjects\IPropertyValueValidator.cs" />
     <Compile Include="DataObjects\ISemanticDataType.cs" />
+    <Compile Include="DataObjects\IStorageDataType.cs" />
     <Compile Include="DataObjects\ITypeMetadataCache.cs" />
+    <Compile Include="DataObjects\ObjectContract.cs" />
     <Compile Include="DataObjects\PropertyAccess.cs" />
+    <Compile Include="DataObjects\PropertyRole.cs" />
+    <Compile Include="Endpoints\AbstractEndpointRegistration.cs" />
+    <Compile Include="Endpoints\Core\Wcf\WcfEndpointComponent.cs" />
+    <Compile Include="Endpoints\IFrameworkEndpointsConfig.cs" />
     <Compile Include="Entities\Core\PascalCaseRelationalMappingConvention.cs" />
     <Compile Include="Entities\Core\RelationalMappingConventionBase.cs" />
     <Compile Include="Entities\Core\UnderscoreRelationalMappingConvention.cs" />
@@ -130,14 +142,14 @@
     <Compile Include="DataObjects\SemanticDataTypeAttribute.cs" />
     <Compile Include="DataObjects\SemanticType.cs" />
     <Compile Include="Entities\DateTimeUtc.cs" />
-    <Compile Include="Entities\IDatabaseConfig.cs" />
+    <Compile Include="Entities\IDataRepositoryFactory.cs" />
+    <Compile Include="Entities\IFrameworkDatabaseConfig.cs" />
     <Compile Include="DataObjects\IDataObjectKeyGenerator.cs" />
     <Compile Include="Entities\DataRepositoryRegistration.cs" />
     <Compile Include="Entities\RelationalMappingConventionDefault.cs" />
     <Compile Include="Entities\EntityContractAttribute.cs" />
     <Compile Include="DataObjects\IDataObjectKey.cs" />
     <Compile Include="Entities\EntityPartContractAttribute.cs" />
-    <Compile Include="Entities\DataRepositoryEndpoint.cs" />
     <Compile Include="Entities\IRelationalMappingConvention.cs" />
     <Compile Include="Entities\IRelationalMappingFineTune.cs" />
     <Compile Include="DataObjects\KeyKind.cs" />
@@ -260,7 +272,6 @@
     <Compile Include="UI\Elements\IUiScreenBuilder.cs" />
     <Compile Include="UI\Elements\IValueUiElementBuilder.cs" />
     <Compile Include="UI\Elements\IVisualUiElementBuilder.cs" />
-    <Compile Include="UI\Endpoints\WebAppEndpoint.cs" />
     <Compile Include="UI\Globalization\InAnyCultureAttribute.cs" />
     <Compile Include="UI\Globalization\InDefaultCultureAttribute.cs" />
     <Compile Include="UI\Globalization\InCultureAttribute.cs" />
@@ -295,7 +306,9 @@
     <Compile Include="Utilities\ParseUtility.cs" />
     <Compile Include="Utilities\PathUtility.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="UI\Endpoints\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />

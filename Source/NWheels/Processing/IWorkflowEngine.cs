@@ -8,7 +8,7 @@ namespace NWheels.Processing
 {
     public interface IWorkflowEngine
     {
-        IWorkflowInstance CreateWorkflow<TCodeBehind, TInstanceData>()
+        IWorkflowInstance CreateWorkflow<TCodeBehind, TInstanceData>();
         IWorkflowInstance[] GetRunningWorkflows();
 
     }

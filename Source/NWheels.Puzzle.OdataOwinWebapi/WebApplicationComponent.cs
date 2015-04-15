@@ -9,10 +9,10 @@ using System.Web.OData.Extensions;
 using Autofac;
 using Autofac.Integration.WebApi;
 using Microsoft.Owin.Hosting;
+using NWheels.Endpoints;
 using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.UI;
-using NWheels.UI.Endpoints;
 using Owin;
 
 namespace NWheels.Puzzle.OdataOwinWebapi
@@ -27,12 +27,12 @@ namespace NWheels.Puzzle.OdataOwinWebapi
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public WebApplicationComponent(IWebAppEndpoint endpoint, Auto<ILogger> logger, IComponentContext componentContext)
+        public WebApplicationComponent(IComponentContext components,  WebAppEndpointRegistration endpoint, Auto<ILogger> logger)
         {
-            _app = endpoint.Contract;
-            _address = endpoint.Address;
+            _app = (IUiApplication)components.Resolve(endpoint.Contract);
+            _address = endpoint.Address.ToString();
             _logger = logger.Instance;
-            _container = (ILifetimeScope)componentContext;
+            _container = (ILifetimeScope)components;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

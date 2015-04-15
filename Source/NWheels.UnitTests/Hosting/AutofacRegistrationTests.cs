@@ -1,4 +1,6 @@
-﻿using Autofac;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Autofac;
 using NUnit.Framework;
 
 namespace NWheels.UnitTests.Hosting
@@ -90,6 +92,79 @@ namespace NWheels.UnitTests.Hosting
             var two = lifetimeContainer.Resolve<IComponentTwo>();
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanInjectModuleComponentsIntoBaseContainerComponent_MustResolveFromChildContainer()
+        {
+            //-- Arrange
+
+            var baseBuilder = new ContainerBuilder();
+            baseBuilder.RegisterType<ComponentZero>().As<IComponentZero, IBaseline>();
+            baseBuilder.RegisterType<BaselineSet>().InstancePerDependency();
+            var baseContainer = baseBuilder.Build();
+
+            var lifetimeContainer = baseContainer.BeginLifetimeScope();
+
+            var lifetimeUpdater1a = new ContainerBuilder();
+            lifetimeUpdater1a.RegisterType(typeof(TestModuleOne));
+            lifetimeUpdater1a.Update(lifetimeContainer.ComponentRegistry);
+
+            var moduleOne = (Module)lifetimeContainer.Resolve(typeof(TestModuleOne));
+
+            var lifetimeUpdater1b = new ContainerBuilder();
+            lifetimeUpdater1b.RegisterModule(moduleOne);
+            lifetimeUpdater1b.Update(lifetimeContainer.ComponentRegistry);
+
+            //-- Act: 
+
+            var resolvedFromBase = baseContainer.Resolve<BaselineSet>();
+            var resolvedFromChild = lifetimeContainer.Resolve<BaselineSet>();
+
+            //-- Assert
+
+            Assert.That(resolvedFromChild.Baselines.Length, Is.EqualTo(2));
+            Assert.That(resolvedFromChild.Baselines.OfType<ComponentZero>().Count(), Is.EqualTo(1));
+            Assert.That(resolvedFromChild.Baselines.OfType<ComponentOne>().Count(), Is.EqualTo(1));
+
+            // injection from base container will only take components registered in the base container
+            Assert.That(resolvedFromBase.Baselines.Length, Is.EqualTo(1));
+            Assert.That(resolvedFromBase.Baselines.OfType<ComponentZero>().Count(), Is.EqualTo(1));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanResolveComponentContextOfChildContainer()
+        {
+            //-- Arrange
+
+            var baseBuilder = new ContainerBuilder();
+            baseBuilder.RegisterType<ComponentZero>().As<IComponentZero, IBaseline>();
+            var baseContainer = baseBuilder.Build();
+
+            var lifetimeContainer = baseContainer.BeginLifetimeScope();
+
+            var lifetimeUpdater1a = new ContainerBuilder();
+            lifetimeUpdater1a.RegisterType(typeof(TestModuleOne));
+            lifetimeUpdater1a.Update(lifetimeContainer.ComponentRegistry);
+
+            var moduleOne = (Module)lifetimeContainer.Resolve(typeof(TestModuleOne));
+
+            var lifetimeUpdater1b = new ContainerBuilder();
+            lifetimeUpdater1b.RegisterModule(moduleOne);
+            lifetimeUpdater1b.Update(lifetimeContainer.ComponentRegistry);
+
+            //-- Act: 
+
+            var componentContextFromBase = baseContainer.Resolve<IComponentContext>();
+            var componentContextFromChild = lifetimeContainer.Resolve<IComponentContext>();
+
+            //-- Assert
+
+            Assert.That(componentContextFromBase.ComponentRegistry.Registrations.Count(), Is.EqualTo(2));
+            Assert.That(componentContextFromChild.ComponentRegistry.Registrations.Count(), Is.EqualTo(3));
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -145,7 +220,24 @@ namespace NWheels.UnitTests.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public interface IComponentZero
+        public interface IBaseline
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class BaselineSet
+        {
+            public BaselineSet(IEnumerable<IBaseline> baselines)
+            {
+                this.Baselines = baselines.ToArray();
+            }
+            public IBaseline[] Baselines { get; private set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IComponentZero : IBaseline
         {
         }
         public class ComponentZero : IComponentZero
@@ -154,7 +246,7 @@ namespace NWheels.UnitTests.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public interface IComponentOne
+        public interface IComponentOne : IBaseline
         {
         }
         public class ComponentOne : IComponentOne
@@ -164,13 +256,13 @@ namespace NWheels.UnitTests.Hosting
         {
             protected override void Load(ContainerBuilder builder)
             {
-                builder.RegisterType<ComponentOne>().As<IComponentOne>();
+                builder.RegisterType<ComponentOne>().As<IComponentOne, IBaseline>();
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public interface IComponentTwo
+        public interface IComponentTwo : IBaseline
         {
         }
         public class ComponentTwo : IComponentTwo
@@ -183,7 +275,7 @@ namespace NWheels.UnitTests.Hosting
             }
             protected override void Load(ContainerBuilder builder)
             {
-                builder.RegisterType<ComponentTwo>().As<IComponentTwo>();
+                builder.RegisterType<ComponentTwo>().As<IComponentTwo, IBaseline>();
             }
         }
     }

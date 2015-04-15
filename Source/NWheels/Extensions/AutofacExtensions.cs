@@ -5,11 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Builder;
+using Autofac.Core;
+using Autofac.Core.Activators.Reflection;
 using NWheels.Configuration;
+using NWheels.Conventions;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
+using NWheels.Endpoints;
+using NWheels.Endpoints.Core.Wcf;
 using NWheels.Entities;
+using NWheels.Hosting;
+using NWheels.Logging;
 using NWheels.UI;
-using NWheels.UI.Endpoints;
 using NWheels.Processing;
 
 namespace NWheels.Extensions
@@ -19,34 +26,21 @@ namespace NWheels.Extensions
         public static TService ResolveAuto<TService>(this IComponentContext container)
             where TService : class
         {
-            return container.Resolve<Auto<TService>>().Instance;
+            return container.Resolve<Auto<TService>>(TypedParameter.From(container)).Instance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void RegisterApplicationJob<TJob>(this ContainerBuilder builder)
-            where TJob : IApplicationJob
+        public static bool TryGetImplementationType(this IComponentContext container, Type contractType, out Type implementationType)
         {
-            builder.RegisterType<TJob>().As<TJob, IApplicationJob>().InstancePerDependency();
+            implementationType = container.ComponentRegistry.RegistrationsFor(new TypedService(contractType))
+                .Select(x => x.Activator)
+                .OfType<ReflectionActivator>()
+                .Select(x => x.LimitType)
+                .FirstOrDefault();
+
+            return (implementationType != null);
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static void RegisterConfigSection<TSection>(this ContainerBuilder builder)
-            where TSection : class, IConfigurationSection
-        {
-            builder.RegisterType<ConfigSectionRegistration<TSection>>().As<IConfigSectionRegistration>().InstancePerDependency();
-        }
-
-        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        //public static IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> AspectLog<TLimit, TActivatorData, TRegistrationStyle>(
-        //    this IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> registration)
-        //{
-        //    registration.RegistrationData.ActivatingHandlers.Add((sender, e) => {
-        //        var factory = e.Context.Resolve<CallLoggingAspectFactory>();
-        //    });
-        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -57,9 +51,23 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static ContractFeature Contracts(this NWheelsFeatureRegistrations features)
+        public static LoggingFeature Logging(this NWheelsFeatureRegistrations features)
         {
-            return new ContractFeature(((IHaveContainerBuilder)features).Builder);
+            return new LoggingFeature(((IHaveContainerBuilder)features).Builder);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ConfigurationFeature Configuration(this NWheelsFeatureRegistrations features)
+        {
+            return new ConfigurationFeature(((IHaveContainerBuilder)features).Builder);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ObjectContractFeature ObjectContracts(this NWheelsFeatureRegistrations features)
+        {
+            return new ObjectContractFeature(((IHaveContainerBuilder)features).Builder);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -71,6 +79,20 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static ApiFeature Api(this NWheelsFeatureRegistrations features)
+        {
+            return new ApiFeature(((IHaveContainerBuilder)features).Builder);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static JobFeature Jobs(this NWheelsFeatureRegistrations features)
+        {
+            return new JobFeature(((IHaveContainerBuilder)features).Builder);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static UIFeature UI(this NWheelsFeatureRegistrations features)
         {
             return new UIFeature(((IHaveContainerBuilder)features).Builder);
@@ -78,10 +100,76 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void WithWebEndpoint<TApp>(this UIAppEndpointRegistrations<TApp> registration) 
+        public static void UseWcfForSoapEndpoints(this ContainerBuilder builder)
+        {
+            builder.RegisterType<WcfEndpointComponent>();
+            builder.RegisterAdapter<SoapApiEndpointRegistration, WcfEndpointComponent>(
+                (context, endpoint) => context.Resolve<WcfEndpointComponent>(TypedParameter.From(endpoint)))
+                .As<ILifecycleEventListener>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static UIAppEndpointRegistrations<TApp> WithWebEndpoint<TApp>(
+            this UIAppEndpointRegistrations<TApp> registration, 
+            string name = null, 
+            string defaultUrl = null,
+            bool exposeExceptions = false) 
             where TApp : class, IUiApplication
         {
-            ((IHaveContainerBuilder)registration).Builder.RegisterType<WebAppEndpoint<TApp>>().As<IWebAppEndpoint>();
+            ((IHaveContainerBuilder)registration).Builder.RegisterInstance(new WebAppEndpointRegistration(name, typeof(TApp), defaultUrl, exposeExceptions));
+            return registration;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ApiEndpointRegistration<TContract> WithSoapEndpoint<TContract>(
+            this ApiEndpointRegistration<TContract> registration, 
+            string name = null, 
+            string defaultListenUrl = null,
+            bool publishMetadata = true,
+            string defaultMetadataUrl = null,
+            bool exposeExceptions = false) 
+            where TContract : class
+        {
+            ((IHaveContainerBuilder)registration).Builder.RegisterInstance(new SoapApiEndpointRegistration(
+                name, typeof(TContract), defaultListenUrl, defaultMetadataUrl, publishMetadata, exposeExceptions));
+            
+            return registration;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static  DataRepositoryRegistration<TRepo> WithRestEndpoint<TRepo>(
+            this DataRepositoryRegistration<TRepo> registration, 
+            string name = null, 
+            string defaultListenUrl = null,
+            bool publishMetadata = true,
+            string defaultMetadataUrl = null,
+            bool exposeExceptions = false) 
+            where TRepo : class, IApplicationDataRepository
+        {
+            ((IHaveContainerBuilder)registration).Builder.RegisterInstance(new RestApiEndpointRegistration(
+                name, typeof(TRepo), defaultListenUrl, defaultMetadataUrl, publishMetadata, exposeExceptions));
+
+            return registration;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ApiEndpointRegistration<TContract> WithJsonEndpoint<TContract>(
+            this ApiEndpointRegistration<TContract> registration, 
+            string name = null, 
+            string defaultListenUrl = null,
+            bool publishMetadata = true,
+            string defaultMetadataUrl = null,
+            bool exposeExceptions = false)
+            where TContract : class
+        {
+            ((IHaveContainerBuilder)registration).Builder.RegisterInstance(new JsonApiEndpointRegistration(
+                name, typeof(TContract), defaultListenUrl, defaultMetadataUrl, publishMetadata, exposeExceptions));
+
+            return registration;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -112,15 +200,60 @@ namespace NWheels.Extensions
             }
         }
 
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class LoggingFeature
+        {
+            private readonly ContainerBuilder _builder;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public LoggingFeature(ContainerBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RegisterLogger<TLogger>()
+                where TLogger : class, IApplicationEventLogger
+            {
+                _builder.Register(ctx => ctx.Resolve<LoggerObjectFactory>().CreateService<TLogger>()).As<TLogger>();
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ConfigurationFeature
+        {
+            private readonly ContainerBuilder _builder;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ConfigurationFeature(ContainerBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RegisterSection<TSection>()
+                where TSection : class, IConfigurationSection
+            {
+                _builder.RegisterType<ConfigSectionRegistration<TSection>>().As<IConfigSectionRegistration>().InstancePerDependency();
+                _builder.Register(ctx => ctx.Resolve<ConfigurationObjectFactory>().CreateService<TSection>()).As<TSection>();
+            }
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class ContractFeature
+        public class ObjectContractFeature
         {
             private readonly ContainerBuilder _builder;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ContractFeature(ContainerBuilder builder)
+            public ObjectContractFeature(ContainerBuilder builder)
             {
                 _builder = builder;
             }
@@ -157,8 +290,8 @@ namespace NWheels.Extensions
 
             public DataRepositoryRegistration<TRepo> RegisterDataRepository<TRepo>() where TRepo : class, IApplicationDataRepository
             {
-                var registration = new DataRepositoryRegistration<TRepo>();
-                _builder.RegisterInstance(registration).As<IDataRepositoryRegistration>();
+                var registration = new DataRepositoryRegistration<TRepo>(_builder);
+                _builder.RegisterInstance(registration).As<DataRepositoryRegistration>();
                 return registration;
             }
 
@@ -205,7 +338,50 @@ namespace NWheels.Extensions
                 var fineTuner = new RelationalMappingFineTuner<TEntity>(fineTuneAction);
                 _builder.RegisterInstance<RelationalMappingFineTuner<TEntity>>(fineTuner);
             }
+        }
 
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ApiFeature
+        {
+            private readonly ContainerBuilder _builder;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ApiFeature(ContainerBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ApiEndpointRegistration<TContract> RegisterContract<TContract>() 
+                where TContract : class
+            {
+                return new ApiEndpointRegistration<TContract>(_builder);
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class JobFeature
+        {
+            private readonly ContainerBuilder _builder;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public JobFeature(ContainerBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RegisterJob<TJob>()
+                where TJob : IApplicationJob
+            {
+                _builder.RegisterType<TJob>().As<TJob, IApplicationJob>().InstancePerDependency();
+            }
         }
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -271,6 +447,28 @@ namespace NWheels.Extensions
             {
                 var mixin = new MixinRegistration(typeof(TContract), typeof(TPart));
                 _builder.RegisterInstance(mixin).As<MixinRegistration>();
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ApiEndpointRegistration<TContract> : IHaveContainerBuilder
+            where TContract : class
+        {
+            private readonly ContainerBuilder _builder;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ApiEndpointRegistration(ContainerBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            ContainerBuilder IHaveContainerBuilder.Builder
+            {
+                get { return _builder; }
             }
         }
 

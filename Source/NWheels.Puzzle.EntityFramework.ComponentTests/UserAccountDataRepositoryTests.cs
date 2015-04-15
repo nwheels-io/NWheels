@@ -100,7 +100,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             var metadataCache = base.CreateMetadataCache(GetRepositoryMixinsRegistrations());
             var entityFactory = new EfEntityObjectFactory(_dynamicModule, metadataCache);
-            var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, ResolveAuto<IDatabaseConfig>());
+            var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, ResolveAuto<IFrameworkDatabaseConfig>());
 
             return repoFactory;
         }

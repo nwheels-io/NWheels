@@ -113,9 +113,13 @@ namespace NWheels.DataObjects.Core.Conventions
         private void InitializeDefaultAttributes()
         {
             AddPropertyAttribute<PropertyContract.KeyAttribute>((attr, prop) => {
-                prop.IsKey = true;
+                prop.Role = PropertyRole.Key;
                 prop.Kind = PropertyKind.Scalar;
                 prop.Validation.IsRequired = true;
+            });
+            AddPropertyAttribute<PropertyContract.VersionAttribute>((attr, prop) => {
+                prop.Role = PropertyRole.Version;
+                prop.Kind = PropertyKind.Scalar;
             });
             AddPropertyAttribute<PropertyContract.RequiredAttribute>((attr, prop) => {
                 prop.Validation.IsRequired = true;
@@ -139,9 +143,12 @@ namespace NWheels.DataObjects.Core.Conventions
             AddPropertyAttribute<System.ComponentModel.DefaultValueAttribute>((attr, prop) =>
                 prop.DefaultValue = attr.Value);
             AddPropertyAttribute<PropertyContract.Semantic.DataTypeAttribute>((attr, prop) => 
-                prop.SemanticType = _cache.GetSemanticTypeInstance(attr.Type));
-            AddPropertyAttribute<PropertyContract.Validation.FutureAttribute>((attr, prop) => 
-                prop.SemanticType = _cache.GetSemanticTypeInstance(typeof(SemanticType.DefaultOf<DateTime>)));
+                prop.SemanticType = _cache.GetSemanticTypeInstance(attr.Type, prop.ClrType));
+            AddPropertyAttribute<PropertyContract.Validation.FutureAttribute>((attr, prop) =>
+                prop.SemanticType = _cache.GetSemanticTypeInstance(typeof(SemanticType.DefaultOf<DateTime>), prop.ClrType));
+            AddPropertyAttribute<PropertyContract.Storage.StorageTypeAttribute>((attr, prop) =>
+                prop.SafeGetRelationalMapping().StorageType = _cache.GetStorageTypeInstance(attr.Type, prop.ClrType));
+            AddPropertyAttribute<PropertyContract.Storage.RelationalMappingAttribute>((attr, prop) => attr.ApplyTo(prop));
             AddPropertyAttribute<PropertyContract.Validation.LengthAttribute>((attr, prop) => {
                 prop.Validation.MinLength = attr.Min;
                 prop.Validation.MaxLength = attr.Max;
@@ -155,7 +162,7 @@ namespace NWheels.DataObjects.Core.Conventions
             AddPropertyAttribute<PropertyContract.Validation.MinValueAttribute>((attr, prop) =>
                 prop.Validation.MinValue = attr.Value);
             AddPropertyAttribute<PropertyContract.Validation.PastAttribute>((attr, prop) =>
-                prop.SemanticType = _cache.GetSemanticTypeInstance(typeof(SemanticType.DefaultOf<DateTime>)));
+                prop.SemanticType = _cache.GetSemanticTypeInstance(typeof(SemanticType.DefaultOf<DateTime>), prop.ClrType));
             AddPropertyAttribute<PropertyContract.Validation.RangeAttribute>((attr, prop) => {
                 prop.Validation.MinValue = attr.Min;
                 prop.Validation.MaxValue = attr.Max;
@@ -174,13 +181,13 @@ namespace NWheels.DataObjects.Core.Conventions
             AddPropertyAttribute<PropertyContract.Presentation.SortAttribute>((attr, prop) =>
                 prop.DefaultSortAscending = attr.Ascending);
             AddPropertyAttribute<PropertyContract.Relation.ManyToManyAttribute>((attr, prop) =>
-                prop.Relation.RelationKind = RelationKind.ManyToMany);
+                prop.SafeGetRelation().RelationKind = RelationKind.ManyToMany);
             AddPropertyAttribute<PropertyContract.Relation.ManyToOneAttribute>((attr, prop) =>
-                prop.Relation.RelationKind = RelationKind.ManyToOne);
+                prop.SafeGetRelation().RelationKind = RelationKind.ManyToOne);
             AddPropertyAttribute<PropertyContract.Relation.OneToManyAttribute>((attr, prop) =>
-                prop.Relation.RelationKind = RelationKind.OneToMany);
+                prop.SafeGetRelation().RelationKind = RelationKind.OneToMany);
             AddPropertyAttribute<PropertyContract.Relation.OneToOneAttribute>((attr, prop) =>
-                prop.Relation.RelationKind = RelationKind.OneToOne);
+                prop.SafeGetRelation().RelationKind = RelationKind.OneToOne);
             AddPropertyAttribute<PropertyContract.Security.SensitiveAttribute>((attr, prop) =>
                 prop.IsSensitive = true);
         }

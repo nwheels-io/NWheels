@@ -39,7 +39,7 @@ namespace NWheels.DataObjects.Core.Conventions
         {
             if ( type.PrimaryKey == null )
             {
-                foreach ( var property in type.Properties.Where(p => p.IsKey) )
+                foreach ( var property in type.Properties.Where(p => p.Role == PropertyRole.Key) )
                 {
                     if ( type.PrimaryKey == null )
                     {

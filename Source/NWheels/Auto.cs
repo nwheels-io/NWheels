@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using NWheels.Conventions;
 
 namespace NWheels
@@ -14,8 +15,9 @@ namespace NWheels
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Auto(IEnumerable<IAutoObjectFactory> autoFactories)
+        public Auto(IComponentContext container)
         {
+            var autoFactories = container.Resolve<IEnumerable<IAutoObjectFactory>>();
             var factory = autoFactories.Single(f => f.ServiceAncestorMarkerType.IsAssignableFrom(typeof(TService)));
             _instance = factory.CreateService<TService>();
         }

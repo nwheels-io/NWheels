@@ -9,5 +9,9 @@ namespace NWheels.Processing
     public abstract class AbstractWorkflow : IWorkflowCodeBehind
     {
 
+        public void OnBuildWorkflow(IWorkflowBuilder builder)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

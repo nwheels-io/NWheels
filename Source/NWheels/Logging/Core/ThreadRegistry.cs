@@ -61,7 +61,7 @@ namespace NWheels.Logging.Core
 
         void IInitializableHostComponent.Initializing()
         {
-            _loggingConfig = _components.ResolveAuto<IFrameworkLoggingConfiguration>();
+            _loggingConfig = _components.Resolve<IFrameworkLoggingConfiguration>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

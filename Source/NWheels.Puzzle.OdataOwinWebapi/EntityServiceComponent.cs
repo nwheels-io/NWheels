@@ -13,9 +13,9 @@ using NWheels.Entities;
 using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.UI;
-using NWheels.UI.Endpoints;
 using Owin;
 using Microsoft.OData.Edm;
+using NWheels.Endpoints;
 
 namespace NWheels.Puzzle.OdataOwinWebapi
 {
@@ -28,9 +28,9 @@ namespace NWheels.Puzzle.OdataOwinWebapi
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EntityServiceComponent(IDataRepositoryEndpoint endpoint, Auto<ILogger> logger, IComponentContext componentContext)
+        public EntityServiceComponent(RestApiEndpointRegistration endpoint, Auto<ILogger> logger, IComponentContext componentContext)
         {
-            _repository = endpoint.Contract;
+            _repository = (IApplicationDataRepository)componentContext.Resolve(endpoint.Contract);
             _logger = logger.Instance;
             _container = (ILifetimeScope)componentContext;
         }

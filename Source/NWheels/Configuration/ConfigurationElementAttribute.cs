@@ -9,7 +9,7 @@ using NWheels.DataObjects;
 
 namespace NWheels.Configuration
 {
-    [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
     public class ConfigurationElementAttribute : DataObjectContractAttribute
     {
         public string XmlName { get; set; }
@@ -18,7 +18,7 @@ namespace NWheels.Configuration
 
         public static ConfigurationElementAttribute From(Type interfaceType)
         {
-            return interfaceType.GetCustomAttribute<ConfigurationElementAttribute>();
+            return interfaceType.GetCustomAttribute<ConfigurationElementAttribute>(inherit: true);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

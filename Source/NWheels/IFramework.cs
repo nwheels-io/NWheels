@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using NWheels.Concurrency;
 using NWheels.Entities;
 using NWheels.Hosting;
+using System.Data;
 
 namespace NWheels
 {
     public interface IFramework
     {
-        TRepository NewUnitOfWork<TRepository>(bool autoCommit = true) where TRepository : class, IApplicationDataRepository;
+        TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, IsolationLevel? isolationLevel = null) where TRepository : class, IApplicationDataRepository;
         IResourceLock NewLock(ResourceLockMode mode, string resourceNameFormat, params object[] formatArgs);
         Guid NewGuid();
         int NewRandomInt32();

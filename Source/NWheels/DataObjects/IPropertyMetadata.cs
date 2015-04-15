@@ -10,7 +10,7 @@ namespace NWheels.DataObjects
         TAttribute TryGetContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute;
         string Name { get; }
         PropertyKind Kind { get; }
-        bool IsKey { get; }
+        PropertyRole Role { get; }
         Type ClrType { get; }
         ISemanticDataType SemanticType { get; }
         PropertyAccess Access { get; }

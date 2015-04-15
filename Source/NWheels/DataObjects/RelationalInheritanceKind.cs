@@ -2,6 +2,7 @@
 {
     public enum RelationalInheritanceKind
     {
+        None,
         TablePerHierarchy,
         TablePerType,
         TablePerConcreteClass

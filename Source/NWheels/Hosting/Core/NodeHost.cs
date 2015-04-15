@@ -7,8 +7,11 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Autofac;
+using Autofac.Core;
 using Autofac.Extras.Multitenant;
 using Hapil;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using NWheels.Configuration;
 using NWheels.Configuration.Core;
 using NWheels.Conventions;
@@ -18,6 +21,7 @@ using NWheels.Core.Processing;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
+using NWheels.Endpoints;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Exceptions;
@@ -27,6 +31,7 @@ using NWheels.Logging.Core;
 using NWheels.Processing;
 using NWheels.Processing.Core;
 using NWheels.Utilities;
+using Formatting = Newtonsoft.Json.Formatting;
 
 namespace NWheels.Hosting.Core
 {
@@ -56,9 +61,9 @@ namespace NWheels.Hosting.Core
 
             _stateMachine = new StateMachine<NodeState, NodeTrigger>(
                 new StateMachineCodeBehind(this), 
-                _baseContainer.Resolve<Auto<StateMachine<NodeState, NodeTrigger>.ILogger>>());
+                _baseContainer.Resolve<StateMachine<NodeState, NodeTrigger>.ILogger>());
 
-            _logger = _baseContainer.ResolveAuto<INodeHostLogger>();
+            _logger = _baseContainer.Resolve<INodeHostLogger>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -196,24 +201,30 @@ namespace NWheels.Hosting.Core
             builder.RegisterInstance<NodeHost>(this);
             builder.RegisterInstance<DynamicModule>(_dynamicModule);
             builder.RegisterInstance(_bootConfig).As<INodeConfiguration>();
-            builder.RegisterGeneric(typeof(Auto<>)).SingleInstance();
             builder.RegisterType<UniversalThreadLogAnchor>().As<IThreadLogAnchor>().SingleInstance();
             builder.RegisterType<ThreadRegistry>().As<IThreadRegistry, IInitializableHostComponent>().SingleInstance();
             builder.RegisterType<ThreadLogAppender>().As<IThreadLogAppender>().SingleInstance();
-            builder.RegisterType<RealFramework>().As<IFramework>().WithParameter(new TypedParameter(typeof(BootConfiguration), _bootConfig)).SingleInstance();
-            builder.RegisterType<LoggerObjectFactory>().As<IAutoObjectFactory>().SingleInstance();
-            builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory>().SingleInstance();
-            builder.RegisterType<XmlConfigurationLoader>().SingleInstance().InstancePerLifetimeScope();
-            builder.RegisterAdapter<IConfigSectionRegistration, IConfigurationSection>((ctx, reg) => reg.ResolveFromContainer(ctx)).SingleInstance();
-            builder.RegisterAdapter<RelationalMappingConventionDefault, IRelationalMappingConvention>(RelationalMappingConventionBase.FromDefault).SingleInstance();
-            builder.RegisterConfigSection<IFrameworkLoggingConfiguration>();
 
+            builder.RegisterType<BootTimeFramework>().As<IFramework>().WithParameter(new TypedParameter(typeof(BootConfiguration), _bootConfig)).SingleInstance();
+
+            builder.RegisterType<LoggerObjectFactory>().As<LoggerObjectFactory, IAutoObjectFactory>().SingleInstance();
+            builder.RegisterType<ConfigurationObjectFactory>().As<ConfigurationObjectFactory, IConfigurationObjectFactory, IAutoObjectFactory>().SingleInstance();
+            builder.RegisterType<XmlConfigurationLoader>().SingleInstance().InstancePerLifetimeScope();
+            builder.RegisterAdapter<RelationalMappingConventionDefault, IRelationalMappingConvention>(RelationalMappingConventionBase.FromDefault).SingleInstance();
+            
+            builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkLoggingConfiguration>();
+            builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkEndpointsConfig>();
+            builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkDatabaseConfig>();
+            builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
+            builder.NWheelsFeatures().Logging().RegisterLogger<INodeHostLogger>();
+            builder.NWheelsFeatures().Logging().RegisterLogger<StateMachine<NodeState, NodeTrigger>.ILogger>();
+            
             builder.RegisterType<ContractMetadataConvention>().As<IMetadataConvention>().SingleInstance();
             builder.RegisterType<AttributeMetadataConvention>().As<IMetadataConvention>().SingleInstance();
             builder.RegisterType<RelationMetadataConvention>().As<IMetadataConvention>().SingleInstance();
             builder.RegisterInstance(new PascalCaseRelationalMappingConvention(usePluralTableNames: true)).As<IRelationalMappingConvention>();
             builder.RegisterType<MetadataConventionSet>().SingleInstance();
-            builder.RegisterType<TypeMetadataCache>().As<ITypeMetadataCache>().SingleInstance();
+            builder.RegisterType<TypeMetadataCache>().As<ITypeMetadataCache, TypeMetadataCache>().SingleInstance();
 
             if ( registerHostComponents != null )
             {
@@ -332,6 +343,14 @@ namespace NWheels.Hosting.Core
                 e.ReceiveFeedack(NodeTrigger.UnloadDone);
                 _lifetime.Dispose();
                 _lifetime = null;
+            }
+        }
+
+        private class BootTimeFramework : RealFramework
+        {
+            public BootTimeFramework(IComponentContext components, INodeConfiguration nodeConfig, IThreadLogAnchor threadLogAnchor)
+                : base(components, nodeConfig, threadLogAnchor)
+            {
             }
         }
 
@@ -506,6 +525,12 @@ namespace NWheels.Hosting.Core
                         }
                     }
 
+                    var frameworkUpdater = new ContainerBuilder();
+                    frameworkUpdater.RegisterType<RealFramework>().As<IFramework>().WithParameter(new TypedParameter(typeof(BootConfiguration), this.NodeConfig)).SingleInstance();
+                    frameworkUpdater.RegisterGeneric(typeof(Auto<>)).SingleInstance();
+                    frameworkUpdater.RegisterAdapter<IConfigSectionRegistration, IConfigurationSection>((ctx, reg) => reg.ResolveFromContainer(_lifetimeContainer)).SingleInstance();
+                    frameworkUpdater.Update(_lifetimeContainer.ComponentRegistry);
+
                     if ( !_nodeConfig.ApplicationModules.Any() )
                     {
                         _logger.NoApplicationModulesRegistered();
@@ -518,25 +543,33 @@ namespace NWheels.Hosting.Core
             private void RegisterModuleLoaderTypes(BootConfiguration.ModuleConfig module)
             {
                 var assembly = LoadModuleAssembly(module);
-                var moduleLoaderType = assembly.GetType(module.LoaderClass, throwOnError: true);
-
-                var loaderTypeUpdater = new ContainerBuilder();
-                loaderTypeUpdater.RegisterType(moduleLoaderType);
+                
+                var moduleLoaderTypes = new List<Type> {
+                    assembly.GetType(module.LoaderClass, throwOnError: true)
+                };
 
                 foreach ( var feature in module.Features )
                 {
                     _logger.RegisteringFeature(feature.Name);
+                    moduleLoaderTypes.Add(assembly.GetType(feature.LoaderClass, throwOnError: true));
+                }
 
-                    var featureLoaderType = assembly.GetType(feature.LoaderClass, throwOnError: true);
-                    loaderTypeUpdater.RegisterType(featureLoaderType);
+                var loaderTypeUpdater = new ContainerBuilder();
+
+                foreach ( var loaderType in moduleLoaderTypes )
+                {
+                    loaderTypeUpdater.RegisterType(loaderType);
                 }
 
                 loaderTypeUpdater.Update(_lifetimeContainer.ComponentRegistry);
-
-                var loaderInstance = (Autofac.Module)_lifetimeContainer.Resolve(moduleLoaderType);
-
                 var moduleUpdater = new ContainerBuilder();
-                moduleUpdater.RegisterModule(loaderInstance);
+
+                foreach ( var loaderType in moduleLoaderTypes )
+                {
+                    var loaderInstance = (Autofac.Module)_lifetimeContainer.Resolve(loaderType);
+                    moduleUpdater.RegisterModule(loaderInstance);
+                }
+
                 moduleUpdater.Update(_lifetimeContainer.ComponentRegistry);
             }
 
@@ -544,13 +577,57 @@ namespace NWheels.Hosting.Core
 
             private Assembly LoadModuleAssembly(BootConfiguration.ModuleConfig module)
             {
+                Assembly assembly;
+
+                if ( !LoadModuleAssemblyByFilePath(module, out assembly) )
+                {
+                    if ( !LoadModuleAssemblyBySimpleName(module, out assembly) )
+                    {
+                        throw new NodeHostConfigException(string.Format("Module assembly '{0}' could not be found at any of the probed locations.", module.Assembly));
+                    }
+                }
+
+                return assembly;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool LoadModuleAssemblyByFilePath(BootConfiguration.ModuleConfig module, out Assembly assembly)
+            {
+                var coreBinPath = PathUtility.LocalBinPath(module.Assembly);
+                var appBinPath = Path.Combine(_nodeConfig.LoadedFromDirectory, module.Assembly);
+
+                if ( File.Exists(coreBinPath) )
+                {
+                    assembly = Assembly.LoadFrom(coreBinPath);
+                    return true;
+                }
+                else if ( File.Exists(appBinPath) )
+                {
+                    assembly = Assembly.LoadFrom(appBinPath);
+                    return true;
+                }
+                else
+                {
+                    _logger.ProbedModuleAssemblyLocation(coreBinPath);
+                    _logger.ProbedModuleAssemblyLocation(appBinPath);
+                    assembly = null;
+                    return false;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private bool LoadModuleAssemblyBySimpleName(BootConfiguration.ModuleConfig module, out Assembly assembly)
+            {
                 var simpleAssemblyName = Path.GetFileNameWithoutExtension(module.Assembly);
                 var loadedAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(asm => asm.GetName().Name.EqualsIgnoreCase(simpleAssemblyName));
 
                 if ( loadedAssembly != null )
                 {
                     _logger.AssemblyAlreadyLoaded(simpleAssemblyName);
-                    return loadedAssembly;
+                    assembly = loadedAssembly;
+                    return true;
                 }
 
                 try
@@ -558,37 +635,15 @@ namespace NWheels.Hosting.Core
                     var assemblyName = new AssemblyName() {
                         Name = simpleAssemblyName
                     };
-                    return Assembly.Load(assemblyName);
+                    
+                    assembly = Assembly.Load(assemblyName);
+                    return true;
                 }
                 catch ( Exception e )
                 {
                     _logger.AssemblyLoadByNameFailed(simpleAssemblyName, e);
-                }
-
-                return LoadModuleAssemblyByFilePath(module);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private Assembly LoadModuleAssemblyByFilePath(BootConfiguration.ModuleConfig module)
-            {
-                var coreBinPath = PathUtility.LocalBinPath(module.Assembly);
-                var appBinPath = Path.Combine(_nodeConfig.LoadedFromDirectory, module.Assembly);
-
-                if ( File.Exists(coreBinPath) )
-                {
-                    return Assembly.LoadFrom(coreBinPath);
-                }
-                else if ( File.Exists(appBinPath) )
-                {
-                    return Assembly.LoadFrom(appBinPath);
-                }
-                else
-                {
-                    _logger.ProbedModuleAssemblyLocation(coreBinPath);
-                    _logger.ProbedModuleAssemblyLocation(appBinPath);
-
-                    throw new NodeHostConfigException(string.Format("Module assembly '{0}' could not be found at any of the probed locations.", module.Assembly));
+                    assembly = null;
+                    return false;
                 }
             }
         }
@@ -613,6 +668,7 @@ namespace NWheels.Hosting.Core
             public void BuildSequence(IRevertableSequenceBuilder sequence)
             {
                 sequence.Once().OnPerform(LoadConfiguration);
+                sequence.Once().OnPerform(LoadDataRepositories);
                 sequence.Once().OnPerform(CallHostComponentsConfigured);
                 sequence.Once().OnPerform(FindLifecycleComponents);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeConfigured);
@@ -633,8 +689,46 @@ namespace NWheels.Hosting.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private static void WriteEffectiveConfigurationXml(XmlConfigurationLoader loader)
+            private void LoadDataRepositories()
             {
+                try
+                {
+                    using ( _logger.InitializingDataRepositories() )
+                    {
+                        var repositoryFactory = _ownerLifetime.LifetimeContainer.Resolve<IDataRepositoryFactory>();
+                        var allRepositoryRegistrations = _ownerLifetime.LifetimeContainer.Resolve<IEnumerable<DataRepositoryRegistration>>().ToArray();
+
+                        foreach ( var registration in allRepositoryRegistrations )
+                        {
+                            using ( var repoActivity = _logger.InitializingDataRepository(type: registration.DataRepositoryType.FullName) )
+                            {
+                                try
+                                {
+                                    var repoInstance = repositoryFactory.NewUnitOfWork(registration.DataRepositoryType, autoCommit: false);
+                                    repoInstance.Dispose();
+                                }
+                                catch ( Exception e )
+                                {
+                                    repoActivity.Fail(e);
+                                    throw;
+                                }
+                            }
+                        }
+                    }
+                }
+                finally
+                {
+                    WriteEffectiveMetadataJson();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void WriteEffectiveConfigurationXml(XmlConfigurationLoader loader)
+            {
+                var filePath = PathUtility.LocalBinPath("effective-config-dump.xml");
+                _logger.WritingEffectiveConfigurationToDisk(filePath);
+
                 var effectiveConfigurationXml = new XDocument();
                 loader.WriteConfigurationDocument(effectiveConfigurationXml, new ConfigurationXmlOptions() { IncludeOverrideHistory = true });
 
@@ -651,7 +745,29 @@ namespace NWheels.Hosting.Core
                     effectiveConfigurationXml.WriteTo(writer);
                 }
 
-                File.WriteAllText(PathUtility.LocalBinPath("effective-config-dump.xml"), effectiveConfigurationXmlText.ToString());
+                File.WriteAllText(filePath, effectiveConfigurationXmlText.ToString());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void WriteEffectiveMetadataJson()
+            {
+                var metadataCache = _ownerLifetime.LifetimeContainer.Resolve<TypeMetadataCache>();
+
+                var filePath = PathUtility.LocalBinPath("effective-metadata-dump.json");
+                _logger.WritingEffectiveMetadataToDisk(filePath);
+
+                var snapshot = metadataCache.TakeSnapshot();
+                var jsonSettings = new JsonSerializerSettings() {
+                    PreserveReferencesHandling = PreserveReferencesHandling.All,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                    Formatting = Formatting.Indented,
+                    Converters = new JsonConverter[] { new StringEnumConverter() },
+                    TypeNameHandling = TypeNameHandling.Objects
+                };
+
+                var json = JsonConvert.SerializeObject(snapshot, jsonSettings);
+                File.WriteAllText(filePath, json);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

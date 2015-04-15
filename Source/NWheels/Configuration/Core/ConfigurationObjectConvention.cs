@@ -184,7 +184,7 @@ namespace NWheels.Configuration.Core
                 });
             }
 
-            writer.Constructor<IConfigurationObjectFactory, Auto<IConfigurationLogger>, string>((cw, factory, logger, path) => {
+            writer.Constructor<IConfigurationObjectFactory, IConfigurationLogger, string>((cw, factory, logger, path) => {
                 cw.Base(factory, logger, path);
                 //workaround: initialize a local and then pass the local to Using
                 var sourceUseScopeLocal = cw.Local(initialValue: Static.Func(ConfigurationSourceInfo.UseSource, Static.Prop(() => ConfigurationSourceInfo.Default)));
@@ -344,46 +344,6 @@ namespace NWheels.Configuration.Core
             return (
                 IsNestedElementCollectionProperty(property) && 
                 property.PropertyType.GetGenericTypeDefinition() == typeof(INamedObjectCollection<>));
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private bool TryGetPropertyDefaultValue(MethodWriterBase writer, PropertyInfo property, out IOperand<TT.TProperty> valueOperand)
-        {
-            var attribute = property.GetCustomAttribute<DefaultValueAttribute>(inherit: true);
-
-            if ( attribute != null && attribute.Value != null )
-            {
-                if ( property.PropertyType.IsInstanceOfType(attribute.Value) )
-                {
-                    if ( attribute.Value is System.Type )
-                    {
-                        valueOperand = Static.Func<string, bool, Type>(
-                            Type.GetType,
-                            writer.Const(((Type)attribute.Value).AssemblyQualifiedName),
-                            writer.Const(true)).CastTo<TT.TProperty>();
-                    }
-                    else
-                    {
-                        var valueOperandType = typeof(Constant<>).MakeGenericType(attribute.Value.GetType());
-                        valueOperand = ((IOperand)Activator.CreateInstance(valueOperandType, attribute.Value)).CastTo<TT.TProperty>();
-                    }
-                }
-                else if ( attribute.Value is string )
-                {
-                    valueOperand = Static.Func(ParseUtility.Parse<TT.TProperty>, writer.Const((string)attribute.Value));
-                }
-                else
-                {
-                    throw new ContractConventionException(
-                        this.GetType(), Context.TypeKey.PrimaryInterface, property, "Specified default value could not be parsed");
-                }
-
-                return true;
-            }
-
-            valueOperand = null;
-            return false;
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

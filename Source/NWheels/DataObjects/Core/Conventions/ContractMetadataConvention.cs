@@ -81,7 +81,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private void ThisIsKeyProperty(PropertyMetadataBuilder property)
         {
-            property.IsKey = true;
+            property.Role = PropertyRole.Key;
             property.Kind = PropertyKind.Scalar;
             property.Validation.IsRequired = true;
         }
@@ -103,9 +103,9 @@ namespace NWheels.DataObjects.Core.Conventions
         private void ThisIsOneToManyProperty(PropertyMetadataBuilder property, Type collectionElementType)
         {
             ThisIsRelationProperty(property);
-            
-            property.Relation.RelationKind = RelationKind.OneToMany;
-            property.Relation.RelatedPartyType = _metadataCache.FindTypeMetadataAllowIncomplete(collectionElementType);
+
+            property.SafeGetRelation().RelationKind = RelationKind.OneToMany;
+            property.SafeGetRelation().RelatedPartyType = _metadataCache.FindTypeMetadataAllowIncomplete(collectionElementType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -14,5 +14,9 @@ namespace NWheels.Entities
         void Insert(TEntity entity);
         void Update(TEntity entity);
         void Delete(TEntity entity);
+        TEntity CheckOutOne<TState>(
+            Expression<Func<TEntity, bool>> where,
+            Expression<Func<TEntity, TState>> stateProperty,
+            TState newStateValue);
     }
 }

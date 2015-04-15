@@ -143,5 +143,17 @@ namespace NWheels.Hosting.Core
 
         [LogError]
         NodeHostException NodeHasFailedToUnload();
+
+        [LogDebug]
+        void WritingEffectiveConfigurationToDisk(string filePath);
+
+        [LogDebug]
+        void WritingEffectiveMetadataToDisk(string filePath);
+
+        [LogActivity]
+        ILogActivity InitializingDataRepositories();
+
+        [LogActivity]
+        ILogActivity InitializingDataRepository(string type);
     }
 }

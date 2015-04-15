@@ -19,11 +19,11 @@ namespace NWheels.Configuration.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected ConfigurationElementBase(IConfigurationObjectFactory factory, Auto<IConfigurationLogger> logger, string configPath)
+        protected ConfigurationElementBase(IConfigurationObjectFactory factory, IConfigurationLogger logger, string configPath)
         {
             _factory = factory;
             _configPath = configPath + "/" + GetXmlName();
-            _logger = logger.Instance;
+            _logger = logger;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

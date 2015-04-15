@@ -12,6 +12,7 @@ namespace NWheels.DataObjects.Core
         private readonly Dictionary<Type, ConcretizationRegistration> _concretizationsByPrimaryContract;
         private readonly ConcurrentDictionary<Type, TypeMetadataBuilder> _metadataByContractType = new ConcurrentDictionary<Type, TypeMetadataBuilder>();
         private readonly ConcurrentDictionary<Type, ISemanticDataType> _semanticDataTypes;
+        private readonly ConcurrentDictionary<Type, IStorageDataType> _storageDataTypes;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -24,6 +25,7 @@ namespace NWheels.DataObjects.Core
             _conventions.InjectCache(this);
 
             _semanticDataTypes = new ConcurrentDictionary<Type, ISemanticDataType>();
+            _storageDataTypes = new ConcurrentDictionary<Type, IStorageDataType>();
             _mixinsByPrimaryContract = mixinRegistrations.GroupBy(r => r.TargetContract).ToDictionary(g => g.Key, g => g.ToArray());
             _concretizationsByPrimaryContract = concretizationRegistrations.ToDictionary(r => r.GeneralContract);
         }
@@ -52,9 +54,26 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ISemanticDataType GetSemanticTypeInstance(Type semanticDataType)
+        public ISemanticDataType GetSemanticTypeInstance(Type semanticDataType, Type propertyClrType)
         {
-            return _semanticDataTypes.GetOrAdd(semanticDataType, key => (ISemanticDataType)Activator.CreateInstance(key));
+            Type closedSemanticDataType = (
+                semanticDataType.IsGenericType && semanticDataType.IsGenericTypeDefinition ?
+                semanticDataType.MakeGenericType(propertyClrType) :
+                semanticDataType);
+
+            return _semanticDataTypes.GetOrAdd(closedSemanticDataType, key => (ISemanticDataType)Activator.CreateInstance(key));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IStorageDataType GetStorageTypeInstance(Type storageDataType, Type propertyClrType)
+        {
+            Type closedStorageDataType = (
+                storageDataType.IsGenericType && storageDataType.IsGenericTypeDefinition ?
+                storageDataType.MakeGenericType(propertyClrType) :
+                storageDataType);
+
+            return _storageDataTypes.GetOrAdd(closedStorageDataType, key => (IStorageDataType)Activator.CreateInstance(key));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -62,6 +81,13 @@ namespace NWheels.DataObjects.Core
         public MetadataConventionSet Conventions
         {
             get { return _conventions; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal Snapshot TakeSnapshot()
+        {
+            return Snapshot.Create(this);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -154,5 +180,44 @@ namespace NWheels.DataObjects.Core
 
         [ThreadStatic]
         private static Dictionary<Type, TypeMetadataBuilder> _s_entriesBeingBuilt;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal class Snapshot
+        {
+            public Dictionary<string, object> Contracts { get; set; }
+            public List<string> SemanticDataTypes { get; set; }
+            public List<string> StorageDataTypes { get; set; }
+            public List<string> Concretizations { get; set; }
+            public List<string> Mixins { get; set; }
+            public List<string> MetadataConventions { get; set; }
+            public List<string> RelationalMappingConventions { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static Snapshot Create(TypeMetadataCache cache)
+            {
+                return new Snapshot() {
+                    Contracts = 
+                        cache._metadataByContractType.ToDictionary(kvp => kvp.Key.FullName, kvp => (object)kvp.Value),
+                    SemanticDataTypes = 
+                        cache._semanticDataTypes.Values.Select(v => v.GetType().FullName).OrderBy(s => s).ToList(),
+                    StorageDataTypes = 
+                        cache._storageDataTypes.Values.Select(v => v.GetType().FullName).OrderBy(s => s).ToList(),
+                    Concretizations = 
+                        cache._concretizationsByPrimaryContract.Values
+                        .Select(v => string.Format("{0} --|> {1}", v.ConcreteContract.FullName, v.GeneralContract.FullName))
+                        .ToList(),
+                    Mixins = 
+                        cache._mixinsByPrimaryContract.Values
+                        .SelectMany(r => r).Select(r => string.Format("{0} += {1}", r.TargetContract.FullName, r.MixinContract.FullName))
+                        .ToList(),
+                    MetadataConventions = 
+                        cache._conventions.MetadataConventions.Select(c => c.GetType().FullName).OrderBy(s => s).ToList(),
+                    RelationalMappingConventions = 
+                        cache._conventions.RelationalMappingConventions.Select(c => c.GetType().FullName).OrderBy(s => s).ToList()
+                };
+            }
+        }
     }
 }

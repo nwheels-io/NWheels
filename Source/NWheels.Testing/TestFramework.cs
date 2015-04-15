@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,11 +13,13 @@ using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.Configuration;
+using NWheels.Configuration.Core;
 using NWheels.Conventions;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
+using NWheels.Endpoints;
 using NWheels.Entities.Core;
 using NWheels.Logging.Core;
 
@@ -59,12 +62,12 @@ namespace NWheels.Testing
             _loggerFactory = new LoggerObjectFactory(_dynamicModule, _logAppender);
 
             _components = BuildComponentContainer();
-            _configurationFactory = new ConfigurationObjectFactory(_components, _dynamicModule, _metadataCache);
+            _configurationFactory = _components.Resolve<ConfigurationObjectFactory>();// new ConfigurationObjectFactory(_components, _dynamicModule, _metadataCache);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TRepository NewUnitOfWork<TRepository>(bool autoCommit = true) 
+        public TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, IsolationLevel? isolationLevel = null) 
             where TRepository : class, Entities.IApplicationDataRepository
         {
             throw new NotImplementedException();
@@ -227,9 +230,17 @@ namespace NWheels.Testing
         {
             var builder = new ContainerBuilder();
 
+            builder.RegisterInstance(_dynamicModule).As<DynamicModule>();
             builder.RegisterType<ThreadRegistry>().SingleInstance();
             builder.RegisterGeneric(typeof(Auto<>)).SingleInstance();
-            builder.RegisterInstance(_loggerFactory).As<IAutoObjectFactory>();
+            builder.RegisterInstance(_metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();
+            builder.RegisterInstance(_loggerFactory).As<LoggerObjectFactory, IAutoObjectFactory>();
+            builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory, IConfigurationObjectFactory, ConfigurationObjectFactory>();
+            
+            builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
+            builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkDatabaseConfig>();
+            builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkLoggingConfiguration>();
+            builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkEndpointsConfig>();
 
             return builder.Build();
         }

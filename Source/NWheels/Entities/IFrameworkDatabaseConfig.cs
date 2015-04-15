@@ -7,8 +7,8 @@ using NWheels.Configuration;
 
 namespace NWheels.Entities
 {
-    [ConfigurationSection(XmlName = "Database")]
-    public interface IDatabaseConfig : IConfigurationSection
+    [ConfigurationSection(XmlName = "Framework.Database")]
+    public interface IFrameworkDatabaseConfig : IConfigurationSection
     {
         string ConnectionString { get; set; }
     }
