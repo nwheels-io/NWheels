@@ -97,6 +97,9 @@ namespace NWheels.DataObjects.Core.Conventions
             property.Relation.ThisPartyKind = RelationPartyKind.Dependent;
             property.Relation.RelatedPartyKind = RelationPartyKind.Principal;
             property.Relation.RelatedPartyKey = FindOrAddPrimaryKey(property.Relation.RelatedPartyType);
+
+            property.Relation.InverseProperty =
+                property.Relation.RelatedPartyType.Properties.FirstOrDefault(p => p.Kind == PropertyKind.Relation && p.Relation.RelatedPartyType == type);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -112,6 +115,9 @@ namespace NWheels.DataObjects.Core.Conventions
             property.Relation.ThisPartyKind = RelationPartyKind.Principal;
             property.Relation.RelatedPartyKind = RelationPartyKind.Dependent;
             property.Relation.RelatedPartyKey = relatedKey;
+
+            property.Relation.InverseProperty =
+                property.Relation.RelatedPartyType.Properties.FirstOrDefault(p => p.Kind == PropertyKind.Relation && p.Relation.RelatedPartyType == type);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

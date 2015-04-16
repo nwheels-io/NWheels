@@ -4,13 +4,17 @@ using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Infrastructure;
+using System.Data.Entity.ModelConfiguration;
+using System.Data.Entity.ModelConfiguration.Configuration;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using System.Reflection;
 using Autofac;
+using NWheels.DataObjects;
 
 namespace NWheels.Puzzle.EntityFramework.Impl
 {
@@ -125,6 +129,14 @@ namespace NWheels.Puzzle.EntityFramework.Impl
             {
                 throw new InvalidOperationException("Operation cannot be performed when unit of work is in the state: " + _currentState);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Expression<Func<TEntityImpl, TProperty>> CreatePropertyExpression<TEntityImpl, TProperty>(MethodInfo getterMethod)
+        {
+            var parameter = Expression.Parameter(typeof(TEntityImpl), "e");
+            return Expression.Lambda<Func<TEntityImpl, TProperty>>(Expression.Property(parameter, getterMethod), new[] { parameter });
         }
     }
 }

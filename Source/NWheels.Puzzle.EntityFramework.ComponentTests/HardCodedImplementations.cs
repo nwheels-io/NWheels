@@ -17,6 +17,7 @@ using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.EFConventions;
 using NWheels.Puzzle.EntityFramework.Impl;
 using System.Data.Entity.ModelConfiguration;
+using System.Linq.Expressions;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
@@ -177,6 +178,9 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
                                 modelBuilder.Conventions.Add(new NoUnderscoreForeignKeyNamingConvention());
 
+                                ParameterExpression parameter;
+                                parameter = Expression.Parameter(typeof(EntityObject_Product), "e");
+                                
                                 var objectSetProducts = modelBuilder.Entity<EntityObject_Product>().HasEntitySetName("Product").ToTable("MY_PRODUCTS");
                                 var objectSetOrders = modelBuilder.Entity<EntityObject_Order>().HasEntitySetName("Order").ToTable("MY_ORDERS");
                                 var objectSetOrderLines = modelBuilder.Entity<EntityObject_OrderLine>().HasEntitySetName("OrderLine").ToTable("MY_ORDER_LINES");

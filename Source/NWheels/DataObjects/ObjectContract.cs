@@ -9,17 +9,10 @@ namespace NWheels.DataObjects
 {
     public static class ObjectContract
     {
-        public interface ITypeMetadataModifier
-        {
-            void ApplyTo(TypeMetadataBuilder type);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public static class Storage
         {
             [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
-            public class RelationalMappingAttribute : Attribute, ITypeMetadataModifier
+            public class RelationalMappingAttribute : Attribute, IObjectContractAttribute
             {
                 public void ApplyTo(TypeMetadataBuilder type)
                 {

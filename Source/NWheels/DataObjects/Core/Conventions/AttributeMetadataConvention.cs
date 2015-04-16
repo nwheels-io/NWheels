@@ -55,6 +55,13 @@ namespace NWheels.DataObjects.Core.Conventions
 
             foreach ( var attribute in typeAttributes )
             {
+                var contractAttribute = (attribute as IObjectContractAttribute);
+
+                if ( contractAttribute != null )
+                {
+                    contractAttribute.ApplyTo(type);
+                }
+
                 Action<Attribute, TypeMetadataBuilder> applier;
 
                 if ( TryGetAttributeApplier(_typeAttributes, attribute.GetType(), out applier) )
@@ -82,6 +89,13 @@ namespace NWheels.DataObjects.Core.Conventions
 
             foreach ( var attribute in propertyAttributes )
             {
+                var contractAttribute = (attribute as IPropertyContractAttribute);
+
+                if ( contractAttribute != null )
+                {
+                    contractAttribute.ApplyTo(property);
+                }
+
                 Action<Attribute, PropertyMetadataBuilder> applier;
 
                 if ( TryGetAttributeApplier(_propertyAttributes, attribute.GetType(), out applier) )

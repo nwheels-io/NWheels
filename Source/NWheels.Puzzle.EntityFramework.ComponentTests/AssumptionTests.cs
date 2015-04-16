@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
+using System.Data.Entity.ModelConfiguration;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using HR1 = NWheels.Puzzle.EntityFramework.ComponentTests.HardCodedImplementations.Repository1;
 using System.Diagnostics;
+using Hapil.Members;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
@@ -59,6 +61,26 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             var providerInfo = new DbProviderInfo(providerInvariantName: "System.Data.SqlClient", providerManifestToken: "2012");
             var model = modelBuilder.Build(providerInfo);
             var compiledModel = model.Compile();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanFindCorrectPrimitivePropertyMethodOfEntityTypeConfiguration()
+        {
+            //-- Arrange
+
+            var propertyMethods =
+                typeof(EntityTypeConfiguration<>)
+                .MakeGenericType(typeof(HR1.EntityObject_Product))
+                .GetMethods()
+                .Where(m => m.Name == "Property" && m.IsGenericMethod)
+                .ToArray();
+
+            //-- Act
+
+            var nonNullablePrimitivePropertyMethod = propertyMethods.Single(m => !m.GetParameters()[0].ParameterType.ToString().Contains("System.Nullable"));
+            var nullablePrimitivePropertyMethod = propertyMethods.Single(m => m.GetParameters()[0].ParameterType.ToString().Contains("System.Nullable"));
         }
     }
 }

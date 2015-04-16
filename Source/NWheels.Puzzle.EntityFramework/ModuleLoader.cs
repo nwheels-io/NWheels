@@ -10,7 +10,9 @@ using MySql.Data.MySqlClient;
 using NWheels.Conventions;
 using NWheels.Entities;
 using NWheels.Extensions;
+using NWheels.Hosting;
 using NWheels.Puzzle.EntityFramework.Conventions;
+using NWheels.Puzzle.EntityFramework.Impl;
 
 namespace NWheels.Puzzle.EntityFramework
 {
@@ -21,6 +23,9 @@ namespace NWheels.Puzzle.EntityFramework
             builder.RegisterType<EfEntityObjectFactory>().SingleInstance();
             builder.RegisterType<EfDataRepositoryFactory>().As<IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterInstance(SqlClientFactory.Instance).As<DbProviderFactory>();
+
+            builder.NWheelsFeatures().Logging().RegisterLogger<IDbCommandLogger>();
+            builder.RegisterType<EfLoggingDbCommandInterceptor>().As<ILifecycleEventListener>().SingleInstance();
         }
     }
 }

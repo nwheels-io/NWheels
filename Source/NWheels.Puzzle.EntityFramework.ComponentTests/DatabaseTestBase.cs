@@ -117,6 +117,8 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                     command.CommandType = CommandType.Text;
                     command.CommandText = script;
 
+                    Console.WriteLine(script);
+
                     connection.Open();
                     command.ExecuteNonQuery();
                 }

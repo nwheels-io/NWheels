@@ -39,13 +39,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Autofac.Extras.Multitenant.3.1.1\lib\net40\Autofac.Extras.Multitenant.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.3.6, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil, Version=0.9.3.7, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.3.6\lib\net45\Hapil.dll</HintPath>
+      <HintPath>..\..\..\git\source\Adstrix.Platform\packages\FelixB.Hapil.0.9.3.7\lib\net45\Hapil.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil.Applied, Version=0.9.3.6, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil.Applied, Version=0.9.3.7, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.3.6\lib\net45\Hapil.Applied.dll</HintPath>
+      <HintPath>..\..\..\git\source\Adstrix.Platform\packages\FelixB.Hapil.0.9.3.7\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -121,10 +121,12 @@
     <Compile Include="DataObjects\IMetadataElement.cs" />
     <Compile Include="DataObjects\IMetadataElementVisitor.cs" />
     <Compile Include="DataObjects\IObjectCollection.cs" />
+    <Compile Include="DataObjects\Core\IPropertyContractAttribute.cs" />
     <Compile Include="DataObjects\IPropertyValueValidator.cs" />
     <Compile Include="DataObjects\ISemanticDataType.cs" />
     <Compile Include="DataObjects\IStorageDataType.cs" />
     <Compile Include="DataObjects\ITypeMetadataCache.cs" />
+    <Compile Include="DataObjects\Core\IObjectContractAttribute.cs" />
     <Compile Include="DataObjects\ObjectContract.cs" />
     <Compile Include="DataObjects\PropertyAccess.cs" />
     <Compile Include="DataObjects\PropertyRole.cs" />

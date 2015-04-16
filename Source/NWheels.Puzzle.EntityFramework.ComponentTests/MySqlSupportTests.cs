@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity.Infrastructure;
+using System.Data.Entity.Infrastructure.Interception;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
     public class MySqlSupportTests : DatabaseTestBase
     {
         private Hapil.DynamicModule _dyamicModule;
+        private SqlLoggingInterceptor _loggingInterceptor;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -34,6 +36,9 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 "EmittedByMySqlSupportTests", 
                 allowSave: true, 
                 saveDirectory: TestContext.CurrentContext.TestDirectory);
+
+            _loggingInterceptor = new SqlLoggingInterceptor();
+            DbInterception.Add(_loggingInterceptor);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -41,6 +46,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         [TestFixtureTearDown]
         public void FixtureTearDown()
         {
+            DbInterception.Remove(_loggingInterceptor);
             _dyamicModule.SaveAssembly();
         }
 
@@ -203,6 +209,33 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 var command = connection.CreateCommand();
                 command.CommandText = "Create FUNCTION TruncateTime(dateValue DateTime) RETURNS date\r\nreturn Date(dateValue);\r\n";
                 command.ExecuteNonQuery();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class SqlLoggingInterceptor : IDbCommandInterceptor
+        {
+            public void NonQueryExecuted(System.Data.Common.DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
+            {
+            }
+            public void NonQueryExecuting(System.Data.Common.DbCommand command, DbCommandInterceptionContext<int> interceptionContext)
+            {
+                Console.Write(command.CommandText);
+            }
+            public void ReaderExecuted(System.Data.Common.DbCommand command, DbCommandInterceptionContext<System.Data.Common.DbDataReader> interceptionContext)
+            {
+            }
+            public void ReaderExecuting(System.Data.Common.DbCommand command, DbCommandInterceptionContext<System.Data.Common.DbDataReader> interceptionContext)
+            {
+                Console.Write(command.CommandText);
+            }
+            public void ScalarExecuted(System.Data.Common.DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
+            {
+            }
+            public void ScalarExecuting(System.Data.Common.DbCommand command, DbCommandInterceptionContext<object> interceptionContext)
+            {
+                Console.Write(command.CommandText);
             }
         }
     }

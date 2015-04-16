@@ -160,21 +160,7 @@ namespace NWheels.DataObjects.Core
 
         public void EnsureRelationalMapping(MetadataConventionSet conventions)
         {
-            if ( this.RelationalMapping == null )
-            {
-                lock ( _relationalMappingSyncRoot )
-                {
-                    if ( this.RelationalMapping == null )
-                    {
-                        conventions.ApplyRelationalMappingConventions(this);
-                    }
-
-                    foreach ( var property in this.Properties.Where(p => p.Kind == PropertyKind.Relation) )
-                    {
-                        property.Relation.RelatedPartyType.EnsureRelationalMapping(conventions);
-                    }
-                }
-            }
+            EnsureRelationalMapping(conventions, new HashSet<TypeMetadataBuilder>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -241,20 +227,27 @@ namespace NWheels.DataObjects.Core
         {
             this.ImplementationType = implementationType;
 
-            var implementationProperties = implementationType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            var implementationPropertyInfoByGetterMethod = implementationProperties.ToDictionary(p => p.GetMethod);
+            var implementationProperties = implementationType.GetProperties(BindingFlags.Instance | BindingFlags.Public).ToDictionary(prop => prop.Name);
 
-            var map = implementationType.GetInterfaceMap(this.ContractType);
-
-            for ( int i = 0 ; i < map.InterfaceMethods.Length ; i++ )
+            foreach ( var property in this.Properties )
             {
-                if ( map.InterfaceMethods[i].IsSpecialName && map.InterfaceMethods[i].Name.StartsWith("get_") )
-                {
-                    var implementationPropertyInfo = implementationPropertyInfoByGetterMethod[map.TargetMethods[i]];
-                    var metadataProperty = _propertyByName[implementationPropertyInfo.Name.Split('.').Last()];
-                    metadataProperty.ImplementationPropertyInfo = implementationPropertyInfo;
-                }
+                property.ImplementationPropertyInfo = implementationProperties[property.Name];
             }
+
+            //var implementationProperties = implementationType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            //var implementationPropertyInfoByGetterMethod = implementationProperties.ToDictionary(p => p.GetMethod);
+
+            //var map = implementationType.GetInterfaceMap(this.ContractType);
+
+            //for ( int i = 0 ; i < map.InterfaceMethods.Length ; i++ )
+            //{
+            //    if ( map.InterfaceMethods[i].IsSpecialName && map.InterfaceMethods[i].Name.StartsWith("get_") )
+            //    {
+            //        var implementationPropertyInfo = implementationPropertyInfoByGetterMethod[map.TargetMethods[i]];
+            //        var metadataProperty = _propertyByName[implementationPropertyInfo.Name.Split('.').Last()];
+            //        metadataProperty.ImplementationPropertyInfo = implementationPropertyInfo;
+            //    }
+            //}
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -289,5 +282,38 @@ namespace NWheels.DataObjects.Core
         internal bool MetadataConventionsPreviewed { get; set; }
         internal bool MetadataConventionsApplied { get; set; }
         internal bool MetadataConventionsFinalized { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void EnsureRelationalMapping(MetadataConventionSet conventions, HashSet<TypeMetadataBuilder> visitedTypes)
+        {
+            if ( !visitedTypes.Add(this) )
+            {
+                return;
+            }
+
+            conventions.ApplyRelationalMappingConventions(this);
+
+            foreach ( var property in this.Properties.Where(p => p.Kind == PropertyKind.Relation) )
+            {
+                property.Relation.RelatedPartyType.EnsureRelationalMapping(conventions, visitedTypes);
+            }
+
+            //if ( this.RelationalMapping == null )
+            //{
+            //    lock ( _relationalMappingSyncRoot )
+            //    {
+            //        if ( this.RelationalMapping == null )
+            //        {
+            //            conventions.ApplyRelationalMappingConventions(this);
+            //        }
+
+            //        foreach ( var property in this.Properties.Where(p => p.Kind == PropertyKind.Relation) )
+            //        {
+            //            property.Relation.RelatedPartyType.EnsureRelationalMapping(conventions);
+            //        }
+            //    }
+            //}
+        }
     }
 }

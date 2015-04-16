@@ -24,6 +24,7 @@ using Hapil.Members;
 using NWheels.Conventions;
 using NWheels.DataObjects.Core;
 using System.Data;
+using System.Linq.Expressions;
 
 // ReSharper disable ConvertToLambdaExpression
 
@@ -196,11 +197,17 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
                                     m.New<NoUnderscoreForeignKeyNamingConvention>()
                                 ));
 
+                                var parameterExpressionLocal = m.Local<ParameterExpression>();
+
                                 foreach ( var entity in _entitiesInRepository )
                                 {
                                     entity.EnsureImplementationType();
 
-                                    var entityConfigurationWriter = new EfEntityConfigurationWriter(entity.Metadata, m, modelBuilderLocal);
+                                    var entityConfigurationWriter = new EfEntityConfigurationWriter(
+                                        entity.Metadata, 
+                                        m, 
+                                        modelBuilderLocal, 
+                                        parameterExpressionLocal);
                                     entityConfigurationWriter.WriteEntityTypeConfiguration();
                                 }
 

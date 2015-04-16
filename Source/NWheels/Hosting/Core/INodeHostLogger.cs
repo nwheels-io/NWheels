@@ -150,6 +150,9 @@ namespace NWheels.Hosting.Core
         [LogDebug]
         void WritingEffectiveMetadataToDisk(string filePath);
 
+        [LogDebug]
+        void SavingDynamicModuleToAssembly(string filePath);
+
         [LogActivity]
         ILogActivity InitializingDataRepositories();
 

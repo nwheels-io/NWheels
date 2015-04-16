@@ -56,6 +56,8 @@ namespace NWheels.DataObjects.Core
 
         public void ApplyRelationalMappingConventions(TypeMetadataBuilder type)
         {
+            type.SafeGetRelationalMapping();
+
             foreach ( var convention in _relationalMappingConventions )
             {
                 convention.Preview(type);

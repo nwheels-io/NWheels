@@ -1,4 +1,5 @@
-﻿using NWheels.DataObjects.Core;
+﻿using Hapil;
+using NWheels.DataObjects.Core;
 
 namespace NWheels.Entities.Core
 {
@@ -17,7 +18,7 @@ namespace NWheels.Entities.Core
 
         protected override string NameTypePrimaryTable(TypeMetadataBuilder type)
         {
-            return (_usePluralTableNames ? base.PluralizationService.Pluralize(type.Name) : type.Name);
+            return (_usePluralTableNames ? base.PluralizationService.Pluralize(type.Name.TrimSuffix("Entity")) : type.Name);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

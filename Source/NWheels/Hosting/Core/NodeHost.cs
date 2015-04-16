@@ -667,6 +667,8 @@ namespace NWheels.Hosting.Core
 
             public void BuildSequence(IRevertableSequenceBuilder sequence)
             {
+                sequence.Once().OnRevert(SaveDynamicModuleToAssembly);
+                sequence.Once().OnRevert(WriteEffectiveMetadataJson);
                 sequence.Once().OnPerform(LoadConfiguration);
                 sequence.Once().OnPerform(LoadDataRepositories);
                 sequence.Once().OnPerform(CallHostComponentsConfigured);
@@ -691,34 +693,34 @@ namespace NWheels.Hosting.Core
 
             private void LoadDataRepositories()
             {
-                try
+                using ( _logger.InitializingDataRepositories() )
                 {
-                    using ( _logger.InitializingDataRepositories() )
-                    {
-                        var repositoryFactory = _ownerLifetime.LifetimeContainer.Resolve<IDataRepositoryFactory>();
-                        var allRepositoryRegistrations = _ownerLifetime.LifetimeContainer.Resolve<IEnumerable<DataRepositoryRegistration>>().ToArray();
+                    var repositoryFactory = _ownerLifetime.LifetimeContainer.Resolve<IDataRepositoryFactory>();
+                    var allRepositoryRegistrations = _ownerLifetime.LifetimeContainer.Resolve<IEnumerable<DataRepositoryRegistration>>().ToArray();
 
-                        foreach ( var registration in allRepositoryRegistrations )
-                        {
-                            using ( var repoActivity = _logger.InitializingDataRepository(type: registration.DataRepositoryType.FullName) )
-                            {
-                                try
-                                {
-                                    var repoInstance = repositoryFactory.NewUnitOfWork(registration.DataRepositoryType, autoCommit: false);
-                                    repoInstance.Dispose();
-                                }
-                                catch ( Exception e )
-                                {
-                                    repoActivity.Fail(e);
-                                    throw;
-                                }
-                            }
-                        }
+                    foreach ( var registration in allRepositoryRegistrations )
+                    {
+                        LoadDataRepository(registration, repositoryFactory);
                     }
                 }
-                finally
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void LoadDataRepository(DataRepositoryRegistration registration, IDataRepositoryFactory factory)
+            {
+                using ( var repoActivity = _logger.InitializingDataRepository(type: registration.DataRepositoryType.FullName) )
                 {
-                    WriteEffectiveMetadataJson();
+                    try
+                    {
+                        var repoInstance = factory.NewUnitOfWork(registration.DataRepositoryType, autoCommit: false);
+                        repoInstance.Dispose();
+                    }
+                    catch ( Exception e )
+                    {
+                        repoActivity.Fail(e);
+                        throw;
+                    }
                 }
             }
 
@@ -768,6 +770,18 @@ namespace NWheels.Hosting.Core
 
                 var json = JsonConvert.SerializeObject(snapshot, jsonSettings);
                 File.WriteAllText(filePath, json);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void SaveDynamicModuleToAssembly()
+            {
+                var dynamicModule = _ownerLifetime.LifetimeContainer.Resolve<DynamicModule>();
+
+                var filePath = PathUtility.LocalBinPath(dynamicModule.SimpleName + ".dll");
+                _logger.SavingDynamicModuleToAssembly(filePath);
+                
+                dynamicModule.SaveAssembly();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

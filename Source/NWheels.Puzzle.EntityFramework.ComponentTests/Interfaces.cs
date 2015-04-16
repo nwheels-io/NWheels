@@ -33,8 +33,11 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             [EntityContract]
             public interface IProduct
             {
+                [PropertyContract.Storage.RelationalMapping(Column = "Id")]
                 int Id { get; set; }
+                [PropertyContract.Storage.RelationalMapping(Column = "Name")]
                 string Name { get; set; }
+                [PropertyContract.Storage.RelationalMapping(Column = "Price")]
                 decimal Price { get; set; }
             }
             [EntityContract]

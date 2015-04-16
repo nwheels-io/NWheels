@@ -40,6 +40,13 @@
             get { return this.RelatedPartyKey; }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IPropertyMetadata IRelationMetadata.InverseProperty
+        {
+            get { return this.InverseProperty; }
+        }
+
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,6 +54,7 @@
         public KeyMetadataBuilder ThisPartyKey { get; set; }
         public TypeMetadataBuilder RelatedPartyType { get; set; }
         public KeyMetadataBuilder RelatedPartyKey { get; set; }
+        public PropertyMetadataBuilder InverseProperty { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -59,6 +67,8 @@
             RelatedPartyType = visitor.VisitElementReference<ITypeMetadata, TypeMetadataBuilder>("RelatedPartyType", RelatedPartyType);
             RelatedPartyKind = visitor.VisitAttribute("RelatedPartyKind", RelatedPartyKind);
             RelatedPartyKey = visitor.VisitElementReference<IKeyMetadata, KeyMetadataBuilder>("RelatedPartyKey", RelatedPartyKey);
+
+            InverseProperty = visitor.VisitElementReference<IPropertyMetadata, PropertyMetadataBuilder>("InverseProperty", InverseProperty);
         }
     }
 }

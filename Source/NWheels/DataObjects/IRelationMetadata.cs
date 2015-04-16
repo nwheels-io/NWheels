@@ -8,5 +8,6 @@
         ITypeMetadata RelatedPartyType { get; }
         RelationPartyKind RelatedPartyKind { get; }
         IKeyMetadata RelatedPartyKey { get; }
+        IPropertyMetadata InverseProperty { get; }
     }
 }

@@ -166,7 +166,8 @@ namespace NWheels.Puzzle.EntityFramework.Impl
             public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
             {
                 var specializedExpression = QueryExpressionSpecializer.Specialize(expression);
-                return _actualQueryProvider.CreateQuery<TElement>(specializedExpression);
+                var query = _actualQueryProvider.CreateQuery<TElement>(specializedExpression);
+                return query;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -174,7 +175,8 @@ namespace NWheels.Puzzle.EntityFramework.Impl
             public IQueryable CreateQuery(Expression expression)
             {
                 var specializedExpression = QueryExpressionSpecializer.Specialize(expression);
-                return _actualQueryProvider.CreateQuery(specializedExpression);
+                var query = _actualQueryProvider.CreateQuery(specializedExpression);
+                return query;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

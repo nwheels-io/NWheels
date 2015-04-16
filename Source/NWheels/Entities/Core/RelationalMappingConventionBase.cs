@@ -97,7 +97,14 @@ namespace NWheels.Entities.Core
 
         protected virtual string NameKeyPropertyColumn(TypeMetadataBuilder type, KeyMetadataBuilder key, PropertyMetadataBuilder property)
         {
-            return NamePropertyColumn(type, property);
+            if ( key.Kind == KeyKind.Foreign )
+            {
+                return NamePropertyColumn(type, property) + "Id";
+            }
+            else
+            {
+                return NamePropertyColumn(type, property);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -174,12 +181,12 @@ namespace NWheels.Entities.Core
 
             if ( string.IsNullOrWhiteSpace(mapping.ColumnName) )
             {
-                mapping.TableName = defaultColumnName;
+                mapping.ColumnName = defaultColumnName;
             }
 
             if ( string.IsNullOrWhiteSpace(mapping.DataTypeName) )
             {
-                mapping.TableName = defaultDataTypeName;
+                mapping.DataTypeName = defaultDataTypeName;
             }
         }
 
