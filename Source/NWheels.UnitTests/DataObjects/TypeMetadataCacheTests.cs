@@ -92,11 +92,11 @@ namespace NWheels.UnitTests.DataObjects
             var orderLineToProduct = orderLineMetadata.Properties.Single(p => p.Name == "Product").Relation;
 
             Assert.That(Jsonlike.Stringify(orderToOrderLine), Is.EqualTo(
-                "{relationKind:OneToMany,thisPartyKind:Principal,thisPartyKey:PK_Order,relatedPartyType:OrderLine,relatedPartyKind:Dependent,relatedPartyKey:FK_Order}"
+                "{relationKind:OneToMany,thisPartyKind:Principal,thisPartyKey:PK_Order,relatedPartyType:OrderLine,relatedPartyKind:Dependent,relatedPartyKey:FK_Order,inverseProperty:Order}"
             ));
 
             Assert.That(Jsonlike.Stringify(orderLineToOrder), Is.EqualTo(
-                "{relationKind:ManyToOne,thisPartyKind:Dependent,thisPartyKey:FK_Order,relatedPartyType:Order,relatedPartyKind:Principal,relatedPartyKey:PK_Order}"
+                "{relationKind:ManyToOne,thisPartyKind:Dependent,thisPartyKey:FK_Order,relatedPartyType:Order,relatedPartyKind:Principal,relatedPartyKey:PK_Order,inverseProperty:OrderLines}"
             ));
 
             Assert.That(Jsonlike.Stringify(orderLineToProduct), Is.EqualTo(

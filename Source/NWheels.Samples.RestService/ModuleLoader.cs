@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using NWheels.Entities;
+using NWheels.Extensions;
 using NWheels.Samples.RestService.EntityFrameworkAutoImpl;
 using NWheels.Samples.RestService.OwinOdataWebApiAutoImpl;
 
@@ -19,7 +20,8 @@ namespace NWheels.Samples.RestService
             builder.RegisterType<ProductController>().InstancePerRequest();
             builder.RegisterType<OrderController>().InstancePerRequest();
             builder.RegisterType<OrderLineController>().InstancePerRequest();
-            builder.RegisterType<DataRepositoryEndpoint<IMyRestServiceEntityRepository>>().As<IDataRepositoryEndpoint>();
+
+            builder.NWheelsFeatures().Entities().RegisterDataRepository<IMyRestServiceEntityRepository>();
         }
     }
 }
