@@ -77,7 +77,7 @@ namespace NWheels.Entities.Core
         protected abstract string NameTypePrimaryTable(TypeMetadataBuilder type);
         protected abstract string NamePropertyColumnTable(TypeMetadataBuilder type, PropertyMetadataBuilder property);
         protected abstract string NamePropertyColumn(TypeMetadataBuilder type, PropertyMetadataBuilder property);
-        protected abstract string NamePropertyColumnDataType(TypeMetadataBuilder type, PropertyMetadataBuilder property);
+        protected abstract string NamePropertyColumnType(TypeMetadataBuilder type, PropertyMetadataBuilder property);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -88,9 +88,9 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual string NameKeyPropertyColumnDataType(TypeMetadataBuilder type, KeyMetadataBuilder key, PropertyMetadataBuilder property)
+        protected virtual string NameKeyPropertyColumnType(TypeMetadataBuilder type, KeyMetadataBuilder key, PropertyMetadataBuilder property)
         {
-            return NamePropertyColumnDataType(type, property);
+            return NamePropertyColumnType(type, property);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -154,7 +154,7 @@ namespace NWheels.Entities.Core
                 property,
                 defaultTableName: NamePropertyColumnTable(type, property),
                 defaultColumnName: NamePropertyColumn(type, property),
-                defaultDataTypeName: NamePropertyColumnDataType(type, property));
+                defaultColumnType: NamePropertyColumnType(type, property));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -165,12 +165,12 @@ namespace NWheels.Entities.Core
                 property,
                 defaultTableName: NameKeyPropertyColumnTable(type, key, property),
                 defaultColumnName: NameKeyPropertyColumn(type, key, property),
-                defaultDataTypeName: NameKeyPropertyColumnDataType(type, key, property));
+                defaultColumnType: NameKeyPropertyColumnType(type, key, property));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void SetPropertyDefaultMapping(PropertyMetadataBuilder property, string defaultTableName, string defaultColumnName, string defaultDataTypeName)
+        private void SetPropertyDefaultMapping(PropertyMetadataBuilder property, string defaultTableName, string defaultColumnName, string defaultColumnType)
         {
             var mapping = property.SafeGetRelationalMapping();
 
@@ -184,9 +184,9 @@ namespace NWheels.Entities.Core
                 mapping.ColumnName = defaultColumnName;
             }
 
-            if ( string.IsNullOrWhiteSpace(mapping.DataTypeName) )
+            if ( string.IsNullOrWhiteSpace(mapping.ColumnType) )
             {
-                mapping.DataTypeName = defaultDataTypeName;
+                mapping.ColumnType = defaultColumnType;
             }
         }
 

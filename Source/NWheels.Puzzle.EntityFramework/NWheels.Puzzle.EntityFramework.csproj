@@ -74,6 +74,7 @@
     <Compile Include="Conventions\EfEntityObjectFactory.cs" />
     <Compile Include="EFConventions\NoUnderscoreForeignKeyNamingConvention.cs" />
     <Compile Include="Conventions\EfEntityConfigurationWriter.cs" />
+    <Compile Include="Impl\EfModelApi.cs" />
     <Compile Include="Impl\EfDataRepositoryBase.cs" />
     <Compile Include="Impl\EfEntityRepository.cs" />
     <Compile Include="Impl\IDbCommandLogger.cs" />

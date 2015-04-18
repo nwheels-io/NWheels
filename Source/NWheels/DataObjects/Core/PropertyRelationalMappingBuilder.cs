@@ -8,7 +8,7 @@
         {
             get
             {
-                return string.Format("{0}.{1}:{2}", TableName, ColumnName, DataTypeName);
+                return string.Format("{0}.{1}:{2}", TableName, ColumnName, ColumnType);
             }
         }
 
@@ -21,7 +21,7 @@
         public IStorageDataType StorageType { get; set; }
         public string TableName { get; set; }
         public string ColumnName { get; set; }
-        public string DataTypeName { get; set; }
+        public string ColumnType { get; set; }
 
         #endregion
 
@@ -32,7 +32,7 @@
             StorageType = visitor.VisitAttribute("StorageType", StorageType);
             TableName = visitor.VisitAttribute("TableName", TableName);
             ColumnName = visitor.VisitAttribute("ColumnName", ColumnName);
-            DataTypeName = visitor.VisitAttribute("DataTypeName", DataTypeName);
+            ColumnType = visitor.VisitAttribute("ColumnType", ColumnType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,7 +42,7 @@
             return 
                 (string.IsNullOrEmpty(TableName) ? "" : "TABLE(" + TableName + ").") +
                 (string.IsNullOrEmpty(ColumnName) ? "" : "COLUMN(" + ColumnName + ")") +
-                (string.IsNullOrEmpty(DataTypeName) ? "" : ".DATATYPE(" + DataTypeName + ")");
+                (string.IsNullOrEmpty(ColumnType) ? "" : ".TYPE(" + ColumnType + ")");
         }
     }
 }

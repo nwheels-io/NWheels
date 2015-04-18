@@ -14,6 +14,7 @@ using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using System.Reflection;
 using Autofac;
+using Hapil;
 using NWheels.DataObjects;
 
 namespace NWheels.Puzzle.EntityFramework.Impl
@@ -133,10 +134,5 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static Expression<Func<TEntityImpl, TProperty>> CreatePropertyExpression<TEntityImpl, TProperty>(MethodInfo getterMethod)
-        {
-            var parameter = Expression.Parameter(typeof(TEntityImpl), "e");
-            return Expression.Lambda<Func<TEntityImpl, TProperty>>(Expression.Property(parameter, getterMethod), new[] { parameter });
-        }
     }
 }

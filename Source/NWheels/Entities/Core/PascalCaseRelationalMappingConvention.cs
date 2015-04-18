@@ -37,7 +37,7 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string NamePropertyColumnDataType(TypeMetadataBuilder type, PropertyMetadataBuilder property)
+        protected override string NamePropertyColumnType(TypeMetadataBuilder type, PropertyMetadataBuilder property)
         {
             return null;
         }

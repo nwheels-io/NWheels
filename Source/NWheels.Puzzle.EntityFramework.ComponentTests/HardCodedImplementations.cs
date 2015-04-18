@@ -18,6 +18,7 @@ using NWheels.Puzzle.EntityFramework.EFConventions;
 using NWheels.Puzzle.EntityFramework.Impl;
 using System.Data.Entity.ModelConfiguration;
 using System.Linq.Expressions;
+using NWheels.DataObjects;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
@@ -123,8 +124,8 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 private IEntityRepository<Interfaces.Repository1.IOrder> m_Orders;
                 private IEntityRepository<Interfaces.Repository1.IProduct> m_Products;
 
-                public DataRepositoryObject_CustomNames(DbConnection connection, bool autoCommit)
-                    : base(GetOrBuildDbCompiledModel(connection), connection, autoCommit)
+                public DataRepositoryObject_CustomNames(ITypeMetadataCache metadataCache, DbConnection connection, bool autoCommit)
+                    : base(GetOrBuildDbCompiledModel(metadataCache, connection), connection, autoCommit)
                 {
                     this.m_Products = new EfEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product>(this);
                     this.m_Orders = new EfEntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order>(this);
@@ -166,8 +167,11 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 private static readonly object _s_compiledModelSyncRoot = new object();
                 private static DbCompiledModel _s_compiledModel;
 
-                private static DbCompiledModel GetOrBuildDbCompiledModel(DbConnection connection)
+                private static DbCompiledModel GetOrBuildDbCompiledModel(ITypeMetadataCache metadataCache, DbConnection connection)
                 {
+                    ITypeMetadata typeMetadata;
+                    object typeConfiguration;
+
                     if ( _s_compiledModel == null )
                     {
                         lock ( _s_compiledModelSyncRoot )
@@ -178,17 +182,33 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
                                 modelBuilder.Conventions.Add(new NoUnderscoreForeignKeyNamingConvention());
 
-                                ParameterExpression parameter;
-                                parameter = Expression.Parameter(typeof(EntityObject_Product), "e");
-                                
-                                var objectSetProducts = modelBuilder.Entity<EntityObject_Product>().HasEntitySetName("Product").ToTable("MY_PRODUCTS");
-                                var objectSetOrders = modelBuilder.Entity<EntityObject_Order>().HasEntitySetName("Order").ToTable("MY_ORDERS");
-                                var objectSetOrderLines = modelBuilder.Entity<EntityObject_OrderLine>().HasEntitySetName("OrderLine").ToTable("MY_ORDER_LINES");
+                                // PRODUCT
 
-                                objectSetProducts.Property(p => p.Price).HasColumnName("MY_SPECIAL_PRICE_COLUMN").HasColumnType("MONEY");
-                                objectSetOrderLines.HasRequired(p => p.Product).WithRequiredDependent().Map(m => m.MapKey("MY_SPECIAL_PRODUCT_ID_COLUMN"));
-                                objectSetOrderLines.HasRequired(p => p.Order).WithMany(o => o.OrderLines).Map(m => m.MapKey("OrderId"));
-                                objectSetOrders.Property(p => p.Id).HasColumnName("MY_SPECIAL_ORDER_ID_COLUMN");
+                                typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IProduct));
+                                typeConfiguration = EfModelApi.EntityType<EntityObject_Product>(modelBuilder, typeMetadata);
+
+                                EfModelApi.ValueTypePrimitiveProperty<EntityObject_Product, int>((EntityTypeConfiguration<EntityObject_Product>)typeConfiguration, typeMetadata.GetPropertyByName("Id"));
+                                EfModelApi.StringProperty<EntityObject_Product>((EntityTypeConfiguration<EntityObject_Product>)typeConfiguration, typeMetadata.GetPropertyByName("Name"));
+                                EfModelApi.ValueTypePrimitiveProperty<EntityObject_Product, decimal>((EntityTypeConfiguration<EntityObject_Product>)typeConfiguration, typeMetadata.GetPropertyByName("Price"));
+
+                                // ORDER
+
+                                typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IOrder));
+                                typeConfiguration = EfModelApi.EntityType<EntityObject_Order>(modelBuilder, typeMetadata);
+
+                                EfModelApi.ValueTypePrimitiveProperty<EntityObject_Order, int>((EntityTypeConfiguration<EntityObject_Order>)typeConfiguration, typeMetadata.GetPropertyByName("Id"));
+                                EfModelApi.ValueTypePrimitiveProperty<EntityObject_Order, DateTime>((EntityTypeConfiguration<EntityObject_Order>)typeConfiguration, typeMetadata.GetPropertyByName("PlacedAt"));
+                                EfModelApi.ValueTypePrimitiveProperty<EntityObject_Order, Interfaces.Repository1.OrderStatus>((EntityTypeConfiguration<EntityObject_Order>)typeConfiguration, typeMetadata.GetPropertyByName("Status"));
+
+                                // ORDER LINE
+
+                                typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IOrderLine));
+                                typeConfiguration = EfModelApi.EntityType<EntityObject_OrderLine>(modelBuilder, typeMetadata);
+
+                                EfModelApi.ValueTypePrimitiveProperty<EntityObject_OrderLine, int>((EntityTypeConfiguration<EntityObject_OrderLine>)typeConfiguration, typeMetadata.GetPropertyByName("Id"));
+                                EfModelApi.ManyToOneRelationProperty<EntityObject_OrderLine, EntityObject_Order>((EntityTypeConfiguration<EntityObject_OrderLine>)typeConfiguration, typeMetadata.GetPropertyByName("Order"));
+                                EfModelApi.ManyToOneRelationProperty<EntityObject_OrderLine, EntityObject_Product>((EntityTypeConfiguration<EntityObject_OrderLine>)typeConfiguration, typeMetadata.GetPropertyByName("Product"));
+                                EfModelApi.ValueTypePrimitiveProperty<EntityObject_OrderLine, int>((EntityTypeConfiguration<EntityObject_OrderLine>)typeConfiguration, typeMetadata.GetPropertyByName("Quantity"));
 
                                 var model = modelBuilder.Build(connection);
                                 _s_compiledModel = model.Compile();

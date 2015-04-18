@@ -34,6 +34,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
     {
         private readonly DbProviderFactory _dbProvider;
         private readonly IFrameworkDatabaseConfig _config;
+        private readonly ITypeMetadataCache _metadataCache;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -47,13 +48,14 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
         {
             _dbProvider = dbProvider;
             _config = config.Instance;
+            _metadataCache = metadataCache;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IApplicationDataRepository CreateDataRepository<TRepo>(DbConnection connection, bool autoCommit) where TRepo : IApplicationDataRepository
         {
-            return CreateInstanceOf<TRepo>().UsingConstructor(connection, autoCommit);
+            return CreateInstanceOf<TRepo>().UsingConstructor(_metadataCache, connection, autoCommit);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -64,7 +66,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
             connection.ConnectionString = _config.ConnectionString;
             connection.Open();
 
-            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor<DbConnection, bool>(connection, autoCommit);
+            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(_metadataCache, connection, autoCommit);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -75,7 +77,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
             connection.ConnectionString = _config.ConnectionString;
             connection.Open();
 
-            return CreateInstanceOf<TRepository>().UsingConstructor<DbConnection, bool>(connection, autoCommit);
+            return CreateInstanceOf<TRepository>().UsingConstructor(_metadataCache, connection, autoCommit);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -88,7 +90,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
             connection.ConnectionString = _config.ConnectionString;
             connection.Open();
 
-            return CreateInstanceOf<TService>().UsingConstructor<DbConnection, bool>(connection, autoCommit);
+            return CreateInstanceOf<TService>().UsingConstructor(_metadataCache, connection, autoCommit);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -185,40 +187,45 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
             private void ImplementGetOrBuildDbCompiledModel(ImplementationClassWriter<TT.TInterface> writer)
             {
-                writer.NewStaticFunction<DbConnection, DbCompiledModel>("GetOrBuildDbCompiledModel", "connection").Implement((m, connection) => {
-                    _methodGetOrBuildDbCompieldModel = m.OwnerMethod;
+                writer.NewStaticFunction<ITypeMetadataCache, DbConnection, DbCompiledModel>("GetOrBuildDbCompiledModel", "metadataCache", "connection")
+                    .Implement((m, metadataCache, connection) => {
+                        _methodGetOrBuildDbCompieldModel = m.OwnerMethod;
 
-                    m.If(_compiledModelField == m.Const<DbCompiledModel>(null)).Then(() => {
-                        m.Lock(_compiledModelSyncRootField, millisecondsTimeout: 10000).Do(() => {
-                            m.If(_compiledModelField == m.Const<DbCompiledModel>(null)).Then(() => {
+                        m.If(_compiledModelField == m.Const<DbCompiledModel>(null)).Then(() => {
+                            m.Lock(_compiledModelSyncRootField, millisecondsTimeout: 10000).Do(() => {
+                                m.If(_compiledModelField == m.Const<DbCompiledModel>(null)).Then(() => {
 
-                                var modelBuilderLocal = m.Local<DbModelBuilder>(initialValue: m.New<DbModelBuilder>());
-                                modelBuilderLocal.Prop(x => x.Conventions).Void(x => x.Add, m.NewArray<IConvention>(values: 
-                                    m.New<NoUnderscoreForeignKeyNamingConvention>()
-                                ));
+                                    var modelBuilderLocal = m.Local<DbModelBuilder>(initialValue: m.New<DbModelBuilder>());
+                                    modelBuilderLocal.Prop(x => x.Conventions).Void(x => x.Add, m.NewArray<IConvention>(values: 
+                                        m.New<NoUnderscoreForeignKeyNamingConvention>()
+                                    ));
 
-                                var parameterExpressionLocal = m.Local<ParameterExpression>();
+                                    var typeMetadataLocal = m.Local<ITypeMetadata>();
+                                    var entityTypeConfigurationLocal = m.Local<object>();
 
-                                foreach ( var entity in _entitiesInRepository )
-                                {
-                                    entity.EnsureImplementationType();
+                                    foreach ( var entity in _entitiesInRepository )
+                                    {
+                                        entity.EnsureImplementationType();
 
-                                    var entityConfigurationWriter = new EfEntityConfigurationWriter(
-                                        entity.Metadata, 
-                                        m, 
-                                        modelBuilderLocal, 
-                                        parameterExpressionLocal);
-                                    entityConfigurationWriter.WriteEntityTypeConfiguration();
-                                }
+                                        var entityConfigurationWriter = new EfEntityConfigurationWriter(
+                                            entity.Metadata, 
+                                            m, 
+                                            modelBuilderLocal, 
+                                            metadataCache,
+                                            typeMetadataLocal,
+                                            entityTypeConfigurationLocal);
 
-                                var modelLocal = m.Local(initialValue: modelBuilderLocal.Func<DbConnection, DbModel>(x => x.Build, connection));
-                                _compiledModelField.Assign(modelLocal.Func<DbCompiledModel>(x => x.Compile));
+                                        entityConfigurationWriter.WriteEntityTypeConfiguration();
+                                    }
+
+                                    var modelLocal = m.Local(initialValue: modelBuilderLocal.Func<DbConnection, DbModel>(x => x.Build, connection));
+                                    _compiledModelField.Assign(modelLocal.Func<DbCompiledModel>(x => x.Compile));
+                                });
                             });
                         });
-                    });
 
-                    m.Return(_compiledModelField);
-                });
+                        m.Return(_compiledModelField);
+                    });
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -237,10 +244,10 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
 
             private void ImplementConstructor(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
-                writer.Constructor<DbConnection, bool>(
-                    (cw, connection, autoCommit) => {
+                writer.Constructor<ITypeMetadataCache, DbConnection, bool>(
+                    (cw, metadata, connection, autoCommit) => {
                         cw.Base(
-                            Static.Func<DbCompiledModel>(_methodGetOrBuildDbCompieldModel, connection), 
+                            Static.Func<DbCompiledModel>(_methodGetOrBuildDbCompieldModel, metadata, connection), 
                             connection, 
                             autoCommit);
                         _initializers.ForEach(init => init(cw));

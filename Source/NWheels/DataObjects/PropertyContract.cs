@@ -106,7 +106,7 @@ namespace NWheels.DataObjects
                     }
                     if ( !string.IsNullOrWhiteSpace(ColumnType) )
                     {
-                        mapping.DataTypeName = ColumnType;
+                        mapping.ColumnType = ColumnType;
                     }
                 }
                 public string Table { get; set; }

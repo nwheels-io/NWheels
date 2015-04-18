@@ -12,6 +12,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using NUnit.Framework;
+using NWheels.DataObjects.Core;
+using NWheels.Testing;
 using HR1 = NWheels.Puzzle.EntityFramework.ComponentTests.HardCodedImplementations.Repository1;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
@@ -170,6 +172,71 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void CanInitializeHardCodedRepositoryWithCustomNames()
+        {
+            //-- Arrange
+
+            DropAndCreateTestDatabase();
+
+            //-- Act
+            
+            InitializeHardCodedDataRepositoryWithCustomNames().Dispose();
+            CreateTestDatabaseObjects();
+
+            //-- Assert
+
+            var productsTable = SelectFromTable("MY_PRODUCTS");
+            var ordersTable = SelectFromTable("MY_ORDERS");
+            var orderLinesTable = SelectFromTable("MY_ORDER_LINES");
+
+            Assert.That(
+                GetCommaSeparatedColumnList(productsTable),
+                Is.EqualTo("Id:Int32,Name:String,MY_SPECIAL_PRICE_COLUMN:Decimal"));
+
+            Assert.That(
+                GetCommaSeparatedColumnList(ordersTable),
+                Is.EqualTo("MY_SPECIAL_ORDER_ID_COLUMN:Int32,PlacedAt:DateTime,Status:Int32"));
+
+            Assert.That(
+                GetCommaSeparatedColumnList(orderLinesTable),
+                Is.EqualTo("Id:Int32,Quantity:Int32,OrderId:Int32,MY_SPECIAL_PRODUCT_ID_COLUMN:Int32"));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanPerformBasicCrudOnHardCodedRepositoryWithCustomNames()
+        {
+            //-- Arrange
+
+            DropAndCreateTestDatabase();
+            InitializeHardCodedDataRepositoryWithCustomNames().Dispose();
+            CreateTestDatabaseObjects();
+
+            //-- Act & Assert
+
+            CrudOperations.Repository1.ExecuteBasic(repoFactory: InitializeHardCodedDataRepositoryWithCustomNames);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanPerformAdvancedRetrievalsOnHardCodedRepositoryWithCustomNames()
+        {
+            //-- Arrange
+
+            DropAndCreateTestDatabase();
+            InitializeHardCodedDataRepositoryWithCustomNames().Dispose();
+            CreateTestDatabaseObjects();
+
+            //-- Act & Assert
+
+            CrudOperations.Repository1.ExecuteAdvancedRetrievals(repoFactory: InitializeHardCodedDataRepositoryWithCustomNames);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private Interfaces.Repository1.IOnlineStoreRepository InitializeHardCodedDataRepository()
         {
             //_components = _componentsBuilder.Build();
@@ -177,6 +244,43 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             var connection = CreateDbConnection();
             connection.Open();
             var repo = new HR1.DataRepositoryObject_DataRepository(connection, autoCommit: false);
+            base.CompiledModel = repo.CompiledModel;
+            return repo;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Interfaces.Repository1.IOnlineStoreRepository InitializeHardCodedDataRepositoryWithCustomNames()
+        {
+            //_components = _componentsBuilder.Build();
+
+            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions();
+
+            var productMetadata = ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IProduct)));
+            var orderMetadata = ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IOrder)));
+            var orderLineMetadata = ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IOrderLine)));
+
+            productMetadata.UpdateImplementation(typeof(HR1.EntityObject_Product));
+            orderMetadata.UpdateImplementation(typeof(HR1.EntityObject_Order));
+            orderLineMetadata.UpdateImplementation(typeof(HR1.EntityObject_OrderLine));
+
+            metadataCache.EnsureRelationalMapping(productMetadata);
+            metadataCache.EnsureRelationalMapping(orderMetadata);
+            metadataCache.EnsureRelationalMapping(orderLineMetadata);
+
+            orderMetadata.RelationalMapping.PrimaryTableName = "MY_ORDERS";
+            orderMetadata.Properties.Single(p => p.Name == "Id").RelationalMapping.ColumnName = "MY_SPECIAL_ORDER_ID_COLUMN";
+
+            productMetadata.RelationalMapping.PrimaryTableName = "MY_PRODUCTS";
+            productMetadata.Properties.Single(p => p.Name == "Price").RelationalMapping.ColumnName = "MY_SPECIAL_PRICE_COLUMN";
+            productMetadata.Properties.Single(p => p.Name == "Price").RelationalMapping.ColumnType = "MONEY";
+
+            orderLineMetadata.RelationalMapping.PrimaryTableName = "MY_ORDER_LINES";
+            orderLineMetadata.Properties.Single(p => p.Name == "Product").RelationalMapping.ColumnName = "MY_SPECIAL_PRODUCT_ID_COLUMN";
+
+            var connection = CreateDbConnection();
+            connection.Open();
+            var repo = new HR1.DataRepositoryObject_CustomNames(metadataCache, connection, autoCommit: false);
             base.CompiledModel = repo.CompiledModel;
             return repo;
         }
