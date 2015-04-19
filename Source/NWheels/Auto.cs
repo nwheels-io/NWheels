@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using Autofac.Core;
 using NWheels.Conventions;
+using NWheels.Extensions;
 
 namespace NWheels
 {
@@ -17,9 +19,16 @@ namespace NWheels
 
         public Auto(IComponentContext container)
         {
-            var autoFactories = container.Resolve<IEnumerable<IAutoObjectFactory>>();
-            var factory = autoFactories.Single(f => f.ServiceAncestorMarkerType.IsAssignableFrom(typeof(TService)));
-            _instance = factory.CreateService<TService>();
+            if ( container.ComponentRegistry.RegistrationsFor(new TypedService(typeof(TService))).Any() )
+            {
+                _instance = container.Resolve<TService>();
+            }
+            else
+            {
+                var autoFactories = container.Resolve<IEnumerable<IAutoObjectFactory>>();
+                var factory = autoFactories.Single(f => f.ServiceAncestorMarkerType.IsAssignableFrom(typeof(TService)));
+                _instance = factory.CreateService<TService>();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

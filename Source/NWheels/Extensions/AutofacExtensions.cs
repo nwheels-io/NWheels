@@ -256,7 +256,7 @@ namespace NWheels.Extensions
                 where TSection : class, IConfigurationSection
             {
                 _builder.RegisterType<ConfigSectionRegistration<TSection>>().As<IConfigSectionRegistration>().InstancePerDependency();
-                _builder.Register(ctx => ctx.Resolve<ConfigurationObjectFactory>().CreateService<TSection>()).As<TSection>();
+                _builder.Register(ctx => ctx.Resolve<ConfigurationObjectFactory>().CreateService<TSection>()).As<TSection>().SingleInstance();
             }
         }
 

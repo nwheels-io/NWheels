@@ -27,10 +27,12 @@ namespace NWheels.Conventions.Core
 
         public TService CreateService<TService>() where TService : class
         {
-            return base.CreateInstanceOf<TService>().UsingConstructor(
+            var sectionObject = base.CreateInstanceOf<TService>().UsingConstructor(
                 (IConfigurationObjectFactory)this, 
                 _components.Resolve<IConfigurationLogger>(), 
                 string.Empty);
+
+            return sectionObject;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
