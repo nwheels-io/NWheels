@@ -528,7 +528,11 @@ namespace NWheels.Hosting.Core
                     var frameworkUpdater = new ContainerBuilder();
                     frameworkUpdater.RegisterType<RealFramework>().As<IFramework>().WithParameter(new TypedParameter(typeof(BootConfiguration), this.NodeConfig)).SingleInstance();
                     frameworkUpdater.RegisterGeneric(typeof(Auto<>)).SingleInstance();
-                    frameworkUpdater.RegisterAdapter<IConfigSectionRegistration, IConfigurationSection>((ctx, reg) => reg.ResolveFromContainer(_lifetimeContainer)).SingleInstance();
+                    frameworkUpdater.RegisterAdapter<IConfigSectionRegistration, IConfigurationSection>(
+                        (ctx, reg) => {
+                            var section = reg.ResolveFromContainer(_lifetimeContainer);
+                            return section;
+                        }).SingleInstance();
                     frameworkUpdater.Update(_lifetimeContainer.ComponentRegistry);
 
                     if ( !_nodeConfig.ApplicationModules.Any() )
@@ -654,6 +658,7 @@ namespace NWheels.Hosting.Core
         {
             private readonly NodeLifetime _ownerLifetime;
             private readonly INodeHostLogger _logger;
+            private bool _suppressDynamicArtifacts;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -686,6 +691,9 @@ namespace NWheels.Hosting.Core
                 var loader = _ownerLifetime.LifetimeContainer.Resolve<XmlConfigurationLoader>();
                 loader.LoadConfiguration(_ownerLifetime.NodeConfig.ConfigFiles);
 
+                var loggingConfiguration = _ownerLifetime.LifetimeContainer.Resolve<IFrameworkLoggingConfiguration>();
+                _suppressDynamicArtifacts = loggingConfiguration.SuppressDynamicArtifacts;
+                
                 WriteEffectiveConfigurationXml(loader);
             }
 
@@ -728,6 +736,11 @@ namespace NWheels.Hosting.Core
 
             private void WriteEffectiveConfigurationXml(XmlConfigurationLoader loader)
             {
+                if ( _suppressDynamicArtifacts )
+                {
+                    return;
+                }
+
                 var filePath = PathUtility.LocalBinPath("effective-config-dump.xml");
                 _logger.WritingEffectiveConfigurationToDisk(filePath);
 
@@ -754,6 +767,11 @@ namespace NWheels.Hosting.Core
 
             private void WriteEffectiveMetadataJson()
             {
+                if ( _suppressDynamicArtifacts )
+                {
+                    return;
+                }
+                
                 var metadataCache = _ownerLifetime.LifetimeContainer.Resolve<TypeMetadataCache>();
 
                 var filePath = PathUtility.LocalBinPath("effective-metadata-dump.json");
@@ -776,11 +794,16 @@ namespace NWheels.Hosting.Core
 
             private void SaveDynamicModuleToAssembly()
             {
+                if ( _suppressDynamicArtifacts )
+                {
+                    return;
+                }
+
                 var dynamicModule = _ownerLifetime.LifetimeContainer.Resolve<DynamicModule>();
 
                 var filePath = PathUtility.LocalBinPath(dynamicModule.SimpleName + ".dll");
                 _logger.SavingDynamicModuleToAssembly(filePath);
-                
+
                 dynamicModule.SaveAssembly();
             }
 

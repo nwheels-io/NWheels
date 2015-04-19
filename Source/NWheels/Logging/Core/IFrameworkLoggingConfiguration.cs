@@ -6,13 +6,18 @@ namespace NWheels.Logging.Core
     [ConfigurationSection(XmlName = "Framework.Logging")]
     public interface IFrameworkLoggingConfiguration : IConfigurationSection
     {
-        [DefaultValue("")]
+        [DefaultValue("..\\Logs\\PlainLog")]
         string PlainLogFolder { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [DefaultValue("Logs")]
+        [DefaultValue("..\\Logs\\ThreadLog")]
         string ThreadLogFolder { get; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DefaultValue(false)]
+        bool SuppressDynamicArtifacts { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
