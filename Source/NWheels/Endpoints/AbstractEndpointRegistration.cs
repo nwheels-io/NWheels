@@ -49,7 +49,7 @@ namespace NWheels.Endpoints
 
         public virtual Uri GetDefaultMetadataAddress()
         {
-            return new Uri(Address, "/metadata");
+            return new Uri(Address.ToString().EndsWith("/") ? Address : new Uri(Address.ToString() + "/"), "metadata");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

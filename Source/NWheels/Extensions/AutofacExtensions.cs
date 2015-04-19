@@ -7,6 +7,7 @@ using Autofac;
 using Autofac.Builder;
 using Autofac.Core;
 using Autofac.Core.Activators.Reflection;
+using Autofac.Core.Lifetime;
 using NWheels.Configuration;
 using NWheels.Conventions;
 using NWheels.Conventions.Core;
@@ -40,6 +41,20 @@ namespace NWheels.Extensions
                 .FirstOrDefault();
 
             return (implementationType != null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool IsServiceRegisteredAsSingleton(this IComponentContext container, Type serviceType)
+        {
+            IComponentRegistration registration;
+
+            if ( !container.ComponentRegistry.TryGetRegistration(new TypedService(serviceType), out registration) )
+            {
+                throw new InvalidOperationException("Specified service could not be found in the container.");
+            }
+
+            return (registration.Sharing == InstanceSharing.Shared && registration.Lifetime is RootScopeLifetime);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Autofac;
+using Autofac.Core;
+using Autofac.Core.Lifetime;
 using NUnit.Framework;
 
 namespace NWheels.UnitTests.Hosting
@@ -164,6 +166,50 @@ namespace NWheels.UnitTests.Hosting
 
             Assert.That(componentContextFromBase.ComponentRegistry.Registrations.Count(), Is.EqualTo(2));
             Assert.That(componentContextFromChild.ComponentRegistry.Registrations.Count(), Is.EqualTo(3));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanDetermineIfComponentIsRegisteredAsSingleton()
+        {
+            //-- Arrange
+
+            var builder = new ContainerBuilder();
+
+            builder.RegisterType<ComponentOne>().As<IComponentOne>().SingleInstance();
+            builder.RegisterType<ComponentTwo>().As<IComponentTwo>().InstancePerDependency();
+
+            var container = builder.Build();
+
+            //-- Act: 
+
+            IComponentRegistration registrationOne;
+            IComponentRegistration registrationTwo;
+
+            if ( !container.ComponentRegistry.TryGetRegistration(new TypedService(typeof(IComponentOne)), out registrationOne) )
+            {
+                Assert.Fail("Registration for IComponentOne could not be retrieved");
+            }
+
+            if ( !container.ComponentRegistry.TryGetRegistration(new TypedService(typeof(IComponentTwo)), out registrationTwo) )
+            {
+                Assert.Fail("Registration for IComponentTwo could not be retrieved");
+            }
+
+            var isOneSingleton = (registrationOne.Sharing == InstanceSharing.Shared && registrationOne.Lifetime is RootScopeLifetime);
+            var isTwoSingleton = (registrationTwo.Sharing == InstanceSharing.Shared && registrationOne.Lifetime is RootScopeLifetime);
+
+            //-- Assert
+
+            Assert.That(isOneSingleton, Is.True);
+            Assert.That(isTwoSingleton, Is.False);
+
+            Assert.That(registrationOne.Lifetime, Is.InstanceOf<RootScopeLifetime>());
+            Assert.That(registrationOne.Sharing, Is.EqualTo(InstanceSharing.Shared));
+
+            Assert.That(registrationTwo.Lifetime, Is.InstanceOf<CurrentScopeLifetime>());
+            Assert.That(registrationTwo.Sharing, Is.EqualTo(InstanceSharing.None));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

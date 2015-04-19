@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Linq;
@@ -6,10 +8,12 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Dispatcher;
+using System.Threading;
 using System.Xml;
 using Autofac;
 using Autofac.Core;
 using Autofac.Core.Activators.Reflection;
+using Hapil;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Logging;
@@ -23,8 +27,7 @@ namespace NWheels.Endpoints.Core.Wcf
         private readonly ILogger _logger;
         private readonly IComponentContext _components;
         private readonly Type _contractType;
-        private readonly Type _serviceType;
-        private ServiceHost _serviceHost;
+        private InjectionEnabledServiceHost _serviceHost;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -39,11 +42,6 @@ namespace NWheels.Endpoints.Core.Wcf
             _logger = logger.Instance;
             _components = components;
             _contractType = _endpointRegistration.Contract;
-
-            if ( !_components.TryGetImplementationType(_contractType, out _serviceType) )
-            {
-                throw new ConfigurationErrorsException("Could not find registered implementation of contract: " + _contractType.ToString());
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -51,7 +49,7 @@ namespace NWheels.Endpoints.Core.Wcf
         public override void NodeActivated()
         {
             _endpointRegistration.ApplyConfiguration(_config);
-            _serviceHost = new ServiceHost(_serviceType);
+            _serviceHost = new InjectionEnabledServiceHost(_components, _contractType);
 
             ConfigureApiEndpoint();
 
@@ -102,10 +100,8 @@ namespace NWheels.Endpoints.Core.Wcf
                 new EndpointAddress(_endpointRegistration.Address));
 
             _serviceHost.AddServiceEndpoint(apiEndpoint);
-
             apiEndpoint.EndpointBehaviors.Add(new MessageLogBehavior(new LoggingMessageInspector(_logger)));
 
-            _serviceHost.Description.Behaviors.Add(new AutofacInstanceProviderBehavior(_components, _serviceType));
             _serviceHost.Description.Behaviors.Add(new ErrorHandlerBehavior(new ErrorHandler(_logger)));
         }
 
@@ -123,16 +119,64 @@ namespace NWheels.Endpoints.Core.Wcf
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class AutofacInstanceProvider : IInstanceProvider
+        public class InjectionEnabledServiceHost : ServiceHostBase
         {
-            private Type _serviceType;
+            private readonly IComponentContext _components;
+            private readonly Type _serviceContractType;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public InjectionEnabledServiceHost(IComponentContext components, Type serviceContractType)
+                : base()
+            {
+                _components = components;
+                _serviceContractType = serviceContractType;
+
+                InitializeDescription(new UriSchemeKeyedCollection());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override ServiceDescription CreateDescription(out IDictionary<string, ContractDescription> implementedContracts)
+            {
+                Type serviceType;
+
+                if ( !_components.TryGetImplementationType(_serviceContractType, out serviceType) )
+                {
+                    throw new ConfigurationErrorsException("Could not find registered implementation of contract: " + _serviceContractType.ToString());
+                }
+
+                var contractDescription = ContractDescription.GetContract(_serviceContractType);
+
+                implementedContracts = new Dictionary<string, ContractDescription> {
+                    { contractDescription.ConfigurationName, contractDescription }
+                };
+
+                var serviceDescription = new ServiceDescription {
+                    ServiceType = serviceType,
+                    ConfigurationName = serviceType.FullName,
+                    Name = _serviceContractType.Name.TrimPrefix("I"),
+                    Namespace = _serviceContractType.Namespace,
+                };
+
+                serviceDescription.Behaviors.Add(new InjectionEnabledInstancingBehavior(_components, _serviceContractType));
+                
+                return serviceDescription;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class InjectionEnabledInstanceProvider : IInstanceProvider
+        {
+            private Type _serviceContractType;
             private IComponentContext _components;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public AutofacInstanceProvider(Type serviceType, IComponentContext components)
+            public InjectionEnabledInstanceProvider(Type serviceContractType, IComponentContext components)
             {
-                _serviceType = serviceType;
+                _serviceContractType = serviceContractType;
                 _components = components;
             }
 
@@ -147,7 +191,7 @@ namespace NWheels.Endpoints.Core.Wcf
 
             public object GetInstance(InstanceContext instanceContext, Message message)
             {
-                return _components.Resolve(_serviceType);
+                return _components.Resolve(_serviceContractType);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -159,17 +203,105 @@ namespace NWheels.Endpoints.Core.Wcf
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class AutofacInstanceProviderBehavior : IServiceBehavior
+        public class PerCallInstanceContextProvider : IInstanceContextProvider
         {
-            private readonly IComponentContext _components;
-            private readonly Type _serviceType;
+            public InstanceContext GetExistingInstanceContext(Message message, IContextChannel channel)
+            {
+                return null;
+            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public AutofacInstanceProviderBehavior(IComponentContext components, Type serviceType)
+            public void InitializeInstanceContext(InstanceContext instanceContext, Message message, IContextChannel channel)
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool IsIdle(InstanceContext instanceContext)
+            {
+                return true;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void NotifyIdle(InstanceContextIdleCallback callback, InstanceContext instanceContext)
+            {
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class SingletonInstanceContextProvider : IInstanceContextProvider
+        {
+            private readonly ServiceHostBase _serviceHost;
+            private readonly object _instanceContextSyncRoot = new object();
+            private InstanceContext _instanceContext;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public SingletonInstanceContextProvider(ServiceHostBase serviceHost)
+            {
+                _serviceHost = serviceHost;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public InstanceContext GetExistingInstanceContext(Message message, IContextChannel channel)
+            {
+                if ( _instanceContext == null )
+                {
+                    if ( !Monitor.TryEnter(_instanceContextSyncRoot, timeout: TimeSpan.FromSeconds(10)) )
+                    {
+                        throw new TimeoutException("Could not acquire lock on instance context withing allotted timeout.");
+                    }
+
+                    if ( _instanceContext != null )
+                    {
+                        Monitor.Exit(_instanceContextSyncRoot);
+                    }
+                }
+
+                return _instanceContext;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void InitializeInstanceContext(InstanceContext instanceContext, Message message, IContextChannel channel)
+            {
+                _instanceContext = instanceContext;
+                Monitor.Exit(_instanceContextSyncRoot);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool IsIdle(InstanceContext instanceContext)
+            {
+                return false;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void NotifyIdle(InstanceContextIdleCallback callback, InstanceContext instanceContext)
+            {
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class InjectionEnabledInstancingBehavior : IServiceBehavior
+        {
+            private readonly IComponentContext _components;
+            private readonly Type _serviceContractType;
+            private readonly bool _isSingleton;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public InjectionEnabledInstancingBehavior(IComponentContext components, Type serviceContractType)
             {
                 _components = components;
-                _serviceType = serviceType;
+                _serviceContractType = serviceContractType;
+                _isSingleton = components.IsServiceRegisteredAsSingleton(_serviceContractType);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -183,14 +315,25 @@ namespace NWheels.Endpoints.Core.Wcf
 
             public void ApplyDispatchBehavior(ServiceDescription serviceDescription, ServiceHostBase serviceHostBase)
             {
-                var instanceProvider = new AutofacInstanceProvider(_serviceType, _components);
- 
+                var instanceProvider = new InjectionEnabledInstanceProvider(_serviceContractType, _components);
+                IInstanceContextProvider instanceContextProvider;
+
+                if ( _isSingleton )
+                {
+                    instanceContextProvider = new SingletonInstanceContextProvider(serviceHostBase);
+                }
+                else
+                {
+                    instanceContextProvider = new PerCallInstanceContextProvider();
+                }
+
                 foreach( var dispatcher in serviceHostBase.ChannelDispatchers.OfType<ChannelDispatcher>() )
                 {
                     foreach ( var endpointDispatcher in dispatcher.Endpoints )
                     {
                         DispatchRuntime dispatchRuntime = endpointDispatcher.DispatchRuntime;
                         dispatchRuntime.InstanceProvider = instanceProvider;
+                        dispatchRuntime.InstanceContextProvider = instanceContextProvider;
                     }
                 }
             }
@@ -252,7 +395,7 @@ namespace NWheels.Endpoints.Core.Wcf
             object IDispatchMessageInspector.AfterReceiveRequest(ref System.ServiceModel.Channels.Message request, IClientChannel channel, InstanceContext instanceContext)
             {
                 var activity = _logger.HandlingRequest(request.Headers.Action);
-                OperationContext.Current.Extensions.Add(new LogOperationExtension(activity));
+                OperationContext.Current.Extensions.Add(new ThreadLogOperationContextExtension(activity));
 
                 MessageBuffer buffer = request.CreateBufferedCopy(Int32.MaxValue);
                 request = buffer.CreateMessage();
@@ -273,7 +416,7 @@ namespace NWheels.Endpoints.Core.Wcf
 
             void IDispatchMessageInspector.BeforeSendReply(ref System.ServiceModel.Channels.Message reply, object correlationState)
             {
-                var logExtension = OperationContext.Current.Extensions.Find<LogOperationExtension>();
+                var logExtension = OperationContext.Current.Extensions.Find<ThreadLogOperationContextExtension>();
 
                 if ( logExtension != null )
                 {
@@ -297,9 +440,9 @@ namespace NWheels.Endpoints.Core.Wcf
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class LogOperationExtension : IExtension<OperationContext>
+        private class ThreadLogOperationContextExtension : IExtension<OperationContext>
         {
-            public LogOperationExtension(ILogActivity activity)
+            public ThreadLogOperationContextExtension(ILogActivity activity)
             {
                 Activity = activity;
             }
