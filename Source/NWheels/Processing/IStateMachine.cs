@@ -1,4 +1,4 @@
-namespace NWheels.Core.Processing
+namespace NWheels.Processing
 {
     public interface IStateMachine<TState, TTrigger>
     {

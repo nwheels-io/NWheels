@@ -9,16 +9,16 @@ using NWheels.Testing;
 namespace NWheels.UnitTests.Processing
 {
     [TestFixture]
-    public class StateMachineTests : UnitTestBase
+    public class TransientStateMachineTests : UnitTestBase
     {
         [Test]
         public void NewInstance_InitialState()
         {
             //-- Arrange, Act
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new TransientStateMachine<PhilisopherState, PhilisopherTrigger>(
                 new PhilisopherCodeBehind(), 
-                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<TransientStateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
 
             //-- Assert
 
@@ -32,9 +32,9 @@ namespace NWheels.UnitTests.Processing
         {
             //-- Arrange
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new TransientStateMachine<PhilisopherState, PhilisopherTrigger>(
                 new PhilisopherCodeBehind(),
-                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<TransientStateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
 
             //-- Act
 
@@ -61,9 +61,9 @@ namespace NWheels.UnitTests.Processing
 
             //-- Act
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new TransientStateMachine<PhilisopherState, PhilisopherTrigger>(
                 codeBehind,
-                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<TransientStateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
             var log1 = codeBehind.TakeLog();
 
             machine.ReceiveTrigger(PhilisopherTrigger.Hungry);
@@ -111,9 +111,9 @@ namespace NWheels.UnitTests.Processing
                 ThrowFromThinkingLeaving = true
             };
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new TransientStateMachine<PhilisopherState, PhilisopherTrigger>(
                 codeBehind,
-                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<TransientStateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
 
             //-- Act
 
@@ -146,9 +146,9 @@ namespace NWheels.UnitTests.Processing
                 ThrowFromTransitioningFromAcquiringForksToEating = true
             };
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new TransientStateMachine<PhilisopherState, PhilisopherTrigger>(
                 codeBehind,
-                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<TransientStateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
 
             //-- Act
 
@@ -185,9 +185,9 @@ namespace NWheels.UnitTests.Processing
                 ThrowFromAcquiringForksEntered = true
             };
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new TransientStateMachine<PhilisopherState, PhilisopherTrigger>(
                 codeBehind,
-                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<TransientStateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
 
             codeBehind.TakeLog();
 
@@ -223,9 +223,9 @@ namespace NWheels.UnitTests.Processing
                 FeedBackFromEating = true
             };
 
-            var machine = new StateMachine<PhilisopherState, PhilisopherTrigger>(
+            var machine = new TransientStateMachine<PhilisopherState, PhilisopherTrigger>(
                 codeBehind,
-                ResolveAuto<StateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
+                ResolveAuto<TransientStateMachine<PhilisopherState, PhilisopherTrigger>.ILogger>());
 
             machine.ReceiveTrigger(PhilisopherTrigger.Hungry);
             codeBehind.TakeLog();

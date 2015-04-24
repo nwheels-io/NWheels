@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Processing.Core;
 
 namespace NWheels.Processing
 {
@@ -23,16 +24,18 @@ namespace NWheels.Processing
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IInitializableWorkflowCodeBehind<TInitData>
+    public interface IInitializableWorkflowCodeBehind<TDataEntity>
+        where TDataEntity : class, IWorkflowInstanceEntity
     {
-        void OnInitialize(TInitData initializationData);
+        void OnInitialize(TDataEntity initialData);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface ISuspendableWorkflowCodeBehind<TSnapshot>
+    public interface ISuspendableWorkflowCodeBehind<TDataEntity> : IWorkflowCodeBehind
+        where TDataEntity : class, IWorkflowInstanceEntity
     {
-        void OnSuspend(out TSnapshot persistableSnapshot);
-        void OnResume(TSnapshot persistedSnapshot);
+        void OnSuspend(TDataEntity dataToSave);
+        void OnResume(TDataEntity savedData);
     }
 }

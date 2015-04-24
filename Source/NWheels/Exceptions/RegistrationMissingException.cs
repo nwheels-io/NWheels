@@ -8,9 +8,9 @@ using NWheels.Extensions;
 namespace NWheels.Exceptions
 {
     [Serializable]
-    public class CodeBehindErrorException : Exception
+    public class RegistrationMissingException : Exception
     {
-        public CodeBehindErrorException(string message, params object[] formatArgs)
+        public RegistrationMissingException(string message, params object[] formatArgs)
             : base(message.FormatIf(formatArgs))
         {
         }

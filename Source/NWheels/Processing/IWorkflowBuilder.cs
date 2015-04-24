@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Processing.Core;
 
 namespace NWheels.Processing
 {
     public interface IWorkflowBuilder
     {
-        void AddActor(IWorkflowActor actor);
-        ISequentialFlow AddSequence();
+        void AddActor<TWorkItem>(string name, int priority, IWorkflowActor<TWorkItem> actor, IWorkflowRouter router);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -18,12 +18,17 @@ namespace NWheels.Processing
     {
     }
 
-
-
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public static class SequentialFlowExtensions
     {
+        public static ISequentialFlow AddSequence(this IWorkflowBuilder builder)
+        {
+            return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static ISequentialFlow Do(this ISequentialFlow flow, string stepName, Action action)
         {
             return flow;

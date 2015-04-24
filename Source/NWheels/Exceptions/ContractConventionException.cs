@@ -5,13 +5,14 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
+using NWheels.Extensions;
 
 namespace NWheels.Exceptions
 {
     public class ContractConventionException : Exception
     {
-        public ContractConventionException(string message)
-            : base(message)
+        public ContractConventionException(string message, params object[] formatArgs)
+            : base(message.FormatIf(formatArgs))
         {
         }
 

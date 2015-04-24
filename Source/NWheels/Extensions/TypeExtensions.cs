@@ -12,5 +12,12 @@ namespace NWheels.Extensions
         {
             return typeof(Exception).IsAssignableFrom(type);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string AssemblyQualifiedNameNonVersioned(this Type type)
+        {
+            return string.Format("{0}, {1}", type.FullName, type.Assembly.GetName().Name);
+        }
     }
 }

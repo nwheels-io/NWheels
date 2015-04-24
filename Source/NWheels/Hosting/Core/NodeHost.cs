@@ -17,7 +17,6 @@ using NWheels.Configuration.Core;
 using NWheels.Conventions;
 using NWheels.Conventions.Core;
 using NWheels.Core;
-using NWheels.Core.Processing;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
@@ -42,7 +41,7 @@ namespace NWheels.Hosting.Core
         private readonly IContainer _baseContainer;
         private readonly INodeHostLogger _logger;
         private readonly IInitializableHostComponent[] _hostComponents;
-        private readonly StateMachine<NodeState, NodeTrigger> _stateMachine;
+        private readonly TransientStateMachine<NodeState, NodeTrigger> _stateMachine;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -59,9 +58,9 @@ namespace NWheels.Hosting.Core
 
             _hostComponents = InitializeHostComponents();
 
-            _stateMachine = new StateMachine<NodeState, NodeTrigger>(
+            _stateMachine = new TransientStateMachine<NodeState, NodeTrigger>(
                 new StateMachineCodeBehind(this), 
-                _baseContainer.Resolve<StateMachine<NodeState, NodeTrigger>.ILogger>());
+                _baseContainer.Resolve<TransientStateMachine<NodeState, NodeTrigger>.ILogger>());
 
             _logger = _baseContainer.Resolve<INodeHostLogger>();
         }
@@ -217,7 +216,7 @@ namespace NWheels.Hosting.Core
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkDatabaseConfig>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<INodeHostLogger>();
-            builder.NWheelsFeatures().Logging().RegisterLogger<StateMachine<NodeState, NodeTrigger>.ILogger>();
+            builder.NWheelsFeatures().Logging().RegisterLogger<TransientStateMachine<NodeState, NodeTrigger>.ILogger>();
             
             builder.RegisterType<ContractMetadataConvention>().As<IMetadataConvention>().SingleInstance();
             builder.RegisterType<AttributeMetadataConvention>().As<IMetadataConvention>().SingleInstance();

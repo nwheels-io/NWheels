@@ -13,5 +13,11 @@ namespace NWheels.Processing
         {
             throw new NotImplementedException();
         }
+
+
+        public Type SnapshotType
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 }

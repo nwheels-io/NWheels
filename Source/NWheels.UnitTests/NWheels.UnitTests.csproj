@@ -51,6 +51,10 @@
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="protobuf-net">
+      <HintPath>..\packages\protobuf-net.2.0.0.668\lib\net40\protobuf-net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -78,9 +82,11 @@
     <Compile Include="Logging\NameValuePairLogNodeTests.cs" />
     <Compile Include="Logging\ThreadLogTests.cs" />
     <Compile Include="Logging\ThreadLogUnitTestBase.cs" />
+    <Compile Include="Processing\Impl\WorkflowProcessorSnapshotTests.cs" />
     <Compile Include="Processing\RevertableSequenceTests.cs" />
     <Compile Include="Processing\Spikes\AsyncAwaitAssumptionTests.cs" />
-    <Compile Include="Processing\StateMachineTests.cs" />
+    <Compile Include="Processing\Spikes\ProtobufSerializationTests.cs" />
+    <Compile Include="Processing\TransientStateMachineTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

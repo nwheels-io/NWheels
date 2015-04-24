@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using NWheels.Core.Processing;
+using Autofac;
 using NWheels.Exceptions;
+using NWheels.Extensions;
 using NWheels.Logging;
 
 namespace NWheels.Processing.Core
 {
-    public class StateMachine<TState, TTrigger> : IStateMachine<TState, TTrigger>, IStateMachineBuilder<TState, TTrigger>
+    public class TransientStateMachine<TState, TTrigger> : IStateMachine<TState, TTrigger>, IStateMachineBuilder<TState, TTrigger>
     {
         private readonly IStateMachineCodeBehind<TState, TTrigger> _codeBehind;
         private readonly ILogger _logger;
@@ -15,14 +16,21 @@ namespace NWheels.Processing.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public StateMachine(IStateMachineCodeBehind<TState, TTrigger> codeBehind, Auto<ILogger> logger)
+        public TransientStateMachine(IStateMachineCodeBehind<TState, TTrigger> codeBehind, IComponentContext components)
+            : this(codeBehind, components.ResolveAuto<ILogger>())
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TransientStateMachine(IStateMachineCodeBehind<TState, TTrigger> codeBehind, Auto<ILogger> logger)
             : this(codeBehind, logger.Instance)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public StateMachine(IStateMachineCodeBehind<TState, TTrigger> codeBehind, ILogger logger)
+        public TransientStateMachine(IStateMachineCodeBehind<TState, TTrigger> codeBehind, ILogger logger)
         {
             _logger = logger;
             _codeBehind = codeBehind;
@@ -130,7 +138,7 @@ namespace NWheels.Processing.Core
 
         private class MachineState : IStateMachineStateBuilder<TState, TTrigger>
         {
-            private readonly StateMachine<TState, TTrigger> _ownerMachine;
+            private readonly TransientStateMachine<TState, TTrigger> _ownerMachine;
             private readonly TState _value;
             private readonly Dictionary<TTrigger, StateTransition> _transitions;
             private EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> _onEntered = null;
@@ -138,7 +146,7 @@ namespace NWheels.Processing.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public MachineState(StateMachine<TState, TTrigger> ownerMachine, TState value)
+            public MachineState(TransientStateMachine<TState, TTrigger> ownerMachine, TState value)
             {
                 _value = value;
                 _ownerMachine = ownerMachine;
@@ -159,6 +167,17 @@ namespace NWheels.Processing.Core
                 EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> handler)
             {
                 _onEntered += handler;
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            IStateMachineStateBuilder<TState, TTrigger> IStateMachineStateBuilder<TState, TTrigger>.OnTimeout(
+                TimeSpan timeout, 
+                EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> handler,
+                bool recurring)
+            {
+                //_onLeaving += handler;
                 return this;
             }
 
@@ -238,7 +257,7 @@ namespace NWheels.Processing.Core
 
         private class StateTransition : IStateMachineTransitionBuilder<TState, TTrigger>
         {
-            private readonly StateMachine<TState, TTrigger> _ownerMachine;
+            private readonly TransientStateMachine<TState, TTrigger> _ownerMachine;
             private readonly MachineState _ownerState;
             private readonly TTrigger _trigger;
             private TState _destinationStateValue;
@@ -247,7 +266,7 @@ namespace NWheels.Processing.Core
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public StateTransition(
-                StateMachine<TState, TTrigger> ownerMachine, 
+                TransientStateMachine<TState, TTrigger> ownerMachine, 
                 MachineState ownerState, 
                 TTrigger trigger)
             {

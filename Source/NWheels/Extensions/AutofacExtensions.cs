@@ -19,6 +19,7 @@ using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.UI;
 using NWheels.Processing;
+using NWheels.Processing.Core;
 
 namespace NWheels.Extensions
 {
@@ -66,6 +67,13 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static HostingFeature Hosting(this NWheelsFeatureRegistrations features)
+        {
+            return new HostingFeature(((IHaveContainerBuilder)features).Builder);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static LoggingFeature Logging(this NWheelsFeatureRegistrations features)
         {
             return new LoggingFeature(((IHaveContainerBuilder)features).Builder);
@@ -90,6 +98,13 @@ namespace NWheels.Extensions
         public static EntityFeature Entities(this NWheelsFeatureRegistrations features)
         {
             return new EntityFeature(((IHaveContainerBuilder)features).Builder);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ProcessingFeature Processing(this NWheelsFeatureRegistrations features)
+        {
+            return new ProcessingFeature(((IHaveContainerBuilder)features).Builder);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -212,6 +227,28 @@ namespace NWheels.Extensions
             ContainerBuilder IHaveContainerBuilder.Builder
             {
                 get { return _builder; }
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class HostingFeature
+        {
+            private readonly ContainerBuilder _builder;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public HostingFeature(ContainerBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IRegistrationBuilder<TComponent, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterLifecycleComponent<TComponent>()
+                where TComponent : class, ILifecycleEventListener
+            {
+                return _builder.RegisterType<TComponent>().As<ILifecycleEventListener>().SingleInstance();
             }
         }
 
@@ -352,6 +389,30 @@ namespace NWheels.Extensions
             {
                 var fineTuner = new RelationalMappingFineTuner<TEntity>(fineTuneAction);
                 _builder.RegisterInstance<RelationalMappingFineTuner<TEntity>>(fineTuner);
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ProcessingFeature
+        {
+            private readonly ContainerBuilder _builder;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ProcessingFeature(ContainerBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RegisterWorkflow<TCodeBehind, TDataRepository, TDataEntity>(Func<TDataRepository, IQueryable<TDataEntity>> entitySelector)
+                where TCodeBehind : class, IWorkflowCodeBehind
+                where TDataEntity : class, IWorkflowInstanceEntity
+            {
+                var registration = new WorkflowTypeRegistration<TCodeBehind, TDataRepository, TDataEntity>(entitySelector);
+                _builder.RegisterInstance(registration).As<WorkflowTypeRegistration>();
             }
         }
 

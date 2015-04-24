@@ -1,20 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace NWheels.Processing
+namespace NWheels.Processing.Core
 {
     public interface IWorkflowInstance
     {
         Guid InstanceId { get; }
-        Type CodeBehindType { get; }
         WorkflowState State { get; }
         DateTime CreatedAtUtc { get; }
         DateTime StateChangedAtUtc { get; }
+        Type CodeBehindType { get; }
         TimeSpan TotalTime { get; }
         TimeSpan TotalExecutionTime { get; }
         TimeSpan TotalSuspensionTime { get; }
+        int TotalSuspensionCount { get; }
     }
 }
