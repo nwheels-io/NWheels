@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="CoreUnitTestBase.cs" />
     <Compile Include="DataObjects\Jsonlike.cs" />
+    <Compile Include="LogAssert.cs" />
     <Compile Include="TestFramework.cs" />
     <Compile Include="TestThreadLogAppender.cs" />
     <Compile Include="UnitTestBase.cs" />
