@@ -58,6 +58,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LogAssertTests.cs" />
+    <Compile Include="LogexTests.cs" />
+    <Compile Include="LogNodeList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

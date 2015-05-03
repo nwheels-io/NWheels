@@ -108,6 +108,36 @@ namespace NWheels.Logging.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static string GetMessageIdClassifier(Type loggerInterface)
+        {
+            if ( loggerInterface.IsNested )
+            {
+                if ( loggerInterface.Name == "ILogger" )
+                {
+                    return loggerInterface.DeclaringType.Name.TrimPrefix("I");
+                }
+                else
+                {
+                    return 
+                        loggerInterface.DeclaringType.Name.TrimPrefix("I") + "." + 
+                        loggerInterface.Name.TrimPrefix("I").TrimSuffix("Logger");
+                }
+            }
+            else
+            {
+                return loggerInterface.Name.TrimPrefix("I");
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetMessageId(MethodInfo method)
+        {
+            return GetMessageIdClassifier(method.DeclaringType) + "." + method.Name;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static ContractConventionException NewContractConventionException(MemberInfo member, string message)
         {
             return new ContractConventionException(typeof(ApplicationEventLoggerConvention), TypeTemplate.Resolve<TypeTemplate.TPrimary>(), member, message);
@@ -417,33 +447,6 @@ namespace NWheels.Logging.Core
                         _valueArgumentDetails[i] = DetailAttribute.FromParameter(_parameters[i]);
                     }
                 }
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-            
-            private static string GetMessageId(MethodInfo method)
-            {
-                string classifier;
-
-                if ( method.DeclaringType.IsNested )
-                {
-                    if ( method.DeclaringType.Name == "ILogger" )
-                    {
-                        classifier = method.DeclaringType.DeclaringType.Name.TrimPrefix("I");
-                    }
-                    else 
-                    {
-                        classifier =
-                            method.DeclaringType.DeclaringType.Name.TrimPrefix("I") + "." +
-                            method.DeclaringType.Name.TrimPrefix("I").TrimSuffix("Logger");
-                    }
-                }
-                else
-                {
-                    classifier = method.DeclaringType.Name.TrimPrefix("I");
-                }
-
-                return classifier + "." + method.Name;
             }
         }
     }

@@ -218,5 +218,60 @@ namespace NWheels.UnitTests.Logging
         public class SomeObject
         {
         }
+
+        public class CompiledExample
+        {
+            private static readonly string _s_string_TestComponentThisIsMyFunction = "!TestComponent.ThisIsMyFunction";
+            private static readonly string _s_string_CallLoggingAspectLoggingCallOutputs = "CallLoggingAspect.LoggingCallOutputs";
+            
+            private readonly object _target;
+            private readonly IThreadLogAppender _threadLogAppender;
+
+            public CompiledExample(object target, IThreadLogAppender threadLogAppender)
+            {
+                _target = target;
+                _threadLogAppender = threadLogAppender;
+            }
+
+            public string ThisIsMyFunction(int num, string str)
+            {
+                LogNameValuePair<int> pair = new LogNameValuePair<int>
+                {
+                    Name = "num",
+                    Value = num,
+                    IsDetail = true
+                };
+                LogNameValuePair<string> pair2 = new LogNameValuePair<string>
+                {
+                    Name = "str",
+                    Value = str,
+                    IsDetail = true
+                };
+                ActivityLogNode activity = new NameValuePairActivityLogNode<int, string>(_s_string_TestComponentThisIsMyFunction, pair, pair2);
+                this._threadLogAppender.AppendActivityNode(activity);
+                try
+                {
+                    string str4 = ((CallLoggingAspectFactoryTests.ITestComponent)this._target).ThisIsMyFunction(num, str);
+                    LogNameValuePair<string> pair3 = new LogNameValuePair<string>
+                    {
+                        Name = CallLoggingAspectFactory.CallOutputReturnValueName,
+                        Value = str4,
+                        IsDetail = true
+                    };
+                    this._threadLogAppender.AppendLogNode(new NameValuePairLogNode<string>(_s_string_CallLoggingAspectLoggingCallOutputs, LogLevel.Debug, null, pair3));
+                    return str4;
+                }
+                catch (Exception exception)
+                {
+                    ((ILogActivity)activity).Fail(exception);
+                    throw;
+                }
+                finally
+                {
+                    ((IDisposable)activity).Dispose();
+                }
+            }
+            
+        }
     }
 }

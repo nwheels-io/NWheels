@@ -14,6 +14,7 @@ namespace NWheels.Logging
         LogContentTypes GetContentTypes();
         bool IsBaseValue();
         bool IsIncludedInSingleLineText();
+        object GetValueAsObject();
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -99,6 +100,13 @@ namespace NWheels.Logging
             return this.ContentTypes;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public object GetValueAsObject()
+        {
+            return this.Value;
+        }
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static string UnprefixBaseName(string name)

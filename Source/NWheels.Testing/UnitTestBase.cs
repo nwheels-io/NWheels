@@ -31,8 +31,7 @@ namespace NWheels.Testing
 
         protected T Resolve<T>() where T : class
         {
-            return null;
-            //return s_Framework.Components.Resolve<T>();
+            return _framework.Components.Resolve<T>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -40,7 +39,7 @@ namespace NWheels.Testing
         protected Auto<T> ResolveAuto<T>() where T : class
         {
             return Auto.Of<T>(null);
-            //return s_Framework.Components.Resolve<T>();
+            //return _framework.Components.Resolve<Auto<T>>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

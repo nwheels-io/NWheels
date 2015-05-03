@@ -99,6 +99,7 @@
     <Compile Include="Conventions\Core\ConfigurationObjectFactory.cs" />
     <Compile Include="Conventions\Core\IConfigurationObjectFactory.cs" />
     <Compile Include="Conventions\Core\LoggerObjectFactory.cs" />
+    <Compile Include="Conventions\Core\EntityObjectFactory.cs" />
     <Compile Include="DataObjects\ConcretizationRegistration.cs" />
     <Compile Include="DataObjects\Core\CollectionAdapter.cs" />
     <Compile Include="DataObjects\Core\Conventions\AttributeMetadataConvention.cs" />

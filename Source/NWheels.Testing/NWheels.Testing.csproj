@@ -62,7 +62,14 @@
   <ItemGroup>
     <Compile Include="CoreUnitTestBase.cs" />
     <Compile Include="DataObjects\Jsonlike.cs" />
+    <Compile Include="Entity\TestEntityRepository.cs" />
     <Compile Include="LogAssert.cs" />
+    <Compile Include="Logex.cs" />
+    <Compile Include="Logging\Core\ILogexMultiplier.cs" />
+    <Compile Include="Logging\Core\ILogexNodeMatcher.cs" />
+    <Compile Include="Logging\Core\ILogexValueMatcher.cs" />
+    <Compile Include="Logging\Impl\LogexImpl.cs" />
+    <Compile Include="LogIs.cs" />
     <Compile Include="TestFramework.cs" />
     <Compile Include="TestThreadLogAppender.cs" />
     <Compile Include="UnitTestBase.cs" />

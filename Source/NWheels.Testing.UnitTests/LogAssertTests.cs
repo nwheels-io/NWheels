@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if false
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +14,7 @@ namespace NWheels.Testing.UnitTests
     public class LogAssertTests : UnitTestBase
     {
         [Test]
-        public void LogAssertEmpty_Pass()
+        public void Empty_Pass()
         {
             //-- Arrange
 
@@ -26,7 +28,7 @@ namespace NWheels.Testing.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test, ExpectedException(typeof(AssertionException))]
-        public void LogAssertEmpty_Fail()
+        public void Empty_Fail()
         {
             //-- Arrange
 
@@ -41,12 +43,12 @@ namespace NWheels.Testing.UnitTests
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void LogAssertMatchById()
+        public void CanMatchByIdAndAnyValues()
         {
             //-- Arrange
 
             var logger = Framework.Logger<ILogger>();
-            
+
             logger.One("ABC", 123);
             logger.Two(Guid.NewGuid(), TimeSpan.FromDays(1));
             logger.One("DEF", 456);
@@ -56,7 +58,7 @@ namespace NWheels.Testing.UnitTests
 
             //-- Act 
 
-            var matched = log.Where(LogAssert.MatchId<ILogger>(x => x.One(null, 0))).ToArray();
+            var matched = log.Where(LogAssert.Match<ILogger>(x => x.One(LogIs.Any<string>(), LogIs.Any<int>()))).ToArray();
 
             //-- Assert
 
@@ -67,6 +69,80 @@ namespace NWheels.Testing.UnitTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void CanMatchByIdAndExactValues()
+        {
+            //-- Arrange
+
+            var logger = Framework.Logger<ILogger>();
+
+            logger.One("ZZZ", 999);
+            logger.One("ABC", 123);
+            logger.Two(Guid.NewGuid(), TimeSpan.FromDays(1));
+            logger.One("DEF", 456);
+            logger.Two(Guid.NewGuid(), TimeSpan.FromDays(2));
+
+            var log = Framework.GetLog();
+
+            //-- Act 
+
+            var matched = log.Where(LogAssert.Match<ILogger>(x => x.One("ABC", 123))).ToArray();
+
+            //-- Assert
+
+            Assert.That(matched.Length, Is.EqualTo(1));
+            Assert.That(matched[0].SingleLineText, Is.EqualTo("One: str=ABC, num=123"));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void ExpectOnce_Pass()
+        {
+            //-- Arrange
+
+            var logger = Framework.Logger<ILogger>();
+
+            logger.One("ABC", 123);
+            logger.One("DEF", 456);
+
+            var log = Framework.GetLog();
+
+            //-- Act & Assert
+
+            LogAssert
+                .ExpectOnce<ILogger>(x => x.One("ABC", 123))
+                .Verify(log);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test, ExpectedException(typeof(AssertionException), ExpectedMessage = "One(str=ABC, num=123)", MatchType = MessageMatch.Contains)]
+        public void ExpectOnce_Fail()
+        {
+            //-- Arrange
+
+            var logger = Framework.Logger<ILogger>();
+
+            logger.One("ZZZ", 999);
+            logger.One("VVV", 888);
+
+            var log = Framework.GetLog();
+
+            //-- Act & Assert
+
+            LogEx
+                .One.Match<ILogger>(x => x.One("ABC", 123))
+                .ZeroOrMore.NotEqualTo<ILogger>(x => x.One("ABC", LogEx.IsAny<int>()))
+                .OneOrMore<ILogger>(x => x.One("ABC", 123))
+                .None<ILogger>(x => x.One("ABC", 123))
+                .AtMost<ILogger>(x => x.One("ABC", 123))
+                .Then.MatchOne<ILogger>(x => x.One("ABC", 123))
+                .MatchOne<ILogger>(x => x.One("ABC", 123))
+                .Verify(log);
+
+
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -79,3 +155,5 @@ namespace NWheels.Testing.UnitTests
         }
     }
 }
+
+#endif
