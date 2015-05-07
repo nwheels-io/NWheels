@@ -14,7 +14,7 @@ namespace NWheels.UnitTests.Processing.Impl
     [TestFixture]
     public class WorkflowProcessorSnapshotTests
     {
-        [Test]
+        [Test, Category("Manual")]
         public void CanSerializeWorkflowProcessorSnapshot()
         {
             //-- Arrange
