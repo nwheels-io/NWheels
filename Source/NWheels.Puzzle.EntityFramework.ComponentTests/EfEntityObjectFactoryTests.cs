@@ -9,6 +9,7 @@ using NUnit.Framework;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.Impl;
 using NWheels.Testing;
+using NWheels.Testing.Entity.Puzzle;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {

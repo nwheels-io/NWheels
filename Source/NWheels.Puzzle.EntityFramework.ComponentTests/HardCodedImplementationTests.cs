@@ -14,6 +14,7 @@ using Autofac;
 using NUnit.Framework;
 using NWheels.DataObjects.Core;
 using NWheels.Testing;
+using NWheels.Testing.Entity.Puzzle;
 using HR1 = NWheels.Puzzle.EntityFramework.ComponentTests.HardCodedImplementations.Repository1;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests

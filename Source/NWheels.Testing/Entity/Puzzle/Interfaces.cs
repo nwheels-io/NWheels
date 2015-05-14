@@ -1,18 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Entities;
-using IR1 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository1;
-using IR2 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository2;
-using IR3A = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3A;
-using IR3B = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3B;
+using IR3A = NWheels.Testing.Entity.Puzzle.Interfaces.Repository3A;
 
-namespace NWheels.Puzzle.EntityFramework.ComponentTests
+namespace NWheels.Testing.Entity.Puzzle
 {
     public static class Interfaces
     {
@@ -87,13 +79,13 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             }
 
             [EntityContract]
-            public interface IAuthorEntity : IR3A.IUserAccountEntity
+            public interface IAuthorEntity : Repository3A.IUserAccountEntity
             {
                 ICollection<ITopLevelContentEntity> AuthoredContents { get; }
             }
 
             [EntityContract]
-            public interface IAbstractContentEntity : IEntityPartId<int>, IR3A.IEntityPartAudit
+            public interface IAbstractContentEntity : IEntityPartId<int>, Repository3A.IEntityPartAudit
             {
                 string Markdown { get; set; }
                 ICollection<ITagEntity> Tags { get; }
@@ -228,12 +220,12 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 MyAdmin = 2
             }
 
-            public interface IMyAppUserAccountEntity : IR3A.IUserAccountEntity, IEntityPartId<int>
+            public interface IMyAppUserAccountEntity : Repository3A.IUserAccountEntity, IEntityPartId<int>
             {
                 new ICollection<IMyAppUserRoleEntity> Roles { get; }
             }
 
-            public interface IMyAppUserRoleEntity : IR3A.IUserRoleEntity, IEntityPartId<int>, IR3A.IEntityPartUserRole<MyAppUserRole>
+            public interface IMyAppUserRoleEntity : Repository3A.IUserRoleEntity, IEntityPartId<int>, Repository3A.IEntityPartUserRole<MyAppUserRole>
             {
             }
 

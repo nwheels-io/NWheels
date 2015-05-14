@@ -16,7 +16,8 @@ using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
 using NWheels.Entities.Core;
 using NWheels.Puzzle.EntityFramework.Impl;
-using IR1 = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository1;
+using NWheels.Testing.Entity.Puzzle;
+using IR1 = NWheels.Testing.Entity.Puzzle.Interfaces.Repository1;
 using HR1 = NWheels.Puzzle.EntityFramework.ComponentTests.HardCodedImplementations.Repository1;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests

@@ -81,13 +81,11 @@
     <Compile Include="MySqlSupportTests.cs" />
     <Compile Include="UserAccountDataRepositoryTests.cs" />
     <Compile Include="BlogDataRepositoryTests.cs" />
-    <Compile Include="CrudOperations.cs" />
     <Compile Include="EfDataRepositoryFactoryTests.cs" />
     <Compile Include="EfEntityObjectFactoryTests.cs" />
     <Compile Include="DatabaseTestBase.cs" />
     <Compile Include="HardCodedImplementations.cs" />
     <Compile Include="HardCodedImplementationTests.cs" />
-    <Compile Include="Interfaces.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

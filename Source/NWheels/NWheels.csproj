@@ -97,11 +97,13 @@
     <Compile Include="Configuration\IConfigurationSection.cs" />
     <Compile Include="Configuration\INamedObjectCollection.cs" />
     <Compile Include="Conventions\Core\ConfigurationObjectFactory.cs" />
+    <Compile Include="Conventions\Core\DataRepositoryFactoryBase.cs" />
     <Compile Include="Conventions\Core\IConfigurationObjectFactory.cs" />
     <Compile Include="Conventions\Core\LoggerObjectFactory.cs" />
     <Compile Include="Conventions\Core\EntityObjectFactory.cs" />
     <Compile Include="DataObjects\ConcretizationRegistration.cs" />
-    <Compile Include="DataObjects\Core\CollectionAdapter.cs" />
+    <Compile Include="DataObjects\Core\AbstractToConcreteCollectionAdapter.cs" />
+    <Compile Include="DataObjects\Core\ConcreteToAbstractCollectionAdapter.cs" />
     <Compile Include="DataObjects\Core\Conventions\AttributeMetadataConvention.cs" />
     <Compile Include="DataObjects\Core\Conventions\ContractMetadataConvention.cs" />
     <Compile Include="DataObjects\Core\Conventions\IMetadataConvention.cs" />
@@ -139,6 +141,7 @@
     <Compile Include="Endpoints\AbstractEndpointRegistration.cs" />
     <Compile Include="Endpoints\Core\Wcf\WcfEndpointComponent.cs" />
     <Compile Include="Endpoints\IFrameworkEndpointsConfig.cs" />
+    <Compile Include="Entities\Core\DataRepositoryBase.cs" />
     <Compile Include="Entities\Core\PascalCaseRelationalMappingConvention.cs" />
     <Compile Include="Entities\Core\RelationalMappingConventionBase.cs" />
     <Compile Include="Entities\Core\UnderscoreRelationalMappingConvention.cs" />
@@ -337,6 +340,7 @@
     <Compile Include="UI\Widgets\IUiWidgetSelector.cs" />
     <Compile Include="Utilities\ParseUtility.cs" />
     <Compile Include="Utilities\PathUtility.cs" />
+    <Compile Include="Utilities\Core\UtilityToolBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="UI\Endpoints\" />

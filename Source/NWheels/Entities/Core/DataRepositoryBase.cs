@@ -1,48 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Data.Entity;
-using System.Data.Entity.Core.Objects;
-using System.Data.Entity.Infrastructure;
-using System.Data.Entity.ModelConfiguration;
-using System.Data.Entity.ModelConfiguration.Configuration;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.Entities;
-using NWheels.Puzzle.EntityFramework.Conventions;
-using System.Reflection;
-using Autofac;
-using Hapil;
-using NWheels.DataObjects;
 
-namespace NWheels.Puzzle.EntityFramework.Impl
+namespace NWheels.Entities.Core
 {
-    public abstract class EfDataRepositoryBase : IApplicationDataRepository
+    public abstract class DataRepositoryBase : IApplicationDataRepository
     {
-        private readonly DbCompiledModel _compiledModel;
         private readonly bool _autoCommit;
-        private readonly DbConnection _connection;
-        private ObjectContext _objectContext;
         private UnitOfWorkState _currentState;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected EfDataRepositoryBase(DbCompiledModel compiledModel, DbConnection connection, bool autoCommit)
+        protected DataRepositoryBase(bool autoCommit)
         {
-            _compiledModel = compiledModel;
             _autoCommit = autoCommit;
-            _connection = connection;
-            _objectContext = compiledModel.CreateObjectContext<ObjectContext>(connection);
             _currentState = UnitOfWorkState.Untouched;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Dispose()
+        public virtual void Dispose()
         {
-            _objectContext.Dispose();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,7 +32,7 @@ namespace NWheels.Puzzle.EntityFramework.Impl
         public void CommitChanges()
         {
             ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
-            _objectContext.SaveChanges(SaveOptions.AcceptAllChangesAfterSave);
+            OnCommitChanges();
             _currentState = UnitOfWorkState.Committed;
         }
 
@@ -63,9 +41,15 @@ namespace NWheels.Puzzle.EntityFramework.Impl
         public void RollbackChanges()
         {
             ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
-            _objectContext.Dispose();
-            _connection.Dispose();
+            OnRollbackChanges();
             _currentState = UnitOfWorkState.RolledBack;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void ValidateOperationalState()
+        {
+            ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -90,37 +74,8 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DbCompiledModel CompiledModel
-        {
-            get
-            {
-                return _compiledModel;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal void ValidateOperationalState()
-        {
-            ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal ObjectSet<T> CreateObjectSet<T>() where T : class
-        {
-            return _objectContext.CreateObjectSet<T>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal ObjectContext ObjectContext
-        {
-            get
-            {
-                return _objectContext;
-            }
-        }
+        protected abstract void OnCommitChanges();
+        protected abstract void OnRollbackChanges();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

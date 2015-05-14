@@ -11,8 +11,8 @@ using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.Impl;
 using NWheels.Testing.DataObjects;
-using IR3A = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3A;
-using IR3B = NWheels.Puzzle.EntityFramework.ComponentTests.Interfaces.Repository3B;
+using IR3A = NWheels.Testing.Entity.Puzzle.Interfaces.Repository3A;
+using IR3B = NWheels.Testing.Entity.Puzzle.Interfaces.Repository3B;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
