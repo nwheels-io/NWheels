@@ -3,7 +3,11 @@ using System.Collections.Generic;
 
 namespace NWheels.DataObjects.Core
 {
-    public class CollectionAdapter<TConcrete, TAbstract> : ICollection<TAbstract>, IList<TAbstract>, IReadOnlyCollection<TAbstract>, IReadOnlyList<TAbstract>
+    public class ConcreteToAbstractCollectionAdapter<TConcrete, TAbstract> : 
+        ICollection<TAbstract>, 
+        IList<TAbstract>, 
+        IReadOnlyCollection<TAbstract>, 
+        IReadOnlyList<TAbstract>
         where TConcrete : TAbstract
     {
         private readonly ICollection<TConcrete> _innerCollection;
@@ -11,7 +15,7 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CollectionAdapter(ICollection<TConcrete> innerCollection)
+        public ConcreteToAbstractCollectionAdapter(ICollection<TConcrete> innerCollection)
         {
             _innerCollection = innerCollection;
             _innerList = (innerCollection as IList<TConcrete>);

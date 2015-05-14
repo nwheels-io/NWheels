@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NWheels.DataObjects.Core
 {
-    public class ObjectCollectionAdapter<TConcrete, TAbstract> : CollectionAdapter<TConcrete, TAbstract>, IObjectCollection<TAbstract>
+    public class ObjectCollectionAdapter<TConcrete, TAbstract> : ConcreteToAbstractCollectionAdapter<TConcrete, TAbstract>, IObjectCollection<TAbstract>
         where TConcrete : TAbstract
     {
         private readonly Func<TConcrete> _itemFactory;

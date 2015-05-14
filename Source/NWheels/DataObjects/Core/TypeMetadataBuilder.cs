@@ -8,11 +8,11 @@ namespace NWheels.DataObjects.Core
     public class TypeMetadataBuilder : MetadataElement<ITypeMetadata>, ITypeMetadata
     {
         private readonly object _relationalMappingSyncRoot = new object();
-        private readonly CollectionAdapter<TypeMetadataBuilder, ITypeMetadata> _derivedTypesAdapter;
-        private readonly CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _propertiesAdapter;
-        private readonly CollectionAdapter<KeyMetadataBuilder, IKeyMetadata> _allKeysAdapter;
-        private readonly CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultDisplayPropertiesAdapter;
-        private readonly CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultSortPropertiesAdapter;
+        private readonly ConcreteToAbstractCollectionAdapter<TypeMetadataBuilder, ITypeMetadata> _derivedTypesAdapter;
+        private readonly ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _propertiesAdapter;
+        private readonly ConcreteToAbstractCollectionAdapter<KeyMetadataBuilder, IKeyMetadata> _allKeysAdapter;
+        private readonly ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultDisplayPropertiesAdapter;
+        private readonly ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultSortPropertiesAdapter;
         private Dictionary<string, PropertyMetadataBuilder> _propertyByName;
         private Dictionary<PropertyInfo, PropertyMetadataBuilder> _propertyByDeclaration;
 
@@ -27,11 +27,11 @@ namespace NWheels.DataObjects.Core
             this.DefaultDisplayProperties = new List<PropertyMetadataBuilder>();
             this.DefaultSortProperties = new List<PropertyMetadataBuilder>();
 
-            _derivedTypesAdapter = new CollectionAdapter<TypeMetadataBuilder, ITypeMetadata>(this.DerivedTypes);
-            _propertiesAdapter = new CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.Properties);
-            _allKeysAdapter = new CollectionAdapter<KeyMetadataBuilder, IKeyMetadata>(this.AllKeys);
-            _defaultDisplayPropertiesAdapter = new CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.DefaultDisplayProperties);
-            _defaultSortPropertiesAdapter = new CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.DefaultSortProperties);
+            _derivedTypesAdapter = new ConcreteToAbstractCollectionAdapter<TypeMetadataBuilder, ITypeMetadata>(this.DerivedTypes);
+            _propertiesAdapter = new ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.Properties);
+            _allKeysAdapter = new ConcreteToAbstractCollectionAdapter<KeyMetadataBuilder, IKeyMetadata>(this.AllKeys);
+            _defaultDisplayPropertiesAdapter = new ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.DefaultDisplayProperties);
+            _defaultSortPropertiesAdapter = new ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.DefaultSortProperties);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

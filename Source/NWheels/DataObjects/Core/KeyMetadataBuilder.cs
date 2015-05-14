@@ -4,14 +4,14 @@ namespace NWheels.DataObjects.Core
 {
     public class KeyMetadataBuilder : MetadataElement<IKeyMetadata>, IKeyMetadata
     {
-        private readonly CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _propertiesAdapter;
+        private readonly ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _propertiesAdapter;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public KeyMetadataBuilder()
         {
             this.Properties = new List<PropertyMetadataBuilder>();
-            _propertiesAdapter = new CollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.Properties);
+            _propertiesAdapter = new ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.Properties);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

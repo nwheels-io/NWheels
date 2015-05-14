@@ -7,7 +7,7 @@ using NWheels.Extensions;
 
 namespace NWheels.Configuration.Core
 {
-    public class NamedObjectCollectionAdapter<TConcrete, TAbstract> : CollectionAdapter<TConcrete, TAbstract>, INamedObjectCollection<TAbstract>
+    public class NamedObjectCollectionAdapter<TConcrete, TAbstract> : ConcreteToAbstractCollectionAdapter<TConcrete, TAbstract>, INamedObjectCollection<TAbstract>
         where TAbstract : class
         where TConcrete : TAbstract
     {
