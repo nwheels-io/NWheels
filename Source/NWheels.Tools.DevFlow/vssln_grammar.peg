@@ -1,0 +1,5 @@
+<<Grammar Name="VSSLN" encoding_class="ascii">>
+
+	[1] project: 'Project';
+
+<</Grammar>>
