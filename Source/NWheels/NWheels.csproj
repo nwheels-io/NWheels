@@ -101,6 +101,8 @@
     <Compile Include="Conventions\Core\IConfigurationObjectFactory.cs" />
     <Compile Include="Conventions\Core\LoggerObjectFactory.cs" />
     <Compile Include="Conventions\Core\EntityObjectFactory.cs" />
+    <Compile Include="Globalization\Currency.cs" />
+    <Compile Include="Globalization\CurrencyInfo.cs" />
     <Compile Include="DataObjects\ConcretizationRegistration.cs" />
     <Compile Include="DataObjects\Core\AbstractToConcreteCollectionAdapter.cs" />
     <Compile Include="DataObjects\Core\ConcreteToAbstractCollectionAdapter.cs" />
@@ -154,6 +156,7 @@
     <Compile Include="DataObjects\SemanticType.cs" />
     <Compile Include="Entities\DateTimeUtc.cs" />
     <Compile Include="Entities\IDataRepositoryFactory.cs" />
+    <Compile Include="Entities\IEntityPartUniqueDisplayName.cs" />
     <Compile Include="Entities\IFrameworkDatabaseConfig.cs" />
     <Compile Include="DataObjects\IDataObjectKeyGenerator.cs" />
     <Compile Include="Entities\DataRepositoryRegistration.cs" />
@@ -245,6 +248,7 @@
     <Compile Include="Logging\NameValuePairLogNode.cs" />
     <Compile Include="Logging\ThreadLogSnapshot.cs" />
     <Compile Include="Logging\ThreadTaskType.cs" />
+    <Compile Include="Money.cs" />
     <Compile Include="Processing\AbstractWorkflow.cs" />
     <Compile Include="Processing\ApplicationJobBase.cs" />
     <Compile Include="Processing\Core\IWorkflowDataRepository.cs" />
