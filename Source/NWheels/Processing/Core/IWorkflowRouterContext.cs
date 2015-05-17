@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace NWheels.Processing.Core
 {
-    public interface IWorkflowRouterContext
+    public interface IWorkflowRouterContext : IWorkflowActorSiteContext
     {
         TWorkItem GetActorWorkItem<TWorkItem>();
         TResult GetActorResult<TResult>();
         TEvent GetReceivedEvent<TEvent>() where TEvent : IWorkflowEvent;
-        void EnqueueWorkItem<TWorkItem>(string actorName, TWorkItem workItem);
         bool HasActorResult { get; }
         bool HasReceivedEvent { get; }
     }

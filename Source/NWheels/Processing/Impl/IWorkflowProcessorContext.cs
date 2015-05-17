@@ -10,5 +10,6 @@ namespace NWheels.Processing.Impl
     internal interface IWorkflowProcessorContext
     {
         void AwaitEvent(Type eventType, object eventKey);
+        IWorkflowInstance WorkflowInstance { get; }
     }
 }

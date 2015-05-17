@@ -36,8 +36,8 @@ namespace NWheels.Processing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Required, PropertyContract.Validation.MaxLength(512)]
-        string CodeBehindClrType { get; set; }
+        //[PropertyContract.Required, PropertyContract.Semantic.(512)]
+        Type CodeBehindClrType { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -58,5 +58,14 @@ namespace NWheels.Processing
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         int TotalSuspensionCount { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityContract]
+    public interface IStateMachineInstanceEntity<TState> : IWorkflowInstanceEntity
+    {
+        [PropertyContract.Required]
+        TState MachineState { get; set; }
     }
 }

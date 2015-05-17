@@ -202,18 +202,29 @@ namespace NWheels.Processing.Impl
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            #region IWorkflowActorSiteContext implementation
+
+            void IWorkflowActorSiteContext.EnqueueWorkItem<T>(string actorName, T workItem)
+            {
+                _processor.GetActorSiteByName(actorName).EnqueueWorkItem(workItem);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            IWorkflowInstance IWorkflowActorSiteContext.WorkflowInstance
+            {
+                get { return _processor._context.WorkflowInstance; }
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             #region IWorkflowActorContext implementation
 
             void IWorkflowActorContext.SetResult<T>(T resultValue)
             {
                 _lastActorResult = resultValue;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            void IWorkflowActorContext.EnqueueWorkItem<T>(string actorName, T workItem)
-            {
-                _processor.GetActorSiteByName(actorName).EnqueueWorkItem(workItem);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -255,13 +266,6 @@ namespace NWheels.Processing.Impl
             TEvent IWorkflowRouterContext.GetReceivedEvent<TEvent>()
             {
                 return (TEvent)_lastReceivedEvent;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            void IWorkflowRouterContext.EnqueueWorkItem<T>(string actorName, T workItem)
-            {
-                _processor.GetActorSiteByName(actorName).EnqueueWorkItem(workItem);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

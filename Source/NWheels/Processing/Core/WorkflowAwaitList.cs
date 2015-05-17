@@ -6,12 +6,36 @@ using System.Threading.Tasks;
 
 namespace NWheels.Processing.Core
 {
+    /// <summary>
+    /// A data structure which tracks subscribers awaiting for events.
+    /// </summary>
+    /// <typeparam name="TAwaitId">
+    /// The id type of the awaiting subscribers tracked by this data structure.
+    /// This type parameter allows reuse of WorkflowAwaitList by both WorkflowEngine and WorkflowProcessor.
+    /// WorkflowEngine tracks workflow instances identified by a Guid, while WorkflowProcessor tracks actors identified by a string name.
+    /// </typeparam>
+    /// <remarks>
+    /// Thread safety: this data structure is not safe for concurrent access.
+    /// </remarks>
     public class WorkflowAwaitList<TAwaitId>
     {
+        /// <summary>
+        /// EntryKey is a (type,key) pair, where 'type' is the CLR type of the event class, and 'key' is a key object encapsulated by event object.
+        /// Entry encapsulates a linked list of subscribers to events identified by the EntryKey.
+        /// </summary>
         private readonly Dictionary<EntryKey, Entry> _entries = new Dictionary<EntryKey, Entry>();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        /// <summary>
+        /// Subscribes an awaiter to one or more events.
+        /// </summary>
+        /// <param name="entryKeys">
+        /// EntryKey objects that identify events to subscribe the awaiter to.
+        /// </param>
+        /// <param name="awaitId">
+        /// The id of the awaiter being subscribed.
+        /// </param>
         public void Include(IEnumerable<EntryKey> entryKeys, TAwaitId awaitId)
         {
             foreach ( var entryKey in entryKeys )
@@ -85,6 +109,12 @@ namespace NWheels.Processing.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        /// <summary>
+        /// EntryKey is a (type,key) pair, where 'type' is the CLR type of the event class, and 'key' is a key object encapsulated by event object.
+        /// </summary>
+        /// <remarks>
+        /// The EntryKey supports comparison for equality through implementation of Object.Equals and IEquatable[EntryKey].
+        /// </remarks>
         public struct EntryKey : IEquatable<EntryKey>
         {
             public readonly Type EventType;
@@ -151,6 +181,9 @@ namespace NWheels.Processing.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        /// <summary>
+        /// Encapsulates a linked list of subscribers to events identified by an EntryKey.
+        /// </summary>
         public class Entry : IEnumerable<TAwaitId>
         {
             private readonly EntryKey _entryKey;

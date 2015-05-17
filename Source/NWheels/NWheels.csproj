@@ -258,6 +258,7 @@
     <Compile Include="Processing\Core\IWorkflowInstanceController.cs" />
     <Compile Include="Processing\Core\IWorkflowReadyQueue.cs" />
     <Compile Include="Processing\Core\RuleActionBase.cs" />
+    <Compile Include="Processing\Core\WorkflowEventBase.cs" />
     <Compile Include="Processing\Core\WorkflowTypeRegistration.cs" />
     <Compile Include="Processing\IMetaRule.cs" />
     <Compile Include="Processing\Impl\IWorkflowInstanceContext.cs" />
@@ -307,6 +308,7 @@
     <Compile Include="Processing\Core\WorkflowState.cs" />
     <Compile Include="Processing\IWorkflowEngine.cs" />
     <Compile Include="Processing\RuleSystemData.cs" />
+    <Compile Include="Processing\StateMachineTriggerEvent.cs" />
     <Compile Include="Processing\StateMachineWorkflow.cs" />
     <Compile Include="Processing\RuleSystemDescription.cs" />
     <Compile Include="Processing\WorkflowEngineFeatureLoader.cs" />

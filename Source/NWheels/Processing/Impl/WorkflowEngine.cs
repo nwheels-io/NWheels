@@ -108,6 +108,13 @@ namespace NWheels.Processing.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void SendTrigger<TTrigger>(TTrigger trigger, Guid stateMachineInstanceId, object context = null)
+        {
+            DispatchEvent(new StateMachineTriggerEvent<TTrigger>(stateMachineInstanceId, trigger, context));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public bool TryGetWorkflow(Guid instanceId, out IWorkflowInstance instance)
         {
             using ( _instancesLock.AcquireReadAccess("TryGetWorkflow", holdDurationMs: 1) )
@@ -376,7 +383,7 @@ namespace NWheels.Processing.Impl
                 initialData.WorkflowState = WorkflowState.Created;
                 initialData.CreatedAtUtc = ownerEngine._framework.UtcNow;
                 initialData.UpdatedAtUtc = initialData.CreatedAtUtc;
-                initialData.CodeBehindClrType = registration.CodeBehindType.AssemblyQualifiedNameNonVersioned();
+                initialData.CodeBehindClrType = registration.CodeBehindType;//.AssemblyQualifiedNameNonVersioned();
 
                 return new WorkflowInstanceContext(ownerEngine, registration, initialData);
             }

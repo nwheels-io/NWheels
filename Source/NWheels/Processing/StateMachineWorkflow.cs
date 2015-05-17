@@ -14,7 +14,7 @@ namespace NWheels.Processing
         IWorkflowCodeBehindLifecycle,
         IInitializableWorkflowCodeBehind<TDataEntity>,
         ISuspendableWorkflowCodeBehind<TDataEntity>
-        where TDataEntity : class, IWorkflowInstanceEntity
+        where TDataEntity : class, IStateMachineInstanceEntity<TState>
     {
         private readonly TransientStateMachine<TState, TTrigger>.ILogger _logger;
         private readonly IStateMachineCodeBehind<TState, TTrigger> _codeBehind;
@@ -113,6 +113,22 @@ namespace NWheels.Processing
             {
                 suspendable.OnResume(savedData);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual void OnTimeout(TDataEntity savedData, ref bool isFailure)
+        {
+            var suspendable = (_codeBehind as ISuspendableWorkflowCodeBehind<TDataEntity>);
+
+            
+
+            if ( suspendable != null )
+            {
+                suspendable.OnTimeout(savedData, ref isFailure);
+            }
+
+
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

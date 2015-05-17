@@ -37,5 +37,6 @@ namespace NWheels.Processing
     {
         void OnSuspend(TDataEntity dataToSave);
         void OnResume(TDataEntity savedData);
+        void OnTimeout(TDataEntity savedData, ref bool isFailure);
     }
 }

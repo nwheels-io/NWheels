@@ -102,6 +102,13 @@ namespace NWheels.Processing.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        IWorkflowInstance IWorkflowProcessorContext.WorkflowInstance
+        {
+            get { return this; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public WorkflowState Run()
         {
             _codeBehindInstance = _codeBehindAdapter.InstantiateCodeBehind(_context.Components);

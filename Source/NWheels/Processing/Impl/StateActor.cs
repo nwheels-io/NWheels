@@ -32,23 +32,34 @@ namespace NWheels.Processing.Impl
 
         public void Execute(IWorkflowActorContext context, StateTriggerWorkItem<TState, TTrigger> workItem)
         {
+            var completed = false;
+
             if ( _onEntered != null )
             {
                 _onEntered(this, workItem.EventArgs);
 
                 if ( workItem.EventArgs.HasFeedback )
                 {
-                    //var newArgs = new StateMachineFeedbackEventArgs<TState, TTrigger>(_value, );
-                    //context.EnqueueWorkItem();
+                    HandleTrigger(context, workItem.EventArgs.Feedback);
+                    completed = true;
                 }
             }
-            
+
+            if ( !completed )
+            {
+                context.AwaitEvent<StateMachineTriggerEvent<TTrigger>, Guid>(key: context.WorkflowInstance.InstanceId);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Route(IWorkflowRouterContext context)
         {
+            if ( context.HasReceivedEvent )
+            {
+                var receivedEvent = context.GetReceivedEvent<StateMachineTriggerEvent<TTrigger>>();
+            }
+
             //context.GetActorResult<>()
 
             //StateTransition transition;
@@ -138,6 +149,46 @@ namespace NWheels.Processing.Impl
             get { return _value; }
         }
 
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void HandleTrigger(IWorkflowActorSiteContext context, TTrigger trigger)
+        {
+            var transition = ValidateTransition(trigger);
+            
+            var args = new StateMachineFeedbackEventArgs<TState, TTrigger>(
+                from: _value,
+                to: transition.Destination,
+                trigger: trigger,
+                context: context);
+
+            if ( _onLeaving != null )
+            {
+                _onLeaving(this, args);
+            }
+
+            transition.PerformTransitioning(args);
+
+            context.EnqueueWorkItem(
+                actorName: transition.Destination.ToString(), 
+                workItem: new StateTriggerWorkItem<TState, TTrigger>(args));
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private StateTransition ValidateTransition(TTrigger trigger)
+        {
+            StateTransition transition;
+
+            if ( _transitionByTrigger.TryGetValue(trigger, out transition) )
+            {
+                return transition;
+            }
+            else
+            {
+                throw _logger.TransitionNotDefined(_codeBehind.GetType(), _value, trigger);
+            }
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private class StateTransition : IStateMachineTransitionBuilder<TState, TTrigger>
@@ -155,16 +206,12 @@ namespace NWheels.Processing.Impl
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void PerformTransition(IWorkflowActorContext context, StateMachineEventArgs<TState, TTrigger> args)
+            public void PerformTransitioning(StateMachineEventArgs<TState, TTrigger> args)
             {
-                var feedbackArgs = (args.HasFromState
-                    ? new StateMachineFeedbackEventArgs<TState, TTrigger>(args.FromState, args.ToState, args.Trigger, args.Context)
-                    : new StateMachineFeedbackEventArgs<TState, TTrigger>(args.ToState));
-
-                //if ( _onTransitioning )
-                
-                //if ( _onEntered != null )
-                
+                if ( _onTransitioning != null )
+                {
+                    _onTransitioning(this, args);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -177,6 +224,13 @@ namespace NWheels.Processing.Impl
                 _onTransitioning = onTransitioning;
 
                 return _origin;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public TState Destination
+            {
+                get { return _destination; }
             }
         }
     }
