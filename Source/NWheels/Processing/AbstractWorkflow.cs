@@ -8,16 +8,6 @@ namespace NWheels.Processing
 {
     public abstract class AbstractWorkflow : IWorkflowCodeBehind
     {
-
-        public void OnBuildWorkflow(IWorkflowBuilder builder)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        public Type SnapshotType
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public abstract void OnBuildWorkflow(IWorkflowBuilder builder);
     }
 }

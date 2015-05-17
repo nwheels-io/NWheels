@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using NWheels.Entities;
 
 namespace NWheels.Processing.Core
 {
     public abstract class WorkflowTypeRegistration
     {
-        public abstract IQueryable<IWorkflowInstanceEntity> GetDataEntityQuery(IComponentContext components);
+        public abstract IQueryable<IWorkflowInstanceEntity> GetDataEntityQuery(IFramework framework, out IUnitOfWork unitOfWork);
         public abstract Type CodeBehindType { get; }
         public abstract Type DataEntityType { get; }
     }
@@ -18,6 +19,7 @@ namespace NWheels.Processing.Core
 
     public class WorkflowTypeRegistration<TCodeBehind, TDataRepository, TDataEntity> : WorkflowTypeRegistration
         where TCodeBehind : class, IWorkflowCodeBehind
+        where TDataRepository : class, IApplicationDataRepository
         where TDataEntity : class, IWorkflowInstanceEntity
     {
         private readonly Func<TDataRepository, IQueryable<TDataEntity>> _entityRepositoryFunc;
@@ -31,11 +33,12 @@ namespace NWheels.Processing.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IQueryable<IWorkflowInstanceEntity> GetDataEntityQuery(IComponentContext components)
+        public override IQueryable<IWorkflowInstanceEntity> GetDataEntityQuery(IFramework framework, out IUnitOfWork unitOfWork)
         {
-            var dataRepository = components.Resolve<TDataRepository>();
+            var dataRepository = framework.NewUnitOfWork<TDataRepository>();
             var dataEntityQueryable = _entityRepositoryFunc(dataRepository);
 
+            unitOfWork = dataRepository;
             return dataEntityQueryable;
         }
 
@@ -43,14 +46,20 @@ namespace NWheels.Processing.Core
 
         public override Type CodeBehindType
         {
-            get { return typeof(TCodeBehind); }
+            get
+            {
+                return typeof(TCodeBehind);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override Type DataEntityType
         {
-            get { return typeof(TDataEntity); }
+            get
+            {
+                return typeof(TDataEntity);
+            }
         }
     }
 }

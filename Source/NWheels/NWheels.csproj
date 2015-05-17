@@ -253,6 +253,7 @@
     <Compile Include="Processing\ApplicationJobBase.cs" />
     <Compile Include="Processing\Core\IRuleActionContext.cs" />
     <Compile Include="Processing\Core\IWorkflowDataRepository.cs" />
+    <Compile Include="Processing\Core\IWorkflowEngineLogger.cs" />
     <Compile Include="Processing\Core\IWorkflowInstanceContainer.cs" />
     <Compile Include="Processing\Core\IWorkflowInstanceController.cs" />
     <Compile Include="Processing\Core\IWorkflowReadyQueue.cs" />
@@ -260,6 +261,9 @@
     <Compile Include="Processing\Core\WorkflowTypeRegistration.cs" />
     <Compile Include="Processing\IMetaRule.cs" />
     <Compile Include="Processing\Impl\IWorkflowInstanceContext.cs" />
+    <Compile Include="Processing\Impl\StateActor.cs" />
+    <Compile Include="Processing\Impl\StateTriggerWorkItem.cs" />
+    <Compile Include="Processing\Impl\TransientWorkflowReadyQueue.cs" />
     <Compile Include="Processing\Impl\WorkflowCodeBehindAdapter.cs" />
     <Compile Include="Processing\Core\IRuleAction.cs" />
     <Compile Include="Processing\IRuleEngine.cs" />
@@ -303,6 +307,7 @@
     <Compile Include="Processing\Core\WorkflowState.cs" />
     <Compile Include="Processing\IWorkflowEngine.cs" />
     <Compile Include="Processing\RuleSystemData.cs" />
+    <Compile Include="Processing\StateMachineWorkflow.cs" />
     <Compile Include="Processing\RuleSystemDescription.cs" />
     <Compile Include="Processing\WorkflowEngineFeatureLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -20,6 +20,7 @@ using NWheels.Logging;
 using NWheels.UI;
 using NWheels.Processing;
 using NWheels.Processing.Core;
+using NWheels.Processing.Impl;
 
 namespace NWheels.Extensions
 {
@@ -409,10 +410,18 @@ namespace NWheels.Extensions
 
             public void RegisterWorkflow<TCodeBehind, TDataRepository, TDataEntity>(Func<TDataRepository, IQueryable<TDataEntity>> entitySelector)
                 where TCodeBehind : class, IWorkflowCodeBehind
+                where TDataRepository : class, IApplicationDataRepository
                 where TDataEntity : class, IWorkflowInstanceEntity
             {
                 var registration = new WorkflowTypeRegistration<TCodeBehind, TDataRepository, TDataEntity>(entitySelector);
                 _builder.RegisterInstance(registration).As<WorkflowTypeRegistration>();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void UseTransientReadyQueue()
+            {
+                _builder.RegisterType<TransientWorkflowReadyQueue>().As<IWorkflowReadyQueue>().SingleInstance();
             }
         }
 

@@ -62,7 +62,7 @@ namespace NWheels.Testing
             _loggerFactory = new LoggerObjectFactory(_dynamicModule, _logAppender);
 
             _components = BuildComponentContainer();
-            _configurationFactory = _components.Resolve<ConfigurationObjectFactory>();// new ConfigurationObjectFactory(_components, _dynamicModule, _metadataCache);
+            _configurationFactory = _components.Resolve<ConfigurationObjectFactory>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

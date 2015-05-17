@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using NWheels.Concurrency;
+using NWheels.Entities;
 using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Hosting;
@@ -18,6 +19,7 @@ namespace NWheels.Processing.Impl
         private readonly IComponentContext _components;
         private readonly IFramework _framework;
         private readonly IWorkflowReadyQueue _queue;
+        private readonly IWorkflowEngineLogger _logger;
         private readonly Dictionary<Type, WorkflowTypeRegistration> _registrationsByCodeBehindType;
         private readonly IResourceLock _instancesLock;
         private readonly Dictionary<Guid, WorkflowInstanceContext> _instanceContextsById;
@@ -26,10 +28,16 @@ namespace NWheels.Processing.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public WorkflowEngine(IComponentContext components, IFramework framework, IWorkflowReadyQueue queue, IEnumerable<WorkflowTypeRegistration> registrations)
+        public WorkflowEngine(
+            IComponentContext components, 
+            IFramework framework, 
+            IWorkflowReadyQueue queue, 
+            IWorkflowEngineLogger logger,
+            IEnumerable<WorkflowTypeRegistration> registrations)
         {
             _framework = framework;
             _queue = queue;
+            _logger = logger;
             _components = components;
             _registrationsByCodeBehindType = registrations.ToDictionary(r => r.CodeBehindType);
             _instancesLock = _framework.NewLock(ResourceLockMode.Exclusive, "WorkflowEngine.Instances");
@@ -137,7 +145,7 @@ namespace NWheels.Processing.Impl
 
             if ( !TryGetWorkflow(instanceId, out instance) )
             {
-                throw new ArgumentException("Workflow instance not found: " + instanceId.ToString("N"));
+                throw _logger.InstanceNotFound(instanceId);
             }
 
             return (IWorkflowInstanceController)instance;
@@ -147,11 +155,23 @@ namespace NWheels.Processing.Impl
 
         public override void NodeActivating()
         {
-            using ( _instancesLock.AcquireWriteAccess("NodeActivating", holdDurationMs: 30000) )
+            using ( _logger.RecoveringExistingInstances() )
+            {
+                RecoverExistingInstances();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void RecoverExistingInstances()
+        {
+            using ( _instancesLock.AcquireWriteAccess("RecoverExistingInstances", holdDurationMs: 30000) )
             {
                 foreach ( var registration in _registrationsByCodeBehindType.Values )
                 {
-                    var instanceRecordsToRecover = registration.GetDataEntityQuery(_components).ToArray();
+                    IUnitOfWork unitOfWork;
+                    var instanceRecordsToRecover = registration.GetDataEntityQuery(_framework, out unitOfWork).ToArray();
+                    unitOfWork.Dispose();
 
                     foreach ( var instanceData in instanceRecordsToRecover )
                     {
@@ -185,7 +205,7 @@ namespace NWheels.Processing.Impl
 
             if ( !_registrationsByCodeBehindType.TryGetValue(codeBehindType, out registration) )
             {
-                throw new RegistrationMissingException("Workflow type was not registered for code-behind type '{0}'.", codeBehindType.FullName);
+                throw _logger.CodeBehindTypeNotRegistered(codeBehindType.FullName);
             }
 
             return registration;

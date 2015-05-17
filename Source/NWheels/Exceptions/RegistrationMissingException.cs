@@ -10,6 +10,13 @@ namespace NWheels.Exceptions
     [Serializable]
     public class RegistrationMissingException : Exception
     {
+        public RegistrationMissingException(string message)
+            : base(message)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
         public RegistrationMissingException(string message, params object[] formatArgs)
             : base(message.FormatIf(formatArgs))
         {

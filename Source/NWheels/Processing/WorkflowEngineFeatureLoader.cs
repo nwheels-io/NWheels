@@ -17,8 +17,10 @@ namespace NWheels.Processing
 
         protected override void Load(ContainerBuilder builder)
         {
+            builder.NWheelsFeatures().Logging().RegisterLogger<IWorkflowEngineLogger>();
+            builder.NWheelsFeatures().Logging().RegisterLogger<TransientWorkflowReadyQueue.ILogger>();
             builder.NWheelsFeatures().Entities().RegisterDataRepository<IWorkflowDataRepository>();
-            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<WorkflowEngine>().As<IWorkflowEngine>();
+            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<WorkflowEngine>().As<IWorkflowEngine, IWorkflowInstanceContainer>();
         }
 
         #endregion

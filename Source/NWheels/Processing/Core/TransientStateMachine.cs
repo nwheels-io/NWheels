@@ -177,7 +177,7 @@ namespace NWheels.Processing.Core
                 EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> handler,
                 bool recurring)
             {
-                //_onLeaving += handler;
+                //TODO: implement timeout
                 return this;
             }
 

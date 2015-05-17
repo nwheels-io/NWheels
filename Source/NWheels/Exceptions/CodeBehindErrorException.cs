@@ -10,6 +10,13 @@ namespace NWheels.Exceptions
     [Serializable]
     public class CodeBehindErrorException : Exception
     {
+        public CodeBehindErrorException(string message)
+            : base(message)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public CodeBehindErrorException(string message, params object[] formatArgs)
             : base(message.FormatIf(formatArgs))
         {
