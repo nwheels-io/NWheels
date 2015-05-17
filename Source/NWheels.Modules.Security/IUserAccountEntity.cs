@@ -11,7 +11,6 @@ using NWheels.Modules.Security.Domain;
 namespace NWheels.Modules.Security
 {
     [EntityContract]
-    [MustHaveMixin(typeof(IEntityPartId<>))]
     public interface IUserAccountEntity
     {
         [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Semantic.DataType(typeof(LoginNameDataType))]
@@ -21,6 +20,15 @@ namespace NWheels.Modules.Security
 
         [PropertyContract.Required, PropertyContract.Validation.Length(min: 2, max: 100)]
         string FullName { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Required, PropertyContract.Semantic.EmailAddress]
+        string EmailAddress { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        bool IsEmailVerified { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

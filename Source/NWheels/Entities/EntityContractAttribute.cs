@@ -12,6 +12,9 @@ namespace NWheels.Entities
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
     public class EntityContractAttribute : DataObjectContractAttribute
     {
+        public bool IsAbstract { get; set; }
+        public Type BaseEntity { get; set; }
+
         public static bool IsEntityContract(Type type)
         {
             return (type.IsInterface && type.GetCustomAttribute<EntityContractAttribute>() != null);

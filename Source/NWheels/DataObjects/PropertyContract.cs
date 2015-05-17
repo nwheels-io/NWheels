@@ -40,6 +40,8 @@ namespace NWheels.DataObjects
 
         public class UniqueAttribute : PropertyContractAttribute { }
 
+        public class UniquePerParentAttribute : PropertyContractAttribute { }
+
         public class DefaultValueAttribute : PropertyContractAttribute
         {
             public DefaultValueAttribute(object value)
@@ -60,6 +62,16 @@ namespace NWheels.DataObjects
                 }
                 public Type Type { get; private set; }
             }
+
+            public class InheritorOfAttribute : DataTypeAttribute
+            {
+                public InheritorOfAttribute(Type requiredBase) :
+                    base(typeof (SemanticType.DefaultOf<Type>))
+                {
+                    this.RequiredBase = requiredBase;
+                }
+                public Type RequiredBase { get; private set; }
+            }
             public class DateAttribute : DataTypeAttribute { public DateAttribute() : base(typeof(SemanticType.DefaultOf<DateTime>)) { } }
             public class TimeAttribute : DataTypeAttribute { public TimeAttribute() : base(typeof(SemanticType.DefaultOf<TimeSpan>)) { } }
             public class DurationAttribute : DataTypeAttribute { public DurationAttribute() : base(typeof(SemanticType.DefaultOf<TimeSpan>)) { } }
@@ -69,6 +81,7 @@ namespace NWheels.DataObjects
             public class EmailAddressAttribute : DataTypeAttribute { public EmailAddressAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class PasswordAttribute : DataTypeAttribute { public PasswordAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class UrlAttribute : DataTypeAttribute { public UrlAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
+            public class IPAddressAttribute : DataTypeAttribute { public IPAddressAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class ImageUrlAttribute : DataTypeAttribute { public ImageUrlAttribute() : base(typeof(SemanticType.DefaultOf<byte[]>)) { } }
             public class CreditCardAttribute : DataTypeAttribute { public CreditCardAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class PostalCodeAttribute : DataTypeAttribute { public PostalCodeAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
@@ -76,6 +89,7 @@ namespace NWheels.DataObjects
             public class HtmlAttribute : DataTypeAttribute { public HtmlAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class XmlAttribute : DataTypeAttribute { public XmlAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class JsonAttribute : DataTypeAttribute { public JsonAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
+            public class DisplayNameAttribute : DataTypeAttribute { public DisplayNameAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
         }
 
         public static class Storage
@@ -240,6 +254,38 @@ namespace NWheels.DataObjects
             public class OneToManyAttribute : PropertyContractAttribute { }
             public class ManyToOneAttribute : PropertyContractAttribute { }
             public class ManyToManyAttribute : PropertyContractAttribute { }
+
+            public class OneToManyAggregationAttribute : PropertyContractAttribute
+            {
+                public void ApplyTo(PropertyMetadataBuilder metadata)
+                {
+                    metadata.SafeGetRelation().RelationKind = RelationKind.OneToMany;
+                }
+            }
+            
+            public class OneToManyCompositionAttribute : PropertyContractAttribute
+            {
+                public void ApplyTo(PropertyMetadataBuilder metadata)
+                {
+                    metadata.SafeGetRelation().RelationKind = RelationKind.OneToMany;
+                }
+            }
+        
+            public class AggregationParentAttribute : PropertyContractAttribute
+            {
+                public void ApplyTo(PropertyMetadataBuilder metadata)
+                {
+                    metadata.SafeGetRelation().RelationKind = RelationKind.ManyToOne;
+                }
+            }
+
+            public class CompositionParentAttribute : PropertyContractAttribute
+            {
+                public void ApplyTo(PropertyMetadataBuilder metadata)
+                {
+                    metadata.SafeGetRelation().RelationKind = RelationKind.ManyToOne;
+                }
+            }
         }
 
         public static class Security

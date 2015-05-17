@@ -66,6 +66,7 @@
     <Compile Include="IEntityPartAudit.cs" />
     <Compile Include="IEntityPartEmailAddress.cs" />
     <Compile Include="IEntityPartGlobalRoles.cs" />
+    <Compile Include="IFrontEndUserAccount.cs" />
     <Compile Include="IPasswordEntity.cs" />
     <Compile Include="IUserAccountEntity.cs" />
     <Compile Include="IUserRoleEntity.cs" />
