@@ -95,9 +95,9 @@ namespace NWheels.Processing.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void AwaitEvent(Type eventType, object eventKey)
+        public void AwaitEvent(Type eventType, object eventKey, TimeSpan timeout)
         {
-            _context.AwaitEvent(eventType, eventKey);
+            _context.AwaitEvent(eventType, eventKey, timeout);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

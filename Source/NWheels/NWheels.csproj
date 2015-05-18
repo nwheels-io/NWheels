@@ -258,6 +258,7 @@
     <Compile Include="Processing\Core\IWorkflowInstanceController.cs" />
     <Compile Include="Processing\Core\IWorkflowReadyQueue.cs" />
     <Compile Include="Processing\Core\RuleActionBase.cs" />
+    <Compile Include="Processing\Core\TimedOutWorkflowEvent.cs" />
     <Compile Include="Processing\Core\WorkflowEventBase.cs" />
     <Compile Include="Processing\Core\WorkflowTypeRegistration.cs" />
     <Compile Include="Processing\IMetaRule.cs" />

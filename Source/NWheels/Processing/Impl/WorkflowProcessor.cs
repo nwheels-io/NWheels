@@ -94,7 +94,7 @@ namespace NWheels.Processing.Impl
 
         private IActorSite TryGetNextActorToExecute()
         {
-            for ( int i = 0; i < _actorSitesByPriority.Count; i++ )
+            for ( int i = 0 ; i < _actorSitesByPriority.Count ; i++ )
             {
                 if ( _actorSitesByPriority[i].WorkItemCount > 0 )
                 {
@@ -116,7 +116,7 @@ namespace NWheels.Processing.Impl
 
         private void DispatchOneEvent(IWorkflowEvent @event)
         {
-            var awaitingActorNames = _awaitingActors.Take(@event.GetType(), @event.KeyObject);
+            var awaitingActorNames = _awaitingActors.Take(@event);
 
             foreach ( var actorName in awaitingActorNames )
             {
@@ -229,17 +229,17 @@ namespace NWheels.Processing.Impl
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
             
-            void IWorkflowActorContext.AwaitEvent<TEvent>()
+            void IWorkflowActorContext.AwaitEvent<TEvent>(TimeSpan timeout)
             {
-                _processor._context.AwaitEvent(typeof(TEvent), eventKey: null);
+                _processor._context.AwaitEvent(typeof(TEvent), eventKey: null, timeout: timeout);
                 _lastActorAsync = true;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            void IWorkflowActorContext.AwaitEvent<TEvent, TKey>(TKey key)
+            void IWorkflowActorContext.AwaitEvent<TEvent, TKey>(TKey key, TimeSpan timeout)
             {
-                _processor._context.AwaitEvent(typeof(TEvent), key);
+                _processor._context.AwaitEvent(typeof(TEvent), key, timeout);
                 _lastActorAsync = true;
             }
 
@@ -256,9 +256,23 @@ namespace NWheels.Processing.Impl
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            bool IWorkflowRouterContext.HasActorResult<TResult>()
+            {
+                return (_lastActorResult is TResult);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             TResult IWorkflowRouterContext.GetActorResult<TResult>()
             {
                 return (TResult)_lastActorResult;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            bool IWorkflowRouterContext.HasReceivedEvent<TEvent>()
+            {
+                return (_lastReceivedEvent is TEvent);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -266,26 +280,6 @@ namespace NWheels.Processing.Impl
             TEvent IWorkflowRouterContext.GetReceivedEvent<TEvent>()
             {
                 return (TEvent)_lastReceivedEvent;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-            
-            bool IWorkflowRouterContext.HasActorResult
-            {
-                get
-                {
-                    return (_lastActorResult != null);
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            bool IWorkflowRouterContext.HasReceivedEvent
-            {
-                get
-                {
-                    return (_lastReceivedEvent != null);
-                }
             }
 
             #endregion

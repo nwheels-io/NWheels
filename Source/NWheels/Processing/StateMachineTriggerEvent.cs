@@ -7,16 +7,18 @@ using NWheels.Processing.Core;
 
 namespace NWheels.Processing
 {
-    public class StateMachineTriggerEvent<TTrigger> : WorkflowEventBase<Guid, object>
+    public class StateMachineTriggerEvent<TTrigger> : WorkflowEventBase<Guid>
     {
         private readonly TTrigger _trigger;
+        private readonly object _context;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public StateMachineTriggerEvent(Guid workflowInstanceId, TTrigger trigger, object context)
-            : base(workflowInstanceId, context)
+            : base(workflowInstanceId)
         {
             _trigger = trigger;
+            _context = context;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -24,6 +26,13 @@ namespace NWheels.Processing
         public TTrigger Trigger
         {
             get { return _trigger; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public object Context
+        {
+            get { return _context; }
         }
     }
 }

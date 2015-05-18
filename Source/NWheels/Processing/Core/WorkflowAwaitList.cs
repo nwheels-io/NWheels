@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Extensions;
 
 namespace NWheels.Processing.Core
 {
@@ -28,32 +29,27 @@ namespace NWheels.Processing.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         /// <summary>
-        /// Subscribes an awaiter to one or more events.
+        /// Merges an exsting entry into this await list.
         /// </summary>
-        /// <param name="entryKeys">
-        /// EntryKey objects that identify events to subscribe the awaiter to.
-        /// </param>
-        /// <param name="awaitId">
-        /// The id of the awaiter being subscribed.
-        /// </param>
-        public void Include(IEnumerable<EntryKey> entryKeys, TAwaitId awaitId)
+        /// <remarks>
+        /// This is used to reconstruct "the big" await list of the WorkfowEngine based on "small" await lists of individual workflow instances.
+        /// </remarks>
+        public void Merge(Entry externalEntry)
         {
-            foreach ( var entryKey in entryKeys )
-            {
-                Push(entryKey, awaitId);
-            }
+            var internalEntry = _entries.GetOrAdd(externalEntry.EntryKey, key => new Entry(key));
+            internalEntry.Merge(externalEntry);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Push(Type eventType, object eventKey, TAwaitId awaitId)
+        public void Push(Type eventType, object eventKey, TAwaitId awaitId, DateTime timeoutAtUtc)
         {
-            Push(new EntryKey(eventType, eventKey), awaitId);
+             Push(new EntryKey(eventType, eventKey), awaitId, timeoutAtUtc);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Push(EntryKey entryKey, TAwaitId awaitId)
+        public void Push(EntryKey entryKey, TAwaitId awaitId, DateTime timeoutAtUtc)
         {
             Entry entry;
 
@@ -63,14 +59,14 @@ namespace NWheels.Processing.Core
                 _entries.Add(entryKey, entry);
             }
 
-            entry.Push(awaitId);
+            entry.Push(awaitId, timeoutAtUtc);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TAwaitId[] Take(Type eventType, object eventKey)
+        public TAwaitId[] Take(IWorkflowEvent @event)
         {
-            return Take(new EntryKey(eventType, eventKey));
+            return Take(new EntryKey(@event.GetEventType(), @event.GetEventKey()));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -82,12 +78,32 @@ namespace NWheels.Processing.Core
             if ( _entries.TryGetValue(entryKey, out entry) )
             {
                 _entries.Remove(entryKey);
-                return entry.ToArray();
+                return entry.Select(e => e.Id).ToArray();
             }
             else
             {
                 return new TAwaitId[0];
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TimedOutAwaiter[] TakeTimedOut(DateTime utcNow)
+        {
+            var timedOut = new List<TimedOutAwaiter>();
+            var entryArray = _entries.Values.ToArray();
+
+            foreach ( var entry in entryArray )
+            {
+                entry.TakeTimedOut(utcNow, timedOut);
+
+                if ( entry.Count == 0 )
+                {
+                    _entries.Remove(entry.EntryKey);
+                }
+            }
+
+            return timedOut.ToArray();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -184,22 +200,22 @@ namespace NWheels.Processing.Core
         /// <summary>
         /// Encapsulates a linked list of subscribers to events identified by an EntryKey.
         /// </summary>
-        public class Entry : IEnumerable<TAwaitId>
+        public class Entry : IEnumerable<Awaiter>
         {
             private readonly EntryKey _entryKey;
-            private readonly LinkedList<TAwaitId> _awaitIds;
+            private readonly LinkedList<Awaiter> _awaitIds;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public Entry(EntryKey entryKey)
             {
                 _entryKey = entryKey;
-                _awaitIds = new LinkedList<TAwaitId>();
+                _awaitIds = new LinkedList<Awaiter>();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IEnumerator<TAwaitId> GetEnumerator()
+            public IEnumerator<Awaiter> GetEnumerator()
             {
                 return _awaitIds.GetEnumerator();
             }
@@ -213,9 +229,39 @@ namespace NWheels.Processing.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void Push(TAwaitId awaitId)
+            public void Push(TAwaitId awaitId, DateTime timeoutAtUtc)
             {
-                _awaitIds.AddLast(awaitId);
+                _awaitIds.AddLast(new Awaiter(awaitId, timeoutAtUtc));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Merge(Entry externalEntry)
+            {
+                foreach ( var externalAwaiter in externalEntry._awaitIds )
+                {
+                    _awaitIds.AddLast(externalAwaiter);
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void TakeTimedOut(DateTime utcNow, List<TimedOutAwaiter> timedOut)
+            {
+                var node = _awaitIds.First;
+
+                while ( node != null )
+                {
+                    if ( utcNow >= node.Value.TimeoutAtUtc )
+                    {
+                        timedOut.Add(new TimedOutAwaiter(node.Value.Id, this.EntryKey));
+                        _awaitIds.Remove(node);
+                    }
+                    else
+                    {
+                        node = node.Next;
+                    }
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -224,6 +270,52 @@ namespace NWheels.Processing.Core
             {
                 get { return _entryKey; }
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public int Count
+            {
+                get { return _awaitIds.Count; }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class TimedOutAwaiter
+        {
+            public TimedOutAwaiter(TAwaitId id, EntryKey key)
+            {
+                this.Id = id;
+                this.EntryKey = key;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TimedOutWorkflowEvent CreateTimedOutEvent()
+            {
+                return new TimedOutWorkflowEvent(this.EntryKey.EventType, this.EntryKey.EventKey);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TAwaitId Id { get; private set; }
+            public EntryKey EntryKey { get; private set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public struct Awaiter
+        {
+            public Awaiter(TAwaitId id, DateTime timeoutAtUtc)
+            {
+                this.Id = id;
+                this.TimeoutAtUtc = timeoutAtUtc;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public readonly TAwaitId Id;
+            public readonly DateTime TimeoutAtUtc;
         }
     }
 }

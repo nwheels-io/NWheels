@@ -1,4 +1,6 @@
-﻿namespace NWheels.Processing.Core
+﻿using System;
+
+namespace NWheels.Processing.Core
 {
     public interface IWorkflowActorSiteContext
     {
@@ -11,7 +13,7 @@
     public interface IWorkflowActorContext : IWorkflowActorSiteContext
     {
         void SetResult<T>(T resultValue);
-        void AwaitEvent<TEvent>() where TEvent : IWorkflowEvent;
-        void AwaitEvent<TEvent, TKey>(TKey key) where TEvent : IWorkflowEvent<TKey>;
+        void AwaitEvent<TEvent>(TimeSpan timeout) where TEvent : IWorkflowEvent;
+        void AwaitEvent<TEvent, TKey>(TKey key, TimeSpan timeout) where TEvent : IWorkflowEvent<TKey>;
     }
 }

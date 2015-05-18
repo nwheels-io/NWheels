@@ -9,9 +9,9 @@ namespace NWheels.Processing.Core
     public interface IWorkflowRouterContext : IWorkflowActorSiteContext
     {
         TWorkItem GetActorWorkItem<TWorkItem>();
+        bool HasActorResult<TResult>();
         TResult GetActorResult<TResult>();
+        bool HasReceivedEvent<TEvent>() where TEvent : IWorkflowEvent;
         TEvent GetReceivedEvent<TEvent>() where TEvent : IWorkflowEvent;
-        bool HasActorResult { get; }
-        bool HasReceivedEvent { get; }
     }
 }

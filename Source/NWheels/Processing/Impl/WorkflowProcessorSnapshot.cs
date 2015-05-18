@@ -13,40 +13,20 @@ namespace NWheels.Processing.Impl
     [DataContract]
     public class WorkflowProcessorSnapshot
     {
-        [DataMember(Order = 1)]
-        public Actor[] Actors { get; set; }
-        
         [DataMember(Order = 2)]
-        public ActorAwaitList AwaitList { get; set; }
+        public AwaitListSnapshot AwaitList { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataContract]
-        public class Actor
+        public class AwaitListSnapshot
         {
             [DataMember(Order = 1)]
-            public string Name { get; set; }
-
-            [DataMember(Order = 2)]
-            public string WorkItemClrType { get; set; }
-            
-            [DataMember(Order = 3)]
-            [ProtoMember(123, Options = MemberSerializationOptions.DynamicType)]
-            public object[] WorkItems { get; set; }
-        }
-
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [DataContract]
-        public class ActorAwaitList
-        {
-            [DataMember(Order = 1)]
-            public ActorAwaitListEntry[] Entries { get; set; }
+            public EntrySnapshot[] Entries { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static ActorAwaitList TakeSnapshotOf(WorkflowAwaitList<string> awaitList)
+            public static AwaitListSnapshot TakeSnapshotOf(WorkflowAwaitList<string> awaitList)
             {
                 return new ActorAwaitList {
                     Entries = awaitList.GetAllEntries().Select(ActorAwaitListEntry.TakeSnapshotOf).ToArray()
@@ -57,7 +37,7 @@ namespace NWheels.Processing.Impl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataContract]
-        public class ActorAwaitListEntry
+        public class EntrySnapshot
         {
             [DataMember(Order = 1)]
             public string EventClrType { get; set; }
@@ -67,13 +47,37 @@ namespace NWheels.Processing.Impl
             public object EventKey { get; set; }
 
             [DataMember(Order = 3)]
-            public string[] ActorNames { get; set; }
+            public AwaiterSnapshot[] Awaiters { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static ActorAwaitListEntry TakeSnapshotOf(WorkflowAwaitList<string>.Entry entry)
+            public static EntrySnapshot TakeSnapshotOf(WorkflowAwaitList<string>.Entry entry)
             {
                 return new ActorAwaitListEntry {
+                    EventClrType = entry.EntryKey.EventType.AssemblyQualifiedNameNonVersioned(),
+                    EventKey = entry.EntryKey.EventKey,
+                    ActorNames = entry.ToArray()
+                };
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataContract]
+        public class AwaiterSnapshot
+        {
+            [DataMember(Order = 1)]
+            public string ActorName { get; set; }
+
+            [DataMember(Order = 2)]
+            public DateTime TimeoutAtUtc { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static AwaitingActor TakeSnapshotOf(WorkflowAwaitList<string>.Awaiter awaiter)
+            {
+                return new ActorAwaitListEntry
+                {
                     EventClrType = entry.EntryKey.EventType.AssemblyQualifiedNameNonVersioned(),
                     EventKey = entry.EntryKey.EventKey,
                     ActorNames = entry.ToArray()

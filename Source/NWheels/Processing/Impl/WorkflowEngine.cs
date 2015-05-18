@@ -75,7 +75,7 @@ namespace NWheels.Processing.Impl
 
         public void DispatchEvent(IWorkflowEvent receivedEvent)
         {
-            var awaitingIds = _awaitingWorkflows.Take(receivedEvent.GetType(), receivedEvent.KeyObject);
+            var awaitingIds = _awaitingWorkflows.Take(receivedEvent);
             var arrayOfSingleEvent = new[] { receivedEvent };
 
             foreach ( var singleId in awaitingIds )
@@ -92,7 +92,7 @@ namespace NWheels.Processing.Impl
 
             foreach ( var singleEvent in receivedEvents )
             {
-                var awaitingIds = _awaitingWorkflows.Take(singleEvent.GetType(), singleEvent.KeyObject);
+                var awaitingIds = _awaitingWorkflows.Take(singleEvent);
 
                 foreach ( var singleId in awaitingIds )
                 {
@@ -220,9 +220,10 @@ namespace NWheels.Processing.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void AwaitEvent(Type eventType, object eventKey, Guid workflowInstanceId)
+        private void AwaitEvent(Type eventType, object eventKey, Guid workflowInstanceId, TimeSpan timeout)
         {
-            _awaitingWorkflows.Push(eventType, eventKey, workflowInstanceId);
+            var timeoutAtUtc = _framework.UtcNow.Add(timeout);
+            _awaitingWorkflows.Push(eventType, eventKey, workflowInstanceId, timeoutAtUtc);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -259,9 +260,9 @@ namespace NWheels.Processing.Impl
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            void IWorkflowInstanceContext.AwaitEvent(Type eventType, object eventKey)
+            void IWorkflowInstanceContext.AwaitEvent(Type eventType, object eventKey, TimeSpan timeout)
             {
-                _ownerEngine.AwaitEvent(eventType, eventKey, _instanceData.WorkflowInstanceId);
+                _ownerEngine.AwaitEvent(eventType, eventKey, _instanceData.WorkflowInstanceId, timeout);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -383,7 +384,7 @@ namespace NWheels.Processing.Impl
                 initialData.WorkflowState = WorkflowState.Created;
                 initialData.CreatedAtUtc = ownerEngine._framework.UtcNow;
                 initialData.UpdatedAtUtc = initialData.CreatedAtUtc;
-                initialData.CodeBehindClrType = registration.CodeBehindType;//.AssemblyQualifiedNameNonVersioned();
+                initialData.CodeBehindClrType = registration.CodeBehindType;
 
                 return new WorkflowInstanceContext(ownerEngine, registration, initialData);
             }

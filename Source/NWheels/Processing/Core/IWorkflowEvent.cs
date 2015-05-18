@@ -1,8 +1,12 @@
-﻿namespace NWheels.Processing.Core
+﻿using System;
+
+namespace NWheels.Processing.Core
 {
     public interface IWorkflowEvent
     {
-        object KeyObject { get; }
+        Type GetEventType();
+        object GetEventKey();
+        WorkflowEventStatus GetEventStatus();
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -14,8 +18,9 @@
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IWorkflowEvent<out TKey, out TPayload> : IWorkflowEvent<TKey>
+    public enum WorkflowEventStatus
     {
-        TPayload Payload { get; }
+        Received,
+        TimedOut
     }
 }

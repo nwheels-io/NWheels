@@ -9,7 +9,7 @@ namespace NWheels.Processing.Impl
 {
     internal interface IWorkflowInstanceContext
     {
-        void AwaitEvent(Type eventType, object eventKey);
+        void AwaitEvent(Type eventType, object eventKey, TimeSpan timeout);
         IComponentContext Components { get; }
         IFramework Framework { get; }
         WorkflowCodeBehindAdapter CodeBehindAdapter { get; }

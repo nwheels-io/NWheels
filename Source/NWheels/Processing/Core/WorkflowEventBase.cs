@@ -6,24 +6,36 @@ using System.Threading.Tasks;
 
 namespace NWheels.Processing.Core
 {
-    public abstract class WorkflowEventBase<TKey, TPayload> : IWorkflowEvent<TKey, TPayload>
+    public abstract class WorkflowEventBase<TKey> : IWorkflowEvent<TKey>
     {
-        protected WorkflowEventBase(TKey key, TPayload payload)
+        protected WorkflowEventBase(TKey key)
         {
             this.Key = key;
-            this.Payload = payload;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public virtual Type GetEventType()
+        {
+            return this.GetType();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        object IWorkflowEvent.KeyObject
+        public virtual object GetEventKey()
         {
-            get { return this.Key; }
+            return this.Key;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual WorkflowEventStatus GetEventStatus()
+        {
+            return WorkflowEventStatus.Received;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TKey Key { get; private set; }
-        public TPayload Payload { get; private set; }
     }
 }

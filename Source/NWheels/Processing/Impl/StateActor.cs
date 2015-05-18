@@ -16,8 +16,10 @@ namespace NWheels.Processing.Impl
         private readonly IStateMachineCodeBehind<TState, TTrigger> _codeBehind;
         private readonly TransientStateMachine<TState, TTrigger>.ILogger _logger;
         private readonly Dictionary<TTrigger, StateTransition> _transitionByTrigger = new Dictionary<TTrigger, StateTransition>();
+        private TimeSpan? _timeout;
         private EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> _onEntered;
         private EventHandler<StateMachineEventArgs<TState, TTrigger>> _onLeaving;
+        private EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> _onTimeout;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -40,14 +42,16 @@ namespace NWheels.Processing.Impl
 
                 if ( workItem.EventArgs.HasFeedback )
                 {
-                    HandleTrigger(context, workItem.EventArgs.Feedback);
+                    HandleTrigger(context, workItem.EventArgs.Feedback, workItem.EventArgs.Context);
                     completed = true;
                 }
             }
 
             if ( !completed )
             {
-                context.AwaitEvent<StateMachineTriggerEvent<TTrigger>, Guid>(key: context.WorkflowInstance.InstanceId);
+                context.AwaitEvent<StateMachineTriggerEvent<TTrigger>, Guid>(
+                    key: context.WorkflowInstance.InstanceId, 
+                    timeout: _timeout.GetValueOrDefault(TimeSpan.FromDays(1)));
             }
         }
 
@@ -55,24 +59,11 @@ namespace NWheels.Processing.Impl
 
         public void Route(IWorkflowRouterContext context)
         {
-            if ( context.HasReceivedEvent )
+            if ( context.HasReceivedEvent<StateMachineTriggerEvent<TTrigger>>() )
             {
                 var receivedEvent = context.GetReceivedEvent<StateMachineTriggerEvent<TTrigger>>();
+                HandleTrigger(context, receivedEvent.Trigger, eventArgsContext: receivedEvent.Context);
             }
-
-            //context.GetActorResult<>()
-
-            //StateTransition transition;
-
-            //if (_transitionByTrigger.TryGetValue(workItem.EventArgs.Trigger, out transition))
-            //{
-            //    if (_onLeaving != null)
-            //    {
-            //        _onLeaving(this, workItem.EventArgs);
-            //    }
-
-            //    transition.PerformTransition(context, workItem.EventArgs);
-            //}
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -102,11 +93,21 @@ namespace NWheels.Processing.Impl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IStateMachineStateBuilder<TState, TTrigger> OnTimeout(
-            TimeSpan timeout, 
-            EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> handler, 
+            TimeSpan timeout,
+            EventHandler<StateMachineFeedbackEventArgs<TState, TTrigger>> handler,
             bool recurring = false)
         {
-            //TODO: implement timeout
+            _timeout = timeout;
+
+            if ( _onTimeout != null )
+            {
+                _onTimeout = handler;
+            }
+            else
+            {
+                _onTimeout += handler;
+            }
+
             return this;
         }
 
@@ -151,7 +152,7 @@ namespace NWheels.Processing.Impl
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void HandleTrigger(IWorkflowActorSiteContext context, TTrigger trigger)
+        private void HandleTrigger(IWorkflowActorSiteContext context, TTrigger trigger, object eventArgsContext)
         {
             var transition = ValidateTransition(trigger);
             
@@ -159,7 +160,7 @@ namespace NWheels.Processing.Impl
                 from: _value,
                 to: transition.Destination,
                 trigger: trigger,
-                context: context);
+                context: eventArgsContext);
 
             if ( _onLeaving != null )
             {

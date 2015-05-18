@@ -117,22 +117,6 @@ namespace NWheels.Processing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public virtual void OnTimeout(TDataEntity savedData, ref bool isFailure)
-        {
-            var suspendable = (_codeBehind as ISuspendableWorkflowCodeBehind<TDataEntity>);
-
-            
-
-            if ( suspendable != null )
-            {
-                suspendable.OnTimeout(savedData, ref isFailure);
-            }
-
-
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public virtual void OnComplete()
         {
             var lifecycle = (_codeBehind as IWorkflowCodeBehindLifecycle);
