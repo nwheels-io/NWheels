@@ -46,11 +46,27 @@ namespace NWheels.Tools.DevFlow
             _targetSolution = new VisualStudioSolutionFile(options.TargetSlnPath, Log);
 
             var projectsSubjectToMerge = _sourceSolution.Projects.Where(p => p.ProjectTypeId == VisualStudioSolutionFile.CSharpProjectTypeId).ToArray();
+
+            if ( !string.IsNullOrWhiteSpace(_options.ProjectsFile) )
+            {
+                projectsSubjectToMerge = FilterProjectsToNerge(projectsSubjectToMerge);
+            }
             
             RewriteSolutionFile(projectsSubjectToMerge);
             RewriteProjectFiles(projectsSubjectToMerge);
 
             _targetSolution.Save();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private VisualStudioSolutionFile.ProjectNode[] FilterProjectsToNerge(IEnumerable<VisualStudioSolutionFile.ProjectNode> projects)
+        {
+            var projectNames = new HashSet<string>(
+                File.ReadAllLines(_options.ProjectsFile).Select(s => s.Trim()).Where(s => !string.IsNullOrEmpty(s)),
+                StringComparer.InvariantCultureIgnoreCase);
+
+            return projects.Where(p => projectNames.Contains(p.ProjectName)).ToArray();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -109,6 +125,9 @@ namespace NWheels.Tools.DevFlow
             public string TargetSlnPath { get; set; }
             [Option('u', "unmerge", HelpText = "Specify to un-merge the solution (revert merge)")]
             public bool Unmerge { get; set; }
+            [Option('p', "projects", 
+                HelpText = "Optional. Path to a text file that lists projects to merge (each line must contain project name without the .DLL extension)")]
+            public string ProjectsFile { get; set; }
         }
     }
 }
