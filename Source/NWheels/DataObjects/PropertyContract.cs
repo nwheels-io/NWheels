@@ -51,7 +51,23 @@ namespace NWheels.DataObjects
 
             public object Value { get; private set; }
         }
-        
+
+        public class CompositionAttribute : PropertyContractAttribute
+        {
+            public void ApplyTo(PropertyMetadataBuilder metadata)
+            {
+                //metadata.SafeGetRelation().RelationKind = RelationKind.ManyToOne;
+            }
+        }
+
+        public class AggregationAttribute : PropertyContractAttribute
+        {
+            public void ApplyTo(PropertyMetadataBuilder metadata)
+            {
+                //metadata.SafeGetRelation().RelationKind = RelationKind.ManyToOne;
+            }
+        }
+
         public static class Semantic
         {
             public class DataTypeAttribute : PropertyContractAttribute
