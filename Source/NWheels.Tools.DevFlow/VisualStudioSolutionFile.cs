@@ -11,6 +11,7 @@ using NWheels.Tools.DevFlow.Parsers;
 using NWheels.Logging.Core;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using NWheels.Utilities;
 
 namespace NWheels.Tools.DevFlow
 {
@@ -30,7 +31,7 @@ namespace NWheels.Tools.DevFlow
 
         public VisualStudioSolutionFile(string filePath, IPlainLog log)
         {
-            _filePath = filePath;
+            _filePath = (Path.IsPathRooted(filePath) ? filePath : PathUtility.GetAbsolutePath(filePath, relativeTo: Environment.CurrentDirectory));
             _log = log;
 
             var fileText = File.ReadAllText(filePath); 
@@ -241,18 +242,22 @@ namespace NWheels.Tools.DevFlow
 
         public static string GetAbsolutePath(string originPath, string relativePath)
         {
-            var combinedAbsolutePath = Path.Combine(Path.GetDirectoryName(originPath), relativePath);
-            var cleanAbsolutePath = Path.GetFullPath(new Uri(combinedAbsolutePath).LocalPath).Replace("/", "\\");
+            return PathUtility.GetAbsolutePath(relativePath, originPath, isRelativeToFile: true);
 
-            return cleanAbsolutePath;
+            //var combinedAbsolutePath = Path.Combine(Path.GetDirectoryName(originPath), relativePath);
+            //var cleanAbsolutePath = Path.GetFullPath(new Uri(combinedAbsolutePath).LocalPath).Replace("/", "\\");
+
+            //return cleanAbsolutePath;
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static string GetRelativePath(string originPath, string absolutePath)
         {
-            var relativePath = new Uri(originPath).MakeRelativeUri(new Uri(absolutePath)).ToString().Replace("/", "\\");
-            return relativePath;
+            return PathUtility.GetRelativePath(absolutePath, originPath);
+
+            //var relativePath = new Uri(originPath).MakeRelativeUri(new Uri(absolutePath)).ToString().Replace("/", "\\");
+            //return relativePath;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

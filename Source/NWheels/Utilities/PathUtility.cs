@@ -42,5 +42,24 @@ namespace NWheels.Utilities
         {
             return Path.Combine(Path.Combine(_s_binFolderPath, subFolder), fileName);
         }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetAbsolutePath(string relativePath, string relativeTo, bool isRelativeToFile = false)
+        {
+            var originDirectory = (isRelativeToFile ? Path.GetDirectoryName(relativeTo) : relativeTo);
+            var combinedAbsolutePath = Path.Combine(originDirectory, relativePath);
+            var cleanAbsolutePath = Path.GetFullPath(new Uri(combinedAbsolutePath).LocalPath).Replace("/", "\\");
+
+            return cleanAbsolutePath;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetRelativePath(string absolutePath, string relativeTo)
+        {
+            var relativePath = new Uri(relativeTo).MakeRelativeUri(new Uri(absolutePath)).ToString().Replace("/", "\\");
+            return relativePath;
+        }
     }
 }
