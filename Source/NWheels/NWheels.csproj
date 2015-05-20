@@ -101,6 +101,9 @@
     <Compile Include="Conventions\Core\IConfigurationObjectFactory.cs" />
     <Compile Include="Conventions\Core\LoggerObjectFactory.cs" />
     <Compile Include="Conventions\Core\EntityObjectFactory.cs" />
+    <Compile Include="Entities\EntityState.cs" />
+    <Compile Include="Entities\IEntityTrigger.cs" />
+    <Compile Include="Entities\IEntityTriggerContext.cs" />
     <Compile Include="Globalization\Currency.cs" />
     <Compile Include="Globalization\CurrencyInfo.cs" />
     <Compile Include="DataObjects\ConcretizationRegistration.cs" />
