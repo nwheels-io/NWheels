@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Processing;
+using NWheels.Processing.Jobs;
 using Quartz;
 
 namespace NWheels.Puzzle.QuartzNet

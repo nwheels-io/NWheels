@@ -82,9 +82,9 @@
     <Compile Include="Logging\NameValuePairLogNodeTests.cs" />
     <Compile Include="Logging\ThreadLogTests.cs" />
     <Compile Include="Logging\ThreadLogUnitTestBase.cs" />
-    <Compile Include="Processing\Impl\WorkflowProcessorSnapshotTests.cs" />
-    <Compile Include="Processing\Impl\WorkflowProcessorTests.cs" />
-    <Compile Include="Processing\Impl\WorkflowTestHelpers.cs" />
+    <Compile Include="Processing\Workflows\Impl\WorkflowProcessorSnapshotTests.cs" />
+    <Compile Include="Processing\Workflows\Impl\WorkflowProcessorTests.cs" />
+    <Compile Include="Processing\Workflows\Impl\ProcessorTestEnvironment.cs" />
     <Compile Include="Processing\RevertableSequenceTests.cs" />
     <Compile Include="Processing\Spikes\AsyncAwaitAssumptionTests.cs" />
     <Compile Include="Processing\Spikes\ProtobufSerializationTests.cs" />
@@ -105,6 +105,7 @@
       <Name>NWheels</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -4,6 +4,8 @@ using System.Runtime.CompilerServices;
 using NUnit.Framework;
 using NWheels.Processing;
 using NWheels.Processing.Core;
+using NWheels.Processing.Workflows;
+using NWheels.Processing.Workflows.Core;
 using NWheels.Testing;
 
 namespace NWheels.UnitTests.Processing

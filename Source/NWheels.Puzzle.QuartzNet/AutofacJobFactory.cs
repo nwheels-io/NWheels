@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Core;
 using NWheels.Processing;
+using NWheels.Processing.Jobs;
 using Quartz.Spi;
 using Quartz;
 

@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Processing.Core;
-using NWheels.Processing.Impl;
+using NWheels.Processing.Workflows;
+using NWheels.Processing.Workflows.Core;
+using NWheels.Processing.Workflows.Impl;
 
 namespace NWheels.Processing
 {
