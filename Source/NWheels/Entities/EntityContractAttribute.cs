@@ -14,6 +14,7 @@ namespace NWheels.Entities
     {
         public bool IsAbstract { get; set; }
         public Type BaseEntity { get; set; }
+        public bool IsAggregation { get; set; }
 
         public static bool IsEntityContract(Type type)
         {

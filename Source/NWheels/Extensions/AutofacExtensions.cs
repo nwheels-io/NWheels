@@ -19,7 +19,6 @@ using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.UI;
 using NWheels.Processing;
-using NWheels.Processing.Core;
 using NWheels.Processing.Jobs;
 using NWheels.Processing.Workflows;
 using NWheels.Processing.Workflows.Core;

@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NWheels.Processing.Jobs;
-using NWheels.Processing.Rules;
-using NWheels.Processing.Rules.Core;
 using NWheels.Utilities;
 
-namespace NWheels.Processing.Core
+namespace NWheels.Processing.Rules.Core
 {
     public abstract class MetaRuleBase : IMetaRule
     {

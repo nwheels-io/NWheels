@@ -1,5 +1,4 @@
-﻿using NWheels.Processing.Core;
-using NWheels.Processing.Rules.Core;
+﻿using NWheels.Processing.Rules.Core;
 
 namespace NWheels.Processing.Rules
 {

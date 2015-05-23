@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
-using NWheels.Processing.Jobs;
-using NWheels.Processing.Rules;
-using NWheels.Processing.Rules.Core;
 
-namespace NWheels.Processing.Core
+namespace NWheels.Processing.Rules.Core
 {
     public abstract class RuleSystemBuilder
     {
@@ -16,6 +13,12 @@ namespace NWheels.Processing.Core
     public class RuleSystemBuilder<TContext> : RuleSystemBuilder
     {
         public void AddAllContextPropertiesAsVariables()
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void AddObjectPropertiesAsVariables<TObject>(Expression<Func<TContext, TObject>> objectInContext)
         {
         }
 

@@ -1,7 +1,4 @@
-﻿using NWheels.Processing.Core;
-using NWheels.Processing.Rules.Core;
-
-namespace NWheels.Processing.Rules
+﻿namespace NWheels.Processing.Rules.Core
 {
     public interface IMetaRule : IParameterizedRuleDomainObject
     {

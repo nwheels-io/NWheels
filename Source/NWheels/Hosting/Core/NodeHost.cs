@@ -28,7 +28,7 @@ using NWheels.Extensions;
 using NWheels.Logging;
 using NWheels.Logging.Core;
 using NWheels.Processing;
-using NWheels.Processing.Core;
+using NWheels.Processing.Rules.Core;
 using NWheels.Processing.Workflows;
 using NWheels.Processing.Workflows.Core;
 using NWheels.Utilities;

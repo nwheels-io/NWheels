@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
-using NWheels.Processing.Rules;
-using NWheels.Processing.Rules.Core;
 
-namespace NWheels.Processing.Core
+namespace NWheels.Processing.Rules.Core
 {
     public class RuleBuilder<TDataContext>
     {

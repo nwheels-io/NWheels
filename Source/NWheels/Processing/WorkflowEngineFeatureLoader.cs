@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.Extensions;
 using NWheels.Hosting;
-using NWheels.Processing.Core;
 using NWheels.Processing.Workflows;
 using NWheels.Processing.Workflows.Core;
 using NWheels.Processing.Workflows.Impl;

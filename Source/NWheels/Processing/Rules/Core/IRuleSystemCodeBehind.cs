@@ -1,6 +1,4 @@
-﻿using NWheels.Processing.Core;
-
-namespace NWheels.Processing.Rules.Core
+﻿namespace NWheels.Processing.Rules.Core
 {
     public interface IRuleSystemCodeBehind<TDataContext>
     {

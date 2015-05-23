@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NWheels.Processing.Workflows;
 using NWheels.Processing.Workflows.Fluent.RevertableSequence;
 
-namespace NWheels.Processing.Core
+namespace NWheels.Processing.Workflows.Core
 {
     internal class RevertableSequence : IRevertableSequence, IRevertableSequenceBuilder
     {

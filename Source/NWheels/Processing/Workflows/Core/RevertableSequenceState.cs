@@ -1,4 +1,4 @@
-﻿namespace NWheels.Processing.Core
+﻿namespace NWheels.Processing.Workflows.Core
 {
     public enum RevertableSequenceState
     {

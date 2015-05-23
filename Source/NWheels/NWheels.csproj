@@ -264,7 +264,7 @@
     <Compile Include="Processing\Workflows\Core\TimedOutWorkflowEvent.cs" />
     <Compile Include="Processing\Workflows\Core\WorkflowEventBase.cs" />
     <Compile Include="Processing\Workflows\Core\WorkflowTypeRegistration.cs" />
-    <Compile Include="Processing\Rules\IMetaRule.cs" />
+    <Compile Include="Processing\Rules\Core\IMetaRule.cs" />
     <Compile Include="Processing\Workflows\Impl\IWorkflowInstanceContext.cs" />
     <Compile Include="Processing\Workflows\Impl\StateActor.cs" />
     <Compile Include="Processing\Workflows\Impl\StateTriggerWorkItem.cs" />
@@ -284,7 +284,7 @@
     <Compile Include="Processing\Workflows\Core\IWorkflowRouter.cs" />
     <Compile Include="Processing\Workflows\Core\IWorkflowRouterContext.cs" />
     <Compile Include="Processing\Workflows\Core\ProcessorResult.cs" />
-    <Compile Include="Processing\Rules\Core\RevertableSequence.cs" />
+    <Compile Include="Processing\Workflows\Core\RevertableSequence.cs" />
     <Compile Include="Processing\Workflows\TransientStateMachine.cs" />
     <Compile Include="Processing\Workflows\Core\WorkflowAwaitList.cs" />
     <Compile Include="Processing\Jobs\IApplicationJob.cs" />
@@ -308,7 +308,7 @@
     <Compile Include="Processing\Workflows\IWorkflowCodeBehind.cs" />
     <Compile Include="Processing\Workflows\Core\IWorkflowEvent.cs" />
     <Compile Include="Processing\Workflows\Core\IWorkflowInstance.cs" />
-    <Compile Include="Processing\Rules\Core\RevertableSequenceState.cs" />
+    <Compile Include="Processing\Workflows\Core\RevertableSequenceState.cs" />
     <Compile Include="Processing\Workflows\Core\WorkflowState.cs" />
     <Compile Include="Processing\Workflows\IWorkflowEngine.cs" />
     <Compile Include="Processing\Rules\RuleSystemData.cs" />

@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.Processing.Rules;
-using NWheels.Processing.Rules.Core;
 
-namespace NWheels.Processing.Core
+namespace NWheels.Processing.Rules.Core
 {
     public abstract class RuleActionBase : IRuleAction, IParameterizedRuleDomainObject
     {

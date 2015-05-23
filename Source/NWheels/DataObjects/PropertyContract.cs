@@ -52,22 +52,6 @@ namespace NWheels.DataObjects
             public object Value { get; private set; }
         }
 
-        public class CompositionAttribute : PropertyContractAttribute
-        {
-            public void ApplyTo(PropertyMetadataBuilder metadata)
-            {
-                //metadata.SafeGetRelation().RelationKind = RelationKind.ManyToOne;
-            }
-        }
-
-        public class AggregationAttribute : PropertyContractAttribute
-        {
-            public void ApplyTo(PropertyMetadataBuilder metadata)
-            {
-                //metadata.SafeGetRelation().RelationKind = RelationKind.ManyToOne;
-            }
-        }
-
         public static class Semantic
         {
             public class DataTypeAttribute : PropertyContractAttribute
@@ -88,6 +72,7 @@ namespace NWheels.DataObjects
                 }
                 public Type RequiredBase { get; private set; }
             }
+
             public class DateAttribute : DataTypeAttribute { public DateAttribute() : base(typeof(SemanticType.DefaultOf<DateTime>)) { } }
             public class TimeAttribute : DataTypeAttribute { public TimeAttribute() : base(typeof(SemanticType.DefaultOf<TimeSpan>)) { } }
             public class DurationAttribute : DataTypeAttribute { public DurationAttribute() : base(typeof(SemanticType.DefaultOf<TimeSpan>)) { } }
@@ -106,6 +91,12 @@ namespace NWheels.DataObjects
             public class XmlAttribute : DataTypeAttribute { public XmlAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class JsonAttribute : DataTypeAttribute { public JsonAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class DisplayNameAttribute : DataTypeAttribute { public DisplayNameAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
+        }
+
+        public static class Aggregation
+        {
+            public class Dimension : PropertyContractAttribute { }
+            public class Measure : PropertyContractAttribute { }
         }
 
         public static class Storage
@@ -271,22 +262,6 @@ namespace NWheels.DataObjects
             public class ManyToOneAttribute : PropertyContractAttribute { }
             public class ManyToManyAttribute : PropertyContractAttribute { }
 
-            public class OneToManyAggregationAttribute : PropertyContractAttribute
-            {
-                public void ApplyTo(PropertyMetadataBuilder metadata)
-                {
-                    metadata.SafeGetRelation().RelationKind = RelationKind.OneToMany;
-                }
-            }
-            
-            public class OneToManyCompositionAttribute : PropertyContractAttribute
-            {
-                public void ApplyTo(PropertyMetadataBuilder metadata)
-                {
-                    metadata.SafeGetRelation().RelationKind = RelationKind.OneToMany;
-                }
-            }
-        
             public class AggregationParentAttribute : PropertyContractAttribute
             {
                 public void ApplyTo(PropertyMetadataBuilder metadata)
@@ -300,6 +275,22 @@ namespace NWheels.DataObjects
                 public void ApplyTo(PropertyMetadataBuilder metadata)
                 {
                     metadata.SafeGetRelation().RelationKind = RelationKind.ManyToOne;
+                }
+            }
+
+            public class CompositionAttribute : PropertyContractAttribute
+            {
+                public void ApplyTo(PropertyMetadataBuilder metadata)
+                {
+                    metadata.SafeGetRelation().RelationKind = RelationKind.OneToMany;
+                }
+            }
+
+            public class AggregationAttribute : PropertyContractAttribute
+            {
+                public void ApplyTo(PropertyMetadataBuilder metadata)
+                {
+                    metadata.SafeGetRelation().RelationKind = RelationKind.OneToMany;
                 }
             }
         }
