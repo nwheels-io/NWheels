@@ -18,7 +18,7 @@ namespace NWheels.Processing.Rules.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void AddObjectPropertiesAsVariables<TObject>(Expression<Func<TContext, TObject>> objectInContext)
+        public void AddScalarPropertiesAsVariables<TObject>(Expression<Func<TContext, TObject>> objectInContext)
         {
         }
 
