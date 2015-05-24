@@ -34,16 +34,16 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
             // (3) CompiledRuleSystem.Run(context)
 
             // CUSTOMER BIRTHDAY - VARIANT 1
-            builder.AddVariable(context => context.Customer.Birthday == _framework.UtcNow.Date, "IsCustomerBirthday", "True if today is customer's birthday, False otherwise.");
+            //builder.AddVariable(context => context.Customer.Birthday == _framework.UtcNow.Date, "IsCustomerBirthday", "True if today is customer's birthday, False otherwise.");
 
             // CUSTOMER BIRTHDAY - VARIANT 2
             builder.AddVariable(new IsCustomerBirthdayToday(_framework));
 
             // CUSTOMER BIRTHDAY - VARIANT 3
-            builder.AddVariable(new RuleVariable<PricingContext, bool>(
-                context => context.Customer.Birthday == _framework.UtcNow.Date, 
-                "IsCustomerBirthday", 
-                "True if today is customer's birthday, False otherwise."));
+			//builder.AddVariable(new RuleVariable<PricingContext, bool>(
+			//	context => context.Customer.Birthday == _framework.UtcNow.Date, 
+			//	"IsCustomerBirthday", 
+			//	"True if today is customer's birthday, False otherwise."));
         }
 
         #endregion
@@ -65,7 +65,8 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
 
             public bool GetValue(PricingContext context)
             {
-                return (context.Customer.Birthday == _framework.UtcNow.Date);
+	            var utcBirthday = context.Customer.Birthday.ToUniversalTime();
+                return ( utcBirthday.Day  == _framework.UtcNow.Date.Day  && utcBirthday.Month ==_framework.UtcNow.Date.Month);
             }
             public string IdName
             {
