@@ -10,6 +10,17 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
 {
     public class PricingRuleSystem : IRuleSystemCodeBehind<PricingContext>
     {
+        private readonly IFramework _framework;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public PricingRuleSystem(IFramework framework)
+        {
+            _framework = framework;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Implementation of IRuleSystemCodeBehind<PricingContext>
 
         public void BuildRuleSystem(RuleSystemBuilder<PricingContext> builder)
@@ -21,12 +32,53 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
             // (1) all this (context+variables+functions+actions) builds RuleSystemDescription
             // (2) RuleSystemDescription + RuleSystemData = CompiledRuleSystem
             // (3) CompiledRuleSystem.Run(context)
+
+            // CUSTOMER BIRTHDAY - VARIANT 1
+            builder.AddVariable(context => context.Customer.Birthday == _framework.UtcNow.Date, "IsCustomerBirthday", "True if today is customer's birthday, False otherwise.");
+
+            // CUSTOMER BIRTHDAY - VARIANT 2
+            builder.AddVariable(new IsCustomerBirthdayToday(_framework));
+
+            // CUSTOMER BIRTHDAY - VARIANT 3
+            builder.AddVariable(new RuleVariable<PricingContext, bool>(
+                context => context.Customer.Birthday == _framework.UtcNow.Date, 
+                "IsCustomerBirthday", 
+                "True if today is customer's birthday, False otherwise."));
         }
 
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public class IsCustomerBirthdayToday : IRuleVariable<PricingContext, bool>
+        {
+            private readonly IFramework _framework;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IsCustomerBirthdayToday(IFramework framework)
+            {
+                _framework = framework;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool GetValue(PricingContext context)
+            {
+                return (context.Customer.Birthday == _framework.UtcNow.Date);
+            }
+            public string IdName
+            {
+                get { return "IsCustomerBirthday"; }
+            }
+            public string Description
+            {
+                get { return "True if today is customer's birthday, False otherwise."; }
+            }
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class AddPriceLineAction : RuleActionBase<PricingContext, Money, string>
         {

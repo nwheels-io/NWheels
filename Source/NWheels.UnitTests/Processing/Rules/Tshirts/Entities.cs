@@ -9,6 +9,12 @@ using NWheels.Entities;
 namespace NWheels.UnitTests.Processing.Rules.Tshirts
 {
     [EntityContract]
+    public interface ICustomerEntity //: IPersonEntity
+    {
+        [PropertyContract.Semantic.Date]
+        DateTime Birthday { get; set; }
+    }
+    [EntityContract]
     public interface ITshirtEntity
     {
         [PropertyContract.Required, PropertyContract.Relation.ManyToOne]

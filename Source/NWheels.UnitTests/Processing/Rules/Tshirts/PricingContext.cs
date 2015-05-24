@@ -14,8 +14,9 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
 
     public class PricingContext : ICollectionRuleSystemContext<ITshirtEntity>
     {
-        public PricingContext(params ITshirtEntity[] products)
+        public PricingContext(ICustomerEntity customer, params ITshirtEntity[] products)
         {
+            this.Customer = customer;
             this.Products = products.ToList();
             this.PriceLines = new List<PriceLine>();
         }
@@ -37,6 +38,10 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ITshirtEntity Current { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ICustomerEntity Customer { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
