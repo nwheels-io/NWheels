@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace NWheels.Processing.Rules.Core
@@ -12,6 +13,15 @@ namespace NWheels.Processing.Rules.Core
 
     public class RuleSystemBuilder<TContext> : RuleSystemBuilder
     {
+        private readonly RuleSystemDescription _desciption = new RuleSystemDescription();
+        private readonly Dictionary<string, IRuleDomainObject> _domainObjectsByIdName = new Dictionary<string, IRuleDomainObject>();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void AddAllContextPropertiesAsVariables()
         {
         }
@@ -32,6 +42,15 @@ namespace NWheels.Processing.Rules.Core
 
         public void AddVariable<TValue>(Func<TContext, TValue> variable, string idName, string description)
         {
+            var runtimeVariable = new RuleVariable<TContext, TValue>(onGetValue: variable, idName: idName, description: description);
+            var metaVariable = new RuleSystemDescription.DomainVariable {
+                IdName = idName,
+                Description = description,
+                ValueType = RuleSystemDescription.TypeDescription.Of<TValue>()
+            };
+            
+            _desciption.Domain.Variables.Add(metaVariable);
+            _domainObjectsByIdName.Add(idName, runtimeVariable);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -174,6 +193,13 @@ namespace NWheels.Processing.Rules.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override RuleSystemDescription GetDescription(bool includeDomain = true, bool includeRules = true)
+        {
+            return _desciption;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public CompiledRuleSystem<TContext> CompileRuleSystem(RuleSystemData rules)
         {
             throw new NotImplementedException();
         }

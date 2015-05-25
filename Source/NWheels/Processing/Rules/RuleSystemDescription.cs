@@ -50,8 +50,6 @@ namespace NWheels.Processing.Rules
             public string IdName { get; set; }
             [DataMember]
             public string Description { get; set; }
-            [DataMember]
-            public TypeDescription ClassType { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
