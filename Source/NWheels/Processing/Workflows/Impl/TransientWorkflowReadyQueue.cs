@@ -8,7 +8,7 @@ using NWheels.Processing.Workflows.Core;
 
 namespace NWheels.Processing.Workflows.Impl
 {
-    internal class TransientWorkflowReadyQueue : LifecycleEventListenerBase, IWorkflowReadyQueue
+    public class TransientWorkflowReadyQueue : LifecycleEventListenerBase, IWorkflowReadyQueue
     {
         private readonly IComponentContext _components;
         private readonly ILogger _logger;

@@ -32,6 +32,7 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [EntityContract]
         public interface IInstanceEntity : IWorkflowInstanceEntity
         {
         }

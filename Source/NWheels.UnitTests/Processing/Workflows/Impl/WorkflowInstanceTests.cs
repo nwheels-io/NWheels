@@ -14,7 +14,7 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
     [TestFixture]
     public class WorkflowInstanceTests : UnitTestBase
     {
-        [Test]
+        [Test, Ignore("WIP")]
         public void CanRunSingleActorWorkflow()
         {
             //-- arrange

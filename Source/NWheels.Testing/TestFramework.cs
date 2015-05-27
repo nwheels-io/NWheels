@@ -33,6 +33,7 @@ namespace NWheels.Testing
         private readonly TestThreadLogAppender _logAppender;
         private readonly LoggerObjectFactory _loggerFactory;
         private readonly ConfigurationObjectFactory _configurationFactory;
+        private readonly TestDataRepositoryFactory _dataRepositoryFactory;
         private readonly TypeMetadataCache _metadataCache;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -64,6 +65,7 @@ namespace NWheels.Testing
 
             _components = BuildComponentContainer();
             _configurationFactory = _components.Resolve<ConfigurationObjectFactory>();
+            _dataRepositoryFactory = _components.Resolve<TestDataRepositoryFactory>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -71,7 +73,7 @@ namespace NWheels.Testing
         public TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, IsolationLevel? isolationLevel = null) 
             where TRepository : class, IApplicationDataRepository
         {
-            throw new NotImplementedException();
+            return _dataRepositoryFactory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -236,7 +238,9 @@ namespace NWheels.Testing
             builder.RegisterGeneric(typeof(Auto<>)).SingleInstance();
             builder.RegisterInstance(_metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();
             builder.RegisterInstance(_loggerFactory).As<LoggerObjectFactory, IAutoObjectFactory>();
-            builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory, IConfigurationObjectFactory, ConfigurationObjectFactory>();
+            builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory, IConfigurationObjectFactory, ConfigurationObjectFactory>().SingleInstance();
+            builder.RegisterType<EntityObjectFactory>().SingleInstance();
+            builder.RegisterType<TestDataRepositoryFactory>().As<TestDataRepositoryFactory, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
             
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();

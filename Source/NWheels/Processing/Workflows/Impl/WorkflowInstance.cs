@@ -45,7 +45,6 @@ namespace NWheels.Processing.Workflows.Impl
                 .OnTrigger(WorkflowProcessorTrigger.Resume).TransitionTo(WorkflowProcessorState.Resuming);
 
             machine.State(WorkflowProcessorState.Initializing)
-                .SetAsInitial()
                 .OnEntered(OnProcessorInitializing)
                 .OnTrigger(WorkflowProcessorTrigger.Success).TransitionTo(WorkflowProcessorState.Starting)
                 .OnTrigger(WorkflowProcessorTrigger.Failure).TransitionTo(WorkflowProcessorState.FailedTerminated);

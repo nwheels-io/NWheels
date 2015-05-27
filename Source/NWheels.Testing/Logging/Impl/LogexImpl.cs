@@ -518,5 +518,31 @@ namespace NWheels.Testing.Logging.Impl
                 return " is anything";
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class NoneToEndTemplate : ILogexTemplate
+        {
+            public LogexSegment[] CreateSegments(ILogexNodeMatcher matcher)
+            {
+                return new[] {
+                    new LogexSegment(new OperatorNotNodeMatcher(matcher), new RangeOfTimesMultiplier(0, Int32.MaxValue, "to end of log")),
+                    new LogexSegment(new EndOfLogMatcher(), new RangeOfTimesMultiplier(1, 1, "once"))
+                };
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class AllToEndTemplate : ILogexTemplate
+        {
+            public LogexSegment[] CreateSegments(ILogexNodeMatcher matcher)
+            {
+                return new[] {
+                    new LogexSegment(matcher, new RangeOfTimesMultiplier(0, Int32.MaxValue, "to end of log")),
+                    new LogexSegment(new EndOfLogMatcher(), new RangeOfTimesMultiplier(1, 1, "once"))
+                };
+            }
+        }
     }
 }

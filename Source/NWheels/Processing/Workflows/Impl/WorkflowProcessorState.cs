@@ -4,7 +4,7 @@ using NWheels.Processing.Workflows.Core;
 
 namespace NWheels.Processing.Workflows.Impl
 {
-    internal enum WorkflowProcessorState
+    public enum WorkflowProcessorState
     {
         Created = WorkflowState.Created,
         Initializing,
@@ -22,7 +22,7 @@ namespace NWheels.Processing.Workflows.Impl
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    internal enum WorkflowProcessorTrigger
+    public enum WorkflowProcessorTrigger
     {
         Run,
         Resume,
