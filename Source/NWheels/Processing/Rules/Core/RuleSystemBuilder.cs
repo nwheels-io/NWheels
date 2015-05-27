@@ -14,6 +14,8 @@ namespace NWheels.Processing.Rules.Core
     public class RuleSystemBuilder<TContext> : RuleSystemBuilder
     {
         private readonly RuleSystemDescription _desciption = new RuleSystemDescription();
+		private readonly CompiledRuleSystem<TContext> _compiledRuleSystem =new CompiledRuleSystem<TContext>();
+
         private readonly Dictionary<string, IRuleDomainObject> _domainObjectsByIdName = new Dictionary<string, IRuleDomainObject>();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -43,26 +45,33 @@ namespace NWheels.Processing.Rules.Core
         public void AddVariable<TValue>(Func<TContext, TValue> variable, string idName, string description)
         {
             var runtimeVariable = new RuleVariable<TContext, TValue>(onGetValue: variable, idName: idName, description: description);
-            var metaVariable = new RuleSystemDescription.DomainVariable {
-                IdName = idName,
-                Description = description,
-                ValueType = RuleSystemDescription.TypeDescription.Of<TValue>()
-            };
-            
-            _desciption.Domain.Variables.Add(metaVariable);
-            _domainObjectsByIdName.Add(idName, runtimeVariable);
+	        AddVariable<TValue>(runtimeVariable);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AddVariable<TValue>(IRuleVariable<TContext, TValue> variable)
         {
+			var metaVariable = new RuleSystemDescription.DomainVariable {
+				IdName = variable.IdName ,
+				Description = variable.Description,
+				ValueType = RuleSystemDescription.TypeDescription.Of<TValue>()
+			};
+			_desciption.Domain.Variables.Add(metaVariable);
+			_compiledRuleSystem.Variables.Add(variable);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AddFunction(IRuleFunction function)
         {
+	        var metaFunction = new RuleSystemDescription.DomainFunction {
+		        Description = function.Description,
+		        IdName = function.Description,
+		        ValueType = RuleSystemDescription.TypeDescription.Of(function.GetType()),
+				Parameters = null
+	        };
+			
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -201,7 +210,7 @@ namespace NWheels.Processing.Rules.Core
 
         public CompiledRuleSystem<TContext> CompileRuleSystem(RuleSystemData rules)
         {
-            throw new NotImplementedException();
+            return _compiledRuleSystem;
         }
     }
 }

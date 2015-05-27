@@ -19,20 +19,32 @@ namespace NWheels.Processing.Rules
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [DataContract(Namespace = DataContractNamespace)]
-        public class DomainDescription
-        {
-            [DataMember]
-            public IList<DomainVariable> Variables { get; set; }
-            [DataMember]
-            public IList<DomainFunction> Functions { get; set; }
-            [DataMember]
-            public IList<DomainAction> Actions { get; set; }
-            [DataMember]
-            public IList<DomainMetaRule> MetaRules { get; set; }
-        }
+	    [DataContract(Namespace = DataContractNamespace)]
+	    public class DomainDescription
+	    {
+		    public DomainDescription()
+		    {
+			    this.Variables = new List<DomainVariable>();
+			    this.Functions = new List<DomainFunction>();
+			    this.Actions = new List<DomainAction>();
+		    }
+				
+			//----------------------------------------------------------------------------------------------------------------------
+	
+		    [DataMember]
+		    public IList<DomainVariable> Variables { get; private set; }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+		    [DataMember]
+		    public IList<DomainFunction> Functions { get; private set; }
+
+		    [DataMember]
+		    public IList<DomainAction> Actions { get; private set; }
+
+		    [DataMember]
+		    public IList<DomainMetaRule> MetaRules { get; set; }
+	    }
+
+	    //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataContract(Namespace = DataContractNamespace)]
         public class RuleCollection

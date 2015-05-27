@@ -252,6 +252,7 @@
     <Compile Include="Logging\ThreadLogSnapshot.cs" />
     <Compile Include="Logging\ThreadTaskType.cs" />
     <Compile Include="Money.cs" />
+    <Compile Include="Processing\Rules\Core\RuleFunction.cs" />
     <Compile Include="Processing\Rules\Core\RuleVariable.cs" />
     <Compile Include="Processing\Workflows\AbstractWorkflow.cs" />
     <Compile Include="Processing\Jobs\ApplicationJobBase.cs" />
