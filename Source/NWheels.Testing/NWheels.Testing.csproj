@@ -62,9 +62,14 @@
   <ItemGroup>
     <Compile Include="CoreUnitTestBase.cs" />
     <Compile Include="DataObjects\Jsonlike.cs" />
-    <Compile Include="Entity\Puzzle\CrudOperations.cs" />
-    <Compile Include="Entity\Puzzle\Interfaces.cs" />
-    <Compile Include="Entity\TestEntityRepository.cs" />
+    <Compile Include="DynamicTypeUnitTestBase.cs" />
+    <Compile Include="Entities\Impl\TestDataRepositoryBase.cs" />
+    <Compile Include="Entities\Impl\TestDataRepositoryFactory.cs" />
+    <Compile Include="Entities\Impl\TestIdMetadataConvention.cs" />
+    <Compile Include="Entities\Impl\TestIntIdValueGenerator.cs" />
+    <Compile Include="Entities\Puzzle\CrudOperations.cs" />
+    <Compile Include="Entities\Puzzle\Interfaces.cs" />
+    <Compile Include="Entities\TestEntityRepository.cs" />
     <Compile Include="LogAssert.cs" />
     <Compile Include="Logex.cs" />
     <Compile Include="Logging\Core\ILogexMultiplier.cs" />

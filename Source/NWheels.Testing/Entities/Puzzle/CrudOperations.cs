@@ -2,7 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 
-namespace NWheels.Testing.Entity.Puzzle
+namespace NWheels.Testing.Entities.Puzzle
 {
     public static class CrudOperations
     {

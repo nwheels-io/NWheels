@@ -45,7 +45,7 @@ namespace NWheels.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IWorkflowInstance StartWorkflow<TCodeBehind, TDataEntity>(TDataEntity initialData)
+        public IWorkflowInstanceInfo StartWorkflow<TCodeBehind, TDataEntity>(TDataEntity initialData)
             where TCodeBehind : class, IWorkflowCodeBehind
             where TDataEntity : class, IWorkflowInstanceEntity
         {
@@ -54,7 +54,7 @@ namespace NWheels.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IWorkflowInstance StartWorkflow(Type codeBehindType, IWorkflowInstanceEntity initialData)
+        public IWorkflowInstanceInfo StartWorkflow(Type codeBehindType, IWorkflowInstanceEntity initialData)
         {
             var registration = FindWorkflowTypeRegistration(codeBehindType);
             var context = WorkflowInstanceContext.CreateNew(this, registration, initialData);
@@ -112,7 +112,7 @@ namespace NWheels.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool TryGetWorkflow(Guid instanceId, out IWorkflowInstance instance)
+        public bool TryGetWorkflow(Guid instanceId, out IWorkflowInstanceInfo instance)
         {
             using ( _instancesLock.AcquireReadAccess("TryGetWorkflow", holdDurationMs: 1) )
             {
@@ -133,11 +133,11 @@ namespace NWheels.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IWorkflowInstance[] GetCurrentWorkflows()
+        public IWorkflowInstanceInfo[] GetCurrentWorkflows()
         {
             using ( _instancesLock.AcquireReadAccess("TryGetWorkflow", holdDurationMs: 1) )
             {
-                return _instanceContextsById.Values.Cast<IWorkflowInstance>().ToArray();
+                return _instanceContextsById.Values.Cast<IWorkflowInstanceInfo>().ToArray();
             }
         }
 
@@ -145,7 +145,7 @@ namespace NWheels.Processing.Workflows.Impl
 
         IWorkflowInstanceController IWorkflowInstanceContainer.GetInstanceById(Guid instanceId)
         {
-            IWorkflowInstance instance;
+            IWorkflowInstanceInfo instance;
 
             if ( !TryGetWorkflow(instanceId, out instance) )
             {
@@ -231,7 +231,7 @@ namespace NWheels.Processing.Workflows.Impl
         ///     Thus, Run() and DispatchAndRun() need no synchronization between them.
         ///     The rest of the operations are read-only, but can be invoked simultaneously by multiple threads. 
         /// </summary>
-        private class WorkflowInstanceContext : IWorkflowInstanceContext, IWorkflowInstance, IWorkflowInstanceController
+        private class WorkflowInstanceContext : IWorkflowInstanceContext, IWorkflowInstanceInfo, IWorkflowInstanceController
         {
             private readonly WorkflowEngine _ownerEngine;
             private readonly WorkflowTypeRegistration _registration;
@@ -292,56 +292,56 @@ namespace NWheels.Processing.Workflows.Impl
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            WorkflowState IWorkflowInstance.State
+            WorkflowState IWorkflowInstanceInfo.State
             {
                 get { return _instanceData.WorkflowState; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            DateTime IWorkflowInstance.CreatedAtUtc
+            DateTime IWorkflowInstanceInfo.CreatedAtUtc
             {
                 get { return _instanceData.CreatedAtUtc; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            DateTime IWorkflowInstance.StateChangedAtUtc
+            DateTime IWorkflowInstanceInfo.StateChangedAtUtc
             {
                 get { return _instanceData.UpdatedAtUtc; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            Type IWorkflowInstance.CodeBehindType
+            Type IWorkflowInstanceInfo.CodeBehindType
             {
                 get { return _registration.CodeBehindType; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            TimeSpan IWorkflowInstance.TotalTime
+            TimeSpan IWorkflowInstanceInfo.TotalTime
             {
                 get { return _instanceData.TotalTime; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            TimeSpan IWorkflowInstance.TotalExecutionTime
+            TimeSpan IWorkflowInstanceInfo.TotalExecutionTime
             {
                 get { return _instanceData.TotalExecutionTime; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            TimeSpan IWorkflowInstance.TotalSuspensionTime
+            TimeSpan IWorkflowInstanceInfo.TotalSuspensionTime
             {
                 get { return _instanceData.TotalSuspensionTime; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            int IWorkflowInstance.TotalSuspensionCount
+            int IWorkflowInstanceInfo.TotalSuspensionCount
             {
                 get { return _instanceData.TotalSuspensionCount; }
             }
@@ -364,7 +364,7 @@ namespace NWheels.Processing.Workflows.Impl
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            IWorkflowInstance IWorkflowInstanceController.InstanceContext
+            IWorkflowInstanceInfo IWorkflowInstanceController.InstanceContext
             {
                 get
                 {

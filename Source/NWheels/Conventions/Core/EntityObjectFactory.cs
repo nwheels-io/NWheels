@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using Hapil;
 using Hapil.Members;
 using Hapil.Operands;
@@ -11,19 +12,22 @@ using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
+using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Conventions.Core
 {
     public class EntityObjectFactory : ConventionObjectFactory
     {
+        private readonly IComponentContext _components;
         private readonly TypeMetadataCache _metadataCache;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EntityObjectFactory(DynamicModule module, TypeMetadataCache metadataCache)
+        public EntityObjectFactory(IComponentContext components, DynamicModule module, TypeMetadataCache metadataCache)
             : base(module, context => new[] { new EntityObjectConvention(metadataCache) })
         {
+            _components = components;
             _metadataCache = metadataCache;
         }
 
@@ -31,7 +35,7 @@ namespace NWheels.Conventions.Core
         
         public TEntityContract NewEntity<TEntityContract>() where TEntityContract : class
         {
-            return CreateInstanceOf<TEntityContract>().UsingDefaultConstructor();
+            return CreateInstanceOf<TEntityContract>().UsingConstructor<IComponentContext>(_components, constructorIndex: 1);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -56,6 +60,8 @@ namespace NWheels.Conventions.Core
         {
             private readonly TypeMetadataCache _metadataCache;
             private readonly List<Action<ConstructorWriter>> _initializers;
+            private readonly List<Action<ConstructorWriter>> _newEntityInitializers;
+            private readonly Dictionary<Type, Dependency> _dependencies;
             private ITypeMetadata _entityMetadata;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,6 +71,8 @@ namespace NWheels.Conventions.Core
             {
                 _metadataCache = metadataCache;
                 _initializers = new List<Action<ConstructorWriter>>();
+                _newEntityInitializers = new List<Action<ConstructorWriter>>();
+                _dependencies = new Dictionary<Type, Dependency>();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -91,8 +99,30 @@ namespace NWheels.Conventions.Core
 
             protected override void OnFinalizeImplementation(ImplementationClassWriter<TypeTemplate.TBase> writer)
             {
-                AddDefaultValueInitializers(writer);
-                writer.Constructor(cw => _initializers.ForEach(init => init(cw)));
+                AddPropertyValueInitializers(writer);
+
+                ImplementDefaultConstructor(writer);
+                ImplementNewEntityConstructor(writer);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementDefaultConstructor(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            {
+                writer.Constructor(cw => {
+                    _initializers.ForEach(init => init(cw));
+                });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementNewEntityConstructor(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            {
+                writer.Constructor<IComponentContext>((cw, components) => {
+                    cw.This();
+                    _dependencies.Values.ForEach(dependency => dependency.WriteResolveStatement(cw, components));
+                    _newEntityInitializers.ForEach(init => init(cw));
+                });
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -173,26 +203,63 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void AddDefaultValueInitializers(ImplementationClassWriter<TT.TBase> writer)
+            private void AddPropertyValueInitializers(ImplementationClassWriter<TT.TBase> writer)
             {
                 foreach ( var property in _entityMetadata.Properties.Where(IsScalarProperty).Cast<PropertyMetadataBuilder>() )
                 {
                     if ( property.DefaultValue != null )
                     {
-                        _initializers.Add(cw => {
-                            using ( TT.CreateScope<TT.TProperty>(property.ClrType) )
-                            {
-                                IOperand<TT.TProperty> defaultValue;
-
-                                if ( property.TryGetDefaultValueOperand(cw, out defaultValue) )
-                                {
-                                    var backingField = writer.OwnerClass.GetPropertyBackingField(property.ContractPropertyInfo).AsOperand<TT.TProperty>();
-                                    backingField.Assign(defaultValue);
-                                }
-                            }
-                        });
+                        AddDefaultValueInitializer(writer, property);
+                    }
+                    else if ( property.DefaultValueGeneratorType != null )
+                    {
+                        AddGeneratedValueInitializer(writer, property);
                     }
                 }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void AddDefaultValueInitializer(ImplementationClassWriter<TypeTemplate.TBase> writer, PropertyMetadataBuilder property)
+            {
+                _newEntityInitializers.Add(cw => {
+                    using ( TT.CreateScope<TT.TProperty>(property.ClrType) )
+                    {
+                        IOperand<TT.TProperty> defaultValue;
+
+                        if ( property.TryGetDefaultValueOperand(cw, out defaultValue) )
+                        {
+                            var backingField = writer.OwnerClass.GetPropertyBackingField(property.ContractPropertyInfo).AsOperand<TT.TProperty>();
+                            backingField.Assign(defaultValue);
+                        }
+                    }
+                });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void AddGeneratedValueInitializer(ImplementationClassWriter<TypeTemplate.TBase> writer, PropertyMetadataBuilder property)
+            {
+                var dependency = GetOrAddConstructorDependencyLocal(property.DefaultValueGeneratorType);
+
+                _newEntityInitializers.Add(cw => {
+                    using ( TT.CreateScope<TT.TProperty>(property.ClrType) )
+                    {
+                        var backingField = writer.OwnerClass.GetPropertyBackingField(property.ContractPropertyInfo).AsOperand<TT.TProperty>();
+                        backingField.Assign(dependency.ResolvedLocal
+                            .CastTo<IPropertyValueGenerator<TT.TProperty>>()
+                            .Func<string, TT.TProperty>(x => x.GenerateValue, cw.Const(property.ContractQualifiedName)));
+                    }
+                });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private Dependency GetOrAddConstructorDependencyLocal(Type dependencyType)
+            {
+                return _dependencies.GetOrAdd(
+                    dependencyType, 
+                    key => new Dependency(dependencyType));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -230,6 +297,32 @@ namespace NWheels.Conventions.Core
             {
                 return EntityContractAttribute.IsEntityContract(type);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class Dependency
+        {
+            public Dependency(Type type)
+            {
+                this.Type = type;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void WriteResolveStatement(MethodWriterBase method, Argument<IComponentContext> components)
+            {
+                using ( TT.CreateScope<TT.TDependency>(Type) )
+                {
+                    ResolvedLocal = method.Local<TT.TDependency>();
+                    ResolvedLocal.Assign(Static.Func(ResolutionExtensions.Resolve<TT.TDependency>, components));
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type Type { get; private set; }
+            public Local<TT.TDependency> ResolvedLocal { get; private set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

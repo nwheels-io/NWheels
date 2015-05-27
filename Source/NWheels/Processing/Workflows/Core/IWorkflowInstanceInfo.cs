@@ -2,7 +2,7 @@
 
 namespace NWheels.Processing.Workflows.Core
 {
-    public interface IWorkflowInstance
+    public interface IWorkflowInstanceInfo
     {
         Guid InstanceId { get; }
         WorkflowState State { get; }

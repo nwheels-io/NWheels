@@ -52,6 +52,18 @@ namespace NWheels.DataObjects
             public object Value { get; private set; }
         }
 
+        public class AutoGenerateAttribute : PropertyContractAttribute
+        {
+            public AutoGenerateAttribute(Type valueGeneratorType)
+            {
+                this.ValueGeneratorType = valueGeneratorType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type ValueGeneratorType { get; private set; }
+        }
+
         public static class Semantic
         {
             public class DataTypeAttribute : PropertyContractAttribute

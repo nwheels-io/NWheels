@@ -1,11 +1,11 @@
-﻿using NWheels.Testing.Entity.Puzzle;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects.Core;
-using IR1 = NWheels.Testing.Entity.Puzzle.Interfaces.Repository1;
+using NWheels.Testing.Entities.Puzzle;
+using IR1 = NWheels.Testing.Entities.Puzzle.Interfaces.Repository1;
 
 namespace NWheels.Puzzle.MongoDb.ComponentTests
 {

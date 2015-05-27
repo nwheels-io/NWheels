@@ -8,7 +8,7 @@ using ProtoBuf;
 namespace NWheels.Processing.Workflows.Impl
 {
     internal class WorkflowInstance : 
-        IWorkflowInstance, 
+        IWorkflowInstanceInfo, 
         IWorkflowProcessorContext,
         IWorkflowInitializer,
         IStateMachineCodeBehind<WorkflowProcessorState, WorkflowProcessorTrigger>
@@ -107,7 +107,7 @@ namespace NWheels.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IWorkflowInstance IWorkflowProcessorContext.WorkflowInstance
+        IWorkflowInstanceInfo IWorkflowProcessorContext.WorkflowInstance
         {
             get { return this; }
         }

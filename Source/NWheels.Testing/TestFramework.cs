@@ -22,6 +22,7 @@ using NWheels.DataObjects.Core.Conventions;
 using NWheels.Endpoints;
 using NWheels.Entities.Core;
 using NWheels.Logging.Core;
+using NWheels.Testing.Entities.Impl;
 
 namespace NWheels.Testing
 {
@@ -37,7 +38,7 @@ namespace NWheels.Testing
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TestFramework()
-            : this(s_DefaultDynamicModule)
+            : this(_s_defaultDynamicModule)
         {
         }
 
@@ -68,7 +69,7 @@ namespace NWheels.Testing
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, IsolationLevel? isolationLevel = null) 
-            where TRepository : class, Entities.IApplicationDataRepository
+            where TRepository : class, IApplicationDataRepository
         {
             throw new NotImplementedException();
         }
@@ -236,18 +237,20 @@ namespace NWheels.Testing
             builder.RegisterInstance(_metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();
             builder.RegisterInstance(_loggerFactory).As<LoggerObjectFactory, IAutoObjectFactory>();
             builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory, IConfigurationObjectFactory, ConfigurationObjectFactory>();
+            builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
             
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkDatabaseConfig>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkLoggingConfiguration>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkEndpointsConfig>();
+            builder.NWheelsFeatures().Entities().UseDefaultIdsOfType<int>();
 
             return builder.Build();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static readonly DynamicModule s_DefaultDynamicModule = new DynamicModule(
+        private static readonly DynamicModule _s_defaultDynamicModule = new DynamicModule(
             simpleName: "UnitTestDynamicTypes." + Guid.NewGuid().ToString("N"),
             allowSave: false);
 
@@ -256,8 +259,15 @@ namespace NWheels.Testing
         public static TypeMetadataCache CreateMetadataCacheWithDefaultConventions(params MixinRegistration[] mixinRegistrations)
         {
             var conventions = new MetadataConventionSet(
-                new IMetadataConvention[] { new ContractMetadataConvention(), new AttributeMetadataConvention(), new RelationMetadataConvention() },
-                new IRelationalMappingConvention[] { new PascalCaseRelationalMappingConvention(usePluralTableNames: true) });
+                new IMetadataConvention[] {
+                    new ContractMetadataConvention(), 
+                    new AttributeMetadataConvention(), 
+                    new RelationMetadataConvention(), 
+                    new TestIdMetadataConvention()
+                },
+                new IRelationalMappingConvention[] {
+                    new PascalCaseRelationalMappingConvention(usePluralTableNames: true)
+                });
 
             return new TypeMetadataCache(conventions, mixinRegistrations, concretizationRegistrations: new ConcretizationRegistration[0]);
         }

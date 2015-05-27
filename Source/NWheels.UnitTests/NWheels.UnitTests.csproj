@@ -73,6 +73,7 @@
     <Compile Include="DataObjects\TestDataObjects.cs" />
     <Compile Include="DataObjects\TypeMetadataBuilderConstructorTests.cs" />
     <Compile Include="DataObjects\TypeMetadataCacheTests.cs" />
+    <Compile Include="Extensions\TypeExtensionTests.cs" />
     <Compile Include="Hosting\AutofacRegistrationTests.cs" />
     <Compile Include="Logging\ApplicationEventLoggerConventionTests.cs" />
     <Compile Include="Logging\CallLoggingAspectFactoryTests.cs" />
@@ -85,6 +86,11 @@
     <Compile Include="Processing\Rules\Tshirts\Entities.cs" />
     <Compile Include="Processing\Rules\Tshirts\PricingContext.cs" />
     <Compile Include="Processing\Rules\Tshirts\PricingRuleSystem.cs" />
+    <Compile Include="Processing\Workflows\Impl\AwaitEventRequest.cs" />
+    <Compile Include="Processing\Workflows\Impl\InstanceTestEnvironment.cs" />
+    <Compile Include="Processing\Workflows\Impl\TestWorkflowInstanceInfo.cs" />
+    <Compile Include="Processing\Workflows\Impl\TestWorkflows.cs" />
+    <Compile Include="Processing\Workflows\Impl\WorkflowInstanceTests.cs" />
     <Compile Include="Processing\Workflows\Impl\WorkflowProcessorSnapshotTests.cs" />
     <Compile Include="Processing\Workflows\Impl\WorkflowProcessorTests.cs" />
     <Compile Include="Processing\Workflows\Impl\ProcessorTestEnvironment.cs" />
@@ -108,7 +114,9 @@
       <Name>NWheels</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="DataObjects\Conventions\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

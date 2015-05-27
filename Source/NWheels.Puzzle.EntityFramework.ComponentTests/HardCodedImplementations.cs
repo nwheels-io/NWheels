@@ -19,7 +19,7 @@ using NWheels.Puzzle.EntityFramework.Impl;
 using System.Data.Entity.ModelConfiguration;
 using System.Linq.Expressions;
 using NWheels.DataObjects;
-using NWheels.Testing.Entity.Puzzle;
+using NWheels.Testing.Entities.Puzzle;
 
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {

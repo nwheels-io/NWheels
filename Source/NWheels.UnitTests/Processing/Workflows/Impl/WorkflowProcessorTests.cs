@@ -153,7 +153,7 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             Assert.That(result, Is.EqualTo(ProcessorResult.Suspended));
             Assert.That(_log, Is.EqualTo(new[] { "A1.Execute(ABC)", "A1.Route()", "B1.Execute(ABC)" }));
             Assert.That(environment.AwaitEventRequests, Is.EqualTo(new[] {
-                new ProcessorTestEnvironment.AwaitEventRequest(typeof(TestEvent), DayOfWeek.Friday, TimeSpan.FromHours(1))
+                new AwaitEventRequest(typeof(TestEvent), DayOfWeek.Friday, TimeSpan.FromHours(1))
             }));
         }
 

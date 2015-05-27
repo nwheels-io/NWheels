@@ -1,57 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NWheels.Conventions.Core;
 using NWheels.Entities;
 
-namespace NWheels.Testing.Entity
+namespace NWheels.Testing.Entities
 {
     public class TestEntityRepository<TEntity> : IEntityRepository<TEntity>
+        where TEntity : class
     {
         private readonly EntityObjectFactory _objectFactory;
+        private readonly HashSet<TEntity> _storedEntities;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TestEntityRepository(EntityObjectFactory objectFactory)
         {
             _objectFactory = objectFactory;
+            _storedEntities = new HashSet<TEntity>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         TEntity IEntityRepository<TEntity>.New()
         {
-            throw new NotImplementedException();
+            return _objectFactory.NewEntity<TEntity>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         IQueryable<TEntity> IEntityRepository<TEntity>.Include(params System.Linq.Expressions.Expression<Func<TEntity, object>>[] properties)
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void IEntityRepository<TEntity>.Insert(TEntity entity)
         {
-            throw new NotImplementedException();
+            _storedEntities.Add(entity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void IEntityRepository<TEntity>.Update(TEntity entity)
         {
-            throw new NotImplementedException();
+            _storedEntities.Add(entity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void IEntityRepository<TEntity>.Delete(TEntity entity)
         {
-            throw new NotImplementedException();
+            _storedEntities.Remove(entity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,35 +66,35 @@ namespace NWheels.Testing.Entity
 
         IEnumerator<TEntity> IEnumerable<TEntity>.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return _storedEntities.GetEnumerator();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return _storedEntities.GetEnumerator();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         Type IQueryable.ElementType
         {
-            get { throw new NotImplementedException(); }
+            get { return _storedEntities.AsQueryable().ElementType; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         System.Linq.Expressions.Expression IQueryable.Expression
         {
-            get { throw new NotImplementedException(); }
+            get { return _storedEntities.AsQueryable().Expression; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         IQueryProvider IQueryable.Provider
         {
-            get { throw new NotImplementedException(); }
+            get { return _storedEntities.AsQueryable().Provider; }
         }
     }
 }

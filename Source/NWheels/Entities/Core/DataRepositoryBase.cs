@@ -79,6 +79,13 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected void ResetCurrentState(UnitOfWorkState newState)
+        {
+            _currentState = newState;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void ValidateState(params UnitOfWorkState[] allowedStates)
         {
             if ( !allowedStates.Contains(_currentState) )

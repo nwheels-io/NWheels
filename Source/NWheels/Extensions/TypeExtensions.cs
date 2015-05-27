@@ -19,5 +19,12 @@ namespace NWheels.Extensions
         {
             return string.Format("{0}, {1}", type.FullName, type.Assembly.GetName().Name);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool IsConstructedGenericTypeOf(this Type type, Type genericTypeDefinition)
+        {
+            return (type.IsConstructedGenericType && type.GetGenericTypeDefinition() == genericTypeDefinition);
+        }
     }
 }

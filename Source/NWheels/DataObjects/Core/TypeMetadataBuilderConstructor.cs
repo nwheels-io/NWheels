@@ -57,7 +57,7 @@ namespace NWheels.DataObjects.Core
         {
             foreach ( var propertyInfo in _allProperties )
             {
-                _thisType.Properties.Add(new PropertyMetadataBuilder(propertyInfo));
+                _thisType.Properties.Add(new PropertyMetadataBuilder(_thisType, propertyInfo));
             }
         }
 

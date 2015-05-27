@@ -103,6 +103,8 @@
     <Compile Include="Conventions\Core\EntityObjectFactory.cs" />
     <Compile Include="Entities\EntityState.cs" />
     <Compile Include="Entities\IEntityTrigger.cs" />
+    <Compile Include="Entities\Core\DefaultIdMetadataConvention.cs" />
+    <Compile Include="DataObjects\Core\IPropertyValueGenerator.cs" />
     <Compile Include="Entities\IEntityTriggerContext.cs" />
     <Compile Include="Globalization\Currency.cs" />
     <Compile Include="Globalization\CurrencyInfo.cs" />
@@ -309,7 +311,7 @@
     <Compile Include="Processing\Workflows\IWorkflowBuilder.cs" />
     <Compile Include="Processing\Workflows\IWorkflowCodeBehind.cs" />
     <Compile Include="Processing\Workflows\Core\IWorkflowEvent.cs" />
-    <Compile Include="Processing\Workflows\Core\IWorkflowInstance.cs" />
+    <Compile Include="Processing\Workflows\Core\IWorkflowInstanceInfo.cs" />
     <Compile Include="Processing\Workflows\Core\RevertableSequenceState.cs" />
     <Compile Include="Processing\Workflows\Core\WorkflowState.cs" />
     <Compile Include="Processing\Workflows\IWorkflowEngine.cs" />

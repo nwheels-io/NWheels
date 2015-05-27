@@ -7,7 +7,7 @@ namespace NWheels.Processing.Workflows.Impl
     {
         void AwaitEvent(Type eventType, object eventKey, TimeSpan timeout);
         Guid WorkflowInstanceId { get; }
-        IWorkflowInstance WorkflowInstance { get; }
+        IWorkflowInstanceInfo WorkflowInstance { get; }
         object InitialWorkItem { get; }
     }
 }

@@ -6,6 +6,6 @@ namespace NWheels.Processing.Workflows.Core
     {
         WorkflowState Run();
         WorkflowState DispatchAndRun(IEnumerable<IWorkflowEvent> receivedEvents);
-        IWorkflowInstance InstanceContext { get; }
+        IWorkflowInstanceInfo InstanceContext { get; }
     }
 }

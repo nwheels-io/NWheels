@@ -15,7 +15,7 @@ namespace NWheels.DataObjects
         Search = 0x04,
         ReadOnly = Read | Search,
         WriteOnly = Write,
-        ReadWrite = Read | Write,
+        ReadWrite = Read | Search | Write,
         SearchOnly = Search
     }
 }

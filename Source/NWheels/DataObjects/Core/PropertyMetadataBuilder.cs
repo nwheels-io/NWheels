@@ -21,11 +21,12 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public PropertyMetadataBuilder(PropertyInfo declaration) 
+        public PropertyMetadataBuilder(TypeMetadataBuilder declaringContract, PropertyInfo declaration) 
             : this()
         {
             this.Name = declaration.Name;
             this.ClrType = declaration.PropertyType;
+            this.DeclaringContract = declaringContract;
             this.ContractPropertyInfo = declaration;
         }
 
@@ -58,6 +59,7 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TypeMetadataBuilder DeclaringContract { get; set; }
         public string Name { get; set; }
         public PropertyKind Kind { get; set; }
         public PropertyRole Role { get; set; }
@@ -69,9 +71,17 @@ namespace NWheels.DataObjects.Core
         public System.Reflection.PropertyInfo ContractPropertyInfo { get; set; }
         public System.Reflection.PropertyInfo ImplementationPropertyInfo { get; set; }
         public object DefaultValue { get; set; }
+        public Type DefaultValueGeneratorType { get; set; }
         public string DefaultDisplayName { get; set; }
         public string DefaultDisplayFormat { get; set; }
         public bool DefaultSortAscending { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        ITypeMetadata IPropertyMetadata.DeclaringContract
+        {
+            get { return this.DeclaringContract; }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -111,9 +121,20 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string ContractQualifiedName
+        {
+            get
+            {
+                return (DeclaringContract.Name + "." + this.Name);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override void AcceptVisitor(IMetadataElementVisitor visitor)
         {
             Name = visitor.VisitAttribute("Name", Name);
+            DeclaringContract = visitor.VisitAttribute("DeclaringContract", DeclaringContract);
             Kind = visitor.VisitAttribute("Kind", Kind);
             Role = visitor.VisitAttribute("Role", Role);
             ClrType = visitor.VisitAttribute("ClrType", ClrType);
@@ -122,6 +143,7 @@ namespace NWheels.DataObjects.Core
             ContractAttributes = visitor.VisitAttribute("ContractAttributes", ContractAttributes);
             ContractPropertyInfo = visitor.VisitAttribute("ContractPropertyInfo", ContractPropertyInfo);
             ImplementationPropertyInfo = visitor.VisitAttribute("ImplementationPropertyInfo", ImplementationPropertyInfo);
+            DefaultValueGeneratorType = visitor.VisitAttribute("DefaultValueGeneratorType", DefaultValueGeneratorType);
             DefaultDisplayName = visitor.VisitAttribute("DefaultDisplayName", DefaultDisplayName);
             DefaultDisplayFormat = visitor.VisitAttribute("DefaultDisplayFormat", DefaultDisplayFormat);
             DefaultSortAscending = visitor.VisitAttribute("DefaultSortAscending", DefaultSortAscending);

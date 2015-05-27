@@ -156,6 +156,8 @@ namespace NWheels.DataObjects.Core.Conventions
                 prop.DefaultValue = attr.Value);
             AddPropertyAttribute<System.ComponentModel.DefaultValueAttribute>((attr, prop) =>
                 prop.DefaultValue = attr.Value);
+            AddPropertyAttribute<PropertyContract.AutoGenerateAttribute>((attr, prop) =>
+                prop.DefaultValueGeneratorType = attr.ValueGeneratorType);
             AddPropertyAttribute<PropertyContract.Semantic.DataTypeAttribute>((attr, prop) => 
                 prop.SemanticType = _cache.GetSemanticTypeInstance(attr.Type, prop.ClrType));
             AddPropertyAttribute<PropertyContract.Validation.FutureAttribute>((attr, prop) =>

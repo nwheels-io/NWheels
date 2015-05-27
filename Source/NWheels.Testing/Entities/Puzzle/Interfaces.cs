@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using NWheels.DataObjects;
 using NWheels.Entities;
-using IR3A = NWheels.Testing.Entity.Puzzle.Interfaces.Repository3A;
+using IR3A = NWheels.Testing.Entities.Puzzle.Interfaces.Repository3A;
 
-namespace NWheels.Testing.Entity.Puzzle
+namespace NWheels.Testing.Entities.Puzzle
 {
     public static class Interfaces
     {

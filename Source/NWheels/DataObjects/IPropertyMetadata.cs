@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using NWheels.DataObjects.Core;
 
 namespace NWheels.DataObjects
 {
@@ -8,7 +9,9 @@ namespace NWheels.DataObjects
     {
         bool HasContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute;
         TAttribute TryGetContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute;
+        ITypeMetadata DeclaringContract { get; }
         string Name { get; }
+        string ContractQualifiedName { get; }
         PropertyKind Kind { get; }
         PropertyRole Role { get; }
         Type ClrType { get; }
@@ -21,6 +24,7 @@ namespace NWheels.DataObjects
         IRelationMetadata Relation { get; }
         IPropertyValidationMetadata Validation { get; }
         object DefaultValue { get; }
+        Type DefaultValueGeneratorType { get; }
         string DefaultDisplayName { get; }
         string DefaultDisplayFormat { get; }
         bool DefaultSortAscending { get; }

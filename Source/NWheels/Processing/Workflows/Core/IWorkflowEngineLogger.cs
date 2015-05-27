@@ -29,5 +29,17 @@ namespace NWheels.Processing.Workflows.Core
 
         [LogActivity]
         ILogActivity RecoveringExistingInstances();
+
+        [LogActivity]
+        ILogActivity ProcessorRunning();
+
+        [LogDebug]
+        void ExecutingActor(string actorName);
+
+        [LogDebug]
+        void ExecutingRouter(string actorName);
+
+        [LogDebug]
+        void ExisingProcessorRun(ProcessorResult result);
     }
 }

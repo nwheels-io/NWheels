@@ -13,7 +13,7 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
         public ProcessorTestEnvironment(TestFramework framework)
         {
             this.ProcessorContext = new TestProcessorContext(this);
-            this.WorkflowInstance = new TestWorkflowInstance();
+            this.WorkflowInstanceInfo = new TestWorkflowInstanceInfo();
             this.ProcessorUnderTest = new WorkflowProcessor(framework, this.ProcessorContext);
             this.AwaitEventRequests = new List<AwaitEventRequest>();
         }
@@ -67,14 +67,13 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             return result;
         }
 
-
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TestProcessorContext ProcessorContext { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TestWorkflowInstance WorkflowInstance { get; private set; }
+        public TestWorkflowInstanceInfo WorkflowInstanceInfo { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -127,9 +126,9 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IWorkflowInstance WorkflowInstance
+            public IWorkflowInstanceInfo WorkflowInstance
             {
-                get { return _environment.WorkflowInstance; }
+                get { return _environment.WorkflowInstanceInfo; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -145,75 +144,6 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             {
                 get { return _environment.InitialWorkItem; }
             }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class TestWorkflowInstance : IWorkflowInstance
-        {
-            #region Implementation of IWorkflowInstance
-
-            public Guid InstanceId { get; set; }
-            public WorkflowState State { get; set; }
-            public DateTime CreatedAtUtc { get; set; }
-            public DateTime StateChangedAtUtc { get; set; }
-            public Type CodeBehindType { get; set; }
-            public TimeSpan TotalTime { get; set; }
-            public TimeSpan TotalExecutionTime { get; set; }
-            public TimeSpan TotalSuspensionTime { get; set; }
-            public int TotalSuspensionCount { get; set; }
-
-            #endregion
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class AwaitEventRequest
-        {
-            public AwaitEventRequest(Type eventType, object eventKey, TimeSpan timeout)
-            {
-                this.EventType = eventType;
-                this.EventKey = eventKey;
-                this.Timeout = timeout;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override bool Equals(object obj)
-            {
-                var other = obj as AwaitEventRequest;
-
-                if ( other != null )
-                {
-                    return this.ToString().Equals(other.ToString());
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override int GetHashCode()
-            {
-                return EventType.GetHashCode() ^ (EventKey != null ? EventKey.GetHashCode() : 0) ^ Timeout.GetHashCode();
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public override string ToString()
-            {
-                return string.Format(
-                    "{0}{1},{2}", 
-                    EventType.Name, EventKey != null ? "[" + EventKey + "]" : "", Timeout);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public Type EventType { get; private set; }
-            public object EventKey { get; private set; }
-            public TimeSpan Timeout { get; private set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

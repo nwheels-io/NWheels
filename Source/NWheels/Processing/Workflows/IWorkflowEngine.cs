@@ -6,13 +6,13 @@ namespace NWheels.Processing.Workflows
 {
     public interface IWorkflowEngine
     {
-        IWorkflowInstance StartWorkflow<TCodeBehind, TDataEntity>(TDataEntity initialData)
+        IWorkflowInstanceInfo StartWorkflow<TCodeBehind, TDataEntity>(TDataEntity initialData)
             where TDataEntity : class, IWorkflowInstanceEntity
             where TCodeBehind : class, IWorkflowCodeBehind;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IWorkflowInstance StartWorkflow(Type codeBehindType, IWorkflowInstanceEntity initialData);
+        IWorkflowInstanceInfo StartWorkflow(Type codeBehindType, IWorkflowInstanceEntity initialData);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -28,10 +28,10 @@ namespace NWheels.Processing.Workflows
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        bool TryGetWorkflow(Guid instanceId, out IWorkflowInstance instance);
+        bool TryGetWorkflow(Guid instanceId, out IWorkflowInstanceInfo instance);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        IWorkflowInstance[] GetCurrentWorkflows();
+        IWorkflowInstanceInfo[] GetCurrentWorkflows();
     }
 }

@@ -12,9 +12,12 @@ using NWheels.Configuration;
 using NWheels.Conventions;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
+using NWheels.DataObjects.Core.Conventions;
 using NWheels.Endpoints;
 using NWheels.Endpoints.Core.Wcf;
 using NWheels.Entities;
+using NWheels.Entities.Core;
 using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.UI;
@@ -366,6 +369,13 @@ namespace NWheels.Extensions
                 _builder.RegisterInstance(new RelationalMappingConventionDefault(
                     RelationalMappingConventionDefault.ConventionType.Underscore, 
                     usePluralTableNames));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void UseDefaultIdsOfType<TId>()
+            {
+                _builder.RegisterType<DefaultIdMetadataConvention>().WithParameter(TypedParameter.From(typeof(TId))).As<IMetadataConvention>().SingleInstance();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

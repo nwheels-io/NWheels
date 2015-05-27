@@ -8,8 +8,8 @@ using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using NUnit.Framework;
-using NWheels.Testing.Entity.Puzzle;
-using IR1 = NWheels.Testing.Entity.Puzzle.Interfaces.Repository1;
+using NWheels.Testing.Entities.Puzzle;
+using IR1 = NWheels.Testing.Entities.Puzzle.Interfaces.Repository1;
 
 namespace NWheels.Puzzle.MongoDb.ComponentTests
 {
