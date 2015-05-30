@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Autofac;
 using NWheels.Processing.Workflows.Core;
 using ProtoBuf;
 
@@ -18,6 +19,7 @@ namespace NWheels.Processing.Workflows.Impl
         private readonly WorkflowCodeBehindAdapter _codeBehindAdapter;
         private readonly IWorkflowInstanceEntity _instanceData;
         private readonly TransientStateMachine<WorkflowProcessorState, WorkflowProcessorTrigger> _processorStateMachine;
+        private readonly IWorkflowEngineLogger _logger;
         private IWorkflowCodeBehind _codeBehindInstance;
         private object _initialWorkItem;
         private IWorkflowEvent[] _receivedEvents;
@@ -32,6 +34,7 @@ namespace NWheels.Processing.Workflows.Impl
             _codeBehindAdapter = context.CodeBehindAdapter;
             _instanceData = context.InstanceData;
             _processorStateMachine = new TransientStateMachine<WorkflowProcessorState, WorkflowProcessorTrigger>(this, _context.Components);
+            _logger = _context.Components.Resolve<IWorkflowEngineLogger>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -116,6 +119,13 @@ namespace NWheels.Processing.Workflows.Impl
         object IWorkflowProcessorContext.InitialWorkItem
         {
             get { return _initialWorkItem; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IWorkflowEngineLogger IWorkflowProcessorContext.Logger
+        {
+            get { return _logger; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

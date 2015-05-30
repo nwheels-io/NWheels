@@ -16,6 +16,7 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             this.WorkflowInstanceInfo = new TestWorkflowInstanceInfo();
             this.ProcessorUnderTest = new WorkflowProcessor(framework, this.ProcessorContext);
             this.AwaitEventRequests = new List<AwaitEventRequest>();
+            this.Logger = framework.Logger<IWorkflowEngineLogger>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -89,6 +90,10 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IWorkflowEngineLogger Logger { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static ProcessorTestEnvironment Build(TestFramework framework, Action<ProcessorTestEnvironment> onBuild)
         {
             var environment = new ProcessorTestEnvironment(framework);
@@ -143,6 +148,13 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             public object InitialWorkItem
             {
                 get { return _environment.InitialWorkItem; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IWorkflowEngineLogger Logger
+            {
+                get { return _environment.Logger; }
             }
         }
 

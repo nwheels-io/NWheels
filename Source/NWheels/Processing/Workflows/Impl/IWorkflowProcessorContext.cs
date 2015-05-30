@@ -9,5 +9,6 @@ namespace NWheels.Processing.Workflows.Impl
         Guid WorkflowInstanceId { get; }
         IWorkflowInstanceInfo WorkflowInstance { get; }
         object InitialWorkItem { get; }
+        IWorkflowEngineLogger Logger { get; }
     }
 }

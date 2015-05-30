@@ -22,11 +22,42 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal static InstanceTestEnvironment<SingleEventAsyncWorkflow, IInstanceEntity> BuildSingleEventAsyncWorkflow(
+            TestFramework framework, 
+            IInstanceEntity existingInstanceData = null)
+        {
+            if ( existingInstanceData == null )
+            {
+                using ( var repo = framework.NewUnitOfWork<IInstanceRepository>() )
+                {
+                    return new InstanceTestEnvironment<SingleEventAsyncWorkflow, IInstanceEntity>(framework, repo.Workflows.New());
+                }
+            }
+            else
+            {
+                return new InstanceTestEnvironment<SingleEventAsyncWorkflow, IInstanceEntity>(framework, existingInstanceData);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class SingleActorWorkflow : IWorkflowCodeBehind
         {
             public void OnBuildWorkflow(IWorkflowBuilder builder)
             {
                 builder.AddActor("A1", 1, new EmptyActor(), new EmptyRouter());
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class SingleEventAsyncWorkflow : IWorkflowCodeBehind
+        {
+            public void OnBuildWorkflow(IWorkflowBuilder builder)
+            {
+                builder.AddActor("A1", 1, new EmptyActor(), new ConstantRouter(routeToActorName: "E1"), isInitial: true);
+                builder.AddActor("E1", 0, new EventOneActor("K1"), new ConstantRouter(routeToActorName: "B1"));
+                builder.AddActor("B1", 0, new EmptyActor(), new EmptyRouter());
             }
         }
 
@@ -50,6 +81,27 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
         {
             public void Execute(IWorkflowActorContext context, string workItem)
             {
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class EventOneActor : IWorkflowActor<string>
+        {
+            private readonly string _key;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public EventOneActor(string key)
+            {
+                _key = key;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Execute(IWorkflowActorContext context, string workItem)
+            {
+                context.AwaitEvent<EventOne, string>(_key, TimeSpan.FromMinutes(31));
             }
         }
 
@@ -81,6 +133,21 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             public void Route(IWorkflowRouterContext context)
             {
             }
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class EventOne : WorkflowEventBase<string>
+        {
+            public EventOne(string key, string data)
+                : base(key)
+            {
+                this.Data = data;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string Data { get; private set; }
         }
     }
 }

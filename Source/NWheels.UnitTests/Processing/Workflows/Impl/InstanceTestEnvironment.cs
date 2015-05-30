@@ -7,6 +7,7 @@ using Autofac;
 using Autofac.Core;
 using NWheels.Extensions;
 using NWheels.Processing.Workflows;
+using NWheels.Processing.Workflows.Core;
 using NWheels.Processing.Workflows.Impl;
 using NWheels.Testing;
 
@@ -22,6 +23,7 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             this.Components = Framework.Components;
 
             var updater = new ContainerBuilder();
+            updater.NWheelsFeatures().Logging().RegisterLogger<IWorkflowEngineLogger>();
             updater.RegisterType<TCodeBehind>();
             updater.Update(this.Components.ComponentRegistry);
 

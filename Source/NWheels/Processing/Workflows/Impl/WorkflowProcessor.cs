@@ -152,14 +152,20 @@ namespace NWheels.Processing.Workflows.Impl
 
         private ProcessorResult RunToSuspendOrCompletion()
         {
-            IActorSite nextActorToExecute;
-
-            while ( (nextActorToExecute = TryGetNextActorToExecute()) != null )
+            using ( _context.Logger.ProcessorRunning() )
             {
-                nextActorToExecute.ExecuteOneWorkItem();
-            }
+                IActorSite nextActorToExecute;
 
-            return (_awaitingActors.IsEmpty ? ProcessorResult.Completed : ProcessorResult.Suspended);
+                while ( (nextActorToExecute = TryGetNextActorToExecute()) != null )
+                {
+                    nextActorToExecute.ExecuteOneWorkItem();
+                }
+
+                var result = (_awaitingActors.IsEmpty ? ProcessorResult.Completed : ProcessorResult.Suspended);
+                
+                _context.Logger.ExitingProcessorRun(result);
+                return result;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -330,6 +336,8 @@ namespace NWheels.Processing.Workflows.Impl
 
             public void ExecuteOneWorkItem()
             {
+                _processor._context.Logger.ExecutingActor(_name);
+
                 var workItem = _workItems.Dequeue();
 
                 _lastWorkItem = workItem;
@@ -341,6 +349,7 @@ namespace NWheels.Processing.Workflows.Impl
 
                 if ( !_lastActorAsync )
                 {
+                    _processor._context.Logger.ExecutingRouter(_name);
                     _router.Route(this);
                 }
             }

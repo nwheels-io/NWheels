@@ -40,6 +40,6 @@ namespace NWheels.Processing.Workflows.Core
         void ExecutingRouter(string actorName);
 
         [LogDebug]
-        void ExisingProcessorRun(ProcessorResult result);
+        void ExitingProcessorRun(ProcessorResult result);
     }
 }
