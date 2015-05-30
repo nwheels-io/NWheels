@@ -472,6 +472,57 @@ namespace NWheels.Testing.UnitTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [TestCase("A1;A2/123;A2/456;A2/789", true, null)]
+        [TestCase("A1;A2/123;A2/456;A1", false, "[3] expected: 'end of log' but was: 'Debug|LogexTests.LoggerA.A1()'")]
+        [TestCase("A1;A2/123;A2/456;A1;B1", false, "[3] expected: 'end of log' but was: 'Debug|LogexTests.LoggerA.A1()'")]
+        public void TestLogex_AllToEnd(string input, bool expectedMatchResult, string expectedMismatchDescription)
+        {
+            //-- arrange
+
+            var log = LogTestHelper.ParseLogFromString(input, Framework);
+            var logex = Logex.Begin()
+                .One().Message<ILoggerA>(x => x.A1())
+                .AllToEnd().Message<ILoggerA>(x => x.A2(Logex.Any<int>()))
+                .End();
+
+            //-- act
+
+            string mismatchDescription;
+            var matchResult = logex.Match(log, out mismatchDescription);
+
+            //-- assert
+
+            Assert.That(matchResult, Is.EqualTo(expectedMatchResult));
+            Assert.That(mismatchDescription, Is.EqualTo(expectedMismatchDescription));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [TestCase("A2/123;B1;B2/456", true, null)]
+        [TestCase("A2/123;B1;A1", false, "[2] expected: 'end of log' but was: 'Debug|LogexTests.LoggerA.A1()'")]
+        [TestCase("A2/123;B1;A1;B2/456", false, "[2] expected: 'end of log' but was: 'Debug|LogexTests.LoggerA.A1()'")]
+        public void TestLogex_NoneToEnd(string input, bool expectedMatchResult, string expectedMismatchDescription)
+        {
+            //-- arrange
+
+            var log = LogTestHelper.ParseLogFromString(input, Framework);
+            var logex = Logex.Begin()
+                .NoneToEnd().Message<ILoggerA>(x => x.A1())
+                .End();
+
+            //-- act
+
+            string mismatchDescription;
+            var matchResult = logex.Match(log, out mismatchDescription);
+
+            //-- assert
+
+            Assert.That(matchResult, Is.EqualTo(expectedMatchResult));
+            Assert.That(mismatchDescription, Is.EqualTo(expectedMismatchDescription));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public interface ILogger : IApplicationEventLogger
         {
             [LogDebug]

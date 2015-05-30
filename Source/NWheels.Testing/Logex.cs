@@ -114,7 +114,7 @@ namespace NWheels.Testing
         {
             private readonly List<LogexSegment> _segments;
             private readonly Stack<List<ILogexNodeMatcher>> _nestedMatchers;
-            private ILogexMultiplier _multiplier;
+            private ILogexTemplate _template;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -122,7 +122,7 @@ namespace NWheels.Testing
             {
                 _segments = new List<LogexSegment>();
                 _nestedMatchers = new Stack<List<ILogexNodeMatcher>>();
-                _multiplier = null;
+                _template = null;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -207,14 +207,16 @@ namespace NWheels.Testing
 
             public Logex.ILogexMatchBuilder AllToEnd()
             {
-                throw new NotImplementedException();
+                _template = new LogexImpl.AllToEndTemplate();
+                return this;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public Logex.ILogexMatchBuilder NoneToEnd()
             {
-                throw new NotImplementedException();
+                _template = new LogexImpl.NoneToEndTemplate();
+                return this;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -365,12 +367,12 @@ namespace NWheels.Testing
 
             private void PushMultiplier(ILogexMultiplier multiplier)
             {
-                if ( _multiplier != null )
+                if ( _template != null )
                 {
                     throw new InvalidOperationException("Logex builder is expecting a matcher, but got multiplier.");
                 }
 
-                _multiplier = multiplier;
+                _template = new LogexImpl.SingleSegmentTemplate(multiplier);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -381,18 +383,17 @@ namespace NWheels.Testing
                 {
                     _nestedMatchers.Peek().Add(matcher);
                 }
-                else if ( _multiplier == null )
+                else if ( _template != null )
                 {
-                    throw new InvalidOperationException("Logex builder is expecting a multiplier, but got matcher.");
+                    _segments.AddRange(_template.CreateSegments(matcher));
                 }
                 else
                 {
-                    _segments.Add(new LogexSegment(matcher, _multiplier));
-                    _multiplier = null;
+                    throw new InvalidOperationException("Logex builder is expecting a multiplier, but got matcher.");
                 }
+
+                _template = null;
             }
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
     }
 }

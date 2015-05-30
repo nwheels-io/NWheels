@@ -521,6 +521,29 @@ namespace NWheels.Testing.Logging.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public class SingleSegmentTemplate : ILogexTemplate
+        {
+            private readonly ILogexMultiplier _multiplier;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public SingleSegmentTemplate(ILogexMultiplier multiplier)
+            {
+                _multiplier = multiplier;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public LogexSegment[] CreateSegments(ILogexNodeMatcher matcher)
+            {
+                return new[] {
+                    new LogexSegment(matcher, _multiplier)
+                };
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class NoneToEndTemplate : ILogexTemplate
         {
             public LogexSegment[] CreateSegments(ILogexNodeMatcher matcher)
