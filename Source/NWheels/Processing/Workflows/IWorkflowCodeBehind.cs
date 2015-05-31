@@ -26,7 +26,7 @@ namespace NWheels.Processing.Workflows
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IInitializableWorkflowCodeBehind<TDataEntity>
+    public interface IInitializableWorkflowCodeBehind<TDataEntity> : IWorkflowCodeBehind
         where TDataEntity : class, IWorkflowInstanceEntity
     {
         void OnInitialize(TDataEntity initialData, IWorkflowInitializer initializer);

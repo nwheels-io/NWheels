@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Entities;
@@ -14,50 +15,107 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
     {
         internal static InstanceTestEnvironment<SingleActorWorkflow, IInstanceEntity> BuildSingleActorWorkflow(TestFramework framework)
         {
-            using ( var repo = framework.NewUnitOfWork<IInstanceRepository>() )
-            {
-                return new InstanceTestEnvironment<SingleActorWorkflow, IInstanceEntity>(framework, repo.Workflows.New());
-            }
+            return BuildEnvironment<SingleActorWorkflow>(framework);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         internal static InstanceTestEnvironment<SingleEventAsyncWorkflow, IInstanceEntity> BuildSingleEventAsyncWorkflow(
-            TestFramework framework, 
+            TestFramework framework,
             IInstanceEntity existingInstanceData = null)
         {
-            if ( existingInstanceData == null )
-            {
-                using ( var repo = framework.NewUnitOfWork<IInstanceRepository>() )
-                {
-                    return new InstanceTestEnvironment<SingleEventAsyncWorkflow, IInstanceEntity>(framework, repo.Workflows.New());
-                }
-            }
-            else
-            {
-                return new InstanceTestEnvironment<SingleEventAsyncWorkflow, IInstanceEntity>(framework, existingInstanceData);
-            }
+            return BuildEnvironment<SingleEventAsyncWorkflow>(framework, existingInstanceData);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class SingleActorWorkflow : IWorkflowCodeBehind
+        internal static InstanceTestEnvironment<MapReduceAsyncWorkflow, IInstanceEntity> BuildMapReduceAsyncWorkflow(
+            TestFramework framework,
+            IInstanceEntity existingInstanceData = null)
+        {
+            return BuildEnvironment<MapReduceAsyncWorkflow>(framework, existingInstanceData);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static InstanceTestEnvironment<TCodeBehind, IInstanceEntity> BuildEnvironment<TCodeBehind>(
+            TestFramework framework,
+            IInstanceEntity existingInstanceData = null) 
+            where TCodeBehind : class, IWorkflowCodeBehind
+        {
+            InstanceTestEnvironment<TCodeBehind, IInstanceEntity> environment;
+
+            if ( existingInstanceData == null )
+            {
+                using ( var repo = framework.NewUnitOfWork<IInstanceRepository>() )
+                {
+                    environment = new InstanceTestEnvironment<TCodeBehind, IInstanceEntity>(framework, repo.Workflows.New());
+                }
+            }
+            else
+            {
+                environment = new InstanceTestEnvironment<TCodeBehind, IInstanceEntity>(framework, existingInstanceData);
+            }
+
+            return environment;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class SingleActorWorkflow : IInitializableWorkflowCodeBehind<IInstanceEntity>
         {
             public void OnBuildWorkflow(IWorkflowBuilder builder)
             {
                 builder.AddActor("A1", 1, new EmptyActor(), new EmptyRouter());
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void OnInitialize(IInstanceEntity initialData, IWorkflowInitializer initializer)
+            {
+                initializer.SetInitialWorkItem("ABC");
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class SingleEventAsyncWorkflow : IWorkflowCodeBehind
+        public class SingleEventAsyncWorkflow : IInitializableWorkflowCodeBehind<IInstanceEntity>
         {
             public void OnBuildWorkflow(IWorkflowBuilder builder)
             {
                 builder.AddActor("A1", 1, new EmptyActor(), new ConstantRouter(routeToActorName: "E1"), isInitial: true);
                 builder.AddActor("E1", 0, new EventOneActor("K1"), new ConstantRouter(routeToActorName: "B1"));
                 builder.AddActor("B1", 0, new EmptyActor(), new EmptyRouter());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void OnInitialize(IInstanceEntity initialData, IWorkflowInitializer initializer)
+            {
+                initializer.SetInitialWorkItem("ABC");
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class MapReduceAsyncWorkflow : IInitializableWorkflowCodeBehind<IInstanceEntity>
+        {
+            public void OnBuildWorkflow(IWorkflowBuilder builder)
+            {
+                builder.AddActor("A1", 1, new EmptyActor(), new MapRouter("M1", "M2", "M3", "M4"), isInitial: true);
+                builder.AddActor("M1", 0, new EventOneActor("KM1"), new ConstantRouter(routeToActorName: "R1"));
+                builder.AddActor("M2", 0, new EventTwoActor("KM2"), new ConstantRouter(routeToActorName: "R1"));
+                builder.AddActor("M3", 0, new EventOneActor("KM3"), new ConstantRouter(routeToActorName: "R1"));
+                builder.AddActor("M4", 0, new EventTwoActor("KM4"), new ConstantRouter(routeToActorName: "R1"));
+                builder.AddActor("R1", 1, new EmptyActor(), new ReduceRouter(branchCount: 4, routeToActorName: "Z1"));
+                builder.AddActor("Z1", 1, new EmptyActor(), new EmptyRouter());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void OnInitialize(IInstanceEntity initialData, IWorkflowInitializer initializer)
+            {
+                initializer.SetInitialWorkItem("ABC");
             }
         }
 
@@ -107,6 +165,27 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public class EventTwoActor : IWorkflowActor<string>
+        {
+            private readonly string _key;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public EventTwoActor(string key)
+            {
+                _key = key;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Execute(IWorkflowActorContext context, string workItem)
+            {
+                context.AwaitEvent<EventTwo, string>(_key, TimeSpan.FromMinutes(31));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class ConstantRouter : IWorkflowRouter
         {
             private readonly string _routeToActorName;
@@ -122,7 +201,113 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
             public void Route(IWorkflowRouterContext context)
             {
-                context.EnqueueWorkItem(_routeToActorName, context.GetActorWorkItem<string>());
+                if ( context.HasActorWorkItem<string>() )
+                {
+                    context.EnqueueWorkItem(_routeToActorName, context.GetActorWorkItem<string>());
+                }
+
+                if ( context.HasReceivedEvent<EventOne>() )
+                {
+                    context.EnqueueWorkItem(_routeToActorName, context.GetReceivedEvent<EventOne>().Data);
+                }
+
+                if ( context.HasReceivedEvent<EventTwo>() )
+                {
+                    context.EnqueueWorkItem(_routeToActorName, context.GetReceivedEvent<EventTwo>().Data.ToString());
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type GetCookieType()
+            {
+                return null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class MapRouter : IWorkflowRouter
+        {
+            private readonly string[] _routeToActorNames;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public MapRouter(params string[] routeToActorNames)
+            {
+                _routeToActorNames = routeToActorNames;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Route(IWorkflowRouterContext context)
+            {
+                foreach ( var actorName in _routeToActorNames )
+                {
+                    context.EnqueueWorkItem(actorName, context.GetActorWorkItem<string>());
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type GetCookieType()
+            {
+                return null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ReduceRouter : IWorkflowRouter
+        {
+            private readonly int _branchCount;
+            private readonly string _routeToActorName;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ReduceRouter(int branchCount, string routeToActorName)
+            {
+                _branchCount = branchCount;
+                _routeToActorName = routeToActorName;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Route(IWorkflowRouterContext context)
+            {
+                var cookie = context.Cookie as MyCookie;
+
+                if ( cookie == null )
+                {
+                    cookie = new MyCookie() {
+                        Results = new List<string>()
+                    };
+
+                    context.Cookie = cookie;
+                }
+
+                cookie.Results.Add(context.GetActorWorkItem<string>());
+
+                if ( cookie.Results.Count == _branchCount )
+                {
+                    context.EnqueueWorkItem(_routeToActorName, string.Join(";", cookie.Results));
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type GetCookieType()
+            {
+                return typeof(MyCookie);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            [DataContract]
+            public class MyCookie
+            {
+                [DataMember]
+                public List<string> Results { get; set; }
             }
         }
 
@@ -133,8 +318,15 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             public void Route(IWorkflowRouterContext context)
             {
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type GetCookieType()
+            {
+                return null;
+            }
         }
-        
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class EventOne : WorkflowEventBase<string>
@@ -148,6 +340,21 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public string Data { get; private set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class EventTwo : WorkflowEventBase<string>
+        {
+            public EventTwo(string key, int data)
+                : base(key)
+            {
+                this.Data = data;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public int Data { get; private set; }
         }
     }
 }

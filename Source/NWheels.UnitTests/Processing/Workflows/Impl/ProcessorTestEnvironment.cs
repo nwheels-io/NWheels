@@ -198,6 +198,13 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             {
                 _onRoute(context);
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type GetCookieType()
+            {
+                return null;
+            }
         }
     }
 }

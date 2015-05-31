@@ -41,5 +41,8 @@ namespace NWheels.Processing.Workflows.Core
 
         [LogDebug]
         void ExitingProcessorRun(ProcessorResult result);
+
+        [LogDebug]
+        void ProcessorDispatchingEvent(Type eventType, object eventKey, WorkflowEventStatus eventStatus, string awaitingActorNames);
     }
 }

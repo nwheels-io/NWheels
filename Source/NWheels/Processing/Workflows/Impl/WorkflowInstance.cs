@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Json;
 using Autofac;
 using NWheels.Processing.Workflows.Core;
 using ProtoBuf;
@@ -291,7 +292,7 @@ namespace NWheels.Processing.Workflows.Impl
 
                 if ( preRunState == WorkflowState.Suspended )
                 {
-                    processor.RestoreSnapshot(DeserializeProcessorSnapshot(_instanceData.ProcessorSnapshot));
+                    processor.RestoreSnapshot(DeserializeProcessorSnapshot(_instanceData.ProcessorSnapshot, processor.GetKnownTypesForSnapshot()));
                     result = processor.DispatchAndRun(_receivedEvents ?? new IWorkflowEvent[0]);
                 }
                 else
@@ -301,7 +302,7 @@ namespace NWheels.Processing.Workflows.Impl
 
                 if ( result == ProcessorResult.Suspended )
                 {
-                    _instanceData.ProcessorSnapshot = SerializeProcessorSnapshot(processor.TakeSnapshot());
+                    _instanceData.ProcessorSnapshot = SerializeProcessorSnapshot(processor.TakeSnapshot(), processor.GetKnownTypesForSnapshot());
                 }
 
                 e.ReceiveFeedack(result == ProcessorResult.Completed ? WorkflowProcessorTrigger.Completed : WorkflowProcessorTrigger.Suspended);
@@ -404,22 +405,29 @@ namespace NWheels.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private byte[] SerializeProcessorSnapshot(WorkflowProcessorSnapshot snapshot)
+        private byte[] SerializeProcessorSnapshot(WorkflowProcessorSnapshot snapshot, IEnumerable<Type> knownTypes)
         {
             using ( var stream = new MemoryStream() )
             {
-                Serializer.Serialize<WorkflowProcessorSnapshot>(stream, snapshot);
+                var serializer = new DataContractJsonSerializer(typeof(WorkflowProcessorSnapshot), knownTypes);
+                serializer.WriteObject(stream, snapshot);
+
+                //Serializer.Serialize<WorkflowProcessorSnapshot>(stream, snapshot);
+
                 return stream.ToArray();
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private WorkflowProcessorSnapshot DeserializeProcessorSnapshot(byte[] serializedSnapshot)
+        private WorkflowProcessorSnapshot DeserializeProcessorSnapshot(byte[] serializedSnapshot, IEnumerable<Type> knownTypes)
         {
             using ( var stream = new MemoryStream(serializedSnapshot) )
             {
-                return Serializer.Deserialize<WorkflowProcessorSnapshot>(stream);
+                var serializer = new DataContractJsonSerializer(typeof(WorkflowProcessorSnapshot), knownTypes);
+                return (WorkflowProcessorSnapshot)serializer.ReadObject(stream);
+
+                //return Serializer.Deserialize<WorkflowProcessorSnapshot>(stream);
             }
         }
 

@@ -76,7 +76,7 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test, Ignore("WIP")]
+        [Test]
         public void CanDispatchEventAndRunAsyncWorkflowToEnd()
         {
             //-- arrange
@@ -103,10 +103,82 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             LogAssert.That(log2).HasNoErrorsOrWarnings();
             LogAssert.That(log2).Matches(Logex.Begin()
                 .ZeroOrMore().AnyMessage()
-                .One().Message<IWorkflowEngineLogger>(x => x.ProcessorRunning())
+                .One().Message<IWorkflowEngineLogger>(x => x.ProcessorDispatchingEvent(typeof(TestWorkflows.EventOne), "K1", WorkflowEventStatus.Received, "E1"))
                 .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("E1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ProcessorRunning())
                 .One().Message<IWorkflowEngineLogger>(x => x.ExecutingActor("B1"))
                 .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("B1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExitingProcessorRun(ProcessorResult.Completed))
+                .End());
+
+            Assert.That(environment2.AwaitEventRequests.Count, Is.EqualTo(0));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanCompleteMapReduceWorkflowWithMultipleSuspends()
+        {
+            //-- arrange
+
+            var environment1 = TestWorkflows.BuildMapReduceAsyncWorkflow(Framework);
+            var workflowState1 = environment1.InstanceUnderTest.Run();
+            var log1 = Framework.TakeLog();
+
+            //-- act
+
+            var environment2 = TestWorkflows.BuildMapReduceAsyncWorkflow(Framework, environment1.InstanceData);
+            var workflowState2 = environment2.InstanceUnderTest.DispatchAndRun(new IWorkflowEvent[] {
+                new TestWorkflows.EventOne("KM1", "AAA"),
+                new TestWorkflows.EventOne("KM3", "BBB"),
+                new TestWorkflows.EventTwo("KM4", 444),
+            });
+            var log2 = Framework.TakeLog();
+
+            var environment3 = TestWorkflows.BuildMapReduceAsyncWorkflow(Framework, environment2.InstanceData);
+            var workflowState3 = environment3.InstanceUnderTest.DispatchAndRun(new IWorkflowEvent[] {
+                new TestWorkflows.EventTwo("KM2", 222),
+            });
+            var log3 = Framework.TakeLog();
+
+            //-- assert
+
+            Assert.That(workflowState1, Is.EqualTo(WorkflowState.Suspended));
+            Assert.That(workflowState2, Is.EqualTo(WorkflowState.Suspended));
+            Assert.That(workflowState3, Is.EqualTo(WorkflowState.Completed));
+            Assert.That(environment3.InstanceData.WorkflowState, Is.EqualTo(WorkflowState.Completed));
+
+            LogAssert.That(log1).HasNoErrorsOrWarnings();
+            LogAssert.That(log2).HasNoErrorsOrWarnings();
+            LogAssert.That(log3).HasNoErrorsOrWarnings();
+            
+            LogAssert.That(log2).Matches(Logex.Begin()
+                .ZeroOrMore().AnyMessage()
+                .One().Message<IWorkflowEngineLogger>(x => x.ProcessorDispatchingEvent(typeof(TestWorkflows.EventOne), "KM1", WorkflowEventStatus.Received, "M1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("M1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ProcessorDispatchingEvent(typeof(TestWorkflows.EventOne), "KM3", WorkflowEventStatus.Received, "M3"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("M3"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ProcessorDispatchingEvent(typeof(TestWorkflows.EventTwo), "KM4", WorkflowEventStatus.Received, "M4"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("M4"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ProcessorRunning())
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingActor("R1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("R1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingActor("R1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("R1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingActor("R1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("R1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExitingProcessorRun(ProcessorResult.Suspended))
+                .End());
+
+            LogAssert.That(log3).Matches(Logex.Begin()
+                .ZeroOrMore().AnyMessage()
+                .One().Message<IWorkflowEngineLogger>(x => x.ProcessorDispatchingEvent(typeof(TestWorkflows.EventTwo), "KM2", WorkflowEventStatus.Received, "M2"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("M2"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ProcessorRunning())
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingActor("R1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("R1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingActor("Z1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("Z1"))
                 .One().Message<IWorkflowEngineLogger>(x => x.ExitingProcessorRun(ProcessorResult.Completed))
                 .End());
 

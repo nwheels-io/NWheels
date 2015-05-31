@@ -52,7 +52,11 @@ namespace NWheels.Processing.Workflows.Impl
         public WorkflowProcessorSnapshot TakeSnapshot()
         {
             return new WorkflowProcessorSnapshot() {
-                AwaitList = WorkflowProcessorSnapshot.AwaitListSnapshot.TakeSnapshotOf(_awaitingActors)
+                AwaitList = WorkflowProcessorSnapshot.AwaitListSnapshot.TakeSnapshotOf(_awaitingActors),
+                Cookies = _actorSitesByName.Values.Select(site => new WorkflowProcessorSnapshot.ActorCookie {
+                    ActorName = site.Name,
+                    Cookie = site.Cookie
+                }).ToArray()
             };
         }
 
@@ -61,6 +65,14 @@ namespace NWheels.Processing.Workflows.Impl
         public void RestoreSnapshot(WorkflowProcessorSnapshot snapshot)
         {
             RestoreAwaitList(snapshot.AwaitList);
+            RestoreActorCookies(snapshot);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEnumerable<Type> GetKnownTypesForSnapshot()
+        {
+            return _actorSitesByName.Values.Select(site => site.GetCookieType()).Where(type => type != null).Distinct();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -118,6 +130,12 @@ namespace NWheels.Processing.Workflows.Impl
         {
             var awaitingActorNames = _awaitingActors.Take(@event);
 
+            _context.Logger.ProcessorDispatchingEvent(
+                @event.GetType(), 
+                @event.GetEventKey(), 
+                @event.GetEventStatus(), 
+                string.Join(",", awaitingActorNames));
+
             foreach ( var actorName in awaitingActorNames )
             {
                 var site = _actorSitesByName[actorName];
@@ -145,6 +163,16 @@ namespace NWheels.Processing.Workflows.Impl
                 {
                     _awaitingActors.Push(eventType, entry.EventKey, awaiter.ActorName, awaiter.TimeoutAtUtc);
                 }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void RestoreActorCookies(WorkflowProcessorSnapshot snapshot)
+        {
+            foreach ( var actorCookie in snapshot.Cookies )
+            {
+                GetActorSiteByName(actorCookie.ActorName).Cookie = actorCookie.Cookie;
             }
         }
 
@@ -183,9 +211,11 @@ namespace NWheels.Processing.Workflows.Impl
             void EnqueueWorkItem<TWorkItem>(TWorkItem workItem);
             void ExecuteOneWorkItem();
             void DispatchEvent(IWorkflowEvent @event);
+            Type GetCookieType();
             string Name { get; }
             int Priority { get; }
             int WorkItemCount { get; }
+            object Cookie { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -248,6 +278,10 @@ namespace NWheels.Processing.Workflows.Impl
             {
                 get { return _name; }
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public object Cookie { get; set; }
 
             #endregion
 
@@ -358,8 +392,17 @@ namespace NWheels.Processing.Workflows.Impl
 
             public void DispatchEvent(IWorkflowEvent @event)
             {
+                _processor._context.Logger.ExecutingRouter(_name);
+
                 _lastReceivedEvent = @event;
                 _router.Route(this);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type GetCookieType()
+            {
+                return _router.GetCookieType();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

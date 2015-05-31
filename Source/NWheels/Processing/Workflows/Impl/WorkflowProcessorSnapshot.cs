@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using NWheels.Extensions;
 using NWheels.Processing.Workflows.Core;
@@ -10,9 +12,12 @@ namespace NWheels.Processing.Workflows.Impl
     [DataContract]
     public class WorkflowProcessorSnapshot
     {
-        [DataMember(Order = 2)]
+        [DataMember(Order = 1)]
         public AwaitListSnapshot AwaitList { get; set; }
 
+        [DataMember(Order = 2)]
+        public IList<ActorCookie> Cookies { get; set; }
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataContract]
@@ -78,6 +83,17 @@ namespace NWheels.Processing.Workflows.Impl
                     TimeoutAtUtc = awaiter.TimeoutAtUtc
                 };
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataContract]
+        public class ActorCookie
+        {
+            [DataMember]
+            public string ActorName { get; set; }
+            [DataMember]
+            public object Cookie { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

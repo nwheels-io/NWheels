@@ -65,6 +65,13 @@ namespace NWheels.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Type GetCookieType()
+        {
+            return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IStateMachineStateBuilder<TState, TTrigger> SetAsInitial()
         {
             this.IsInitialState = true;
