@@ -6,7 +6,7 @@ using NWheels.Processing.Workflows.Impl;
 
 namespace NWheels.Processing.Workflows
 {
-    public abstract class StateMachineWorkflow<TState, TTrigger, TDataEntity> : 
+    public class StateMachineWorkflow<TState, TTrigger, TDataEntity> : 
         IStateMachineBuilder<TState, TTrigger>,
         IWorkflowCodeBehind,
         IWorkflowCodeBehindLifecycle,
@@ -17,10 +17,11 @@ namespace NWheels.Processing.Workflows
         private readonly TransientStateMachine<TState, TTrigger>.ILogger _logger;
         private readonly IStateMachineCodeBehind<TState, TTrigger> _codeBehind;
         private readonly Dictionary<TState, StateActor<TState, TTrigger>> _actorsByState;
+        private StateActor<TState, TTrigger> _initialState;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected StateMachineWorkflow(IStateMachineCodeBehind<TState, TTrigger> codeBehind, TransientStateMachine<TState, TTrigger>.ILogger logger)
+        public StateMachineWorkflow(IStateMachineCodeBehind<TState, TTrigger> codeBehind, TransientStateMachine<TState, TTrigger>.ILogger logger)
         {
             _codeBehind = codeBehind;
             _logger = logger;
@@ -41,8 +42,10 @@ namespace NWheels.Processing.Workflows
             foreach ( var actorAndRouter in allActors )
             {
                 priority++;
-                builder.AddActor(actorAndRouter.Value.ToString(), priority, actor: actorAndRouter, router: actorAndRouter);
+                builder.AddActor(actorAndRouter.Value.ToString(), priority, actor: actorAndRouter, router: actorAndRouter, isInitial: priority == 0);
             }
+
+            _initialState = allActors.FirstOrDefault();
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -74,6 +77,12 @@ namespace NWheels.Processing.Workflows
             if ( initializable != null )
             {
                 initializable.OnInitialize(initialData, initializer);
+            }
+
+            if ( _initialState != null )
+            {
+                initializer.SetInitialWorkItem(
+                    new StateTriggerWorkItem<TState, TTrigger>(new StateMachineFeedbackEventArgs<TState, TTrigger>(_initialState.Value)));
             }
         }
 
@@ -148,9 +157,5 @@ namespace NWheels.Processing.Workflows
                 lifecycle.OnFinalize();
             }
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected abstract void OnBuildStateMachine(IStateMachineBuilder<TState, TTrigger> builder);
     }
 }

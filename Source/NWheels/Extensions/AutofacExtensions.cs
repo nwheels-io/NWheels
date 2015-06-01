@@ -176,7 +176,7 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static  DataRepositoryRegistration<TRepo> WithRestEndpoint<TRepo>(
+        public static DataRepositoryRegistration<TRepo> WithRestEndpoint<TRepo>(
             this DataRepositoryRegistration<TRepo> registration, 
             string name = null, 
             string defaultListenUrl = null,
@@ -427,6 +427,23 @@ namespace NWheels.Extensions
             {
                 var registration = new WorkflowTypeRegistration<TCodeBehind, TDataRepository, TDataEntity>(entitySelector);
                 _builder.RegisterInstance(registration).As<WorkflowTypeRegistration>();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RegisterStateMachineWorkflow<TState, TTrigger, TCodeBehind, TDataRepository, TDataEntity>(
+                Func<TDataRepository, IQueryable<TDataEntity>> entitySelector)
+                where TCodeBehind : class, IStateMachineCodeBehind<TState, TTrigger>
+                where TDataRepository : class, IApplicationDataRepository
+                where TDataEntity : class, IStateMachineInstanceEntity<TState>
+            {
+                _builder.RegisterType<StateMachineWorkflow<TState, TTrigger, TDataEntity>>().WithParameter(new ResolvedParameter(
+                    (pi, ctx) => pi.ParameterType == typeof(IStateMachineCodeBehind<TState, TTrigger>), 
+                    (pi, ctx) => ctx.Resolve<TCodeBehind>()));
+
+                _builder.NWheelsFeatures().Logging().RegisterLogger<TransientStateMachine<TState, TTrigger>.ILogger>();
+
+                RegisterWorkflow<StateMachineWorkflow<TState, TTrigger, TDataEntity>, TDataRepository, TDataEntity>(entitySelector);
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------

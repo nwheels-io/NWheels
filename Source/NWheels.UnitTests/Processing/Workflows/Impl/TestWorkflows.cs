@@ -4,7 +4,10 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using NWheels.Entities;
+using NWheels.Extensions;
+using NWheels.Logging;
 using NWheels.Processing.Workflows;
 using NWheels.Processing.Workflows.Core;
 using NWheels.Testing;
@@ -15,7 +18,9 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
     {
         internal static InstanceTestEnvironment<SingleActorWorkflow, IInstanceEntity> BuildSingleActorWorkflow(TestFramework framework)
         {
-            return BuildEnvironment<SingleActorWorkflow>(framework);
+            return BuildEnvironment<SingleActorWorkflow, IInstanceEntity>(
+                framework, 
+                newInstanceDataFactory: repo => repo.Workflows.New());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -24,7 +29,24 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             TestFramework framework,
             IInstanceEntity existingInstanceData = null)
         {
-            return BuildEnvironment<SingleEventAsyncWorkflow>(framework, existingInstanceData);
+            return BuildEnvironment<SingleEventAsyncWorkflow, IInstanceEntity>(
+                framework, 
+                newInstanceDataFactory: repo => repo.Workflows.New(),
+                existingInstanceData: existingInstanceData);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal static InstanceTestEnvironment<AsyncWorkflowWithLifecycleEvents, IInstanceEntity> BuildAsyncWorkflowWithLifecycleEvents(
+            TestFramework framework,
+            IInstanceEntity existingInstanceData = null)
+        {
+            framework.UpdateComponents(builder => builder.NWheelsFeatures().Logging().RegisterLogger<IWorkflowLifecycleLogger>());
+
+            return BuildEnvironment<AsyncWorkflowWithLifecycleEvents, IInstanceEntity>(
+                framework,
+                newInstanceDataFactory: repo => repo.Workflows.New(),
+                existingInstanceData: existingInstanceData);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,28 +55,57 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             TestFramework framework,
             IInstanceEntity existingInstanceData = null)
         {
-            return BuildEnvironment<MapReduceAsyncWorkflow>(framework, existingInstanceData);
+            return BuildEnvironment<MapReduceAsyncWorkflow, IInstanceEntity>(
+                framework,
+                newInstanceDataFactory: repo => repo.Workflows.New(),
+                existingInstanceData: existingInstanceData);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static InstanceTestEnvironment<TCodeBehind, IInstanceEntity> BuildEnvironment<TCodeBehind>(
-            TestFramework framework,
-            IInstanceEntity existingInstanceData = null) 
-            where TCodeBehind : class, IWorkflowCodeBehind
+        internal static InstanceTestEnvironment<StateMachineWorkflow<OrderItemState, OrderItemTrigger, IOrderItemEntity>, IOrderItemEntity> 
+            BuildStateMachineWorkflow(
+                TestFramework framework,
+                IOrderItemEntity existingInstanceData = null)
         {
-            InstanceTestEnvironment<TCodeBehind, IInstanceEntity> environment;
+            framework.UpdateComponents(builder => {
+                builder.RegisterType<OrderItemWorkflow>().InstancePerDependency();
+                builder.NWheelsFeatures().Processing().RegisterStateMachineWorkflow<
+                    OrderItemState, 
+                    OrderItemTrigger, 
+                    OrderItemWorkflow, 
+                    IInstanceRepository, 
+                    IOrderItemEntity>(repo => repo.OrderItems);
+                builder.NWheelsFeatures().Logging().RegisterLogger<IOrderItemLogger>();
+            });
 
-            if ( existingInstanceData == null )
+            return BuildEnvironment<StateMachineWorkflow<OrderItemState, OrderItemTrigger, IOrderItemEntity>, IOrderItemEntity>(
+                framework, 
+                newInstanceDataFactory: repo => repo.OrderItems.New(),
+                existingInstanceData: existingInstanceData);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static InstanceTestEnvironment<TCodeBehind, TDataEntity> BuildEnvironment<TCodeBehind, TDataEntity>(
+            TestFramework framework,
+            Func<IInstanceRepository, TDataEntity> newInstanceDataFactory = null,
+            TDataEntity existingInstanceData = null) 
+            where TCodeBehind : class, IWorkflowCodeBehind
+            where TDataEntity : class, IWorkflowInstanceEntity
+        {
+            InstanceTestEnvironment<TCodeBehind, TDataEntity> environment;
+
+            if ( existingInstanceData == null && newInstanceDataFactory != null )
             {
                 using ( var repo = framework.NewUnitOfWork<IInstanceRepository>() )
                 {
-                    environment = new InstanceTestEnvironment<TCodeBehind, IInstanceEntity>(framework, repo.Workflows.New());
+                    environment = new InstanceTestEnvironment<TCodeBehind, TDataEntity>(framework, newInstanceDataFactory(repo));
                 }
             }
             else
             {
-                environment = new InstanceTestEnvironment<TCodeBehind, IInstanceEntity>(framework, existingInstanceData);
+                environment = new InstanceTestEnvironment<TCodeBehind, TDataEntity>(framework, existingInstanceData);
             }
 
             return environment;
@@ -98,6 +149,85 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public class AsyncWorkflowWithLifecycleEvents : 
+            IInitializableWorkflowCodeBehind<IInstanceEntity>,
+            ISuspendableWorkflowCodeBehind<IInstanceEntity>,
+            IWorkflowCodeBehindLifecycle
+        {
+            private readonly IWorkflowLifecycleLogger _logger;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public AsyncWorkflowWithLifecycleEvents(IWorkflowLifecycleLogger logger)
+            {
+                _logger = logger;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void OnBuildWorkflow(IWorkflowBuilder builder)
+            {
+                _logger.OnBuildWorkflow();
+
+                builder.AddActor("A1", 1, new EmptyActor(), new ConstantRouter(routeToActorName: "E1"), isInitial: true);
+                builder.AddActor("E1", 0, new EventOneActor("K1"), new ConstantRouter(routeToActorName: "B1"));
+                builder.AddActor("B1", 0, new EmptyActor(), new EmptyRouter());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void OnInitialize(IInstanceEntity initialData, IWorkflowInitializer initializer)
+            {
+                _logger.OnInitialize();
+
+                initializer.SetInitialWorkItem("ABC");
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void OnStart()
+            {
+                _logger.OnStart();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void OnSuspend(IInstanceEntity dataToSave)
+            {
+                _logger.OnSuspend();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void OnResume(IInstanceEntity savedData)
+            {
+                _logger.OnResume();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void OnComplete()
+            {
+                _logger.OnComplete();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void OnFail(Exception error)
+            {
+                _logger.OnFail(error);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void OnFinalize()
+            {
+                _logger.OnFinalize();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class MapReduceAsyncWorkflow : IInitializableWorkflowCodeBehind<IInstanceEntity>
         {
             public void OnBuildWorkflow(IWorkflowBuilder builder)
@@ -121,8 +251,143 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public interface IWorkflowLifecycleLogger : IApplicationEventLogger
+        {
+            [LogInfo]
+            void OnBuildWorkflow();
+            [LogInfo]
+            void OnInitialize();
+            [LogInfo]
+            void OnStart();
+            [LogInfo]
+            void OnSuspend();
+            [LogInfo]
+            void OnResume();
+            [LogInfo]
+            void OnComplete();
+            [LogInfo]
+            void OnFail(Exception error);
+            [LogInfo]
+            void OnFinalize();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public enum OrderItemState
+        {
+            PaymentConfirmationPending,
+            LockingStock,
+            OrderingFromSupplier,
+            RequestingDelivery,
+            DeliveryConfirmationPending,
+            Delivered,
+            Problematic
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public enum OrderItemTrigger
+        {
+            PaymentReceived,
+            PaymentFailed,
+            StockLocked,
+            OutOfStock,
+            StockSystemError,
+            SupplierOrderAccepted,
+            SupplierOrderDenied,
+            SupplierOrderArrived,
+            DeliveryRequestAccepted,
+            DeliveryRequestDenied,
+            DeliveryConfirmed
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IOrderItemLogger : IApplicationEventLogger
+        {
+            [LogInfo]
+            void PaymentConfirmationPending();
+            [LogInfo]
+            void PaymentReceived();
+            [LogInfo]
+            void PaymentFailed();
+            [LogInfo]
+            void LockingStock();
+            [LogInfo]
+            void StockLocked();
+            [LogInfo]
+            void OutOfStock();
+            [LogError]
+            void StockSystemError();
+            [LogInfo]
+            void RequestingDelivery();
+            [LogInfo]
+            void DeliveryRequestAccepted();
+            [LogInfo]
+            void DeliveryRequestDenied();
+            [LogWarning]
+            void DeliveryRequestTimedOut();
+            [LogInfo]
+            void DeliveryConfirmationPending();
+            [LogInfo]
+            void Delivered();
+            [LogWarning]
+            void DeliveryTimedOut();
+            [LogWarning]
+            void Problematic();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class OrderItemWorkflow : IStateMachineCodeBehind<OrderItemState, OrderItemTrigger>
+        {
+            private readonly IOrderItemLogger _logger;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public OrderItemWorkflow(IOrderItemLogger logger)
+            {
+                _logger = logger;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void BuildStateMachine(IStateMachineBuilder<OrderItemState, OrderItemTrigger> machine)
+            {
+                machine.State(OrderItemState.PaymentConfirmationPending)
+                    .SetAsInitial()
+                    .OnEntered((sender, args) => _logger.PaymentConfirmationPending())
+                    .OnTrigger(OrderItemTrigger.PaymentReceived).TransitionTo(OrderItemState.LockingStock)
+                    .OnTrigger(OrderItemTrigger.PaymentFailed).TransitionTo(OrderItemState.Problematic, (sender, args) => _logger.PaymentFailed());
+
+                machine.State(OrderItemState.LockingStock)
+                    .OnEntered((sender, args) => _logger.LockingStock())
+                    .OnTrigger(OrderItemTrigger.StockLocked).TransitionTo(OrderItemState.RequestingDelivery)
+                    .OnTrigger(OrderItemTrigger.OutOfStock).TransitionTo(OrderItemState.OrderingFromSupplier)
+                    .OnTrigger(OrderItemTrigger.StockSystemError).TransitionTo(OrderItemState.Problematic, (sender, args) => _logger.StockSystemError());
+
+                machine.State(OrderItemState.RequestingDelivery)
+                    .OnEntered((sender, args) => _logger.RequestingDelivery())
+                    .OnTrigger(OrderItemTrigger.DeliveryRequestAccepted).TransitionTo(OrderItemState.DeliveryConfirmationPending)
+                    .OnTrigger(OrderItemTrigger.DeliveryRequestDenied).TransitionTo(OrderItemState.Problematic, (sender, args) => _logger.DeliveryRequestDenied());
+
+                machine.State(OrderItemState.DeliveryConfirmationPending)
+                    .OnEntered((sender, args) => _logger.DeliveryConfirmationPending())
+                    .OnTrigger(OrderItemTrigger.DeliveryConfirmed).TransitionTo(OrderItemState.Delivered);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [EntityContract]
         public interface IInstanceEntity : IWorkflowInstanceEntity
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [EntityContract]
+        public interface IOrderItemEntity : IInstanceEntity, IStateMachineInstanceEntity<OrderItemState>
         {
         }
 
@@ -131,6 +396,7 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
         public interface IInstanceRepository : IApplicationDataRepository
         {
             IEntityRepository<IInstanceEntity> Workflows { get; }
+            IEntityRepository<IOrderItemEntity> OrderItems { get; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

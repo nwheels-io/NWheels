@@ -24,14 +24,14 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
             var updater = new ContainerBuilder();
             updater.NWheelsFeatures().Logging().RegisterLogger<IWorkflowEngineLogger>();
-            updater.RegisterType<TCodeBehind>();
+            updater.RegisterType<TCodeBehind>().PreserveExistingDefaults();
             updater.Update(this.Components.ComponentRegistry);
 
             this.InstanceData = instanceData;
             this.InstanceContext = new TestWorkflowInstanceContext(this);
             this.CodeBehindAdapter = new WorkflowCodeBehindAdapter<TCodeBehind, TDataEntity>();
             this.AwaitEventRequests = new List<AwaitEventRequest>();
-
+            
             this.InstanceUnderTest = new WorkflowInstance(this.InstanceContext);
         }
 

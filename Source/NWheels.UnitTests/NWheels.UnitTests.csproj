@@ -88,6 +88,7 @@
     <Compile Include="Processing\Rules\Tshirts\PricingRuleSystem.cs" />
     <Compile Include="Processing\Workflows\Impl\AwaitEventRequest.cs" />
     <Compile Include="Processing\Workflows\Impl\InstanceTestEnvironment.cs" />
+    <Compile Include="Processing\Workflows\Impl\StateMachineWorkflowTests.cs" />
     <Compile Include="Processing\Workflows\Impl\TestWorkflowInstanceInfo.cs" />
     <Compile Include="Processing\Workflows\Impl\TestWorkflows.cs" />
     <Compile Include="Processing\Workflows\Impl\WorkflowInstanceTests.cs" />

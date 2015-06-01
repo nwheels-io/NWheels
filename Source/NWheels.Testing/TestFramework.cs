@@ -210,6 +210,15 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void UpdateComponents(Action<ContainerBuilder> onRegisterComponents)
+        {
+            var builder = new ContainerBuilder();
+            onRegisterComponents(builder);
+            builder.Update(_components.ComponentRegistry);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Queue<Guid> PresetGuids { get; private set; }
         public Queue<int> PresetRandomInt32 { get; private set; }
         public Queue<long> PresetRandomInt64 { get; private set; }

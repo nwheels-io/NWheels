@@ -182,7 +182,48 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
                 .One().Message<IWorkflowEngineLogger>(x => x.ExitingProcessorRun(ProcessorResult.Completed))
                 .End());
 
+            Assert.That(environment3.AwaitEventRequests.Count, Is.EqualTo(0));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test, Ignore("WIP")]
+        public void CanInvokeCodeBehindLifecycleEvents()
+        {
+            //-- arrange
+
+            var environment1 = TestWorkflows.BuildAsyncWorkflowWithLifecycleEvents(Framework);
+            var workflowState1 = environment1.InstanceUnderTest.Run();
+            var log1 = Framework.TakeLog();
+
+            var environment2 = TestWorkflows.BuildAsyncWorkflowWithLifecycleEvents(Framework, environment1.InstanceData);
+            var receivedEvent = new TestWorkflows.EventOne("K1", "ABC");
+
+            //-- act
+
+            var workflowState2 = environment2.InstanceUnderTest.DispatchAndRun(new IWorkflowEvent[] { receivedEvent });
+            var log2 = Framework.TakeLog();
+
+            //-- assert
+
+            Assert.That(workflowState1, Is.EqualTo(WorkflowState.Suspended));
+            Assert.That(workflowState2, Is.EqualTo(WorkflowState.Completed));
+            Assert.That(environment2.InstanceData.WorkflowState, Is.EqualTo(WorkflowState.Completed));
+
+            LogAssert.That(log1).HasNoErrorsOrWarnings();
+            LogAssert.That(log2).HasNoErrorsOrWarnings();
+            LogAssert.That(log2).Matches(Logex.Begin()
+                .ZeroOrMore().AnyMessage()
+                .One().Message<IWorkflowEngineLogger>(x => x.ProcessorDispatchingEvent(typeof(TestWorkflows.EventOne), "K1", WorkflowEventStatus.Received, "E1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("E1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ProcessorRunning())
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingActor("B1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("B1"))
+                .One().Message<IWorkflowEngineLogger>(x => x.ExitingProcessorRun(ProcessorResult.Completed))
+                .End());
+
             Assert.That(environment2.AwaitEventRequests.Count, Is.EqualTo(0));
+            
         }
     }
 }
