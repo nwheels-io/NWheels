@@ -18,6 +18,7 @@ namespace NWheels.UnitTests.Processing.Rules
 
             var stringVariable = new RuleVariable<BaseContext, string>(
                 context => context.StringValue,
+				()=> new List<object>(), 
                 idName: "StringValue",
                 description: "StringValue from base context");
 
@@ -49,6 +50,7 @@ namespace NWheels.UnitTests.Processing.Rules
 
             IRuleVariable<BaseContext, string> baseVariable = new RuleVariable<BaseContext, string>(
                 context => context.StringValue,
+				() => new List<object>(), 
                 idName: "StringValue",
                 description: "StringValue from base context");
 
@@ -86,6 +88,7 @@ namespace NWheels.UnitTests.Processing.Rules
 
             IRuleVariable<BaseContext, string> baseVariable = new RuleVariable<BaseContext, string>(
                 context => context.StringValue,
+				() => new List<object>(), 
                 idName: "StringValue",
                 description: "StringValue from base context");
 
@@ -107,7 +110,30 @@ namespace NWheels.UnitTests.Processing.Rules
             Assert.That(value, Is.EqualTo("ABC"));
         }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+		//----------------------------------------------------------------------------------------------------------------------
+
+		[Test]
+	    public void CanInventoryValues()
+	    {
+		    var variable = new RuleVariable<BaseContext, int>(
+			    context=>1,
+			    () =>  new List<object>() {
+					    1,
+					    2,
+					    3,
+					    4,
+					    5,
+					    6,
+					    7
+				    },
+			    idName: "values",
+			    description: "values");
+		    var values = variable.GetInventoryValues();
+			Assert.That(values.Count,Is.EqualTo(7));
+			Assert.That(values[0],Is.EqualTo(1));
+	    }
+
+	    //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class BaseContext
         {

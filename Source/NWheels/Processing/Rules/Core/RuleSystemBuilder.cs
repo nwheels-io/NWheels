@@ -42,9 +42,9 @@ namespace NWheels.Processing.Rules.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void AddVariable<TValue>(Func<TContext, TValue> variable, string idName, string description)
+        public void AddVariable<TValue>(Func<TContext, TValue> variable,Func<IList<object>> inventoryVariables,  string idName, string description)
         {
-            var runtimeVariable = new RuleVariable<TContext, TValue>(onGetValue: variable, idName: idName, description: description);
+            var runtimeVariable = new RuleVariable<TContext, TValue>(onGetValue: variable,onGetInventoryValues: inventoryVariables, idName: idName, description: description);
 	        AddVariable<TValue>(runtimeVariable);
         }
 

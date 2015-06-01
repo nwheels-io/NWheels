@@ -25,8 +25,8 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
 
         public void BuildRuleSystem(RuleSystemBuilder<PricingContext> builder)
         {
-            builder.AddVariable(context => context.Current.Color, "Color", "The color of the T-shirt");
-            builder.AddVariable(context => context.Current.Size, "Size", "The size of the T-shirt");
+            builder.AddVariable(context => context.Current.Color,()=> new List<object>(),  "Color", "The color of the T-shirt");
+            builder.AddVariable(context => context.Current.Size, ()=> new List<object>(),"Size", "The size of the T-shirt");
             builder.AddScalarPropertiesAsVariables(context => context.Current.Model);
             builder.AddAction(new AddPriceLineAction());
             // (1) all this (context+variables+functions+actions) builds RuleSystemDescription
@@ -76,7 +76,17 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
             {
                 get { return "True if today is customer's birthday, False otherwise."; }
             }
-        }
+
+			#region IRuleVariable<CustomerContextBase,bool> Members
+
+
+			public IList<object> GetInventoryValues()
+			{
+				return new List<object>();
+			}
+
+			#endregion
+		}
 
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
