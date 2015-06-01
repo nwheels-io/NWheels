@@ -50,7 +50,7 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class IsCustomerBirthdayToday : IRuleVariable<PricingContext, bool>
+        public class IsCustomerBirthdayToday : IRuleVariable<CustomerContextBase, bool>
         {
             private readonly IFramework _framework;
 
@@ -63,7 +63,7 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public bool GetValue(PricingContext context)
+            public bool GetValue(CustomerContextBase context)
             {
 	            var utcBirthday = context.Customer.Birthday.ToUniversalTime();
                 return ( utcBirthday.Day  == _framework.UtcNow.Date.Day  && utcBirthday.Month ==_framework.UtcNow.Date.Month);

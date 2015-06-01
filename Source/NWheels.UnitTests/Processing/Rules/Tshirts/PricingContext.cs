@@ -11,12 +11,13 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
         T Current { get; set; }
     }
 
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class PricingContext : ICollectionRuleSystemContext<ITshirtEntity>
+    public class PricingContext : CustomerContextBase, ICollectionRuleSystemContext<ITshirtEntity>
     {
         public PricingContext(ICustomerEntity customer, params ITshirtEntity[] products)
+            : base(customer)
         {
-            this.Customer = customer;
             this.Products = products.ToList();
             this.PriceLines = new List<PriceLine>();
         }
@@ -38,10 +39,6 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ITshirtEntity Current { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public ICustomerEntity Customer { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

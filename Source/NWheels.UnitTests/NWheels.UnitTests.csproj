@@ -83,6 +83,8 @@
     <Compile Include="Logging\NameValuePairLogNodeTests.cs" />
     <Compile Include="Logging\ThreadLogTests.cs" />
     <Compile Include="Logging\ThreadLogUnitTestBase.cs" />
+    <Compile Include="Processing\Rules\DomainObjectVarianceTests.cs" />
+    <Compile Include="Processing\Rules\Tshirts\CustomerContextBase.cs" />
     <Compile Include="Processing\Rules\Tshirts\Entities.cs" />
     <Compile Include="Processing\Rules\Tshirts\PricingContext.cs" />
     <Compile Include="Processing\Rules\Tshirts\PricingRuleSystem.cs" />
