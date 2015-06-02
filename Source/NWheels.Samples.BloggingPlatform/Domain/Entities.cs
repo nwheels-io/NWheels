@@ -1,11 +1,12 @@
-﻿using System;
+﻿#if false
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Entities;
-using NWheels.Modules.Security;
 
 namespace NWheels.Samples.BloggingPlatform.Domain
 {
@@ -148,3 +149,5 @@ namespace NWheels.Samples.BloggingPlatform.Domain
         ICollection<IAbstractContentEntity> RelatedContents { get; }
     }
 }
+
+#endif

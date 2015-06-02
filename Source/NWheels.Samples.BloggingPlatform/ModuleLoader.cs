@@ -1,4 +1,6 @@
-﻿using Autofac;
+﻿#if false
+
+using Autofac;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,3 +24,6 @@ namespace NWheels.Samples.BloggingPlatform
         }
     }
 }
+
+
+#endif

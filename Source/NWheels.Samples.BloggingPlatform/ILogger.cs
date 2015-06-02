@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if false
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,3 +20,5 @@ namespace NWheels.Samples.BloggingPlatform
         AuthorizationException UserIsNotAuthorizedToPerformRequestedOperation(IUserAccountEntity user, IBlogEntity blog);
     }
 }
+
+#endif

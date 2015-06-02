@@ -151,7 +151,7 @@ namespace NWheels.Extensions
             string name = null, 
             string defaultUrl = null,
             bool exposeExceptions = false) 
-            where TApp : class, IUiApplication
+            where TApp : class, IUIApplication
         {
             ((IHaveContainerBuilder)registration).Builder.RegisterInstance(new WebAppEndpointRegistration(name, typeof(TApp), defaultUrl, exposeExceptions));
             return registration;
@@ -513,9 +513,9 @@ namespace NWheels.Extensions
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp>() where TApp : class, IUiApplication
+            public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp>() where TApp : class, IUIApplication
             {
-                _builder.RegisterType<TApp>().As<TApp, IUiApplication>();
+                _builder.RegisterType<TApp>().As<TApp, IUIApplication>();
                 return new UIAppEndpointRegistrations<TApp>(_builder);
             }
         }
@@ -589,7 +589,7 @@ namespace NWheels.Extensions
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class UIAppEndpointRegistrations<TApp> : IHaveContainerBuilder
-            where TApp : class, IUiApplication
+            where TApp : class, IUIApplication
         {
             private readonly ContainerBuilder _builder;
 

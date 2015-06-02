@@ -14,6 +14,8 @@ namespace NWheels.UnitTests.Processing.Rules
         [Test]
         public void CanUseInlineBaseContextVariableWithDerivedContext()
         {
+            var list = new List<IRuleVariable<object, object>>();
+
             //-- arrange
 
             var stringVariable = new RuleVariable<BaseContext, string>(

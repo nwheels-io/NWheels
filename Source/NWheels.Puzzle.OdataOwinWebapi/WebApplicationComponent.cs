@@ -19,7 +19,7 @@ namespace NWheels.Puzzle.OdataOwinWebapi
 {
     internal class WebApplicationComponent : LifecycleEventListenerBase
     {
-        private readonly IUiApplication _app;
+        private readonly IUIApplication _app;
         private readonly string _address;
         private readonly ILogger _logger;
         private readonly ILifetimeScope _container;
@@ -29,7 +29,7 @@ namespace NWheels.Puzzle.OdataOwinWebapi
 
         public WebApplicationComponent(IComponentContext components,  WebAppEndpointRegistration endpoint, Auto<ILogger> logger)
         {
-            _app = (IUiApplication)components.Resolve(endpoint.Contract);
+            _app = (IUIApplication)components.Resolve(endpoint.Contract);
             _address = endpoint.Address.ToString();
             _logger = logger.Instance;
             _container = (ILifetimeScope)components;

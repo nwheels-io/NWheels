@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Processing.Rules.Core;
-using NWheels.UI.Globalization;
 
 namespace NWheels.UnitTests.Processing.Rules.Tshirts
 {

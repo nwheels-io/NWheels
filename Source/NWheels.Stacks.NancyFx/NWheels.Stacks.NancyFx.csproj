@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{41A08180-7090-4302-910A-5973BB230219}</ProjectGuid>
+    <ProjectGuid>{36F48C78-669C-4D75-ACCD-F98D89E66C88}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NWheels.Samples.BloggingPlatform</RootNamespace>
-    <AssemblyName>NWheels.Samples.BloggingPlatform</AssemblyName>
+    <RootNamespace>NWheels.Stacks.NancyFx</RootNamespace>
+    <AssemblyName>NWheels.Stacks.NancyFx</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -16,7 +16,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Bin\Samples\BloggingPlatform\</OutputPath>
+    <OutputPath>..\Bin\Core\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\Bin\Samples\BloggingPlatform\</OutputPath>
+    <OutputPath>..\Bin\Core\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -35,7 +35,23 @@
     <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
-      <Private>False</Private>
+    </Reference>
+    <Reference Include="Hapil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\FelixB.Hapil.0.9.6\lib\net45\Hapil.dll</HintPath>
+    </Reference>
+    <Reference Include="Hapil.Applied, Version=0.9.6.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\FelixB.Hapil.0.9.6\lib\net45\Hapil.Applied.dll</HintPath>
+    </Reference>
+    <Reference Include="Nancy">
+      <HintPath>..\packages\Nancy.1.2.0\lib\net40\Nancy.dll</HintPath>
+    </Reference>
+    <Reference Include="Nancy.Bootstrappers.Autofac">
+      <HintPath>..\packages\Nancy.Bootstrappers.Autofac.1.2.0\lib\net40\Nancy.Bootstrappers.Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Nancy.Hosting.Self">
+      <HintPath>..\packages\Nancy.Hosting.Self.1.2.0\lib\net40\Nancy.Hosting.Self.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -46,28 +62,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Apps\BlogApp.cs" />
-    <Compile Include="Domain\BlogAuthorizationContext.cs" />
-    <Compile Include="Domain\Entities.cs" />
-    <Compile Include="ILogger.cs" />
-    <Compile Include="ModuleLoader.cs" />
+    <Compile Include="WebApplicationBootstrapper.cs" />
+    <Compile Include="WebApplicationComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebApplicationModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels\NWheels.csproj">
       <Project>{f0ecf554-bf54-4843-b62f-c67c4deb2764}</Project>
       <Name>NWheels</Name>
-      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="boot.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
