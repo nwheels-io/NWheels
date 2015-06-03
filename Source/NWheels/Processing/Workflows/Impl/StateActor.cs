@@ -11,6 +11,7 @@ namespace NWheels.Processing.Workflows.Impl
     {
         private readonly TState _value;
         private readonly IStateMachineCodeBehind<TState, TTrigger> _codeBehind;
+        private readonly IFramework _framework;
         private readonly TransientStateMachine<TState, TTrigger>.ILogger _logger;
         private readonly Dictionary<TTrigger, StateTransition> _transitionByTrigger = new Dictionary<TTrigger, StateTransition>();
         private TimeSpan? _timeout;
@@ -20,10 +21,15 @@ namespace NWheels.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public StateActor(TState value, IStateMachineCodeBehind<TState, TTrigger> codeBehind, TransientStateMachine<TState, TTrigger>.ILogger logger)
+        public StateActor(
+            TState value, 
+            IStateMachineCodeBehind<TState, TTrigger> codeBehind, 
+            IFramework framework, 
+            TransientStateMachine<TState, TTrigger>.ILogger logger)
         {
-            _codeBehind = codeBehind;
             _value = value;
+            _codeBehind = codeBehind;
+            _framework = framework;
             _logger = logger;
         }
 
@@ -31,6 +37,8 @@ namespace NWheels.Processing.Workflows.Impl
 
         public void Execute(IWorkflowActorContext context, StateTriggerWorkItem<TState, TTrigger> workItem)
         {
+            SetCurrentState((IStateMachineInstanceEntity<TState>)context.InstanceData);
+
             var completed = false;
 
             if ( _onEntered != null )
@@ -44,10 +52,10 @@ namespace NWheels.Processing.Workflows.Impl
                 }
             }
 
-            if ( !completed )
+            if ( !completed && _transitionByTrigger.Count > 0 )
             {
                 context.AwaitEvent<StateMachineTriggerEvent<TTrigger>, Guid>(
-                    key: context.WorkflowInstance.InstanceId, 
+                    key: context.InstanceInfo.InstanceId, 
                     timeout: _timeout.GetValueOrDefault(TimeSpan.FromDays(1)));
             }
         }
@@ -140,7 +148,10 @@ namespace NWheels.Processing.Workflows.Impl
                 throw _logger.TransitionAlreadyDefined(_codeBehind.GetType(), _value, trigger);
             }
 
-            return new StateTransition(this);
+            var transition =  new StateTransition(this);
+            _transitionByTrigger.Add(trigger, transition);
+
+            return transition;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -152,6 +163,14 @@ namespace NWheels.Processing.Workflows.Impl
         public TState Value
         {
             get { return _value; }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void SetCurrentState(IStateMachineInstanceEntity<TState> instanceData)
+        {
+            instanceData.MachineState = _value;
+            instanceData.UpdatedAtUtc = _framework.UtcNow;
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

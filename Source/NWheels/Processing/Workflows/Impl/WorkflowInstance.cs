@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using Autofac;
 using NWheels.Processing.Workflows.Core;
@@ -21,6 +22,7 @@ namespace NWheels.Processing.Workflows.Impl
         private readonly IWorkflowInstanceEntity _instanceData;
         private readonly TransientStateMachine<WorkflowProcessorState, WorkflowProcessorTrigger> _processorStateMachine;
         private readonly IWorkflowEngineLogger _logger;
+        private WorkflowProcessor _processorInstance;
         private IWorkflowCodeBehind _codeBehindInstance;
         private object _initialWorkItem;
         private IWorkflowEvent[] _receivedEvents;
@@ -113,6 +115,13 @@ namespace NWheels.Processing.Workflows.Impl
         IWorkflowInstanceInfo IWorkflowProcessorContext.WorkflowInstance
         {
             get { return this; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IWorkflowInstanceEntity IWorkflowProcessorContext.InstanceData
+        {
+            get { return _instanceData; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -252,6 +261,8 @@ namespace NWheels.Processing.Workflows.Impl
 
         private void OnProcessorInitializing(object sender, StateMachineFeedbackEventArgs<WorkflowProcessorState, WorkflowProcessorTrigger> e)
         {
+            InstantiateWorkflowProcessor();
+
             InvokeCodeBehind(e, () => {
                 _codeBehindAdapter.OnInitialize(_codeBehindInstance, _instanceData, initializer: this);
             });
@@ -270,6 +281,11 @@ namespace NWheels.Processing.Workflows.Impl
 
         private void OnProcessorResuming(object sender, StateMachineFeedbackEventArgs<WorkflowProcessorState, WorkflowProcessorTrigger> e)
         {
+            InstantiateWorkflowProcessor();
+
+            var deserializedSnapshot = DeserializeProcessorSnapshot(_instanceData.ProcessorSnapshot, _processorInstance.GetKnownTypesForSnapshot());
+            _processorInstance.RestoreSnapshot(deserializedSnapshot);
+
             InvokeCodeBehind(e, () => {
                 _codeBehindAdapter.OnResume(_codeBehindInstance, _instanceData);
             });
@@ -284,25 +300,15 @@ namespace NWheels.Processing.Workflows.Impl
                 var preRunState = _instanceData.WorkflowState;
                 SetWorkflowState(WorkflowState.Running);
 
-                var processor = new WorkflowProcessor(_framework, this);
-                _codeBehindAdapter.OnBuildWorkflow(_codeBehindInstance, processor);
-                processor.EndBuildWorkflow();
-
                 ProcessorResult result;
 
                 if ( preRunState == WorkflowState.Suspended )
                 {
-                    processor.RestoreSnapshot(DeserializeProcessorSnapshot(_instanceData.ProcessorSnapshot, processor.GetKnownTypesForSnapshot()));
-                    result = processor.DispatchAndRun(_receivedEvents ?? new IWorkflowEvent[0]);
+                    result = _processorInstance.DispatchAndRun(_receivedEvents ?? new IWorkflowEvent[0]);
                 }
                 else
                 {
-                    result = processor.Run();
-                }
-
-                if ( result == ProcessorResult.Suspended )
-                {
-                    _instanceData.ProcessorSnapshot = SerializeProcessorSnapshot(processor.TakeSnapshot(), processor.GetKnownTypesForSnapshot());
+                    result = _processorInstance.Run();
                 }
 
                 e.ReceiveFeedack(result == ProcessorResult.Completed ? WorkflowProcessorTrigger.Completed : WorkflowProcessorTrigger.Suspended);
@@ -321,6 +327,9 @@ namespace NWheels.Processing.Workflows.Impl
             InvokeCodeBehind(e, () => {
                 _codeBehindAdapter.OnSuspend(_codeBehindInstance, _instanceData);
             });
+
+            var snapshot = _processorInstance.TakeSnapshot();
+            _instanceData.ProcessorSnapshot = SerializeProcessorSnapshot(snapshot, _processorInstance.GetKnownTypesForSnapshot());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -376,6 +385,15 @@ namespace NWheels.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private void InstantiateWorkflowProcessor()
+        {
+            _processorInstance = new WorkflowProcessor(_framework, this);
+            _codeBehindAdapter.OnBuildWorkflow(_codeBehindInstance, _processorInstance);
+            _processorInstance.EndBuildWorkflow();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void InvokeCodeBehind(
             StateMachineFeedbackEventArgs<WorkflowProcessorState, WorkflowProcessorTrigger> eventArgs,
             Action action, 
@@ -409,7 +427,7 @@ namespace NWheels.Processing.Workflows.Impl
         {
             using ( var stream = new MemoryStream() )
             {
-                var serializer = new DataContractJsonSerializer(typeof(WorkflowProcessorSnapshot), knownTypes);
+                var serializer = new DataContractSerializer(typeof(WorkflowProcessorSnapshot), knownTypes);
                 serializer.WriteObject(stream, snapshot);
 
                 //Serializer.Serialize<WorkflowProcessorSnapshot>(stream, snapshot);
@@ -424,7 +442,7 @@ namespace NWheels.Processing.Workflows.Impl
         {
             using ( var stream = new MemoryStream(serializedSnapshot) )
             {
-                var serializer = new DataContractJsonSerializer(typeof(WorkflowProcessorSnapshot), knownTypes);
+                var serializer = new DataContractSerializer(typeof(WorkflowProcessorSnapshot), knownTypes);
                 return (WorkflowProcessorSnapshot)serializer.ReadObject(stream);
 
                 //return Serializer.Deserialize<WorkflowProcessorSnapshot>(stream);

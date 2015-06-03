@@ -10,7 +10,6 @@ namespace NWheels.Processing.Workflows.Impl
 {
     public class TransientWorkflowReadyQueue : LifecycleEventListenerBase, IWorkflowReadyQueue
     {
-        private readonly IComponentContext _components;
         private readonly ILogger _logger;
         private IWorkflowInstanceContainer _instanceContainer;
         private Thread _listenerThread;
@@ -19,9 +18,8 @@ namespace NWheels.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TransientWorkflowReadyQueue(IComponentContext components, ILogger logger)
+        public TransientWorkflowReadyQueue(ILogger logger)
         {
-            _components = components;
             _logger = logger;
         }
 
@@ -45,7 +43,6 @@ namespace NWheels.Processing.Workflows.Impl
 
         public override void NodeActivating()
         {
-            _instanceContainer = _components.Resolve<IWorkflowInstanceContainer>();
             _cancellation = new CancellationTokenSource();
             _queue = new BlockingCollection<WorkItem>();
             _listenerThread = new Thread(RunListenerThread);
@@ -89,6 +86,16 @@ namespace NWheels.Processing.Workflows.Impl
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IWorkflowInstanceContainer InjectedInstanceContainer
+        {
+            set
+            {
+                _instanceContainer = value;
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

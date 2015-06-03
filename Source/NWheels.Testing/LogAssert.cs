@@ -9,6 +9,7 @@ using NUnit.Framework;
 using NWheels.Extensions;
 using NWheels.Logging;
 using NWheels.Logging.Core;
+using NWheels.Testing.Logging.Impl;
 
 namespace NWheels.Testing
 {
@@ -17,6 +18,15 @@ namespace NWheels.Testing
         public static Assertions That(IEnumerable<LogNode> log)
         {
             return new Assertions(log);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<LogNode> From<TLogger>(this IEnumerable<LogNode> log) 
+            where TLogger : IApplicationEventLogger
+        {
+            var matcher = new LogexImpl.ByLoggerNodeMatcher(typeof(TLogger));
+            return log.Where(matcher.Match);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

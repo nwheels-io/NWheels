@@ -242,6 +242,7 @@ namespace NWheels.Testing
         {
             var builder = new ContainerBuilder();
 
+            builder.RegisterInstance(this).As<IFramework>();
             builder.RegisterInstance(_dynamicModule).As<DynamicModule>();
             builder.RegisterType<ThreadRegistry>().SingleInstance();
             builder.RegisterGeneric(typeof(Auto<>)).SingleInstance();

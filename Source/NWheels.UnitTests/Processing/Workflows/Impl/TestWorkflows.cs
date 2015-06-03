@@ -278,10 +278,12 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             PaymentConfirmationPending,
             LockingStock,
             OrderingFromSupplier,
+            WaitingForSupply,
             RequestingDelivery,
             DeliveryConfirmationPending,
             Delivered,
-            Problematic
+            Problematic,
+            ProblemResolvedResuming
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -298,7 +300,8 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             SupplierOrderArrived,
             DeliveryRequestAccepted,
             DeliveryRequestDenied,
-            DeliveryConfirmed
+            DeliveryConfirmed,
+            ProblemResolved // includes next state to continue from in the event data
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -335,6 +338,12 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             void DeliveryTimedOut();
             [LogWarning]
             void Problematic();
+            [LogInfo]
+            void OrderingFromSupplier();
+            [LogInfo]
+            void SupplierOrderDenied();
+            [LogInfo]
+            void WaitingForSupply();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -374,6 +383,20 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
                 machine.State(OrderItemState.DeliveryConfirmationPending)
                     .OnEntered((sender, args) => _logger.DeliveryConfirmationPending())
                     .OnTrigger(OrderItemTrigger.DeliveryConfirmed).TransitionTo(OrderItemState.Delivered);
+
+                machine.State(OrderItemState.OrderingFromSupplier)
+                    .OnEntered((sender, args) => _logger.OrderingFromSupplier())
+                    .OnTrigger(OrderItemTrigger.SupplierOrderAccepted).TransitionTo(OrderItemState.WaitingForSupply)
+                    .OnTrigger(OrderItemTrigger.SupplierOrderDenied).TransitionTo(OrderItemState.Problematic, (sender, args) => _logger.SupplierOrderDenied());
+
+                machine.State(OrderItemState.WaitingForSupply)
+                    .OnEntered((sender, args) => _logger.WaitingForSupply())
+                    .OnTrigger(OrderItemTrigger.SupplierOrderArrived).TransitionTo(OrderItemState.LockingStock);
+
+                machine.State(OrderItemState.Delivered)
+                    .OnEntered((sender, args) => _logger.Delivered());
+                
+                machine.State(OrderItemState.Problematic);
             }
         }
 

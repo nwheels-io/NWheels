@@ -5,7 +5,8 @@ namespace NWheels.Processing.Workflows.Core
     public interface IWorkflowActorSiteContext
     {
         void EnqueueWorkItem<TWorkItem>(string actorName, TWorkItem workItem);
-        IWorkflowInstanceInfo WorkflowInstance { get; }
+        IWorkflowInstanceInfo InstanceInfo { get; }
+        IWorkflowInstanceEntity InstanceData { get; }
         string ActorName { get; }
         object Cookie { get; set; }
     }

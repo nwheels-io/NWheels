@@ -187,7 +187,7 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test, Ignore("WIP")]
+        [Test]
         public void CanInvokeCodeBehindLifecycleEvents()
         {
             //-- arrange
@@ -206,24 +206,27 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
             //-- assert
 
-            Assert.That(workflowState1, Is.EqualTo(WorkflowState.Suspended));
-            Assert.That(workflowState2, Is.EqualTo(WorkflowState.Completed));
-            Assert.That(environment2.InstanceData.WorkflowState, Is.EqualTo(WorkflowState.Completed));
-
             LogAssert.That(log1).HasNoErrorsOrWarnings();
             LogAssert.That(log2).HasNoErrorsOrWarnings();
-            LogAssert.That(log2).Matches(Logex.Begin()
-                .ZeroOrMore().AnyMessage()
-                .One().Message<IWorkflowEngineLogger>(x => x.ProcessorDispatchingEvent(typeof(TestWorkflows.EventOne), "K1", WorkflowEventStatus.Received, "E1"))
-                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("E1"))
-                .One().Message<IWorkflowEngineLogger>(x => x.ProcessorRunning())
-                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingActor("B1"))
-                .One().Message<IWorkflowEngineLogger>(x => x.ExecutingRouter("B1"))
-                .One().Message<IWorkflowEngineLogger>(x => x.ExitingProcessorRun(ProcessorResult.Completed))
+
+            Assert.That(workflowState1, Is.EqualTo(WorkflowState.Suspended));
+            Assert.That(workflowState2, Is.EqualTo(WorkflowState.Completed));
+
+            LogAssert.That(log1.From<TestWorkflows.IWorkflowLifecycleLogger>()).Matches(Logex
+                .Begin()
+                    .One().Message<TestWorkflows.IWorkflowLifecycleLogger>(x => x.OnBuildWorkflow())
+                    .One().Message<TestWorkflows.IWorkflowLifecycleLogger>(x => x.OnInitialize())
+                    .One().Message<TestWorkflows.IWorkflowLifecycleLogger>(x => x.OnStart())
+                    .One().Message<TestWorkflows.IWorkflowLifecycleLogger>(x => x.OnSuspend())
                 .End());
 
-            Assert.That(environment2.AwaitEventRequests.Count, Is.EqualTo(0));
-            
+            LogAssert.That(log2.From<TestWorkflows.IWorkflowLifecycleLogger>()).Matches(Logex
+                .Begin()
+                    .One().Message<TestWorkflows.IWorkflowLifecycleLogger>(x => x.OnBuildWorkflow())
+                    .One().Message<TestWorkflows.IWorkflowLifecycleLogger>(x => x.OnResume())
+                    .One().Message<TestWorkflows.IWorkflowLifecycleLogger>(x => x.OnComplete())
+                    .One().Message<TestWorkflows.IWorkflowLifecycleLogger>(x => x.OnFinalize())
+                .End());
         }
     }
 }

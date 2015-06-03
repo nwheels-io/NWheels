@@ -14,6 +14,7 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
         {
             this.ProcessorContext = new TestProcessorContext(this);
             this.WorkflowInstanceInfo = new TestWorkflowInstanceInfo();
+            this.WorkflowInstanceData = framework.NewUnitOfWork<TestWorkflows.IInstanceRepository>().Workflows.New();
             this.ProcessorUnderTest = new WorkflowProcessor(framework, this.ProcessorContext);
             this.AwaitEventRequests = new List<AwaitEventRequest>();
             this.Logger = framework.Logger<IWorkflowEngineLogger>();
@@ -78,6 +79,10 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IWorkflowInstanceEntity WorkflowInstanceData { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public WorkflowProcessor ProcessorUnderTest { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -134,6 +139,13 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
             public IWorkflowInstanceInfo WorkflowInstance
             {
                 get { return _environment.WorkflowInstanceInfo; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IWorkflowInstanceEntity InstanceData
+            {
+                get { return _environment.WorkflowInstanceData; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

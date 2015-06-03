@@ -267,9 +267,16 @@ namespace NWheels.Processing.Workflows.Impl
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            IWorkflowInstanceInfo IWorkflowActorSiteContext.WorkflowInstance
+            IWorkflowInstanceInfo IWorkflowActorSiteContext.InstanceInfo
             {
                 get { return _processor._context.WorkflowInstance; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            IWorkflowInstanceEntity IWorkflowActorSiteContext.InstanceData
+            {
+                get { return _processor._context.InstanceData; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -14,16 +14,21 @@ namespace NWheels.Processing.Workflows
         ISuspendableWorkflowCodeBehind<TDataEntity>
         where TDataEntity : class, IStateMachineInstanceEntity<TState>
     {
-        private readonly TransientStateMachine<TState, TTrigger>.ILogger _logger;
         private readonly IStateMachineCodeBehind<TState, TTrigger> _codeBehind;
+        private readonly IFramework _framework;
+        private readonly TransientStateMachine<TState, TTrigger>.ILogger _logger;
         private readonly Dictionary<TState, StateActor<TState, TTrigger>> _actorsByState;
         private StateActor<TState, TTrigger> _initialState;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public StateMachineWorkflow(IStateMachineCodeBehind<TState, TTrigger> codeBehind, TransientStateMachine<TState, TTrigger>.ILogger logger)
+        public StateMachineWorkflow(
+            IStateMachineCodeBehind<TState, TTrigger> codeBehind, 
+            IFramework framework,
+            TransientStateMachine<TState, TTrigger>.ILogger logger)
         {
             _codeBehind = codeBehind;
+            _framework = framework;
             _logger = logger;
             _actorsByState = new Dictionary<TState, StateActor<TState, TTrigger>>();
         }
@@ -35,7 +40,7 @@ namespace NWheels.Processing.Workflows
             _codeBehind.BuildStateMachine(this);
 
             var allActors = _actorsByState.Values.ToList();
-            allActors.Sort(comparison: (x, y) => x.IsInitialState.CompareTo(y.IsInitialState));
+            allActors.Sort(comparison: (x, y) => y.IsInitialState.CompareTo(x.IsInitialState));
 
             var priority = 0;
 
@@ -62,7 +67,7 @@ namespace NWheels.Processing.Workflows
                 throw _logger.StateAlreadyDefined(_codeBehind.GetType(), value);
             }
 
-            var actor = new StateActor<TState, TTrigger>(value, _codeBehind, _logger);
+            var actor = new StateActor<TState, TTrigger>(value, _codeBehind, _framework, _logger);
             _actorsByState.Add(value, actor);
 
             return actor;
