@@ -19,11 +19,11 @@ namespace NWheels.Puzzle.OdataOwinWebapi
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<WebApplicationComponent>().InstancePerDependency();
+            //builder.RegisterType<WebApplicationComponent>().InstancePerDependency();
             builder.RegisterType<EntityServiceComponent>().InstancePerDependency();
 
-            builder.RegisterAdapter<WebAppEndpointRegistration, ILifecycleEventListener>(
-                (context, endpoint) => context.Resolve<WebApplicationComponent>(TypedParameter.From(endpoint)));
+            //builder.RegisterAdapter<WebAppEndpointRegistration, ILifecycleEventListener>(
+            //    (context, endpoint) => context.Resolve<WebApplicationComponent>(TypedParameter.From(endpoint)));
 
             builder.RegisterAdapter<RestApiEndpointRegistration, ILifecycleEventListener>(
                 (context, endpoint) => context.Resolve<EntityServiceComponent>(TypedParameter.From(endpoint)));

@@ -5,19 +5,32 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
+using NWheels.Globalization;
 using NWheels.UI;
 
 namespace NWheels.Domains.Security.UI
 {
-    [UITemplate("UserLoginScreen")]
-    public interface IUserLoginUIScreen : IUIScreen, IBound<IUserLoginUIScreen, IUserLoginModel, IUserLoginState>
+    public interface IUserLoginFormWidget : IWidget, IBound<IUserLoginFormWidget, IUserLoginFormModel, IUserLoginFormState>
     {
+        bool SignUpEnabled { get; set; }
+        bool ForgotPasswordEnabled { get; set; }
+
+        string LoginNameLabel { get; set; }
+        string PasswordLabel { get; set; }
+        string LoginNamePlaceholder { get; set; }
+        string PasswordPlaceholder { get; set; }
+        string SignUpText { get; set; }
+        string ForgotPasswordText { get; set; }
+
+        ICommand LogIn { get; set; }
+        ICommand SignUp { get; set; }
+        ICommand ForgotPassword { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [UIObjectContract]
-    public interface IUserLoginModel
+    [ViewModelContract]
+    public interface IUserLoginFormModel
     {
         [PropertyContract.Required]
         string LoginName { get; set; }
@@ -30,13 +43,83 @@ namespace NWheels.Domains.Security.UI
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [UIObjectContract]
-    public interface IUserLoginState
+    [ViewModelContract]
+    public interface IUserLoginFormState
     {
         bool RememberMe { get; set; }
-        string LoginNamePlaceholder { get; set; }
-        string PasswordPlaceholder { get; set; }
-        string SignUpUrl { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class UserLoginFormFluentApi
+    {
+        public static IUserLoginFormWidget LoginNameLabel(this IUserLoginFormWidget widget, string value)
+        {
+            widget.LoginNameLabel = value;
+            return widget;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IUserLoginFormWidget PasswordLabel(this IUserLoginFormWidget widget, string value)
+        {
+            widget.PasswordLabel = value;
+            return widget;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public static IUserLoginFormWidget LoginNamePlaceholder(this IUserLoginFormWidget widget, string value)
+        {
+            widget.LoginNamePlaceholder = value;
+            return widget;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public static IUserLoginFormWidget PasswordPlaceholder(this IUserLoginFormWidget widget, string value)
+        {
+            widget.PasswordPlaceholder = value;
+            return widget;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public static IUserLoginFormWidget SignUpText(this IUserLoginFormWidget widget, string value)
+        {
+            widget.SignUpText = value;
+            return widget;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IUserLoginFormWidget ForgotPasswordText(this IUserLoginFormWidget widget, string value)
+        {
+            widget.ForgotPasswordText = value;
+            return widget;
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class UserLoginFormWidget : ICodeBehind<IUserLoginFormWidget>
+    {
+        private readonly ISecurityDomainTranslations _translations;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UserLoginFormWidget(ISecurityDomainTranslations translations)
+        {
+            _translations = translations;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void OnDescribeUI(IUserLoginFormWidget widget)
+        {
+            var t = _translations;
+            widget.LoginNameLabel(t.LoginName).PasswordLabel(t.Password).LoginNamePlaceholder(t.LoginName).PasswordPlaceholder(t.Password);
+        }
     }
 }
 

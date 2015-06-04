@@ -53,8 +53,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IUserAccountEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\IUserLoginUIScreen.cs" />
+    <Compile Include="UI\ISecurityDomainTranslations.cs" />
+    <Compile Include="UI\IUserLoginFormWidget.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels\NWheels.csproj">

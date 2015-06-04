@@ -6,19 +6,20 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public interface IUIApplication
+    public interface IApplication : IUIElement
     {
         string Icon { get; set; }
         string Title { get; set; }
         string SubTitle { get; set; }
         string Copyright { get; set; }
+        IScreen InitialScreen { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public static class UIApplicationExtensions
     {
-        public static T Icon<T>(this T app, string icon) where T : IUIApplication
+        public static T AppIcon<T>(this T app, string icon) where T : IApplication
         {
             app.Icon = icon;
             return app;
@@ -26,7 +27,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static T Title<T>(this T app, string title) where T : IUIApplication
+        public static T AppTitle<T>(this T app, string title) where T : IApplication
         {
             app.Icon = title;
             return app;
@@ -34,7 +35,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static T SubTitle<T>(this T app, string subTitle) where T : IUIApplication
+        public static T AppSubTitle<T>(this T app, string subTitle) where T : IApplication
         {
             app.SubTitle = subTitle;
             return app;
@@ -42,11 +43,18 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static T Copyright<T>(this T app, string copyright) where T : IUIApplication
+        public static T AppCopyright<T>(this T app, string copyright) where T : IApplication
         {
             app.Copyright = copyright;
             return app;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static T InitialScreen<T>(this T app, Func<T, IScreen> screenSelector) where T : IApplication
+        {
+            app.InitialScreen = screenSelector(app);
+            return app;
+        }
     }
 }

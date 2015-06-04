@@ -7,7 +7,7 @@ using NWheels.DataObjects;
 
 namespace NWheels.UI
 {
-    public class UIObjectContractAttribute : DataObjectContractAttribute
+    public class ViewModelContractAttribute : DataObjectContractAttribute
     {
     }
 }

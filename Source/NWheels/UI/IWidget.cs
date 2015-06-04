@@ -6,20 +6,19 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public interface IUIWidget
+    public interface IWidget : IUIElement
     {
-        string IdName { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface ICompositeUIWidget : IUIWidget, IEnumerable<IUIWidget>
+    public interface ICompositeWidget : IWidget, IEnumerable<IWidget>
     {
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
     
-    public interface ITemplateUIWidget : ICompositeUIWidget
+    public interface ITemplateWidget : ICompositeWidget
     {
     }
 }

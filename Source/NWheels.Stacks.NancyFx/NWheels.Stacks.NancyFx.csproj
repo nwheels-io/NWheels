@@ -62,6 +62,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IWebApplicationLogger.cs" />
+    <Compile Include="ModuleLoader.cs" />
     <Compile Include="WebApplicationBootstrapper.cs" />
     <Compile Include="WebApplicationComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -76,6 +78,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="angular.min.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public interface ICommandUIWidget
+    public interface ICommandWidget
     {
-        IUICommand Command { get; set; }
+        ICommand Command { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public static class CommandUIWidgetExtensions
+    public static class CommandWidgetExtensions
     {
-        public static T Command<T>(this T widget, IUICommand command) where T : ICommandUIWidget
+        public static T Command<T>(this T widget, ICommand command) where T : ICommandWidget
         {
             widget.Command = command;
             return widget;

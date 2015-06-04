@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Hapil;
 
 namespace NWheels.Endpoints
 {
@@ -37,7 +38,8 @@ namespace NWheels.Endpoints
         {
             if ( !string.IsNullOrWhiteSpace(this.Name) )
             {
-                return new Uri(string.Format("http://localhost:8900/{0}", this.Name));
+                return new Uri(string.Format("http://localhost:8900/", this.Name.TrimPrefix("I")));
+                //return new Uri(string.Format("http://localhost:8900/{0}", this.Name.TrimPrefix("I")));
             }
             else
             {
@@ -171,9 +173,14 @@ namespace NWheels.Endpoints
     public class WebAppEndpointRegistration : AbstractEndpointRegistration
     {
         public WebAppEndpointRegistration(
-            string name, Type contract, string defaultUrl, bool exposeExceptions)
+            string name, Type contract, Type codeBehindType, string defaultUrl, bool exposeExceptions)
             : base(name, contract, defaultUrl, publishMetadata: false, defaultMetadataUrl: null, exposeExceptionDatails: exposeExceptions)
         {
+            this.CodeBehindType = codeBehindType;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Type CodeBehindType { get; private set; }
     }
 }

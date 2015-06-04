@@ -23,6 +23,7 @@ using NWheels.DataObjects.Core.Conventions;
 using NWheels.Endpoints;
 using NWheels.Entities;
 using NWheels.Entities.Core;
+using NWheels.Entities.Impl;
 using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Logging;
@@ -212,7 +213,8 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<ConfigurationObjectFactory>().As<ConfigurationObjectFactory, IConfigurationObjectFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<XmlConfigurationLoader>().SingleInstance().InstancePerLifetimeScope();
             builder.RegisterAdapter<RelationalMappingConventionDefault, IRelationalMappingConvention>(RelationalMappingConventionBase.FromDefault).SingleInstance();
-            
+            builder.RegisterType<VoidDataRepositoryFactory>().As<IDataRepositoryFactory>();
+
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkLoggingConfiguration>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkEndpointsConfig>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkDatabaseConfig>();

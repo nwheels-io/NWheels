@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public interface IUICommand
+    public interface IScreen : IUIElement
     {
         string Icon { get; set; }
-        string Text { get; set; }
-        bool HideIfDisabled { get; set; }
+        string Title { get; set; }
+        string SubTitle { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public static class UICommandExtensions
+    public static class ScreenFluentApi
     {
-        public static T Icon<T>(this T screen, string icon) where T : IUIScreen
+        public static T Icon<T>(this T screen, string icon) where T : IScreen
         {
             screen.Icon = icon;
             return screen;
@@ -25,7 +25,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static T Title<T>(this T screen, string title) where T : IUIScreen
+        public static T Title<T>(this T screen, string title) where T : IScreen
         {
             screen.Icon = title;
             return screen;
@@ -33,7 +33,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static T SubTitle<T>(this T screen, string subTitle) where T : IUIScreen
+        public static T SubTitle<T>(this T screen, string subTitle) where T : IScreen
         {
             screen.SubTitle = subTitle;
             return screen;

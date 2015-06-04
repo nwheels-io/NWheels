@@ -1,25 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public interface IBound<TTarget, TModel, TState>
+    public interface ICommand : IUIElement
     {
-        IBindingSelector<TModel, TState, TValue> Bind<TValue>(Expression<Func<TTarget, TValue>> receiverProperty);
+        string Icon { get; set; }
+        string Text { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IBindingSelector<TModel, TState, TValue>
+    public static class CommandFluentApi
     {
-        void ToModel(Expression<Func<TModel, TValue>> modelProperty);
+        public static ICommand Icon(this ICommand command, string value)
+        {
+            command.Icon = value;
+            return command;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void ToState(Expression<Func<TState, TValue>> stateProperty);
+        public static ICommand Title(this ICommand command, string value)
+        {
+            command.Icon = value;
+            return command;
+        }
     }
 }

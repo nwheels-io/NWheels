@@ -3,58 +3,55 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Autofac;
-using Nancy;
-using Nancy.Bootstrappers.Autofac;
-using Nancy.Conventions;
 
-namespace NWheels.Stacks.NancyFx
+namespace NWheels.UI.Core
 {
-    public class WebApplicationBootstrapper : AutofacNancyBootstrapper, IRootPathProvider
+    public abstract class ApplicationBase : UIElementBase, IApplication
     {
-        private readonly WebApplicationModule _module;
+        private readonly List<ScreenBase> _screens;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public WebApplicationBootstrapper(WebApplicationModule module)
+        protected ApplicationBase()
         {
-            _module = module;
+            _screens = new List<ScreenBase>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override IEnumerable<INancyModule> GetAllModules(ILifetimeScope container)
+        #region Implementation of IApplication
+
+        public string Icon { get; set; }
+        public string Title { get; set; }
+        public string SubTitle { get; set; }
+        public string Copyright { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IScreen IApplication.InitialScreen
         {
-            return new[] { _module };
+            get { return this.InitialScreen; }
+            set { this.InitialScreen = (ScreenBase)value; }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IReadOnlyList<ScreenBase> Screens
+        {
+            get { return _screens; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override INancyModule GetModule(ILifetimeScope container, Type moduleType)
-        {
-            return _module;
-        }
+        public ScreenBase InitialScreen { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void ConfigureConventions(NancyConventions nancyConventions)
+        protected void AddScreen(ScreenBase screen)
         {
-            nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/assets", "assets"));
-            base.ConfigureConventions(nancyConventions);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override IRootPathProvider RootPathProvider
-        {
-            get { return this; }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string GetRootPath()
-        {
-            return _module.ContentRootPath;
+            _screens.Add(screen);
         }
     }
 }

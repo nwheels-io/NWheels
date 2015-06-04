@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public interface IUIApplicationBuilder<TApp>
-        where TApp : IUIApplication
+    public interface ICodeBehind<in TElement>
+        where TElement : IUIElement
     {
-        void BuildApplication(TApp app);
+        void OnDescribeUI(TElement element);
     }
 }

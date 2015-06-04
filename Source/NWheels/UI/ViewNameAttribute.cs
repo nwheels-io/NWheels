@@ -7,23 +7,23 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
-    public class UITemplateAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+    public class ViewNameAttribute : Attribute
     {
-        public UITemplateAttribute(string templateName)
+        public ViewNameAttribute(string viewName)
         {
-            this.TemplateName = templateName;
+            this.ViewName = viewName;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string TemplateName { get; private set; }
+        public string ViewName { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static UITemplateAttribute FromType(Type type)
+        public static ViewNameAttribute FromType(Type type)
         {
-            return type.GetCustomAttribute<UITemplateAttribute>();
+            return type.GetCustomAttribute<ViewNameAttribute>();
         }
     }
 }

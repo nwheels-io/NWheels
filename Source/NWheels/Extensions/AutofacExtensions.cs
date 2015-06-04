@@ -147,14 +147,15 @@ namespace NWheels.Extensions
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static UIAppEndpointRegistrations<TApp> WithWebEndpoint<TApp>(
-            this UIAppEndpointRegistrations<TApp> registration, 
+            this UIAppEndpointRegistrations<TApp> fluentRegistration, 
             string name = null, 
             string defaultUrl = null,
             bool exposeExceptions = false) 
-            where TApp : class, IUIApplication
+            where TApp : class, IApplication
         {
-            ((IHaveContainerBuilder)registration).Builder.RegisterInstance(new WebAppEndpointRegistration(name, typeof(TApp), defaultUrl, exposeExceptions));
-            return registration;
+            var registration = new WebAppEndpointRegistration(name, typeof(TApp), fluentRegistration.CodeBehindType, defaultUrl, exposeExceptions);
+            ((IHaveContainerBuilder)fluentRegistration).Builder.RegisterInstance(registration);
+            return fluentRegistration;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -513,10 +514,20 @@ namespace NWheels.Extensions
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp>() where TApp : class, IUIApplication
+            public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp>() where TApp : class, IApplication
             {
-                _builder.RegisterType<TApp>().As<TApp, IUIApplication>();
-                return new UIAppEndpointRegistrations<TApp>(_builder);
+                _builder.RegisterType<TApp>().As<TApp, IApplication>();
+                return new UIAppEndpointRegistrations<TApp>(_builder, typeof(TApp), codeBehindType: null);
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp, TCodeBehind>() 
+                where TApp : class, IApplication
+                where TCodeBehind : class, UI.ICodeBehind<TApp>
+            {
+                _builder.RegisterType<TCodeBehind>().As<UI.ICodeBehind<TApp>>();
+                return new UIAppEndpointRegistrations<TApp>(_builder, typeof(TApp), typeof(TCodeBehind));
             }
         }
 
@@ -589,22 +600,40 @@ namespace NWheels.Extensions
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class UIAppEndpointRegistrations<TApp> : IHaveContainerBuilder
-            where TApp : class, IUIApplication
+            where TApp : class, IApplication
         {
-            private readonly ContainerBuilder _builder;
+            private readonly ContainerBuilder _containerBuilder;
+            private readonly Type _applicationType;
+            private readonly Type _codeBehindType;
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public UIAppEndpointRegistrations(ContainerBuilder builder)
+            public UIAppEndpointRegistrations(ContainerBuilder containerBuilder, Type applicationType, Type codeBehindType)
             {
-                _builder = builder;
+                _applicationType = applicationType;
+                _containerBuilder = containerBuilder;
+                _codeBehindType = codeBehindType;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
             ContainerBuilder IHaveContainerBuilder.Builder
             {
-                get { return _builder; }
+                get { return _containerBuilder; }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type ApplicationType
+            {
+                get { return _applicationType; }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type CodeBehindType
+            {
+                get { return _codeBehindType; }
             }
         }
     }
