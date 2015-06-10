@@ -32,7 +32,9 @@ namespace NWheels.Processing.Workflows
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Required, PropertyContract.Semantic.InheritorOf(typeof(IWorkflowCodeBehind))]
+        [PropertyContract.Required, 
+            PropertyContract.Semantic.InheritorOf(typeof(IWorkflowCodeBehind)), 
+            PropertyContract.Storage.Json]
         Type CodeBehindClrType { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

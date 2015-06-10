@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 using Hapil;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
+using NWheels.Conventions.Core;
 using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.Impl;
+using NWheels.Testing;
 using NWheels.Testing.Entities.Puzzle;
 using IR1 = NWheels.Testing.Entities.Puzzle.Interfaces.Repository1;
 using HR1 = NWheels.Puzzle.EntityFramework.ComponentTests.HardCodedImplementations.Repository1;
@@ -50,7 +52,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
             using ( var connection = base.CreateDbConnection() )
             {
-                repoFactory.CreateDataRepository<IR1.IOnlineStoreRepository>(connection, autoCommit: true);
+                repoFactory.NewUnitOfWork<IR1.IOnlineStoreRepository>(autoCommit: true);
             }
         }
 
@@ -115,9 +117,13 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         private EfDataRepositoryFactory CreateDataRepositoryFactory()
         {
-            var metadataCache = base.CreateMetadataCache();
-            var entityFactory = new EfEntityObjectFactory(_dyamicModule, metadataCache);
-            var repoFactory = new EfDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, ResolveAuto<IFrameworkDatabaseConfig>());
+            var configAuto = ResolveAuto<IFrameworkDatabaseConfig>();
+            configAuto.Instance.ConnectionString = ConnectionString;
+
+            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions();
+            var entityFactory = new EntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
+            var repoFactory = new EfDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, configAuto);
+            
             return repoFactory;
         }
 
@@ -128,7 +134,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             var repoFactory = CreateDataRepositoryFactory();
 
             var connection = base.CreateDbConnection();
-            var repo = repoFactory.CreateDataRepository<IR1.IOnlineStoreRepository>(connection, autoCommit: true);
+            var repo = repoFactory.NewUnitOfWork<IR1.IOnlineStoreRepository>(autoCommit: true);
 
             base.CompiledModel = ((EfDataRepositoryBase)repo).CompiledModel;
 

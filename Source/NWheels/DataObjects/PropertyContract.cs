@@ -123,6 +123,7 @@ namespace NWheels.DataObjects
                 public Type Type { get; private set; }
             }
             public class JsonAttribute : StorageTypeAttribute { public JsonAttribute() : base(typeof(JsonStorageType<>)) { } }
+            public class ClrTypeAttribute : StorageTypeAttribute { public ClrTypeAttribute() : base(typeof(ClrTypeStorageType)) { } }
 
             public class RelationalMappingAttribute : PropertyContractAttribute
             {

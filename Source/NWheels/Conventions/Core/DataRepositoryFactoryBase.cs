@@ -100,7 +100,7 @@ namespace NWheels.Conventions.Core
                 _entityContractsInRepository = new HashSet<Type>();
                 _initializers = new List<Action<ConstructorWriter>>();
 
-                this.RepositoryBaseType = typeof(DataRepositoryBase);;
+                this.RepositoryBaseType = typeof(DataRepositoryBase);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -386,12 +386,14 @@ namespace NWheels.Conventions.Core
 
             protected override void ImplementConstructor(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
-                writer.Constructor<ITypeMetadataCache, DbConnection, bool>(
-                    (cw, metadata, connection, autoCommit) => {
+                writer.Constructor<EntityObjectFactory, ITypeMetadataCache, DbConnection, bool>(
+                    (cw, entityFactory, metadata, connection, autoCommit) => {
                         cw.Base(
+                            entityFactory,
                             Static.Func<TModel>(_methodGetOrBuildDbCompieldModel, metadata, connection),
                             connection,
                             autoCommit);
+                        EntityFactoryField.Assign(entityFactory);
                         Initializers.ForEach(init => init(cw));
                     });
             }
@@ -409,32 +411,9 @@ namespace NWheels.Conventions.Core
                         m.If(_compiledModelField == m.Const<TModel>(null)).Then(() => {
                             m.Lock(_compiledModelSyncRootField, millisecondsTimeout: 10000).Do(() => {
                                 m.If(_compiledModelField == m.Const<TModel>(null)).Then(() => {
+                                    
+                                    ImplementBuildDbCompiledModel(m, metadataCache, connection);
 
-                                    //var modelBuilderLocal = m.Local<DbModelBuilder>(initialValue: m.New<DbModelBuilder>());
-                                    //modelBuilderLocal.Prop(x => x.Conventions).Void(x => x.Add, m.NewArray<IConvention>(values:
-                                    //    m.New<NoUnderscoreForeignKeyNamingConvention>()
-                                    //));
-
-                                    //var typeMetadataLocal = m.Local<ITypeMetadata>();
-                                    //var entityTypeConfigurationLocal = m.Local<object>();
-
-                                    //foreach (var entity in _entitiesInRepository)
-                                    //{
-                                    //    entity.EnsureImplementationType();
-
-                                    //    var entityConfigurationWriter = new EfEntityConfigurationWriter(
-                                    //        entity.Metadata,
-                                    //        m,
-                                    //        modelBuilderLocal,
-                                    //        metadataCache,
-                                    //        typeMetadataLocal,
-                                    //        entityTypeConfigurationLocal);
-
-                                    //    entityConfigurationWriter.WriteEntityTypeConfiguration();
-                                    //}
-
-                                    //var modelLocal = m.Local(initialValue: modelBuilderLocal.Func<DbConnection, DbModel>(x => x.Build, connection));
-                                    //_compiledModelField.Assign(modelLocal.Func<DbCompiledModel>(x => x.Compile));
                                 });
                             });
                         });
@@ -445,7 +424,10 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected abstract void ImplementBuildDbCompiledModel(ImplementationClassWriter<TT.TInterface> writer);
+            protected abstract void ImplementBuildDbCompiledModel(
+                FunctionMethodWriter<TModel> writer, 
+                Operand<ITypeMetadataCache> metadataCache,
+                Operand<TConnection> connection);
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
             

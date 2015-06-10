@@ -15,7 +15,7 @@ using NWheels.Testing;
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
     [TestFixture]
-    public abstract class DatabaseTestBase : CoreUnitTestBase
+    public abstract class DatabaseTestBase : UnitTestBase
     {
         public const string DatabaseName = "NWheelsEFTests";
 

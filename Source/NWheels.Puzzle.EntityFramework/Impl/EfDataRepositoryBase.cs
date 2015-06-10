@@ -15,77 +15,35 @@ using NWheels.Puzzle.EntityFramework.Conventions;
 using System.Reflection;
 using Autofac;
 using Hapil;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
+using NWheels.Entities.Core;
 
 namespace NWheels.Puzzle.EntityFramework.Impl
 {
-    public abstract class EfDataRepositoryBase : IApplicationDataRepository
+    public abstract class EfDataRepositoryBase : DataRepositoryBase
     {
         private readonly DbCompiledModel _compiledModel;
-        private readonly bool _autoCommit;
         private readonly DbConnection _connection;
+        private readonly IEntityObjectFactory _entityFactory;
         private ObjectContext _objectContext;
-        private UnitOfWorkState _currentState;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected EfDataRepositoryBase(DbCompiledModel compiledModel, DbConnection connection, bool autoCommit)
+        protected EfDataRepositoryBase(IEntityObjectFactory entityFactory, DbCompiledModel compiledModel, DbConnection connection, bool autoCommit)
+            : base(autoCommit)
         {
+            _entityFactory = entityFactory;
             _compiledModel = compiledModel;
-            _autoCommit = autoCommit;
             _connection = connection;
             _objectContext = compiledModel.CreateObjectContext<ObjectContext>(connection);
-            _currentState = UnitOfWorkState.Untouched;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Dispose()
+        public override void Dispose()
         {
             _objectContext.Dispose();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public abstract Type[] GetEntityTypesInRepository();
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void CommitChanges()
-        {
-            ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
-            _objectContext.SaveChanges(SaveOptions.AcceptAllChangesAfterSave);
-            _currentState = UnitOfWorkState.Committed;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void RollbackChanges()
-        {
-            ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
-            _objectContext.Dispose();
-            _connection.Dispose();
-            _currentState = UnitOfWorkState.RolledBack;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public bool IsAutoCommitMode
-        {
-            get
-            {
-                return _autoCommit;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public UnitOfWorkState UnitOfWorkState
-        {
-            get
-            {
-                return _currentState;
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -100,9 +58,9 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal void ValidateOperationalState()
+        public IEntityObjectFactory EntityFactory
         {
-            ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
+            get { return _entityFactory; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -124,12 +82,17 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ValidateState(params UnitOfWorkState[] allowedStates)
+        protected override void OnCommitChanges()
         {
-            if ( !allowedStates.Contains(_currentState) )
-            {
-                throw new InvalidOperationException("Operation cannot be performed when unit of work is in the state: " + _currentState);
-            }
+            _objectContext.SaveChanges(SaveOptions.AcceptAllChangesAfterSave);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnRollbackChanges()
+        {
+            _objectContext.Dispose();
+            _connection.Dispose();
         }
     }
 }

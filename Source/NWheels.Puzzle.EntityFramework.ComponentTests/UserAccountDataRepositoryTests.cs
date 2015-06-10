@@ -6,10 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Hapil;
 using NUnit.Framework;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.Impl;
+using NWheels.Testing;
 using NWheels.Testing.DataObjects;
 using IR3A = NWheels.Testing.Entities.Puzzle.Interfaces.Repository3A;
 using IR3B = NWheels.Testing.Entities.Puzzle.Interfaces.Repository3B;
@@ -47,7 +49,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var metadataCache = base.CreateMetadataCache(GetRepositoryMixinsRegistrations());
+            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(GetRepositoryMixinsRegistrations());
 
             //-- Act
 
@@ -65,8 +67,8 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
         {
             //-- Arrange
 
-            var metadataCache = base.CreateMetadataCache(GetRepositoryMixinsRegistrations());
-            var entityObjectFactory = new EfEntityObjectFactory(_dynamicModule, metadataCache);
+            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(GetRepositoryMixinsRegistrations());
+            var entityObjectFactory = new EntityObjectFactory(Framework.Components, _dynamicModule, metadataCache);
 
             //-- Act
 
@@ -90,7 +92,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
             using ( var connection = base.CreateDbConnection() )
             {
-                repoFactory.CreateDataRepository<IR3B.IMyAppDataRepository>(connection, autoCommit: true);
+                repoFactory.NewUnitOfWork<IR3B.IMyAppDataRepository>(autoCommit: true);
             }
         }
 
@@ -98,8 +100,8 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         private EfDataRepositoryFactory CreateDataRepositoryFactory()
         {
-            var metadataCache = base.CreateMetadataCache(GetRepositoryMixinsRegistrations());
-            var entityFactory = new EfEntityObjectFactory(_dynamicModule, metadataCache);
+            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(GetRepositoryMixinsRegistrations());
+            var entityFactory = new EntityObjectFactory(Framework.Components, _dynamicModule, metadataCache);
             var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, ResolveAuto<IFrameworkDatabaseConfig>());
 
             return repoFactory;
@@ -112,7 +114,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
             var repoFactory = CreateDataRepositoryFactory();
 
             var connection = base.CreateDbConnection();
-            var repo = repoFactory.CreateDataRepository<IR3B.IMyAppDataRepository>(connection, autoCommit: true);
+            var repo = repoFactory.NewUnitOfWork<IR3B.IMyAppDataRepository>(autoCommit: true);
 
             base.CompiledModel = ((EfDataRepositoryBase)repo).CompiledModel;
 

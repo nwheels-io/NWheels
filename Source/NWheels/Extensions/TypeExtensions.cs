@@ -17,6 +17,7 @@ namespace NWheels.Extensions
 
         public static string AssemblyQualifiedNameNonVersioned(this Type type)
         {
+            //TODO: recurse to handle generic type parameters as well!
             return string.Format("{0}, {1}", type.FullName, type.Assembly.GetName().Name);
         }
 

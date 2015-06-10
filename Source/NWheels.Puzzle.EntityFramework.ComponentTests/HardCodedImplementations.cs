@@ -18,6 +18,7 @@ using NWheels.Puzzle.EntityFramework.EFConventions;
 using NWheels.Puzzle.EntityFramework.Impl;
 using System.Data.Entity.ModelConfiguration;
 using System.Linq.Expressions;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.Testing.Entities.Puzzle;
 
@@ -50,7 +51,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 private IEntityRepository<Interfaces.Repository1.IProduct> m_Products;
 
                 public DataRepositoryObject_DataRepository(DbConnection connection, bool autoCommit)
-                    : base(GetOrBuildDbCompoledModel(connection), connection, autoCommit)
+                    : base(new HardCodedEntityFactory(), GetOrBuildDbCompoledModel(connection), connection, autoCommit)
                 {
                     this.m_Products = new EfEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product>(this);
                     this.m_Orders = new EfEntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order>(this);
@@ -126,7 +127,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                 private IEntityRepository<Interfaces.Repository1.IProduct> m_Products;
 
                 public DataRepositoryObject_CustomNames(ITypeMetadataCache metadataCache, DbConnection connection, bool autoCommit)
-                    : base(GetOrBuildDbCompiledModel(metadataCache, connection), connection, autoCommit)
+                    : base(new HardCodedEntityFactory(), GetOrBuildDbCompiledModel(metadataCache, connection), connection, autoCommit)
                 {
                     this.m_Products = new EfEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product>(this);
                     this.m_Orders = new EfEntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order>(this);
@@ -223,18 +224,42 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public class HardCodedEntityFactory : IEntityObjectFactory
+            {
+                public TEntityContract NewEntity<TEntityContract>() where TEntityContract : class
+                {
+                    if ( typeof(TEntityContract) == typeof(Interfaces.Repository1.IOrder) )
+                    {
+                        return (TEntityContract)(object)new EntityObject_Order();
+                    }
+                    if ( typeof(TEntityContract) == typeof(Interfaces.Repository1.IOrderLine) )
+                    {
+                        return (TEntityContract)(object)new EntityObject_OrderLine();
+                    }
+                    if ( typeof(TEntityContract) == typeof(Interfaces.Repository1.IProduct) )
+                    {
+                        return (TEntityContract)(object)new EntityObject_Product();
+                    }
+
+                    throw new NotSupportedException(
+                        string.Format("Entity contract '{0}' is not supported by HardCodedEntityFactory.", typeof(TEntityContract).Name));
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public class EntityObject_Order : Interfaces.Repository1.IOrder
             {
                 private int m_Id;
                 private ICollection<EntityObject_OrderLine> m_OrderLines = new HashSet<EntityObject_OrderLine>();
-                private EfEntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine> m_OrderLines_Adapter;
+                private EntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine> m_OrderLines_Adapter;
                 private DateTime m_PlacedAt;
                 private Interfaces.Repository1.OrderStatus m_Status;
 
                 public EntityObject_Order()
                 {
                     this.m_OrderLines_Adapter =
-                        new EfEntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine>(this.m_OrderLines);
+                        new EntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine>(this.m_OrderLines);
                     this.m_Status = Interfaces.Repository1.OrderStatus.New;
                }
 
@@ -254,7 +279,7 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
                     get { return this.m_OrderLines; }
                     set
                     {
-                        this.m_OrderLines_Adapter = new EfEntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine>(value);
+                        this.m_OrderLines_Adapter = new EntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine>(value);
                         this.m_OrderLines = value;
                     }
                 }

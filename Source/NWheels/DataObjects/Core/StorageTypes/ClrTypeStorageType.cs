@@ -3,25 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
+using NWheels.Extensions;
 
 namespace NWheels.DataObjects.Core.StorageTypes
 {
-    public class JsonStorageType<TContractValue> : IStorageDataType<TContractValue, string>, IStorageContractConversionWriter
+    public class ClrTypeStorageType : IStorageDataType<System.Type, string>, IStorageContractConversionWriter
     {
-        public string ContractToStorage(TContractValue contractValue)
+        public string ContractToStorage(Type contractValue)
         {
-            return JsonConvert.SerializeObject(contractValue);
+            return contractValue.AssemblyQualifiedNameNonVersioned();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TContractValue StorageToContract(string storageValue)
+        public Type StorageToContract(string storageValue)
         {
-            return JsonConvert.DeserializeObject<TContractValue>(storageValue);
+            return Type.GetType(storageValue);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -34,21 +34,25 @@ namespace NWheels.DataObjects.Core.StorageTypes
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void IStorageContractConversionWriter.WriteContractToStorageConversion(
-            MethodWriterBase method, 
-            IOperand<TypeTemplate.TContract> contractValue, 
+            MethodWriterBase method,
+            IOperand<TypeTemplate.TContract> contractValue,
             MutableOperand<TypeTemplate.TValue> storageValue)
         {
-            storageValue.Assign(Static.Func(JsonConvert.SerializeObject, contractValue.CastTo<object>()).CastTo<TypeTemplate.TValue>());
+            storageValue.Assign(
+                Static.Func(NWheels.Extensions.TypeExtensions.AssemblyQualifiedNameNonVersioned, contractValue.CastTo<Type>())
+                .CastTo<TypeTemplate.TValue>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void IStorageContractConversionWriter.WriteStorageToContractConversion(
-            MethodWriterBase method, 
-            MutableOperand<TypeTemplate.TContract> contractValue, 
+            MethodWriterBase method,
+            MutableOperand<TypeTemplate.TContract> contractValue,
             IOperand<TypeTemplate.TValue> storageValue)
         {
-            contractValue.Assign(Static.Func(JsonConvert.DeserializeObject<TypeTemplate.TContract>, storageValue.CastTo<string>()).CastTo<TypeTemplate.TContract>());
+            contractValue.Assign(
+                Static.Func(Type.GetType, storageValue.CastTo<string>())
+                .CastTo<TypeTemplate.TContract>());
         }
     }
 }

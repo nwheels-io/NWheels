@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using NWheels.Conventions;
+using NWheels.Conventions.Core;
 using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Hosting;
@@ -20,7 +21,7 @@ namespace NWheels.Puzzle.EntityFramework
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<EfEntityObjectFactory>().SingleInstance();
+            builder.RegisterType<EntityObjectFactory>().SingleInstance();
             builder.RegisterType<EfDataRepositoryFactory>().As<IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterInstance(SqlClientFactory.Instance).As<DbProviderFactory>();
 

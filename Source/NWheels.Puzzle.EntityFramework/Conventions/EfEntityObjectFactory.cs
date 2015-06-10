@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if false
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -8,6 +10,7 @@ using Hapil;
 using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
@@ -22,7 +25,7 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public EfEntityObjectFactory(DynamicModule module, TypeMetadataCache metadataCache)
-            : base(module, context => new[] { new EntityObjectConvention(metadataCache) })
+            : base(module, context => new[] { new EntityObjectFactory. EntityObjectConvention(metadataCache) })
         {
             _metadataCache = metadataCache;
         }
@@ -322,3 +325,6 @@ namespace NWheels.Puzzle.EntityFramework.Conventions
         }
     }
 }
+
+
+#endif

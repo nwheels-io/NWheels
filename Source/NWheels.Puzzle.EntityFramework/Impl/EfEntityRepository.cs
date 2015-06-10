@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
+using Autofac;
 using NWheels.Entities;
 
 namespace NWheels.Puzzle.EntityFramework.Impl
@@ -86,8 +87,7 @@ namespace NWheels.Puzzle.EntityFramework.Impl
 
         public TEntityContract New()
         {
-            _ownerRepo.ValidateOperationalState();
-            return _objectSet.CreateObject<TEntityImpl>();
+            return _ownerRepo.EntityFactory.NewEntity<TEntityContract>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

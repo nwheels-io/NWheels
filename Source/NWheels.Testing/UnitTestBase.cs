@@ -38,8 +38,8 @@ namespace NWheels.Testing
 
         protected Auto<T> ResolveAuto<T>() where T : class
         {
-            return Auto.Of<T>(null);
-            //return _framework.Components.Resolve<Auto<T>>();
+            //return Auto.Of<T>(null);
+            return _framework.Components.Resolve<Auto<T>>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

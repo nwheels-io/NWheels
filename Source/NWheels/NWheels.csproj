@@ -99,8 +99,13 @@
     <Compile Include="Conventions\Core\ConfigurationObjectFactory.cs" />
     <Compile Include="Conventions\Core\DataRepositoryFactoryBase.cs" />
     <Compile Include="Conventions\Core\IConfigurationObjectFactory.cs" />
+    <Compile Include="Conventions\Core\IEntityObjectFactory.cs" />
     <Compile Include="Conventions\Core\LoggerObjectFactory.cs" />
     <Compile Include="Conventions\Core\EntityObjectFactory.cs" />
+    <Compile Include="DataObjects\Core\IStorageContractConversionWriter.cs" />
+    <Compile Include="DataObjects\Core\StorageTypes\ClrTypeStorageType.cs" />
+    <Compile Include="DataObjects\Core\StorageTypes\DualValueStates.cs" />
+    <Compile Include="Entities\Core\EntityObjectBase.cs" />
     <Compile Include="Entities\EntityState.cs" />
     <Compile Include="Entities\IEntityTrigger.cs" />
     <Compile Include="Entities\Core\DefaultIdMetadataConvention.cs" />

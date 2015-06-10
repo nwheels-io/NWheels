@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
+using NWheels.Conventions.Core;
 using NWheels.Puzzle.EntityFramework.Conventions;
 using NWheels.Puzzle.EntityFramework.Impl;
 using NWheels.Testing;
@@ -14,7 +15,7 @@ using NWheels.Testing.Entities.Puzzle;
 namespace NWheels.Puzzle.EntityFramework.ComponentTests
 {
     [TestFixture]
-    public class EfEntityObjectFactoryTests : NUnitEmittedTypesTestBase
+    public class EfEntityObjectFactoryTests : DynamicTypeUnitTestBase
     {
         [Test]
         public void CanCreateFlatEntityObject()
@@ -292,10 +293,10 @@ namespace NWheels.Puzzle.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private EfEntityObjectFactory CreateEntityObjectFactory()
+        private EntityObjectFactory CreateEntityObjectFactory()
         {
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions();
-            return new EfEntityObjectFactory(base.Module, metadataCache);
+            return new EntityObjectFactory(Framework.Components, base.DyamicModule, metadataCache);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

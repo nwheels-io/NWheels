@@ -11,13 +11,14 @@ using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
+using NWheels.DataObjects.Core.StorageTypes;
 using NWheels.Entities;
 using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Conventions.Core
 {
-    public class EntityObjectFactory : ConventionObjectFactory
+    public class EntityObjectFactory : ConventionObjectFactory, IEntityObjectFactory
     {
         private readonly IComponentContext _components;
         private readonly TypeMetadataCache _metadataCache;
@@ -56,7 +57,7 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class EntityObjectConvention : ImplementationConvention
+        public class EntityObjectConvention : ImplementationConvention
         {
             private readonly TypeMetadataCache _metadataCache;
             private readonly List<Action<ConstructorWriter>> _initializers;
@@ -137,8 +138,53 @@ namespace NWheels.Conventions.Core
 
                     var explicitImpl = writer.ImplementInterfaceExplicitly<TypeTemplate.TInterface>();
 
+                    explicitImpl.AllProperties(IsSpecialStorageTypeProperty).ForEach(p => ImplementSpecialStorageTypeProperty(explicitImpl, p));
                     explicitImpl.AllProperties(IsSingleNavigationProperty).ForEach(p => ImplementSingleNavigationProperty(explicitImpl, p));
                     explicitImpl.AllProperties(IsNavigationCollectionProperty).ForEach(p => ImplementNavigationCollectionProperty(explicitImpl, p));
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementSpecialStorageTypeProperty(ImplementationClassWriter<TT.TInterface> explicitImpl, PropertyInfo property)
+            {
+                var propertyMetadata = _entityMetadata.GetPropertyByDeclaration(property);
+                var storageAdapter = propertyMetadata.RelationalMapping.StorageType;
+                var conversionWriter = (IStorageContractConversionWriter)storageAdapter;
+
+                using ( TT.CreateScope<TT.TContract, TT.TValue>(propertyMetadata.ClrType, storageAdapter.StorageDataType) )
+                {
+                    var contractField = explicitImpl.Field<TT.TContract>("m_" + property.Name + "_ContractValue");
+                    var storageField = explicitImpl.Field<TT.TValue>("m_" + property.Name + "_StorageValue");
+                    var stateField = explicitImpl.Field<DualValueStates>("m_" + property.Name + "_ValueState");
+
+                    explicitImpl.Property(property).Implement(
+                        getter: p => p.Get(m => {
+                            m.If(stateField == DualValueStates.Storage).Then(() => {
+                                conversionWriter.WriteStorageToContractConversion(m, contractField, storageField);
+                                stateField.Assign(stateField | DualValueStates.Contract);
+                            });
+                            m.Return(contractField.CastTo<TT.TProperty>());
+                        }),
+                        setter: p => p.Set((m, value) => {
+                            contractField.Assign(value.CastTo<TT.TContract>());
+                            stateField.Assign(DualValueStates.Contract);
+                        })
+                    );
+
+                    explicitImpl.NewVirtualWritableProperty<TT.TValue>(property.Name).Implement(
+                        getter: p => p.Get(m => {
+                            m.If(stateField == DualValueStates.Contract).Then(() => {
+                                conversionWriter.WriteContractToStorageConversion(m, contractField, storageField);
+                                stateField.Assign(stateField | DualValueStates.Storage);
+                            });
+                            m.Return(storageField);
+                        }),
+                        setter: p => p.Set((m, value) => {
+                            storageField.Assign(value);
+                            stateField.Assign(DualValueStates.Storage);
+                        })
+                    );
                 }
             }
 
@@ -266,7 +312,16 @@ namespace NWheels.Conventions.Core
 
             private bool IsScalarProperty(PropertyInfo property)
             {
-                return (_entityMetadata.GetPropertyByDeclaration(property).Kind == PropertyKind.Scalar);
+                var propertyMetadata = _entityMetadata.GetPropertyByDeclaration(property);
+                return (propertyMetadata.Kind == PropertyKind.Scalar && propertyMetadata.RelationalMapping.StorageType == null);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool IsSpecialStorageTypeProperty(PropertyInfo property)
+            {
+                var propertyMetadata = _entityMetadata.GetPropertyByDeclaration(property);
+                return (propertyMetadata.Kind == PropertyKind.Scalar && propertyMetadata.RelationalMapping.StorageType != null);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

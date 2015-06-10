@@ -250,7 +250,7 @@ namespace NWheels.UnitTests.Processing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private enum PhilisopherState
+        public enum PhilisopherState
         {
             Thinking,
             AcquiringForks,
@@ -259,7 +259,7 @@ namespace NWheels.UnitTests.Processing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private enum PhilisopherTrigger
+        public enum PhilisopherTrigger
         {
             Hungry,
             GotForks,
