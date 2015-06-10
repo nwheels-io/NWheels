@@ -14,16 +14,12 @@ namespace NWheels.Processing
 {
     public class WorkflowEngineFeatureLoader : Module
     {
-        #region Overrides of Module
-
         protected override void Load(ContainerBuilder builder)
         {
             builder.NWheelsFeatures().Logging().RegisterLogger<IWorkflowEngineLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<TransientWorkflowReadyQueue.ILogger>();
-            builder.NWheelsFeatures().Entities().RegisterDataRepository<IWorkflowDataRepository>();
+            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<TransientWorkflowReadyQueue>().As<IWorkflowReadyQueue>();
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<WorkflowEngine>().As<IWorkflowEngine, IWorkflowInstanceContainer>();
         }
-
-        #endregion
     }
 }

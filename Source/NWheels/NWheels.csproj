@@ -265,7 +265,6 @@
     <Compile Include="Processing\Workflows\AbstractWorkflow.cs" />
     <Compile Include="Processing\Jobs\ApplicationJobBase.cs" />
     <Compile Include="Processing\Rules\Core\IRuleActionContext.cs" />
-    <Compile Include="Processing\Workflows\Core\IWorkflowDataRepository.cs" />
     <Compile Include="Processing\Workflows\Core\IWorkflowEngineLogger.cs" />
     <Compile Include="Processing\Workflows\Core\IWorkflowInstanceContainer.cs" />
     <Compile Include="Processing\Workflows\Core\IWorkflowInstanceController.cs" />
