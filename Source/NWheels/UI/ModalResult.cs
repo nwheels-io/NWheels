@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public static class Toolbox
+    public enum ModalResult
     {
-        public interface IScreenPartContainerWidget : IWidget
-        {
-        }
+        None,
+        OK,
+        Cancel
     }
 }

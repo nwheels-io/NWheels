@@ -153,7 +153,7 @@ namespace NWheels.Extensions
             bool exposeExceptions = false) 
             where TApp : class, IApplication
         {
-            var registration = new WebAppEndpointRegistration(name, typeof(TApp), fluentRegistration.CodeBehindType, defaultUrl, exposeExceptions);
+            var registration = new WebAppEndpointRegistration(name, typeof(TApp), defaultUrl, exposeExceptions);
             ((IHaveContainerBuilder)fluentRegistration).Builder.RegisterInstance(registration);
             return fluentRegistration;
         }
@@ -517,17 +517,7 @@ namespace NWheels.Extensions
             public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp>() where TApp : class, IApplication
             {
                 _builder.RegisterType<TApp>().As<TApp, IApplication>();
-                return new UIAppEndpointRegistrations<TApp>(_builder, typeof(TApp), codeBehindType: null);
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp, TCodeBehind>() 
-                where TApp : class, IApplication
-                where TCodeBehind : class, UI.ICodeBehind<TApp>
-            {
-                _builder.RegisterType<TCodeBehind>().As<UI.ICodeBehind<TApp>>();
-                return new UIAppEndpointRegistrations<TApp>(_builder, typeof(TApp), typeof(TCodeBehind));
+                return new UIAppEndpointRegistrations<TApp>(_builder, typeof(TApp));
             }
         }
 
@@ -604,15 +594,13 @@ namespace NWheels.Extensions
         {
             private readonly ContainerBuilder _containerBuilder;
             private readonly Type _applicationType;
-            private readonly Type _codeBehindType;
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public UIAppEndpointRegistrations(ContainerBuilder containerBuilder, Type applicationType, Type codeBehindType)
+            public UIAppEndpointRegistrations(ContainerBuilder containerBuilder, Type applicationType)
             {
                 _applicationType = applicationType;
                 _containerBuilder = containerBuilder;
-                _codeBehindType = codeBehindType;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -627,13 +615,6 @@ namespace NWheels.Extensions
             public Type ApplicationType
             {
                 get { return _applicationType; }
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public Type CodeBehindType
-            {
-                get { return _codeBehindType; }
             }
         }
     }

@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 namespace NWheels.UI
 {
     /// <summary>
-    /// Defines a UI application. This is UIDL root object.
-    /// An Application declares its Screens and Screen Parts.
+    /// This interface distinguishes valid containers for UI elements such as 
+    /// commands, alerts, and notifications.
     /// </summary>
-    public interface IApplication : IUIElement, IUIElementContainer
+    public interface IUIElementContainer
     {
     }
 }

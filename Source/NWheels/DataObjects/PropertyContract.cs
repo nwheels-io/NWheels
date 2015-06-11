@@ -267,6 +267,12 @@ namespace NWheels.DataObjects
                 }
                 public bool Ascending { get; private set; }
             }
+            public class PersistedOnUserMachineAttribute : PropertyContractAttribute
+            {
+                public PersistedOnUserMachineAttribute()
+                {
+                }
+            }
         }
 
         public static class Relation

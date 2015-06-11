@@ -10,116 +10,69 @@ using NWheels.UI;
 
 namespace NWheels.Domains.Security.UI
 {
-    public interface IUserLoginFormWidget : IWidget, IBound<IUserLoginFormWidget, IUserLoginFormModel, IUserLoginFormState>
+    public class UserLoginForm : WidgetBase<UserLoginForm.IView, UserLoginForm.IData, UserLoginForm.IState>
     {
-        bool SignUpEnabled { get; set; }
-        bool ForgotPasswordEnabled { get; set; }
-
-        string LoginNameLabel { get; set; }
-        string PasswordLabel { get; set; }
-        string LoginNamePlaceholder { get; set; }
-        string PasswordPlaceholder { get; set; }
-        string SignUpText { get; set; }
-        string ForgotPasswordText { get; set; }
-
-        ICommand LogIn { get; set; }
-        ICommand SignUp { get; set; }
-        ICommand ForgotPassword { get; set; }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    [ViewModelContract]
-    public interface IUserLoginFormModel
-    {
-        [PropertyContract.Required]
-        string LoginName { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        [PropertyContract.Required, PropertyContract.Semantic.Password]
-        string Password { get; set; }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    [ViewModelContract]
-    public interface IUserLoginFormState
-    {
-        bool RememberMe { get; set; }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public static class UserLoginFormFluentApi
-    {
-        public static IUserLoginFormWidget LoginNameLabel(this IUserLoginFormWidget widget, string value)
+        public override void DescribePresenter(IPresenterBuilder<IView, IData, IState> mvp)
         {
-            widget.LoginNameLabel = value;
-            return widget;
+            mvp.On(mvp.View.LogIn.OnExecuting)
+                .CallApi<ISecurityDomainApi>().RequestReply((api, data, state, input) => api.LogUserIn(data.LoginName, data.Password))
+                .Then(
+                    onSuccess: b => b.Broadcast(mvp.View.UserLoggedIn).BubbleUp(),
+                    onFailure: b => b.ShowAlert().From<IView>().Alert((v, d, s, failure) => v.LoginHasFailed(failure.ReasonText)).Inline());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static IUserLoginFormWidget PasswordLabel(this IUserLoginFormWidget widget, string value)
+        public interface IView : IUIElementContainer
         {
-            widget.PasswordLabel = value;
-            return widget;
+            string LoginNameLabel { get; set; }
+            string PasswordLabel { get; set; }
+            string LoginNamePlaceholder { get; set; }
+            string PasswordPlaceholder { get; set; }
+            string SignUpText { get; set; }
+            string ForgotPasswordText { get; set; }
+
+            ICommand LogIn { get; }
+            ICommand SignUp { get; }
+            ICommand ForgotPassword { get; }
+            INotification UserLoggedIn { get; }
+            IUserAlert LoginHasFailed(string reason);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ViewModelContract]
+        public interface IData
+        {
+            [PropertyContract.Required]
+            string LoginName { get; set; }
+            [PropertyContract.Required, PropertyContract.Semantic.Password]
+            string Password { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        public static IUserLoginFormWidget LoginNamePlaceholder(this IUserLoginFormWidget widget, string value)
+        [ViewModelContract]
+        public interface IState
         {
-            widget.LoginNamePlaceholder = value;
-            return widget;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        public static IUserLoginFormWidget PasswordPlaceholder(this IUserLoginFormWidget widget, string value)
-        {
-            widget.PasswordPlaceholder = value;
-            return widget;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        public static IUserLoginFormWidget SignUpText(this IUserLoginFormWidget widget, string value)
-        {
-            widget.SignUpText = value;
-            return widget;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static IUserLoginFormWidget ForgotPasswordText(this IUserLoginFormWidget widget, string value)
-        {
-            widget.ForgotPasswordText = value;
-            return widget;
+            [PropertyContract.Presentation.PersistedOnUserMachine]
+            bool RememberMe { get; set; }
         }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class UserLoginFormWidget : ICodeBehind<IUserLoginFormWidget>
+    public interface ISecurityDomainApi
     {
-        private readonly ISecurityDomainTranslations _translations;
+        [DomainApiFault(typeof(LoginFailedApiFault))]
+        void LogUserIn(string loginName, string password);
+    }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public UserLoginFormWidget(ISecurityDomainTranslations translations)
-        {
-            _translations = translations;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void OnDescribeUI(IUserLoginFormWidget widget)
-        {
-            var t = _translations;
-            widget.LoginNameLabel(t.LoginName).PasswordLabel(t.Password).LoginNamePlaceholder(t.LoginName).PasswordPlaceholder(t.Password);
-        }
+    public enum LoginFailedApiFault
+    {
+        LoginIncorrect,
+        PasswordExpired,
+        AccountLockedOut
     }
 }
 

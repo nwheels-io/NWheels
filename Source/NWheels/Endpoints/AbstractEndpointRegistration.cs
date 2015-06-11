@@ -173,14 +173,9 @@ namespace NWheels.Endpoints
     public class WebAppEndpointRegistration : AbstractEndpointRegistration
     {
         public WebAppEndpointRegistration(
-            string name, Type contract, Type codeBehindType, string defaultUrl, bool exposeExceptions)
+            string name, Type contract, string defaultUrl, bool exposeExceptions)
             : base(name, contract, defaultUrl, publishMetadata: false, defaultMetadataUrl: null, exposeExceptionDatails: exposeExceptions)
         {
-            this.CodeBehindType = codeBehindType;
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public Type CodeBehindType { get; private set; }
     }
 }

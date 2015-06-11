@@ -6,37 +6,17 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public interface IScreen : IUIElement
+    /// <summary>
+    /// Defines a screen of an applicaiton. 
+    /// Screen is the top-level encapsulation of UI elements. 
+    /// User can only interact with one Screen at a time.
+    /// A Screen can declare contained Widgets and nested Screen Parts.
+    /// </summary>
+    /// <typeparamref name="TInputParam">
+    /// Type of screen input parameter model. Use IEmptyInputParam if there is no input parameter.
+    /// </typeparamref>
+    public interface IScreen<out TInputParam> : IUIElement, IUIElementContainer, INavigationTarget<TInputParam>
+        where TInputParam : class
     {
-        string Icon { get; set; }
-        string Title { get; set; }
-        string SubTitle { get; set; }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public static class ScreenFluentApi
-    {
-        public static T Icon<T>(this T screen, string icon) where T : IScreen
-        {
-            screen.Icon = icon;
-            return screen;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static T Title<T>(this T screen, string title) where T : IScreen
-        {
-            screen.Icon = title;
-            return screen;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static T SubTitle<T>(this T screen, string subTitle) where T : IScreen
-        {
-            screen.SubTitle = subTitle;
-            return screen;
-        }
     }
 }

@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.UI
+namespace NWheels.UI.Core
 {
-    public static class Toolbox
+    public class AlterModelBehaviorDescription
     {
-        public interface IScreenPartContainerWidget : IWidget
-        {
-        }
     }
 }

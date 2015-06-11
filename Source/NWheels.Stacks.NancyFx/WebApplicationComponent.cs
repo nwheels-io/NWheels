@@ -17,7 +17,7 @@ namespace NWheels.Stacks.NancyFx
     {
         private readonly WebAppEndpointRegistration _endpointRegistration;
         private readonly IWebApplicationLogger _logger;
-        private readonly ApplicationBase _application;
+        private readonly ApplicationDescription _application;
         private NancyHost _host;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ namespace NWheels.Stacks.NancyFx
         {
             _endpointRegistration = endpointRegistration;
             _logger = logger;
-            _application = (ApplicationBase)components.Resolve(endpointRegistration.Contract);
+            _application = (ApplicationDescription)components.Resolve(endpointRegistration.Contract);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -6,28 +6,30 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
+    /// <summary>
+    /// Defines a Command, which encapsulates information required to execute an action upon a request by user. 
+    /// </summary>
     public interface ICommand : IUIElement
     {
-        string Icon { get; set; }
-        string Text { get; set; }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public static class CommandFluentApi
-    {
-        public static ICommand Icon(this ICommand command, string value)
-        {
-            command.Icon = value;
-            return command;
-        }
+        /// <summary>
+        /// Qualified name of the command, which uniquely identifies it.
+        /// </summary>
+        string QualifiedName { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static ICommand Title(this ICommand command, string value)
-        {
-            command.Icon = value;
-            return command;
-        }
+        /// <summary>
+        /// Broadcast when the command is triggered to execute.
+        /// QualifiedName is passed as notification payload.
+        /// </summary>
+        INotification<string> OnExecuting { get; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Broadcast when the Enabled/Disabled state of the command needs to be updated.
+        /// QualifiedName is passed as notification payload.
+        /// </summary>
+        INotification<string> OnUpdating { get; }
     }
 }

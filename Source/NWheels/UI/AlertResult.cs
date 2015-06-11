@@ -6,10 +6,15 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public static class Toolbox
+    public enum AlertResult
     {
-        public interface IScreenPartContainerWidget : IWidget
-        {
-        }
+        None,
+        OK,
+        Cancel,
+        Abort,
+        Retry,
+        Ignore,
+        Yes,
+        No,
     }
 }

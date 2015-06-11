@@ -12,17 +12,17 @@ namespace NWheels.Stacks.NancyFx
 {
     public class WebApplicationModule : NancyModule
     {
-        private readonly ApplicationBase _application;
+        private readonly ApplicationDescription _application;
         private readonly string _contentRootPath;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public WebApplicationModule(ApplicationBase application)
+        public WebApplicationModule(ApplicationDescription application)
         {
             _application = application;
 
-            base.Get["/"] = parameters => View[GetSkinViewPath(_application.InitialScreen.ViewName)];
-            base.Get["/init.json"] = parameters => Response.AsJson<ScreenBase>(_application.InitialScreen);
+            base.Get["/"] = parameters => View[GetSkinViewPath(_application.InitialScreen.IdName)];
+            base.Get["/init.json"] = parameters => Response.AsJson<ScreenDescription>(_application.InitialScreen);
 
             _contentRootPath = Path.Combine(Path.GetDirectoryName(_application.GetType().Assembly.Location), _application.IdName);
         }

@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 namespace NWheels.UI
 {
     /// <summary>
-    /// Defines a UI application. This is UIDL root object.
-    /// An Application declares its Screens and Screen Parts.
+    /// Encasulates error information for a failed promise.
     /// </summary>
-    public interface IApplication : IUIElement, IUIElementContainer
+    public interface IPromiseFailureInfo
     {
+        string ReasonText { get; }
+        object ReasonCode { get; }
     }
 }

@@ -6,19 +6,11 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public interface IWidget : IUIElement
-    {
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public interface ICompositeWidget : IWidget, IEnumerable<IWidget>
-    {
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-    
-    public interface ITemplateWidget : ICompositeWidget
+    /// <summary>
+    /// Defines a widget, which is a basic element of user interaction.
+    /// A Widget can declare contained widgets, notifications, and commands.
+    /// </summary>
+    public interface IWidget : IUIElement, IUIElementContainer
     {
     }
 }

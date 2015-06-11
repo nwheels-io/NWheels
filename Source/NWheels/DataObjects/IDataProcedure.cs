@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.UI
+namespace NWheels.DataObjects
 {
-    public static class Toolbox
+    public interface IDataProcedure
     {
-        public interface IScreenPartContainerWidget : IWidget
-        {
-        }
     }
 }

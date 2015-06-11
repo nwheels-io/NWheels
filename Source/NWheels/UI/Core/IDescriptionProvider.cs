@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.UI
+namespace NWheels.UI.Core
 {
-    public static class Toolbox
+    public interface IDescriptionProvider<TDescription>
     {
-        public interface IScreenPartContainerWidget : IWidget
-        {
-        }
+        TDescription GetDescription();
     }
 }

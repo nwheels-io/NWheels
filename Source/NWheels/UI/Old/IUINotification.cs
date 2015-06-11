@@ -6,10 +6,7 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public static class Toolbox
+    public interface IUINotification
     {
-        public interface IScreenPartContainerWidget : IWidget
-        {
-        }
     }
 }
