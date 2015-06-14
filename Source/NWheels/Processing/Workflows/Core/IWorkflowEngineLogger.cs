@@ -30,6 +30,9 @@ namespace NWheels.Processing.Workflows.Core
         [LogActivity]
         ILogActivity RecoveringExistingInstances();
 
+        [LogCritical]
+        void FailedToRecoverExistingInstances(Exception error);
+
         [LogActivity]
         ILogActivity ProcessorRunning();
 

@@ -161,7 +161,14 @@ namespace NWheels.Processing.Workflows.Impl
         {
             using ( _logger.RecoveringExistingInstances() )
             {
-                RecoverExistingInstances();
+                try
+                {
+                    RecoverExistingInstances();
+                }
+                catch ( Exception e )
+                {
+                    _logger.FailedToRecoverExistingInstances(e);
+                }
             }
         }
 

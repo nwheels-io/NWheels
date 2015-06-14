@@ -421,6 +421,23 @@ namespace NWheels.Extensions
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public void UseBuiltInWorkflowEngine()
+            {
+                _builder.NWheelsFeatures().Logging().RegisterLogger<IWorkflowEngineLogger>();
+                _builder.NWheelsFeatures().Logging().RegisterLogger<TransientWorkflowReadyQueue.ILogger>();
+                //_builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<TransientWorkflowReadyQueue>().As<IWorkflowReadyQueue>();
+                _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<WorkflowEngine>().As<IWorkflowEngine, IWorkflowInstanceContainer>();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void UseTransientReadyQueue()
+            {
+                _builder.RegisterType<TransientWorkflowReadyQueue>().As<IWorkflowReadyQueue>().SingleInstance();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
             public void RegisterWorkflow<TCodeBehind, TDataRepository, TDataEntity>(Func<TDataRepository, IQueryable<TDataEntity>> entitySelector)
                 where TCodeBehind : class, IWorkflowCodeBehind
                 where TDataRepository : class, IApplicationDataRepository
@@ -445,13 +462,6 @@ namespace NWheels.Extensions
                 _builder.NWheelsFeatures().Logging().RegisterLogger<TransientStateMachine<TState, TTrigger>.ILogger>();
 
                 RegisterWorkflow<StateMachineWorkflow<TState, TTrigger, TDataEntity>, TDataRepository, TDataEntity>(entitySelector);
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public void UseTransientReadyQueue()
-            {
-                _builder.RegisterType<TransientWorkflowReadyQueue>().As<IWorkflowReadyQueue>().SingleInstance();
             }
         }
 
