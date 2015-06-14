@@ -386,6 +386,8 @@
     <Compile Include="UI\IViewModel.cs" />
     <Compile Include="UI\ModalResult.cs" />
     <Compile Include="UI\PresenterFluentApi.cs" />
+    <Compile Include="UI\ScreenBase.cs" />
+    <Compile Include="UI\ScreenPartBase.cs" />
     <Compile Include="UI\Toolbox.cs" />
     <Compile Include="UI\ViewModelContractAttribute.cs">
       <SubType>Code</SubType>

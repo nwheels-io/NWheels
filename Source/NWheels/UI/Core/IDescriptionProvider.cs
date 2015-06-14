@@ -6,7 +6,13 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI.Core
 {
-    public interface IDescriptionProvider<TDescription>
+    public interface IDescriptionProvider
+    {
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface IDescriptionProvider<out TDescription> : IDescriptionProvider
     {
         TDescription GetDescription();
     }
