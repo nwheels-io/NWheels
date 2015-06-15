@@ -12,13 +12,13 @@ namespace NWheels.UI.Core
         {
             this.Commands = new List<CommandDescription>();
             this.Notifications = new List<NotificationDescription>();
-            this.Alerts = new List<AlertDescription>();
+            this.UserAlerts = new List<UserAlertDescription>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public List<CommandDescription> Commands { get; private set; }
         public List<NotificationDescription> Notifications { get; private set; }
-        public List<AlertDescription> Alerts { get; private set; }
+        public List<UserAlertDescription> UserAlerts { get; private set; }
     }
 }

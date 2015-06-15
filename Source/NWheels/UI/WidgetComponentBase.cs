@@ -10,7 +10,7 @@ namespace NWheels.UI
     /// <summary>
     /// Base class for defining a widget.
     /// </summary>
-    /// <typeparam name="TView">
+    /// <typeparam name="TContents">
     /// An interface that declares widget properties and contained elements (widgets, commands, notifications, and alerts).
     /// This is usually a nested type in concrete widget class.
     /// </typeparam>
@@ -22,10 +22,10 @@ namespace NWheels.UI
     /// The State part of the model.
     /// This is usually a nested type in concrete widget class.
     /// </typeparam>
-    public abstract class WidgetBase<TView, TData, TState> : 
-        IPresenter<TView, TData, TState>,
+    public abstract class WidgetComponentBase<TContents, TData, TState> : 
+        IWidgetPresenter<TContents, TData, TState>,
         IDescriptionProvider<WidgetDescription>
-        where TView : IUIElementContainer
+        where TContents : IWidget
         where TData : class 
         where TState : class
     {
@@ -33,10 +33,10 @@ namespace NWheels.UI
         /// Initializes widget properties, defines data bindings and behaviors.
         /// This is where the things are wired together.
         /// </summary>
-        /// <param name="mvp">
+        /// <param name="presenter">
         /// An interface which exposes fluent APIs for wiring the things together.
         /// </param>
-        public abstract void DescribePresenter(IPresenterBuilder<TView, TData, TState> mvp);
+        public abstract void DescribePresenter(IWidgetPresenterBuilder<TContents, TData, TState> presenter);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -44,5 +44,9 @@ namespace NWheels.UI
         {
             throw new NotImplementedException();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TContents Contents { get; set; }
     }
 }

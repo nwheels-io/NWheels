@@ -14,15 +14,15 @@ namespace NWheels.UI
             where TData : class
             where TState : class
         {
-            IPresenterBuilder<TView, TData, TState> ToData(Expression<Func<TData, TValue>> dataProperty);
-            IPresenterBuilder<TView, TData, TState> ToState(Expression<Func<TState, TValue>> stateProperty);
+            IAbstractPresenterBuilder<TView, TData, TState> ToData(Expression<Func<TData, TValue>> dataProperty);
+            IAbstractPresenterBuilder<TView, TData, TState> ToState(Expression<Func<TState, TValue>> stateProperty);
             
-            IPresenterBuilder<TView, TData, TState> ToApi<TApiContract>(Expression<Func<TApiContract, TValue>> apiCall);
-            IPresenterBuilder<TView, TData, TState> ToApi<TApiContract, TReply>(
+            IAbstractPresenterBuilder<TView, TData, TState> ToApi<TApiContract>(Expression<Func<TApiContract, TValue>> apiCall);
+            IAbstractPresenterBuilder<TView, TData, TState> ToApi<TApiContract, TReply>(
                 Expression<Func<TApiContract, TReply>> apiCall, 
                 Expression<Func<TReply, TValue>> valueSelector);
 
-            IPresenterBuilder<TView, TData, TState> ToEntity<TEntity>(
+            IAbstractPresenterBuilder<TView, TData, TState> ToEntity<TEntity>(
                 Action<IQueryable<TEntity>> query,
                 Expression<Func<TEntity[], TValue>> valueSelector)
                 where TEntity : class;
@@ -68,7 +68,7 @@ namespace NWheels.UI
                 where TScreen : IScreen<Empty.InputParam>;
             
             IPromiseBuilder<TInput, TData, TState> ToScreen<TScreen, TParam>(
-                Expression<Func<IViewModel<TData, TState>, TParam>> paramSelector) 
+                Expression<Func<TData, TState, TParam>> paramSelector) 
                 where TParam : class 
                 where TScreen : IScreen<TParam>;
 
@@ -78,7 +78,7 @@ namespace NWheels.UI
 
             IPromiseBuilder<TInput, TData, TState> ToScreenPart<TScreenPart, TParam>(
                 Toolbox.IScreenPartContainerWidget targetContainer,
-                Expression<Func<IViewModel<TData, TState>, TParam>> paramSelector)
+                Expression<Func<TData, TState, TParam>> paramSelector)
                 where TParam : class
                 where TScreenPart : IScreenPart<TParam>;
 
@@ -86,7 +86,7 @@ namespace NWheels.UI
                 where TScreenPart : IScreenPart<Empty.InputParam>;
 
             IPromiseBuilder<ModalResult, TData, TState> ShowScreenPartDialog<TScreenPart, TParam>(
-                Expression<Func<IViewModel<TData, TState>, TParam>> paramSelector)
+                Expression<Func<TData, TState, TParam>> paramSelector)
                 where TParam : class
                 where TScreenPart : IScreenPart<TParam>;
         }
@@ -159,8 +159,8 @@ namespace NWheels.UI
             where TData : class
             where TState : class
         {
-            IPromiseBuilder<AlertResult, TData, TState> Inline();
-            IPromiseBuilder<AlertResult, TData, TState> Popup();
+            IPromiseBuilder<UserAlertResult, TData, TState> Inline();
+            IPromiseBuilder<UserAlertResult, TData, TState> Popup();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ namespace NWheels.UI
             where TData : class
             where TState : class
         {
-            IWhenBehaviorBuilder<TInput, TData, TState> When(
+            IWhenOtherwiseBehaviorBuilder<TInput, TData, TState> When(
                 Expression<Func<TData, TState, TInput, bool>> conition,
                 Expression<Action<IBehaviorBuilder<TInput, TData, TState>>> onTrue);
         }

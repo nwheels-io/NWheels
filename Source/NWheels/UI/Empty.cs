@@ -14,5 +14,11 @@ namespace NWheels.UI
         public class Payload
         {
         }
+        public class Data
+        {
+        }
+        public class State
+        {
+        }
     }
 }

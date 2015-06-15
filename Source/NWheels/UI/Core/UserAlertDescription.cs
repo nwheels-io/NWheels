@@ -1,6 +1,6 @@
 ﻿namespace NWheels.UI.Core
 {
-    public class AlertDescription
+    public class UserAlertDescription
     {
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace NWheels.UI.Core
 {
-    public class ScreenDescription : NavigationTargetDescription
+    public class ScreenDescription : RootContentContainerDescription
     {
     }
 }

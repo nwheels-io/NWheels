@@ -13,8 +13,7 @@ namespace NWheels.UI
     /// Type of input parameter model. Use IEmptyInputParam if there is no input parameter. 
     /// </typeparam>
     public interface INavigationTarget<out TInputParam>
-        where TInputParam : class
     {
-        INotification<TInputParam> OnNavigatedHere { get; }
+        INotification<TInputParam> NavigatedHere { get; }
     }
 }

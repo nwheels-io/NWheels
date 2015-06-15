@@ -334,7 +334,11 @@
     <Compile Include="Processing\Rules\RuleSystemDescription.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\RealFramework.cs" />
-    <Compile Include="UI\AlertResult.cs" />
+    <Compile Include="UI\Core\RootContentContainerDescription.cs" />
+    <Compile Include="UI\IApplicationPresenter.cs" />
+    <Compile Include="UI\IRootContentContainer.cs" />
+    <Compile Include="UI\UserAlertResult.cs" />
+    <Compile Include="UI\ApplicationComponentBase.cs" />
     <Compile Include="UI\Core\AlterModelBehaviorDescription.cs" />
     <Compile Include="UI\Core\ApiBindingDescription.cs" />
     <Compile Include="UI\Core\BehaviorDescription.cs" />
@@ -361,8 +365,8 @@
     <Compile Include="UI\IApplication.cs" />
     <Compile Include="UI\ICommand.cs" />
     <Compile Include="UI\IDomainApi.cs" />
-    <Compile Include="UI\IEntityCrudApi.cs" />
-    <Compile Include="UI\Core\AlertDescription.cs" />
+    <Compile Include="UI\IEntityApi.cs" />
+    <Compile Include="UI\Core\UserAlertDescription.cs" />
     <Compile Include="UI\Core\ApplicationDescription.cs" />
     <Compile Include="UI\Core\CommandDescription.cs" />
     <Compile Include="UI\Core\NavigationTargetDescription.cs" />
@@ -373,8 +377,10 @@
     <Compile Include="UI\IPromiseFailureInfo.cs" />
     <Compile Include="UI\INavigationTarget.cs" />
     <Compile Include="UI\INotification.cs" />
-    <Compile Include="UI\IPresenter.cs" />
-    <Compile Include="UI\IPresenterBuilder.cs" />
+    <Compile Include="UI\IScreenPresenter.cs" />
+    <Compile Include="UI\IScreenPartPresenter.cs" />
+    <Compile Include="UI\IWidgetPresenter.cs" />
+    <Compile Include="UI\IAbstractPresenterBuilder.cs" />
     <Compile Include="UI\IScreen.cs" />
     <Compile Include="UI\IScreenPart.cs" />
     <Compile Include="UI\IUIElement.cs" />
@@ -382,16 +388,15 @@
     <Compile Include="UI\IUserAlert.cs" />
     <Compile Include="UI\IWidget.cs" />
     <Compile Include="UI\Impl\UIObjectFactory.cs" />
-    <Compile Include="UI\IViewModel.cs" />
     <Compile Include="UI\ModalResult.cs" />
     <Compile Include="UI\PresenterFluentApi.cs" />
-    <Compile Include="UI\ScreenBase.cs" />
-    <Compile Include="UI\ScreenPartBase.cs" />
+    <Compile Include="UI\ScreenComponentBase.cs" />
+    <Compile Include="UI\ScreenPartComponentBase.cs" />
     <Compile Include="UI\Toolbox.cs" />
     <Compile Include="UI\ViewModelContractAttribute.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="UI\WidgetBase.cs" />
+    <Compile Include="UI\WidgetComponentBase.cs" />
     <Compile Include="Utilities\EntityUtility.cs" />
     <Compile Include="Utilities\ParseUtility.cs" />
     <Compile Include="Utilities\PathUtility.cs" />

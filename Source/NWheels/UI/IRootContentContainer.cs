@@ -6,15 +6,8 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public enum AlertResult
+    public interface IRootContentContainer<out TInputParam> : INavigationTarget<TInputParam>
     {
-        None,
-        OK,
-        Cancel,
-        Abort,
-        Retry,
-        Ignore,
-        Yes,
-        No,
+        IWidget ContentRoot { get; set; }
     }
 }

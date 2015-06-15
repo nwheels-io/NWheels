@@ -10,20 +10,20 @@ using NWheels.UI;
 
 namespace NWheels.Domains.Security.UI
 {
-    public class UserLoginForm : WidgetBase<UserLoginForm.IView, UserLoginForm.IData, UserLoginForm.IState>
+    public class UserLoginForm : WidgetComponentBase<UserLoginForm.IContents, UserLoginForm.IData, UserLoginForm.IState>
     {
-        public override void DescribePresenter(IPresenterBuilder<IView, IData, IState> mvp)
+        public override void DescribePresenter(IContents contents, IAbstractPresenterBuilder<IContents, IData, IState> presenter)
         {
-            mvp.On(mvp.View.LogIn.OnExecuting)
+            presenter.On(contents.LogIn.OnExecuting)
                 .CallApi<ISecurityDomainApi>().RequestReply((api, data, state, input) => api.LogUserIn(data.LoginName, data.Password))
                 .Then(
-                    onSuccess: b => b.Broadcast(mvp.View.UserLoggedIn).BubbleUp(),
-                    onFailure: b => b.ShowAlert().From<IView>().Alert((v, d, s, failure) => v.LoginHasFailed(failure.ReasonText)).Inline());
+                    onSuccess: b => b.Broadcast(contents.UserLoggedIn).BubbleUp(),
+                    onFailure: b => b.ShowAlert().From<IContents>().Alert((c, d, s, failure) => c.LoginHasFailed(failure.ReasonText)).Inline());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public interface IView : IUIElementContainer
+        public interface IContents : IWidget
         {
             string LoginNameLabel { get; set; }
             string PasswordLabel { get; set; }
