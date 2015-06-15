@@ -4,12 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.UI
+namespace NWheels.UI.Toolbox
 {
-    public static class Toolbox
+    class TextEditor
     {
-        public interface IScreenPartContainerWidget : IWidget
-        {
-        }
     }
 }

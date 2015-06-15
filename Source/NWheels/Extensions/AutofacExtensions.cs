@@ -26,6 +26,7 @@ using NWheels.Processing.Jobs;
 using NWheels.Processing.Workflows;
 using NWheels.Processing.Workflows.Core;
 using NWheels.Processing.Workflows.Impl;
+using NWheels.UI.Core;
 
 namespace NWheels.Extensions
 {
@@ -151,7 +152,7 @@ namespace NWheels.Extensions
             string name = null, 
             string defaultUrl = null,
             bool exposeExceptions = false) 
-            where TApp : class, IApplication
+            where TApp : IDescriptionProvider<ApplicationDescription>
         {
             var registration = new WebAppEndpointRegistration(name, typeof(TApp), defaultUrl, exposeExceptions);
             ((IHaveContainerBuilder)fluentRegistration).Builder.RegisterInstance(registration);
@@ -524,10 +525,10 @@ namespace NWheels.Extensions
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp>() where TApp : class, IApplication
+            public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp>() where TApp : IDescriptionProvider<ApplicationDescription>
             {
-                _builder.RegisterType<TApp>().As<TApp, IApplication>();
-                return new UIAppEndpointRegistrations<TApp>(_builder, typeof(TApp));
+                _builder.RegisterType<TApp>().As<TApp, IDescriptionProvider<ApplicationDescription>>();
+                return new UIAppEndpointRegistrations<TApp>(_builder);
             }
         }
 
@@ -600,16 +601,16 @@ namespace NWheels.Extensions
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class UIAppEndpointRegistrations<TApp> : IHaveContainerBuilder
-            where TApp : class, IApplication
+            where TApp : IDescriptionProvider<ApplicationDescription>
         {
             private readonly ContainerBuilder _containerBuilder;
             private readonly Type _applicationType;
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public UIAppEndpointRegistrations(ContainerBuilder containerBuilder, Type applicationType)
+            public UIAppEndpointRegistrations(ContainerBuilder containerBuilder)
             {
-                _applicationType = applicationType;
+                _applicationType = typeof(TApp);
                 _containerBuilder = containerBuilder;
             }
 

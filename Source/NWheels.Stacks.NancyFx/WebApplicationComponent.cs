@@ -26,7 +26,7 @@ namespace NWheels.Stacks.NancyFx
         {
             _endpointRegistration = endpointRegistration;
             _logger = logger;
-            _application = (ApplicationDescription)components.Resolve(endpointRegistration.Contract);
+            _application = ((IDescriptionProvider<ApplicationDescription>)components.Resolve(endpointRegistration.Contract)).GetDescription();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

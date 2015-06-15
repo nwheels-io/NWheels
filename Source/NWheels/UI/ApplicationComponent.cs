@@ -12,14 +12,14 @@ namespace NWheels.UI
     /// </summary>
     /// <remarks>
     /// </remarks>
-    /// <typeparam name="TContents"></typeparam>
+    /// <typeparam name="TApp"></typeparam>
     /// <typeparam name="TData"></typeparam>
     /// <typeparam name="TState"></typeparam>
-    /// <typeparam name="TInputParam"></typeparam>
-    public abstract class ApplicationComponentBase<TInputParam, TContents, TData, TState> :
-        IApplicationPresenter<TInputParam, TContents, TData, TState>,
-        IDescriptionProvider<ApplicationDescription>
-        where TContents : IApplication<TInputParam>
+    /// <typeparam name="TInput"></typeparam>
+    public abstract class ApplicationComponent<TApp, TInput, TData, TState> :
+        NavigationTargetComponent<TInput>,
+        IApplication<TApp, TInput, TData, TState>
+        where TApp : IApplication<TApp, TInput, TData, TState>
         where TData : class
         where TState : class
     {
@@ -30,7 +30,7 @@ namespace NWheels.UI
         /// <param name="presenter">
         /// An interface which exposes fluent APIs for wiring the things together.
         /// </param>
-        public abstract void DescribePresenter(IApplicationPresenterBuilder<TInputParam, TContents, TData, TState> presenter);
+        public abstract void DescribePresenter(IApplicationPresenterBuilder<TApp, TInput, TData, TState> presenter);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -41,20 +41,21 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TContents Contents { get; set; }
+        public IScreen DefaultInitialScreen { get; set; }
+        public INotification NavigationNotAuthorized { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public abstract class ApplicationComponentBase<TInputParam, TContents> : ApplicationComponentBase<TInputParam, TContents, Empty.Data, Empty.State>
-        where TContents : IApplication<TInputParam>
+    public abstract class ApplicationComponent<TApp, TInput> : ApplicationComponent<TApp, TInput, Empty.Data, Empty.State>
+        where TApp : IApplication<TApp, TInput, Empty.Data, Empty.State>
     {
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public abstract class ApplicationComponentBase<TContents> : ApplicationComponentBase<Empty.InputParam, TContents, Empty.Data, Empty.State>
-        where TContents : IApplication
+    public abstract class ApplicationComponent<TApp> : ApplicationComponent<TApp, Empty.Input, Empty.Data, Empty.State>
+        where TApp : IApplication<TApp, Empty.Input, Empty.Data, Empty.State>
     {
     }
 }

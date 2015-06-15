@@ -10,33 +10,42 @@ using NWheels.UI;
 
 namespace NWheels.Domains.Security.UI
 {
-    public class UserLoginForm : WidgetComponentBase<UserLoginForm.IContents, UserLoginForm.IData, UserLoginForm.IState>
+    public class UserLoginForm : WidgetComponent<UserLoginForm, UserLoginForm.IData, UserLoginForm.IState>
     {
-        public override void DescribePresenter(IWidgetPresenterBuilder<IContents, IData, IState> presenter)
+        public override void DescribePresenter(IWidgetPresenter<UserLoginForm, IData, IState> presenter)
         {
-            presenter.On(Contents.LogIn.OnExecuting)
+            presenter.On(LogIn)
                 .CallApi<ISecurityDomainApi>().RequestReply((api, data, state, input) => api.LogUserIn(data.LoginName, data.Password))
                 .Then(
-                    onSuccess: b => b.Broadcast(Contents.UserLoggedIn).BubbleUp(),
-                    onFailure: b => b.ShowAlert().From<IContents>().Alert((c, d, s, failure) => c.LoginHasFailed(failure.ReasonText)).Inline());
+                    onSuccess: b => b.Broadcast(UserLoggedIn).BubbleUp(),
+                    onFailure: b => b.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.LoginHasFailed(failure.ReasonText)));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public interface IContents : IWidget
-        {
-            string LoginNameLabel { get; set; }
-            string PasswordLabel { get; set; }
-            string LoginNamePlaceholder { get; set; }
-            string PasswordPlaceholder { get; set; }
-            string SignUpText { get; set; }
-            string ForgotPasswordText { get; set; }
+        public ICommand LogIn { get; set; }
+        public ICommand SignUp { get; set; }
+        public ICommand ForgotPassword { get; set; }
+        public INotification UserLoggedIn { get; set; }
+        public ITranslations Translations { get; set; }
 
-            ICommand LogIn { get; }
-            ICommand SignUp { get; }
-            ICommand ForgotPassword { get; }
-            INotification UserLoggedIn { get; }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IAlerts : IApplicationAlertRepository
+        {
             IUserAlert LoginHasFailed(string reason);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface ITranslations : ILocalizableApplicationResources
+        {
+            string LoginName { get; }
+            string Password { get; }
+            string EnterLoginName { get; }
+            string EnterPassword { get; }
+            string SignUp { get; }
+            string ForgotPassword { get; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,7 +64,7 @@ namespace NWheels.Domains.Security.UI
         [ViewModelContract]
         public interface IState
         {
-            [PropertyContract.Presentation.PersistedOnUserMachine]
+            [ViewModelPropertyContract.PersistedOnUserMachine]
             bool RememberMe { get; set; }
         }
     }
@@ -64,15 +73,23 @@ namespace NWheels.Domains.Security.UI
 
     public interface ISecurityDomainApi
     {
-        [DomainApiFault(typeof(LoginFailedApiFault))]
+        [DomainApiFault(typeof(LoginFailedFault))]
         void LogUserIn(string loginName, string password);
+
+        [DomainApiFault(typeof(LogoutFailedFault))]
+        void LogUserOut();
     }
 
-    public enum LoginFailedApiFault
+    public enum LoginFailedFault
     {
         LoginIncorrect,
         PasswordExpired,
         AccountLockedOut
+    }
+
+    public enum LogoutFailedFault
+    {
+        NotLoggedIn
     }
 }
 

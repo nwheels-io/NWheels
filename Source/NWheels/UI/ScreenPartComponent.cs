@@ -10,10 +10,10 @@ namespace NWheels.UI
     /// <summary>
     /// Base class for defining a Screen Part.
     /// </summary>
-    /// <typeparam name="TInputParam">
+    /// <typeparam name="TInput">
     /// Type of navigation input parameter for the Screen Part.
     /// </typeparam>
-    /// <typeparam name="TContents">
+    /// <typeparam name="TScreenPart">
     /// An interface that declares contained elements (widgets, commands, notifications, and alerts).
     /// This is usually a nested type in concrete Screen Part class.
     /// </typeparam>
@@ -25,10 +25,10 @@ namespace NWheels.UI
     /// The State part of the model.
     /// This is usually a nested type in a concrete Screen Part class.
     /// </typeparam>
-    public abstract class ScreenPartComponentBase<TInputParam, TContents, TData, TState> :
-        IScreenPartPresenter<TInputParam, TContents, TData, TState>,
-        IDescriptionProvider<ScreenPartDescription>
-        where TContents : IScreenPart<TInputParam>
+    public abstract class ScreenPartComponent<TScreenPart, TInput, TData, TState> :
+        RootContentContainerComponent<TInput>,
+        IScreenPart<TScreenPart, TInput, TData, TState>
+        where TScreenPart : IScreenPart<TScreenPart, TInput, TData, TState>
         where TData : class
         where TState : class
     {
@@ -39,7 +39,7 @@ namespace NWheels.UI
         /// <param name="presenter">
         /// An interface which exposes fluent APIs for wiring the things together.
         /// </param>
-        public abstract void DescribePresenter(IScreenPartPresenterBuilder<TInputParam, TContents, TData, TState> presenter);
+        public abstract void DescribePresenter(IScreenPartPresenter<TScreenPart, TInput, TData, TState> presenter);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -47,16 +47,13 @@ namespace NWheels.UI
         {
             throw new NotImplementedException();
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public TContents Contents { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public abstract class ScreenPartComponentBase<TContents, TData, TState> : ScreenPartComponentBase<Empty.InputParam, TContents, TData, TState>
-        where TContents : IScreenPart
+    public abstract class ScreenPartComponent<TScreenPart, TData, TState> : 
+        ScreenPartComponent<TScreenPart, Empty.Input, TData, TState>
+        where TScreenPart : IScreenPart<TScreenPart, Empty.Input, TData, TState>
         where TData : class
         where TState : class
     {

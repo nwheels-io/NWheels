@@ -8,7 +8,7 @@ namespace NWheels.UI
 {
     public static class Empty
     {
-        public class InputParam
+        public class Input
         {
         }
         public class Payload

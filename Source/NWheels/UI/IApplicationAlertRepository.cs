@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.UI.Core
+namespace NWheels.UI
 {
-    public interface IDescriptionProvider<out TDescription>
+    public interface IApplicationAlertRepository
     {
-        TDescription GetDescription();
     }
 }

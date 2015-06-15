@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public interface IRootContentContainer<out TInputParam> : INavigationTarget<TInputParam>
+    public interface IRootContentContainer : IUIElementContainer
     {
         IWidget ContentRoot { get; set; }
     }

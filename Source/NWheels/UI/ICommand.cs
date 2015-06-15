@@ -22,7 +22,7 @@ namespace NWheels.UI
         /// Broadcast when the command is triggered to execute.
         /// QualifiedName is passed as notification payload.
         /// </summary>
-        INotification<string> OnExecuting { get; }
+        INotification<string> Executing { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -30,6 +30,6 @@ namespace NWheels.UI
         /// Broadcast when the Enabled/Disabled state of the command needs to be updated.
         /// QualifiedName is passed as notification payload.
         /// </summary>
-        INotification<string> OnUpdating { get; }
+        INotification<string> Updating { get; }
     }
 }

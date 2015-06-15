@@ -10,7 +10,7 @@ namespace NWheels.UI
     /// This interface distinguishes valid containers for UI elements such as 
     /// commands, alerts, and notifications.
     /// </summary>
-    public interface IUIElementContainer
+    public interface IUIElementContainer : IUIElement
     {
     }
 }

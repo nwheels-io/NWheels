@@ -10,7 +10,7 @@ namespace NWheels.UI
     /// <summary>
     /// Base class for defining a widget.
     /// </summary>
-    /// <typeparam name="TContents">
+    /// <typeparam name="TWidget">
     /// An interface that declares widget properties and contained elements (widgets, commands, notifications, and alerts).
     /// This is usually a nested type in concrete widget class.
     /// </typeparam>
@@ -22,10 +22,10 @@ namespace NWheels.UI
     /// The State part of the model.
     /// This is usually a nested type in concrete widget class.
     /// </typeparam>
-    public abstract class WidgetComponentBase<TContents, TData, TState> : 
-        IWidgetPresenter<TContents, TData, TState>,
-        IDescriptionProvider<WidgetDescription>
-        where TContents : IWidget
+    public abstract class WidgetComponent<TWidget, TData, TState> :
+        UIElementContainerComponent,
+        IWidget<TWidget, TData, TState>
+        where TWidget : WidgetComponent<TWidget, TData, TState>
         where TData : class 
         where TState : class
     {
@@ -36,7 +36,7 @@ namespace NWheels.UI
         /// <param name="presenter">
         /// An interface which exposes fluent APIs for wiring the things together.
         /// </param>
-        public abstract void DescribePresenter(IWidgetPresenterBuilder<TContents, TData, TState> presenter);
+        public abstract void DescribePresenter(IWidgetPresenter<TWidget, TData, TState> presenter);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -44,9 +44,5 @@ namespace NWheels.UI
         {
             throw new NotImplementedException();
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public TContents Contents { get; set; }
     }
 }

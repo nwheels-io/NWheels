@@ -14,15 +14,15 @@ namespace NWheels.UI
             where TData : class
             where TState : class
         {
-            IAbstractPresenterBuilder<TView, TData, TState> ToData(Expression<Func<TData, TValue>> dataProperty);
-            IAbstractPresenterBuilder<TView, TData, TState> ToState(Expression<Func<TState, TValue>> stateProperty);
+            IAbstractPresenter<TView, TData, TState> ToData(Expression<Func<TData, TValue>> dataProperty);
+            IAbstractPresenter<TView, TData, TState> ToState(Expression<Func<TState, TValue>> stateProperty);
             
-            IAbstractPresenterBuilder<TView, TData, TState> ToApi<TApiContract>(Expression<Func<TApiContract, TValue>> apiCall);
-            IAbstractPresenterBuilder<TView, TData, TState> ToApi<TApiContract, TReply>(
+            IAbstractPresenter<TView, TData, TState> ToApi<TApiContract>(Expression<Func<TApiContract, TValue>> apiCall);
+            IAbstractPresenter<TView, TData, TState> ToApi<TApiContract, TReply>(
                 Expression<Func<TApiContract, TReply>> apiCall, 
                 Expression<Func<TReply, TValue>> valueSelector);
 
-            IAbstractPresenterBuilder<TView, TData, TState> ToEntity<TEntity>(
+            IAbstractPresenter<TView, TData, TState> ToEntity<TEntity>(
                 Action<IQueryable<TEntity>> query,
                 Expression<Func<TEntity[], TValue>> valueSelector)
                 where TEntity : class;
@@ -34,6 +34,8 @@ namespace NWheels.UI
             where TData : class
             where TState : class
         {
+            IPromiseBuilder<TInput, TData, TState> PerformCommand(ICommand command);
+
             ICallApiBehaviorBuilder<TInput, TData, TState, TContract> CallApi<TContract>();
             
             INavigateBehaviorBuilder<TInput, TData, TState> Navigate();
@@ -41,8 +43,8 @@ namespace NWheels.UI
             IBroadcastBehaviorBuilder<TInput, TData, TState> Broadcast();
             IBroadcastBehaviorBuilder4<TInput, TData, TState> Broadcast(INotification notification);
             IBroadcastBehaviorBuilder3<TInput, TData, TState, TPayload> Broadcast<TPayload>(INotification<TPayload> notification);
-            
-            IShowAlertBehaviorBuilder<TInput, TData, TState> ShowAlert();
+
+            IShowAlertBehaviorBuilder2<TInput, TData, TState, TRepo> UserAlertFrom<TRepo>() where TRepo : IApplicationAlertRepository;
 
             IAlterModelBehaviorBuilder<TInput, TData, TState> AlterModel();
         }
@@ -64,31 +66,59 @@ namespace NWheels.UI
             where TData : class 
             where TState : class
         {
-            IPromiseBuilder<TInput, TData, TState> ToScreen<TScreen>() 
-                where TScreen : IScreen<Empty.InputParam>;
+            IPromiseBuilder<TInput, TData, TState> ToScreen(IScreen screen);
+            IPromiseBuilder<TInput, TData, TState> ToScreen(IScreenWithInput<Empty.Input> screen);
+            IPromiseBuilder<TInput, TData, TState> ToScreen<TScreen>() where TScreen : IScreen;
             
-            IPromiseBuilder<TInput, TData, TState> ToScreen<TScreen, TParam>(
-                Expression<Func<TData, TState, TParam>> paramSelector) 
-                where TParam : class 
-                where TScreen : IScreen<TParam>;
+            INavigateBehaviorInputBuilder<TInput, TData, TState, TScreenInput> ToScreen<TScreenInput>(IScreenWithInput<TScreenInput> screen);
+            INavigateBehaviorInputBuilder<TInput, TData, TState, TScreenInput> ToScreen<TScreen, TScreenInput>() where TScreen : IScreenWithInput<TScreenInput>;
 
-            IPromiseBuilder<TInput, TData, TState> ToScreenPart<TScreenPart>(
-                Toolbox.IScreenPartContainerWidget targetContainer)
-                where TScreenPart : IScreenPart<Empty.InputParam>;
+            INavigateBehaviorScreenPartSelector<TInput, TData, TState> FromContainer(Toolbox.ScreenPartContainer container);
+            INavigateBehaviorModalScreenPartSelector<TInput, TData, TState> ShowModalDialog();
+        }
 
-            IPromiseBuilder<TInput, TData, TState> ToScreenPart<TScreenPart, TParam>(
-                Toolbox.IScreenPartContainerWidget targetContainer,
-                Expression<Func<TData, TState, TParam>> paramSelector)
-                where TParam : class
-                where TScreenPart : IScreenPart<TParam>;
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            IPromiseBuilder<ModalResult, TData, TState> ShowScreenPartDialog<TScreenPart>()
-                where TScreenPart : IScreenPart<Empty.InputParam>;
+        public interface INavigateBehaviorScreenPartSelector<TInput, TData, TState>
+            where TData : class
+            where TState : class
+        {
+            IPromiseBuilder<TInput, TData, TState> ToScreenPart(IScreenPart screenPart);
+            IPromiseBuilder<TInput, TData, TState> ToScreenPart<TPart>() where TPart : IScreenPart;
 
-            IPromiseBuilder<ModalResult, TData, TState> ShowScreenPartDialog<TScreenPart, TParam>(
-                Expression<Func<TData, TState, TParam>> paramSelector)
-                where TParam : class
-                where TScreenPart : IScreenPart<TParam>;
+            INavigateBehaviorInputBuilder<TInput, TData, TState, TPartInput> ToScreenPart<TPartInput>(IScreenPartWithInput<TPartInput> screenPart);
+            INavigateBehaviorInputBuilder<TInput, TData, TState, TPartInput> ToScreenPart<TPart, TPartInput>() where TPart : IScreenWithInput<TPartInput>;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface INavigateBehaviorModalScreenPartSelector<TInput, TData, TState>
+            where TData : class
+            where TState : class
+        {
+            IPromiseBuilder<ModalResult, TData, TState> WithScreenPart(IScreenPart screenPart);
+            IPromiseBuilder<ModalResult, TData, TState> WithScreenPart<TPart>() where TPart : IScreenPart;
+
+            INavigateBehaviorModalInputBuilder<TInput, TData, TState, TPartInput> WithScreenPart<TPartInput>(IScreenPartWithInput<TPartInput> screenPart);
+            INavigateBehaviorModalInputBuilder<TInput, TData, TState, TPartInput> WithScreenPart<TPart, TPartInput>() where TPart : IScreenWithInput<TPartInput>;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface INavigateBehaviorInputBuilder<TInput, TData, TState, TTargetInput>
+            where TData : class
+            where TState : class
+        {
+            IPromiseBuilder<TTargetInput, TData, TState> WithInput(Expression<Func<TInput, TData, TState, TTargetInput>> targetInputSelector);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface INavigateBehaviorModalInputBuilder<TInput, TData, TState, TTargetInput>
+            where TData : class
+            where TState : class
+        {
+            IPromiseBuilder<ModalResult, TData, TState> WithInput(Expression<Func<TInput, TData, TState, TTargetInput>> targetInputSelector);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -134,34 +164,38 @@ namespace NWheels.UI
             IPromiseBuilder<TInput, TData, TState> BubbleUpAndTunnelDown();
         }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public interface IShowAlertBehaviorBuilder<TInput, TData, TState>
-            where TData : class
-            where TState : class
-        {
-            IShowAlertBehaviorBuilder2<TInput, TData, TState, TContainer> From<TContainer>() where TContainer : IUIElementContainer;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public interface IShowAlertBehaviorBuilder2<TInput, TData, TState, TContainer>
-            where TData : class
-            where TState : class
-            where TContainer : IUIElementContainer
-        {
-            IShowAlertBehaviorBuilder3<TInput, TData, TState> Alert(Expression<Func<TContainer, TData, TState, TInput, IUserAlert>> alertCall);
-        }
+        //public interface IShowAlertBehaviorBuilder<TInput, TData, TState>
+        //    where TData : class
+        //    where TState : class
+        //{
+        //    IShowAlertBehaviorBuilder2<TInput, TData, TState, TRepo> From<TRepo>() where TRepo : IApplicationAlertRepository;
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public interface IShowAlertBehaviorBuilder3<TInput, TData, TState>
+        public interface IShowAlertBehaviorBuilder2<TInput, TData, TState, TRepo>
             where TData : class
             where TState : class
+            where TRepo : IApplicationAlertRepository
         {
-            IPromiseBuilder<UserAlertResult, TData, TState> Inline();
-            IPromiseBuilder<UserAlertResult, TData, TState> Popup();
+            IPromiseBuilder<UserAlertResult, TData, TState> ShowInline(Expression<Func<TRepo, IUserAlert>> alertCall);
+            IPromiseBuilder<UserAlertResult, TData, TState> ShowInline(Expression<Func<TRepo, TData, TState, TInput, IUserAlert>> alertCall);
+
+            IPromiseBuilder<UserAlertResult, TData, TState> ShowPopup(Expression<Func<TRepo, IUserAlert>> alertCall);
+            IPromiseBuilder<UserAlertResult, TData, TState> ShowPopup(Expression<Func<TRepo, TData, TState, TInput, IUserAlert>> alertCall);
         }
+
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //public interface IShowAlertBehaviorBuilder3<TInput, TData, TState>
+        //    where TData : class
+        //    where TState : class
+        //{
+        //    IPromiseBuilder<UserAlertResult, TData, TState> Inline();
+        //    IPromiseBuilder<UserAlertResult, TData, TState> Popup();
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -169,7 +203,21 @@ namespace NWheels.UI
             where TData : class
             where TState : class
         {
-            //TBD
+            IPromiseBuilder<TInput, TData, TState> SetData<TValue>(
+                Expression<Func<TData, TValue>> propertySelector,
+                Expression<Func<TData, TState, TInput, TValue>> newValue);
+
+            IPromiseBuilder<TInput, TData, TState> SetData<TValue>(
+                Expression<Func<TData, TValue>> propertySelector,
+                Expression<Func<TValue>> newValue);
+
+            IPromiseBuilder<TInput, TData, TState> SetState<TValue>(
+                Expression<Func<TState, TValue>> propertySelector,
+                Expression<Func<TData, TState, TInput, TValue>> newValue);
+
+            IPromiseBuilder<TInput, TData, TState> SetState<TValue>(
+                Expression<Func<TState, TValue>> propertySelector,
+                Expression<Func<TValue>> newValue);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -201,7 +249,8 @@ namespace NWheels.UI
             where TData : class
             where TState : class
         {
-            void Otherwise(Expression<Action<IBehaviorBuilder<TInput, TData, TState>>> onOtherwise);
+            IPromiseBuilder<TInput, TData, TState> EndWhen();
+            IPromiseBuilder<TInput, TData, TState> Otherwise(Expression<Action<IBehaviorBuilder<TInput, TData, TState>>> onOtherwise);
         }
     }
 }

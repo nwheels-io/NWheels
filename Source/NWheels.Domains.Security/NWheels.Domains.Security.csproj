@@ -56,7 +56,7 @@
     <Compile Include="IUserAccountEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\ISecurityDomainTranslations.cs" />
-    <Compile Include="UI\IUserLoginFormWidget.cs" />
+    <Compile Include="UI\UserLoginForm.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels\NWheels.csproj">

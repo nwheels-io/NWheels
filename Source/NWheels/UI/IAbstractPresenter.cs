@@ -20,11 +20,15 @@ namespace NWheels.UI
     /// <typeparam name="TState">
     /// Type of State model contract, as required by the Presenter.
     /// </typeparam>
-    public interface IAbstractPresenterBuilder<TContents, TData, TState>
+    public interface IAbstractPresenter<TContents, TData, TState>
         where TContents : IUIElementContainer
         where TData : class
         where TState : class
     {
+        TElement New<TElement>() where TElement : IUIElement;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         PresenterFluentApi.IBindingSourceBuilder<TContents, TData, TState, TValue> Bind<TValue>(
             Expression<Func<TContents, TValue>> destination);
 
@@ -33,12 +37,20 @@ namespace NWheels.UI
         PresenterFluentApi.IBehaviorBuilder<TPayload, TData, TState> On<TPayload>(
             INotification<TPayload> notification)
             where TPayload : class;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        PresenterFluentApi.IBehaviorBuilder<Empty.Payload, TData, TState> On(INotification notification);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        PresenterFluentApi.IBehaviorBuilder<Empty.Payload, TData, TState> On(ICommand command);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IWidgetPresenterBuilder<TContents, TData, TState> : IAbstractPresenterBuilder<TContents, TData, TState>
-        where TContents : IWidget
+    public interface IWidgetPresenter<TWidget, TData, TState> : IAbstractPresenter<TWidget, TData, TState>
+        where TWidget : IWidget<TWidget, TData, TState>
         where TData : class
         where TState : class
     {
@@ -46,19 +58,9 @@ namespace NWheels.UI
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IAbstractNavigationTargetPresenterBuilder<TInputParam, TContents, TData, TState> : IAbstractPresenterBuilder<TContents, TData, TState>
-        where TContents : IUIElementContainer, INavigationTarget<TInputParam>
-        where TData : class
-        where TState : class
-    {
-        void SetContentRoot(IWidget rootWidget);
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public interface IScreenPartPresenterBuilder<TInputParam, TContents, TData, TState> : 
-        IAbstractNavigationTargetPresenterBuilder<TInputParam, TContents, TData, TState>
-        where TContents : IScreenPart<TInputParam>
+    public interface IAbstractNavigationTargetPresenter<TTarget, out TInput, TData, TState> : 
+        IAbstractPresenter<TTarget, TData, TState>
+        where TTarget : IUIElementContainer, INavigationTarget<TInput>
         where TData : class
         where TState : class
     {
@@ -66,9 +68,9 @@ namespace NWheels.UI
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IScreenPresenterBuilder<TInputParam, TContents, TData, TState> : 
-        IAbstractNavigationTargetPresenterBuilder<TInputParam, TContents, TData, TState>
-        where TContents : IScreen<TInputParam>
+    public interface IScreenPartPresenter<TScreenPart, out TInput, TData, TState> :
+        IAbstractNavigationTargetPresenter<TScreenPart, TInput, TData, TState>
+        where TScreenPart : IScreenPart<TScreenPart, TInput, TData, TState>
         where TData : class
         where TState : class
     {
@@ -76,14 +78,20 @@ namespace NWheels.UI
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IApplicationPresenterBuilder<TInputParam, TContents, TData, TState> : IAbstractPresenterBuilder<TContents, TData, TState>
-        where TContents : IApplication<TInputParam>
+    public interface IScreenPresenter<TScreen, out TInput, TData, TState> :
+        IAbstractNavigationTargetPresenter<TScreen, TInput, TData, TState>
+        where TScreen : IScreen<TScreen, TInput, TData, TState>
         where TData : class
         where TState : class
     {
-        void SetInitialScreen(IScreen screen);
-        void SetInitialScreen<TInputParam2>(
-            IScreen<TInputParam2> screen, 
-            Expression<Func<TContents, TData, TState, TInputParam, TInputParam2>> screenInputSelector);
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface IApplicationPresenterBuilder<TApp, TInput, TData, TState> : IAbstractPresenter<TApp, TData, TState>
+        where TApp : IApplication<TApp, TInput, TData, TState>
+        where TData : class
+        where TState : class
+    {
     }
 }
