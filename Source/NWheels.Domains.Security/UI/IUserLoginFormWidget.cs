@@ -12,12 +12,12 @@ namespace NWheels.Domains.Security.UI
 {
     public class UserLoginForm : WidgetComponentBase<UserLoginForm.IContents, UserLoginForm.IData, UserLoginForm.IState>
     {
-        public override void DescribePresenter(IContents contents, IAbstractPresenterBuilder<IContents, IData, IState> presenter)
+        public override void DescribePresenter(IWidgetPresenterBuilder<IContents, IData, IState> presenter)
         {
-            presenter.On(contents.LogIn.OnExecuting)
+            presenter.On(Contents.LogIn.OnExecuting)
                 .CallApi<ISecurityDomainApi>().RequestReply((api, data, state, input) => api.LogUserIn(data.LoginName, data.Password))
                 .Then(
-                    onSuccess: b => b.Broadcast(contents.UserLoggedIn).BubbleUp(),
+                    onSuccess: b => b.Broadcast(Contents.UserLoggedIn).BubbleUp(),
                     onFailure: b => b.ShowAlert().From<IContents>().Alert((c, d, s, failure) => c.LoginHasFailed(failure.ReasonText)).Inline());
         }
 
