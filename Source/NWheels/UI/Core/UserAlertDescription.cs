@@ -13,5 +13,6 @@
         public UserAlertType Type { get; set; }
         public string Text { get; set; }
         public UserAlertResult[] Results { get; set; }
+        public string[] Parameters { get; set; }
     }
 }

@@ -337,6 +337,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\RealFramework.cs" />
     <Compile Include="UI\CommandComponent.cs" />
+    <Compile Include="UI\Core\DuplicateReferenceAttribute.cs" />
     <Compile Include="UI\Core\RootContentContainerDescription.cs" />
     <Compile Include="UI\Core\UINodeDescription.cs" />
     <Compile Include="UI\Core\UINodeType.cs" />

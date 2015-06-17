@@ -9,7 +9,7 @@ namespace NWheels.UI.Core
             this.NodeType = UINodeType.NotSet;
             this.IdName = idName;
             this.Parent = parent;
-            this.QualifiedName = parent.QualifiedName + "_" + idName;
+            this.QualifiedName = (parent != null ? parent.QualifiedName + "_" : "") + idName;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -20,6 +20,7 @@ namespace NWheels.UI.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [DuplicateReference]
         public UINodeDescription Parent { get; private set; }
     }
 }
