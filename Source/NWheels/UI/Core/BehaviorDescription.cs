@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI.Core
 {
-    public class BehaviorDescription
+    public class BehaviorDescription : UINodeDescription
     {
+        public BehaviorDescription(string idName, NotificationDescription parent)
+            : base(idName, parent)
+        {
+            base.NodeType = UINodeType.Behavior;
+        }
     }
 }

@@ -25,12 +25,13 @@ namespace NWheels.UI
         where TData : class
         where TState : class
     {
-        TElement New<TElement>() where TElement : IUIElement;
+        PresenterFluentApi.IBindingSourceBuilder<TContents, TData, TState, TValue> Bind<TValue>(
+            Expression<Func<TContents, TValue>> destination);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        PresenterFluentApi.IBindingSourceBuilder<TContents, TData, TState, TValue> Bind<TValue>(
-            Expression<Func<TContents, TValue>> destination);
+        PresenterFluentApi.IBehaviorBuilder<TValue, TData, TState> OnChange<TValue>(
+            Expression<Func<TContents, TValue>> property);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -45,6 +46,14 @@ namespace NWheels.UI
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         PresenterFluentApi.IBehaviorBuilder<Empty.Payload, TData, TState> On(ICommand command);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        TElement New<TElement>() where TElement : IUIElement;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        BehaviorDescription Behavior<TInput>(Action<PresenterFluentApi.IBehaviorBuilder<TInput, TData, TState>> describe);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

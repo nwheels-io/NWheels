@@ -2,15 +2,12 @@
 
 namespace NWheels.UI.Core
 {
-    public class WidgetDescription : UIElementContainerDescription
+    public abstract class WidgetDescription : UIContentElementDescription
     {
-        public WidgetDescription()
+        protected WidgetDescription(string idName, UIContentElementDescription parent)
+            : base(idName, parent)
         {
-            this.Widgets = new List<WidgetDescription>();
+            base.NodeType = UINodeType.Widget;
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public List<WidgetDescription> Widgets { get; private set; }
     }
 }

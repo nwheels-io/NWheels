@@ -38,8 +38,8 @@ namespace NWheels.Endpoints
         {
             if ( !string.IsNullOrWhiteSpace(this.Name) )
             {
-                //return new Uri(string.Format("http://localhost:8900/", this.Name.TrimPrefix("I")));
-                return new Uri(string.Format("http://localhost:8900/{0}", this.Name.TrimPrefix("I")));
+                return new Uri(string.Format("http://localhost:8900/", this.Name.TrimPrefix("I")));
+                //return new Uri(string.Format("http://localhost:8900/{0}", this.Name.TrimPrefix("I")));
             }
             else
             {

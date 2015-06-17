@@ -1,9 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace NWheels.UI.Core
 {
-    public abstract class NavigationTargetDescription : UIElementContainerDescription
+    public abstract class NavigationTargetDescription : UIContentElementDescription
     {
-        public Type InputParameterType { get; set; }
+        protected NavigationTargetDescription(string idName, NavigationTargetDescription parent)
+            : base(idName, parent)
+        {
+            this.NavigatedHere = new NotificationDescription("NavigatedHere", this);
+            base.Notifications.Add(NavigatedHere);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        internal NotificationDescription NavigatedHere { get; set; }
     }
 }

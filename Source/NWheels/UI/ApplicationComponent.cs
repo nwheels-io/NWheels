@@ -34,7 +34,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        ApplicationDescription IDescriptionProvider<ApplicationDescription>.GetDescription()
+        public virtual ApplicationDescription GetDescription()
         {
             throw new NotImplementedException();
         }

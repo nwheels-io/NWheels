@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI.Core
 {
-    public class DataBindingDescription
+    public class DataBindingDescription : UINodeDescription
     {
+        public DataBindingDescription(string idName, PresenterDescription parent)
+            : base(idName, parent)
+        {
+            base.NodeType = UINodeType.DataBinding;
+        }
     }
 }

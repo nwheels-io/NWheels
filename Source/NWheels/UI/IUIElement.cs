@@ -43,6 +43,6 @@ namespace NWheels.UI
         /// <summary>
         /// Indicates whether current user has permissions to access this UI element.
         /// </summary>
-        bool Authorized { get; }
+        bool Authorized { get; set; }
     }
 }

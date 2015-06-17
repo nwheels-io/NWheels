@@ -8,6 +8,6 @@ namespace NWheels.UI
 {
     public abstract class RootContentContainerComponent<TInput> : NavigationTargetComponent<TInput>, IRootContentContainer
     {
-        public IWidget ContentRoot { get; set; }
+        public IUIElementContainer ContentRoot { get; set; }
     }
 }

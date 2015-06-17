@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Globalization;
 using NWheels.UI;
+using NWheels.UI.Core;
 
 namespace NWheels.Domains.Security.UI
 {
@@ -33,6 +34,7 @@ namespace NWheels.Domains.Security.UI
 
         public interface IAlerts : IApplicationAlertRepository
         {
+            [ErrorAlert]
             IUserAlert LoginHasFailed(string reason);
         }
 
@@ -67,30 +69,47 @@ namespace NWheels.Domains.Security.UI
             [ViewModelPropertyContract.PersistedOnUserMachine]
             bool RememberMe { get; set; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class GeneratedDescription : WidgetDescription
+        {
+            public GeneratedDescription(string idName, UIContentElementDescription parent)
+                : base(idName, parent)
+            {
+                base.ElementType = "UserLoginForm";
+
+                this.LogIn = new CommandDescription("LogIn", this);
+                this.SignUp = new CommandDescription("SignUp", this);
+                this.ForgotPassword = new CommandDescription("ForgotPassword", this);
+                this.UserLoggedIn = new NotificationDescription("UserLoggedIn", this);
+                this.Translations = new {
+                    LoginName = "Login name",
+                    Password = "Password",
+                    EnterLoginName = "Enter login name",
+                    EnterPassword = "Enter password",
+                    SignUp = "Sign up",
+                    ForgotPassword = "Forgot password"
+                };
+
+                base.Commands.Add(LogIn);
+                base.Commands.Add(SignUp);
+                base.Commands.Add(ForgotPassword);
+                base.Notifications.Add(UserLoggedIn);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal CommandDescription LogIn { get; set; }
+            internal CommandDescription SignUp { get; set; }
+            internal CommandDescription ForgotPassword { get; set; }
+            internal NotificationDescription UserLoggedIn { get; set; }
+            public object Translations { get; set; }
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface ISecurityDomainApi
-    {
-        [DomainApiFault(typeof(LoginFailedFault))]
-        void LogUserIn(string loginName, string password);
-
-        [DomainApiFault(typeof(LogoutFailedFault))]
-        void LogUserOut();
-    }
-
-    public enum LoginFailedFault
-    {
-        LoginIncorrect,
-        PasswordExpired,
-        AccountLockedOut
-    }
-
-    public enum LogoutFailedFault
-    {
-        NotLoggedIn
-    }
 }
 
 #if false

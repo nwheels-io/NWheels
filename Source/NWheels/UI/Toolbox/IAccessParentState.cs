@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.UI.Core
+namespace NWheels.UI.Toolbox
 {
-    public class ShowAlertBehaviorDescription
+    public interface IAccessParentState<TParentState>
     {
+        TParentState ParentState { get; set; }
     }
 }

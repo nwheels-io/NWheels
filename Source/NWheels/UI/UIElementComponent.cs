@@ -12,6 +12,6 @@ namespace NWheels.UI
         public string HelpText { get; set; }
         public string Icon { get; set; }
         public bool Enabled { get; set; }
-        public bool Authorized { get; private set; }
+        public bool Authorized { get; set; }
     }
 }

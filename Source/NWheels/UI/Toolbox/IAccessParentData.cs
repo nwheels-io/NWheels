@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.UI.Core
+namespace NWheels.UI.Toolbox
 {
-    public class AlterModelBehaviorDescription
+    public interface IAccessParentData<TParentData>
     {
+        TParentData ParentData { get; set; }
     }
 }

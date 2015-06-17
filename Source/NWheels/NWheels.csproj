@@ -70,6 +70,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authorization\EntityPermission.cs" />
     <Compile Include="Auto.cs" />
     <Compile Include="Concurrency\Core\ResourceLock.cs" />
     <Compile Include="Concurrency\IResourceLock.cs" />
@@ -268,7 +269,7 @@
     <Compile Include="Logging\ThreadLogSnapshot.cs" />
     <Compile Include="Logging\ThreadTaskType.cs" />
     <Compile Include="Money.cs" />
-    <Compile Include="PermissionContract.cs" />
+    <Compile Include="Authorization\AuthorizationContract.cs" />
     <Compile Include="Processing\Rules\Core\RuleFunction.cs" />
     <Compile Include="Processing\Rules\Core\RuleVariable.cs" />
     <Compile Include="Processing\Workflows\AbstractWorkflow.cs" />
@@ -335,18 +336,26 @@
     <Compile Include="Processing\Rules\RuleSystemDescription.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\RealFramework.cs" />
+    <Compile Include="UI\CommandComponent.cs" />
     <Compile Include="UI\Core\RootContentContainerDescription.cs" />
+    <Compile Include="UI\Core\UINodeDescription.cs" />
+    <Compile Include="UI\Core\UINodeType.cs" />
     <Compile Include="UI\IRootContentContainer.cs" />
     <Compile Include="UI\IApplicationAlertRepository.cs" />
+    <Compile Include="UI\ISecurityDomainApi.cs" />
     <Compile Include="UI\NavigationTargetComponent.cs" />
     <Compile Include="UI\RootContentContainerComponent.cs" />
     <Compile Include="UI\Toolbox\Button.cs" />
     <Compile Include="UI\Toolbox\Calendar.cs" />
     <Compile Include="UI\Toolbox\Chart.cs" />
+    <Compile Include="UI\Toolbox\Container.cs" />
     <Compile Include="UI\Toolbox\DatePicker.cs" />
     <Compile Include="UI\Toolbox\EntityCrud.cs" />
+    <Compile Include="UI\Toolbox\EntityForm.cs" />
     <Compile Include="UI\Toolbox\FileUpload.cs" />
     <Compile Include="UI\Toolbox\Form.cs" />
+    <Compile Include="UI\Toolbox\IAccessParentData.cs" />
+    <Compile Include="UI\Toolbox\IAccessParentState.cs" />
     <Compile Include="UI\Toolbox\InputField.cs" />
     <Compile Include="UI\Toolbox\LandingPage.cs" />
     <Compile Include="UI\Toolbox\LandingPageSection.cs" />
@@ -373,24 +382,12 @@
     <Compile Include="UI\UIElementList.cs" />
     <Compile Include="UI\UserAlertResult.cs" />
     <Compile Include="UI\ApplicationComponent.cs" />
-    <Compile Include="UI\Core\AlterModelBehaviorDescription.cs" />
-    <Compile Include="UI\Core\ApiBindingDescription.cs" />
     <Compile Include="UI\Core\BehaviorDescription.cs" />
-    <Compile Include="UI\Core\BindingTransformRuleDescription.cs" />
-    <Compile Include="UI\Core\BranchByRuleBehaviorDescription.cs" />
-    <Compile Include="UI\Core\BranchRuleDescription.cs" />
-    <Compile Include="UI\Core\BroadcastBehaviorDescription.cs" />
-    <Compile Include="UI\Core\CallApiBehaviorDescription.cs" />
     <Compile Include="UI\Core\DataBindingDescription.cs" />
     <Compile Include="UI\Core\DomainApiDescription.cs" />
-    <Compile Include="UI\Core\EntityBindingDescription.cs" />
     <Compile Include="UI\Core\IDescriptionProvider.cs" />
-    <Compile Include="UI\Core\ModelBindingDescription.cs" />
-    <Compile Include="UI\Core\NavigateBehaviorDescription.cs" />
     <Compile Include="UI\Core\PresenterDescription.cs" />
-    <Compile Include="UI\Core\ShowAlertBehaviorDescription.cs" />
-    <Compile Include="UI\Core\SubscriptionDescription.cs" />
-    <Compile Include="UI\Core\UIElementContainerDescription.cs" />
+    <Compile Include="UI\Core\UIContentElementDescription.cs" />
     <Compile Include="UI\Core\UIElementDescription.cs" />
     <Compile Include="UI\DomainApiFaultAttribute.cs">
       <SubType>Code</SubType>
@@ -423,6 +420,7 @@
     <Compile Include="UI\PresenterFluentApi.cs" />
     <Compile Include="UI\ScreenComponent.cs" />
     <Compile Include="UI\ScreenPartComponent.cs" />
+    <Compile Include="UI\UserAlertType.cs" />
     <Compile Include="UI\ViewModelContractAttribute.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.UI.Core;
 
 namespace NWheels.UI.Toolbox
 {
@@ -16,5 +17,17 @@ namespace NWheels.UI.Toolbox
 
         public IScreenPart ContainedScreenPart { get; set; }
         public INotification ScreenPartLoaded { get; set; }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class GeneratedDescription : WidgetDescription
+        {
+            public GeneratedDescription(string idName, UIContentElementDescription parent)
+                : base(idName, parent)
+            {
+                base.ElementType = "ScreenPartContainer";
+            }
+        }
     }
 }

@@ -8,6 +8,6 @@ namespace NWheels.UI
 {
     public interface IRootContentContainer : IUIElementContainer
     {
-        IWidget ContentRoot { get; set; }
+        IUIElementContainer ContentRoot { get; set; }
     }
 }

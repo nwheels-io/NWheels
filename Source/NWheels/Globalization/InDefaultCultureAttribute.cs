@@ -2,7 +2,7 @@
 
 namespace NWheels.Globalization
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class InDefaultCultureAttribute : Attribute
     {
         private readonly string _localizedValue;

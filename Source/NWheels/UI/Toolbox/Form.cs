@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI.Toolbox
 {
-    class Form
+    public class Form : WidgetComponent<Form, Empty.Data, Empty.State>
     {
+        public override void DescribePresenter(IWidgetPresenter<Form, Empty.Data, Empty.State> presenter)
+        {
+        }
     }
 }

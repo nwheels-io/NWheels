@@ -6,19 +6,20 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI.Core
 {
-    public abstract class UIElementContainerDescription : UIElementDescription
+    public abstract class UIContentElementDescription : UIElementDescription
     {
-        protected UIElementContainerDescription()
+        protected UIContentElementDescription(string idName, UIContentElementDescription parent)
+            : base(idName, parent)
         {
+            this.Presenter = new PresenterDescription(this);
             this.Commands = new List<CommandDescription>();
-            this.Notifications = new List<NotificationDescription>();
             this.UserAlerts = new List<UserAlertDescription>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public PresenterDescription Presenter { get; private set; }
         public List<CommandDescription> Commands { get; private set; }
-        public List<NotificationDescription> Notifications { get; private set; }
         public List<UserAlertDescription> UserAlerts { get; private set; }
     }
 }

@@ -57,7 +57,7 @@ namespace NWheels.UI
         {
             IPromiseBuilder<TInput, TData, TState> OneWay(Expression<Action<TContract, TData, TState, TInput>> call);
             IPromiseBuilder<TInput, TData, TState> RequestReply(Expression<Action<TContract, TData, TState, TInput>> call);
-            IPromiseBuilder<TReply, TData, TState> RequestReply<TReply>(Expression<Func<TContract, TData, TState, TInput, TReply>> call) where TReply : class;
+            IPromiseBuilder<TReply, TData, TState> RequestReply<TReply>(Expression<Func<TContract, TData, TState, TInput, TReply>> call);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -7,7 +7,10 @@ using NWheels.UI.Core;
 
 namespace NWheels.UI
 {
-    public interface IWidget : IDescriptionProvider<WidgetDescription>
+    public interface IWidget : 
+        IUIElement, 
+        IUIElementContainer, 
+        IDescriptionProvider<WidgetDescription>
     {
     }
 
