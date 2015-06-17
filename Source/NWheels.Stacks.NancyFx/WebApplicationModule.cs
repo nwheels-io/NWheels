@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nancy;
+using Nancy.Json;
+using Nancy.Responses;
 using NWheels.UI;
 using NWheels.UI.Core;
 
@@ -22,9 +24,17 @@ namespace NWheels.Stacks.NancyFx
             _application = application;
 
             base.Get["/"] = parameters => View[GetSkinViewPath(_application.InitialScreen.IdName)];
-            base.Get["/init.json"] = parameters => Response.AsJson<ScreenDescription>(GetInitialScreen());// _application.Screens.Find(s => s.IdName == _application.InitialScreenIdName));
+            base.Get["/meta.json"] = parameters => GetApplicationMetadata();//Response.AsJson<ScreenDescription>(GetInitialScreen());// _application.Screens.Find(s => s.IdName == _application.InitialScreenIdName));
 
             _contentRootPath = Path.Combine(Path.GetDirectoryName(_application.GetType().Assembly.Location), _application.IdName);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Response GetApplicationMetadata()
+        {
+            var serializer = new MetadataJsonSerializer();
+            return new JsonResponse<ApplicationDescription>(_application, serializer);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

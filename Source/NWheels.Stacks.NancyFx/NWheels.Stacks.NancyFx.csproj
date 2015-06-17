@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IWebApplicationLogger.cs" />
+    <Compile Include="MetadataJsonSerializer.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="WebApplicationBootstrapper.cs" />
     <Compile Include="WebApplicationComponent.cs" />
