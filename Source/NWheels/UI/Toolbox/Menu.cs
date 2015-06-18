@@ -36,14 +36,17 @@ namespace NWheels.UI.Toolbox
                     : base(idName, parent)
                 {
                     Selected = new NotificationDescription("Selected", this);
+                    base.Notifications.Add(Selected);
                     SubItems = new List<GeneratedDescription>();
                     SubItems.AddRange(subItems);
                 }
 
                 //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+                [DuplicateReference]
                 public NotificationDescription Selected { get; set; }
                 public List<GeneratedDescription> SubItems { get; set; }
+                public int Level { get; set; }
             }
         }
 

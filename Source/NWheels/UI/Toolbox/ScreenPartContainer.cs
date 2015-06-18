@@ -28,6 +28,10 @@ namespace NWheels.UI.Toolbox
             {
                 base.ElementType = "ScreenPartContainer";
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string InitialScreenPartIdName { get; set; }
         }
     }
 }

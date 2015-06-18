@@ -10,6 +10,8 @@ namespace NWheels.UI.Core
             base.NodeType = UINodeType.Application;
             this.Screens = new List<ScreenDescription>();
             this.ScreenParts = new List<ScreenPartDescription>();
+            this.NavigationNotAuthorized = new NotificationDescription("NavigationNotAuthorized", this);
+            base.Notifications.Add(this.NavigationNotAuthorized);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -20,13 +22,15 @@ namespace NWheels.UI.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DuplicateReference]
-        public ScreenDescription InitialScreen { get; set; }
+        public ScreenDescription DefaultInitialScreen { get; set; }
+        [DuplicateReference]
+        public NotificationDescription NavigationNotAuthorized { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string InitialScreenIdName
+        public string DefaultInitialScreenIdName
         {
-            get { return InitialScreen.IdName; }
+            get { return DefaultInitialScreen.IdName; }
         }
     }
 }

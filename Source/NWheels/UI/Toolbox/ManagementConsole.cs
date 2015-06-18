@@ -29,6 +29,10 @@ namespace NWheels.UI.Toolbox
 
         public class GeneratedDescription : WidgetDescription
         {
+            private ScreenPartDescription _dashboard;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public GeneratedDescription(string idName, UIContentElementDescription parent)
                 : base(idName, parent)
             {
@@ -39,8 +43,30 @@ namespace NWheels.UI.Toolbox
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public ScreenPartContainer.GeneratedDescription MainContent { get; private set; }
-            public ScreenPartDescription Dashboard { get; set; }
             public Menu.GeneratedDescription NavigationStructure { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            [DuplicateReference]
+            public ScreenPartDescription Dashboard
+            {
+                get
+                {
+                    return _dashboard;
+                }
+                set
+                {
+                    _dashboard = value;
+                    MainContent.InitialScreenPartIdName = _dashboard.IdName;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string DashboardIdName
+            {
+                get { return Dashboard.IdName; }
+            }
         }
     }
 }

@@ -33,6 +33,7 @@ namespace NWheels.UI.Core
         Navigate,
         AlertUser,
         Broadcast,
+        InvokeCommand,
         AlterModel,
         BranchByRule
     }
@@ -67,6 +68,7 @@ namespace NWheels.UI.Core
 
         public UINodeType TargetType { get; set; }
         public string TargetIdName { get; set; }
+        public string ContainerQualifiedName { get; set; }
         public string InputExpression { get; set; }
     }
 
@@ -89,6 +91,28 @@ namespace NWheels.UI.Core
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    public class InvokeCommandBehaviorDescription : BehaviorDescription
+    {
+        public InvokeCommandBehaviorDescription(string idName, NotificationDescription parent)
+            : base(idName, BehaviorType.InvokeCommand, parent)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DuplicateReference]
+        public CommandDescription Command { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string CommandQualifiedName
+        {
+            get { return Command.QualifiedName; }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
     public class AlertBehaviorDescription : BehaviorDescription
     {
         public AlertBehaviorDescription(string idName, NotificationDescription parent)
@@ -100,6 +124,7 @@ namespace NWheels.UI.Core
 
         public UserAlertDescription Alert { get; set; }
         public string[] ParameterExpressions { get; set; }
+        public UserAlertDisplayMode DisplayMode { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -113,7 +138,18 @@ namespace NWheels.UI.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string NotificationIdName { get; set; }
+        [DuplicateReference]
+        public NotificationDescription Notification { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string NotificationQualifiedName
+        {
+            get { return Notification.QualifiedName; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public BroadcastDirection Direction { get; set; }
         public string PayloadExpression { get; set; }
     }

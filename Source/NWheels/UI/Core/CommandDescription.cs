@@ -18,7 +18,9 @@ namespace NWheels.UI.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [DuplicateReference]
         public NotificationDescription Executing { get; set; }
+        [DuplicateReference]
         public NotificationDescription Updating { get; set; }
     }
 }

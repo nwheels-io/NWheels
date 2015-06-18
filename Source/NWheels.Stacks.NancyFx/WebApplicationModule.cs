@@ -23,7 +23,7 @@ namespace NWheels.Stacks.NancyFx
         {
             _application = application;
 
-            base.Get["/"] = parameters => View[GetSkinViewPath(_application.InitialScreen.IdName)];
+            base.Get["/"] = parameters => View[GetSkinViewPath(_application.DefaultInitialScreen.IdName)];
             base.Get["/meta.json"] = parameters => GetApplicationMetadata();//Response.AsJson<ScreenDescription>(GetInitialScreen());// _application.Screens.Find(s => s.IdName == _application.InitialScreenIdName));
 
             _contentRootPath = Path.Combine(Path.GetDirectoryName(_application.GetType().Assembly.Location), _application.IdName);
@@ -41,7 +41,7 @@ namespace NWheels.Stacks.NancyFx
 
         private ScreenDescription GetInitialScreen()
         {
-            var screen = _application.Screens.Find(s => s.IdName == _application.InitialScreen.IdName);
+            var screen = _application.Screens.Find(s => s.IdName == _application.DefaultInitialScreen.IdName);
             return screen;
         }
 
