@@ -26,7 +26,7 @@ using NWheels.Processing.Jobs;
 using NWheels.Processing.Workflows;
 using NWheels.Processing.Workflows.Core;
 using NWheels.Processing.Workflows.Impl;
-using NWheels.UI.Core;
+using NWheels.UI.Uidl;
 
 namespace NWheels.Extensions
 {
@@ -152,7 +152,7 @@ namespace NWheels.Extensions
             string name = null, 
             string defaultUrl = null,
             bool exposeExceptions = false) 
-            where TApp : IDescriptionProvider<ApplicationDescription>
+            where TApp : UidlApplication
         {
             var registration = new WebAppEndpointRegistration(name, typeof(TApp), defaultUrl, exposeExceptions);
             ((IHaveContainerBuilder)fluentRegistration).Builder.RegisterInstance(registration);
@@ -525,9 +525,9 @@ namespace NWheels.Extensions
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp>() where TApp : IDescriptionProvider<ApplicationDescription>
+            public UIAppEndpointRegistrations<TApp> RegisterApplication<TApp>() where TApp : UidlApplication
             {
-                _builder.RegisterType<TApp>().As<TApp, IDescriptionProvider<ApplicationDescription>>();
+                _builder.RegisterType<TApp>().As<TApp, UidlApplication>();
                 return new UIAppEndpointRegistrations<TApp>(_builder);
             }
         }
@@ -601,7 +601,7 @@ namespace NWheels.Extensions
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class UIAppEndpointRegistrations<TApp> : IHaveContainerBuilder
-            where TApp : IDescriptionProvider<ApplicationDescription>
+            where TApp : UidlApplication
         {
             private readonly ContainerBuilder _containerBuilder;
             private readonly Type _applicationType;

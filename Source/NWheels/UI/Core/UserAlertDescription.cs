@@ -1,4 +1,6 @@
-﻿namespace NWheels.UI.Core
+﻿using NWheels.UI.Uidl;
+
+namespace NWheels.UI.Core
 {
     public class UserAlertDescription : UINodeDescription
     {

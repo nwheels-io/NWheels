@@ -1,72 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using NWheels.UI.Core;
+using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
 {
-    public class ManagementConsole : WidgetComponent<ManagementConsole, Empty.Data, Empty.State>
+    [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+    public class ManagementConsole : WidgetUidlNode
     {
-        public override void DescribePresenter(IWidgetPresenter<ManagementConsole, Empty.Data, Empty.State> presenter)
+        public ManagementConsole(string idName, ControlledUidlNode parent)
+            : base(idName, parent)
         {
+            this.MainMenu = new Menu("MainMenu", this);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void DefineNavigation(object anonymous)
+        public ManagementConsole Navigation(object anonymous)
         {
-            this.NavigationStructure = anonymous;
+            MainMenu.DefineNavigation(anonymous);
+            return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IScreenPart Dashboard { get; set; }
-        public object NavigationStructure { get; set; }
+        public ManagementConsole Dashboard(UidlScreenPart dashboardScreenPart)
+        {
+            DashboardScreenPartQualifiedName = dashboardScreenPart.QualifiedName;
+            MainContent.InitalScreenPartQualifiedName = dashboardScreenPart.QualifiedName;
+            return this;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class GeneratedDescription : WidgetDescription
+        [DataMember]
+        public Menu MainMenu { get; set; }
+        [DataMember]
+        public ScreenPartContainer MainContent { get; set; }
+        [DataMember]
+        public string DashboardScreenPartQualifiedName { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
-            private ScreenPartDescription _dashboard;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public GeneratedDescription(string idName, UIContentElementDescription parent)
-                : base(idName, parent)
-            {
-                base.ElementType = "ManagementConsole";
-                this.MainContent = new ScreenPartContainer.GeneratedDescription("MainContent", this);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public ScreenPartContainer.GeneratedDescription MainContent { get; private set; }
-            public Menu.GeneratedDescription NavigationStructure { get; set; }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            [DuplicateReference]
-            public ScreenPartDescription Dashboard
-            {
-                get
-                {
-                    return _dashboard;
-                }
-                set
-                {
-                    _dashboard = value;
-                    MainContent.InitialScreenPartIdName = _dashboard.IdName;
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public string DashboardIdName
-            {
-                get { return Dashboard.IdName; }
-            }
+            return new WidgetUidlNode[] { MainMenu, MainContent };
         }
     }
 }

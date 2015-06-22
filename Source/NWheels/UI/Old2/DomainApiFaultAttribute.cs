@@ -6,18 +6,16 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
-    public static class ViewModelPropertyContract
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    public class DomainApiFaultAttribute : Attribute
     {
-        [AttributeUsage(AttributeTargets.Property)]
-        public class PersistedOnUserMachineAttribute : Attribute
+        public DomainApiFaultAttribute(Type enumType)
         {
+            this.EnumType = enumType;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [AttributeUsage(AttributeTargets.Property)]
-        public class UserIPAddress : Attribute
-        {
-        }
+        public Type EnumType { get; private set; }
     }
 }

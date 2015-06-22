@@ -1,35 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.UI.Core;
+﻿using System.Collections.Generic;
+using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
 {
-    public class Splash : WidgetComponent<Splash, Empty.Data, Empty.State>
+    public class Splash : WidgetBase<Splash, Empty.Data, Empty.State>
     {
-        public override void DescribePresenter(IWidgetPresenter<Splash, Empty.Data, Empty.State> presenter)
+        public Splash(string idName, ControlledUidlNode parent)
+            : base(idName, parent)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IWidget Content { get; set; }
+        public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
+        {
+            yield return InsideContent;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class GeneratedDescription : WidgetDescription
+        protected override void DescribePresenter(PresenterBuilder<Splash, Empty.Data, Empty.State> presenter)
         {
-            public GeneratedDescription(string idName, UIContentElementDescription parent)
-                : base(idName, parent)
-            {
-                base.ElementType = "Splash";
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public WidgetDescription Content { get; set; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public WidgetUidlNode InsideContent { get; set; }
     }
 }

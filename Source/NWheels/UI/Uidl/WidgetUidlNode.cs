@@ -4,21 +4,22 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using NWheels.UI.Uidl;
 
-namespace NWheels.UI.Toolbox
+namespace NWheels.UI.Uidl
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-    public class ScreenPartContainer : WidgetUidlNode
+    public abstract class WidgetUidlNode : ControlledUidlNode
     {
-        public ScreenPartContainer(string idName, ControlledUidlNode parent)
-            : base(idName, parent)
+        protected WidgetUidlNode(string idName, ControlledUidlNode parent)
+            : base(UidlNodeType.Widget, idName, parent)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [DataMember]
-        public string InitalScreenPartQualifiedName { get; set; }
+        public virtual IEnumerable<WidgetUidlNode> GetNestedWidgets()
+        {
+            return new WidgetUidlNode[0];
+        }
     }
 }

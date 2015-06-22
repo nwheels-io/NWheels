@@ -7,58 +7,58 @@ using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Globalization;
 using NWheels.UI;
-using NWheels.UI.Core;
+using NWheels.UI.Uidl;
 
 namespace NWheels.Domains.Security.UI
 {
-    public class UserLoginForm : WidgetComponent<UserLoginForm, UserLoginForm.IData, UserLoginForm.IState>
+    public class UserLoginForm : WidgetBase<UserLoginForm, ILogUserInRequest, UserLoginForm.IState>
     {
-        public override void DescribePresenter(IWidgetPresenter<UserLoginForm, IData, IState> presenter)
+        public UserLoginForm(string idName, ControlledUidlNode parent)
+            : base(idName, parent)
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void DescribePresenter(PresenterBuilder<UserLoginForm, ILogUserInRequest, IState> presenter)
+        {
+            base.Translatables.AddRange(new[] {
+                "LoginName", "Password", "EnterLoginName", "EnterPassword", "SignUp", "ForgotPassword", 
+            });
+
             presenter.On(LogIn)
-                .CallApi<ISecurityDomainApi>().RequestReply((api, data, state, input) => api.LogUserIn(data.LoginName, data.Password))
+                .CallApi<ISecurityDomainApi>().RequestReply((api, data, state, input) => api.LogUserIn(data))
                 .Then(
                     onSuccess: b => b.Broadcast(UserLoggedIn).BubbleUp(),
                     onFailure: b => b.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.LoginHasFailed(failure.ReasonText)));
+
+            presenter.On(LogoutRequested)
+                .CallApi<ISecurityDomainApi>().RequestReply((api, data, state, input) => api.LogUserOut())
+                .Then(
+                    onSuccess: b => b.Broadcast(UserLoggedOut).BubbleUp(),
+                    onFailure: b => b.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.LoginHasFailed(failure.ReasonText))
+                        .Then(bb => bb.Broadcast(UserLoggedOut).BubbleUp()));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ICommand LogIn { get; set; }
-        public ICommand SignUp { get; set; }
-        public ICommand ForgotPassword { get; set; }
-        public INotification UserLoggedIn { get; set; }
-        public ITranslations Translations { get; set; }
+        public UidlCommand LogIn { get; set; }
+        public UidlCommand SignUp { get; set; }
+        public UidlCommand ForgotPassword { get; set; }
+        
+        public UidlNotification UserLoggedIn { get; set; }
+        public UidlNotification UserLoggedOut { get; set; }
+        public UidlNotification LogoutRequested { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public interface IAlerts : IApplicationAlertRepository
+        public interface IAlerts : IUserAlertRepository
         {
-            [ErrorAlert]
-            IUserAlert LoginHasFailed(string reason);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public interface ITranslations : ILocalizableApplicationResources
-        {
-            string LoginName { get; }
-            string Password { get; }
-            string EnterLoginName { get; }
-            string EnterPassword { get; }
-            string SignUp { get; }
-            string ForgotPassword { get; }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [ViewModelContract]
-        public interface IData
-        {
-            [PropertyContract.Required]
-            string LoginName { get; set; }
-            [PropertyContract.Required, PropertyContract.Semantic.Password]
-            string Password { get; set; }
+            [ErrorAlert(UserAlertResult.OK)]
+            UidlUserAlert LoginHasFailed(string reason);
+            
+            [WarningAlert(UserAlertResult.OK)]
+            UidlUserAlert UserWasNotLoggedOut(string reason);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -69,209 +69,5 @@ namespace NWheels.Domains.Security.UI
             [ViewModelPropertyContract.PersistedOnUserMachine]
             bool RememberMe { get; set; }
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class GeneratedDescription : WidgetDescription
-        {
-            public GeneratedDescription(string idName, UIContentElementDescription parent)
-                : base(idName, parent)
-            {
-                base.ElementType = "UserLoginForm";
-
-                this.LogIn = new CommandDescription("LogIn", this);
-                this.SignUp = new CommandDescription("SignUp", this);
-                this.ForgotPassword = new CommandDescription("ForgotPassword", this);
-                this.UserLoggedIn = new NotificationDescription("UserLoggedIn", this);
-                this.Translations = new {
-                    LoginName = "Login name",
-                    Password = "Password",
-                    EnterLoginName = "Enter login name",
-                    EnterPassword = "Enter password",
-                    SignUp = "Sign up",
-                    ForgotPassword = "Forgot password"
-                };
-
-                base.Commands.Add(LogIn);
-                base.Commands.Add(SignUp);
-                base.Commands.Add(ForgotPassword);
-                base.Notifications.Add(UserLoggedIn);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            internal CommandDescription LogIn { get; set; }
-            internal CommandDescription SignUp { get; set; }
-            internal CommandDescription ForgotPassword { get; set; }
-            internal NotificationDescription UserLoggedIn { get; set; }
-            public object Translations { get; set; }
-        }
     }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
 }
-
-#if false
-
-namespace NWheels.Domains.Security.UI
-{
-
-    
-    public interface ILoginModel
-    {
-	    string LoginName { get; set; }
-	    string Password { get; set; }
-    }
-    public interface ILoginState
-    {
-        bool RememberMe { get; set; }
-    }
-    public interface ILoginScreenTemplate : ITemplateUIWidget, Abstractions.IBound<ILoginScreenTemplate, ILoginModel, ILoginState>
-    {
-        string LoginIcon { get; set; }
-        string LoginTitle { get; set; }
-        string LoginSubTitle { get; set; }
-        string LoginNamePlaceholder { get; set; }
-        string PasswordPlaceholder { get; set; }
-        string SignUpUrl { get; set; }
-    }
-    public interface ILoginUIScreen : IUIScreen, Abstractions.IBound<ILoginUIScreen, ILoginScreenModel, ILoginScreenState>
-    {
-        ILoginScreenTemplate Template { get; } 
-    }
-    public interface IMyApp1 : IUIApplication
-    {
-        ILoginUIScreen LoginScreen { get; }
-    }
-
-
-    
-    public class MyApp1Builder : Abstractions.IApplicationBuilder<IMyApp1>
-    {
-        private readonly IMyApp1Translation _translation;
-
-        public MyApp1Builder(IMyApp1Translation translation)
-        {
-            _translation = translation;
-        }
-
-        public void BuildApplication(IMyApp1 app)
-        {
-            var t = _translation;
-
-            app.Icon(t.MyAppIcon).Title(t.MyApp).SubTitle(t.MyAppDescr).Copyright(t.MyAppDescr);
-            //app.LoginScreen
-        }
-    }
-
-
-    public interface IMyApp1Translation : ILocalizableUiResources
-    {
-        string MyApp { get; }
-        string MyAppDescr { get; }
-        string MyAppIcon { get; }
-    }
-
-
-    namespace Abstractions
-    {
-        public interface ICompositeOf<TChildren> : IEnumerable<TChildren>
-        {
-        }
-        public interface IWidget
-        {
-            string IdName { get; }
-        }
-        public interface ICompositeWidget<TChildren> : IWidget, ICompositeOf<TChildren>
-            where TChildren : IWidget
-        {
-        }
-        public interface IBound<TWidget, TModel, TState>
-        {
-            IBindTo<TModel, TState, TValue> Bind<TValue>(Expression<Func<TWidget, TValue>> widgetProperty);
-        }
-        public interface IBindTo<TModel, TState, TValue>
-        {
-            void ToModel(Expression<Func<TModel, TValue>> modelProperty);
-            void ToState(Expression<Func<TState, TValue>> stateProperty);
-        }
-
-
-        
-        public abstract class Widget : IWidget
-        {
-            public string IdName { get; set; }
-        }
-        public abstract class CommandWidget : Widget
-        {
-            public Command Command { get; set; }
-        }
-        public abstract class CompositeWidget : Widget, IEnumerable<Widget>
-        {
-            public abstract IEnumerator<Widget> GetEnumerator();
-            public abstract int WidgetCount { get; }
-
-            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-            {
-                return this.GetEnumerator();
-            }
-        }
-        public abstract class ContainerWidget : CompositeWidget
-        {
-            private readonly List<Widget> _widgets = new List<Widget>();
-
-            public override IEnumerator<Widget> GetEnumerator()
-            {
-                return _widgets.GetEnumerator();
-            }
-            public void Add(Widget widget)
-            {
-                _widgets.Add(widget);
-            }
-            public override int WidgetCount
-            {
-                get { return _widgets.Count; }
-            }
-            public Widget this[int index]
-            {
-                get { return _widgets[index]; }
-                set { _widgets[index] = value; }
-            }
-        }
-        public abstract class TemplateWidget<TPlaceholder> : CompositeWidget
-        {
-            private readonly Dictionary<TPlaceholder, Widget> _widgets = new Dictionary<TPlaceholder, Widget>();
-
-            public override IEnumerator<Widget> GetEnumerator()
-            {
-                return _widgets.Values.GetEnumerator();
-            }
-            public override int WidgetCount
-            {
-                get { return _widgets.Count; }
-            }
-            public Widget this[TPlaceholder placeholder]
-            {
-                get { return _widgets[placeholder]; }
-                set { _widgets[placeholder] = value; }
-            }
-        }
-        public abstract class Command
-        {
-        }
-    }
-
-    namespace Toolbox
-    {
-
-        public class Link : Abstractions.CommandWidget
-        {
-            public string Url { get; set; }
-            public string Text { get; set; }
-        }
-    }
-
-}
-
-#endif

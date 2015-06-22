@@ -336,98 +336,54 @@
     <Compile Include="Processing\Rules\RuleSystemDescription.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\RealFramework.cs" />
-    <Compile Include="UI\CommandComponent.cs" />
-    <Compile Include="UI\Core\DuplicateReferenceAttribute.cs" />
-    <Compile Include="UI\Core\RootContentContainerDescription.cs" />
-    <Compile Include="UI\Core\UINodeDescription.cs" />
-    <Compile Include="UI\Core\UINodeType.cs" />
-    <Compile Include="UI\IRootContentContainer.cs" />
-    <Compile Include="UI\IApplicationAlertRepository.cs" />
-    <Compile Include="UI\ISecurityDomainApi.cs" />
-    <Compile Include="UI\NavigationTargetComponent.cs" />
-    <Compile Include="UI\RootContentContainerComponent.cs" />
-    <Compile Include="UI\Toolbox\Button.cs" />
-    <Compile Include="UI\Toolbox\Calendar.cs" />
-    <Compile Include="UI\Toolbox\Chart.cs" />
-    <Compile Include="UI\Toolbox\Container.cs" />
-    <Compile Include="UI\Toolbox\DatePicker.cs" />
-    <Compile Include="UI\Toolbox\EntityCrud.cs" />
-    <Compile Include="UI\Toolbox\EntityForm.cs" />
-    <Compile Include="UI\Toolbox\FileUpload.cs" />
-    <Compile Include="UI\Toolbox\Form.cs" />
-    <Compile Include="UI\Toolbox\IAccessParentData.cs" />
-    <Compile Include="UI\Toolbox\IAccessParentState.cs" />
-    <Compile Include="UI\Toolbox\InputField.cs" />
-    <Compile Include="UI\Toolbox\LandingPage.cs" />
-    <Compile Include="UI\Toolbox\LandingPageSection.cs" />
-    <Compile Include="UI\Toolbox\LayoutAccordion.cs" />
-    <Compile Include="UI\Toolbox\LayoutDock.cs" />
-    <Compile Include="UI\Toolbox\LayoutFlow.cs" />
-    <Compile Include="UI\Toolbox\LayoutGrid.cs" />
-    <Compile Include="UI\Toolbox\LayoutStack.cs" />
-    <Compile Include="UI\Toolbox\LayoutTabs.cs" />
-    <Compile Include="UI\Toolbox\Link.cs" />
-    <Compile Include="UI\Toolbox\ItemList.cs" />
-    <Compile Include="UI\Toolbox\ManagementConsole.cs" />
-    <Compile Include="UI\Toolbox\Menu.cs" />
-    <Compile Include="UI\Toolbox\ProgressBar.cs" />
-    <Compile Include="UI\Toolbox\ScreenPartContainer.cs" />
-    <Compile Include="UI\Toolbox\Splash.cs" />
-    <Compile Include="UI\Toolbox\Table.cs" />
-    <Compile Include="UI\Toolbox\TextEditor.cs" />
-    <Compile Include="UI\Toolbox\TreeTable.cs" />
-    <Compile Include="UI\Toolbox\Wizard.cs" />
-    <Compile Include="UI\Toolbox\WorldMap.cs" />
-    <Compile Include="UI\UIElementComponent.cs" />
-    <Compile Include="UI\UIElementContainerComponent.cs" />
-    <Compile Include="UI\UIElementList.cs" />
-    <Compile Include="UI\UserAlertResult.cs" />
-    <Compile Include="UI\ApplicationComponent.cs" />
-    <Compile Include="UI\Core\BehaviorDescription.cs" />
-    <Compile Include="UI\Core\DataBindingDescription.cs" />
-    <Compile Include="UI\Core\DomainApiDescription.cs" />
-    <Compile Include="UI\Core\IDescriptionProvider.cs" />
-    <Compile Include="UI\Core\PresenterDescription.cs" />
-    <Compile Include="UI\Core\UIContentElementDescription.cs" />
-    <Compile Include="UI\Core\UIElementDescription.cs" />
-    <Compile Include="UI\DomainApiFaultAttribute.cs">
+    <Compile Include="UI\ApplicationBase.cs" />
+    <Compile Include="UI\DomainApiFaultAttribute.cs" />
+    <Compile Include="UI\IUserAlertRepository.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UI\IPromiseFailureInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\IScreenPartWithInput.cs" />
+    <Compile Include="UI\IScreenWithInput.cs" />
+    <Compile Include="UI\PresenterBuilder.cs" />
+    <Compile Include="UI\ScreenBase.cs" />
+    <Compile Include="UI\ScreenPartBase.cs" />
+    <Compile Include="UI\Toolbox\Menu.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\Toolbox\ScreenPartContainer.cs" />
+    <Compile Include="UI\Toolbox\ManagementConsole.cs" />
+    <Compile Include="UI\Toolbox\Splash.cs" />
+    <Compile Include="UI\UidlBuilder.cs" />
+    <Compile Include="UI\Uidl\Enums.cs" />
+    <Compile Include="UI\Uidl\UidlApplication.cs" />
+    <Compile Include="UI\Uidl\BehaviorUidlNode.cs" />
+    <Compile Include="UI\Uidl\UidlCommand.cs" />
+    <Compile Include="UI\Uidl\ControlledUidlNode.cs" />
+    <Compile Include="UI\Uidl\DataBindingUidlNode.cs" />
+    <Compile Include="UI\Uidl\InteractiveUidlNode.cs" />
+    <Compile Include="UI\Uidl\NavigationTargetUidlNode.cs" />
+    <Compile Include="UI\Uidl\UidlLocale.cs" />
+    <Compile Include="UI\Uidl\UidlMetaType.cs" />
+    <Compile Include="UI\Uidl\UidlMetaProperty.cs" />
+    <Compile Include="UI\Uidl\UidlNotification.cs" />
+    <Compile Include="UI\Uidl\RootContentUidlNode.cs" />
+    <Compile Include="UI\Uidl\UidlScreenPart.cs" />
+    <Compile Include="UI\Uidl\UidlScreen.cs" />
+    <Compile Include="UI\Uidl\AbstractUidlNode.cs" />
+    <Compile Include="UI\Uidl\UidlDocument.cs" />
+    <Compile Include="UI\Uidl\UidlUserAlert.cs" />
+    <Compile Include="UI\Uidl\WidgetUidlNode.cs" />
     <Compile Include="UI\Empty.cs" />
-    <Compile Include="UI\IApplication.cs" />
-    <Compile Include="UI\ICommand.cs" />
-    <Compile Include="UI\IDomainApi.cs" />
-    <Compile Include="UI\IEntityApi.cs" />
-    <Compile Include="UI\Core\UserAlertDescription.cs" />
-    <Compile Include="UI\Core\ApplicationDescription.cs" />
-    <Compile Include="UI\Core\CommandDescription.cs" />
-    <Compile Include="UI\Core\NavigationTargetDescription.cs" />
-    <Compile Include="UI\Core\NotificationDescription.cs" />
-    <Compile Include="UI\Core\ScreenDescription.cs" />
-    <Compile Include="UI\Core\ScreenPartDescription.cs" />
-    <Compile Include="UI\Core\WidgetDescription.cs" />
-    <Compile Include="UI\IPromiseFailureInfo.cs" />
-    <Compile Include="UI\INavigationTarget.cs" />
-    <Compile Include="UI\INotification.cs" />
-    <Compile Include="UI\IAbstractPresenter.cs" />
-    <Compile Include="UI\IScreen.cs" />
-    <Compile Include="UI\IScreenPart.cs" />
-    <Compile Include="UI\IUIElement.cs" />
-    <Compile Include="UI\IUIElementContainer.cs" />
-    <Compile Include="UI\IUserAlert.cs" />
-    <Compile Include="UI\IWidget.cs" />
     <Compile Include="UI\Impl\UIObjectFactory.cs" />
-    <Compile Include="UI\ModalResult.cs" />
-    <Compile Include="UI\PresenterFluentApi.cs" />
-    <Compile Include="UI\ScreenComponent.cs" />
-    <Compile Include="UI\ScreenPartComponent.cs" />
-    <Compile Include="UI\UserAlertType.cs" />
+    <Compile Include="UI\UserAlertAttribute.cs" />
     <Compile Include="UI\ViewModelContractAttribute.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="UI\ViewModelPropertyContract.cs" />
     <Compile Include="UI\TemplateAttribute.cs" />
-    <Compile Include="UI\WidgetComponent.cs" />
+    <Compile Include="UI\WidgetBase.cs" />
     <Compile Include="Utilities\EntityUtility.cs" />
     <Compile Include="Utilities\ParseUtility.cs" />
     <Compile Include="Utilities\PathUtility.cs" />
@@ -435,6 +391,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Processing\Rules\Impl\" />
+    <Folder Include="UI\Core\" />
+    <Folder Include="UI\Old2\" />
+    <Folder Include="UI\OldToolbox\" />
     <Folder Include="UI\Old\" />
   </ItemGroup>
   <ItemGroup>

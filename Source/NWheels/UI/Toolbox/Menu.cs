@@ -1,68 +1,198 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.UI.Core;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.Serialization;
+using NWheels.Extensions;
+using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
 {
-    public class Menu : WidgetComponent<Menu, Empty.Data, Empty.State>
+    [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+    public class Menu : WidgetBase<Menu, Empty.Data, Empty.State>
     {
-        public override void DescribePresenter(IWidgetPresenter<Menu, Empty.Data, Empty.State> presenter)
+        public Menu(string idName, ControlledUidlNode parent)
+            : base(idName, parent)
+        {
+            this.Items = new List<MenuItem>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void DefineNavigation(object anonymous)
+        {
+            DefineNavigation(anonymous, Items, level: 0, parent: this);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
+        {
+            return Items;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public List<MenuItem> Items { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void DescribePresenter(PresenterBuilder<Menu, Empty.Data, Empty.State> presenter)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UIElementList<Item> Items { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class Item : UIElementContainerComponent
+        private void DefineNavigation(object anonymous, List<MenuItem> destination, int level, ControlledUidlNode parent)
         {
-            public Item(string icon = null, object subItems = null)
+            foreach ( var property in anonymous.GetType().GetProperties().Where(IsMenuItemProperty) )
             {
-            }
+                var item = new MenuItem(property.Name, parent);
+                
+                item.Text = property.Name;
+                item.Level = level;
 
-            public INotification Selected { get; set; }
-            public UIElementList<Item> SubItems { get; set; }
+                destination.Add(item);
 
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public class GeneratedDescription : UIElementDescription
-            {
-                public GeneratedDescription(string idName, UIContentElementDescription parent, params GeneratedDescription[] subItems)
-                    : base(idName, parent)
+                if ( property.PropertyType == typeof(ItemAction) )
                 {
-                    Selected = new NotificationDescription("Selected", this);
-                    base.Notifications.Add(Selected);
-                    SubItems = new List<GeneratedDescription>();
-                    SubItems.AddRange(subItems);
+                    item.Action = (ItemAction)property.GetValue(anonymous);
                 }
-
-                //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-                [DuplicateReference]
-                public NotificationDescription Selected { get; set; }
-                public List<GeneratedDescription> SubItems { get; set; }
-                public int Level { get; set; }
+                else if ( property.PropertyType.IsAnonymousType() )
+                {
+                    DefineNavigation(property.GetValue(anonymous), item.SubItems, level + 1, parent);
+                }
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class GeneratedDescription : WidgetDescription
+        private static bool IsMenuItemProperty(PropertyInfo property)
         {
-            public GeneratedDescription(string idName, UIContentElementDescription parent)
-                : base(idName, parent)
+            return (property.DeclaringType != typeof(object));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public delegate void DescribeActionCallback(PresenterBuilder<MenuItem, Empty.Data, Empty.State>.BehaviorBuilder<Empty.Payload> behavior);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static class Action
+        {
+            public static object Goto<TInput>(IScreenWithInput<TInput> screen, TInput value = default(TInput))
             {
-                this.Items = new List<Item.GeneratedDescription>();
+                return Describe(b => b.Navigate().ToScreen(screen).WithInput((payload, data, state) => value));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public List<Item.GeneratedDescription> Items { get; set; }
+            public static object Goto<TInput>(IScreenPartWithInput<TInput> screenPart, ScreenPartContainer targetContainer, TInput value = default(TInput))
+            {
+                return Describe(b => b.Navigate().FromContainer(targetContainer).ToScreenPart(screenPart).WithInput((payload, data, state) => value));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static object AlertUserPopup<TRepo>(Expression<Func<TRepo, UidlUserAlert>> alertCall)
+                where TRepo : IUserAlertRepository
+            {
+                return Describe(b => b.UserAlertFrom<TRepo>().ShowPopup(alertCall));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static object AlertUserInline<TRepo>(Expression<Func<TRepo, UidlUserAlert>> alertCall)
+                where TRepo : IUserAlertRepository
+            {
+                return Describe(b => b.UserAlertFrom<TRepo>().ShowInline(alertCall));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static object Notify(UidlNotification notification, BroadcastDirection direction = BroadcastDirection.BubbleUp)
+            {
+                return Describe(b => b.Broadcast(notification).Direction(direction));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static object InvokeCommand(UidlCommand command)
+            {
+                return Describe(b => b.InvokeCommand(command));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static object Notify<TPayload>(
+                UidlNotification<TPayload> notification, 
+                TPayload payload, 
+                BroadcastDirection direction = BroadcastDirection.BubbleUp)
+            {
+                return Describe(b => b.Broadcast(notification).WithPayload((data, state, input) => payload).Direction(direction));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static object Describe(DescribeActionCallback onDescribe)
+            {
+                return new ItemAction(onDescribe);
+            }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal class ItemAction
+        {
+            public ItemAction(DescribeActionCallback onDescribe)
+            {
+                this.OnDescribe = onDescribe;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public DescribeActionCallback OnDescribe { get; private set; }
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+    public class MenuItem : WidgetBase<MenuItem, Empty.Data, Empty.State>
+    {
+        public MenuItem(string idName, ControlledUidlNode parent)
+            : base(idName, parent)
+        {
+            this.SubItems = new List<MenuItem>();
+            this.Selected = new UidlNotification("Selected", this);
+            base.Notifications.Add(this.Selected);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public int Level { get; set; }
+        [DataMember]
+        public List<MenuItem> SubItems { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UidlNotification Selected { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void DescribePresenter(PresenterBuilder<MenuItem, Empty.Data, Empty.State> presenter)
+        {
+            if ( this.Action != null )
+            {
+                this.Action.OnDescribe(presenter.On(Selected));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        internal Menu.ItemAction Action { get; set; }
     }
 }
