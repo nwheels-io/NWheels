@@ -91,6 +91,10 @@ namespace NWheels.UI
                 {
                     property.SetValue(parent, _applicationBeingAdded);
                 }
+                else if ( typeof(UidlScreenPart).IsAssignableFrom(property.PropertyType) )
+                {
+                    property.SetValue(parent, GetScreenPartInstance(property.PropertyType));
+                }
                 else
                 {
                     var instance = (AbstractUidlNode)Activator.CreateInstance(property.PropertyType, property.Name, parent);
@@ -157,6 +161,22 @@ namespace NWheels.UI
             }
 
             return metaType;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private UidlScreenPart GetScreenPartInstance(Type screenPartType)
+        {
+            var existingInstance = _applicationBeingAdded.ScreenParts.FirstOrDefault(s => s.GetType() == screenPartType);
+
+            if ( existingInstance != null )
+            {
+                return existingInstance;
+            }
+
+            var newInstance = (UidlScreenPart)Activator.CreateInstance(screenPartType, screenPartType.Name, _applicationBeingAdded);
+            _applicationBeingAdded.ScreenParts.Add(newInstance);
+            return newInstance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
