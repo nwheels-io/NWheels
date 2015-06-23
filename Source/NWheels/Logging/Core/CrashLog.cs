@@ -29,7 +29,7 @@ namespace NWheels.Logging.Core
                 (e.ExceptionObject != null ? e.ExceptionObject.ToString() : "(no exception available)");
 
             File.WriteAllText(
-                PathUtility.LocalBinPath("crash.log"), 
+                PathUtility.HostBinPath("crash.log"), 
                 "UNHANDLED EXCEPTION! " + e.ExceptionObject.ToString());
         }
     }

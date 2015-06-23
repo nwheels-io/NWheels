@@ -14,7 +14,18 @@ namespace NWheels.UI.Uidl
             : base(nodeType, idName, parent)
         {
             this.Notifications = new List<UidlNotification>();
-            this.Translatables = new List<string>();
+            this.Text = base.IdName;
+            this.Enabled = true;
+            this.Authorized = true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual IEnumerable<string> GetTranslatables()
+        {
+            return new[] {
+                this.Text, this.HelpText, this.Icon
+            };
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -34,7 +45,5 @@ namespace NWheels.UI.Uidl
 
         [DataMember]
         public List<UidlNotification> Notifications { get; set; }
-        [DataMember]
-        public List<string> Translatables { get; set; }
     }
 }

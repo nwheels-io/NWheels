@@ -72,7 +72,7 @@ namespace NWheels.Hosts.Console
 
         private static void LoadBootConfig(string[] programArgs)
         {
-            var configFilePath = PathUtility.LocalBinPath(programArgs.Length > 0 ? programArgs[0] : BootConfiguration.DefaultBootConfigFileName);
+            var configFilePath = PathUtility.HostBinPath(programArgs.Length > 0 ? programArgs[0] : BootConfiguration.DefaultBootConfigFileName);
 
             _s_log.Debug("Loading configuration from: {0}", configFilePath);
 
@@ -122,7 +122,7 @@ namespace NWheels.Hosts.Console
 
         private static void BlockUntilStopRequested()
         {
-            var stopRequestFilePath = PathUtility.LocalBinPath(fileName: "stop.request");
+            var stopRequestFilePath = PathUtility.HostBinPath(fileName: "stop.request");
 
             System.Console.ForegroundColor = ConsoleColor.Green;
             System.Console.WriteLine();
@@ -170,7 +170,7 @@ namespace NWheels.Hosts.Console
             };
 
             var serializer = new DataContractSerializer(typeof(BootConfiguration));
-            using ( var file = File.Create(PathUtility.LocalBinPath(BootConfiguration.DefaultBootConfigFileName)) )
+            using ( var file = File.Create(PathUtility.HostBinPath(BootConfiguration.DefaultBootConfigFileName)) )
             {
                 serializer.WriteObject(file, _s_bootConfig);
                 file.Flush();

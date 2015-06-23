@@ -208,6 +208,8 @@ namespace NWheels.UI
                     behavior.Subscription = new BehaviorUidlNode.SubscriptionToNotification() {
                         NotificationQualifiedName = _notification.QualifiedName
                     };
+
+                    _ownerNode.Behaviors.Add(behavior);
                 }
             }
         }

@@ -54,7 +54,7 @@ namespace NWheels.Hosts.Service
         {
             s_Log.Debug("Loading {0}", BootConfiguration.DefaultBootConfigFileName);
 
-            s_BootConfig = BootConfiguration.LoadFromFile(PathUtility.LocalBinPath(BootConfiguration.DefaultBootConfigFileName));
+            s_BootConfig = BootConfiguration.LoadFromFile(PathUtility.HostBinPath(BootConfiguration.DefaultBootConfigFileName));
             s_BootConfig.Validate();
 
             s_Log.Info(s_BootConfig.ToLogString());

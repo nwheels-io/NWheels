@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading;
 using Hapil.Members;
 using Nancy.Responses;
-using NWheels.UI.Core;
+using NWheels.Extensions;
 using NWheels.UI.Uidl;
 
 namespace NWheels.Stacks.NancyFx
@@ -35,7 +35,7 @@ namespace NWheels.Stacks.NancyFx
                     null, false, JsonSettings.MaxJsonLength, JsonSettings.MaxRecursions, false, true);
 
                 serializer.RegisterConverters(
-                    new JavaScriptConverter[] { new SkipDuplicateReferencesConverter() },
+                    new JavaScriptConverter[] { new ExcludeNonDataMemberPropertiesConverter() },
                     new JavaScriptPrimitiveConverter[] { new StringEnumConverter() });
 
                 var outputText = new StringBuilder();
@@ -57,7 +57,7 @@ namespace NWheels.Stacks.NancyFx
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class SkipDuplicateReferencesConverter : JavaScriptConverter
+        public class ExcludeNonDataMemberPropertiesConverter : JavaScriptConverter
         {
             #region Overrides of JavaScriptConverter
 
@@ -71,7 +71,7 @@ namespace NWheels.Stacks.NancyFx
             public override IDictionary<string, object> Serialize(object obj, JavaScriptSerializer serializer)
             {
                 var members = TypeMemberCache.Of(obj.GetType());
-                var propertiesToSerialize = members.SelectAllProperties(where: p => p.GetCustomAttribute<DataMemberAttribute>(inherit: true) == null);
+                var propertiesToSerialize = members.SelectAllProperties(where: p => p.HasAttribute<DataMemberAttribute>());
                 var serialized = new Dictionary<string, object>();
 
                 foreach ( var property in propertiesToSerialize.ToArray() )

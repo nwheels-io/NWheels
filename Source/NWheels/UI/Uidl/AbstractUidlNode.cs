@@ -20,7 +20,8 @@ namespace NWheels.UI.Uidl
         protected AbstractUidlNode(UidlNodeType nodeType, string idName, AbstractUidlNode parent)
         {
             this.NodeType = nodeType;
-            this.IdName = (idName == IdNameAsTypeMacro ? this.GetType().Name : idName);
+            // ReSharper disable once DoNotCallOverridableMethodsInConstructor
+            this.IdName = (idName == IdNameAsTypeMacro ? GetIdNameFromType() : idName);
             this.QualifiedName = (parent != null ? parent.QualifiedName + ":" : "") + IdName;
         }
 
@@ -32,5 +33,12 @@ namespace NWheels.UI.Uidl
         public string IdName { get; set; }
         [DataMember]
         public string QualifiedName { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual string GetIdNameFromType()
+        {
+            return this.GetType().Name;
+        }
     }
 }

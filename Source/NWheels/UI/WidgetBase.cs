@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using NWheels.UI.Uidl;
 
@@ -19,11 +20,14 @@ namespace NWheels.UI
         {
             base.ModelDataType = builder.RegisterMetaType(typeof(TData));
             base.ModelStateType = builder.RegisterMetaType(typeof(TState));
-                
-            builder.InstantiateDeclaredMemberNodes(this);
-            builder.BuildNodes(this.GetNestedWidgets().Cast<AbstractUidlNode>().ToArray());
+        }
 
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void UidlBuilder.IBuildableUidlNode.DescribePresenter(UidlBuilder builder)
+        {
             DescribePresenter(new PresenterBuilder<TWidget, TData, TState>(builder, this));
+            builder.DescribeNodePresenters(this.GetNestedWidgets().Cast<AbstractUidlNode>().ToArray());
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

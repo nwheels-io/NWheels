@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NWheels.Extensions;
 
-namespace NWheels.UI.Core
+namespace NWheels.Globalization
 {
-    public interface IUILocalizationProvider
+    public interface ILocalizationProvider
     {
         Dictionary<string, string> GetLocalStrings(IEnumerable<string> stringIds, CultureInfo culture);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public class VoidUILocalizationProvider : IUILocalizationProvider
+    public class VoidLocalizationProvider : ILocalizationProvider
     {
         public Dictionary<string, string> GetLocalStrings(IEnumerable<string> stringIds, CultureInfo culture)
         {

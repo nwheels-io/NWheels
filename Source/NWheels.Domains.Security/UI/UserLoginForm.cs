@@ -20,12 +20,17 @@ namespace NWheels.Domains.Security.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override IEnumerable<string> GetTranslatables()
+        {
+            return base.GetTranslatables().Concat(new[] {
+                "LoginName", "Password", "EnterLoginName", "EnterPassword", "SignUp", "ForgotPassword", "RememberMe"
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void DescribePresenter(PresenterBuilder<UserLoginForm, ILogUserInRequest, IState> presenter)
         {
-            base.Translatables.AddRange(new[] {
-                "LoginName", "Password", "EnterLoginName", "EnterPassword", "SignUp", "ForgotPassword", 
-            });
-
             presenter.On(LogIn)
                 .CallApi<ISecurityDomainApi>().RequestReply((api, data, state, input) => api.LogUserIn(data))
                 .Then(

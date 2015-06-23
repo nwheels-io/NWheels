@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.UI.Core;
 
 namespace NWheels.UI.Uidl
 {
@@ -17,7 +18,21 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [DataMember]
+        public override IEnumerable<string> GetTranslatables()
+        {
+            if ( ContentRoot != null )
+            {
+                return base.GetTranslatables().Concat(ContentRoot.GetTranslatables());
+            }
+            else
+            {
+                return base.GetTranslatables();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember, ManuallyAssigned]
         public WidgetUidlNode ContentRoot { get; set; }
     }
 }

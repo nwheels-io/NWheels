@@ -8,9 +8,9 @@ using Nancy.Bootstrappers.Autofac;
 using Nancy.Hosting.Self;
 using NWheels.DataObjects;
 using NWheels.Endpoints;
+using NWheels.Globalization;
 using NWheels.Hosting;
 using NWheels.UI;
-using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
 namespace NWheels.Stacks.NancyFx
@@ -22,6 +22,7 @@ namespace NWheels.Stacks.NancyFx
         private readonly UidlApplication _application;
         private readonly UidlDocument _uidl;
         private NancyHost _host;
+        private WebApplicationModule _module;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -29,7 +30,7 @@ namespace NWheels.Stacks.NancyFx
             IComponentContext components, 
             WebAppEndpointRegistration endpointRegistration, 
             ITypeMetadataCache metadataCache,
-            IUILocalizationProvider localizationProvider,
+            ILocalizationProvider localizationProvider,
             IWebApplicationLogger logger)
         {
             _endpointRegistration = endpointRegistration;
@@ -42,21 +43,19 @@ namespace NWheels.Stacks.NancyFx
 
         public override void Load()
         {
-            var module = new WebApplicationModule(_uidl);
-            var bootstrapper = new WebApplicationBootstrapper(module);
-
-            _logger.WebApplicationActivating(_application.IdName, _endpointRegistration.Address, module.ContentRootPath);
+            _module = new WebApplicationModule(_uidl, applicationAssembly: _endpointRegistration.Contract.Assembly);
+            var bootstrapper = new WebApplicationBootstrapper(_module);
 
             _host = new NancyHost(bootstrapper, new[] { TrailingSlashSafeUri(_endpointRegistration.Address) });
-            
-            _logger.WebApplicationActive(_application.IdName, _endpointRegistration.Address);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void Activate()
         {
+            _logger.WebApplicationActivating(_application.IdName, _endpointRegistration.Address, _module.ContentRootPath);
             _host.Start();
+            _logger.WebApplicationActive(_application.IdName, _endpointRegistration.Address);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -73,6 +72,7 @@ namespace NWheels.Stacks.NancyFx
         {
             _host.Dispose();
             _host = null;
+            _module = null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

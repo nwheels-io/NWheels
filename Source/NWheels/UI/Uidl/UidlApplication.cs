@@ -23,6 +23,16 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override IEnumerable<string> GetTranslatables()
+        {
+            return base.GetTranslatables()
+                .Concat(Screens.SelectMany(s => s.GetTranslatables()))
+                .Concat(ScreenParts.SelectMany(sp => sp.GetTranslatables()))
+                .Concat(UserAlerts.Values.Select(ua => ua.Text));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public string Version { get; set; }
         [DataMember]

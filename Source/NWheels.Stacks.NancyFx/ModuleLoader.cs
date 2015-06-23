@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using Nancy;
 using NWheels.Endpoints;
 using NWheels.Extensions;
 using NWheels.Hosting;
@@ -23,6 +24,9 @@ namespace NWheels.Stacks.NancyFx
                     var component = context.Resolve<WebApplicationComponent>(TypedParameter.From(registration));
                     return component;
                 });
+
+            StaticConfiguration.Caching.EnableRuntimeViewDiscovery = true;
+            StaticConfiguration.Caching.EnableRuntimeViewUpdates = true;
         }
     }
 }

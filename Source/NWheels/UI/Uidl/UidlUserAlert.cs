@@ -35,9 +35,13 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [DataMember]
         public UserAlertType Type { get; set; }
+        [DataMember]
         public string Text { get; set; }
+        [DataMember]
         public string[] ParameterNames { get; set; }
+        [DataMember]
         public UserAlertResult[] ResultChoices { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -178,11 +178,11 @@ namespace NWheels.Puzzle.Nlog
         {
             var target = new FileTarget() {
                 Name = PlainTextFileTargetName,
-                FileName = PathUtility.LocalBinPath("..\\Logs\\PlainLog", "plain.log"),
+                FileName = PathUtility.HostBinPath("..\\Logs\\PlainLog", "plain.log"),
                 CreateDirs = true,
                 ArchiveEvery = FileArchivePeriod.Hour,
                 ArchiveNumbering = ArchiveNumberingMode.Sequence,
-                ArchiveFileName = PathUtility.LocalBinPath("..\\Logs\\PlainLog", @"${date:universalTime=True:format=yyyyMMdd}-{####}.plain.log"),
+                ArchiveFileName = PathUtility.HostBinPath("..\\Logs\\PlainLog", @"${date:universalTime=True:format=yyyyMMdd}-{####}.plain.log"),
                 MaxArchiveFiles = 10,
                 EnableFileDelete = true,
                 ConcurrentWrites = false,
@@ -202,11 +202,11 @@ namespace NWheels.Puzzle.Nlog
         {
             var target = new FileTarget() {
                 Name = NameValuePairFileTargetName,
-                FileName = PathUtility.LocalBinPath("..\\Logs\\PlainLog", "nvp.log"),
+                FileName = PathUtility.HostBinPath("..\\Logs\\PlainLog", "nvp.log"),
                 CreateDirs = true,
                 ArchiveEvery = FileArchivePeriod.Day,
                 ArchiveNumbering = ArchiveNumberingMode.Sequence,
-                ArchiveFileName = PathUtility.LocalBinPath("..\\Logs\\PlainLog", @"${date:universalTime=True:format=yyyyMMdd}-{####}.nvp.log"),
+                ArchiveFileName = PathUtility.HostBinPath("..\\Logs\\PlainLog", @"${date:universalTime=True:format=yyyyMMdd}-{####}.nvp.log"),
                 MaxArchiveFiles = 10,
                 EnableFileDelete = true,
                 ConcurrentWrites = false,

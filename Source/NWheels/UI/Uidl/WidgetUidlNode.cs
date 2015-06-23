@@ -13,6 +13,9 @@ namespace NWheels.UI.Uidl
         protected WidgetUidlNode(string idName, ControlledUidlNode parent)
             : base(UidlNodeType.Widget, idName, parent)
         {
+            this.WidgetType = this.GetType().Name;
+            this.TemplateName = this.GetType().Name;
+            TemplateAttribute.ApplyIfDefined(this.GetType(), this);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -21,5 +24,19 @@ namespace NWheels.UI.Uidl
         {
             return new WidgetUidlNode[0];
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override IEnumerable<string> GetTranslatables()
+        {
+            return base.GetTranslatables().Concat(GetNestedWidgets().Where(widget => widget != null).SelectMany(widget => widget.GetTranslatables()));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public string WidgetType { get; set; }
+        [DataMember]
+        public string TemplateName { get; set; }
     }
 }

@@ -26,13 +26,13 @@ using NWheels.Entities.Core;
 using NWheels.Entities.Impl;
 using NWheels.Exceptions;
 using NWheels.Extensions;
+using NWheels.Globalization;
 using NWheels.Logging;
 using NWheels.Logging.Core;
 using NWheels.Processing;
 using NWheels.Processing.Rules.Core;
 using NWheels.Processing.Workflows;
 using NWheels.Processing.Workflows.Core;
-using NWheels.UI.Core;
 using NWheels.Utilities;
 using Formatting = Newtonsoft.Json.Formatting;
 
@@ -56,7 +56,7 @@ namespace NWheels.Hosting.Core
             _dynamicModule = new DynamicModule(
                 simpleName: "NWheels.RunTimeTypes", 
                 allowSave: true, 
-                saveDirectory: PathUtility.LocalBinPath());
+                saveDirectory: PathUtility.HostBinPath());
 
             _baseContainer = BuildBaseContainer(registerHostComponents);
 
@@ -230,7 +230,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<MetadataConventionSet>().SingleInstance();
             builder.RegisterType<TypeMetadataCache>().As<ITypeMetadataCache, TypeMetadataCache>().SingleInstance();
 
-            builder.RegisterType<VoidUILocalizationProvider>().As<IUILocalizationProvider>().SingleInstance();
+            builder.RegisterType<VoidLocalizationProvider>().As<ILocalizationProvider>().SingleInstance();
 
             if ( registerHostComponents != null )
             {
@@ -604,7 +604,7 @@ namespace NWheels.Hosting.Core
 
             private bool LoadModuleAssemblyByFilePath(BootConfiguration.ModuleConfig module, out Assembly assembly)
             {
-                var coreBinPath = PathUtility.LocalBinPath(module.Assembly);
+                var coreBinPath = PathUtility.HostBinPath(module.Assembly);
                 var appBinPath = Path.Combine(_nodeConfig.LoadedFromDirectory, module.Assembly);
 
                 if ( File.Exists(coreBinPath) )
@@ -747,7 +747,7 @@ namespace NWheels.Hosting.Core
                     return;
                 }
 
-                var filePath = PathUtility.LocalBinPath("effective-config-dump.xml");
+                var filePath = PathUtility.HostBinPath("effective-config-dump.xml");
                 _logger.WritingEffectiveConfigurationToDisk(filePath);
 
                 var effectiveConfigurationXml = new XDocument();
@@ -780,7 +780,7 @@ namespace NWheels.Hosting.Core
                 
                 var metadataCache = _ownerLifetime.LifetimeContainer.Resolve<TypeMetadataCache>();
 
-                var filePath = PathUtility.LocalBinPath("effective-metadata-dump.json");
+                var filePath = PathUtility.HostBinPath("effective-metadata-dump.json");
                 _logger.WritingEffectiveMetadataToDisk(filePath);
 
                 var snapshot = metadataCache.TakeSnapshot();
@@ -807,7 +807,7 @@ namespace NWheels.Hosting.Core
 
                 var dynamicModule = _ownerLifetime.LifetimeContainer.Resolve<DynamicModule>();
 
-                var filePath = PathUtility.LocalBinPath(dynamicModule.SimpleName + ".dll");
+                var filePath = PathUtility.HostBinPath(dynamicModule.SimpleName + ".dll");
                 _logger.SavingDynamicModuleToAssembly(filePath);
 
                 dynamicModule.SaveAssembly();

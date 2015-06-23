@@ -1,3 +1,4 @@
+using System.Linq;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI
@@ -19,11 +20,14 @@ namespace NWheels.UI
             base.InputParameterType = builder.RegisterMetaType(typeof(TInput));
             base.ModelDataType = builder.RegisterMetaType(typeof(TData));
             base.ModelStateType = builder.RegisterMetaType(typeof(TState));
+        }
 
-            builder.InstantiateDeclaredMemberNodes(this);
-            builder.BuildNodes(this.ContentRoot);
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        void UidlBuilder.IBuildableUidlNode.DescribePresenter(UidlBuilder builder)
+        {
             DescribePresenter(new PresenterBuilder<TScreen, TData, TState>(builder, this));
+            builder.DescribeNodePresenters(this.ContentRoot);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

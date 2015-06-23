@@ -68,7 +68,7 @@ namespace NWheels.Logging.Core
 
         void IInitializableHostComponent.Configured()
         {
-            _threadLogFolder = PathUtility.LocalBinPath(_loggingConfig.ThreadLogFolder);
+            _threadLogFolder = PathUtility.HostBinPath(_loggingConfig.ThreadLogFolder);
 
             if ( !Directory.Exists(_threadLogFolder) )
             {

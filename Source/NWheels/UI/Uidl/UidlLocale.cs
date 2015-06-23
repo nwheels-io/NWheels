@@ -11,7 +11,13 @@ namespace NWheels.UI.Uidl
     public class UidlLocale
     {
         [DataMember]
-        public string CultureName { get; set; }
+        public string IdName { get; set; }
+        [DataMember]
+        public string FullName { get; set; }
+        [DataMember]
+        public bool IsRightToLeft { get; set; }
+        [DataMember]
+        public string ListSeparator { get; set; }
         [DataMember]
         public Dictionary<string, string> Translations { get; set; }
     }

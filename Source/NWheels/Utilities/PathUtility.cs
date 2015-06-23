@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,16 +32,32 @@ namespace NWheels.Utilities
             
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static string LocalBinPath(string fileName = null)
+        public static string HostBinPath(string fileName = null)
         {
             return Path.Combine(_s_binFolderPath, fileName ?? "");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static string LocalBinPath(string subFolder, string fileName)
+        public static string HostBinPath(string subFolder, string fileName)
         {
             return Path.Combine(Path.Combine(_s_binFolderPath, subFolder), fileName);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string ModuleBinPath(Assembly module, string fileName = null)
+        {
+            var moduleDirectory = Path.GetDirectoryName(module.Location);
+            return Path.Combine(moduleDirectory, fileName ?? "");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string ModuleBinPath(Assembly module, string subFolder, string fileName)
+        {
+            var moduleDirectory = Path.GetDirectoryName(module.Location);
+            return Path.Combine(Path.Combine(moduleDirectory, subFolder), fileName);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

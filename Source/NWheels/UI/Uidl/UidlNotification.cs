@@ -43,5 +43,11 @@ namespace NWheels.UI.Uidl
         {
             base.PayloadType = builder.RegisterMetaType(typeof(TPayload));
         }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void UidlBuilder.IBuildableUidlNode.DescribePresenter(UidlBuilder builder)
+        {
+        }
     }
 }

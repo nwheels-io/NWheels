@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Reflection;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI
@@ -17,20 +18,34 @@ namespace NWheels.UI
 
         void UidlBuilder.IBuildableUidlNode.Build(UidlBuilder builder)
         {
-            base.Version = this.GetType().Assembly.GetName().Version.ToString();
+            var appIdAttribute = this.GetType().GetCustomAttribute<AppIdAttribute>();
+
+            if ( appIdAttribute != null && !string.IsNullOrWhiteSpace(appIdAttribute.Version) )
+            {
+                base.Version = appIdAttribute.Version;
+            }
+            else
+            {
+                base.Version = this.GetType().Assembly.GetName().Version.ToString();
+            }
+
             base.InputParameterType = builder.RegisterMetaType(typeof(TInput));
                 
-            var memberNodes = builder.InstantiateDeclaredMemberNodes(this);
+            var memberNodes = builder.GetDeclaredMemberNodes(this);
 
             base.Screens.AddRange(memberNodes.OfType<UidlScreen>());
             base.ScreenParts.AddRange(memberNodes.OfType<UidlScreenPart>());
-
-            builder.BuildNodes(base.ScreenParts.Cast<AbstractUidlNode>().ToArray());
-            builder.BuildNodes(base.Screens.Cast<AbstractUidlNode>().ToArray());
-
-            DescribePresenter(new PresenterBuilder<TApp, TData, TState>(builder, this));
         }
-        
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void UidlBuilder.IBuildableUidlNode.DescribePresenter(UidlBuilder builder)
+        {
+            DescribePresenter(new PresenterBuilder<TApp, TData, TState>(builder, this));
+            builder.DescribeNodePresenters(base.ScreenParts.Cast<AbstractUidlNode>().ToArray());
+            builder.DescribeNodePresenters(base.Screens.Cast<AbstractUidlNode>().ToArray());
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected abstract void DescribePresenter(PresenterBuilder<TApp, TData, TState> presenter);
@@ -40,6 +55,22 @@ namespace NWheels.UI
         protected void SetDefaultInitialScreen(UidlScreen screen)
         {
             base.DefaultInitialScreenQualifiedName = screen.QualifiedName;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override string GetIdNameFromType()
+        {
+            var appIdAttribute = this.GetType().GetCustomAttribute<AppIdAttribute>();
+
+            if ( appIdAttribute != null )
+            {
+                return appIdAttribute.IdName;
+            }
+            else
+            {
+                return base.GetIdNameFromType();
+            }
         }
     }
 
