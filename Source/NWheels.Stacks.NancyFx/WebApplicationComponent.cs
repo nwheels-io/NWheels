@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 using Autofac;
 using Nancy.Bootstrappers.Autofac;
 using Nancy.Hosting.Self;
+using NWheels.DataObjects;
 using NWheels.Endpoints;
 using NWheels.Hosting;
 using NWheels.UI;
 using NWheels.UI.Core;
+using NWheels.UI.Uidl;
 
 namespace NWheels.Stacks.NancyFx
 {
@@ -17,23 +19,30 @@ namespace NWheels.Stacks.NancyFx
     {
         private readonly WebAppEndpointRegistration _endpointRegistration;
         private readonly IWebApplicationLogger _logger;
-        private readonly ApplicationDescription _application;
+        private readonly UidlApplication _application;
+        private readonly UidlDocument _uidl;
         private NancyHost _host;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public WebApplicationComponent(IComponentContext components, WebAppEndpointRegistration endpointRegistration, IWebApplicationLogger logger)
+        public WebApplicationComponent(
+            IComponentContext components, 
+            WebAppEndpointRegistration endpointRegistration, 
+            ITypeMetadataCache metadataCache,
+            IUILocalizationProvider localizationProvider,
+            IWebApplicationLogger logger)
         {
             _endpointRegistration = endpointRegistration;
             _logger = logger;
-            _application = ((IDescriptionProvider<ApplicationDescription>)components.Resolve(endpointRegistration.Contract)).GetDescription();
+            _application = (UidlApplication)components.Resolve(endpointRegistration.Contract);
+            _uidl = UidlBuilder.GetApplicationDocument(_application, metadataCache, localizationProvider);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void Load()
         {
-            var module = new WebApplicationModule(_application);
+            var module = new WebApplicationModule(_uidl);
             var bootstrapper = new WebApplicationBootstrapper(module);
 
             _logger.WebApplicationActivating(_application.IdName, _endpointRegistration.Address, module.ContentRootPath);

@@ -8,41 +8,36 @@ using Nancy;
 using Nancy.Json;
 using Nancy.Responses;
 using NWheels.UI;
-using NWheels.UI.Core;
+using NWheels.UI.Uidl;
+using NWheels.Utilities;
 
 namespace NWheels.Stacks.NancyFx
 {
     public class WebApplicationModule : NancyModule
     {
-        private readonly ApplicationDescription _application;
+        private readonly UidlDocument _uidl;
+        private readonly UidlApplication _application;
         private readonly string _contentRootPath;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public WebApplicationModule(ApplicationDescription application)
+        public WebApplicationModule(UidlDocument uidl)
         {
-            _application = application;
+            _uidl = uidl;
+            _application = uidl.Applications[0];
 
-            base.Get["/"] = parameters => View[GetSkinViewPath(_application.DefaultInitialScreen.IdName)];
-            base.Get["/meta.json"] = parameters => GetApplicationMetadata();//Response.AsJson<ScreenDescription>(GetInitialScreen());// _application.Screens.Find(s => s.IdName == _application.InitialScreenIdName));
+            base.Get["/"] = parameters => View["Skin.Default/index.html"];
+            base.Get["/uidl.json"] = parameters => GetUidlResponse();
 
-            _contentRootPath = Path.Combine(Path.GetDirectoryName(_application.GetType().Assembly.Location), _application.IdName);
+            _contentRootPath = PathUtility.LocalBinPath(_application.IdName);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private Response GetApplicationMetadata()
+        private Response GetUidlResponse()
         {
             var serializer = new MetadataJsonSerializer();
-            return new JsonResponse<ApplicationDescription>(_application, serializer);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private ScreenDescription GetInitialScreen()
-        {
-            var screen = _application.Screens.Find(s => s.IdName == _application.DefaultInitialScreen.IdName);
-            return screen;
+            return new JsonResponse<UidlDocument>(_uidl, serializer);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

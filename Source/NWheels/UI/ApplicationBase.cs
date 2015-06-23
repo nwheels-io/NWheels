@@ -25,6 +25,9 @@ namespace NWheels.UI
             base.Screens.AddRange(memberNodes.OfType<UidlScreen>());
             base.ScreenParts.AddRange(memberNodes.OfType<UidlScreenPart>());
 
+            builder.BuildNodes(base.ScreenParts.Cast<AbstractUidlNode>().ToArray());
+            builder.BuildNodes(base.Screens.Cast<AbstractUidlNode>().ToArray());
+
             DescribePresenter(new PresenterBuilder<TApp, TData, TState>(builder, this));
         }
         

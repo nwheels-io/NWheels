@@ -22,6 +22,7 @@ namespace NWheels.UI.Uidl
         {
             this.Applications = new List<UidlApplication>();
             this.Locales = new Dictionary<string, UidlLocale>();
+            this.MetaTypes = new Dictionary<string, UidlMetaType>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -9,6 +9,7 @@ using Hapil;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Extensions;
+using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI
@@ -156,6 +157,22 @@ namespace NWheels.UI
             }
 
             return metaType;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static UidlDocument GetApplicationDocument(
+            UidlApplication application, 
+            ITypeMetadataCache metadataCache, 
+            IUILocalizationProvider localizationProvider)
+        {
+            var builder = new UidlBuilder(metadataCache);
+            builder.AddApplication(application);
+
+            var localStrings = localizationProvider.GetLocalStrings(builder.GetTranslatables(), CultureInfo.CurrentUICulture);
+            builder.AddLocale(CultureInfo.CurrentUICulture, localStrings);
+
+            return builder.GetDocument();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

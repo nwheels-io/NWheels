@@ -1,4 +1,5 @@
-﻿using Nancy;
+﻿using System.Runtime.Serialization;
+using Nancy;
 using Nancy.IO;
 using Nancy.Json;
 using System;
@@ -13,6 +14,7 @@ using System.Threading;
 using Hapil.Members;
 using Nancy.Responses;
 using NWheels.UI.Core;
+using NWheels.UI.Uidl;
 
 namespace NWheels.Stacks.NancyFx
 {
@@ -69,7 +71,7 @@ namespace NWheels.Stacks.NancyFx
             public override IDictionary<string, object> Serialize(object obj, JavaScriptSerializer serializer)
             {
                 var members = TypeMemberCache.Of(obj.GetType());
-                var propertiesToSerialize = members.SelectAllProperties(where: p => p.GetCustomAttribute<DuplicateReferenceAttribute>(inherit: true) == null);
+                var propertiesToSerialize = members.SelectAllProperties(where: p => p.GetCustomAttribute<DataMemberAttribute>(inherit: true) == null);
                 var serialized = new Dictionary<string, object>();
 
                 foreach ( var property in propertiesToSerialize.ToArray() )
@@ -86,7 +88,7 @@ namespace NWheels.Stacks.NancyFx
             {
                 get
                 {
-                    return new[] { typeof(UINodeDescription) };
+                    return new[] { typeof(AbstractUidlNode) };
                 }
             }
 

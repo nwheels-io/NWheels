@@ -32,6 +32,7 @@ using NWheels.Processing;
 using NWheels.Processing.Rules.Core;
 using NWheels.Processing.Workflows;
 using NWheels.Processing.Workflows.Core;
+using NWheels.UI.Core;
 using NWheels.Utilities;
 using Formatting = Newtonsoft.Json.Formatting;
 
@@ -228,6 +229,8 @@ namespace NWheels.Hosting.Core
             builder.RegisterInstance(new PascalCaseRelationalMappingConvention(usePluralTableNames: true)).As<IRelationalMappingConvention>();
             builder.RegisterType<MetadataConventionSet>().SingleInstance();
             builder.RegisterType<TypeMetadataCache>().As<ITypeMetadataCache, TypeMetadataCache>().SingleInstance();
+
+            builder.RegisterType<VoidUILocalizationProvider>().As<IUILocalizationProvider>().SingleInstance();
 
             if ( registerHostComponents != null )
             {

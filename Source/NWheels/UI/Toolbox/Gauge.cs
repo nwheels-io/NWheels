@@ -18,7 +18,6 @@ namespace NWheels.UI.Toolbox
 
         protected override void DescribePresenter(PresenterBuilder<Gauge, Empty.Data, Empty.State> presenter)
         {
-            throw new NotImplementedException();
         }
     }
 }
