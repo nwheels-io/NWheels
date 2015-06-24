@@ -101,7 +101,7 @@ namespace NWheels.UI.Uidl
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [DataContract(Name = "AlertBehavior", Namespace = UidlDocument.DataContractNamespace)]
+    [DataContract(Name = "AlertUser", Namespace = UidlDocument.DataContractNamespace)]
     public class UidlAlertUserBehavior : BehaviorUidlNode
     {
         public UidlAlertUserBehavior(string idName, ControlledUidlNode parent)

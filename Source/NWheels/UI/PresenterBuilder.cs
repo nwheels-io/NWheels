@@ -720,7 +720,7 @@ namespace NWheels.UI
                 {
                     var builder = new BehaviorBuilder<IPromiseFailureInfo>(_ownerNode, notification: null, uidl: _uidl);
                     onFailure(builder);
-                    _behaviorToComplete.OnSuccess = builder.Behavior;
+                    _behaviorToComplete.OnFailure = builder.Behavior;
                 }
             }
         }
