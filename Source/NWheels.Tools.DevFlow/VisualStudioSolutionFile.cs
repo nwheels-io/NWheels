@@ -648,18 +648,27 @@ namespace NWheels.Tools.DevFlow
                 if ( affectedReference != null )
                 {
                     XElement backupReference = null;
-                    var backupComment = affectedReference.Parent.Nodes().First(node => IsReferenceBackupCommentNode(node, unmergedSourceProject, out backupReference));
+                    var backupComment = affectedReference.Parent.Nodes().FirstOrDefault(node => IsReferenceBackupCommentNode(node, unmergedSourceProject, out backupReference));
 
-                    ownerSolution.Log.Debug("Restoring reference '{0}' -> '{1}'.", this.ProjectName, unmergedSourceProject.ProjectName);
-
-                    var rebuiltReference = RebuildReferenceElement(backupReference);
-                    affectedReference.ReplaceWith(rebuiltReference);
-
-                    if ( backupComment.NextNode is XText )
+                    if ( backupComment != null )
                     {
-                        backupComment.NextNode.Remove();
+                        ownerSolution.Log.Debug("Restoring reference '{0}' -> '{1}'.", this.ProjectName, unmergedSourceProject.ProjectName);
+
+                        var rebuiltReference = RebuildReferenceElement(backupReference);
+                        affectedReference.ReplaceWith(rebuiltReference);
+
+                        if ( backupComment.NextNode is XText )
+                        {
+                            backupComment.NextNode.Remove();
+                        }
+
+                        backupComment.Remove();
                     }
-                    backupComment.Remove();
+                    else
+                    {
+                        ownerSolution.Log.Warning("Removing new reference '{0}' -X-> '{1}', you'll have to add package reference manually.", this.ProjectName, unmergedSourceProject.ProjectName);
+                        affectedReference.Remove();
+                    }
 
                     _projectFileChanged = true;
                 }
