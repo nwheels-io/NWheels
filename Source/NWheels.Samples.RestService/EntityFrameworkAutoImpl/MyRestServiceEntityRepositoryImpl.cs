@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Web.OData.Builder;
-using NWheels.Puzzle.OdataOwinWebapi;
+using NWheels.Stacks.OdataOwinWebapi;
 
 namespace NWheels.Samples.RestService.EntityFrameworkAutoImpl
 {

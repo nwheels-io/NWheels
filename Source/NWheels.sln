@@ -29,19 +29,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Hosts.Console", "NW
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Stacks", "Stacks", "{4829A9A2-7B02-4FD7-8581-FC59B4029699}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Puzzle.Nlog", "NWheels.Puzzle.Nlog\NWheels.Puzzle.Nlog.csproj", "{8EC79D0A-B99D-4ED1-9494-7756F29916C7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.Nlog", "NWheels.Stacks.Nlog\NWheels.Stacks.Nlog.csproj", "{8EC79D0A-B99D-4ED1-9494-7756F29916C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Puzzle.OdataOwinWebapi", "NWheels.Puzzle.OdataOwinWebapi\NWheels.Puzzle.OdataOwinWebapi.csproj", "{D793F755-6585-4E09-9F40-3A689FDF4DFF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.OdataOwinWebapi", "NWheels.Stacks.OdataOwinWebapi\NWheels.Stacks.OdataOwinWebapi.csproj", "{D793F755-6585-4E09-9F40-3A689FDF4DFF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Samples.RestService", "NWheels.Samples.RestService\NWheels.Samples.RestService.csproj", "{FC22F1C9-8CD7-4183-B527-9FB604E9500E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Hosts.Service", "NWheels.Hosts.Service\NWheels.Hosts.Service.csproj", "{27F27BD0-0854-42F7-8D17-9D1E8AC184B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Puzzle.QuartzNet", "NWheels.Puzzle.QuartzNet\NWheels.Puzzle.QuartzNet.csproj", "{63F44387-BE72-499B-8F7E-B783B1E219F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.QuartzNet", "NWheels.Stacks.QuartzNet\NWheels.Stacks.QuartzNet.csproj", "{63F44387-BE72-499B-8F7E-B783B1E219F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Puzzle.EntityFramework", "NWheels.Puzzle.EntityFramework\NWheels.Puzzle.EntityFramework.csproj", "{FA1FD78F-2906-477E-AD2F-55BB8AE19A75}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.EntityFramework", "NWheels.Stacks.EntityFramework\NWheels.Stacks.EntityFramework.csproj", "{FA1FD78F-2906-477E-AD2F-55BB8AE19A75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Puzzle.EntityFramework.ComponentTests", "NWheels.Puzzle.EntityFramework.ComponentTests\NWheels.Puzzle.EntityFramework.ComponentTests.csproj", "{5BC24A16-7B3B-4F81-B97E-FD8F2B60BB95}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.EntityFramework.ComponentTests", "NWheels.Stacks.EntityFramework.ComponentTests\NWheels.Stacks.EntityFramework.ComponentTests.csproj", "{5BC24A16-7B3B-4F81-B97E-FD8F2B60BB95}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EntityFramework", "EntityFramework", "{DED7537D-C277-42A1-820B-5C2B78EBA79A}"
 EndProject
@@ -71,9 +71,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{1421
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MongoDb", "MongoDb", "{A67D2D34-0D89-48D0-87C5-79CF6B9BB608}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Puzzle.MongoDb", "NWheels.Puzzle.MongoDb\NWheels.Puzzle.MongoDb.csproj", "{4209CD2A-DA3D-4806-939F-9454FCD475D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.MongoDb", "NWheels.Stacks.MongoDb\NWheels.Stacks.MongoDb.csproj", "{4209CD2A-DA3D-4806-939F-9454FCD475D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Puzzle.MongoDb.ComponentTests", "NWheels.Puzzle.MongoDb.ComponentTests\NWheels.Puzzle.MongoDb.ComponentTests.csproj", "{5F24D74F-A03A-4D6C-9D6B-AD4266743749}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.MongoDb.ComponentTests", "NWheels.Stacks.MongoDb.ComponentTests\NWheels.Stacks.MongoDb.ComponentTests.csproj", "{5F24D74F-A03A-4D6C-9D6B-AD4266743749}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Tools.DevFlow", "NWheels.Tools.DevFlow\NWheels.Tools.DevFlow.csproj", "{5F04CFF3-3D68-4126-B3B8-858196D388C5}"
 EndProject

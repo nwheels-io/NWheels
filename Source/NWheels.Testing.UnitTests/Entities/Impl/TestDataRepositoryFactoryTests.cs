@@ -7,8 +7,8 @@ using NUnit.Framework;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects.Core;
 using NWheels.Testing.Entities.Impl;
-using NWheels.Testing.Entities.Puzzle;
-using IR1 = NWheels.Testing.Entities.Puzzle.Interfaces.Repository1;
+using NWheels.Testing.Entities.Stacks;
+using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;
 
 namespace NWheels.Testing.UnitTests.Entities.Impl
 {

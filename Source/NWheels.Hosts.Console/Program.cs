@@ -11,7 +11,7 @@ using Autofac;
 using NWheels.Hosting;
 using NWheels.Hosting.Core;
 using NWheels.Logging.Core;
-using NWheels.Puzzle.Nlog;
+using NWheels.Stacks.Nlog;
 using NWheels.Utilities;
 
 namespace NWheels.Hosts.Console
@@ -108,7 +108,7 @@ namespace NWheels.Hosts.Console
 
         private static void RegisterHostComponents(ContainerBuilder builder)
         {
-            builder.RegisterModule<NWheels.Puzzle.Nlog.ModuleLoader>();
+            builder.RegisterModule<NWheels.Stacks.Nlog.ModuleLoader>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

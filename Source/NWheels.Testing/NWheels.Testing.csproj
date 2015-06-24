@@ -67,8 +67,8 @@
     <Compile Include="Entities\Impl\TestDataRepositoryFactory.cs" />
     <Compile Include="Entities\Impl\TestIdMetadataConvention.cs" />
     <Compile Include="Entities\Impl\TestIntIdValueGenerator.cs" />
-    <Compile Include="Entities\Puzzle\CrudOperations.cs" />
-    <Compile Include="Entities\Puzzle\Interfaces.cs" />
+    <Compile Include="Entities\Stacks\CrudOperations.cs" />
+    <Compile Include="Entities\Stacks\Interfaces.cs" />
     <Compile Include="Entities\TestEntityRepository.cs" />
     <Compile Include="LogAssert.cs" />
     <Compile Include="Logex.cs" />

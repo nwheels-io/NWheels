@@ -46,7 +46,7 @@ namespace NWheels.Hosts.Service
         
         private void RegisterHostComponents(ContainerBuilder builder)
         {
-            builder.RegisterModule<NWheels.Puzzle.Nlog.ModuleLoader>();
+            builder.RegisterModule<NWheels.Stacks.Nlog.ModuleLoader>();
         }
     }
 }

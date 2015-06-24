@@ -10,14 +10,18 @@
     <!--iconUrl>http://nwheelsdotorg.files.wordpress.com/2014/12/felixb-hapil-32x32.png</iconUrl-->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>
-      How to use:
-      - Plug your domain into a ready full-stack development toolchain, and deliver production-ready solution at a supersonic speed.
-      - Tailor technology stack ("the puzzle") to your requirements by choosing from a set of pieces provided out-of-the-box, and wherever necessary, bring pieces of your own.
-      This Full Stack package installs the core framework and the default puzzle, which sets you up and running. Recommended unless you assemble a custom puzzle.
+      How to prepare an enterprise application:
+      - Add domain data, expressed through entity contracts, which are C# interfaces.
+      - Plug domain logic into supplied framework facilities: entity triggers, transaction scripts, workflows, rule engines, actors, and jobs.
+      - Open some endpoints and listen to common (REST, SOAP, HTTP) or custom protocols, or messaging middleware like MSMQ.
+      - Describe user interface, using cross-platform description language (UIDL), which is exposed as C#-based fluent API.
+      - Build technology stack to taste, by choosing from a set of stack modules provided out-of-the-box, or bringing stack modules of your own.
+      - Enjoy 0 to 60 mph in one day
+      This Full Stack package installs the core framework and the default technology stack, which sets you up and running. Recommended unless you assemble a custom stack.
     </description>
-    <summary>A-to-Z architectural recipe and implementation framework for enterprise-scale application development on .NET platform</summary>
+    <summary>A-to-Z architectural recipe and implementation framework for .NET-based enterprise applications</summary>
     <copyright>Copyright © 2014 Felix Berman</copyright>
-    <tags>Fullstack Enterprise Architecture Productivity RAD</tags>
+    <tags>Fullstack Enterprise Application Architecture Productivity Cross Platform</tags>
     <dependencies>
       <dependency id="FelixB.Hapil" version="0.9.6" />
       <dependency id="Autofac" version="3.5.2" />

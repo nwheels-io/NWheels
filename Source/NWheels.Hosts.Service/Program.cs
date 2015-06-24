@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NWheels.Hosting;
 using NWheels.Logging.Core;
-using NWheels.Puzzle.Nlog;
+using NWheels.Stacks.Nlog;
 using NWheels.Utilities;
 
 namespace NWheels.Hosts.Service

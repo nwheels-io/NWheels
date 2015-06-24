@@ -57,9 +57,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NWheels.Puzzle.Nlog\NWheels.Puzzle.Nlog.csproj">
+    <ProjectReference Include="..\NWheels.Stacks.Nlog\NWheels.Stacks.Nlog.csproj">
       <Project>{8ec79d0a-b99d-4ed1-9494-7756f29916c7}</Project>
-      <Name>NWheels.Puzzle.Nlog</Name>
+      <Name>NWheels.Stacks.Nlog</Name>
     </ProjectReference>
     <ProjectReference Include="..\NWheels.Tools.DevFlow\NWheels.Tools.DevFlow.csproj">
       <Project>{5f04cff3-3d68-4126-b3b8-858196d388c5}</Project>

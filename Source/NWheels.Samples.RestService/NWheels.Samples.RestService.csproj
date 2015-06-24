@@ -123,9 +123,9 @@
     <Compile Include="SampleLogGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NWheels.Puzzle.OdataOwinWebapi\NWheels.Puzzle.OdataOwinWebapi.csproj">
+    <ProjectReference Include="..\NWheels.Stacks.OdataOwinWebapi\NWheels.Stacks.OdataOwinWebapi.csproj">
       <Project>{d793f755-6585-4e09-9f40-3a689fdf4dff}</Project>
-      <Name>NWheels.Puzzle.OdataOwinWebapi</Name>
+      <Name>NWheels.Stacks.OdataOwinWebapi</Name>
       <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\NWheels\NWheels.csproj">

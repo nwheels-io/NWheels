@@ -7,7 +7,7 @@ using Autofac;
 using CommandLine;
 using CommandLine.Text;
 using NWheels.Logging.Core;
-using NWheels.Puzzle.Nlog;
+using NWheels.Stacks.Nlog;
 using NWheels.Tools.DevFlow;
 using NWheels.Utilities.Core;
 

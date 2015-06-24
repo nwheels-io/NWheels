@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Web.Http;
 using System.Web.OData.Routing;
-using NWheels.Puzzle.OdataOwinWebapi;
+using NWheels.Stacks.OdataOwinWebapi;
 
 namespace NWheels.Samples.RestService.OwinOdataWebApiAutoImpl
 {
