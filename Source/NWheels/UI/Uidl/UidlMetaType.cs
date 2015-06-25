@@ -63,12 +63,20 @@ namespace NWheels.UI.Uidl
             : base(type)
         {
             base.TypeKind = UidlMetaTypeKind.Object;
+            this.BaseTypeName = metadata.BaseType != null ? metadata.BaseType.Name : null;
+            this.DerivedTypeNames = metadata.DerivedTypes.Select(t => t.Name).ToList();
+            this.Properties = metadata.Properties.ToDictionary(p => p.Name, p => new UidlMetaProperty(p));
+            this.PrimaryKey = metadata.PrimaryKey != null ? new MetaKey(metadata.PrimaryKey) : null;
+            this.AllKeys = metadata.AllKeys.ToDictionary(k => k.Name, k => new MetaKey(k));
+            this.DefaultDisplayFormat = metadata.DefaultDisplayFormat;
+            this.DefaultDisplayPropertyNames = metadata.DefaultDisplayProperties.Select(p => p.Name).ToList();
+            this.DefaultSortPropertyNames = metadata.DefaultSortProperties.Select(p => p.Name).ToList();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
-        public bool BaseTypeName { get; set; }
+        public string BaseTypeName { get; set; }
         [DataMember]
         public List<string> DerivedTypeNames { get; set; }
         [DataMember]
@@ -89,6 +97,15 @@ namespace NWheels.UI.Uidl
         [DataContract(Name = "MetaKey", Namespace = UidlDocument.DataContractNamespace)]
         public class MetaKey
         {
+            public MetaKey(IKeyMetadata metadata)
+            {
+                this.Name = metadata.Name;
+                this.Kind = metadata.Kind;
+                this.PropertyNames = metadata.Properties.Select(p => p.Name).ToList();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             [DataMember]
             public string Name { get; set; }
             [DataMember]

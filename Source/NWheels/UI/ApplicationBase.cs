@@ -12,6 +12,8 @@ namespace NWheels.UI
         protected ApplicationBase()
             : base(IdNameAsTypeMacro)
         {
+            var requiredApiContracts = this.GetType().GetCustomAttributes<RequireDomainApiAttribute>().Select(attr => attr.ContractType);
+            base.RequiredDomainApis.AddRange(requiredApiContracts.Distinct());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,6 +37,8 @@ namespace NWheels.UI
 
             base.Screens.AddRange(memberNodes.OfType<UidlScreen>());
             base.ScreenParts.AddRange(memberNodes.OfType<UidlScreenPart>());
+
+            builder.BuildNodes(memberNodes);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

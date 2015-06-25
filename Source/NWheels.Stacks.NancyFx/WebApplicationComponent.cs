@@ -21,6 +21,7 @@ namespace NWheels.Stacks.NancyFx
         private readonly IWebApplicationLogger _logger;
         private readonly UidlApplication _application;
         private readonly UidlDocument _uidl;
+        private readonly Dictionary<Type, object> _domainServicesByContractType;
         private NancyHost _host;
         private WebApplicationModule _module;
 
@@ -37,13 +38,14 @@ namespace NWheels.Stacks.NancyFx
             _logger = logger;
             _application = (UidlApplication)components.Resolve(endpointRegistration.Contract);
             _uidl = UidlBuilder.GetApplicationDocument(_application, metadataCache, localizationProvider);
+            _domainServicesByContractType = _application.RequiredDomainApis.ToDictionary(contract => contract, components.Resolve);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void Load()
         {
-            _module = new WebApplicationModule(_uidl, applicationAssembly: _endpointRegistration.Contract.Assembly);
+            _module = new WebApplicationModule(_uidl, _application, _domainServicesByContractType);
             var bootstrapper = new WebApplicationBootstrapper(_module);
 
             _host = new NancyHost(bootstrapper, new[] { TrailingSlashSafeUri(_endpointRegistration.Address) });

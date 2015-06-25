@@ -20,6 +20,8 @@ namespace NWheels.UI
         {
             base.ModelDataType = builder.RegisterMetaType(typeof(TData));
             base.ModelStateType = builder.RegisterMetaType(typeof(TState));
+
+            builder.BuildNodes(builder.GetDeclaredMemberNodes(this));
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

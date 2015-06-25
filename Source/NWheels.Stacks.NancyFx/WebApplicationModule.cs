@@ -17,30 +17,45 @@ namespace NWheels.Stacks.NancyFx
     public class WebApplicationModule : NancyModule
     {
         private readonly UidlDocument _uidl;
-        private readonly Assembly _applicationAssembly;
         private readonly UidlApplication _application;
+        private readonly Dictionary<Type, object> _domainApis;
+        private readonly Dictionary<string, Type> _domainApiContractTypeByName;
         private readonly string _contentRootPath;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public WebApplicationModule(UidlDocument uidl, Assembly applicationAssembly)
+        public WebApplicationModule(
+            UidlDocument uidl, 
+            UidlApplication application, 
+            Dictionary<Type, object> domainApis)
         {
             _uidl = uidl;
-            _applicationAssembly = applicationAssembly;
-            _application = uidl.Applications[0];
+            _application = application;
+            _domainApis = domainApis;
 
             base.Get["/"] = parameters => View["index.html"];
-            base.Get["/uidl.json"] = parameters => GetUidlResponse();
+            base.Get["/uidl.json"] = parameters => GetUidl();
+            base.Post["/api/{contract}/{operation}"] = parameters => ExecuteDomainApi(parameters);
 
-            _contentRootPath = PathUtility.ModuleBinPath(_applicationAssembly, _application.IdName) + "\\Skin.Default";
+            _domainApiContractTypeByName = _domainApis.Keys.ToDictionary(type => type.Name, type => type);
+            _contentRootPath = PathUtility.ModuleBinPath(_application.GetType().Assembly, _application.IdName) + "\\Skin.Default";
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private Response GetUidlResponse()
+        private Response GetUidl()
         {
             var serializer = new MetadataJsonSerializer();
             return new JsonResponse<UidlDocument>(_uidl, serializer);
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Response ExecuteDomainApi(dynamic parameters)
+        {
+            var contractType = _domainApiContractTypeByName[parameters.contract];
+            return Response.AsJson(new { Success = true });
         }
 
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------

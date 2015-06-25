@@ -361,6 +361,7 @@
     <Compile Include="UI\Toolbox\Splash.cs" />
     <Compile Include="UI\UidlBuilder.cs" />
     <Compile Include="UI\Uidl\Enums.cs" />
+    <Compile Include="UI\Uidl\RequireDomainApiAttribute.cs" />
     <Compile Include="UI\Uidl\UidlApplication.cs" />
     <Compile Include="UI\Uidl\BehaviorUidlNode.cs" />
     <Compile Include="UI\Uidl\UidlCommand.cs" />

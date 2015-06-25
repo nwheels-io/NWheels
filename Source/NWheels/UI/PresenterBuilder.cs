@@ -267,6 +267,7 @@ namespace NWheels.UI
 
                 _behavior.ContractName = method.DeclaringType.Name;
                 _behavior.OperationName = method.Name;
+                _behavior.ParameterNames = method.GetParameters().Select(p => p.Name).ToArray();
                 _behavior.ParameterExpressions = callArguments.Select(x => x.ToString()).ToArray();
             }
         }

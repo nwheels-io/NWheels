@@ -19,6 +19,8 @@ namespace NWheels.UI.Uidl
 
             this.RequestNotAuthorized = new UidlNotification("RequestNotAuthorized", this);
             base.Notifications.Add(this.RequestNotAuthorized);
+
+            this.RequiredDomainApis = new List<Type>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,5 +49,17 @@ namespace NWheels.UI.Uidl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlNotification RequestNotAuthorized { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public List<Type> RequiredDomainApis { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected void RequireDomainApi<TContract>() 
+            where TContract : class
+        {
+            this.RequiredDomainApis.Add(typeof(TContract));            
+        }
     }
 }

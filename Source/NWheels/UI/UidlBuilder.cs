@@ -92,7 +92,7 @@ namespace NWheels.UI
 
         internal void BuildNodes(params AbstractUidlNode[] nodes)
         {
-            nodes.OfType<IBuildableUidlNode>().ForEach(node => node.Build(this));
+            nodes.OfType<IBuildableUidlNode>().Where(node => !(node is UidlApplication)).ForEach(node => node.Build(this));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

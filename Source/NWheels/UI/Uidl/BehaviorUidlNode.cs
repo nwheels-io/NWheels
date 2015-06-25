@@ -80,6 +80,8 @@ namespace NWheels.UI.Uidl
         [DataMember]
         public string OperationName { get; set; }
         [DataMember]
+        public string[] ParameterNames { get; set; }
+        [DataMember]
         public string[] ParameterExpressions { get; set; }
     }
 

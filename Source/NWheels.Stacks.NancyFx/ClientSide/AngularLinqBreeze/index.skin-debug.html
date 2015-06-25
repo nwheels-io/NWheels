@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html ng-app="theApp" ng-controller="appStart">
+    <head>
+        <meta charset="utf-8" />
+        <title ng-bind="pageTitle">LOADING . . .</title>
+        <script>document.write('<base href="' + document.location + '" />');</script>
+        <!--link rel="stylesheet" href="style.css" /-->
+        <!--script data-require="angular.js@1.2.x" src="http://code.angularjs.org/1.2.7/angular.js" data-semver="1.2.7"></script-->
+        <script src="assets/plugins/angular-1.3.16/angular.min.js"></script>
+        <script src="assets/plugins/linqjs-2.2.0.2/linq.min.js"></script>
+        <script src="assets/js/app.js"></script>
+        
+        <style>
+            body, button, input { font-family: Consolas; font-size: 16pt; padding:0px; margin:0px; }
+            div.border { padding : 10px; margin : 10px; border : 2px solid black; }
+            div.content-example { padding : 10px; margin : 10px; border : 2px solid #e0e0e0; background-color: #e0e0e0; }
+            div.inline-alert { padding : 5px; margin : 5px 10px 5px 10px; border : none; background-color: yellow; }
+            div.layout { padding : 0; margin : 0; border : none; }
+            .clearfix { overflow: auto; zoom: 1; } 
+            .bold { font-weight:bold; } 
+        </style>
+    </head>
+
+    <body>
+
+        <div class="layout" ng-if="app">
+            <div class="layout">
+                <uidl-screen ng-if="currentScreen" uidl="currentScreen"></uidl-screen>
+            </div>
+        </div>
+        
+        <script type="text/ng-template" id="uidl-screen">
+            <div class="border">
+                SCREEN[{{uidl.text}}]
+                <uidl-widget uidl="uidl.contentRoot"></uidl-widget>
+            </div>
+        </script>
+        
+        <script type="text/ng-template" id="uidl-screen-part">
+            <div class="border">
+                SCREEN-PART[{{uidl.text}}]
+                <uidl-widget uidl="uidl.contentRoot"></uidl-widget>
+            </div>
+        </script>
+        
+        <script type="text/ng-template" id="uidl-user-alert-inline">
+            <div ng-show="alert" class="inline-alert clearfix">
+                {{translate(alert.uidl.type)}} : {{translate(alert.uidl.text)}}
+                <button ng-click="alert.answer('Cancel')" style="float:right;">x</button>
+                <div ng-show="alert.uidl.resutChoices.length">
+                    <button 
+                        ng-repeat="choice in alert.uidl.resultChoices"
+                        ng-click="alert.answer(choice)">{{choice}}</button>
+                </div>
+            </div>
+        </script>
+        
+        <script type="text/ng-template" id="uidl-element-template-Splash">
+            <div class="border">
+                WIDGET[{{uidl.text}}]
+                <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
+                <div class="content-example">{{translate('SplashImageGoesHere')}}...
+                   <!--div data-ng-show="showing" data-ng-init="showing=true"  data-ng-click="showing=!showing">hello</div-->
+                </div>
+                <uidl-widget uidl="uidl.insideContent"></uidl-widget>
+            </div>
+        </script>
+
+        <script type="text/ng-template" id="uidl-element-template-UserLoginForm">
+            <div class="border">
+                WIDGET[{{uidl.text}}]
+                <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
+                <div class="content-example">
+                    <label style="display:inline-block;width:140px">{{translate('loginName')}}</label>
+                    <input ng-model="model.data.loginName" type=text id="{{uidl.qualifiedName}}_login" placeholder="{{translate('enterLoginName')}}" /><br />
+                
+                    <label style="display:inline-block;width:140px">{{translate('password')}}</label>
+                    <input ng-model="model.data.password" type=password id="{{uidl.qualifiedName}}_password" placeholder="{{translate('enterPassword')}}" /><br />
+                    
+                    <label style="display:inline-block;width:140px">&nbsp;</label>
+                    <button ng-click="$emit(uidl.qualifiedName + ':LogIn:Executing')">{{translate('Login')}}</button><br />
+                    
+                    <label style="display:inline-block;width:140px">&nbsp;</label>
+                    <input ng-model="model.state.rememberMe" type=checkbox />
+                    <label>{{translate('RememberMe')}}</label>
+                </div>
+            </div>
+        </script>
+
+        <script type="text/ng-template" id="uidl-element-template-ManagementConsole">
+            <div uidl-controller class="border clearfix">
+                <div class="layout">
+                    WIDGET[{{uidl.elementType}}]
+                </div>
+                <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
+                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                    <tr>
+                        <td width="350">
+                            <div class="content-example">
+                                <span ng-repeat="item in uidl.navigationStructure.items" ng-include="'uidl-element-template-ManagementConsole-menu-item'"></span>
+                            </div>
+                        </td>
+                        <td style="vertical-align:top">
+                            <uidl-widget uidl="uidl.mainContent"></uidl-widget>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </script>
+
+        <script type="text/ng-template" id="uidl-element-template-ManagementConsole-menu-item">
+            <a ng-class="{bold: item.level==0}" ng-show="item.notifications[0].subscribers.length" href="" ng-click="itemSelected(item)">{{item.text}}</a>
+            <span ng-class="{bold: item.level==0}" ng-hide="item.notifications[0].subscribers.length">{{item.text}}</span>
+            <ul>
+                <li ng-repeat="item in item.subItems" ng-include="'uidl-element-template-ManagementConsole-menu-item'"></li>
+            </ul>
+        </script>
+        
+        <script type="text/ng-template" id="uidl-element-template-ScreenPartContainer">
+            <div class="border" uidl-controller>
+                WIDGET[{{uidl.elementType}}]
+                <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
+                <uidl-screen-part ng-if="currentScreenPart" uidl="currentScreenPart"></uidl-screen-part>
+            </div>
+        </script>
+        
+    </body>
+    
+</html>
