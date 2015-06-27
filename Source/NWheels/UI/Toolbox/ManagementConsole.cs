@@ -9,7 +9,7 @@ using NWheels.UI.Uidl;
 namespace NWheels.UI.Toolbox
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-    public class ManagementConsole : WidgetUidlNode
+    public class ManagementConsole : WidgetUidlNode, UidlBuilder.IBuildableUidlNode
     {
         public ManagementConsole(string idName, ControlledUidlNode parent)
             : base(idName, parent)
@@ -49,5 +49,23 @@ namespace NWheels.UI.Toolbox
         {
             return new WidgetUidlNode[] { MainMenu, MainContent };
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region IBuildableUidlNode Members
+
+        void UidlBuilder.IBuildableUidlNode.Build(UidlBuilder builder)
+        {
+            builder.BuildNodes(this.GetNestedWidgets().Cast<AbstractUidlNode>().ToArray());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void UidlBuilder.IBuildableUidlNode.DescribePresenter(UidlBuilder builder)
+        {
+            builder.DescribeNodePresenters(this.GetNestedWidgets().Cast<AbstractUidlNode>().ToArray());
+        }
+
+        #endregion
     }
 }

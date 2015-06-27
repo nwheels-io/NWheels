@@ -64,108 +64,6 @@ theApp.service('uidlService', ['$q', '$http', '$rootScope', function ($q, $http,
     };
     */
     //-----------------------------------------------------------------------------------------------------------------
-
-    m_behaviorImplementations['Navigate'] = {
-        returnsPromise: false,
-        execute: function(scope, behavior, input) {
-            switch(behavior.targetType) {
-                case 'Screen':
-                    var screen = m_index.screens[toCamelCase(behavior.targetQualifiedName)];
-                    $rootScope.currentScreen = screen;
-                    $rootScope.$broadcast(screen.qualifiedName + ':NavigatedHere', input);
-                    break;
-                case 'ScreenPart':
-                    var screenPart = m_index.screenParts[toCamelCase(targetQualifiedName)];
-                    $rootScope.$broadcast(behavior.containerQualifiedName + ':NavReq', {
-                        screenPart: screenPart,
-                        input: input
-                    });
-                    break;
-            }
-        },
-    };
-    
-    //-----------------------------------------------------------------------------------------------------------------
-
-    m_behaviorImplementations['InvokeCommand'] = {
-        returnsPromise: false,
-        execute: function(scope, behavior, input) {
-            scope.$emit(behavior.commandQualifiedName + ':Executing', input);
-        },
-    };
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    m_behaviorImplementations['Broadcast'] = {
-        returnsPromise: false,
-        execute: function(scope, behavior, input) {
-            if (behavior.direction.indexOf('BubbleUp') > -1) {
-                scope.$emit(behavior.notificationQualifiedName, input);
-            }
-            if (behavior.direction.indexOf('TunnelDown') > -1) {
-                scope.$broadcast(behavior.notificationQualifiedName, input);
-            }
-        },
-    };
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    m_behaviorImplementations['CallApi'] = {
-        returnsPromise: true,
-        execute: function(scope, behavior, input) {
-            var requestData = { };
-            var parameterContext = {
-                data: scope.model.data,
-                state: scope.model.state,
-                input: input
-            };
-            for (var i = 0; i < behavior.parameterNames.length; i++) {
-                var parameterValue = Enumerable.Return(parameterContext).Select('ctx=>ctx.' + behavior.parameterExpressions[i]).Single();
-                requestData[behavior.parameterNames[i]] = parameterValue;
-            }
-            return $http.post('api/' + behavior.contractName + '/' + behavior.operationName, requestData.request);
-        },
-    };
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    m_behaviorImplementations['AlertUser'] = {
-        returnsPromise: true,
-        execute: function(scope, behavior, input) {
-            return $q(function(resolve, reject) {
-                var uidlAlert = m_app.userAlerts[toCamelCase(behavior.alertQualifiedName)];
-                scope.userAlert = {
-                    uidl: uidlAlert,
-                    answer: function(choice) {
-                        resolve(choice);
-                        scope.userAlert = null;
-                    }
-                };
-            });            
-        },
-    };
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    m_behaviorImplementations['AlterModel'] = {
-        returnsPromise: false,
-        execute: function(scope, behavior, input) {
-            //TBD
-        },
-    };
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    m_controllerImplementations['ScreenPartContainer'] = {
-        implement: function(scope) {
-            scope.$on(scope.uidl.qualifiedName + ':NavReq', function(event, data) {
-                scope.currentScreenPart = data.screenPart;
-                scope.$broadcast(data.screenPart.qualifiedName + ':NavigatedHere', data.input);
-            });
-        },
-    };
-
-    //-----------------------------------------------------------------------------------------------------------------
     /*
     function executeBehavior(scope, behavior, eventArgs) {
         switch(behavior.behaviorType) {
@@ -236,6 +134,7 @@ theApp.service('uidlService', ['$q', '$http', '$rootScope', function ($q, $http,
 
     function implementSubscription(scope, behavior) {
         scope.$on(behavior.subscription.notificationQualifiedName, function(event, input) {
+			console.log('uidlService::on-behavior', behavior.qualifiedName);
             implementBehavior(scope, behavior, input);
         });
     }
@@ -250,7 +149,8 @@ theApp.service('uidlService', ['$q', '$http', '$rootScope', function ($q, $http,
         };
         
         if (scope.uidl) {
-
+			console.log('uidlService::implementController', scope.uidl.qualifiedName);
+		
             if (scope.uidl.widgetType && m_controllerImplementations[scope.uidl.widgetType]) {
                 m_controllerImplementations[scope.uidl.widgetType].implement(scope);
             }
@@ -278,6 +178,139 @@ theApp.service('uidlService', ['$q', '$http', '$rootScope', function ($q, $http,
     function getCurrentLocale() {
         return m_uidl.locales['en-US'];
     }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_behaviorImplementations['Navigate'] = {
+        returnsPromise: false,
+        execute: function(scope, behavior, input) {
+			console.log('run-behavior > navigate', behavior.targetType, behavior.targetQualifiedName);
+            switch(behavior.targetType) {
+                case 'Screen':
+                    var screen = m_index.screens[behavior.targetQualifiedName];
+                    $rootScope.currentScreen = screen;
+                    $rootScope.$broadcast(screen.qualifiedName + ':NavigatedHere', input);
+                    break;
+                case 'ScreenPart':
+                    var screenPart = m_index.screenParts[behavior.targetQualifiedName];
+                    $rootScope.$broadcast(behavior.targetContainerQualifiedName + ':NavReq', {
+                        screenPart: screenPart,
+                        input: input
+                    });
+                    break;
+            }
+        },
+    };
+    
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_behaviorImplementations['InvokeCommand'] = {
+        returnsPromise: false,
+        execute: function(scope, behavior, input) {
+			console.log('run-behavior > invokeCommand', behavior.commandQualifiedName);
+            scope.$emit(behavior.commandQualifiedName + ':Executing', input);
+        },
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_behaviorImplementations['Broadcast'] = {
+        returnsPromise: false,
+        execute: function(scope, behavior, input) {
+			console.log('run-behavior > broadcast', behavior.notificationQualifiedName, behavior.direction);
+            if (behavior.direction.indexOf('BubbleUp') > -1) {
+                scope.$emit(behavior.notificationQualifiedName, input);
+            }
+            if (behavior.direction.indexOf('TunnelDown') > -1) {
+                scope.$broadcast(behavior.notificationQualifiedName, input);
+            }
+        },
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_behaviorImplementations['CallApi'] = {
+        returnsPromise: true,
+        execute: function(scope, behavior, input) {
+			console.log('run-behavior > callApi', behavior.contractName, behavior.operationName);
+            var requestData = { };
+            var parameterContext = {
+                data: scope.model.data,
+                state: scope.model.state,
+                input: input
+            };
+            for (var i = 0; i < behavior.parameterNames.length; i++) {
+                var parameterValue = Enumerable.Return(parameterContext).Select('ctx=>ctx.' + behavior.parameterExpressions[i]).Single();
+                requestData[behavior.parameterNames[i]] = parameterValue;
+            }
+            return $http.post('api/' + behavior.contractName + '/' + behavior.operationName, requestData.request);
+        },
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_behaviorImplementations['AlertUser'] = {
+        returnsPromise: true,
+        execute: function(scope, behavior, input) {
+			console.log('run-behavior > alertUser');
+            return $q(function(resolve, reject) {
+                var uidlAlert = m_app.userAlerts[toCamelCase(behavior.alertQualifiedName)];
+                scope.userAlert = {
+                    uidl: uidlAlert,
+                    answer: function(choice) {
+                        resolve(choice);
+                        scope.userAlert = null;
+                    }
+                };
+            });            
+        },
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_behaviorImplementations['AlterModel'] = {
+        returnsPromise: false,
+        execute: function(scope, behavior, input) {
+            //TBD
+        },
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_controllerImplementations['ScreenPartContainer'] = {
+        implement: function(scope) {
+            scope.$on(scope.uidl.qualifiedName + ':NavReq', function(event, data) {
+				console.log('screenPartContainer::on-NavReq', scope.uidl.qualifiedName, '->', data.screenPart.qualifiedName);
+                scope.currentScreenPart = data.screenPart;
+                scope.$broadcast(data.screenPart.qualifiedName + ':NavigatedHere', data.input);
+            });
+			if (scope.uidl.initalScreenPartQualifiedName) {
+                scope.currentScreenPart = m_index.screenParts[scope.uidl.initalScreenPartQualifiedName];
+                scope.$broadcast(scope.uidl.initalScreenPartQualifiedName + ':NavigatedHere');
+			}
+        },
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_controllerImplementations['ManagementConsole'] = {
+        implement: function(scope) {
+			function implementMenuItems(items) {
+				for (var i = 0; i < items.length; i++) {
+					var item = items[i];
+					for (var j = 0; j < item.behaviors.length; j++) {
+						var behavior = item.behaviors[j];
+						if (behavior.subscription) {
+							implementSubscription(scope, behavior);
+						}
+					}
+					implementMenuItems(item.subItems);
+				}
+			}
+			
+			implementMenuItems(scope.uidl.mainMenu.items);
+        },
+    };
 
     //-----------------------------------------------------------------------------------------------------------------
 
@@ -348,10 +381,18 @@ theApp.directive('uidlScreen', ['uidlService', function(uidlService) {
         },
         restrict: 'E',
         replace: true,
-        link: function(scope, elem, attrs) { },
+        link: function(scope, elem, attrs) { 
+			//console.log('uidlScreen::link', scope.uidl.qualifiedName);
+            //uidlService.implementController(scope);
+		},
         template: '<ng-include src="\'uidl-screen\'"></ng-include>',
         controller: function ($scope) {
-            uidlService.implementController($scope);
+			//console.log('uidlScreen::controller', $scope.uidl.qualifiedName);
+            //uidlService.implementController($scope);
+			$scope.$watch('uidl', function(newValue, oldValue) {
+				console.log('uidlScreen::watch(uidl)', oldValue.qualifiedName, '->', $scope.uidl.qualifiedName);
+				uidlService.implementController($scope);
+			});
         }        
     };
 }]);
@@ -365,10 +406,18 @@ theApp.directive('uidlScreenPart', ['uidlService', function(uidlService) {
         },
         restrict: 'E',
         replace: true,
-        link: function(scope, elem, attrs) { },
+        link: function(scope, elem, attrs) { 
+			//console.log('uidlScreenPart::link', scope.uidl.qualifiedName);
+            //uidlService.implementController(scope);
+		},
         template: '<ng-include src="\'uidl-screen-part\'"></ng-include>',
         controller: function ($scope) {
-            uidlService.implementController($scope);
+			//console.log('uidlScreenPart::controller', $scope.uidl.qualifiedName);
+            //uidlService.implementController($scope);
+			$scope.$watch('uidl', function(newValue, oldValue) {
+				console.log('uidlScreenPart::watch(uidl)', oldValue.qualifiedName, '->', $scope.uidl.qualifiedName);
+				uidlService.implementController($scope);
+			});
         }        
     };
 }]);
@@ -382,10 +431,18 @@ theApp.directive('uidlWidget', ['uidlService', function(uidlService) {
         },
         restrict: 'E',
         replace: true,
-        link: function(scope, elem, attrs) { },
+        link: function(scope, elem, attrs) { 
+			//console.log('uidlWidget::link', scope.uidl.qualifiedName);
+            //uidlService.implementController(scope);
+		},
         template: '<ng-include src="\'uidl-element-template-\' + uidl.templateName"></ng-include>',
         controller: function ($scope) {
-            uidlService.implementController($scope);
+			//console.log('uidlWidget::controller', $scope.uidl.qualifiedName);
+            //uidlService.implementController($scope);
+			$scope.$watch('uidl', function(newValue, oldValue) {
+				console.log('uidlWidget::watch(uidl)', oldValue ? oldValue.qualifiedName : '0', '->', $scope.uidl ? $scope.uidl.qualifiedName : '0');
+				uidlService.implementController($scope);
+			});
         }        
     };
 }]);
@@ -400,7 +457,12 @@ theApp.directive('uidlUserAlertInline', ['uidlService', function(uidlService) {
         restrict: 'E',
         replace: false,
         templateUrl: 'uidl-user-alert-inline',
+        link: function(scope, elem, attrs) { 
+			//console.log('uidlUserAlertInline::link');
+            //uidlService.implementController(scope);
+		},
         controller: function($scope) {
+			//console.log('uidlUserAlertInline::controller');
             uidlService.implementController($scope);
         },
     } 

@@ -88,16 +88,16 @@
         </script>
 
         <script type="text/ng-template" id="uidl-element-template-ManagementConsole">
-            <div uidl-controller class="border clearfix">
+            <div class="border clearfix">
                 <div class="layout">
-                    WIDGET[{{uidl.elementType}}]
+                    WIDGET[{{uidl.widgetType}}]
                 </div>
                 <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
                     <tr>
                         <td width="350">
                             <div class="content-example">
-                                <span ng-repeat="item in uidl.navigationStructure.items" ng-include="'uidl-element-template-ManagementConsole-menu-item'"></span>
+                                <span ng-repeat="item in uidl.mainMenu.items" ng-include="'uidl-element-template-ManagementConsole-menu-item'"></span>
                             </div>
                         </td>
                         <td style="vertical-align:top">
@@ -109,16 +109,16 @@
         </script>
 
         <script type="text/ng-template" id="uidl-element-template-ManagementConsole-menu-item">
-            <a ng-class="{bold: item.level==0}" ng-show="item.notifications[0].subscribers.length" href="" ng-click="itemSelected(item)">{{item.text}}</a>
-            <span ng-class="{bold: item.level==0}" ng-hide="item.notifications[0].subscribers.length">{{item.text}}</span>
+            <a ng-class="{bold: item.level==0}" ng-show="item.notifications[1].subscribedBehaviorQualifiedNames.length" href="" ng-click="$emit(item.notifications[1].qualifiedName)">{{item.text}}</a>
+            <span ng-class="{bold: item.level==0}" ng-hide="item.notifications[1].subscribedBehaviorQualifiedNames.length">{{item.text}}</span>
             <ul>
                 <li ng-repeat="item in item.subItems" ng-include="'uidl-element-template-ManagementConsole-menu-item'"></li>
             </ul>
         </script>
         
         <script type="text/ng-template" id="uidl-element-template-ScreenPartContainer">
-            <div class="border" uidl-controller>
-                WIDGET[{{uidl.elementType}}]
+            <div class="border">
+                WIDGET[{{uidl.widgetType}}]
                 <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
                 <uidl-screen-part ng-if="currentScreenPart" uidl="currentScreenPart"></uidl-screen-part>
             </div>
