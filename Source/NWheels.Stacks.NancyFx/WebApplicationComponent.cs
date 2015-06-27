@@ -15,13 +15,14 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.Stacks.NancyFx
 {
-    public class WebApplicationComponent : LifecycleEventListenerBase
+    public class WebApplicationComponent : LifecycleEventListenerBase, IWebModuleContext
     {
         private readonly WebAppEndpointRegistration _endpointRegistration;
         private readonly IWebApplicationLogger _logger;
         private readonly UidlApplication _application;
         private readonly UidlDocument _uidl;
-        private readonly Dictionary<Type, object> _domainServicesByContractType;
+        private readonly Dictionary<string, object> _apiServicesByContractName;
+        private readonly Dictionary<string, WebApiDispatcherBase> _apiDispatchersByContractName;
         private NancyHost _host;
         private WebApplicationModule _module;
 
@@ -32,20 +33,73 @@ namespace NWheels.Stacks.NancyFx
             WebAppEndpointRegistration endpointRegistration, 
             ITypeMetadataCache metadataCache,
             ILocalizationProvider localizationProvider,
+            WebApiDispatcherFactory dispatcherFactory,
             IWebApplicationLogger logger)
         {
             _endpointRegistration = endpointRegistration;
             _logger = logger;
+
             _application = (UidlApplication)components.Resolve(endpointRegistration.Contract);
             _uidl = UidlBuilder.GetApplicationDocument(_application, metadataCache, localizationProvider);
-            _domainServicesByContractType = _application.RequiredDomainApis.ToDictionary(contract => contract, components.Resolve);
+            
+            _apiServicesByContractName = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
+            _apiDispatchersByContractName = new Dictionary<string, WebApiDispatcherBase>(StringComparer.InvariantCultureIgnoreCase);
+
+            BuildApiDispatchers(components, dispatcherFactory);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void BuildApiDispatchers(IComponentContext components, WebApiDispatcherFactory dispatcherFactory)
+        {
+            foreach ( var apiContractType in _application.RequiredDomainApis )
+            {
+                var contractName = apiContractType.Name;
+                var service = components.Resolve(apiContractType);
+                var dispatcher = dispatcherFactory.CreateDispatcher(apiContractType);
+
+                _apiServicesByContractName.Add(contractName, service);
+                _apiDispatchersByContractName.Add(contractName, dispatcher);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region IWebModuleContext Members
+
+        UidlDocument IWebModuleContext.Uidl
+        {
+            get { return _uidl; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        UidlApplication IWebModuleContext.Application
+        {
+            get { return _application; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IReadOnlyDictionary<string, object> IWebModuleContext.ApiServicesByContractName
+        {
+            get { return _apiServicesByContractName; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IReadOnlyDictionary<string, WebApiDispatcherBase> IWebModuleContext.ApiDispatchersByContractName
+        {
+            get { return _apiDispatchersByContractName; }
+        }
+
+        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void Load()
         {
-            _module = new WebApplicationModule(_uidl, _application, _domainServicesByContractType);
+            _module = new WebApplicationModule(this);
             var bootstrapper = new WebApplicationBootstrapper(_module);
 
             _host = new NancyHost(bootstrapper, new[] { TrailingSlashSafeUri(_endpointRegistration.Address) });

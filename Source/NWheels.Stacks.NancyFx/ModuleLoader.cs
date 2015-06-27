@@ -25,6 +25,8 @@ namespace NWheels.Stacks.NancyFx
                     return component;
                 });
 
+            builder.RegisterType<WebApiDispatcherFactory>().SingleInstance();
+
             StaticConfiguration.Caching.EnableRuntimeViewDiscovery = true;
             StaticConfiguration.Caching.EnableRuntimeViewUpdates = true;
         }

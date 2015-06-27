@@ -16,29 +16,20 @@ namespace NWheels.Stacks.NancyFx
 {
     public class WebApplicationModule : NancyModule
     {
-        private readonly UidlDocument _uidl;
-        private readonly UidlApplication _application;
-        private readonly Dictionary<Type, object> _domainApis;
-        private readonly Dictionary<string, Type> _domainApiContractTypeByName;
+        private readonly IWebModuleContext _context;
         private readonly string _contentRootPath;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public WebApplicationModule(
-            UidlDocument uidl, 
-            UidlApplication application, 
-            Dictionary<Type, object> domainApis)
+        public WebApplicationModule(IWebModuleContext context)
         {
-            _uidl = uidl;
-            _application = application;
-            _domainApis = domainApis;
+            _context = context;
 
-            base.Get["/"] = parameters => View["index.html"];
-            base.Get["/uidl.json"] = parameters => GetUidl();
-            base.Post["/api/{contract}/{operation}"] = parameters => ExecuteDomainApi(parameters);
+            base.Get["/"] = route => View["index.html"];
+            base.Get["/uidl.json"] = route => GetUidl();
+            base.Post["/api/{contract}/{operation}"] = route => ExecuteDomainApi(route.contract, route.operation);
 
-            _domainApiContractTypeByName = _domainApis.Keys.ToDictionary(type => type.Name, type => type);
-            _contentRootPath = PathUtility.ModuleBinPath(_application.GetType().Assembly, _application.IdName) + "\\Skin.Default";
+            _contentRootPath = PathUtility.ModuleBinPath(_context.Application.GetType().Assembly, _context.Application.IdName) + "\\Skin.Default";
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,16 +37,30 @@ namespace NWheels.Stacks.NancyFx
         private Response GetUidl()
         {
             var serializer = new MetadataJsonSerializer();
-            return new JsonResponse<UidlDocument>(_uidl, serializer);
+            return new JsonResponse<UidlDocument>(_context.Uidl, serializer);
         }
-
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private Response ExecuteDomainApi(dynamic parameters)
+        private object ExecuteDomainApi(string contractName, string operationName)
         {
-            var contractType = _domainApiContractTypeByName[parameters.contract];
-            return Response.AsJson(new { Success = true });
+            object apiService;
+            WebApiDispatcherBase apiDispatcher;
+
+            if ( !_context.ApiDispatchersByContractName.TryGetValue(contractName, out apiDispatcher) ||
+                !_context.ApiServicesByContractName.TryGetValue(contractName, out apiService) )
+            {
+                return HttpStatusCode.NotFound;
+            }
+
+            var replyObject = apiDispatcher.DispatchOperation(operationName, this, apiService);
+
+            if ( replyObject is HttpStatusCode )
+            {
+                return replyObject;
+            }
+
+            return Response.AsJson(replyObject);
         }
 
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------

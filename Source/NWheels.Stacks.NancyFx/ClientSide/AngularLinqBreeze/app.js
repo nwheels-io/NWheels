@@ -123,7 +123,7 @@ theApp.service('uidlService', ['$q', '$http', '$rootScope', function ($q, $http,
                 var parameterValue = Enumerable.Return(parameterContext).Select('ctx=>ctx.' + behavior.parameterExpressions[i]).Single();
                 requestData[behavior.parameterNames[i]] = parameterValue;
             }
-            return $http.post('api/' + behavior.contractName + '/' + behavior.operationName, requestData);
+            return $http.post('api/' + behavior.contractName + '/' + behavior.operationName, requestData.request);
         },
     };
 

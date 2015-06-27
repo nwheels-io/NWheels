@@ -41,6 +41,13 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public object NewEntity(Type entityContractType)
+        {
+            return CreateInstanceOf(entityContractType).UsingConstructor<IComponentContext>(_components, constructorIndex: 1);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Type GetOrBuildEntityImplementation(Type entityContractInterface) 
         {
             var typeKey = new TypeKey(primaryInterface: entityContractInterface);

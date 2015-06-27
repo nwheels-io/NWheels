@@ -1,22 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Conventions.Core;
 using NWheels.Domains.Security.UI;
+using NWheels.UI;
 
 namespace NWheels.Domains.Security.Impl
 {
-    internal class SecurityDomainApi : ISecurityDomainApi
+    internal class SecurityDomainApi : DomainApiBase, ISecurityDomainApi
     {
-        public ILogUserInReply LogUserIn(ILogUserInRequest request)
+        public SecurityDomainApi(IEntityObjectFactory objectFactory)
+            : base(objectFactory)
         {
-            throw new NotImplementedException();
         }
 
-        public ILogUserInReply LogUserOut()
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ILogUserInReply LogUserIn(ILogUserInRequest request)
         {
-            throw new NotImplementedException();
+            return NewModel<ILogUserInReply>(
+                m => m.UserId = null,
+                m => m.AuthorizedUidlNodes = new[] { "AAA", "BBB", "CCC" });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ILogUserOutReply LogUserOut(ILogUserOutRequest request)
+        {
+            return NewModel<ILogUserOutReply>();
         }
     }
 }

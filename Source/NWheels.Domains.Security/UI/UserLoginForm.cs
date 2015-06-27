@@ -38,7 +38,7 @@ namespace NWheels.Domains.Security.UI
                     onFailure: b => b.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.LoginHasFailed(failure.ReasonText)));
 
             presenter.On(LogoutRequested)
-                .CallApi<ISecurityDomainApi>().RequestReply((api, data, state, input) => api.LogUserOut())
+                .CallApi<ISecurityDomainApi>().RequestReply((api, data, state, input) => api.LogUserOut(null))
                 .Then(
                     onSuccess: b => b.Broadcast(UserLoggedOut).BubbleUp(),
                     onFailure: b => b.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.LoginHasFailed(failure.ReasonText))

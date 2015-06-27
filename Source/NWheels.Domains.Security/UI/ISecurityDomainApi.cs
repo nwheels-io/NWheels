@@ -16,7 +16,7 @@ namespace NWheels.Domains.Security.UI
         ILogUserInReply LogUserIn(ILogUserInRequest request);
 
         [DomainApiFault(typeof(LogoutFault))]
-        ILogUserInReply LogUserOut();
+        ILogUserOutReply LogUserOut(ILogUserOutRequest request);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -41,6 +41,20 @@ namespace NWheels.Domains.Security.UI
         
         [PropertyContract.ReadOnly]
         string[] AuthorizedUidlNodes { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [ViewModelContract]
+    public interface ILogUserOutRequest
+    {
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [ViewModelContract]
+    public interface ILogUserOutReply
+    {
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

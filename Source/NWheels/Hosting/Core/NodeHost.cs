@@ -215,6 +215,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<XmlConfigurationLoader>().SingleInstance().InstancePerLifetimeScope();
             builder.RegisterAdapter<RelationalMappingConventionDefault, IRelationalMappingConvention>(RelationalMappingConventionBase.FromDefault).SingleInstance();
             builder.RegisterType<VoidDataRepositoryFactory>().As<IDataRepositoryFactory>();
+            builder.RegisterType<EntityObjectFactory>().As<EntityObjectFactory, IEntityObjectFactory>().SingleInstance();
 
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkLoggingConfiguration>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkEndpointsConfig>();

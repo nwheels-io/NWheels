@@ -244,6 +244,13 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                     throw new NotSupportedException(
                         string.Format("Entity contract '{0}' is not supported by HardCodedEntityFactory.", typeof(TEntityContract).Name));
                 }
+
+                //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+                public object NewEntity(Type entityContractType)
+                {
+                    throw new NotImplementedException();
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

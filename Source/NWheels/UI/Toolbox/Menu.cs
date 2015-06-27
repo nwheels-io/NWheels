@@ -56,13 +56,13 @@ namespace NWheels.UI.Toolbox
 
                 destination.Add(item);
 
-                if ( property.PropertyType == typeof(ItemAction) )
-                {
-                    item.Action = (ItemAction)property.GetValue(anonymous);
-                }
-                else if ( property.PropertyType.IsAnonymousType() )
+                if ( property.PropertyType.IsAnonymousType() )
                 {
                     DefineNavigation(property.GetValue(anonymous), item.SubItems, level + 1, parent);
+                }
+                else if ( property.PropertyType == typeof(ItemAction) )
+                {
+                    item.Action = (ItemAction)property.GetValue(anonymous);
                 }
             }
         }
@@ -82,21 +82,21 @@ namespace NWheels.UI.Toolbox
 
         public static class Action
         {
-            public static object Goto<TInput>(IScreenWithInput<TInput> screen, TInput value = default(TInput))
+            public static ItemAction Goto<TInput>(IScreenWithInput<TInput> screen, TInput value = default(TInput))
             {
                 return Describe(b => b.Navigate().ToScreen(screen).WithInput((payload, data, state) => value));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static object Goto<TInput>(IScreenPartWithInput<TInput> screenPart, ScreenPartContainer targetContainer, TInput value = default(TInput))
+            public static ItemAction Goto<TInput>(IScreenPartWithInput<TInput> screenPart, ScreenPartContainer targetContainer, TInput value = default(TInput))
             {
                 return Describe(b => b.Navigate().FromContainer(targetContainer).ToScreenPart(screenPart).WithInput((payload, data, state) => value));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static object AlertUserPopup<TRepo>(Expression<Func<TRepo, UidlUserAlert>> alertCall)
+            public static ItemAction AlertUserPopup<TRepo>(Expression<Func<TRepo, UidlUserAlert>> alertCall)
                 where TRepo : IUserAlertRepository
             {
                 return Describe(b => b.UserAlertFrom<TRepo>().ShowPopup(alertCall));
@@ -104,7 +104,7 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static object AlertUserInline<TRepo>(Expression<Func<TRepo, UidlUserAlert>> alertCall)
+            public static ItemAction AlertUserInline<TRepo>(Expression<Func<TRepo, UidlUserAlert>> alertCall)
                 where TRepo : IUserAlertRepository
             {
                 return Describe(b => b.UserAlertFrom<TRepo>().ShowInline(alertCall));
@@ -112,21 +112,21 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static object Notify(UidlNotification notification, BroadcastDirection direction = BroadcastDirection.BubbleUp)
+            public static ItemAction Notify(UidlNotification notification, BroadcastDirection direction = BroadcastDirection.BubbleUp)
             {
                 return Describe(b => b.Broadcast(notification).Direction(direction));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static object InvokeCommand(UidlCommand command)
+            public static ItemAction InvokeCommand(UidlCommand command)
             {
                 return Describe(b => b.InvokeCommand(command));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static object Notify<TPayload>(
+            public static ItemAction Notify<TPayload>(
                 UidlNotification<TPayload> notification, 
                 TPayload payload, 
                 BroadcastDirection direction = BroadcastDirection.BubbleUp)
@@ -136,7 +136,7 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static object Describe(DescribeActionCallback onDescribe)
+            public static ItemAction Describe(DescribeActionCallback onDescribe)
             {
                 return new ItemAction(onDescribe);
             }
@@ -144,7 +144,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal class ItemAction
+        public class ItemAction
         {
             public ItemAction(DescribeActionCallback onDescribe)
             {
