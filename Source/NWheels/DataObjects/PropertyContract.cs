@@ -92,6 +92,7 @@ namespace NWheels.DataObjects
             public class CurrencyAttribute : DataTypeAttribute { public CurrencyAttribute() : base(typeof(SemanticType.DefaultOf<decimal>)) { } }
             public class MultilineTextAttribute : DataTypeAttribute { public MultilineTextAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class EmailAddressAttribute : DataTypeAttribute { public EmailAddressAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
+            public class LoginNameAttribute : DataTypeAttribute { public LoginNameAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class PasswordAttribute : DataTypeAttribute { public PasswordAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class UrlAttribute : DataTypeAttribute { public UrlAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class IPAddressAttribute : DataTypeAttribute { public IPAddressAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }

@@ -10,6 +10,7 @@ namespace NWheels.DataObjects
     {
         System.ComponentModel.DataAnnotations.DataType GetDataTypeAnnotation();
         IPropertyValidationMetadata GetDefaultValidation();
+        PropertyAccess? GetDefaultPropertyAccess(); 
         string Name { get; }
         Type ClrType { get; }
         object DefaultValue { get; }

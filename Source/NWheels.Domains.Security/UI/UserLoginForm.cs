@@ -37,12 +37,6 @@ namespace NWheels.Domains.Security.UI
                     onSuccess: b => b.Broadcast(UserLoggedIn).BubbleUp(),
                     onFailure: b => b.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.LoginHasFailed(failure.ReasonText)));
 
-            presenter.On(LogoutRequested)
-                .CallApi<ISecurityDomainApi>().RequestReply((api, data, state, input) => api.LogUserOut(null))
-                .Then(
-                    onSuccess: b => b.Broadcast(UserLoggedOut).BubbleUp(),
-                    onFailure: b => b.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.LoginHasFailed(failure.ReasonText))
-                        .Then(bb => bb.Broadcast(UserLoggedOut).BubbleUp()));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,10 +44,7 @@ namespace NWheels.Domains.Security.UI
         public UidlCommand LogIn { get; set; }
         public UidlCommand SignUp { get; set; }
         public UidlCommand ForgotPassword { get; set; }
-        
         public UidlNotification UserLoggedIn { get; set; }
-        public UidlNotification UserLoggedOut { get; set; }
-        public UidlNotification LogoutRequested { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

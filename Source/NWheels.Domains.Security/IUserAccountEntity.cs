@@ -7,8 +7,4 @@ using NWheels.Entities;
 
 namespace NWheels.Domains.Security
 {
-    [EntityContract]
-    public interface IUserAccountEntity
-    {
-    }
 }
