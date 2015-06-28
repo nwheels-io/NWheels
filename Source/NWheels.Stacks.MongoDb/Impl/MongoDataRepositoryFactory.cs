@@ -69,13 +69,7 @@ namespace NWheels.Stacks.MongoDb.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class EmptyModel
-        {
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class MongoDataRepositoryConvention : ConnectedModelDataRepositoryConvention<MongoDatabase, EmptyModel>
+        public class MongoDataRepositoryConvention : ConnectedModelDataRepositoryConvention<MongoDatabase, object>
         {
             public MongoDataRepositoryConvention(EntityObjectFactory entityFactory, ITypeMetadataCache metadataCache)
                 : base(entityFactory, metadataCache)
@@ -86,11 +80,11 @@ namespace NWheels.Stacks.MongoDb.Impl
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected override void ImplementBuildDbCompiledModel(
-                FunctionMethodWriter<EmptyModel> writer,
+                FunctionMethodWriter<object> writer,
                 Operand<ITypeMetadataCache> metadataCache,
                 Operand<MongoDatabase> connection)
             {
-                base.CompiledModelField.Assign(writer.New<EmptyModel>());
+                base.CompiledModelField.Assign(writer.New<object>());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -98,9 +92,12 @@ namespace NWheels.Stacks.MongoDb.Impl
             protected override IOperand<IEntityRepository<TT.TContract>> GetNewEntityRepositoryExpression(MethodWriterBase writer)
             {
                 return writer.New<MongoEntityRepository<TT.TContract, TT.TImpl>>(
-                    writer.This<MongoDataRepositoryBase>(), // ownerRepo
-                    base.MetadataCacheField,                // metadata
-                    base.EntityFactoryField);               // objectFactory
+                    // ownerRepo
+                    writer.This<MongoDataRepositoryBase>(),                             
+                    // metadataCache
+                    base.MetadataCacheField,
+                    // objectFactory
+                    base.EntityFactoryField);                                           
             }
         }
     }

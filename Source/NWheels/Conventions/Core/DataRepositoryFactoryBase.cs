@@ -388,7 +388,7 @@ namespace NWheels.Conventions.Core
 
             protected override void ImplementConstructor(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
-                writer.Constructor<EntityObjectFactory, ITypeMetadataCache, DbConnection, bool>(
+                writer.Constructor<EntityObjectFactory, ITypeMetadataCache, TConnection, bool>(
                     (cw, entityFactory, metadata, connection, autoCommit) => {
                         cw.Base(
                             entityFactory,

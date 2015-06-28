@@ -19,16 +19,16 @@ namespace NWheels.DataObjects.Core.Conventions
 
         public void Preview(TypeMetadataBuilder type)
         {
+            foreach ( var property in type.Properties )
+            {
+                ApplyToProperty(property);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Apply(TypeMetadataBuilder type)
         {
-            foreach ( var property in type.Properties )
-            {
-                ApplyToProperty(property);
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

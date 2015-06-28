@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Hapil;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using NUnit.Framework;
@@ -11,24 +12,45 @@ using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Stacks.MongoDb.Impl;
 using NWheels.Testing;
+using NWheels.Testing.Entities.Stacks;
 using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;
 
 namespace NWheels.Stacks.MongoDb.ComponentTests
 {
     [TestFixture, Category("Integration")]
-    public class MongoDataRepositoryFactoryTests : DynamicTypeUnitTestBase
+    public class MongoDataRepositoryFactoryTests : UnitTestBase
     {
         public const string TestDatabaseName = "NWheelsTest";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Hapil.DynamicModule _dyamicModule;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [TestFixtureSetUp]
+        public void FixtureSetUp()
+        {
+            _dyamicModule = new DynamicModule(
+                "EmittedByMongoDataRepositoryFactoryTests",
+                allowSave: true,
+                saveDirectory: TestContext.CurrentContext.TestDirectory);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [TestFixtureTearDown]
+        public void FixtureTearDown()
+        {
+            _dyamicModule.SaveAssembly();
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [SetUp]
         public void SetUp()
         {
-            DropAndCreateDatabase();
-            
-            var config = Framework.ConfigSection<IFrameworkDatabaseConfig>();
-            config.ConnectionString = string.Format("mongodb://localhost/{0}", TestDatabaseName);
+            DropAndCreateTestDatabase();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,17 +69,49 @@ namespace NWheels.Stacks.MongoDb.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void CanPerformBasicCrudOperations()
+        {
+            //-- Arrange
+
+            var factory = CreateDataRepositoryFactory();
+
+            //-- Act & Assert
+
+            CrudOperations.Repository1.ExecuteBasic(repoFactory: () => factory.CreateService<IR1.IOnlineStoreRepository>());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanPerformAdvancedRetrievals()
+        {
+            //-- Arrange
+
+            var factory = CreateDataRepositoryFactory();
+
+            //-- Act & Assert
+
+            CrudOperations.Repository1.ExecuteAdvancedRetrievals(repoFactory: () => factory.CreateService<IR1.IOnlineStoreRepository>());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private MongoDataRepositoryFactory CreateDataRepositoryFactory()
         {
-            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new DefaultIdMetadataConvention(typeof(ObjectId)));
-            var entityFactory = new EntityObjectFactory(Framework.Components, DyamicModule, metadataCache);
-            var repoFactory = new MongoDataRepositoryFactory(DyamicModule, entityFactory, metadataCache, Framework.ConfigSection<IFrameworkDatabaseConfig>());
+            var configAuto = ResolveAuto<IFrameworkDatabaseConfig>();
+            configAuto.Instance.ConnectionString = string.Format("server=localhost;database={0}", TestDatabaseName);
+
+            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions();
+            var entityFactory = new EntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
+            var repoFactory = new MongoDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache, configAuto.Instance);
+            
             return repoFactory;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void DropAndCreateDatabase()
+        private static void DropAndCreateTestDatabase()
         {
             var client = new MongoClient();
             var server = client.GetServer();
@@ -69,6 +123,5 @@ namespace NWheels.Stacks.MongoDb.ComponentTests
 
             server.GetDatabase(TestDatabaseName);
         }
-
     }
 }

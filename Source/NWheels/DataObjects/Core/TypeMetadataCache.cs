@@ -39,9 +39,26 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool ContainsTypeMetadata(Type primaryContract)
+        {
+            return _metadataByContractType.ContainsKey(primaryContract);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public ITypeMetadata GetTypeMetadata(Type primaryContract)
         {
             return _metadataByContractType.GetOrAdd(primaryContract, BuildTypeMetadata);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool TryGetTypeMetadata(Type primaryContract, out ITypeMetadata metadata)
+        {
+            TypeMetadataBuilder metadataBuilder;
+            var result = _metadataByContractType.TryGetValue(primaryContract, out metadataBuilder);
+            metadata = metadataBuilder;
+            return result;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -142,10 +159,16 @@ namespace NWheels.DataObjects.Core
                 else
                 {
                     var constructor = new TypeMetadataBuilderConstructor(_conventions);
-                    constructor.ConstructMetadata(primaryContract, mixinContracts, builder, cache: this);
-                }
+                    Type[] addedMixinContracts;
+                    
+                    if ( !constructor.ConstructMetadata(primaryContract, mixinContracts, builder, this, out addedMixinContracts) && 
+                        addedMixinContracts.Length > 0 )
+                    {
+                        return BuildTypeMetadata(primaryContract, mixinContracts.Union(addedMixinContracts).ToArray());
+                    }
 
-                return builder;
+                    return builder;
+                }
             }
             finally
             {

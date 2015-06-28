@@ -80,11 +80,17 @@ namespace NWheels.UnitTests.DataObjects
             var metadataConstructor = CreateMetadataConstructor(out metadataCache);
             var typeMetadata = new TypeMetadataBuilder();
 
-            metadataConstructor.ConstructMetadata(
+            Type[] addedMixinContracts;
+
+            var done = metadataConstructor.ConstructMetadata(
                 primaryContract: typeof(T),
                 mixinContracts: Type.EmptyTypes,
                 builder: typeMetadata,
-                cache: metadataCache);
+                cache: metadataCache,
+                addedMixinContracts: out addedMixinContracts);
+
+            Assert.IsTrue(done);
+            Assert.IsEmpty(addedMixinContracts);
 
             return typeMetadata;
         }

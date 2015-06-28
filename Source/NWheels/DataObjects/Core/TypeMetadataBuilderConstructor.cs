@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Hapil;
 using Hapil.Members;
@@ -24,22 +25,39 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void ConstructMetadata(Type primaryContract, Type[] mixinContracts, TypeMetadataBuilder builder, TypeMetadataCache cache)
+        public bool ConstructMetadata(
+            Type primaryContract,
+            Type[] mixinContracts,
+            TypeMetadataBuilder builder,
+            TypeMetadataCache cache,
+            out Type[] addedMixinContracts)
         {
             _mixinContracts = mixinContracts;
             _primaryContract = primaryContract;
             _thisType = builder;
             _cache = cache;
-            
+
             _allProperties = UnionPropertiesInAllContracts(primaryContract, mixinContracts);
 
             builder.Name = primaryContract.Name.TrimPrefix("I");
             builder.ContractType = primaryContract;
             builder.MixinContractTypes.AddRange(mixinContracts);
 
+            var initialMixinContractCount = _mixinContracts.Length;
+
             ConstructProperties();
 
-            builder.EndBuild();
+            if ( builder.MixinContractTypes.Count == initialMixinContractCount )
+            {
+                builder.EndBuild();
+                addedMixinContracts = Type.EmptyTypes;
+                return true;
+            }
+            else
+            {
+                addedMixinContracts = builder.MixinContractTypes.Skip(initialMixinContractCount).ToArray();
+                return false;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

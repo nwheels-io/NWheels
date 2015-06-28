@@ -17,6 +17,7 @@ namespace NWheels.Stacks.MongoDb.Impl
         where TEntityImpl : class, TEntityContract
     {
         private readonly MongoDataRepositoryBase _ownerRepo;
+        private readonly ITypeMetadataCache _metadataCache;
         private readonly ITypeMetadata _metadata;
         private readonly EntityObjectFactory _objectFactory;
         private readonly MongoCollection<TEntityImpl> _objectSet;
@@ -24,10 +25,11 @@ namespace NWheels.Stacks.MongoDb.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MongoEntityRepository(MongoDataRepositoryBase ownerRepo, ITypeMetadata metadata, EntityObjectFactory objectFactory)
+        public MongoEntityRepository(MongoDataRepositoryBase ownerRepo, ITypeMetadataCache metadataCache, EntityObjectFactory objectFactory)
         {
             _ownerRepo = ownerRepo;
-            _metadata = metadata;
+            _metadataCache = metadataCache;
+            _metadata = metadataCache.GetTypeMetadata(typeof(TEntityContract));
             _objectFactory = objectFactory;
             _objectSet = ownerRepo.GetCollection<TEntityImpl>(_metadata.Name);
             _queryProvider = null;
@@ -174,6 +176,7 @@ namespace NWheels.Stacks.MongoDb.Impl
         {
             private readonly MongoEntityRepository<TEntityContract, TEntityImpl> _ownerRepo;
             private readonly IQueryProvider _actualQueryProvider;
+            private readonly MongoQueryExpressionSpecializer _expressionSpecializer;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -181,6 +184,7 @@ namespace NWheels.Stacks.MongoDb.Impl
             {
                 _ownerRepo = ownerRepo;
                 _actualQueryProvider = ownerRepo.ObjectSet.AsQueryable().Provider;
+                _expressionSpecializer = new MongoQueryExpressionSpecializer(ownerRepo._metadata, ownerRepo._metadataCache);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -189,7 +193,7 @@ namespace NWheels.Stacks.MongoDb.Impl
 
             public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
             {
-                var specializedExpression = MongoQueryExpressionSpecializer.Specialize(expression);
+                var specializedExpression = _expressionSpecializer.Specialize(expression);
                 var query = _actualQueryProvider.CreateQuery<TElement>(specializedExpression);
                 return query;
             }
@@ -198,7 +202,7 @@ namespace NWheels.Stacks.MongoDb.Impl
 
             public IQueryable CreateQuery(Expression expression)
             {
-                var specializedExpression = MongoQueryExpressionSpecializer.Specialize(expression);
+                var specializedExpression = _expressionSpecializer.Specialize(expression);
                 var query = _actualQueryProvider.CreateQuery(specializedExpression);
                 return query;
             }
@@ -207,7 +211,8 @@ namespace NWheels.Stacks.MongoDb.Impl
 
             public TResult Execute<TResult>(Expression expression)
             {
-                return _actualQueryProvider.Execute<TResult>(expression);
+                var specializedExpression = _expressionSpecializer.Specialize(expression);
+                return _actualQueryProvider.Execute<TResult>(specializedExpression);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

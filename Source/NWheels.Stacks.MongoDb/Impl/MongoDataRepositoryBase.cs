@@ -1,5 +1,6 @@
 ﻿using System;
 using MongoDB.Driver;
+using NWheels.Conventions.Core;
 using NWheels.Entities.Core;
 
 namespace NWheels.Stacks.MongoDb.Impl
@@ -10,7 +11,7 @@ namespace NWheels.Stacks.MongoDb.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected MongoDataRepositoryBase(bool autoCommit, MongoDatabase database)
+        protected MongoDataRepositoryBase(EntityObjectFactory objectFactory, object emptyModel, MongoDatabase database, bool autoCommit)
             : base(autoCommit)
         {
             _database = database;

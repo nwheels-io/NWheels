@@ -8,6 +8,7 @@ using NUnit.Framework;
 
 namespace NWheels.Testing
 {
+    [TestFixture]
     public class DynamicTypeUnitTestBase : UnitTestBase
     {
         private Hapil.DynamicModule _dyamicModule;
