@@ -80,6 +80,16 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private class ImplementorKey
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly object _s_defaultImplementorKey = new object();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public abstract class DataRepositoryConvention : ImplementationConvention
         {
             private readonly ITypeMetadataCache _metadataCache;

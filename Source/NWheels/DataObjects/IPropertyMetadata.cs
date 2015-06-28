@@ -9,6 +9,7 @@ namespace NWheels.DataObjects
     {
         bool HasContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute;
         TAttribute TryGetContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute;
+        bool TryGetImplementationPropertyInfo(object implementorKey, out PropertyInfo implementationProperty);
         ITypeMetadata DeclaringContract { get; }
         string Name { get; }
         string ContractQualifiedName { get; }
@@ -20,7 +21,6 @@ namespace NWheels.DataObjects
         bool IsSensitive { get; }
         IReadOnlyList<PropertyContractAttribute> ContractAttributes { get; }
         PropertyInfo ContractPropertyInfo { get; }
-        PropertyInfo ImplementationPropertyInfo { get; }
         IRelationMetadata Relation { get; }
         IPropertyValidationMetadata Validation { get; }
         object DefaultValue { get; }

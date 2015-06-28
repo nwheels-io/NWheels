@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -13,6 +14,7 @@ namespace NWheels.DataObjects.Core
         private readonly ConcreteToAbstractCollectionAdapter<KeyMetadataBuilder, IKeyMetadata> _allKeysAdapter;
         private readonly ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultDisplayPropertiesAdapter;
         private readonly ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultSortPropertiesAdapter;
+        private readonly ConcurrentDictionary<object, Type> _implementationTypeByKey;
         private Dictionary<string, PropertyMetadataBuilder> _propertyByName;
         private Dictionary<PropertyInfo, PropertyMetadataBuilder> _propertyByDeclaration;
 
@@ -32,6 +34,7 @@ namespace NWheels.DataObjects.Core
             _allKeysAdapter = new ConcreteToAbstractCollectionAdapter<KeyMetadataBuilder, IKeyMetadata>(this.AllKeys);
             _defaultDisplayPropertiesAdapter = new ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.DefaultDisplayProperties);
             _defaultSortPropertiesAdapter = new ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.DefaultSortProperties);
+            _implementationTypeByKey = new ConcurrentDictionary<object, Type>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -49,9 +52,15 @@ namespace NWheels.DataObjects.Core
 
         #region ITypeMetadata Members
 
+        public bool TryGetImplementationType(object implementorKey, out Type implementationType)
+        {
+            return _implementationTypeByKey.TryGetValue(implementorKey, out implementationType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string Name { get; set; }
         public Type ContractType { get; set; }
-        public Type ImplementationType { get; set; }
         public bool IsAbstract { get; set; }
         public string DefaultDisplayFormat { get; set; }
 
@@ -223,15 +232,15 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void UpdateImplementation(Type implementationType)
+        public void UpdateImplementation(object implementorKey, Type implementationType)
         {
-            this.ImplementationType = implementationType;
+            _implementationTypeByKey[implementorKey] = implementationType;
 
             var implementationProperties = implementationType.GetProperties(BindingFlags.Instance | BindingFlags.Public).ToDictionary(prop => prop.Name);
 
             foreach ( var property in this.Properties )
             {
-                property.ImplementationPropertyInfo = implementationProperties[property.Name];
+                property.UpdateImplementation(implementorKey, implementationProperties[property.Name]);
             }
 
             //var implementationProperties = implementationType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);

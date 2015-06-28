@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -13,8 +14,14 @@ namespace NWheels.DataObjects.Core
 {
     public class PropertyMetadataBuilder : MetadataElement<IPropertyMetadata>, IPropertyMetadata
     {
+        private readonly ConcurrentDictionary<object, PropertyInfo> _implementationPropertyInfoByKey;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public PropertyMetadataBuilder()
         {
+            _implementationPropertyInfoByKey = new ConcurrentDictionary<object, PropertyInfo>();
+
             this.ContractAttributes = new List<PropertyContractAttribute>();
             this.Validation = new PropertyValidationMetadataBuilder();
         }
@@ -59,6 +66,13 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool TryGetImplementationPropertyInfo(object implementorKey, out PropertyInfo implementationProperty)
+        {
+            return _implementationPropertyInfoByKey.TryGetValue(implementorKey, out implementationProperty);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TypeMetadataBuilder DeclaringContract { get; set; }
         public string Name { get; set; }
         public PropertyKind Kind { get; set; }
@@ -69,7 +83,6 @@ namespace NWheels.DataObjects.Core
         public bool IsSensitive { get; set; }
         public List<PropertyContractAttribute> ContractAttributes { get; set; }
         public System.Reflection.PropertyInfo ContractPropertyInfo { get; set; }
-        public System.Reflection.PropertyInfo ImplementationPropertyInfo { get; set; }
         public object DefaultValue { get; set; }
         public Type DefaultValueGeneratorType { get; set; }
         public string DefaultDisplayName { get; set; }
@@ -113,6 +126,11 @@ namespace NWheels.DataObjects.Core
 
         #endregion
 
+        public void UpdateImplementation(object implementorKey, PropertyInfo implementationProperty)
+        {
+            _implementationPropertyInfoByKey[implementorKey] = implementationProperty;
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         public PropertyRelationalMappingBuilder RelationalMapping { get; set; }
@@ -142,7 +160,6 @@ namespace NWheels.DataObjects.Core
             Access = visitor.VisitAttribute("Access", Access);
             ContractAttributes = visitor.VisitAttribute("ContractAttributes", ContractAttributes);
             ContractPropertyInfo = visitor.VisitAttribute("ContractPropertyInfo", ContractPropertyInfo);
-            ImplementationPropertyInfo = visitor.VisitAttribute("ImplementationPropertyInfo", ImplementationPropertyInfo);
             DefaultValueGeneratorType = visitor.VisitAttribute("DefaultValueGeneratorType", DefaultValueGeneratorType);
             DefaultDisplayName = visitor.VisitAttribute("DefaultDisplayName", DefaultDisplayName);
             DefaultDisplayFormat = visitor.VisitAttribute("DefaultDisplayFormat", DefaultDisplayFormat);
