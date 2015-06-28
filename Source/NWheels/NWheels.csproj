@@ -354,6 +354,7 @@
     <Compile Include="UI\PresenterBuilder.cs" />
     <Compile Include="UI\ScreenBase.cs" />
     <Compile Include="UI\ScreenPartBase.cs" />
+    <Compile Include="UI\Toolbox\Container.cs" />
     <Compile Include="UI\Toolbox\Gauge.cs" />
     <Compile Include="UI\Toolbox\Menu.cs">
       <SubType>Code</SubType>

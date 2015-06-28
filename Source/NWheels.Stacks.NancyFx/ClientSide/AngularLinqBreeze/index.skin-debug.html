@@ -87,10 +87,19 @@
             </div>
         </script>
 
+        <script type="text/ng-template" id="uidl-element-template-CurrentLoggedInUser">
+            <div class="border">
+				<a href="" ng-click="$emit(uidl.qualifiedName + ':LogOut:Executing')">{{translate('LogOut')}}</a>
+			</div>
+        </script>
+
         <script type="text/ng-template" id="uidl-element-template-ManagementConsole">
             <div class="border clearfix">
                 <div class="layout">
                     WIDGET[{{uidl.widgetType}}]
+					<div class="layout" style="float:right">
+						<uidl-widget uidl="uidl.statusBar"></uidl-widget>
+					</div>
                 </div>
                 <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
@@ -116,6 +125,10 @@
             </ul>
         </script>
         
+        <script type="text/ng-template" id="uidl-element-template-Container">
+            <uidl-widget ng-repeat="widget in uidl.containedWidgets" uidl="widget"></uidl-widget>
+        </script>
+
         <script type="text/ng-template" id="uidl-element-template-ScreenPartContainer">
             <div class="border">
                 WIDGET[{{uidl.widgetType}}]

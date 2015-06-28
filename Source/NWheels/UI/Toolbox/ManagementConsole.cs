@@ -36,8 +36,18 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ManagementConsole StatusBarWidgets(params WidgetUidlNode[] widgets)
+        {
+            StatusBar.ContainedWidgets.AddRange(widgets);
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public Menu MainMenu { get; set; }
+        [DataMember]
+        public Container StatusBar { get; set; }
         [DataMember]
         public ScreenPartContainer MainContent { get; set; }
         [DataMember]
@@ -47,7 +57,7 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
-            return new WidgetUidlNode[] { MainMenu, MainContent };
+            return new WidgetUidlNode[] { MainMenu, MainContent, StatusBar };
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
