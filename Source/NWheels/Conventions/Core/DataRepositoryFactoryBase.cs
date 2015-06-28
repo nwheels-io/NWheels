@@ -357,6 +357,7 @@ namespace NWheels.Conventions.Core
             where TConnection : class
             where TModel : class
         {
+            private Field<ITypeMetadataCache> _metadataCacheField;
             private MethodMember _methodGetOrBuildDbCompieldModel;
             private Field<TModel> _compiledModelField;
             private Field<object> _compiledModelSyncRootField;
@@ -372,6 +373,7 @@ namespace NWheels.Conventions.Core
 
             protected override void ImplementStaticConstructor(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
+                writer.Field("_metadataCache", out _metadataCacheField);
                 writer.StaticField("_s_compiledModel", out _compiledModelField);
                 writer.StaticField("_s_compiledModelSyncRoot", out _compiledModelSyncRootField);
 
@@ -394,6 +396,7 @@ namespace NWheels.Conventions.Core
                             connection,
                             autoCommit);
                         EntityFactoryField.Assign(entityFactory);
+                        MetadataCacheField.Assign(metadata);
                         Initializers.ForEach(init => init(cw));
                     });
             }
@@ -428,6 +431,13 @@ namespace NWheels.Conventions.Core
                 FunctionMethodWriter<TModel> writer, 
                 Operand<ITypeMetadataCache> metadataCache,
                 Operand<TConnection> connection);
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected Field<ITypeMetadataCache> MetadataCacheField
+            {
+                get { return _metadataCacheField; }
+            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
             

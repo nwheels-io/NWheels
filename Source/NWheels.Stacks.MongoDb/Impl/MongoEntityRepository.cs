@@ -16,19 +16,19 @@ namespace NWheels.Stacks.MongoDb.Impl
         where TEntityContract : class
         where TEntityImpl : class, TEntityContract
     {
-        private readonly ITypeMetadata _metadata;
         private readonly MongoDataRepositoryBase _ownerRepo;
+        private readonly ITypeMetadata _metadata;
         private readonly EntityObjectFactory _objectFactory;
         private readonly MongoCollection<TEntityImpl> _objectSet;
         private InterceptingQueryProvider _queryProvider;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MongoEntityRepository(ITypeMetadata metadata, MongoDataRepositoryBase ownerRepo, EntityObjectFactory objectFactory)
+        public MongoEntityRepository(MongoDataRepositoryBase ownerRepo, ITypeMetadata metadata, EntityObjectFactory objectFactory)
         {
-            _objectFactory = objectFactory;
-            _metadata = metadata;
             _ownerRepo = ownerRepo;
+            _metadata = metadata;
+            _objectFactory = objectFactory;
             _objectSet = ownerRepo.GetCollection<TEntityImpl>(_metadata.Name);
             _queryProvider = null;
         }

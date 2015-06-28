@@ -64,9 +64,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Impl\MongoDataRepositoryFactory.cs" />
     <Compile Include="Impl\MongoDataRepositoryBase.cs" />
     <Compile Include="Impl\MongoEntityRepository.cs" />
     <Compile Include="Impl\MongoQueryExpressionSpecializer.cs" />
+    <Compile Include="ModuleLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

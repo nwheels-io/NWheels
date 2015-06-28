@@ -272,12 +272,21 @@ namespace NWheels.Testing
 
         public static TypeMetadataCache CreateMetadataCacheWithDefaultConventions(params MixinRegistration[] mixinRegistrations)
         {
+            return CreateMetadataCacheWithDefaultConventions(new TestIdMetadataConvention(), mixinRegistrations);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static TypeMetadataCache CreateMetadataCacheWithDefaultConventions(
+            IMetadataConvention defaultIdConvention, 
+            params MixinRegistration[] mixinRegistrations)
+        {
             var conventions = new MetadataConventionSet(
                 new IMetadataConvention[] {
                     new ContractMetadataConvention(), 
                     new AttributeMetadataConvention(), 
                     new RelationMetadataConvention(), 
-                    new TestIdMetadataConvention()
+                    defaultIdConvention
                 },
                 new IRelationalMappingConvention[] {
                     new PascalCaseRelationalMappingConvention(usePluralTableNames: true)
