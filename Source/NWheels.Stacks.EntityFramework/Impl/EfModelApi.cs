@@ -9,7 +9,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
+using NWheels.Extensions;
 
 namespace NWheels.Stacks.EntityFramework.Impl
 {
@@ -49,7 +51,7 @@ namespace NWheels.Stacks.EntityFramework.Impl
             where TEntity : class
             where TProperty : struct
         {
-            var propertyConfiguration = entity.Property<TProperty>(PropertyExpression<TEntity, TProperty>(property.ImplementationPropertyInfo));
+            var propertyConfiguration = entity.Property<TProperty>(PropertyExpression<TEntity, TProperty>(property.GetImplementationBy<EntityObjectFactory>()));
             ConfigurePrimitivePropertyMapping(property, propertyConfiguration);
             return propertyConfiguration;
         }
@@ -62,7 +64,7 @@ namespace NWheels.Stacks.EntityFramework.Impl
             where TEntity : class
             where TProperty : struct
         {
-            var propertyConfiguration = entity.Property<TProperty>(PropertyExpression<TEntity, TProperty?>(property.ImplementationPropertyInfo));
+            var propertyConfiguration = entity.Property<TProperty>(PropertyExpression<TEntity, TProperty?>(property.GetImplementationBy<EntityObjectFactory>()));
             ConfigurePrimitivePropertyMapping(property, propertyConfiguration);
             return propertyConfiguration;
         }
@@ -74,7 +76,7 @@ namespace NWheels.Stacks.EntityFramework.Impl
             IPropertyMetadata property)
             where TEntity : class
         {
-            var propertyConfiguration = entity.Property(PropertyExpression<TEntity, string>(property.ImplementationPropertyInfo));
+            var propertyConfiguration = entity.Property(PropertyExpression<TEntity, string>(property.GetImplementationBy<EntityObjectFactory>()));
             ConfigurePrimitivePropertyMapping(property, propertyConfiguration);
             return propertyConfiguration;
         }
@@ -86,7 +88,7 @@ namespace NWheels.Stacks.EntityFramework.Impl
             IPropertyMetadata property)
             where TEntity : class
         {
-            var propertyConfiguration = entity.Property(PropertyExpression<TEntity, byte[]>(property.ImplementationPropertyInfo));
+            var propertyConfiguration = entity.Property(PropertyExpression<TEntity, byte[]>(property.GetImplementationBy<EntityObjectFactory>()));
             ConfigurePrimitivePropertyMapping(property, propertyConfiguration);
             return propertyConfiguration;
         }
@@ -100,14 +102,14 @@ namespace NWheels.Stacks.EntityFramework.Impl
             where TOneEntity : class
         {
             var required = manyEntity.HasRequired<TOneEntity>(
-                PropertyExpression<TManyEntity, TOneEntity>(manyProperty.ImplementationPropertyInfo));
+                PropertyExpression<TManyEntity, TOneEntity>(manyProperty.GetImplementationBy<EntityObjectFactory>()));
 
             ForeignKeyNavigationPropertyConfiguration foreignKey;
 
             if ( manyProperty.Relation.InverseProperty != null && manyProperty.Relation.InverseProperty.ClrType.IsCollectionType() )
             {
                 foreignKey = required.WithMany(PropertyExpression<TOneEntity, ICollection<TManyEntity>>(
-                    manyProperty.Relation.InverseProperty.ImplementationPropertyInfo));
+                    manyProperty.Relation.InverseProperty.GetImplementationBy<EntityObjectFactory>()));
             }
             else
             {

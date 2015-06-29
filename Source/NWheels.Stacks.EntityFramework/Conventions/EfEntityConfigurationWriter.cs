@@ -14,6 +14,8 @@ using NWheels.Entities;
 using NWheels.DataObjects;
 using System.Linq.Expressions;
 using Hapil.Members;
+using NWheels.Conventions.Core;
+using NWheels.Extensions;
 using NWheels.Stacks.EntityFramework.Impl;
 using TT = Hapil.TypeTemplate;
 
@@ -52,7 +54,7 @@ namespace NWheels.Stacks.EntityFramework.Conventions
         {
             var m = _method;
 
-            using ( TT.CreateScope<TT.TImpl>(_metadata.ImplementationType) )
+            using ( TT.CreateScope<TT.TImpl>(_metadata.GetImplementationBy<EntityObjectFactory>()) )
             {
                 _typeMetadataLocal.Assign(_metadataCache.Func<Type, ITypeMetadata>(x => x.GetTypeMetadata, m.Const(_metadata.ContractType)));
                 _entityTypeConfigurationLocal.Assign(Static.Func(EfModelApi.EntityType<TT.TImpl>, _model, _typeMetadataLocal));
@@ -125,11 +127,11 @@ namespace NWheels.Stacks.EntityFramework.Conventions
 
         private void WriteRelationPropertyConfiguration(IPropertyMetadata property)
         {
-            if ( property.Relation.RelationKind == RelationKind.ManyToOne )
+            if ( property.Relation.Multiplicity == RelationMultiplicity.ManyToOne )
             {
                 var m = _method;
 
-                using ( TT.CreateScope<TT.TImpl2>(property.Relation.RelatedPartyType.ImplementationType) )
+                using ( TT.CreateScope<TT.TImpl2>(property.Relation.RelatedPartyType.GetImplementationBy<EntityObjectFactory>()) )
                 {
                     Static.GenericFunc(
                         (e, p) => EfModelApi.ManyToOneRelationProperty<TT.TImpl, TT.TImpl2>(e, p),

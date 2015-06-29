@@ -1,4 +1,5 @@
 using System;
+using NWheels.DataObjects.Core;
 
 namespace NWheels.Conventions.Core
 {

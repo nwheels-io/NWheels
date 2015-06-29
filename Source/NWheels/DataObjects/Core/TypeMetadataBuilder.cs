@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using NWheels.Conventions.Core;
 
 namespace NWheels.DataObjects.Core
 {
@@ -14,7 +15,7 @@ namespace NWheels.DataObjects.Core
         private readonly ConcreteToAbstractCollectionAdapter<KeyMetadataBuilder, IKeyMetadata> _allKeysAdapter;
         private readonly ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultDisplayPropertiesAdapter;
         private readonly ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultSortPropertiesAdapter;
-        private readonly ConcurrentDictionary<object, Type> _implementationTypeByKey;
+        private readonly ConcurrentDictionary<Type, Type> _implementationTypeByFactoryType;
         private Dictionary<string, PropertyMetadataBuilder> _propertyByName;
         private Dictionary<PropertyInfo, PropertyMetadataBuilder> _propertyByDeclaration;
 
@@ -34,7 +35,7 @@ namespace NWheels.DataObjects.Core
             _allKeysAdapter = new ConcreteToAbstractCollectionAdapter<KeyMetadataBuilder, IKeyMetadata>(this.AllKeys);
             _defaultDisplayPropertiesAdapter = new ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.DefaultDisplayProperties);
             _defaultSortPropertiesAdapter = new ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.DefaultSortProperties);
-            _implementationTypeByKey = new ConcurrentDictionary<object, Type>();
+            _implementationTypeByFactoryType = new ConcurrentDictionary<Type, Type>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -52,9 +53,9 @@ namespace NWheels.DataObjects.Core
 
         #region ITypeMetadata Members
 
-        public bool TryGetImplementationType(object implementorKey, out Type implementationType)
+        public bool TryGetImplementation(Type factoryType, out Type implementationType)
         {
-            return _implementationTypeByKey.TryGetValue(implementorKey, out implementationType);
+            return _implementationTypeByFactoryType.TryGetValue(factoryType, out implementationType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -147,7 +148,6 @@ namespace NWheels.DataObjects.Core
         {
             Name = visitor.VisitAttribute("Name", Name);
             ContractType = visitor.VisitAttribute("ContractType", ContractType);
-            ImplementationType = visitor.VisitAttribute("ImplementationType", ImplementationType);
             IsAbstract = visitor.VisitAttribute("IsAbstract", IsAbstract);
 
             BaseType = visitor.VisitElement<ITypeMetadata, TypeMetadataBuilder>(BaseType);
@@ -232,15 +232,22 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void UpdateImplementation(object implementorKey, Type implementationType)
+        public void UpdateImplementation(IEntityObjectFactory factory, Type implementationType)
         {
-            _implementationTypeByKey[implementorKey] = implementationType;
+            UpdateImplementation(factory.GetType(), implementationType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void UpdateImplementation(Type factoryType, Type implementationType)
+        {
+            _implementationTypeByFactoryType[factoryType] = implementationType;
 
             var implementationProperties = implementationType.GetProperties(BindingFlags.Instance | BindingFlags.Public).ToDictionary(prop => prop.Name);
 
             foreach ( var property in this.Properties )
             {
-                property.UpdateImplementation(implementorKey, implementationProperties[property.Name]);
+                property.UpdateImplementation(factoryType, implementationProperties[property.Name]);
             }
 
             //var implementationProperties = implementationType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);

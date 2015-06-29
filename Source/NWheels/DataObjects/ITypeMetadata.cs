@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using NWheels.Conventions.Core;
+using NWheels.DataObjects.Core;
 
 namespace NWheels.DataObjects
 {
@@ -11,7 +13,7 @@ namespace NWheels.DataObjects
         string Name { get; }
         Type ContractType { get; }
         IReadOnlyList<Type> MixinContractTypes { get; }
-        bool TryGetImplementationType(object implementorKey, out Type implementationType);
+        bool TryGetImplementation(Type factoryType, out Type implementationType);
         bool IsAbstract { get; }
         ITypeMetadata BaseType { get; }
         IReadOnlyList<ITypeMetadata> DerivedTypes { get; }

@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using NUnit.Framework;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects.Core;
 using NWheels.Testing;
 using NWheels.Testing.Entities.Stacks;
@@ -261,9 +262,9 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
             var orderMetadata = ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IOrder)));
             var orderLineMetadata = ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IOrderLine)));
 
-            productMetadata.UpdateImplementation(typeof(HR1.EntityObject_Product));
-            orderMetadata.UpdateImplementation(typeof(HR1.EntityObject_Order));
-            orderLineMetadata.UpdateImplementation(typeof(HR1.EntityObject_OrderLine));
+            productMetadata.UpdateImplementation(typeof(EntityObjectFactory), typeof(HR1.EntityObject_Product));
+            orderMetadata.UpdateImplementation(typeof(EntityObjectFactory), typeof(HR1.EntityObject_Order));
+            orderLineMetadata.UpdateImplementation(typeof(EntityObjectFactory), typeof(HR1.EntityObject_OrderLine));
 
             metadataCache.EnsureRelationalMapping(productMetadata);
             metadataCache.EnsureRelationalMapping(orderMetadata);

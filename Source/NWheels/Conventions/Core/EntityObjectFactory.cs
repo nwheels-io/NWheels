@@ -26,7 +26,7 @@ namespace NWheels.Conventions.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public EntityObjectFactory(IComponentContext components, DynamicModule module, TypeMetadataCache metadataCache)
-            : base(module, context => new[] { new EntityObjectConvention(metadataCache) })
+            : base(module)
         {
             _components = components;
             _metadataCache = metadataCache;
@@ -56,10 +56,26 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TypeMetadataCache MetadataCache
+        {
+            get { return _metadataCache; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
+        {
+            return new IObjectFactoryConvention[] {
+                new EntityObjectConvention(_metadataCache)
+            };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void OnClassTypeCreated(TypeKey key, TypeEntry type)
         {
             var entityMetadata = (TypeMetadataBuilder)_metadataCache.GetTypeMetadata(key.PrimaryInterface);
-            entityMetadata.UpdateImplementation(type.DynamicType);
+            entityMetadata.UpdateImplementation(this, type.DynamicType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

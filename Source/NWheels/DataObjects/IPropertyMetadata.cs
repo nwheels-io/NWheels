@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects.Core;
 
 namespace NWheels.DataObjects
@@ -9,7 +10,7 @@ namespace NWheels.DataObjects
     {
         bool HasContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute;
         TAttribute TryGetContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute;
-        bool TryGetImplementationPropertyInfo(object implementorKey, out PropertyInfo implementationProperty);
+        bool TryGetImplementation(Type factoryType, out PropertyInfo implementationProperty);
         ITypeMetadata DeclaringContract { get; }
         string Name { get; }
         string ContractQualifiedName { get; }
@@ -19,6 +20,7 @@ namespace NWheels.DataObjects
         ISemanticDataType SemanticType { get; }
         PropertyAccess Access { get; }
         bool IsSensitive { get; }
+        bool IsCollection { get; }
         IReadOnlyList<PropertyContractAttribute> ContractAttributes { get; }
         PropertyInfo ContractPropertyInfo { get; }
         IRelationMetadata Relation { get; }

@@ -485,8 +485,7 @@ namespace NWheels.Conventions.Core
 
                 this.RepositoryProperty = null;
                 this.Metadata = ownerConvention.MetadataCache.GetTypeMetadata(_contractType);
-
-                _implementationType = this.Metadata.ImplementationType;
+                this.Metadata.TryGetImplementation(_ownerConvention.EntityFactory.GetType(), out _implementationType);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -517,7 +516,7 @@ namespace NWheels.Conventions.Core
                 {
                     var implementationTypeKey = new TypeKey(primaryInterface: _contractType);
                     _implementationType = _ownerConvention.EntityFactory.FindDynamicType(implementationTypeKey);
-                    ((TypeMetadataBuilder)this.Metadata).UpdateImplementation(_implementationType);
+                    ((TypeMetadataBuilder)this.Metadata).UpdateImplementation(_ownerConvention.EntityFactory, _implementationType);
                 }
             }
 

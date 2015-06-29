@@ -6,6 +6,7 @@ using System.Reflection;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
+using NWheels.Conventions.Core;
 using NWheels.Exceptions;
 using NWheels.Utilities;
 using TT = Hapil.TypeTemplate;
@@ -14,13 +15,13 @@ namespace NWheels.DataObjects.Core
 {
     public class PropertyMetadataBuilder : MetadataElement<IPropertyMetadata>, IPropertyMetadata
     {
-        private readonly ConcurrentDictionary<object, PropertyInfo> _implementationPropertyInfoByKey;
+        private readonly ConcurrentDictionary<Type, PropertyInfo> _implementationPropertyByFactoryType;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public PropertyMetadataBuilder()
         {
-            _implementationPropertyInfoByKey = new ConcurrentDictionary<object, PropertyInfo>();
+            _implementationPropertyByFactoryType = new ConcurrentDictionary<Type, PropertyInfo>();
 
             this.ContractAttributes = new List<PropertyContractAttribute>();
             this.Validation = new PropertyValidationMetadataBuilder();
@@ -66,9 +67,9 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool TryGetImplementationPropertyInfo(object implementorKey, out PropertyInfo implementationProperty)
+        public bool TryGetImplementation(Type factoryType, out PropertyInfo implementationProperty)
         {
-            return _implementationPropertyInfoByKey.TryGetValue(implementorKey, out implementationProperty);
+            return _implementationPropertyByFactoryType.TryGetValue(factoryType, out implementationProperty);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -88,6 +89,16 @@ namespace NWheels.DataObjects.Core
         public string DefaultDisplayName { get; set; }
         public string DefaultDisplayFormat { get; set; }
         public bool DefaultSortAscending { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsCollection
+        {
+            get
+            {
+                return this.ClrType.IsCollectionType();
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -126,9 +137,11 @@ namespace NWheels.DataObjects.Core
 
         #endregion
 
-        public void UpdateImplementation(object implementorKey, PropertyInfo implementationProperty)
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void UpdateImplementation(Type factoryType, PropertyInfo implementationProperty)
         {
-            _implementationPropertyInfoByKey[implementorKey] = implementationProperty;
+            _implementationPropertyByFactoryType[factoryType] = implementationProperty;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
