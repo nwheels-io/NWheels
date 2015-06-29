@@ -54,7 +54,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities.cs" />
-    <Compile Include="Impl\SecurityDomainApi.cs" />
+    <Compile Include="Core\SecurityDomainApi.cs" />
+    <Compile Include="IUserAccountDataRepository.cs" />
     <Compile Include="IUserAccountEntity.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -8,19 +8,29 @@ using NWheels.Conventions.Core;
 using NWheels.Domains.Security.UI;
 using NWheels.UI;
 
-namespace NWheels.Domains.Security.Impl
+namespace NWheels.Domains.Security.Core
 {
-    internal class SecurityDomainApi : DomainApiBase, ISecurityDomainApi
+    public class SecurityDomainApi : DomainApiBase, ISecurityDomainApi
     {
-        public SecurityDomainApi(IEntityObjectFactory objectFactory)
+        private readonly IFramework _framework;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public SecurityDomainApi(IFramework framework, IEntityObjectFactory objectFactory)
             : base(objectFactory)
         {
+            _framework = framework;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ILogUserInReply LogUserIn(ILogUserInRequest request)
         {
+            using ( var data = _framework.NewUnitOfWork<IUserAccountDataRepository>() )
+            {
+                
+            }
+
             return NewModel<ILogUserInReply>(
                 m => m.UserId = null,
                 m => m.AuthorizedUidlNodes = new[] { "AAA", "BBB", "CCC" });

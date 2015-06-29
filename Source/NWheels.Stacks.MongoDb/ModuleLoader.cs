@@ -11,6 +11,7 @@ using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Stacks.MongoDb.Impl;
+using MongoDB.Bson;
 
 namespace NWheels.Stacks.MongoDb
 {
@@ -20,6 +21,7 @@ namespace NWheels.Stacks.MongoDb
         {
             builder.RegisterType<MongoEntityObjectFactory>().SingleInstance();
             builder.RegisterType<MongoDataRepositoryFactory>().As<IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
+            builder.NWheelsFeatures().Entities().UseDefaultIdsOfType<ObjectId>();
             //TODO: add logging component
         }
     }
