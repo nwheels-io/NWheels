@@ -108,7 +108,10 @@
     <Compile Include="DataObjects\IDataProcedure.cs" />
     <Compile Include="DataObjects\IDataProcedureBuilder.cs" />
     <Compile Include="DataObjects\Core\StorageTypes\DualValueStates.cs" />
+    <Compile Include="DataObjects\RelationKind.cs" />
+    <Compile Include="Entities\Core\EntityId.cs" />
     <Compile Include="Entities\Core\EntityObjectBase.cs" />
+    <Compile Include="Entities\Core\IEntityObject.cs" />
     <Compile Include="Entities\EntityId.cs" />
     <Compile Include="Entities\EntityState.cs" />
     <Compile Include="Entities\IEntityId.cs" />
@@ -117,6 +120,8 @@
     <Compile Include="DataObjects\Core\IPropertyValueGenerator.cs" />
     <Compile Include="Entities\IEntityTriggerContext.cs" />
     <Compile Include="Entities\Impl\VoidDataRepositoryFactory.cs" />
+    <Compile Include="Extensions\TypeMetadataExtensions.cs" />
+    <Compile Include="Extensions\PropertyMetadataExtensions.cs" />
     <Compile Include="Globalization\Currency.cs" />
     <Compile Include="Globalization\CurrencyInfo.cs" />
     <Compile Include="DataObjects\ConcretizationRegistration.cs" />
@@ -187,7 +192,7 @@
     <Compile Include="Entities\IActiveRecord.cs" />
     <Compile Include="Entities\IApplicationDataRepository.cs" />
     <Compile Include="DataObjects\RelationalInheritanceKind.cs" />
-    <Compile Include="DataObjects\RelationKind.cs" />
+    <Compile Include="DataObjects\RelationMultiplicity.cs" />
     <Compile Include="DataObjects\RelationPartyKind.cs" />
     <Compile Include="DataObjects\IKeyMetadata.cs" />
     <Compile Include="DataObjects\ITypeMetadata.cs" />
