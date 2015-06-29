@@ -81,12 +81,12 @@ namespace NWheels.Stacks.MongoDb.Impl
 
                 if ( node.Type == _thisTypeMetadata.ContractType )
                 {
-                    var replaced = Expression.Parameter(_thisTypeMetadata.ImplementationType, node.Name);
+                    var replaced = Expression.Parameter(_thisTypeMetadata.GetImplementationBy<MongoEntityObjectFactory>(), node.Name);
                     return replaced;
                 }
                 else if ( _metadataCache.TryGetTypeMetadata(node.Type, out typeMetadata) )
                 {
-                    var replaced = Expression.Parameter(typeMetadata.ImplementationType, node.Name);
+                    var replaced = Expression.Parameter(typeMetadata.GetImplementationBy<MongoEntityObjectFactory>(), node.Name);
                     return replaced;
                 }
                 else
@@ -116,7 +116,7 @@ namespace NWheels.Stacks.MongoDb.Impl
 
                     if ( typeMetadata != null )
                     {
-                        var implementationPropertyInfo = typeMetadata.GetPropertyByDeclaration((PropertyInfo)node.Member).ImplementationPropertyInfo;
+                        var implementationPropertyInfo = typeMetadata.GetPropertyByDeclaration((PropertyInfo)node.Member).GetImplementationBy<MongoEntityObjectFactory>();
                         var replaced = Expression.MakeMemberAccess(_ownerSpecializer.Specialize(node.Expression), implementationPropertyInfo);
                         return replaced;
                     }
@@ -136,7 +136,7 @@ namespace NWheels.Stacks.MongoDb.Impl
 
             private Type GetReplacingType(Type type)
             {
-                return _metadataCache.GetTypeMetadata(type).ImplementationType;
+                return _metadataCache.GetTypeMetadata(type).GetImplementationBy<MongoEntityObjectFactory>();
             }
         }
     }

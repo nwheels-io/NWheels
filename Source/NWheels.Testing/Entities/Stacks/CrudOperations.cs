@@ -81,7 +81,7 @@ namespace NWheels.Testing.Entities.Stacks
                     var product2 = repo.Products.Single(p => p.Name == "DEF");
 
                     var order = repo.Orders.New();
-                    order.PlacedAt = new DateTime(2015, 1, 1, 12, 0, 0);
+                    order.PlacedAt = new DateTime(2015, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
                     order.OrderLines.Add(repo.NewOrderLine(order, product1, quantity: 22));
                     order.OrderLines.Add(repo.NewOrderLine(order, product2, quantity: 11));
@@ -101,7 +101,7 @@ namespace NWheels.Testing.Entities.Stacks
                     var product2 = repo.Products.Single(p => p.Name == "DEF");
 
                     var order = repo.Orders.New();
-                    order.PlacedAt = new DateTime(2015, 1, 2, 12, 0, 0);
+                    order.PlacedAt = new DateTime(2015, 1, 2, 12, 0, 0, DateTimeKind.Utc);
 
                     order.OrderLines.Add(repo.NewOrderLine(order, product1, quantity: 11));
                     order.OrderLines.Add(repo.NewOrderLine(order, product2, quantity: 22));
@@ -120,7 +120,7 @@ namespace NWheels.Testing.Entities.Stacks
                     var product2 = repo.Products.Single(p => p.Name == "DEF");
 
                     var order = repo.Orders.New();
-                    order.PlacedAt = new DateTime(2015, 1, 2, 13, 0, 0);
+                    order.PlacedAt = new DateTime(2015, 1, 2, 13, 0, 0, DateTimeKind.Utc);
 
                     order.OrderLines.Add(repo.NewOrderLine(order, product2, quantity: 33));
 
@@ -164,7 +164,7 @@ namespace NWheels.Testing.Entities.Stacks
 
                 #region Assert order1
                 Assert.That(order1.Id, Is.EqualTo(1));
-                Assert.That(order1.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 1, 12, 0, 0)));
+                Assert.That(order1.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 1, 12, 0, 0, DateTimeKind.Utc)));
                 Assert.That(order1.Status, Is.EqualTo(Interfaces.Repository1.OrderStatus.ProductsShipped));
                 
                 var order1Lines = order1.OrderLines.ToArray();
@@ -181,7 +181,7 @@ namespace NWheels.Testing.Entities.Stacks
 
                 #region Assert order2
                 Assert.That(order2.Id, Is.EqualTo(2));
-                Assert.That(order2.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 2, 12, 0, 0)));
+                Assert.That(order2.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 2, 12, 0, 0, DateTimeKind.Utc)));
                 Assert.That(order2.Status, Is.EqualTo(Interfaces.Repository1.OrderStatus.PaymentReceived));
 
                 var order2Lines = order2.OrderLines.ToArray();
@@ -198,7 +198,7 @@ namespace NWheels.Testing.Entities.Stacks
 
                 #region Assert order3
                 Assert.That(order3.Id, Is.EqualTo(3));
-                Assert.That(order3.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 2, 13, 0, 0)));
+                Assert.That(order3.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 2, 13, 0, 0, DateTimeKind.Utc)));
                 Assert.That(order3.Status, Is.EqualTo(Interfaces.Repository1.OrderStatus.New));
 
                 var order3Lines = order3.OrderLines.ToArray();

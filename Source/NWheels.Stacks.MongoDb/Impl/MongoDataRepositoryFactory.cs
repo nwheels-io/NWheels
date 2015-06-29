@@ -30,13 +30,13 @@ namespace NWheels.Stacks.MongoDb.Impl
     {
         private readonly IFrameworkDatabaseConfig _config;
         private readonly ITypeMetadataCache _metadataCache;
-        private readonly EntityObjectFactory _entityFactory;
+        private readonly MongoEntityObjectFactory _entityFactory;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public MongoDataRepositoryFactory(
             DynamicModule module,
-            EntityObjectFactory entityFactory,
+            MongoEntityObjectFactory entityFactory,
             ITypeMetadataCache metadataCache,
             IFrameworkDatabaseConfig config = null)
             : base(module, metadataCache)

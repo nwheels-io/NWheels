@@ -18,6 +18,7 @@ namespace NWheels.Stacks.MongoDb
     {
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterType<MongoEntityObjectFactory>().SingleInstance();
             builder.RegisterType<MongoDataRepositoryFactory>().As<IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             //TODO: add logging component
         }

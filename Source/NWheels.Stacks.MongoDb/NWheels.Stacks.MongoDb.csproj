@@ -64,8 +64,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\MongoDBRefStorageType.cs" />
     <Compile Include="Impl\MongoDataRepositoryFactory.cs" />
     <Compile Include="Impl\MongoDataRepositoryBase.cs" />
+    <Compile Include="Impl\MongoEntityObjectFactory.cs" />
     <Compile Include="Impl\MongoEntityRepository.cs" />
     <Compile Include="Impl\MongoQueryExpressionSpecializer.cs" />
     <Compile Include="ModuleLoader.cs" />
@@ -81,9 +83,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Core\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

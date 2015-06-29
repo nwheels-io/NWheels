@@ -9,6 +9,7 @@ using MongoDB.Driver.Linq;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.Entities;
+using NWheels.Extensions;
 
 namespace NWheels.Stacks.MongoDb.Impl
 {
@@ -104,7 +105,7 @@ namespace NWheels.Stacks.MongoDb.Impl
         public IQueryable<TEntityContract> Include(Expression<Func<TEntityContract, object>>[] properties)
         {
             _ownerRepo.ValidateOperationalState();
-            return QueryWithIncludedProperties(_objectSet.AsQueryable(), properties);
+            return this;//QueryWithIncludedProperties(_objectSet.AsQueryable(), properties);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -129,7 +130,7 @@ namespace NWheels.Stacks.MongoDb.Impl
         {
             _ownerRepo.ValidateOperationalState();
 
-            var keyProperty = _metadata.PrimaryKey.Properties[0].ImplementationPropertyInfo;
+            var keyProperty = _metadata.PrimaryKey.Properties[0].GetImplementationBy<MongoEntityObjectFactory>();
             var keyPropertyExpression = PropertyExpression<TEntityImpl, object>(keyProperty);
             var query = Query<TEntityImpl>.EQ(keyPropertyExpression, keyProperty.GetValue(entity));
             

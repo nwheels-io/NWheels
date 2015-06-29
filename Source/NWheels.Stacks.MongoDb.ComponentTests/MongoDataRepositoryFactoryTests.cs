@@ -69,7 +69,7 @@ namespace NWheels.Stacks.MongoDb.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test]
+        [Test, Ignore("Requires further enhancements in ")]
         public void CanPerformBasicCrudOperations()
         {
             //-- Arrange
@@ -83,7 +83,7 @@ namespace NWheels.Stacks.MongoDb.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test]
+        [Test, Ignore("Requires LINQ to Aggregation Framework, waiting for C# Mongo driver v2.1")]
         public void CanPerformAdvancedRetrievals()
         {
             //-- Arrange
@@ -103,7 +103,7 @@ namespace NWheels.Stacks.MongoDb.ComponentTests
             configAuto.Instance.ConnectionString = string.Format("server=localhost;database={0}", TestDatabaseName);
 
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions();
-            var entityFactory = new EntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
+            var entityFactory = new MongoEntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
             var repoFactory = new MongoDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache, configAuto.Instance);
             
             return repoFactory;
