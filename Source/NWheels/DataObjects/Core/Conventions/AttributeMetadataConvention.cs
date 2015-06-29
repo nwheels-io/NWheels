@@ -197,13 +197,13 @@ namespace NWheels.DataObjects.Core.Conventions
             AddPropertyAttribute<PropertyContract.Presentation.SortAttribute>((attr, prop) =>
                 prop.DefaultSortAscending = attr.Ascending);
             AddPropertyAttribute<PropertyContract.Relation.ManyToManyAttribute>((attr, prop) =>
-                prop.SafeGetRelation().RelationKind = RelationKind.ManyToMany);
+                prop.SafeGetRelation().Multiplicity = RelationMultiplicity.ManyToMany);
             AddPropertyAttribute<PropertyContract.Relation.ManyToOneAttribute>((attr, prop) =>
-                prop.SafeGetRelation().RelationKind = RelationKind.ManyToOne);
+                prop.SafeGetRelation().Multiplicity = RelationMultiplicity.ManyToOne);
             AddPropertyAttribute<PropertyContract.Relation.OneToManyAttribute>((attr, prop) =>
-                prop.SafeGetRelation().RelationKind = RelationKind.OneToMany);
+                prop.SafeGetRelation().Multiplicity = RelationMultiplicity.OneToMany);
             AddPropertyAttribute<PropertyContract.Relation.OneToOneAttribute>((attr, prop) =>
-                prop.SafeGetRelation().RelationKind = RelationKind.OneToOne);
+                prop.SafeGetRelation().Multiplicity = RelationMultiplicity.OneToOne);
             AddPropertyAttribute<PropertyContract.Security.SensitiveAttribute>((attr, prop) =>
                 prop.IsSensitive = true);
         }

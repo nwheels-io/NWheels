@@ -72,14 +72,14 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private void CompleteRelationMetadata(TypeMetadataBuilder type, PropertyMetadataBuilder property)
         {
-            switch ( property.Relation.RelationKind )
+            switch ( property.Relation.Multiplicity )
             {
-                case RelationKind.OneToOne:
-                case RelationKind.ManyToOne:
+                case RelationMultiplicity.OneToOne:
+                case RelationMultiplicity.ManyToOne:
                     AddToOneRelation(type, property);
                     break;
-                case RelationKind.OneToMany:
-                case RelationKind.ManyToMany:
+                case RelationMultiplicity.OneToMany:
+                case RelationMultiplicity.ManyToMany:
                     AddToManyRelation(type, property);
                     break;
             }

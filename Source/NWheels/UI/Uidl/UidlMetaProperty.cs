@@ -108,7 +108,8 @@ namespace NWheels.UI.Uidl
         {
             public MetaRelation(IRelationMetadata metadata)
             {
-                this.RelationKind = metadata.RelationKind;
+                this.Kind = metadata.Kind;
+                this.Multiplicity = metadata.Multiplicity;
                 this.ThisPartyKind = metadata.ThisPartyKind;
                 this.ThisPartyKeyName = metadata.ThisPartyKey != null ? metadata.ThisPartyKey.Name : null;
                 this.RelatedPartyTypeName = metadata.RelatedPartyType != null ? metadata.RelatedPartyType.Name : null;
@@ -120,7 +121,9 @@ namespace NWheels.UI.Uidl
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             [DataMember]
-            public RelationKind RelationKind { get; set; }
+            public RelationKind Kind { get; set; }
+            [DataMember]
+            public RelationMultiplicity Multiplicity { get; set; }
             [DataMember]
             public RelationPartyKind ThisPartyKind { get; set; }
             [DataMember]

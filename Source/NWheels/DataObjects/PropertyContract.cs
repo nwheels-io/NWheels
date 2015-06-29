@@ -281,7 +281,11 @@ namespace NWheels.DataObjects
             {
                 public void ApplyTo(PropertyMetadataBuilder metadata)
                 {
-                    metadata.SafeGetRelation().RelationKind = RelationKind.ManyToOne;
+                    var relation = metadata.SafeGetRelation();
+
+                    relation.Kind = RelationKind.Aggregation;
+                    relation.Multiplicity = metadata.IsCollection ? RelationMultiplicity.ManyToMany : RelationMultiplicity.ManyToOne;
+                    relation.ThisPartyKind = RelationPartyKind.Dependent;
                 }
             }
 
@@ -289,7 +293,11 @@ namespace NWheels.DataObjects
             {
                 public void ApplyTo(PropertyMetadataBuilder metadata)
                 {
-                    metadata.SafeGetRelation().RelationKind = RelationKind.ManyToOne;
+                    var relation = metadata.SafeGetRelation();
+
+                    relation.Kind = RelationKind.Composition;
+                    relation.Multiplicity = RelationMultiplicity.ManyToOne;
+                    relation.ThisPartyKind = RelationPartyKind.Dependent;
                 }
             }
 
@@ -297,7 +305,11 @@ namespace NWheels.DataObjects
             {
                 public void ApplyTo(PropertyMetadataBuilder metadata)
                 {
-                    metadata.SafeGetRelation().RelationKind = RelationKind.OneToMany;
+                    var relation = metadata.SafeGetRelation();
+                    
+                    relation.Kind = RelationKind.Composition;
+                    relation.Multiplicity = metadata.IsCollection ? RelationMultiplicity.OneToMany : RelationMultiplicity.OneToOne;
+                    relation.ThisPartyKind = RelationPartyKind.Principal;
                 }
             }
 
@@ -305,7 +317,11 @@ namespace NWheels.DataObjects
             {
                 public void ApplyTo(PropertyMetadataBuilder metadata)
                 {
-                    metadata.SafeGetRelation().RelationKind = RelationKind.OneToMany;
+                    var relation = metadata.SafeGetRelation();
+                    
+                    relation.Kind = RelationKind.Aggregation;
+                    relation.Multiplicity = metadata.IsCollection ? RelationMultiplicity.OneToMany : RelationMultiplicity.OneToOne;
+                    relation.ThisPartyKind = RelationPartyKind.Principal;
                 }
             }
         }

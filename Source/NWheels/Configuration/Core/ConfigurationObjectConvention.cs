@@ -227,7 +227,7 @@ namespace NWheels.Configuration.Core
                                 m.Const(property.Name),
                                 backingField);
                         }
-                        else if ( property.Kind == PropertyKind.Relation && property.Relation.RelationKind.IsIn(RelationKind.OneToOne, RelationKind.ManyToOne) )
+                        else if ( property.Kind == PropertyKind.Relation && property.Relation.Multiplicity.IsIn(RelationMultiplicity.OneToOne, RelationMultiplicity.ManyToOne) )
                         {
                             m.This<ConfigurationElementBase>().Void<XElement, string, IConfigurationElement>(
                                 x => x.ReadNestedElement,
@@ -235,7 +235,7 @@ namespace NWheels.Configuration.Core
                                 m.Const(property.Name),
                                 backingField.CastTo<IConfigurationElement>());
                         }
-                        else if ( property.Kind == PropertyKind.Relation && property.Relation.RelationKind.IsIn(RelationKind.OneToMany, RelationKind.ManyToMany) )
+                        else if ( property.Kind == PropertyKind.Relation && property.Relation.Multiplicity.IsIn(RelationMultiplicity.OneToMany, RelationMultiplicity.ManyToMany) )
                         {
                             using ( TT.CreateScope<TT.TItem>(property.Relation.RelatedPartyType.ContractType) )
                             {
@@ -282,7 +282,7 @@ namespace NWheels.Configuration.Core
                                 m.Const(property.Name),
                                 backingField);
                         }
-                        else if ( property.Kind == PropertyKind.Relation && property.Relation.RelationKind.IsIn(RelationKind.OneToOne, RelationKind.ManyToOne) )
+                        else if ( property.Kind == PropertyKind.Relation && property.Relation.Multiplicity.IsIn(RelationMultiplicity.OneToOne, RelationMultiplicity.ManyToOne) )
                         {
                             m.This<ConfigurationElementBase>().Void<XElement, string, IConfigurationElement>(
                                 x => x.WriteNestedElement,
@@ -290,7 +290,7 @@ namespace NWheels.Configuration.Core
                                 m.Const(property.Name),
                                 backingField.CastTo<IConfigurationElement>());
                         }
-                        else if ( property.Kind == PropertyKind.Relation && property.Relation.RelationKind.IsIn(RelationKind.OneToMany, RelationKind.ManyToMany) )
+                        else if ( property.Kind == PropertyKind.Relation && property.Relation.Multiplicity.IsIn(RelationMultiplicity.OneToMany, RelationMultiplicity.ManyToMany) )
                         {
                             using ( TT.CreateScope<TT.TItem>(property.Relation.RelatedPartyType.ContractType) )
                             {
@@ -321,8 +321,8 @@ namespace NWheels.Configuration.Core
 
             return (
                 propertyMetadata.Kind == PropertyKind.Relation &&
-                (propertyMetadata.Relation.RelationKind == RelationKind.ManyToOne ||
-                propertyMetadata.Relation.RelationKind == RelationKind.OneToOne));
+                (propertyMetadata.Relation.Multiplicity == RelationMultiplicity.ManyToOne ||
+                propertyMetadata.Relation.Multiplicity == RelationMultiplicity.OneToOne));
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -333,8 +333,8 @@ namespace NWheels.Configuration.Core
 
             return (
                 propertyMetadata.Kind == PropertyKind.Relation &&
-                (propertyMetadata.Relation.RelationKind == RelationKind.OneToMany ||
-                propertyMetadata.Relation.RelationKind == RelationKind.ManyToMany));
+                (propertyMetadata.Relation.Multiplicity == RelationMultiplicity.OneToMany ||
+                propertyMetadata.Relation.Multiplicity == RelationMultiplicity.ManyToMany));
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

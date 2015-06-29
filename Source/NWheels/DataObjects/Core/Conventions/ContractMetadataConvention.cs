@@ -104,7 +104,7 @@ namespace NWheels.DataObjects.Core.Conventions
         {
             ThisIsRelationProperty(property);
 
-            property.SafeGetRelation().RelationKind = RelationKind.OneToMany;
+            property.SafeGetRelation().Multiplicity = RelationMultiplicity.OneToMany;
             property.SafeGetRelation().RelatedPartyType = _metadataCache.FindTypeMetadataAllowIncomplete(collectionElementType);
         }
 
@@ -114,7 +114,7 @@ namespace NWheels.DataObjects.Core.Conventions
         {
             ThisIsRelationProperty(property);
 
-            property.Relation.RelationKind = RelationKind.ManyToOne;
+            property.Relation.Multiplicity = RelationMultiplicity.ManyToOne;
             property.Relation.RelatedPartyType = _metadataCache.FindTypeMetadataAllowIncomplete(property.ClrType);
         }
 

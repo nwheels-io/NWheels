@@ -15,7 +15,8 @@
 
         #region IRelationMetadata Members
 
-        public RelationKind RelationKind { get; set; }
+        public RelationKind Kind { get; set; }
+        public RelationMultiplicity Multiplicity { get; set; }
         public RelationPartyKind ThisPartyKind { get; set; }
         public RelationPartyKind RelatedPartyKind { get; set; }
 
@@ -60,7 +61,8 @@
 
         public override void AcceptVisitor(IMetadataElementVisitor visitor)
         {
-            RelationKind = visitor.VisitAttribute("RelationKind", RelationKind);
+            Kind = visitor.VisitAttribute("Kind", Kind);
+            Multiplicity = visitor.VisitAttribute("RelationKind", Multiplicity);
             ThisPartyKind = visitor.VisitAttribute("ThisPartyKind", ThisPartyKind);
             ThisPartyKey = visitor.VisitElementReference<IKeyMetadata, KeyMetadataBuilder>("ThisPartyKey", ThisPartyKey);
 
