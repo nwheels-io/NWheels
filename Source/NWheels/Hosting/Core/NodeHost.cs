@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using Autofac;
@@ -42,38 +43,28 @@ namespace NWheels.Hosting.Core
     public class NodeHost : INodeHost
     {
         private readonly BootConfiguration _bootConfig;
-        private readonly DynamicModule _dynamicModule;
-        private readonly IContainer _baseContainer;
-        private readonly INodeHostLogger _logger;
+        private readonly Action<ContainerBuilder> _registerHostComponents;
+        private int _initializationCount = 0;
+        private DynamicModule _dynamicModule;
+        private IContainer _baseContainer;
+        private INodeHostLogger _logger;
         //private readonly IInitializableHostComponent[] _hostComponents;
-        private readonly TransientStateMachine<NodeState, NodeTrigger> _stateMachine;
+        private TransientStateMachine<NodeState, NodeTrigger> _stateMachine;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NodeHost(BootConfiguration bootConfig, Action<ContainerBuilder> registerHostComponents = null)
         {
             _bootConfig = bootConfig;
-            
-            _dynamicModule = new DynamicModule(
-                simpleName: "NWheels.RunTimeTypes", 
-                allowSave: true, 
-                saveDirectory: PathUtility.HostBinPath());
-
-            _baseContainer = BuildBaseContainer(registerHostComponents);
-
-            //_hostComponents = InitializeHostComponents();
-
-            _stateMachine = new TransientStateMachine<NodeState, NodeTrigger>(
-                new StateMachineCodeBehind(this), 
-                _baseContainer.Resolve<TransientStateMachine<NodeState, NodeTrigger>.ILogger>());
-
-            _logger = _baseContainer.Resolve<INodeHostLogger>();
+            _registerHostComponents = registerHostComponents;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Load()
         {
+            InitializeBeforeLoad();
+
             using ( _logger.NodeLoading() )
             {
                 try
@@ -124,6 +115,8 @@ namespace NWheels.Hosting.Core
 
         public void LoadAndActivate()
         {
+            InitializeBeforeLoad();
+
             using ( _logger.NodeStartingUp() )
             {
                 Load();
@@ -163,6 +156,8 @@ namespace NWheels.Hosting.Core
 
                 _logger.NodeUnloaded();
             }
+
+            FinalizeAfterUnload();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -194,6 +189,47 @@ namespace NWheels.Hosting.Core
             {
                 return _stateMachine.CurrentState;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void InitializeBeforeLoad()
+        {
+            if ( Interlocked.Increment(ref _initializationCount) > 1 )
+            {
+                return;
+            }
+
+            _dynamicModule = new DynamicModule(
+                simpleName: "NWheels.RunTimeTypes",
+                allowSave: true,
+                saveDirectory: PathUtility.HostBinPath());
+
+            _baseContainer = BuildBaseContainer(_registerHostComponents);
+
+            //_hostComponents = InitializeHostComponents();
+
+            _stateMachine = new TransientStateMachine<NodeState, NodeTrigger>(
+                new StateMachineCodeBehind(this),
+                _baseContainer.Resolve<TransientStateMachine<NodeState, NodeTrigger>.ILogger>());
+
+            _logger = _baseContainer.Resolve<INodeHostLogger>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void FinalizeAfterUnload()
+        {
+            if ( Interlocked.Decrement(ref _initializationCount) > 0 )
+            {
+                return;
+            }
+
+            _baseContainer.Dispose();
+            _baseContainer = null;
+            _dynamicModule = null;
+            _stateMachine = null;
+            _logger = null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -359,6 +395,8 @@ namespace NWheels.Hosting.Core
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class BootTimeFramework : RealFramework
         {
             public BootTimeFramework(IComponentContext components, INodeConfiguration nodeConfig, IThreadLogAnchor threadLogAnchor)
@@ -390,7 +428,7 @@ namespace NWheels.Hosting.Core
                 _nodeConfig = nodeConfig;
                 _logger = logger;
                 //_hostComponents = hostComponents;
-                _lifetimeContainer = baseContainer.BeginLifetimeScope();// new MultitenantContainer(this, baseContainer);
+                _lifetimeContainer = baseContainer;//.BeginLifetimeScope();// new MultitenantContainer(this, baseContainer);
                 _loadSequence = new RevertableSequence(new LoadSequenceCodeBehind(this));
                 _activateSequence = new RevertableSequence(new ActivateSequenceCodeBehind(this));
                 _lifecycleComponents = new List<ILifecycleEventListener>();
@@ -403,7 +441,7 @@ namespace NWheels.Hosting.Core
 
             public void Dispose()
             {
-                _lifetimeContainer.Dispose();
+                //_lifetimeContainer.Dispose();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
