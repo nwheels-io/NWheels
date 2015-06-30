@@ -1,51 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Entities;
-using NWheels.Modules.Security.Domain;
 
 namespace NWheels.Modules.Security
 {
-    [EntityContract]
-    public interface IUserAccountEntity
+    [EntityContract, EntityKeyGenerator.Sequential]
+    public interface IDataAuditJournalEntryEntity : IEntityPartId<long>, IEntityPartCorrelationId
     {
-        [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Semantic.DataType(typeof(LoginNameDataType))]
-        string LoginName { get; set; }
+        [PropertyContract.Required]
+        IUserAccountEntity Who { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Required, PropertyContract.Validation.Length(min: 2, max: 100)]
-        string FullName { get; set; }
+        DateTime When { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Required, PropertyContract.Semantic.EmailAddress]
-        string EmailAddress { get; set; }
+        [PropertyContract.Required, PropertyContract.Validation.MaxLength(100)]
+        string ModuleName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        bool IsEmailVerified { get; set; }
+        [PropertyContract.Validation.MaxLength(100)]
+        string ComponentName { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Validation.MaxLength(100)]
+        string OperationName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [PropertyContract.Required]
-        ICollection<IPasswordEntity> Passwords { get; }
+        string AffectedEntityName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        DateTime? LastLoginAt { get; set; }
+        [PropertyContract.Required]
+        string AffectedEntityId { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Validation.MinValue(0)]
-        int FailedLoginCount { get; set; }
+        [PropertyContract.Required]
+        string[] AffectedPropertyNames { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        bool IsLockedOut { get; set; }
+
+        [PropertyContract.Required]
+        string[] OldPropertyValues { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Required]
+        string[] NewPropertyValues { get; set; }
     }
 }

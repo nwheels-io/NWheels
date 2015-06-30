@@ -8,6 +8,18 @@ using NWheels.Entities;
 
 namespace NWheels.Domains.Security
 {
+    public interface IUserAccountDataRepository : IApplicationDataRepository
+    {
+        IEntityRepository<IUserAccountEntity> AllUsers { get; }
+        IEntityRepository<IBackEndUserAccountEntity> BackEndUsers { get; }
+        IEntityRepository<IFrontEndUserAccountEntity> FrontEndUsers { get; }
+        IBackEndUserAccountEntity NewBackEndUser();
+        IFrontEndUserAccountEntity NewFrontEndUser();
+        IPasswordEntity NewPassword();
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
     [EntityContract(IsAbstract = true)]
     public interface IUserAccountEntity
     {
@@ -36,6 +48,11 @@ namespace NWheels.Domains.Security
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         bool IsLockedOut { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Relation.Composition]
+        ICollection<string> Claims { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,5 +100,117 @@ namespace NWheels.Domains.Security
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         bool MustChange { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityContract]
+    public interface IUserRoleEntity : IEntityPartUniqueDisplayName
+    {
+        [PropertyContract.Required(AllowEmpty = false)]
+        string SystemName { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Relation.Composition]
+        ICollection<string> DefaultClaims { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityContract]
+    public interface IUserActionPermissionEntity : IEntityPartUniqueDisplayName
+    {
+        [PropertyContract.Required(AllowEmpty = false)]
+        string SystemName { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityContract]
+    public interface IUserDataPermissionEntity : IEntityPartUniqueDisplayName
+    {
+        [PropertyContract.Required(AllowEmpty = false)]
+        string SystemName { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Semantic.InheritorOf(typeof(IEntityAccessRule))]
+        Type EntityAccessRule { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityContract, EntityKeyGenerator.Sequential]
+    public interface IDataAuditJournalEntryEntity : IEntityPartId<long>, IEntityPartCorrelationId
+    {
+        [PropertyContract.Required]
+        IUserAccountEntity Who { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        DateTime When { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Required, PropertyContract.Validation.MaxLength(100)]
+        string ModuleName { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Validation.MaxLength(100)]
+        string ComponentName { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Validation.MaxLength(100)]
+        string OperationName { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Required]
+        string AffectedEntityName { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Required]
+        string AffectedEntityId { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Required]
+        string[] AffectedPropertyNames { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Required]
+        string[] OldPropertyValues { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Required]
+        string[] NewPropertyValues { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityPartContract]
+    public interface IEntityPartAudit
+    {
+        DateTime CreatedAt { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Required]
+        IUserAccountEntity CreatedBy { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        DateTime ModifiedAt { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Required]
+        IUserAccountEntity ModifiedBy { get; set; }
     }
 }

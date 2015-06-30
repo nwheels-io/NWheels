@@ -37,7 +37,7 @@ namespace NWheels.Domains.Security.UI
     public interface ILogUserInReply
     {
         [PropertyContract.ReadOnly]
-        IEntityId<IUserAccountEntity> UserId { get; set; }
+        string UserFullName { get; set; }
         
         [PropertyContract.ReadOnly]
         string[] AuthorizedUidlNodes { get; set; }
@@ -55,21 +55,5 @@ namespace NWheels.Domains.Security.UI
     [ViewModelContract]
     public interface ILogUserOutReply
     {
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public enum LoginFault
-    {
-        LoginIncorrect,
-        PasswordExpired,
-        AccountLockedOut
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public enum LogoutFault
-    {
-        NotLoggedIn
     }
 }

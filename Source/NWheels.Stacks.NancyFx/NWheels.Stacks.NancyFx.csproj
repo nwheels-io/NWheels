@@ -87,6 +87,8 @@
   <ItemGroup>
     <Content Include="ClientSide\AngularLinqBreeze\angular.min.js" />
     <Content Include="ClientSide\AngularLinqBreeze\app.js" />
+    <Content Include="ClientSide\AngularLinqBreeze\index.skin-debug.html" />
+    <Content Include="ClientSide\AngularLinqBreeze\linq.min.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

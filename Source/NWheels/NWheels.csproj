@@ -120,6 +120,7 @@
     <Compile Include="DataObjects\Core\IPropertyValueGenerator.cs" />
     <Compile Include="Entities\IEntityTriggerContext.cs" />
     <Compile Include="Entities\Impl\VoidDataRepositoryFactory.cs" />
+    <Compile Include="Exceptions\DomainFaultException.cs" />
     <Compile Include="Extensions\TypeMetadataExtensions.cs" />
     <Compile Include="Extensions\PropertyMetadataExtensions.cs" />
     <Compile Include="Globalization\Currency.cs" />

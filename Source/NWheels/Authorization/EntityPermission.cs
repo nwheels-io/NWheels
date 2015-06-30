@@ -12,6 +12,6 @@ namespace NWheels.Authorization
         Create,
         Retrieve,
         Update,
-        Delete
+        Delete,
     }
 }

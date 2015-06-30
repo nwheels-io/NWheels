@@ -46,6 +46,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IdentityModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -53,12 +54,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authorization\DataPermissionClaimSet.cs" />
+    <Compile Include="Authorization\ActionPermissionClaimSet.cs" />
+    <Compile Include="Authorization\UserRoleClaimSet.cs" />
     <Compile Include="Entities.cs" />
-    <Compile Include="Core\SecurityDomainApi.cs" />
-    <Compile Include="IUserAccountDataRepository.cs" />
-    <Compile Include="IUserAccountEntity.cs" />
+    <Compile Include="EntityExtensions.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="IEntityAccessControlBuilder.cs" />
+    <Compile Include="IEntityAccessRule.cs" />
+    <Compile Include="Authorization\NWheelsUserIdentity.cs" />
+    <Compile Include="Authorization\NWheelsAuthorizationPolicy.cs" />
+    <Compile Include="Authorization\ClaimFactory.cs" />
+    <Compile Include="Logic\DummyCryptoProvider.cs" />
+    <Compile Include="Logic\ICryptoProvider.cs" />
+    <Compile Include="Logic\LoginTransactionScript.cs" />
+    <Compile Include="Logic\SecurityDomainApi.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RequiredClaimsAttribute.cs" />
     <Compile Include="UI\CurrentLoggedInUser.cs" />
     <Compile Include="UI\ISecurityDomainApi.cs" />
     <Compile Include="UI\UserLoginForm.cs" />
