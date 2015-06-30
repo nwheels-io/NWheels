@@ -10,13 +10,12 @@ using NWheels.Utilities;
 
 namespace NWheels.Logging.Core
 {
-    internal class ThreadRegistry : IThreadRegistry, IInitializableHostComponent
+    internal class ThreadRegistry : IThreadRegistry //, IInitializableHostComponent
     {
         private readonly object _syncRoot = new object();
         private readonly HashSet<ThreadLog> _runningThreads = new HashSet<ThreadLog>();
         private readonly IComponentContext _components;
-        private IFrameworkLoggingConfiguration _loggingConfig;
-        private string _threadLogFolder;
+        private IEnumerable<IThreadLogPersistor> _threadLogPersistors;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -44,7 +43,7 @@ namespace NWheels.Logging.Core
                 _runningThreads.Remove(threadLog);
             }
 
-            PersistLogInXmlFormat(threadLog);
+            PersistThreadLog(threadLog);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -59,36 +58,51 @@ namespace NWheels.Logging.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void IInitializableHostComponent.Initializing()
+        private void PersistThreadLog(ThreadLog threadLog)
         {
-            _loggingConfig = _components.Resolve<IFrameworkLoggingConfiguration>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        void IInitializableHostComponent.Configured()
-        {
-            _threadLogFolder = PathUtility.HostBinPath(_loggingConfig.ThreadLogFolder);
-
-            if ( !Directory.Exists(_threadLogFolder) )
+            if ( _threadLogPersistors == null )
             {
-                Directory.CreateDirectory(_threadLogFolder);
+                _threadLogPersistors = _components.Resolve<IEnumerable<IThreadLogPersistor>>();
+            }
+
+            foreach ( var persistor in _threadLogPersistors )
+            {
+                persistor.Persist(threadLog);
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void PersistLogInXmlFormat(ThreadLog log)
-        {
-            var serializer = new DataContractSerializer(typeof(ThreadLogSnapshot));
-            var fileName = log.LogId.ToString("N") + ".threadlog";
+        //void IInitializableHostComponent.Initializing()
+        //{
+        //    _loggingConfig = _components.Resolve<IFrameworkLoggingConfiguration>();
+        //}
 
-            using ( var file = File.Create(Path.Combine(_threadLogFolder, fileName)) )
-            {
-                var writer = XmlWriter.Create(file);
-                serializer.WriteObject(writer, log.TakeSnapshot());
-                writer.Flush();
-            }
-        }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //void IInitializableHostComponent.Configured()
+        //{
+        //    _threadLogFolder = PathUtility.HostBinPath(_loggingConfig.ThreadLogFolder);
+
+        //    if ( !Directory.Exists(_threadLogFolder) )
+        //    {
+        //        Directory.CreateDirectory(_threadLogFolder);
+        //    }
+        //}
+
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //private void PersistLogInXmlFormat(ThreadLog log)
+        //{
+        //    var serializer = new DataContractSerializer(typeof(ThreadLogSnapshot));
+        //    var fileName = log.LogId.ToString("N") + ".threadlog";
+
+        //    using ( var file = File.Create(Path.Combine(_threadLogFolder, fileName)) )
+        //    {
+        //        var writer = XmlWriter.Create(file);
+        //        serializer.WriteObject(writer, log.TakeSnapshot());
+        //        writer.Flush();
+        //    }
+        //}
     }
 }

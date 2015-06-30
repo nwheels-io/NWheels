@@ -1,8 +1,8 @@
-﻿namespace NWheels.Hosting.Core
-{
-    public interface IInitializableHostComponent
-    {
-        void Initializing();
-        void Configured();
-    }
-}
+﻿//namespace NWheels.Hosting.Core
+//{
+//    public interface IInitializableHostComponent
+//    {
+//        void Initializing();
+//        void Configured();
+//    }
+//}
