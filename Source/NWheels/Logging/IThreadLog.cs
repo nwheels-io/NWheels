@@ -3,9 +3,9 @@ using NWheels.Hosting;
 
 namespace NWheels.Logging
 {
-    internal interface IThreadLog
+    public interface IReadOnlyThreadLog
     {
-        void NotifyActivityClosed(ActivityLogNode activity);
+        ThreadLogSnapshot TakeSnapshot();
         INodeConfiguration Node { get; }
         ThreadTaskType TaskType { get; }
         Guid LogId { get; }
@@ -13,6 +13,13 @@ namespace NWheels.Logging
         DateTime ThreadStartedAtUtc { get; }
         long ElapsedThreadMilliseconds { get; }
         ActivityLogNode RootActivity { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    internal interface IThreadLog : IReadOnlyThreadLog
+    {
+        void NotifyActivityClosed(ActivityLogNode activity);
         ActivityLogNode CurrentActivity { get; }
     }
 }

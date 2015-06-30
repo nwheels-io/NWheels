@@ -247,6 +247,7 @@
     <Compile Include="Logging\Core\IFrameworkLoggingConfiguration.cs" />
     <Compile Include="Logging\Core\IPlainLog.cs" />
     <Compile Include="Logging\Core\IThreadLogAnchor.cs" />
+    <Compile Include="Logging\Core\IThreadLogPersistor.cs" />
     <Compile Include="Logging\Core\IThreadRegistry.cs" />
     <Compile Include="Logging\Core\NameValuePairLogNodeBuilder.cs" />
     <Compile Include="Logging\Core\StopwatchClock.cs" />
@@ -261,6 +262,7 @@
     <Compile Include="Logging\IApplicationEventLogger.cs" />
     <Compile Include="Logging\ILogActivity.cs" />
     <Compile Include="Logging\ILoggableObject.cs" />
+    <Compile Include="Logging\Impl\StupidXmlThreadLogPersistor.cs" />
     <Compile Include="Logging\IThreadLog.cs" />
     <Compile Include="Logging\IThreadLogAppender.cs" />
     <Compile Include="Logging\LogAttributeBase.cs" />
