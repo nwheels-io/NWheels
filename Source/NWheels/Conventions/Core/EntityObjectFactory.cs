@@ -86,6 +86,7 @@ namespace NWheels.Conventions.Core
             private readonly List<Action<ConstructorWriter>> _initializers;
             private readonly List<Action<ConstructorWriter>> _newEntityInitializers;
             private readonly Dictionary<Type, Dependency> _dependencies;
+            private readonly HashSet<PropertyInfo> _baseContractProperties;
             private ITypeMetadata _entityMetadata;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -97,6 +98,7 @@ namespace NWheels.Conventions.Core
                 _initializers = new List<Action<ConstructorWriter>>();
                 _newEntityInitializers = new List<Action<ConstructorWriter>>();
                 _dependencies = new Dictionary<Type, Dependency>();
+                _baseContractProperties = new HashSet<PropertyInfo>();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -105,6 +107,14 @@ namespace NWheels.Conventions.Core
             {
                 _entityMetadata = _metadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
                 _metadataCache.EnsureRelationalMapping(_entityMetadata);
+
+                if ( _entityMetadata.BaseType != null )
+                {
+                    var baseTypeKey = new TypeKey(primaryInterface: _entityMetadata.BaseType.ContractType);
+                    context.BaseType = base.Context.Factory.FindDynamicType(baseTypeKey);
+
+                    _baseContractProperties.UnionWith(_entityMetadata.BaseType.Properties.Select(p => p.ContractPropertyInfo));
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -134,6 +144,7 @@ namespace NWheels.Conventions.Core
             private void ImplementDefaultConstructor(ImplementationClassWriter<TypeTemplate.TBase> writer)
             {
                 writer.Constructor(cw => {
+                    cw.Base();
                     _initializers.ForEach(init => init(cw));
                 });
             }
@@ -143,7 +154,16 @@ namespace NWheels.Conventions.Core
             private void ImplementNewEntityConstructor(ImplementationClassWriter<TypeTemplate.TBase> writer)
             {
                 writer.Constructor<IComponentContext>((cw, components) => {
-                    cw.This();
+                    if ( _entityMetadata.BaseType == null )
+                    {
+                        cw.Base();
+                    }
+                    else
+                    {
+                        cw.Base(components);
+                    }
+
+                    _initializers.ForEach(init => init(cw));
                     _dependencies.Values.ForEach(dependency => dependency.WriteResolveStatement(cw, components));
                     _newEntityInitializers.ForEach(init => init(cw));
                 });
@@ -157,13 +177,32 @@ namespace NWheels.Conventions.Core
                 {
                     var implicitImpl = writer.ImplementInterface<TypeTemplate.TInterface>();
 
-                    implicitImpl.AllProperties(IsScalarProperty).ImplementAutomatic();
+                    implicitImpl.AllProperties(IsScalarReadWriteProperty).ImplementAutomatic();
 
                     var explicitImpl = writer.ImplementInterfaceExplicitly<TypeTemplate.TInterface>();
 
+                    explicitImpl.AllProperties(IsScalarReadOrWriteOnlyProperty).ForEach(p => ImplementReadOrWriteOnlyScalarProperty(explicitImpl, p));
                     explicitImpl.AllProperties(IsSpecialStorageTypeProperty).ForEach(p => ImplementSpecialStorageTypeProperty(explicitImpl, p));
                     explicitImpl.AllProperties(IsSingleNavigationProperty).ForEach(p => ImplementSingleNavigationProperty(explicitImpl, p));
                     explicitImpl.AllProperties(IsNavigationCollectionProperty).ForEach(p => ImplementNavigationCollectionProperty(explicitImpl, p));
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementReadOrWriteOnlyScalarProperty(
+                ImplementationClassWriter<TypeTemplate.TInterface> explicitImplementation,
+                PropertyInfo property)
+            {
+                using ( TT.CreateScope<TT.TProperty>(property.PropertyType) )
+                { 
+                    var backingField = explicitImplementation.Field<TT.TProperty>("m_" + property.Name);
+                    explicitImplementation.NewVirtualWritableProperty<TT.TProperty>(property.Name).ImplementAutomatic(backingField);
+
+                    explicitImplementation.Property(property).Implement(
+                        getter: p => property.CanRead ? p.Get(m => m.Return(backingField.CastTo<TT.TProperty>())) : null,
+                        setter: p => property.CanWrite ? p.Set((m, value) => backingField.Assign(value.CastTo<TT.TProperty>())) : null
+                    );
                 }
             }
 
@@ -333,16 +372,55 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private bool IsScalarProperty(PropertyInfo property)
+            private bool IsImplementedByBaseEntity(PropertyInfo property)
             {
+                return _baseContractProperties.Contains(property);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool IsScalarReadWriteProperty(PropertyInfo property)
+            {
+                if ( IsImplementedByBaseEntity(property) )
+                {
+                    return false;
+                }
+
                 var propertyMetadata = _entityMetadata.GetPropertyByDeclaration(property);
-                return (propertyMetadata.Kind == PropertyKind.Scalar && propertyMetadata.RelationalMapping.StorageType == null);
+                
+                return (
+                    propertyMetadata.Kind == PropertyKind.Scalar && 
+                    propertyMetadata.RelationalMapping.StorageType == null &&
+                    property.CanRead && 
+                    property.CanWrite);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool IsScalarReadOrWriteOnlyProperty(PropertyInfo property)
+            {
+                if ( IsImplementedByBaseEntity(property) )
+                {
+                    return false;
+                }
+
+                var propertyMetadata = _entityMetadata.GetPropertyByDeclaration(property);
+
+                return (
+                    propertyMetadata.Kind == PropertyKind.Scalar &&
+                    propertyMetadata.RelationalMapping.StorageType == null &&
+                    !(property.CanRead && property.CanWrite));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private bool IsSpecialStorageTypeProperty(PropertyInfo property)
             {
+                if ( IsImplementedByBaseEntity(property) )
+                {
+                    return false;
+                }
+
                 var propertyMetadata = _entityMetadata.GetPropertyByDeclaration(property);
                 return (propertyMetadata.Kind == PropertyKind.Scalar && propertyMetadata.RelationalMapping.StorageType != null);
             }
@@ -351,6 +429,11 @@ namespace NWheels.Conventions.Core
 
             private bool IsScalarProperty(IPropertyMetadata property)
             {
+                if ( IsImplementedByBaseEntity(property.ContractPropertyInfo) )
+                {
+                    return false;
+                }
+
                 return (property.Kind == PropertyKind.Scalar);
             }
 
@@ -358,6 +441,11 @@ namespace NWheels.Conventions.Core
 
             private bool IsSingleNavigationProperty(PropertyInfo property)
             {
+                if ( IsImplementedByBaseEntity(property) )
+                {
+                    return false;
+                }
+
                 return (!property.PropertyType.IsCollectionType() && IsEntityContract(property.PropertyType));
             }
 
@@ -365,6 +453,11 @@ namespace NWheels.Conventions.Core
 
             private bool IsNavigationCollectionProperty(PropertyInfo property)
             {
+                if ( IsImplementedByBaseEntity(property) )
+                {
+                    return false;
+                }
+
                 Type itemType;
                 return (property.PropertyType.IsCollectionType(out itemType) && IsEntityContract(itemType));
             }

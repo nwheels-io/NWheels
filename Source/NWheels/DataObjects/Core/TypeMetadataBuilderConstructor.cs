@@ -45,6 +45,8 @@ namespace NWheels.DataObjects.Core
 
             var initialMixinContractCount = _mixinContracts.Length;
 
+            ApplyObjectContractAttribute();
+            RegisterTypeInheritance();
             ConstructProperties();
 
             if ( builder.MixinContractTypes.Count == initialMixinContractCount )
@@ -57,6 +59,28 @@ namespace NWheels.DataObjects.Core
             {
                 addedMixinContracts = builder.MixinContractTypes.Skip(initialMixinContractCount).ToArray();
                 return false;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ApplyObjectContractAttribute()
+        {
+            var contractAttribute = (_primaryContract.GetCustomAttribute<DataObjectContractAttribute>() as IObjectContractAttribute);
+
+            if ( contractAttribute != null )
+            {
+                contractAttribute.ApplyTo(_thisType, _cache);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void RegisterTypeInheritance()
+        {
+            if ( _thisType.BaseType != null )
+            {
+                _thisType.BaseType.RegisterDerivedType(_thisType);
             }
         }
 

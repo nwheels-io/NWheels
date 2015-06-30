@@ -10,6 +10,10 @@ namespace NWheels.Domains.Security
     public interface IUserAccountDataRepository : IApplicationDataRepository
     {
         IEntityRepository<IUserAccountEntity> AllUsers { get; }
+        IEntityRepository<IBackEndUserAccountEntity> BackEndUsers { get; }
+        IEntityRepository<IFrontEndUserAccountEntity> FrontEndUsers { get; }
+        IBackEndUserAccountEntity NewBackEndUser();
+        IFrontEndUserAccountEntity NewFrontEndUser();
         IPasswordEntity NewPassword();
     }
 }

@@ -287,6 +287,20 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal void RegisterDerivedType(TypeMetadataBuilder derivedType)
+        {
+            var existingRegistrationIndex = this.DerivedTypes.FindIndex(t => t.ContractType == derivedType.ContractType);
+
+            if ( existingRegistrationIndex >= 0 )
+            {
+                this.DerivedTypes.RemoveAt(existingRegistrationIndex);
+            }
+
+            this.DerivedTypes.Add(derivedType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal void EndBuild()
         {
             _propertyByName = this.Properties.ToDictionary(p => p.Name);

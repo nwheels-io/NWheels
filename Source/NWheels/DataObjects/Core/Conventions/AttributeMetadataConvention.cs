@@ -59,7 +59,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
                 if ( contractAttribute != null )
                 {
-                    contractAttribute.ApplyTo(type);
+                    contractAttribute.ApplyTo(type, _cache);
                 }
 
                 Action<Attribute, TypeMetadataBuilder> applier;

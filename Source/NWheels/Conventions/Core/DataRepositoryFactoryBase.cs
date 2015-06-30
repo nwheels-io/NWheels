@@ -80,16 +80,6 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class ImplementorKey
-        {
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static readonly object _s_defaultImplementorKey = new object();
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public abstract class DataRepositoryConvention : ImplementationConvention
         {
             private readonly ITypeMetadataCache _metadataCache;
@@ -115,7 +105,7 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void ValidateContractProperty(PropertyInfo property, out Type entityContractType, out Type entityImplementationType)
+            public void ValidateContractProperty(PropertyInfo property, out Type entityContractType)
             {
                 var type = property.PropertyType;
 
@@ -129,6 +119,13 @@ namespace NWheels.Conventions.Core
                     throw new ContractConventionException(this, property.DeclaringType, property, "Property must be read-only");
                 }
 
+                entityContractType = property.PropertyType.GetGenericArguments()[0];
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void DecomposeContractProperty(PropertyInfo property, out Type entityContractType, out Type entityImplementationType)
+            {
                 entityContractType = property.PropertyType.GetGenericArguments()[0];
 
                 if ( !EntityContractAttribute.IsEntityContract(entityContractType) )
@@ -168,6 +165,7 @@ namespace NWheels.Conventions.Core
 
             protected override void OnImplementPrimaryInterface(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
+                ValidateRepositoryContract(writer);
                 FindEntitiesInRepository(writer);
 
                 _entityFactoryField = writer.Field<EntityObjectFactory>("EntityFactory", isPublic: true);
@@ -283,7 +281,7 @@ namespace NWheels.Conventions.Core
 
             protected bool IsNewEntityMethod(MethodInfo method)
             {
-                var result = (method.Name.StartsWith("New") && EntityContractsInRepository.Contains(method.ReturnType));
+                var result = (method.Name.StartsWith("New") && EntityContractsInRepository.Any(contract => contract.IsAssignableFrom(method.ReturnType)));
                 return result;
             }
 
@@ -298,16 +296,8 @@ namespace NWheels.Conventions.Core
 
             protected void FindEntitiesInRepository(ImplementationClassWriter<TT.TInterface> writer)
             {
-                writer.AllProperties(MustImplementProperty).ForEach(property => {
-                    var entity = new EntityInRepository(property, this);
-                    EntitiesInRepository.Add(entity);
-                    FindEntityContractsInRepository(entity.Metadata);
-                });
-
-                foreach ( var contractType in EntityContractsInRepository )
-                {
-                    FindEntityInRepositoryByContract(contractType);
-                }
+                ScanEntitiesFromRepositoryContract(writer);
+                EnsureAllRelatedEntitiesRegistered();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -358,6 +348,47 @@ namespace NWheels.Conventions.Core
             protected List<Action<ConstructorWriter>> Initializers
             {
                 get { return _initializers; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private void ValidateRepositoryContract(ImplementationClassWriter<TypeTemplate.TInterface> writer)
+            {
+                writer.AllProperties(MustImplementProperty).ForEach(property => {
+                    Type entityContractType;
+                    ValidateContractProperty(property, out entityContractType);
+                        
+                    _metadataCache.GetTypeMetadata(entityContractType); // force entity metadata to be created now, if not yet
+                });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ScanEntitiesFromRepositoryContract(ImplementationClassWriter<TypeTemplate.TInterface> writer)
+            {
+                writer.AllProperties(MustImplementProperty).ForEach(property => {
+                    var entity = new EntityInRepository(property, this);
+                    EntitiesInRepository.Add(entity);
+                    FindEntityContractsInRepository(entity.Metadata);
+                });
+
+                writer.AllMethods(IsNewEntityMethod).ForEach(method => {
+                    var entityContractType = method.ReturnType;
+                    if ( !EntityContractsInRepository.Contains(entityContractType) )
+                    {
+                        FindEntityContractsInRepository(_metadataCache.GetTypeMetadata(entityContractType));
+                    }
+                });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private void EnsureAllRelatedEntitiesRegistered()
+            {
+                foreach ( var contractType in EntityContractsInRepository )
+                {
+                    FindEntityInRepositoryByContract(contractType);
+                }
             }
         }
 
@@ -470,7 +501,7 @@ namespace NWheels.Conventions.Core
             public EntityInRepository(PropertyInfo property, DataRepositoryConvention ownerConvention)
             {
                 _ownerConvention = ownerConvention;
-                ownerConvention.ValidateContractProperty(property, out _contractType, out _implementationType);
+                ownerConvention.DecomposeContractProperty(property, out _contractType, out _implementationType);
 
                 this.RepositoryProperty = property;
                 this.Metadata = ownerConvention.MetadataCache.GetTypeMetadata(_contractType);

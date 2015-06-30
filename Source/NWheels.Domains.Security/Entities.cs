@@ -8,7 +8,7 @@ using NWheels.Entities;
 
 namespace NWheels.Domains.Security
 {
-    [EntityContract]
+    [EntityContract(IsAbstract = true)]
     public interface IUserAccountEntity
     {
         [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Semantic.LoginName]
@@ -40,14 +40,14 @@ namespace NWheels.Domains.Security
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [EntityContract]
+    [EntityContract(BaseEntity = typeof(IUserAccountEntity))]
     public interface IBackEndUserAccountEntity : IUserAccountEntity
     {
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [EntityContract]
+    [EntityContract(BaseEntity = typeof(IUserAccountEntity))]
     public interface IFrontEndUserAccountEntity : IUserAccountEntity
     {
         [PropertyContract.Required, PropertyContract.Semantic.EmailAddress]

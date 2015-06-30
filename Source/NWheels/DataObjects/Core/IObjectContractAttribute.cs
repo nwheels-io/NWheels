@@ -4,6 +4,6 @@ namespace NWheels.DataObjects.Core
 {
     public interface IObjectContractAttribute
     {
-        void ApplyTo(TypeMetadataBuilder type);
+        void ApplyTo(TypeMetadataBuilder type, TypeMetadataCache cache);
     }
 }

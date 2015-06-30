@@ -25,7 +25,8 @@ namespace NWheels.Stacks.MongoDb.Impl
         public Expression Specialize(Expression general)
         {
             var visitor = new SpecializingVisitor(this, _thisTypeMetadata, _metadataCache);
-            return visitor.Visit(general);
+            var specialized = visitor.Visit(general);
+            return specialized;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -53,9 +54,11 @@ namespace NWheels.Stacks.MongoDb.Impl
                 {
                     var replacedTypeArguments = node.Method.GetGenericArguments().Select(t => t.Replace(ShouldReplaceType, GetReplacingType)).ToArray();
                     
-                    return Expression.Call(
+                    var specialized = Expression.Call(
                         node.Method.GetGenericMethodDefinition().MakeGenericMethod(replacedTypeArguments),
                         node.Arguments.Select(arg => _ownerSpecializer.Specialize(arg)));
+
+                    return specialized;
                 }
 
                 return node;
@@ -67,10 +70,12 @@ namespace NWheels.Stacks.MongoDb.Impl
             {
                 var replacedDelegateType = typeof(T).Replace(findWhat: ShouldReplaceType, replaceWith: GetReplacingType);
 
-                return Expression.Lambda(
+                var specialized = Expression.Lambda(
                     replacedDelegateType,
                     _ownerSpecializer.Specialize(node.Body),
                     node.Parameters.Select(p => _ownerSpecializer.Specialize(p)).Cast<ParameterExpression>());
+
+                return specialized;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -123,6 +128,13 @@ namespace NWheels.Stacks.MongoDb.Impl
                 }
 
                 return base.VisitMember(node);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override Expression VisitUnary(UnaryExpression node)
+            {
+                return base.VisitUnary(node);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

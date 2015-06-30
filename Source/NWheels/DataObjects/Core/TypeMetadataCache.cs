@@ -136,6 +136,7 @@ namespace NWheels.DataObjects.Core
         {
             var entriesBeingBuilt = _s_entriesBeingBuilt;
             var ownEntriesBeingBuilt = (entriesBeingBuilt == null);
+            var newEntryInserted = false;
 
             if ( ownEntriesBeingBuilt )
             {
@@ -146,29 +147,10 @@ namespace NWheels.DataObjects.Core
             try
             {
                 var builder = new TypeMetadataBuilder();
-                entriesBeingBuilt.Add(primaryContract, builder);
+                newEntryInserted = !entriesBeingBuilt.ContainsKey(primaryContract);
+                entriesBeingBuilt[primaryContract] = builder;
 
-                ConcretizationRegistration concretization;
-                if ( _concretizationsByPrimaryContract.TryGetValue(primaryContract, out concretization) && concretization.ConcreteContract != primaryContract )
-                {
-                    var concretizationMixinContracts = GetRegisteredMixinContracts(concretization.ConcreteContract);
-                    return BuildTypeMetadata(
-                        concretization.ConcreteContract, 
-                        mixinContracts.Union(concretizationMixinContracts).ToArray());
-                }
-                else
-                {
-                    var constructor = new TypeMetadataBuilderConstructor(_conventions);
-                    Type[] addedMixinContracts;
-                    
-                    if ( !constructor.ConstructMetadata(primaryContract, mixinContracts, builder, this, out addedMixinContracts) && 
-                        addedMixinContracts.Length > 0 )
-                    {
-                        return BuildTypeMetadata(primaryContract, mixinContracts.Union(addedMixinContracts).ToArray());
-                    }
-
-                    return builder;
-                }
+                return BuildTypeMetadata(primaryContract, mixinContracts, builder);
             }
             finally
             {
@@ -176,9 +158,39 @@ namespace NWheels.DataObjects.Core
                 {
                     _s_entriesBeingBuilt = null;
                 }
-                else
+                else if ( newEntryInserted )
                 {
                     entriesBeingBuilt.Remove(primaryContract);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private TypeMetadataBuilder BuildTypeMetadata(Type primaryContract, Type[] mixinContracts, TypeMetadataBuilder builder)
+        {
+            ConcretizationRegistration concretization;
+
+            if ( _concretizationsByPrimaryContract.TryGetValue(primaryContract, out concretization) && concretization.ConcreteContract != primaryContract )
+            {
+                var concretizationMixinContracts = GetRegisteredMixinContracts(concretization.ConcreteContract);
+                
+                return BuildTypeMetadata(
+                    concretization.ConcreteContract, 
+                    mixinContracts.Union(concretizationMixinContracts).ToArray());
+            }
+            else
+            {
+                var constructor = new TypeMetadataBuilderConstructor(_conventions);
+                Type[] addedMixinContracts;
+
+                if ( constructor.ConstructMetadata(primaryContract, mixinContracts, builder, this, out addedMixinContracts) && addedMixinContracts.Length == 0 )
+                {
+                    return builder;
+                }
+                else
+                {
+                    return BuildTypeMetadata(primaryContract, mixinContracts.Union(addedMixinContracts).ToArray());
                 }
             }
         }

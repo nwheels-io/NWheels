@@ -19,7 +19,9 @@ using NWheels.Conventions;
 using NWheels.DataObjects.Core;
 using System.Data;
 using System.Linq.Expressions;
+using MongoDB.Bson.Serialization;
 using NWheels.Conventions.Core;
+using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
 
 // ReSharper disable ConvertToLambdaExpression
@@ -84,6 +86,7 @@ namespace NWheels.Stacks.MongoDb.Impl
                 Operand<ITypeMetadataCache> metadataCache,
                 Operand<MongoDatabase> connection)
             {
+                WritePolymorphicEntityRegistrations(writer);
                 base.CompiledModelField.Assign(writer.New<object>());
             }
 
@@ -98,6 +101,19 @@ namespace NWheels.Stacks.MongoDb.Impl
                     base.MetadataCacheField,
                     // objectFactory
                     base.EntityFactoryField);                                           
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void WritePolymorphicEntityRegistrations(FunctionMethodWriter<object> writer)
+            {
+                foreach ( var entity in base.EntitiesInRepository )
+                {
+                    if ( entity.Metadata.BaseType != null )
+                    {
+                        Static.Func(BsonClassMap.LookupClassMap, writer.Const(entity.ImplementationType));
+                    }
+                }
             }
         }
     }

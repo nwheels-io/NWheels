@@ -32,7 +32,7 @@ namespace NWheels.Stacks.MongoDb.Impl
             _metadataCache = metadataCache;
             _metadata = metadataCache.GetTypeMetadata(typeof(TEntityContract));
             _objectFactory = objectFactory;
-            _objectSet = ownerRepo.GetCollection<TEntityImpl>(_metadata.Name);
+            _objectSet = ownerRepo.GetCollection<TEntityImpl>(GetMongoCollectionName(_metadata));
             _queryProvider = null;
         }
 
@@ -152,6 +152,18 @@ namespace NWheels.Stacks.MongoDb.Impl
             {
                 return _objectSet;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static string GetMongoCollectionName(ITypeMetadata metadata)
+        {
+            if ( metadata.BaseType != null )
+            {
+                return GetMongoCollectionName(metadata.BaseType);
+            }
+
+            return metadata.Name;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

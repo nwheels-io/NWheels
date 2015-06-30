@@ -14,7 +14,7 @@ namespace NWheels.DataObjects
             [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
             public class RelationalMappingAttribute : Attribute, IObjectContractAttribute
             {
-                public void ApplyTo(TypeMetadataBuilder type)
+                public void ApplyTo(TypeMetadataBuilder type, TypeMetadataCache metadataCache)
                 {
                     var mapping = type.SafeGetRelationalMapping();
 
