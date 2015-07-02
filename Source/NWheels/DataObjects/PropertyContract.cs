@@ -75,7 +75,7 @@ namespace NWheels.DataObjects
                 public Type Type { get; private set; }
             }
 
-            public class InheritorOfAttribute : DataTypeAttribute
+            public class InheritorOfAttribute : DataTypeAttribute, IPropertyContractAttribute
             {
                 public InheritorOfAttribute(Type requiredBase) :
                     base(typeof (SemanticType.DefaultOf<Type>))
@@ -83,6 +83,11 @@ namespace NWheels.DataObjects
                     this.RequiredBase = requiredBase;
                 }
                 public Type RequiredBase { get; private set; }
+
+                public void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+                {
+                    property.SafeGetRelationalMapping().StorageType = cache.GetStorageTypeInstance(typeof(ClrTypeStorageType), property.ClrType);
+                }
             }
 
             public class DateAttribute : DataTypeAttribute { public DateAttribute() : base(typeof(SemanticType.DefaultOf<DateTime>)) { } }

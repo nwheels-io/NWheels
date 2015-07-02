@@ -93,7 +93,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
                 if ( contractAttribute != null )
                 {
-                    contractAttribute.ApplyTo(property);
+                    contractAttribute.ApplyTo(property, _cache);
                 }
 
                 Action<Attribute, PropertyMetadataBuilder> applier;

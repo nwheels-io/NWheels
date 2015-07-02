@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
-using NWheels.Domains.Security.Logic;
+using NWheels.Domains.Security.Core;
+using NWheels.Domains.Security.Impl;
 using NWheels.Domains.Security.UI;
 using NWheels.Extensions;
 
@@ -14,10 +15,15 @@ namespace NWheels.Domains.Security
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<SecurityDomainApi>().As<ISecurityDomainApi>().SingleInstance();
-            builder.RegisterType<DummyCryptoProvider>().As<ICryptoProvider>().SingleInstance();
-            builder.RegisterType<LoginTransactionScript>().SingleInstance();
+            builder.NWheelsFeatures().Logging().RegisterLogger<ISecurityDomainLogger>();
             builder.NWheelsFeatures().Entities().RegisterDataRepository<IUserAccountDataRepository>();
+
+            builder.RegisterType<DummyCryptoProvider>().As<ICryptoProvider>().SingleInstance();
+            builder.RegisterType<PrivateAuthenticationProvider>().As<IAuthenticationProvider>().SingleInstance();
+            builder.RegisterType<ClaimFactory>().SingleInstance();
+
+            builder.RegisterType<LoginTransactionScript>().SingleInstance();
+            builder.RegisterType<SecurityDomainApi>().As<ISecurityDomainApi>().SingleInstance();
         }
     }
 }

@@ -9,6 +9,6 @@ namespace NWheels.DataObjects.Core
 {
     public interface IPropertyContractAttribute
     {
-        void ApplyTo(PropertyMetadataBuilder property);
+        void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache);
     }
 }

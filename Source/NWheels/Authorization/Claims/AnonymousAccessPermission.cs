@@ -1,62 +1,60 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Claims;
 using System.Linq;
+using System.Security;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using NWheels.Exceptions;
 
-namespace NWheels.Domains.Security.Authorization
+namespace NWheels.Authorization.Claims
 {
-    public class UserRoleClaimSet : ClaimSet
+    public class AnonymousAccessPermission : IPermission
     {
-
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        #region Overrides of ClaimSet
-
-        public override IEnumerable<Claim> FindClaims(string claimType, string right)
+        public void Demand()
         {
-            throw new NotImplementedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IEnumerator<Claim> GetEnumerator()
+        public IPermission Copy()
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override Claim this[int index]
+        public IPermission Intersect(IPermission target)
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override int Count
+        public bool IsSubsetOf(IPermission target)
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            return true;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override ClaimSet Issuer
+        public IPermission Union(IPermission target)
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            return this;
         }
 
-        #endregion
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void FromXml(SecurityElement e)
+        {
+            throw new NotSupportedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public SecurityElement ToXml()
+        {
+            throw new NotSupportedException();
+        }
     }
 }

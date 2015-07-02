@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NWheels.Authorization
 {
-    [AuthorizationContract.Claims]
+    [EnumClaimContract(EnumClaimKind.OperationPermission)]
     public enum EntityPermission
     {
         Create,

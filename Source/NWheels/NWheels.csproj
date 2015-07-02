@@ -21,6 +21,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,6 +31,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autofac">
@@ -70,7 +72,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authorization\Claims\AnonymousAccessPermission.cs" />
+    <Compile Include="Authorization\Claims\UserIdentityClaimPermission.cs" />
+    <Compile Include="Authorization\Claims\IImplyMoreClaims.cs" />
+    <Compile Include="Authorization\Claims\EnumClaimsPermission.cs" />
+    <Compile Include="Authorization\EnumClaimCodeAccessAttribute.cs" />
+    <Compile Include="Authorization\Claims\EnumClaimBase.cs" />
+    <Compile Include="Authorization\Claims\EntityAccessRuleClaim.cs" />
+    <Compile Include="Authorization\Claims\UserIdentityClaim.cs" />
     <Compile Include="Authorization\EntityPermission.cs" />
+    <Compile Include="Authorization\Claims\OperationPermissionClaim.cs" />
+    <Compile Include="Authorization\EnumClaimContractAttribute.cs" />
+    <Compile Include="Authorization\EnumClaimKind.cs" />
+    <Compile Include="Authorization\Claims\UserRoleClaim.cs" />
+    <Compile Include="Authorization\IEntityAccessControlBuilder.cs" />
+    <Compile Include="Authorization\IEntityAccessRule.cs" />
+    <Compile Include="Authorization\IIdentityInfo.cs" />
+    <Compile Include="Utilities\SecureStringUtility.cs" />
+    <Compile Include="Permission.cs" />
     <Compile Include="Auto.cs" />
     <Compile Include="Concurrency\Core\ResourceLock.cs" />
     <Compile Include="Concurrency\IResourceLock.cs" />
@@ -121,6 +140,7 @@
     <Compile Include="Entities\IEntityTriggerContext.cs" />
     <Compile Include="Entities\Impl\VoidDataRepositoryFactory.cs" />
     <Compile Include="Exceptions\DomainFaultException.cs" />
+    <Compile Include="Exceptions\AccessDeniedException.cs" />
     <Compile Include="Extensions\TypeMetadataExtensions.cs" />
     <Compile Include="Extensions\PropertyMetadataExtensions.cs" />
     <Compile Include="Globalization\Currency.cs" />
@@ -278,7 +298,6 @@
     <Compile Include="Logging\ThreadLogSnapshot.cs" />
     <Compile Include="Logging\ThreadTaskType.cs" />
     <Compile Include="Money.cs" />
-    <Compile Include="Authorization\AuthorizationContract.cs" />
     <Compile Include="Processing\Rules\Core\RuleFunction.cs" />
     <Compile Include="Processing\Rules\Core\RuleVariable.cs" />
     <Compile Include="Processing\Workflows\AbstractWorkflow.cs" />

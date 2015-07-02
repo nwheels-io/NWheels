@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Authorization;
 using NWheels.DataObjects;
 using NWheels.Entities;
 
@@ -13,6 +14,9 @@ namespace NWheels.Domains.Security
         IEntityRepository<IUserAccountEntity> AllUsers { get; }
         IEntityRepository<IBackEndUserAccountEntity> BackEndUsers { get; }
         IEntityRepository<IFrontEndUserAccountEntity> FrontEndUsers { get; }
+        IEntityRepository<IUserRoleEntity> UserRoles { get; }
+        IEntityRepository<IOperationPermissionEntity> OperationPermissions { get; }
+        IEntityRepository<IEntityAccessRuleEntity> EntityAccessRules { get; }
         IBackEndUserAccountEntity NewBackEndUser();
         IFrontEndUserAccountEntity NewFrontEndUser();
         IPasswordEntity NewPassword();
@@ -21,7 +25,7 @@ namespace NWheels.Domains.Security
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract(IsAbstract = true)]
-    public interface IUserAccountEntity
+    public interface IUserAccountEntity : IEntityPartClaimsContainer
     {
         [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Semantic.LoginName]
         string LoginName { get; set; }
@@ -48,11 +52,6 @@ namespace NWheels.Domains.Security
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         bool IsLockedOut { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [PropertyContract.Relation.Composition]
-        ICollection<string> Claims { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -103,40 +102,74 @@ namespace NWheels.Domains.Security
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    public static partial class EntityExtensions
+    {
+        public static bool IsExpired(this IPasswordEntity password, DateTime utcNow)
+        {
+            if ( !password.ExpiresAtUtc.HasValue )
+            {
+                return false;
+            }
 
-    [EntityContract]
-    public interface IUserRoleEntity : IEntityPartUniqueDisplayName
+            return (utcNow >= password.ExpiresAtUtc.Value);
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityPartContract]
+    public interface IEntityPartClaim
     {
         [PropertyContract.Required(AllowEmpty = false)]
-        string SystemName { get; set; }
+        string ClaimValueType { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Relation.Composition]
-        ICollection<string> DefaultClaims { get; }
+        [PropertyContract.Required(AllowEmpty = false)]
+        string ClaimValue { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityPartContract]
+    public interface IEntityPartClaimsContainer
+    {
+        [PropertyContract.Relation.Aggregation]
+        ICollection<IUserRoleEntity> AssociatedRoles { get; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Relation.Aggregation]
+        ICollection<IOperationPermissionEntity> AssociatedPermissions { get; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Relation.Aggregation]
+        ICollection<IEntityAccessRuleEntity> AssociatedDataRules { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IUserActionPermissionEntity : IEntityPartUniqueDisplayName
+    public interface IUserRoleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim, IEntityPartClaimsContainer
     {
-        [PropertyContract.Required(AllowEmpty = false)]
-        string SystemName { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IUserDataPermissionEntity : IEntityPartUniqueDisplayName
+    public interface IOperationPermissionEntity : IEntityPartUniqueDisplayName, IEntityPartClaim
     {
-        [PropertyContract.Required(AllowEmpty = false)]
-        string SystemName { get; set; }
+    }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    [EntityContract]
+    public interface IEntityAccessRuleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim
+    {
         [PropertyContract.Semantic.InheritorOf(typeof(IEntityAccessRule))]
-        Type EntityAccessRule { get; set; }
+        Type RuleObject { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

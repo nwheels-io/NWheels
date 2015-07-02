@@ -36,10 +36,8 @@ namespace NWheels.Domains.Security.UI
     [ViewModelContract]
     public interface ILogUserInReply
     {
-        [PropertyContract.ReadOnly]
-        string UserFullName { get; set; }
-        
-        [PropertyContract.ReadOnly]
+        string UserType { get; set; }
+        string[] UserRoles { get; set; }
         string[] AuthorizedUidlNodes { get; set; }
     }
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace NWheels.Domains.Security
+namespace NWheels.Authorization
 {
     public interface IEntityAccessControlBuilder
     {

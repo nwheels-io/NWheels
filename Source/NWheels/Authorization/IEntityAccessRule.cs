@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using NWheels.DataObjects;
 
-namespace NWheels.Domains.Security
+namespace NWheels.Authorization
 {
     public interface IEntityAccessRule
     {
