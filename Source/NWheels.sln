@@ -93,6 +93,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ECommerce", "ECommerce", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Crm", "Crm", "{3F6F7B4C-BD2D-48F2-96C5-D3042F85BD96}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Domains.Security.UnitTests", "NWheels.Domains.Security.UnitTests\NWheels.Domains.Security.UnitTests.csproj", "{4548FCAE-33CE-485D-8638-4DD38809B371}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -195,6 +197,10 @@ Global
 		{36F48C78-669C-4D75-ACCD-F98D89E66C88}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36F48C78-669C-4D75-ACCD-F98D89E66C88}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36F48C78-669C-4D75-ACCD-F98D89E66C88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4548FCAE-33CE-485D-8638-4DD38809B371}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4548FCAE-33CE-485D-8638-4DD38809B371}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4548FCAE-33CE-485D-8638-4DD38809B371}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4548FCAE-33CE-485D-8638-4DD38809B371}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -233,5 +239,6 @@ Global
 		{ADBCD8B1-C625-41FE-8E29-A3DD32D74C0E} = {71D49538-44D0-4F25-9140-19043FC0E7E9}
 		{0FF7D8CA-E141-4003-AE34-CEECA30E882C} = {71D49538-44D0-4F25-9140-19043FC0E7E9}
 		{3F6F7B4C-BD2D-48F2-96C5-D3042F85BD96} = {71D49538-44D0-4F25-9140-19043FC0E7E9}
+		{4548FCAE-33CE-485D-8638-4DD38809B371} = {ADBCD8B1-C625-41FE-8E29-A3DD32D74C0E}
 	EndGlobalSection
 EndGlobal
