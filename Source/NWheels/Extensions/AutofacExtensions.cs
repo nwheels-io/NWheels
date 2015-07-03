@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Builder;
@@ -30,7 +31,7 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.Extensions
 {
-    public static class AutofacExtensions
+    public static partial class AutofacExtensions
     {
         public static TService ResolveAuto<TService>(this IComponentContext container)
             where TService : class
