@@ -261,10 +261,12 @@ namespace NWheels.Hosting.Core
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<INodeHostLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<TransientStateMachine<NodeState, NodeTrigger>.ILogger>();
-            
-            builder.RegisterType<ContractMetadataConvention>().As<IMetadataConvention>().SingleInstance();
-            builder.RegisterType<AttributeMetadataConvention>().As<IMetadataConvention>().SingleInstance();
-            builder.RegisterType<RelationMetadataConvention>().As<IMetadataConvention>().SingleInstance();
+
+            builder.RegisterPipeline<IMetadataConvention>().SingleInstance();
+            builder.RegisterPipeline<IRelationalMappingConvention>().SingleInstance();
+            builder.RegisterType<ContractMetadataConvention>().As<IMetadataConvention>().SingleInstance().FirstInPipeline();
+            builder.RegisterType<AttributeMetadataConvention>().As<IMetadataConvention>().SingleInstance().LastInPipeline();
+            builder.RegisterType<RelationMetadataConvention>().As<IMetadataConvention>().SingleInstance().LastInPipeline();
             builder.RegisterInstance(new PascalCaseRelationalMappingConvention(usePluralTableNames: true)).As<IRelationalMappingConvention>();
             builder.RegisterType<MetadataConventionSet>().SingleInstance();
             builder.RegisterType<TypeMetadataCache>().As<ITypeMetadataCache, TypeMetadataCache>().SingleInstance();

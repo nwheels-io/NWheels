@@ -378,7 +378,11 @@ namespace NWheels.Extensions
 
             public void UseDefaultIdsOfType<TId>()
             {
-                _builder.RegisterType<DefaultIdMetadataConvention>().WithParameter(TypedParameter.From(typeof(TId))).As<IMetadataConvention>().SingleInstance();
+                _builder.RegisterType<DefaultIdMetadataConvention>()
+                    .WithParameter(TypedParameter.From(typeof(TId)))
+                    .As<IMetadataConvention>()
+                    .SingleInstance()
+                    .LastInPipeline();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

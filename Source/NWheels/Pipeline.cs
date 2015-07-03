@@ -71,5 +71,12 @@ namespace NWheels
         }
 
         #endregion
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static implicit operator Pipeline<TService>(TService[] orderedComponents)
+        {
+            return new Pipeline<TService>(orderedComponents);
+        }
     }
 }

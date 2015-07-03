@@ -14,8 +14,8 @@ namespace NWheels.DataObjects.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public MetadataConventionSet(
-            IEnumerable<IMetadataConvention> metadataConventions,
-            IEnumerable<IRelationalMappingConvention> relationalMappingConventions)
+            Pipeline<IMetadataConvention> metadataConventions,
+            Pipeline<IRelationalMappingConvention> relationalMappingConventions)
         {
             _metadataConventions = metadataConventions.ToArray();
             _relationalMappingConventions = relationalMappingConventions.ToArray();

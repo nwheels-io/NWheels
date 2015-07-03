@@ -17,7 +17,7 @@ using Hapil.Members;
 namespace NWheels.Stacks.EntityFramework.ComponentTests
 {
     [TestFixture]
-    public class AssumptionTests
+    public class EntityConfigurationAssumptionTests
     {
         [Test]
         public void CanEnumerateDbProviders()
