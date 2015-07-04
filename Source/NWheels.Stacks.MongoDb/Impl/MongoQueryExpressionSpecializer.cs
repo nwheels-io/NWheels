@@ -24,6 +24,11 @@ namespace NWheels.Stacks.MongoDb.Impl
         
         public Expression Specialize(Expression general)
         {
+            if ( general == null )
+            {
+                return null;
+            }
+
             var visitor = new SpecializingVisitor(this, _thisTypeMetadata, _metadataCache);
             var specialized = visitor.Visit(general);
             return specialized;
@@ -55,7 +60,33 @@ namespace NWheels.Stacks.MongoDb.Impl
                     var replacedTypeArguments = node.Method.GetGenericArguments().Select(t => t.Replace(ShouldReplaceType, GetReplacingType)).ToArray();
                     
                     var specialized = Expression.Call(
+                        _ownerSpecializer.Specialize(node.Object),
                         node.Method.GetGenericMethodDefinition().MakeGenericMethod(replacedTypeArguments),
+                        node.Arguments.Select(arg => _ownerSpecializer.Specialize(arg)));
+
+                    return specialized;
+                }
+                else if ( 
+                    node.Method.DeclaringType != null && 
+                    node.Method.DeclaringType.IsGenericType &&
+                    node.Method.DeclaringType.GetGenericArguments().Any(ShouldReplaceType) )
+                {
+                    var replacedTypeArguments = node.Method.DeclaringType.GetGenericArguments().Select(t => t.Replace(ShouldReplaceType, GetReplacingType)).ToArray();
+                    var replacedDeclaringType = node.Method.DeclaringType.GetGenericTypeDefinition().MakeGenericType(replacedTypeArguments);
+                    var replacedParameterTypes = node.Method.GetParameters().Select(p => p.ParameterType.Replace(ShouldReplaceType, GetReplacingType)).ToArray();
+                    var replacedMethod = replacedDeclaringType.GetMethod(node.Method.Name, replacedParameterTypes);
+                    var specialized = Expression.Call(
+                        _ownerSpecializer.Specialize(node.Object),
+                        replacedMethod,
+                        node.Arguments.Select(arg => _ownerSpecializer.Specialize(arg)));
+
+                    return specialized;
+                }
+                else if ( node.Arguments.Any(arg => ShouldReplaceType(arg.Type)) )
+                {
+                    var specialized = Expression.Call(
+                        _ownerSpecializer.Specialize(node.Object),
+                        node.Method,
                         node.Arguments.Select(arg => _ownerSpecializer.Specialize(arg)));
 
                     return specialized;

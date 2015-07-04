@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\UserAccountPrincipal.cs" />
     <Compile Include="Entities.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Impl\ClaimFactory.cs" />

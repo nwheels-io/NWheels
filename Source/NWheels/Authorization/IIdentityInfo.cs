@@ -10,6 +10,8 @@ namespace NWheels.Authorization
     public interface IIdentityInfo : IIdentity
     {
         bool IsOfType(Type accountEntityType);
+        bool IsInRole(string userRole);
+        string[] GetUserRoles();
         string LoginName { get; }
         string QualifiedLoginName { get; }
         string PersonFullName { get; }

@@ -30,6 +30,13 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IUserAccountEntity GetUserAccount()
+        {
+            return _userAccount;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override bool IsAuthenticated
         {
             get { return true; }
@@ -54,6 +61,20 @@ namespace NWheels.Domains.Security.Core
         bool IIdentityInfo.IsOfType(Type accountEntityType)
         {
             return accountEntityType.IsAssignableFrom(_userAccount.GetType());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        bool IIdentityInfo.IsInRole(string userRole)
+        {
+            return Claims.Any(c => c.Type == UserRoleClaim.UserRoleClaimTypeString && c.Value == userRole);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        string[] IIdentityInfo.GetUserRoles()
+        {
+            return Claims.Where(c => c.Type == UserRoleClaim.UserRoleClaimTypeString).Select(c => c.Value).ToArray();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

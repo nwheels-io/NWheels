@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using NWheels.Authorization.Claims;
+using NWheels.Hosting;
 
 namespace NWheels.Domains.Security.Impl
 {
@@ -27,19 +28,32 @@ namespace NWheels.Domains.Security.Impl
 
             using ( var data = _framework.NewUnitOfWork<IUserAccountDataRepository>() )
             {
-                foreach ( var includedRole in data.UserRoles.Where(r => claimsContainer.AssociatedRoles.Contains(r)) )
+                var allRoles = data.UserRoles.ToDictionary(r => r.ClaimValue);
+                var allPermissions = data.OperationPermissions.ToDictionary(p => p.ClaimValue);
+                var allDataRules = data.EntityAccessRules.ToDictionary(r => r.ClaimValue);
+
+                if ( claimsContainer.AssociatedRoles != null )
                 {
-                    expandedClaims.Add(new UserAccountRoleClaim(this, includedRole));
+                    foreach ( var includedRole in claimsContainer.AssociatedRoles.Select(s => allRoles[s]) )
+                    {
+                        expandedClaims.Add(new UserAccountRoleClaim(this, includedRole));
+                    }
                 }
 
-                foreach ( var permission in data.OperationPermissions.Where(p => claimsContainer.AssociatedPermissions.Contains(p)) )
+                if ( claimsContainer.AssociatedPermissions != null )
                 {
-                    expandedClaims.Add(new OperationPermissionClaim(permission.ClaimValue));
+                    foreach ( var permission in claimsContainer.AssociatedPermissions.Select(s => allPermissions[s]) )
+                    {
+                        expandedClaims.Add(new OperationPermissionClaim(permission.ClaimValue));
+                    }
                 }
 
-                foreach ( var dataRule in data.EntityAccessRules.Where(r => claimsContainer.AssociatedDataRules.Contains(r)) )
+                if (claimsContainer.AssociatedDataRules != null)
                 {
-                    expandedClaims.Add(new EntityAccessRuleClaim(dataRule.ClaimValue));
+                    foreach ( var dataRule in claimsContainer.AssociatedDataRules.Select(s => allDataRules[s]) )
+                    {
+                        expandedClaims.Add(new EntityAccessRuleClaim(dataRule.ClaimValue));
+                    }
                 }
             }
 

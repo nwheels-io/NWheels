@@ -27,8 +27,6 @@ namespace NWheels.Domains.Security
     [EntityContract(IsAbstract = true)]
     public interface IUserAccountEntity : IEntityPartClaimsContainer
     {
-        int Id { get; }
-
         [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Semantic.LoginName]
         string LoginName { get; set; }
 
@@ -137,18 +135,18 @@ namespace NWheels.Domains.Security
     [EntityPartContract]
     public interface IEntityPartClaimsContainer
     {
-        [PropertyContract.Relation.Aggregation]
-        ICollection<IUserRoleEntity> AssociatedRoles { get; }
+        [PropertyContract.Relation.Composition]
+        string[] AssociatedRoles { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Relation.Aggregation]
-        ICollection<IOperationPermissionEntity> AssociatedPermissions { get; }
+        [PropertyContract.Relation.Composition]
+        string[] AssociatedPermissions { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Relation.Aggregation]
-        ICollection<IEntityAccessRuleEntity> AssociatedDataRules { get; }
+        [PropertyContract.Relation.Composition]
+        string[] AssociatedDataRules { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

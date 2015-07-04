@@ -24,18 +24,18 @@ namespace NWheels.Domains.Security.Impl
 
         public ILogUserInReply LogUserIn(ILogUserInRequest request)
         {
-            _loginTransaction.Execute(request.LoginName, SecureStringUtility.ClearToSecure(request.Password));
+            var identityInfo = _loginTransaction.Execute(request.LoginName, SecureStringUtility.ClearToSecure(request.Password));
+            var reply = NewModel<ILogUserInReply>();
 
+            reply.AuthorizedUidlNodes = new string[0];
+            reply.FullName = identityInfo.PersonFullName;
+            reply.Roles = identityInfo.GetUserRoles();
 
-
-            return NewModel<ILogUserInReply>(
-                m => m.AuthorizedUidlNodes = new[] { "AAA", "BBB", "CCC" }
-            );
+            return reply;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [SecurityCheck.Authentication(SecurityAction.Demand)]
         public ILogUserOutReply LogUserOut(ILogUserOutRequest request)
         {
             return NewModel<ILogUserOutReply>();

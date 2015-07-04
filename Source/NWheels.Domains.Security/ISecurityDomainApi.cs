@@ -36,8 +36,9 @@ namespace NWheels.Domains.Security.UI
     [ViewModelContract]
     public interface ILogUserInReply
     {
-        string UserType { get; set; }
-        string[] UserRoles { get; set; }
+        int Id { get; set; }
+        string FullName { get; set; }
+        string[] Roles { get; set; }
         string[] AuthorizedUidlNodes { get; set; }
     }
 
@@ -53,5 +54,6 @@ namespace NWheels.Domains.Security.UI
     [ViewModelContract]
     public interface ILogUserOutReply
     {
+        int Id { get; set; }
     }
 }

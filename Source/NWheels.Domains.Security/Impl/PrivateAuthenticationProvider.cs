@@ -30,7 +30,7 @@ namespace NWheels.Domains.Security.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IPrincipal Authenticate(string loginName, SecureString password)
+        public UserAccountPrincipal Authenticate(string loginName, SecureString password)
         {
             using ( var data = _framework.NewUnitOfWork<IUserAccountDataRepository>() )
             {
@@ -63,11 +63,11 @@ namespace NWheels.Domains.Security.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IPrincipal CreatePrincipal(IUserAccountEntity userAccount)
+        private UserAccountPrincipal CreatePrincipal(IUserAccountEntity userAccount)
         {
             var claims = _claimFactory.CreateClaimsFromContainerEntity(userAccount);
             var identity = new UserAccountIdentity(userAccount, claims);
-            var principal = new ClaimsPrincipal(identity);
+            var principal = new UserAccountPrincipal(identity);
 
             return principal;
         }
