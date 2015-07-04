@@ -203,6 +203,8 @@ namespace NWheels.Conventions.Core
                         getter: p => property.CanRead ? p.Get(m => m.Return(backingField.CastTo<TT.TProperty>())) : null,
                         setter: p => property.CanWrite ? p.Set((m, value) => backingField.Assign(value.CastTo<TT.TProperty>())) : null
                     );
+
+                    explicitImplementation.OwnerClass.SetPropertyBackingField(property, backingField);
                 }
             }
 
