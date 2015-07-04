@@ -4,16 +4,18 @@ using NWheels.Authorization.Claims;
 
 namespace NWheels.Authorization
 {
-    public abstract class EnumClaimCodeAccessAttribute : CodeAccessSecurityAttribute
+    public abstract class ClaimCodeAccessAttribute : CodeAccessSecurityAttribute
     {
-        private readonly object[] _requiredClaimEnumValues;
+        private readonly string _requiredClaimType;
+        private readonly string[] _requiredClaimValues;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected EnumClaimCodeAccessAttribute(SecurityAction action, params object[] requiredClaimEnumValues)
+        protected ClaimCodeAccessAttribute(SecurityAction action, string requiredClaimType, params string[] requiredClaimValues)
             : base(action)
         {
-            _requiredClaimEnumValues = requiredClaimEnumValues;
+            _requiredClaimType = requiredClaimType;
+            _requiredClaimValues = requiredClaimValues;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -22,7 +24,7 @@ namespace NWheels.Authorization
 
         public override IPermission CreatePermission()
         {
-            return new EnumClaimsPermission(_requiredClaimEnumValues);
+            return new ClaimsPermission(_requiredClaimType, _requiredClaimValues);
         }
 
         #endregion

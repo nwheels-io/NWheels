@@ -3,14 +3,14 @@ using System.Security.Claims;
 
 namespace NWheels.Authorization.Claims
 {
-    public class UserRoleClaim : EnumClaimBase, IImplyMoreClaims
+    public class UserRoleClaim : Claim, IImplyMoreClaims
     {
         public static readonly string UserRoleClaimTypeString = "UserRole";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UserRoleClaim(object userRoleEnumValue)
-            : base(UserRoleClaimTypeString, GetEnumValueString(userRoleEnumValue))
+        public UserRoleClaim(string claimValue)
+            : base(UserRoleClaimTypeString, claimValue)
         {
         }
 

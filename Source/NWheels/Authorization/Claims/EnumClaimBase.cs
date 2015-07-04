@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if false
+
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using NWheels.Extensions;
@@ -53,3 +55,5 @@ namespace NWheels.Authorization.Claims
         }
     }
 }
+
+#endif

@@ -35,7 +35,7 @@ namespace NWheels.Domains.Security.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Permission.MustAuthenticate(SecurityAction.Demand)]
+        [SecurityCheck.Authentication(SecurityAction.Demand)]
         public ILogUserOutReply LogUserOut(ILogUserOutRequest request)
         {
             return NewModel<ILogUserOutReply>();

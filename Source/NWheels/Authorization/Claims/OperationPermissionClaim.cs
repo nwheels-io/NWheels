@@ -1,13 +1,15 @@
-﻿namespace NWheels.Authorization.Claims
+﻿using System.Security.Claims;
+
+namespace NWheels.Authorization.Claims
 {
-    public class OperationPermissionClaim : EnumClaimBase
+    public class OperationPermissionClaim : Claim
     {
         public static readonly string OperationPermissionClaimTypeString = "OperationPermission";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public OperationPermissionClaim(object permissionEnumValue)
-            : base(OperationPermissionClaimTypeString, GetEnumValueString(permissionEnumValue))
+        public OperationPermissionClaim(string claimValue)
+            : base(OperationPermissionClaimTypeString, claimValue)
         {
         }
     }

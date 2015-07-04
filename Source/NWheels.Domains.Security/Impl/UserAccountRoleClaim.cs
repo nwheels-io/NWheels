@@ -16,7 +16,7 @@ namespace NWheels.Domains.Security.Impl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UserAccountRoleClaim(ClaimFactory claimFactory, IUserRoleEntity userRole)
-            : base(ClaimFactory.ParseClaimEnumValue(userRole.ClaimValueType, userRole.ClaimValue))
+            : base(userRole.ClaimValue)
         {
             _claimFactory = claimFactory;
             _userRole = userRole;

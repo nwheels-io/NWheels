@@ -63,10 +63,10 @@ namespace NWheels.Domains.Security.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IPrincipal CreatePrincipal(IUserAccountEntity user)
+        private IPrincipal CreatePrincipal(IUserAccountEntity userAccount)
         {
-            var claims = _claimFactory.CreateClaimsFromContainerEntity(user);
-            var identity = new UserAccountIdentity(user, claims);
+            var claims = _claimFactory.CreateClaimsFromContainerEntity(userAccount);
+            var identity = new UserAccountIdentity(userAccount, claims);
             var principal = new ClaimsPrincipal(identity);
 
             return principal;

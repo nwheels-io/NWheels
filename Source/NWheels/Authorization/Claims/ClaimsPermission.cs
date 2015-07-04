@@ -10,15 +10,17 @@ using NWheels.Exceptions;
 
 namespace NWheels.Authorization.Claims
 {
-    public class EnumClaimsPermission : IPermission
+    public class ClaimsPermission : IPermission
     {
-        private readonly object[] _requiredClaimEnumValues;
+        private readonly string _requiredClaimType;
+        private readonly string[] _requiredClaimValues;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EnumClaimsPermission(object[] requiredClaimEnumValues)
+        public ClaimsPermission(string requiredClaimType, params string[] requiredClaimValues)
         {
-            _requiredClaimEnumValues = requiredClaimEnumValues;
+            _requiredClaimType = requiredClaimType;
+            _requiredClaimValues = requiredClaimValues;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,18 +29,18 @@ namespace NWheels.Authorization.Claims
         {
             var principal = Thread.CurrentPrincipal as ClaimsPrincipal;
 
-            if ( principal == null && _requiredClaimEnumValues.Length > 0 )
+            if ( principal == null && _requiredClaimValues.Length > 0 )
             {
                 throw new AccessDeniedException();
             }
 
-            foreach ( var value in _requiredClaimEnumValues )
+            foreach ( var value in _requiredClaimValues )
             {
-                var requiredValue = value;
+                var requiredClaimValue = value;
 
-                if ( !principal.HasClaim(presentClaim => MatchClaim(presentClaim, requiredValue)) )
+                if ( !principal.HasClaim(_requiredClaimType, requiredClaimValue) )
                 {
-                    throw new AccessDeniedException(requiredValue);
+                    throw new AccessDeniedException(_requiredClaimType, requiredClaimValue);
                 }
             }
         }
@@ -83,22 +85,6 @@ namespace NWheels.Authorization.Claims
         public SecurityElement ToXml()
         {
             throw new NotSupportedException();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static bool MatchClaim(Claim claim, object requiredEnumValue)
-        {
-            var enumClaim = claim as EnumClaimBase;
-
-            if ( enumClaim != null )
-            {
-                return enumClaim.MatchEnumValue(requiredEnumValue);
-            }
-            else
-            {
-                return false;
-            }
         }
     }
 }

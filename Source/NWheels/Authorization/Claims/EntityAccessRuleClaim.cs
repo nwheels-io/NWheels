@@ -1,13 +1,15 @@
-﻿namespace NWheels.Authorization.Claims
+﻿using System.Security.Claims;
+
+namespace NWheels.Authorization.Claims
 {
-    public class EntityAccessRuleClaim : EnumClaimBase
+    public class EntityAccessRuleClaim : Claim
     {
         public static readonly string EntityAccessRuleClaimTypeString = "EntityAccessRule";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EntityAccessRuleClaim(object permissionEnumValue)
-            : base(EntityAccessRuleClaimTypeString, GetEnumValueString(permissionEnumValue))
+        public EntityAccessRuleClaim(string claimValue)
+            : base(EntityAccessRuleClaimTypeString, claimValue)
         {
         }
     }

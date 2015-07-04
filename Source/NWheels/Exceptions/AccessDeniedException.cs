@@ -17,21 +17,16 @@ namespace NWheels.Exceptions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public AccessDeniedException(Claim failedClaim) : this()
+        public AccessDeniedException(string failedClaimType, string failedClaimValue) 
+            : base(string.Format("Access denied. User has no [{0}:{1}]", failedClaimType, failedClaimValue))
         {
-            this.FailedClaim = failedClaim;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public AccessDeniedException(object failedClaimValue) : this()
-        {
+            this.FailedClaimType = failedClaimType;
             this.FailedClaimValue = failedClaimValue;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Claim FailedClaim { get; private set; }
-        public object FailedClaimValue { get; private set; }
+        public string FailedClaimType { get; private set; }
+        public string FailedClaimValue { get; private set; }
     }
 }

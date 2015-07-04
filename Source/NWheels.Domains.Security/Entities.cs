@@ -27,6 +27,8 @@ namespace NWheels.Domains.Security
     [EntityContract(IsAbstract = true)]
     public interface IUserAccountEntity : IEntityPartClaimsContainer
     {
+        int Id { get; }
+
         [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Semantic.LoginName]
         string LoginName { get; set; }
 
