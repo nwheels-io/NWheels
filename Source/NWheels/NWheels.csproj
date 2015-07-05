@@ -86,6 +86,7 @@
     <Compile Include="Authorization\IEntityAccessControlBuilder.cs" />
     <Compile Include="Authorization\IEntityAccessRule.cs" />
     <Compile Include="Authorization\IIdentityInfo.cs" />
+    <Compile Include="Entities\Core\IDataRepositoryCallback.cs" />
     <Compile Include="Extensions\AutofacExtensions.Pipeline.cs" />
     <Compile Include="Pipeline.cs" />
     <Compile Include="UI\AuthorizationContract.cs" />

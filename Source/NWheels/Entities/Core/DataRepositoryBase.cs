@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 
@@ -6,6 +7,7 @@ namespace NWheels.Entities.Core
 {
     public abstract class DataRepositoryBase : IApplicationDataRepository
     {
+        private readonly Dictionary<Type, Action<IDataRepositoryCallback>> _genericCallbacksByContractType;
         private readonly bool _autoCommit;
         private UnitOfWorkState _currentState;
 
@@ -13,6 +15,7 @@ namespace NWheels.Entities.Core
 
         protected DataRepositoryBase(bool autoCommit)
         {
+            _genericCallbacksByContractType = new Dictionary<Type, Action<IDataRepositoryCallback>>();
             _autoCommit = autoCommit;
             _currentState = UnitOfWorkState.Untouched;
         }
@@ -25,6 +28,14 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void InvokeGenericOperation(Type contractType, IDataRepositoryCallback callback)
+        {
+            _genericCallbacksByContractType[contractType](callback);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public abstract Type[] GetEntityContractsInRepository();
         public abstract Type[] GetEntityTypesInRepository();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,6 +61,13 @@ namespace NWheels.Entities.Core
         public void ValidateOperationalState()
         {
             ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RegisterEntityRepository<TEntityContract, TEntityImpl>(IEntityRepository<TEntityContract> repo)
+        {
+            _genericCallbacksByContractType.Add(typeof(TEntityContract), callback => callback.Invoke<TEntityContract, TEntityImpl>(repo));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

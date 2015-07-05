@@ -13,6 +13,7 @@ namespace NWheels
     public interface IFramework
     {
         TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, IsolationLevel? isolationLevel = null) where TRepository : class, IApplicationDataRepository;
+        IApplicationDataRepository NewUnitOfWork(Type repositoryContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null);
         IResourceLock NewLock(ResourceLockMode mode, string resourceNameFormat, params object[] formatArgs);
         Guid NewGuid();
         int NewRandomInt32();

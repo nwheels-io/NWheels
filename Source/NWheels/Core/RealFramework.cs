@@ -39,6 +39,14 @@ namespace NWheels.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IApplicationDataRepository NewUnitOfWork(Type repositoryContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null)
+        {
+            var factory = _components.Resolve<IDataRepositoryFactory>();
+            return factory.NewUnitOfWork(repositoryContractType, autoCommit, isolationLevel);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Guid NewGuid()
         {
             return Guid.NewGuid();

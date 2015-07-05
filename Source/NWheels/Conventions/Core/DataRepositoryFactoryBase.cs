@@ -175,6 +175,7 @@ namespace NWheels.Conventions.Core
                 ImplementGetOrBuildDbCompiledModel(writer);
                 ImplementConstructor(writer);
                 ImplementGetEntityTypesInRepository(writer);
+                ImplementGetEntityContractsInRepository(writer);
                 ImplementNewEntityMethods(writer);
             }
 
@@ -203,9 +204,12 @@ namespace NWheels.Conventions.Core
                 Initializers.Add(cw => {
                     using (TT.CreateScope<TT.TContract, TT.TImpl>(entity.ContractType, entity.ImplementationType))
                     {
-                        writer.OwnerClass.GetPropertyBackingField(entity.RepositoryProperty)
-                            .AsOperand<IEntityRepository<TT.TContract>>()
-                            .Assign(GetNewEntityRepositoryExpression(cw));
+                        var backingField = writer.OwnerClass
+                            .GetPropertyBackingField(entity.RepositoryProperty)
+                            .AsOperand<IEntityRepository<TT.TContract>>();
+
+                        backingField.Assign(GetNewEntityRepositoryExpression(cw));
+                        cw.This<DataRepositoryBase>().Void(x => x.RegisterEntityRepository<TT.TContract, TT.TImpl>, backingField);
                     }
                 });
             }
@@ -238,6 +242,15 @@ namespace NWheels.Conventions.Core
                 writer.ImplementBase<DataRepositoryBase>()
                     .Method<IEnumerable<Type>>(x => x.GetEntityTypesInRepository)
                     .Implement(m => m.Return(m.NewArray<Type>(constantValues: EntitiesInRepository.Select(e => e.ImplementationType).ToArray())));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected virtual void ImplementGetEntityContractsInRepository(ImplementationClassWriter<TypeTemplate.TInterface> writer)
+            {
+                writer.ImplementBase<DataRepositoryBase>()
+                    .Method<IEnumerable<Type>>(x => x.GetEntityContractsInRepository)
+                    .Implement(m => m.Return(m.NewArray<Type>(constantValues: EntitiesInRepository.Select(e => e.ContractType).ToArray())));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

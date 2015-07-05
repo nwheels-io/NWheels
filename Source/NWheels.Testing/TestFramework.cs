@@ -78,6 +78,13 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IApplicationDataRepository NewUnitOfWork(Type repositoryContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null)
+        {
+            return _dataRepositoryFactory.NewUnitOfWork(repositoryContractType, autoCommit, isolationLevel);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IResourceLock NewLock(ResourceLockMode mode, string resourceNameFormat, params object[] formatArgs)
         {
             return new ResourceLock(mode, resourceNameFormat.FormatIf(formatArgs));
