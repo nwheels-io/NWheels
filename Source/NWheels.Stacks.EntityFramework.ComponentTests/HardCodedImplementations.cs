@@ -117,6 +117,11 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 
                     return _s_compiledModel;
                 }
+
+                public override Type[] GetEntityContractsInRepository()
+                {
+                    throw new NotImplementedException();
+                }
             }
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -219,6 +224,11 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                     }
 
                     return _s_compiledModel;
+                }
+
+                public override Type[] GetEntityContractsInRepository()
+                {
+                    throw new NotImplementedException();
                 }
             }
 

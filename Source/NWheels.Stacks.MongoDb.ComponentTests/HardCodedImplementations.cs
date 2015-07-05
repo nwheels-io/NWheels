@@ -58,6 +58,16 @@ namespace NWheels.Stacks.MongoDb.ComponentTests
             {
                 throw new NotImplementedException();
             }
+
+            public void InvokeGenericOperation(Type contractType, Entities.Core.IDataRepositoryCallback callback)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Type[] GetEntityContractsInRepository()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

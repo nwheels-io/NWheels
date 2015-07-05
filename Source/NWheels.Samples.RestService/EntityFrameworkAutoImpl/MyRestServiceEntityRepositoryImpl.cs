@@ -82,5 +82,15 @@ namespace NWheels.Samples.RestService.EntityFrameworkAutoImpl
         void IDisposable.Dispose()
         {
         }
+
+        public void InvokeGenericOperation(Type contractType, Entities.Core.IDataRepositoryCallback callback)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Type[] GetEntityContractsInRepository()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
