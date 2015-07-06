@@ -15,21 +15,20 @@ using NWheels.Endpoints;
 
 namespace NWheels.Stacks.ODataBreeze
 {
-    internal class ODataEndpointComponent : LifecycleEventListenerBase
+    public class ODataEndpointComponent : LifecycleEventListenerBase
     {
-        private readonly ILifetimeScope _container;
+        private readonly ILifetimeScope _baseContainer;
         private readonly RestApiEndpointRegistration _endpointRegistration;
-        private readonly IApplicationDataRepository _repository;
         private readonly ILogger _logger;
         private IDisposable _host = null;
+        private ILifetimeScope _hostLifetimeContainer = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ODataEndpointComponent(IComponentContext components, RestApiEndpointRegistration endpointRegistration, Auto<ILogger> logger)
         {
-            _container = (ILifetimeScope)components;
+            _baseContainer = (ILifetimeScope)components;
             _endpointRegistration = endpointRegistration;
-            _repository = (IApplicationDataRepository)components.Resolve(endpointRegistration.Contract);
             _logger = logger.Instance;
         }
 
@@ -40,12 +39,15 @@ namespace NWheels.Stacks.ODataBreeze
             try
             {
                 var url = _endpointRegistration.AddressWithTrailingSlash.ToString();
+                
+                _hostLifetimeContainer = _baseContainer.BeginLifetimeScope();
                 _host = WebApp.Start(url, ConfigureWebService);
-                _logger.RestEndpointStarted(_repository.GetType().Name, url);
+
+                _logger.RestEndpointStarted(_endpointRegistration.Contract.Name, url);
             }
             catch ( Exception e )
             {
-                _logger.RestEndpointFailedToStart(_repository.GetType().Name, e);
+                _logger.RestEndpointFailedToStart(_endpointRegistration.Contract.Name, e);
                 throw;
             }
         }
@@ -57,11 +59,16 @@ namespace NWheels.Stacks.ODataBreeze
             try
             {
                 _host.Dispose();
-                _logger.RestEndpointStopped(_repository.GetType().Name);
+                _hostLifetimeContainer.Dispose();
+                
+                _host = null;
+                _hostLifetimeContainer = null;
+
+                _logger.RestEndpointStopped(_endpointRegistration.Contract.Name);
             }
             catch ( Exception e )
             {
-                _logger.RestEndpointFailedToStop(_repository.GetType().Name, e);
+                _logger.RestEndpointFailedToStop(_endpointRegistration.Contract.Name, e);
                 throw;
             }
         }
@@ -76,9 +83,9 @@ namespace NWheels.Stacks.ODataBreeze
                 name: "BreezeApi",
                 routeTemplate: "breeze/{controller}/{action}");
 
-            config.DependencyResolver = new AutofacWebApiDependencyResolver(_container);
+            config.DependencyResolver = new AutofacWebApiDependencyResolver(_hostLifetimeContainer);
 
-            app.UseAutofacMiddleware(_container);
+            app.UseAutofacMiddleware(_hostLifetimeContainer);
             app.UseAutofacWebApi(config);
             app.UseWebApi(config);
         }

@@ -65,6 +65,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Hapil, Version=0.9.9.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\FelixB.Hapil.0.9.9\lib\net45\Hapil.dll</HintPath>
+    </Reference>
+    <Reference Include="Hapil.Applied, Version=0.9.9.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\FelixB.Hapil.0.9.9\lib\net45\Hapil.Applied.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Data.Edm, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Data.Edm.5.6.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
@@ -136,7 +144,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BreezeWebApiConfig.cs" />
+    <Compile Include="EdmModelBuilder - Copy.cs" />
+    <Compile Include="EdmModelBuilder.cs" />
     <Compile Include="HardCoded\UserAccountsController.cs" />
+    <Compile Include="HardCoded\UserAccountsContextProvider.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="ODataEndpointComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

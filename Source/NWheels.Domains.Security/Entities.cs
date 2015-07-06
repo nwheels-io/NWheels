@@ -25,7 +25,7 @@ namespace NWheels.Domains.Security
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract(IsAbstract = true)]
-    public interface IUserAccountEntity : IEntityPartClaimsContainer
+    public interface IUserAccountEntity : IEntityPartClaimsContainer, IEntityPartId<int>
     {
         [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Semantic.LoginName]
         string LoginName { get; set; }
@@ -77,7 +77,7 @@ namespace NWheels.Domains.Security
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IPasswordEntity
+    public interface IPasswordEntity : IEntityPartId<int>
     {
         [PropertyContract.Required, PropertyContract.Relation.CompositionParent]
         IUserAccountEntity User { get; set; }
@@ -152,21 +152,21 @@ namespace NWheels.Domains.Security
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IUserRoleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim, IEntityPartClaimsContainer
+    public interface IUserRoleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim, IEntityPartClaimsContainer, IEntityPartId<int>
     {
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IOperationPermissionEntity : IEntityPartUniqueDisplayName, IEntityPartClaim
+    public interface IOperationPermissionEntity : IEntityPartUniqueDisplayName, IEntityPartClaim, IEntityPartId<int>
     {
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IEntityAccessRuleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim
+    public interface IEntityAccessRuleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim, IEntityPartId<int>
     {
         [PropertyContract.Semantic.InheritorOf(typeof(IEntityAccessRule))]
         Type RuleObject { get; set; }
