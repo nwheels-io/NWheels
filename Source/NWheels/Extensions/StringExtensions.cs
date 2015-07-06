@@ -8,6 +8,62 @@ namespace NWheels.Extensions
 {
     public static class StringExtensions
     {
+        public static string TrimLead(this string str, string prefix)
+        {
+            if ( str != null && prefix != null && str.StartsWith(prefix) )
+            {
+                return str.Substring(prefix.Length);
+            }
+            else
+            {
+                return str;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string TrimTail(this string str, string suffix)
+        {
+            if ( str != null && suffix != null && str.EndsWith(suffix) )
+            {
+                return str.Substring(0, str.Length - suffix.Length);
+            }
+            else
+            {
+                return str;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string ConvertToPascalCase(this string str)
+        {
+            if ( !string.IsNullOrEmpty(str) )
+            {
+                return str.Substring(0, 1).ToUpper() + str.Substring(1);
+            }
+            else
+            {
+                return str;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string ConvertToCamelCase(this string str)
+        {
+            if ( !string.IsNullOrEmpty(str) )
+            {
+                return str.Substring(0, 1).ToLower() + str.Substring(1);
+            }
+            else
+            {
+                return str;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static bool EqualsIgnoreCase(this string s, string other)
         {
             return s.Equals(other, StringComparison.InvariantCultureIgnoreCase);
