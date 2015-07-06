@@ -145,14 +145,16 @@ namespace NWheels.Testing
 
             public Logex.ILogexMatchBuilder Between(int fromTimes, int toTimes)
             {
-                throw new NotImplementedException();
+                PushMultiplier(new LogexImpl.RangeOfTimesMultiplier(fromTimes, toTimes, string.Format("{0}..{1} times", fromTimes, toTimes)));
+                return this;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public Logex.ILogexMatchBuilder Exactly(int times)
             {
-                throw new NotImplementedException();
+                PushMultiplier(new LogexImpl.RangeOfTimesMultiplier(times, times, times + " times"));
+                return this;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
