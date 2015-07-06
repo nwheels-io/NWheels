@@ -60,7 +60,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyUtility.cs" />
     <Compile Include="BootConfigurationExtensions.cs" />
     <Compile Include="CoreUnitTestBase.cs" />
     <Compile Include="DataObjects\Jsonlike.cs" />

@@ -88,9 +88,16 @@
     <Compile Include="Authorization\IIdentityInfo.cs" />
     <Compile Include="Entities\Core\IDataRepositoryCallback.cs" />
     <Compile Include="Entities\Core\IStorageInitializer.cs" />
+    <Compile Include="Entities\Core\HiloGeneratorMetadataConvention.cs" />
+    <Compile Include="Entities\Core\HiloIntegerIdGenerator.cs" />
+    <Compile Include="Entities\IDataRepositoryPopulator.cs" />
+    <Compile Include="Entities\Impl\DatabaseInitializer.cs" />
     <Compile Include="Extensions\AutofacExtensions.Pipeline.cs" />
     <Compile Include="Pipeline.cs" />
     <Compile Include="UI\AuthorizationContract.cs" />
+    <Compile Include="UI\Toolbox\Chart.cs" />
+    <Compile Include="UI\Toolbox\Crud.cs" />
+    <Compile Include="Utilities\AssemblyUtility.cs" />
     <Compile Include="Utilities\SecureStringUtility.cs" />
     <Compile Include="SecurityCheck.cs" />
     <Compile Include="Auto.cs" />

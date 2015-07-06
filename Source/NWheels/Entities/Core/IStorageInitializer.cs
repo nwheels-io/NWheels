@@ -8,6 +8,7 @@ namespace NWheels.Entities.Core
 {
     public interface IStorageInitializer
     {
+        bool StorageSchemaExists(string connectionString);
         void MigrateStorageSchema(string connectionString);
         void CreateStorageSchema(string connectionString);
         void DropStorageSchema(string connectionString);

@@ -358,6 +358,14 @@ namespace NWheels.Extensions
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public IRegistrationBuilder<TPopulator, ConcreteReflectionActivatorData, SingleRegistrationStyle> 
+                RegisterDataPopulator<TPopulator>() where TPopulator : IDataRepositoryPopulator
+            {
+                return _builder.RegisterType<TPopulator>().As<IDataRepositoryPopulator>().SingleInstance();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public void UsePascalCaseRelationalMappingConvention(bool usePluralTableNames = true)
             {
                 _builder.RegisterInstance(new RelationalMappingConventionDefault(
@@ -383,6 +391,18 @@ namespace NWheels.Extensions
                     .As<IMetadataConvention>()
                     .SingleInstance()
                     .LastInPipeline();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void UseHiloIntegerIdGenerator(int loDigits)
+            {
+                _builder.RegisterType<HiloGeneratorMetadataConvention>().As<IMetadataConvention>().LastInPipeline();
+                _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<HiloIntegerIdGenerator>()
+                    .WithParameter(TypedParameter.From(loDigits))
+                    .As<HiloIntegerIdGenerator, IPropertyValueGenerator, IDataRepositoryPopulator>()
+                    .FirstInPipeline()
+                    .SingleInstance();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

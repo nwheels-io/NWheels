@@ -65,6 +65,12 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected virtual void OnInitializedStorage()
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected virtual void StartNodeHost()
         {
             this.Node = new NodeHost(CreateNodeConfiguration(), OnRegisteringHostComponents);
@@ -167,6 +173,11 @@ namespace NWheels.Testing
                 _ownerTest.Framework = framework;
 
                 databaseConfig.Instance.ConnectionString = _ownerTest.StorageConnectionString;
+                
+                storageInitializer.DropStorageSchema(databaseConfig.Instance.ConnectionString);
+                storageInitializer.CreateStorageSchema(databaseConfig.Instance.ConnectionString);
+
+                _ownerTest.OnInitializedStorage();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

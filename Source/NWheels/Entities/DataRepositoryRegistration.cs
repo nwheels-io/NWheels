@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using NWheels.Entities.Impl;
 using NWheels.Extensions;
 
 namespace NWheels.Entities
@@ -11,7 +12,6 @@ namespace NWheels.Entities
     public abstract class DataRepositoryRegistration
     {
         public abstract Type DataRepositoryType { get; }
-        public abstract bool InitializeStorageOnStartup { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -20,7 +20,6 @@ namespace NWheels.Entities
         where TRepo : class, IApplicationDataRepository
     {
         private readonly ContainerBuilder _builder;
-        private bool _initializeStorageOnStartup;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -38,19 +37,10 @@ namespace NWheels.Entities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override bool InitializeStorageOnStartup
-        {
-            get
-            {
-                return _initializeStorageOnStartup;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public DataRepositoryRegistration<TRepo> WithInitializeStorageOnStartup()
         {
-            _initializeStorageOnStartup = true;
+            _builder.NWheelsFeatures().Logging().RegisterLogger<DatabaseInitializer.ILogger>();
+            _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>();
             return this;
         }
 
