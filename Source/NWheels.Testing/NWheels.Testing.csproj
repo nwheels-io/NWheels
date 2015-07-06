@@ -36,17 +36,17 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.8.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil, Version=0.9.9.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.8\lib\net45\Hapil.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.9\lib\net45\Hapil.dll</HintPath>
     </Reference>
     <Reference Include="Hapil.Applied">
-      <HintPath>..\packages\FelixB.Hapil.0.9.8\lib\net45\Hapil.Applied.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.9\lib\net45\Hapil.Applied.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Hapil.Testing.NUnit, Version=0.9.8.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil.Testing.NUnit, Version=0.9.9.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.Testing.NUnit.0.9.8\lib\net45\Hapil.Testing.NUnit.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.Testing.NUnit.0.9.9\lib\net45\Hapil.Testing.NUnit.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
@@ -60,6 +60,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyUtility.cs" />
+    <Compile Include="BootConfigurationExtensions.cs" />
     <Compile Include="CoreUnitTestBase.cs" />
     <Compile Include="DataObjects\Jsonlike.cs" />
     <Compile Include="DynamicTypeUnitTestBase.cs" />
@@ -79,7 +81,9 @@
     <Compile Include="Logging\Core\ILogexValueMatcher.cs" />
     <Compile Include="Logging\Impl\LogexImpl.cs" />
     <Compile Include="LogIs.cs" />
+    <Compile Include="SystemTestBase.cs" />
     <Compile Include="TestFramework.cs" />
+    <Compile Include="TestNodeHost.cs" />
     <Compile Include="TestThreadLogAppender.cs" />
     <Compile Include="UnitTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -89,6 +93,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NWheels.Stacks.Nlog\NWheels.Stacks.Nlog.csproj">
+      <Project>{8ec79d0a-b99d-4ed1-9494-7756f29916c7}</Project>
+      <Name>NWheels.Stacks.Nlog</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NWheels\NWheels.csproj">
       <Project>{f0ecf554-bf54-4843-b62f-c67c4deb2764}</Project>
       <Name>NWheels</Name>
