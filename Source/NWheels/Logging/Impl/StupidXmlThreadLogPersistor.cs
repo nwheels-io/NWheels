@@ -16,13 +16,15 @@ namespace NWheels.Logging.Impl
     internal class StupidXmlThreadLogPersistor : LifecycleEventListenerBase, IThreadLogPersistor
     {
         private readonly IComponentContext _components;
+        private readonly IPlainLog _plainLog;
         private string _threadLogFolder;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public StupidXmlThreadLogPersistor(IComponentContext components)
+        public StupidXmlThreadLogPersistor(IComponentContext components, IPlainLog plainLog)
         {
             _components = components;
+            _plainLog = plainLog;
             _threadLogFolder = PathUtility.HostBinPath("..\\BootLog");
         }
 
@@ -63,11 +65,18 @@ namespace NWheels.Logging.Impl
             var serializer = new DataContractSerializer(typeof(ThreadLogSnapshot));
             var fileName = threadLog.LogId.ToString("N") + ".threadlog";
 
-            using ( var file = File.Create(Path.Combine(_threadLogFolder, fileName)) )
+            try
             {
-                var writer = XmlWriter.Create(file);
-                serializer.WriteObject(writer, threadLog.TakeSnapshot());
-                writer.Flush();
+                using ( var file = File.Create(Path.Combine(_threadLogFolder, fileName)) )
+                {
+                    var writer = XmlWriter.Create(file);
+                    serializer.WriteObject(writer, threadLog.TakeSnapshot());
+                    writer.Flush();
+                }
+            }
+            catch ( Exception e )
+            {
+                _plainLog.Warning(e.Message);
             }
         }
     }

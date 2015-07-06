@@ -732,10 +732,10 @@ namespace NWheels.Hosting.Core
                 sequence.Once().OnRevert(SaveDynamicModuleToAssembly);
                 sequence.Once().OnRevert(WriteEffectiveMetadataJson);
                 sequence.Once().OnPerform(LoadConfiguration);
-                sequence.Once().OnPerform(LoadDataRepositories);
                 //sequence.Once().OnPerform(CallHostComponentsConfigured);
                 sequence.Once().OnPerform(FindLifecycleComponents);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeConfigured);
+                sequence.Once().OnPerform(LoadDataRepositories);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoading).OnRevert(CallComponentNodeUnloaded);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentLoad).OnRevert(CallComponentUnload);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoaded).OnRevert(CallComponentNodeUnloading);
