@@ -22,6 +22,8 @@ namespace NWheels.UI
             base.ModelStateType = builder.RegisterMetaType(typeof(TState));
 
             builder.BuildNodes(builder.GetDeclaredMemberNodes(this));
+
+            OnBuild(builder);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,5 +37,11 @@ namespace NWheels.UI
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected abstract void DescribePresenter(PresenterBuilder<TWidget, TData, TState> presenter);
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void OnBuild(UidlBuilder builder)
+        {
+        }
     }
 }

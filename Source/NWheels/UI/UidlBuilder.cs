@@ -69,6 +69,20 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string RegisterMetaType(Type type)
+        {
+            var typeKey = type.AssemblyQualifiedNameNonVersioned();
+
+            if (!_document.MetaTypes.ContainsKey(typeKey))
+            {
+                _document.MetaTypes.Add(typeKey, CreateMetaType(type));
+            }
+
+            return typeKey;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IEnumerable<string> GetTranslatables()
         {
             var translatables = new HashSet<string>();
@@ -144,20 +158,6 @@ namespace NWheels.UI
                 .ToArray();
 
             return declaredMemberNodes;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal string RegisterMetaType(Type type)
-        {
-            var typeKey = type.AssemblyQualifiedNameNonVersioned();
-
-            if ( !_document.MetaTypes.ContainsKey(typeKey) )
-            {
-                _document.MetaTypes.Add(typeKey, CreateMetaType(type));
-            }
-
-            return typeKey;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -241,6 +241,9 @@ namespace NWheels.UI
 
             var newInstance = (UidlScreenPart)Activator.CreateInstance(screenPartType, screenPartType.Name, _applicationBeingAdded);
             _applicationBeingAdded.ScreenParts.Add(newInstance);
+            
+            InstantiateDeclaredMemberNodes(newInstance);
+            
             return newInstance;
         }
 
