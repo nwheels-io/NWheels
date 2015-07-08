@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +30,15 @@ namespace NWheels.UI.Toolbox
         public string EntityName { get; set; }
         [DataMember]
         public string EntityMetaType { get; set; }
+        [DataMember]
+        public List<string> DisplayColumns { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override IEnumerable<string> GetTranslatables()
+        {
+            return base.GetTranslatables().Concat(DisplayColumns ?? new List<string>());
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -43,6 +53,21 @@ namespace NWheels.UI.Toolbox
             this.WidgetType = "Crud";
             this.TemplateName = "Crud";
             this.EntityName = typeof(TEntity).Name.TrimLead("I").TrimTail("Entity");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Crud<TEntity> Column<T>(Expression<Func<TEntity, T>> propertySelector)
+        {
+            var property = propertySelector.GetPropertyInfo();
+            
+            if ( this.DisplayColumns == null )
+            {
+                this.DisplayColumns = new List<string>();
+            }
+
+            this.DisplayColumns.Add(property.Name);
+            return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

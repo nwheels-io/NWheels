@@ -7,6 +7,7 @@ using System.Spatial;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 using Hapil;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Csdl;
@@ -67,12 +68,47 @@ namespace NWheels.Stacks.ODataBreeze
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string GetModelJsonString()
+        public string GetModelXmlString()
+        {
+            var xmlString = WriteEdmxAsXmlString();
+
+            var edmxDocument = XDocument.Parse(xmlString);
+            var dataServicesElement = edmxDocument.Root.Elements().First(e => e.Name.LocalName == "DataServices");
+            var necessarySchemaElements = dataServicesElement.Elements().Where(e => 
+                e.Name.LocalName == "Schema" && 
+                e.Elements().Any(ee => ee.Name.LocalName == "EntityType")).ToArray();
+
+            var firstNecessarySchemaElement = necessarySchemaElements[0];
+
+            foreach ( var subsequentNecessarySchemaElement in necessarySchemaElements.Skip(1) )
+            {
+                var schemaChildElements = subsequentNecessarySchemaElement.Elements().ToArray();
+                
+                foreach ( var childElement in schemaChildElements )
+                {
+                    childElement.Remove();
+                    firstNecessarySchemaElement.Add(childElement);
+                }
+            }
+
+            return firstNecessarySchemaElement.ToString();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string WriteEdmxAsXmlString()
         {
             var output = new StringBuilder();
             IEnumerable<EdmError> errors;
 
-            using ( var xmlWriter = XmlWriter.Create(output) )
+            var xmlSettings = new XmlWriterSettings() {
+                ConformanceLevel = ConformanceLevel.Fragment,
+                Indent = true,
+                IndentChars = "  ",
+                Encoding = Encoding.UTF8
+            };
+
+            using ( var xmlWriter = XmlWriter.Create(output, xmlSettings) )
             {
                 if ( !EdmxWriter.TryWriteEdmx(_model, xmlWriter, EdmxTarget.OData, out errors) )
                 {
@@ -126,7 +162,7 @@ namespace NWheels.Stacks.ODataBreeze
                 property.Name, 
                 GetEdmPrimitiveTypeKind(underlyingClrType), 
                 isNullable: !property.Validation.IsRequired);
-
+            
             if ( property.Role == PropertyRole.Key )
             {
                 entityType.AddKeys(edmProperty);

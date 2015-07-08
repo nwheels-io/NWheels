@@ -10,6 +10,13 @@ namespace NWheels.Extensions
 {
     public static class ExpressionExtensions
     {
+        public static PropertyInfo GetPropertyInfo(this LambdaExpression lambda)
+        {
+            return (PropertyInfo)((MemberExpression)lambda.Body).Member;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static MethodInfo GetMethodInfo(this LambdaExpression lambda)
         {
             Expression[] callArguments;

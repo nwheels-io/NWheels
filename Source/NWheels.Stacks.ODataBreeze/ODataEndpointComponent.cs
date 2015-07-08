@@ -1,13 +1,18 @@
-﻿using System;
+﻿#pragma warning disable 0618
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.OData.Batch;
 using Autofac;
 using Autofac.Integration.WebApi;
 using Owin;
 using Microsoft.Owin.Hosting;
+using NWheels.DataObjects;
+using NWheels.Domains.Security;
 using NWheels.Entities;
 using NWheels.Hosting;
 using NWheels.Logging;
@@ -22,11 +27,13 @@ namespace NWheels.Stacks.ODataBreeze
         private readonly ILogger _logger;
         private IDisposable _host = null;
         private ILifetimeScope _hostLifetimeContainer = null;
+        private readonly ITypeMetadataCache _metadataCache;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ODataEndpointComponent(IComponentContext components, RestApiEndpointRegistration endpointRegistration, Auto<ILogger> logger)
+        public ODataEndpointComponent(IComponentContext components, ITypeMetadataCache metadataCache, RestApiEndpointRegistration endpointRegistration, Auto<ILogger> logger)
         {
+            _metadataCache = metadataCache;
             _baseContainer = (ILifetimeScope)components;
             _endpointRegistration = endpointRegistration;
             _logger = logger.Instance;
@@ -81,7 +88,7 @@ namespace NWheels.Stacks.ODataBreeze
 
             config.Routes.MapHttpRoute(
                 name: "BreezeApi",
-                routeTemplate: "breeze/{controller}/{action}");
+                routeTemplate: "{controller}/{action}");
 
             config.DependencyResolver = new AutofacWebApiDependencyResolver(_hostLifetimeContainer);
 

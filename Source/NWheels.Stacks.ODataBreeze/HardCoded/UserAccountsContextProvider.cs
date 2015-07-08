@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Breeze.ContextProvider;
 using Hapil;
 using Microsoft.Data.Edm;
@@ -31,6 +32,20 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string GetRepositoryMetadataString(bool fullEdmx)
+        {
+            var builder = new EdmModelBuilder(_metadataCache);
+
+            builder.AddEntity(_metadataCache.GetTypeMetadata(typeof(IUserAccountEntity)));
+            builder.AddEntity(_metadataCache.GetTypeMetadata(typeof(IUserRoleEntity)));
+            builder.AddEntity(_metadataCache.GetTypeMetadata(typeof(IOperationPermissionEntity)));
+            builder.AddEntity(_metadataCache.GetTypeMetadata(typeof(IEntityAccessRuleEntity)));
+
+            return builder.GetModelXmlString();
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IUserAccountDataRepository QuerySource
         {
             get { return _querySource; }
@@ -40,14 +55,10 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
 
         protected override string BuildJsonMetadata()
         {
-            var builder = new EdmModelBuilder(_metadataCache);
+            var xmlString = GetRepositoryMetadataString(fullEdmx: false);
+            var document = XDocument.Parse(xmlString);
+            var jsonString = XDocToJson(document);
 
-            builder.AddEntity(_metadataCache.GetTypeMetadata(typeof(IUserAccountEntity)));
-            builder.AddEntity(_metadataCache.GetTypeMetadata(typeof(IUserRoleEntity)));
-            builder.AddEntity(_metadataCache.GetTypeMetadata(typeof(IOperationPermissionEntity)));
-            builder.AddEntity(_metadataCache.GetTypeMetadata(typeof(IEntityAccessRuleEntity)));
-
-            var jsonString = builder.GetModelJsonString();
             return jsonString;
         }
 
