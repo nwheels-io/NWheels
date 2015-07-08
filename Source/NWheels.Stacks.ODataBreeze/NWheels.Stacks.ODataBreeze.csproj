@@ -150,6 +150,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BreezeMetadataBuilder.cs" />
     <Compile Include="BreezeWebApiConfig.cs" />
     <Compile Include="EdmModelBuilder - Copy.cs" />
     <Compile Include="EdmModelBuilder.cs" />
