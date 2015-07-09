@@ -55,11 +55,14 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
 
         protected override string BuildJsonMetadata()
         {
-            var xmlString = GetRepositoryMetadataString(fullEdmx: false);
-            var document = XDocument.Parse(xmlString);
-            var jsonString = XDocToJson(document);
+            var builder = new BreezeMetadataBuilder(_metadataCache);
 
-            return jsonString;
+            builder.AddDataService("rest/UserAccounts/");
+            builder.AddEntity(typeof(IUserAccountEntity));
+            builder.AddEntity(typeof(IFrontEndUserAccountEntity));
+            builder.AddEntity(typeof(IBackEndUserAccountEntity));
+
+            return builder.GetMetadataJsonString();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
