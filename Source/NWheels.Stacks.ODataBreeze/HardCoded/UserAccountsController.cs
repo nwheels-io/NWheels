@@ -38,8 +38,8 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
         [HttpGet]
         public string Metadata()
         {
-            //var metadataJsonString = _contextProvider.Metadata();
-            var metadataJsonString = File.ReadAllText(@"C:\Temp\metadata.json");
+            var metadataJsonString = _contextProvider.Metadata();
+            //var metadataJsonString = File.ReadAllText(@"C:\Temp\metadata.json");
             return metadataJsonString;
         }
 
@@ -61,17 +61,17 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
         //    //return metadataJsonString;
         //}
 
-        [HttpGet]
-        public HttpResponseMessage UserAccount()
-        {
-            var dataJsonString = File.ReadAllText(@"C:\Temp\data.json");
+        //[HttpGet]
+        //public HttpResponseMessage UserAccount()
+        //{
+        //    var dataJsonString = File.ReadAllText(@"C:\Temp\data.json");
             
-            var response = new HttpResponseMessage() {
-                Content = new StringContent(dataJsonString, Encoding.UTF8, "application/json")
-            };
+        //    var response = new HttpResponseMessage() {
+        //        Content = new StringContent(dataJsonString, Encoding.UTF8, "application/json")
+        //    };
 
-            return response;
-        }
+        //    return response;
+        //}
 
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -92,12 +92,12 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
 
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //[HttpGet]
-        //[Queryable]
-        //public IQueryable<IUserAccountEntity> UserAccount()
-        //{
-        //    return _contextProvider.QuerySource.AllUsers;
-        //}
+        [HttpGet]
+        [Queryable]
+        public IQueryable<IUserAccountEntity> UserAccount()
+        {
+            return _contextProvider.QuerySource.AllUsers;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
