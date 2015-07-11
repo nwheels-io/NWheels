@@ -68,6 +68,12 @@ namespace NWheels.Stacks.MongoDb.ComponentTests
             {
                 throw new NotImplementedException();
             }
+
+
+            public Entities.IEntityRepository[] GetEntityRepositories()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

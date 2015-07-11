@@ -92,5 +92,11 @@ namespace NWheels.Samples.RestService.EntityFrameworkAutoImpl
         {
             throw new NotImplementedException();
         }
+
+
+        public Entities.IEntityRepository[] GetEntityRepositories()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
