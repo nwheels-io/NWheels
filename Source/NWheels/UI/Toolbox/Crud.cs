@@ -6,21 +6,24 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Extensions;
+using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-    public class Crud : WidgetBase<Gauge, Empty.Data, Empty.State>
+    public class Crud : WidgetBase<Crud, Empty.Data, Empty.State>
     {
         public Crud(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
+            DisplayColumns = new List<string>();
+            Form = new CrudForm("Form", this);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<Gauge, Empty.Data, Empty.State> presenter)
+        protected override void DescribePresenter(PresenterBuilder<Crud, Empty.Data, Empty.State> presenter)
         {
         }
 
@@ -32,12 +35,21 @@ namespace NWheels.UI.Toolbox
         public string EntityMetaType { get; set; }
         [DataMember]
         public List<string> DisplayColumns { get; set; }
+        [DataMember, ManuallyAssigned]
+        public CrudForm Form { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override IEnumerable<string> GetTranslatables()
         {
             return base.GetTranslatables().Concat(DisplayColumns ?? new List<string>());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
+        {
+            return new WidgetUidlNode[] { Form };
         }
     }
 
@@ -53,6 +65,7 @@ namespace NWheels.UI.Toolbox
             this.WidgetType = "Crud";
             this.TemplateName = "Crud";
             this.EntityName = typeof(TEntity).Name.TrimLead("I").TrimTail("Entity");
+            this.Form = new CrudForm<TEntity>("Form", this);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -60,6 +60,13 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IEnumerable<KeyValuePair<Type, Type>> GetAllImplementations()
+        {
+            return _implementationTypeByFactoryType.ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string Name { get; set; }
         public Type ContractType { get; set; }
         public bool IsAbstract { get; set; }

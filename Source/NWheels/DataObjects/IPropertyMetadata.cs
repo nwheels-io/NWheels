@@ -11,6 +11,7 @@ namespace NWheels.DataObjects
         bool HasContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute;
         TAttribute TryGetContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute;
         bool TryGetImplementation(Type factoryType, out PropertyInfo implementationProperty);
+        IEnumerable<KeyValuePair<Type, PropertyInfo>> GetAllImplementations();
         ITypeMetadata DeclaringContract { get; }
         string Name { get; }
         string ContractQualifiedName { get; }

@@ -97,6 +97,7 @@
     <Compile Include="UI\AuthorizationContract.cs" />
     <Compile Include="UI\Toolbox\Chart.cs" />
     <Compile Include="UI\Toolbox\Crud.cs" />
+    <Compile Include="UI\Toolbox\CrudForm.cs" />
     <Compile Include="Utilities\AssemblyUtility.cs" />
     <Compile Include="Utilities\SecureStringUtility.cs" />
     <Compile Include="SecurityCheck.cs" />

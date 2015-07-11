@@ -71,6 +71,8 @@ namespace NWheels.UI.Uidl
             this.DefaultDisplayFormat = metadata.DefaultDisplayFormat;
             this.DefaultDisplayPropertyNames = metadata.DefaultDisplayProperties.Select(p => p.Name).ToList();
             this.DefaultSortPropertyNames = metadata.DefaultSortProperties.Select(p => p.Name).ToList();
+
+            SetRestType(metadata);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -79,6 +81,10 @@ namespace NWheels.UI.Uidl
         public string BaseTypeName { get; set; }
         [DataMember]
         public List<string> DerivedTypeNames { get; set; }
+        [DataMember]
+        public string RestTypeNamespace { get; set; }
+        [DataMember]
+        public string RestTypeName { get; set; }
         [DataMember]
         public Dictionary<string, UidlMetaProperty> Properties { get; set; }
         [DataMember]
@@ -91,6 +97,21 @@ namespace NWheels.UI.Uidl
         public List<string> DefaultDisplayPropertyNames { get; set; }
         [DataMember]
         public List<string> DefaultSortPropertyNames { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void SetRestType(ITypeMetadata metadata)
+        {
+            var implementations = metadata.GetAllImplementations().ToArray();
+
+            if ( implementations.Any() )
+            {
+                var implementationType = implementations.Single().Value; //TODO: get rid of this limitation - introduce REST entity factory
+
+                this.RestTypeName = implementationType.Name;
+                this.RestTypeNamespace = implementationType.Namespace;
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -74,6 +74,13 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IEnumerable<KeyValuePair<Type, PropertyInfo>> GetAllImplementations()
+        {
+            return _implementationPropertyByFactoryType.ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TypeMetadataBuilder DeclaringContract { get; set; }
         public string Name { get; set; }
         public PropertyKind Kind { get; set; }

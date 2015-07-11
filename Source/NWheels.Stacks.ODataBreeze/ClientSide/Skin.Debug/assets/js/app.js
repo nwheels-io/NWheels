@@ -192,6 +192,7 @@ theApp.service('uidlService', ['$q', '$http', '$rootScope', function ($q, $http,
                 case 'Screen':
                     var screen = m_index.screens[behavior.targetQualifiedName];
                     $rootScope.currentScreen = screen;
+                    location.hash = screen.qualifiedName;
                     $rootScope.$broadcast(screen.qualifiedName + ':NavigatedHere', input);
                     break;
                 case 'ScreenPart':
@@ -288,6 +289,7 @@ theApp.service('uidlService', ['$q', '$http', '$rootScope', function ($q, $http,
             scope.$on(scope.uidl.qualifiedName + ':NavReq', function(event, data) {
 				console.log('screenPartContainer::on-NavReq', scope.uidl.qualifiedName, '->', data.screenPart.qualifiedName);
                 scope.currentScreenPart = data.screenPart;
+                location.hash = data.screenPart.qualifiedName;
                 scope.$broadcast(data.screenPart.qualifiedName + ':NavigatedHere', data.input);
             });
 			if (scope.uidl.initalScreenPartQualifiedName) {
@@ -322,21 +324,52 @@ theApp.service('uidlService', ['$q', '$http', '$rootScope', function ($q, $http,
 
     m_controllerImplementations['Crud'] = {
         implement: function(scope) {
-			function implementMenuItems(items) {
-				for (var i = 0; i < items.length; i++) {
-					var item = items[i];
-					for (var j = 0; j < item.behaviors.length; j++) {
-						var behavior = item.behaviors[j];
-						if (behavior.subscription) {
-							implementSubscription(scope, behavior);
-						}
-					}
-					implementMenuItems(item.subItems);
-				}
-			}
-			
-			implementMenuItems(scope.uidl.mainMenu.items);
-        },
+            var metaType = scope.uidlService.getMetaType(scope.uidl.entityMetaType);
+            
+            scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function(name) { 
+                return metaType.properties[toCamelCase(name)];
+            }).ToArray();
+            
+            scope.entityService.queryEntity(scope.uidl.entityName).then(function(data) {
+               scope.resultSet = data.results;
+            });
+
+			scope.editEntity = function(entity) {
+                scope.model.entity = entity;
+                scope.uiShowCrudForm = true;
+			};
+
+			scope.newEntity = function() {
+			    scope.model.entity = scope.entityService.createEntity(scope.uidl.entityName, { });
+                scope.uiShowCrudForm = true;
+			};
+
+			scope.$on(scope.uidl.form.qualifiedName + ':Closing', function(input) {
+				scope.uiShowCrudForm = false;
+			});
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_controllerImplementations['CrudForm'] = {
+        implement: function(scope) {
+            var metaType = scope.uidlService.getMetaType(scope.uidl.entityMetaType);
+
+			scope.notifyFormClosing = function() {
+			    scope.$emit(scope.uidl.qualifiedName + ':Closing');
+			};
+
+			scope.saveChanges = function() {
+				scope.entityService.saveChanges();
+				scope.notifyFormClosing();
+			};
+
+			scope.cancelEdit = function() {
+				scope.entityService.rejectChanges();
+				scope.notifyFormClosing();
+			};
+        }
     };
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -354,17 +387,49 @@ theApp.service('uidlService', ['$q', '$http', '$rootScope', function ($q, $http,
 
 //---------------------------------------------------------------------------------------------------------------------
 
+theApp.factory('entityManagerFactory', ['breeze', function (breeze) {
+    configureBreeze();
+    var serviceRoot = window.location.protocol + '//' + window.location.host + '/';
+    var serviceName = serviceRoot + 'rest/UserAccounts/';
+    var factory = {
+        newManager: newManager,
+        serviceName: serviceName
+    };
+
+    return factory;
+
+    function configureBreeze() {           
+        // use Web API OData to query and save
+        breeze.config.initializeAdapterInstance('dataService', 'webApiOData', true);
+
+        // convert between server-side PascalCase and client-side camelCase
+        breeze.NamingConvention.camelCase.setAsDefault();
+    }
+
+    function newManager() {
+        var mgr = new breeze.EntityManager(serviceName);
+        return mgr;
+    }
+}]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
 theApp.service('entityService', 
 ['$http', '$q', '$timeout', 'breeze', 'logger', 
 function ($http, $q, $timeout, breeze, logger) {
 
-    var serviceUrl = 'http://localhost:8901/breeze/UserAccounts/'; // route to the same origin Web Api controller
+    var serviceRoot = window.location.protocol + '//' + window.location.host + '/rest/';
+    var serviceName = serviceRoot + 'UserAccounts/';
+    //var serviceUrl = 'http://localhost:8900/rest/UserAccounts/'; // route to the same origin Web Api controller
 
     // *** Cross origin service example  ***
     // When data server and application server are in different origins
     //var serviceName = 'http://sampleservice.breezejs.com/api/todos/';
 
-    var manager = new breeze.EntityManager(serviceUrl);
+    //breeze.config.initializeAdapterInstance('dataService', 'webApiOData', true);
+    //breeze.NamingConvention.camelCase.setAsDefault();
+    
+    var manager = new breeze.EntityManager(serviceName);
     manager.enableSaveQueuing(true);
 
     var service = {
@@ -372,14 +437,18 @@ function ($http, $q, $timeout, breeze, logger) {
         queryEntity: queryEntity,
         hasChanges: hasChanges,
         saveChanges: saveChanges,
-        deleteEntityAndSave: deleteEntityAndSave
+        rejectChanges: rejectChanges,
+        deleteEntityAndSave: deleteEntityAndSave,
+        showLocalStateDump: showLocalStateDump
     };
     return service;
 
     //-----------------------------------------------------------------------------------------------------------------
 
     function createEntity(entityName, initialValues) {
-        return manager.createEntity(entityName, initialValues);
+        var entity = manager.createEntity(entityName, initialValues);
+        manager.addEntity(entity);
+        return entity;
     }
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -463,13 +532,22 @@ function ($http, $q, $timeout, breeze, logger) {
             }
 
             logger.error(error, reason);
-            // DEMO ONLY: discard all pending changes
-            // Let them see the error for a second before rejecting changes
-            $timeout(function() {
-                manager.rejectChanges();
-            }, 1000);
             return $q.reject(error); // so downstream promise users know it failed
         }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function rejectChanges() {
+        return manager.rejectChanges();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function showLocalStateDump(elementId) {
+    	var exportedData = JSON.parse(manager.exportEntities());
+    	exportedData.metadataStore = JSON.parse(exportedData.metadataStore);
+        document.getElementById(elementId).innerHTML = JSON.stringify(exportedData, undefined, 2);
     }
 
 }]);
@@ -631,7 +709,8 @@ theApp.directive('uidlScreenPart', ['uidlService', 'entityService', function(uid
 theApp.directive('uidlWidget', ['uidlService', 'entityService', function(uidlService, entityService) {
     return {
         scope: {
-            uidl: '='
+            uidl: '=',
+            parentModel: '='
         },
         restrict: 'E',
         replace: true,

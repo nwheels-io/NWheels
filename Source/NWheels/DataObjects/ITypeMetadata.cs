@@ -14,6 +14,7 @@ namespace NWheels.DataObjects
         Type ContractType { get; }
         IReadOnlyList<Type> MixinContractTypes { get; }
         bool TryGetImplementation(Type factoryType, out Type implementationType);
+        IEnumerable<KeyValuePair<Type, Type>> GetAllImplementations();
         bool IsAbstract { get; }
         ITypeMetadata BaseType { get; }
         IReadOnlyList<ITypeMetadata> DerivedTypes { get; }

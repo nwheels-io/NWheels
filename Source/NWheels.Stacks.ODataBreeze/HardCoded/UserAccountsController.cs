@@ -61,17 +61,18 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
         //    //return metadataJsonString;
         //}
 
-        //[HttpGet]
-        //public HttpResponseMessage UserAccount()
-        //{
-        //    var dataJsonString = File.ReadAllText(@"C:\Temp\data.json");
-            
-        //    var response = new HttpResponseMessage() {
-        //        Content = new StringContent(dataJsonString, Encoding.UTF8, "application/json")
-        //    };
+        [HttpGet]
+        public HttpResponseMessage UserAccount()
+        {
+            var dataJsonString = File.ReadAllText(@"C:\Temp\data.json");
 
-        //    return response;
-        //}
+            var response = new HttpResponseMessage()
+            {
+                Content = new StringContent(dataJsonString, Encoding.UTF8, "application/json")
+            };
+
+            return response;
+        }
 
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -92,12 +93,12 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
 
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [HttpGet]
-        [Queryable]
-        public IQueryable<IUserAccountEntity> UserAccount()
-        {
-            return _contextProvider.QuerySource.AllUsers;
-        }
+        //[HttpGet]
+        //[Queryable]
+        //public IQueryable<IUserAccountEntity> UserAccount()
+        //{
+        //    return _contextProvider.QuerySource.AllUsers;
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

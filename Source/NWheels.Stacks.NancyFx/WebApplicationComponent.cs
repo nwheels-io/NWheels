@@ -17,12 +17,16 @@ namespace NWheels.Stacks.NancyFx
 {
     public class WebApplicationComponent : LifecycleEventListenerBase, IWebModuleContext
     {
+        private readonly IComponentContext _components;
         private readonly WebAppEndpointRegistration _endpointRegistration;
+        private readonly ITypeMetadataCache _metadataCache;
+        private readonly ILocalizationProvider _localizationProvider;
+        private readonly WebApiDispatcherFactory _dispatcherFactory;
         private readonly IWebApplicationLogger _logger;
         private readonly UidlApplication _application;
-        private readonly UidlDocument _uidl;
         private readonly Dictionary<string, object> _apiServicesByContractName;
         private readonly Dictionary<string, WebApiDispatcherBase> _apiDispatchersByContractName;
+        private UidlDocument _uidl;
         private NancyHost _host;
         private WebApplicationModule _module;
 
@@ -36,16 +40,17 @@ namespace NWheels.Stacks.NancyFx
             WebApiDispatcherFactory dispatcherFactory,
             IWebApplicationLogger logger)
         {
+            _components = components;
             _endpointRegistration = endpointRegistration;
+            _metadataCache = metadataCache;
+            _localizationProvider = localizationProvider;
+            _dispatcherFactory = dispatcherFactory;
             _logger = logger;
 
             _application = (UidlApplication)components.Resolve(endpointRegistration.Contract);
-            _uidl = UidlBuilder.GetApplicationDocument(_application, metadataCache, localizationProvider);
             
             _apiServicesByContractName = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
             _apiDispatchersByContractName = new Dictionary<string, WebApiDispatcherBase>(StringComparer.InvariantCultureIgnoreCase);
-
-            BuildApiDispatchers(components, dispatcherFactory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -99,6 +104,9 @@ namespace NWheels.Stacks.NancyFx
 
         public override void Load()
         {
+            _uidl = UidlBuilder.GetApplicationDocument(_application, _metadataCache, _localizationProvider);
+            BuildApiDispatchers(_components, _dispatcherFactory);
+
             _module = new WebApplicationModule(this);
             var bootstrapper = new WebApplicationBootstrapper(_module);
 

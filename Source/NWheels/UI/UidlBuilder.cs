@@ -104,6 +104,13 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ITypeMetadataCache MetadataCache
+        {
+            get { return _metadataCache; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal void BuildNodes(params AbstractUidlNode[] nodes)
         {
             nodes.OfType<IBuildableUidlNode>().Where(node => !(node is UidlApplication)).ForEach(node => node.Build(this));
@@ -268,7 +275,8 @@ namespace NWheels.UI
         private static bool IsAssignableDeclaredMemberNodeProperty(AbstractUidlNode parent, PropertyInfo property)
         {
             return (
-                property.DeclaringType == parent.GetType() && 
+                property.CanWrite &&
+                property.DeclaringType.IsAssignableFrom(parent.GetType()) && 
                 typeof(AbstractUidlNode).IsAssignableFrom(property.PropertyType) && 
                 !property.HasAttribute<ManuallyAssignedAttribute>());
         }
