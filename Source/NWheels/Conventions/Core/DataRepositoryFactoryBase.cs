@@ -176,6 +176,7 @@ namespace NWheels.Conventions.Core
                 ImplementConstructor(writer);
                 ImplementGetEntityTypesInRepository(writer);
                 ImplementGetEntityContractsInRepository(writer);
+                ImplementGetEntityRepositories(writer);
                 ImplementNewEntityMethods(writer);
             }
 
@@ -189,7 +190,7 @@ namespace NWheels.Conventions.Core
 
             protected virtual void ImplementEntityRepositoryProperties(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
-                foreach (var entity in EntitiesInRepository.Where(e => e.RepositoryProperty != null))
+                foreach ( var entity in EntitiesInRepository.Where(e => e.RepositoryProperty != null) )
                 {
                     ImplementEntityRepositoryProperty(writer, entity);
                 }
@@ -240,7 +241,7 @@ namespace NWheels.Conventions.Core
             protected virtual void ImplementGetEntityTypesInRepository(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
                 writer.ImplementBase<DataRepositoryBase>()
-                    .Method<IEnumerable<Type>>(x => x.GetEntityTypesInRepository)
+                    .Method<Type[]>(x => x.GetEntityTypesInRepository)
                     .Implement(m => m.Return(m.NewArray<Type>(constantValues: EntitiesInRepository.Select(e => e.ImplementationType).ToArray())));
             }
 
@@ -249,8 +250,37 @@ namespace NWheels.Conventions.Core
             protected virtual void ImplementGetEntityContractsInRepository(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
                 writer.ImplementBase<DataRepositoryBase>()
-                    .Method<IEnumerable<Type>>(x => x.GetEntityContractsInRepository)
+                    .Method<Type[]>(x => x.GetEntityContractsInRepository)
                     .Implement(m => m.Return(m.NewArray<Type>(constantValues: EntitiesInRepository.Select(e => e.ContractType).ToArray())));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected virtual void ImplementGetEntityRepositories(ImplementationClassWriter<TypeTemplate.TInterface> writer)
+            {
+                writer.ImplementBase<DataRepositoryBase>()
+                    .Method<IEntityRepository[]>(x => x.GetEntityRepositories)
+                    .Implement(m => {
+                        var repoArray = m.Local<IEntityRepository[]>();
+                        repoArray.Assign(m.NewArray<IEntityRepository>(m.Const(EntitiesInRepository.Count)));
+
+                        for ( int index = 0 ; index < EntitiesInRepository.Count ; index++ )
+                        {
+                            var entity = EntitiesInRepository[index];
+
+                            if ( entity.RepositoryProperty != null )
+                            {
+                                var backingField = writer.OwnerClass.GetPropertyBackingField(entity.RepositoryProperty);
+                                repoArray.ItemAt(index).Assign(backingField.AsOperand<IEntityRepository>());
+                            }
+                            else
+                            {
+                                repoArray.ItemAt(index).Assign(m.Const<IEntityRepository>(null));
+                            }
+                        }
+
+                        m.Return(repoArray);
+                    });
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

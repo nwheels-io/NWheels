@@ -88,7 +88,19 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
 
         protected override void SaveChangesCore(SaveWorkState saveWorkState)
         {
-            throw new NotImplementedException();
+            foreach ( var typeGroup in saveWorkState.SaveMap )
+            {
+                var entityImplementationType = typeGroup.Key;
+
+                foreach ( var entityToSave in typeGroup.Value )
+                {
+                    //switch ( entityToSave.EntityState )
+                    //{
+                    //    case EntityState.Added:
+
+                    //}
+                }
+            }
         }
     }
 }

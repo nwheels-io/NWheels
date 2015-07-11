@@ -122,6 +122,11 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                 {
                     throw new NotImplementedException();
                 }
+
+                public override IEntityRepository[] GetEntityRepositories()
+                {
+                    throw new NotImplementedException();
+                }
             }
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -227,6 +232,11 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                 }
 
                 public override Type[] GetEntityContractsInRepository()
+                {
+                    throw new NotImplementedException();
+                }
+
+                public override IEntityRepository[] GetEntityRepositories()
                 {
                     throw new NotImplementedException();
                 }

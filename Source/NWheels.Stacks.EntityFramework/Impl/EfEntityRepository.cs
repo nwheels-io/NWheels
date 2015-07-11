@@ -7,11 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
 using Autofac;
+using NWheels.DataObjects;
 using NWheels.Entities;
 
 namespace NWheels.Stacks.EntityFramework.Impl
 {
-    public class EfEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>
+    public class EfEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>, IEntityRepository
         where TEntityContract : class
         where TEntityImpl : class, TEntityContract
     {
@@ -82,6 +83,61 @@ namespace NWheels.Stacks.EntityFramework.Impl
                 return _queryProvider;
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Implementation of IEntityRepository
+
+        void IEntityRepository.Insert(object entity)
+        {
+            this.Insert((TEntityContract)entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IEntityRepository.Update(object entity)
+        {
+            this.Update((TEntityContract)entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IEntityRepository.Delete(object entity)
+        {
+            this.Delete((TEntityContract)entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Type IEntityRepository.ContractType
+        {
+            get
+            {
+                return typeof(TEntityContract);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Type IEntityRepository.ImplementationType
+        {
+            get
+            {
+                return typeof(TEntityImpl);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        ITypeMetadata IEntityRepository.Metadata
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -196,6 +252,7 @@ namespace NWheels.Stacks.EntityFramework.Impl
             #endregion
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TEntityContract CheckOutOne<TState>(Expression<Func<TEntityContract, bool>> where, Expression<Func<TEntityContract, TState>> stateProperty, TState newStateValue)
         {

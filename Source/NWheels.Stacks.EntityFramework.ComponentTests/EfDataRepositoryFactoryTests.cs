@@ -115,6 +115,41 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void CanGetEntityRepositories()
+        {
+            //-- arrange
+
+            var repoFactory = CreateDataRepositoryFactory();
+
+            //-- act
+
+            Type[] entityContracts = null;
+            IEntityRepository[] repositories = null;
+
+            using ( var connection = base.CreateDbConnection() )
+            {
+                using ( var dataRepo = repoFactory.NewUnitOfWork<IR1.IOnlineStoreRepository>(autoCommit: true) )
+                {
+                    entityContracts = dataRepo.GetEntityContractsInRepository();
+                    repositories = dataRepo.GetEntityRepositories();
+                }
+            }
+
+            //-- assert
+
+            var productsIndex = entityContracts.ToList().IndexOf(typeof(IR1.IProduct));
+            var ordersIndex = entityContracts.ToList().IndexOf(typeof(IR1.IOrder));
+            var orderLinesIndex = entityContracts.ToList().IndexOf(typeof(IR1.IOrderLine));
+
+            Assert.That(repositories, Is.Not.Null);
+            Assert.That(repositories[productsIndex], Is.InstanceOf<IEntityRepository<IR1.IProduct>>());
+            Assert.That(repositories[ordersIndex], Is.InstanceOf<IEntityRepository<IR1.IOrder>>());
+            Assert.That(repositories[orderLinesIndex], Is.Null); // entity parts don't have their own entity repository
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private EfDataRepositoryFactory CreateDataRepositoryFactory()
         {
             var configAuto = ResolveAuto<IFrameworkDatabaseConfig>();

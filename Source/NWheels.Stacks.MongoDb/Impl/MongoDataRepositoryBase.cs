@@ -27,7 +27,6 @@ namespace NWheels.Stacks.MongoDb.Impl
 
         protected override void OnRollbackChanges()
         {
-            throw new NotSupportedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

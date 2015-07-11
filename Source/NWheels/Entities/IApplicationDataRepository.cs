@@ -12,5 +12,6 @@ namespace NWheels.Entities
         void InvokeGenericOperation(Type contractType, IDataRepositoryCallback callback);
         Type[] GetEntityTypesInRepository();
         Type[] GetEntityContractsInRepository();
+        IEntityRepository[] GetEntityRepositories();
     }
 }

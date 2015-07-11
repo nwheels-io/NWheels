@@ -4,9 +4,22 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.DataObjects;
 
 namespace NWheels.Entities
 {
+    public interface IEntityRepository
+    {
+        void Insert(object entity);
+        void Update(object entity);
+        void Delete(object entity);
+        Type ContractType { get; }
+        Type ImplementationType { get; }
+        ITypeMetadata Metadata { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
     public interface IEntityRepository<TEntity> : IQueryable<TEntity>
     {
         TEntity New();

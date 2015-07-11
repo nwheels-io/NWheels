@@ -37,6 +37,7 @@ namespace NWheels.Entities.Core
         
         public abstract Type[] GetEntityContractsInRepository();
         public abstract Type[] GetEntityTypesInRepository();
+        public abstract IEntityRepository[] GetEntityRepositories();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

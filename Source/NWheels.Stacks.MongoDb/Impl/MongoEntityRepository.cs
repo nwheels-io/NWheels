@@ -13,7 +13,7 @@ using NWheels.Extensions;
 
 namespace NWheels.Stacks.MongoDb.Impl
 {
-    public class MongoEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>
+    public class MongoEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>, IEntityRepository
         where TEntityContract : class
         where TEntityImpl : class, TEntityContract
     {
@@ -93,6 +93,61 @@ namespace NWheels.Stacks.MongoDb.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region IEntityRepository members
+
+        void IEntityRepository.Insert(object entity)
+        {
+            this.Insert((TEntityContract)entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        void IEntityRepository.Update(object entity)
+        {
+            this.Update((TEntityContract)entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IEntityRepository.Delete(object entity)
+        {
+            this.Delete((TEntityContract)entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        Type IEntityRepository.ContractType
+        {
+            get
+            {
+                return typeof(TEntityContract);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Type IEntityRepository.ImplementationType
+        {
+            get
+            {
+                return typeof(TEntityImpl);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        ITypeMetadata IEntityRepository.Metadata
+        {
+            get
+            {
+                return _metadata;
+            }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TEntityContract New()
         {
             _ownerRepo.ValidateOperationalState();
@@ -100,7 +155,6 @@ namespace NWheels.Stacks.MongoDb.Impl
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
 
         public IQueryable<TEntityContract> Include(Expression<Func<TEntityContract, object>>[] properties)
         {
