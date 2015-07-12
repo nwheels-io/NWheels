@@ -10,6 +10,7 @@ namespace NWheels.Entities
 {
     public interface IEntityRepository
     {
+        object New();
         void Insert(object entity);
         void Update(object entity);
         void Delete(object entity);

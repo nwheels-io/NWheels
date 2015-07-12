@@ -125,8 +125,8 @@ namespace NWheels.Stacks.ODataBreeze
 
         private string GetQualifiedStructuralTypeName(ITypeMetadata type)
         {
-            var implementationType = GetEntityImplementationType(type); 
-            return implementationType.Name + ":#" + implementationType.Namespace;
+            var implementationType = GetEntityImplementationType(type);
+            return GetQualifiedTypeString(implementationType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -200,6 +200,13 @@ namespace NWheels.Stacks.ODataBreeze
             {
                 return  type.Name;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetQualifiedTypeString(Type type)
+        {
+            return type.Name + ":#" + type.Namespace;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

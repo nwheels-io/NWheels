@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
 using NWheels.Conventions.Core;
+using NWheels.Entities.Core;
 using NWheels.Stacks.EntityFramework.Conventions;
 using NWheels.Stacks.EntityFramework.Impl;
 using NWheels.Testing;
@@ -289,6 +290,91 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
             Assert.That(isPropertyVirtual(orderLinesPropertyOfOrder), Is.True);
             Assert.That(isPropertyVirtual(orderPropertyOfOrderLine), Is.True);
             Assert.That(isPropertyVirtual(productPropertyOfOrderLine), Is.True);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void EntityImplementsIEntityObject()
+        {
+            //-- Arrange
+
+            var factory = CreateEntityObjectFactory();
+            var product = factory.NewEntity<Interfaces.Repository1.IProduct>();
+
+            //-- Act
+
+            var entityObject = (product as IEntityObject);
+
+            //-- Assert
+
+            Assert.That(entityObject, Is.Not.Null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanGetEntityContractType()
+        {
+            //-- Arrange
+
+            var factory = CreateEntityObjectFactory();
+            var product = factory.NewEntity<Interfaces.Repository1.IProduct>();
+
+            //-- Act
+
+            var contractType = ((IEntityObject)product).ContractType;
+
+            //-- Assert
+
+            Assert.That(contractType, Is.EqualTo(typeof(Interfaces.Repository1.IProduct)));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanGetEntityId()
+        {
+            //-- Arrange
+
+            var factory = CreateEntityObjectFactory();
+            var product = factory.NewEntity<Interfaces.Repository1.IProduct>();
+
+            product.Id = 123;
+
+            //-- Act
+
+            var entityId = ((IEntityObject)product).GetId();
+
+            //-- Assert
+
+            Assert.That(entityId, Is.Not.Null);
+            Assert.That(entityId.ContractType, Is.EqualTo(typeof(Interfaces.Repository1.IProduct)));
+            Assert.That(entityId.Value, Is.EqualTo(123));
+            Assert.That(entityId.ValueAs<int>(), Is.EqualTo(123));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanSetEntityId()
+        {
+            object x = 123;
+            int y = (int)x;
+
+
+            //-- Arrange
+
+            var factory = CreateEntityObjectFactory();
+            var product = factory.NewEntity<Interfaces.Repository1.IProduct>();
+
+            //-- Act
+
+            ((IEntityObject)product).SetId(123);
+
+            //-- Assert
+
+            Assert.That(product.Id, Is.EqualTo(123));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

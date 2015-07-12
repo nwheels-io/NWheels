@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace NWheels.Entities.Core
 {
-    public class EntityId<TEntityContract, TId1> : IEntityId<TEntityContract>
+    public class EntityId<TEntityContract, TValue> : IEntityId<TEntityContract>
         where TEntityContract : class
     {
-        private readonly TId1 _id1;
+        private readonly TValue _value;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EntityId(TId1 id1)
+        public EntityId(TValue value)
         {
-            _id1 = id1;
+            _value = value;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -24,11 +24,11 @@ namespace NWheels.Entities.Core
 
         public bool Equals(IEntityId other)
         {
-            var typedOther = (other as EntityId<TEntityContract, TId1>);
+            var typedOther = (other as EntityId<TEntityContract, TValue>);
 
             if ( typedOther != null )
             {
-                return (typedOther._id1.Equals(this._id1));
+                return (typedOther._value.Equals(this._value));
             }
             else
             {
@@ -42,44 +42,56 @@ namespace NWheels.Entities.Core
 
         #region Implementation of IEntityId
 
-        public Type GetContract()
+        public Type ContractType
         {
-            return typeof(TEntityContract);
+            get
+            {
+                return typeof(TEntityContract);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public object GetValue()
+        public object Value
         {
-            return _id1;
+            get
+            {
+                return _value;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public T GetValue<T>()
+        public T ValueAs<T>()
         {
-            return (T)(object)_id1;
+            return (T)(object)_value;
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of Object
+
+        public override bool Equals(object obj)
+        {
+            var otherId = (obj as IEntityId);
+
+            if ( otherId != null )
+            {
+                return this.Equals(otherId);
+            }
+            else
+            {
+                return false;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Tuple<T1, T2> GetValue<T1, T2>()
+        public override int GetHashCode()
         {
-            throw new NotSupportedException();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public Tuple<T1, T2, T3> GetValue<T1, T2, T3>()
-        {
-            throw new NotSupportedException();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public Tuple<T1, T2, T3, T4> GetValue<T1, T2, T3, T4>()
-        {
-            throw new NotSupportedException();
+            return _value.GetHashCode();
         }
 
         #endregion

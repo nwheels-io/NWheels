@@ -1,64 +1,38 @@
-﻿#if false
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Entities.Core;
 
 namespace NWheels.Entities
 {
-    public class EntityId<TEntity, TId> : IEntityId<TEntity>
-        where TEntity : class
+    public static class EntityId
     {
-        private TId _id1;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public EntityId
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public bool Equals(IEntityId other)
+        public static IEntityId Of(object entity)
         {
-            throw new NotImplementedException();
+            return GetValidatedEntityObject(entity).GetId();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public object GetValue()
+        public static object ValueOf(object entity)
         {
-            throw new NotImplementedException();
+            return GetValidatedEntityObject(entity).GetId().Value;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public T GetValue<T>()
+        private static IEntityObject GetValidatedEntityObject(object obj)
         {
-            throw new NotImplementedException();
-        }
+            var entityObject = obj as IEntityObject;
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            if ( entityObject == null )
+            {
+                throw new ArgumentException("Not an entity object", "entity");
+            }
 
-        public Tuple<T1, T2> GetValue<T1, T2>()
-        {
-            throw new NotSupportedException();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public Tuple<T1, T2, T3> GetValue<T1, T2, T3>()
-        {
-            throw new NotSupportedException();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public Tuple<T1, T2, T3, T4> GetValue<T1, T2, T3, T4>()
-        {
-            throw new NotSupportedException();
+            return entityObject;
         }
     }
 }
-
-#endif

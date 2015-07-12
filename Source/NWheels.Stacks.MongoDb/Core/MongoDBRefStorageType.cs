@@ -36,7 +36,7 @@ namespace NWheels.Stacks.MongoDb.Core
                 return new MongoDBRef(collectionName: _metaType.Name, id: null);
             }
 
-            var idValue = ((IEntityObject)contractValue).GetId().GetValue();
+            var idValue = ((IEntityObject)contractValue).GetId().Value;
             var idBsonValue = BsonValue.Create(idValue);
 
             return new MongoDBRef(collectionName: _metaType.Name, id: idBsonValue);

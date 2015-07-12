@@ -8,12 +8,9 @@ namespace NWheels.Entities
 {
     public interface IEntityId : IEquatable<IEntityId>
     {
-        Type GetContract();
-        object GetValue();
-        T GetValue<T>();
-        Tuple<T1, T2> GetValue<T1, T2>();
-        Tuple<T1, T2, T3> GetValue<T1, T2, T3>();
-        Tuple<T1, T2, T3, T4> GetValue<T1, T2, T3, T4>();
+        T ValueAs<T>();
+        object Value { get; }
+        Type ContractType { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

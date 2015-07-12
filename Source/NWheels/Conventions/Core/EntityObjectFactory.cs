@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
@@ -13,6 +14,7 @@ using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.StorageTypes;
 using NWheels.Entities;
+using NWheels.Entities.Core;
 using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
 
@@ -127,6 +129,8 @@ namespace NWheels.Conventions.Core
                 {
                     ImplementEntityContract(writer, mixinType);
                 }
+
+                ImplementIEntityObject(writer);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -313,6 +317,71 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private void ImplementIEntityObject(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            {
+                var interfaceImpl = writer.ImplementInterfaceExplicitly<IEntityObject>();
+
+                interfaceImpl.Property(x => x.ContractType).Implement(
+                    getter: p => p.Get(w => 
+                        w.Return(w.Const(_entityMetadata.ContractType))));
+
+                if ( _entityMetadata.PrimaryKey == null )
+                {
+                    interfaceImpl.Method<IEntityId>(x => x.GetId).Throw<NotSupportedException>("Entity has no primary key");
+                    interfaceImpl.Method<object>(x => x.SetId).Throw<NotSupportedException>("Entity has no primary key");
+                }
+                else if ( ThisContractDeclaresKeyProperties() )
+                {
+                    interfaceImpl.Method<IEntityId>(x => x.GetId).Implement(ImplementEntityObjectGetId);
+                    interfaceImpl.Method<object>(x => x.SetId).Implement(ImplementEntityObjectSetId);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementEntityObjectGetId(FunctionMethodWriter<IEntityId> writer)
+            {
+                var w = writer;
+
+                if ( _entityMetadata.PrimaryKey.Properties.Count != 1 )
+                {
+                    w.Throw<NotSupportedException>("Currently only scalar primary keys are supported.");
+                }
+                else
+                {
+                    var keyProperty = _entityMetadata.PrimaryKey.Properties[0].ContractPropertyInfo;
+
+                    using ( TT.CreateScope<TT.TContract, TT.TKey>(_entityMetadata.ContractType, keyProperty.PropertyType) )
+                    {
+                        w.Return(w.New<EntityId<TT.TContract, TT.TKey>>(w.This<TT.TContract>().Prop<TT.TKey>(keyProperty)));
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementEntityObjectSetId(VoidMethodWriter writer, Argument<object> value)
+            {
+                var w = writer;
+
+                if ( _entityMetadata.PrimaryKey.Properties.Count != 1 )
+                {
+                    w.Throw<NotSupportedException>("Currently only scalar primary keys are supported.");
+                }
+                else
+                {
+                    var keyProperty = _entityMetadata.PrimaryKey.Properties[0].ContractPropertyInfo;
+                    var backingField = w.OwnerClass.GetPropertyBackingField(keyProperty);
+
+                    using ( TT.CreateScope<TT.TContract, TT.TKey>(_entityMetadata.ContractType, keyProperty.PropertyType) )
+                    {
+                        backingField.AsOperand<TT.TKey>().Assign(value.CastTo<TT.TKey>());
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private void AddPropertyValueInitializers(ImplementationClassWriter<TT.TBase> writer)
             {
                 foreach ( var property in _entityMetadata.Properties.Where(IsScalarProperty).Cast<PropertyMetadataBuilder>() )
@@ -370,6 +439,15 @@ namespace NWheels.Conventions.Core
                 return _dependencies.GetOrAdd(
                     dependencyType, 
                     key => new Dependency(dependencyType));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool ThisContractDeclaresKeyProperties()
+            {
+                return (
+                    _entityMetadata.PrimaryKey != null &&
+                    _entityMetadata.PrimaryKey.Properties.Any(p => !IsImplementedByBaseEntity(p.ContractPropertyInfo)));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

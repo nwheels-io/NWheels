@@ -18,7 +18,7 @@
         <script src="assets/js/app.js"></script>
         
         <style>
-            body, button, input { font-family: Consolas; font-size: 16pt; padding:0px; margin:0px; }
+            body, button, input { font-family: Consolas; font-size: 14pt; padding:0px; margin:0px; }
             div.border { padding : 10px; margin : 10px; border : 2px solid black; }
             div.content-example { padding : 10px; margin : 10px; border : 2px solid #e0e0e0; background-color: #e0e0e0; }
             div.inline-alert { padding : 5px; margin : 5px 10px 5px 10px; border : none; background-color: yellow; }
@@ -27,23 +27,24 @@
             .bold { font-weight:bold; } 
             table.data { margin:5px;border-collapse: separate; border-spacing: 2px; }
             table.data th, table.data td { font-weight:normal;  padding:5px;  }
-            table.data th { background-color:black; color:white;font-size: 13pt;}
-            table.data td { font-size: 12pt; height:24px;}
+            table.data th { background-color:black; color:white;font-size: 12pt;}
+            table.data td { font-size: 11pt; height:24px;}
             table.data tbody tr { background-color: white; }
             table.data tbody tr:hover { background-color: #f0f0f0; cursor:pointer; }
 
             table.dataForm { margin:5px;border-collapse: collapse; border-spacing: 3px; }
-            table.dataForm th, table.dataForm td { font-weight:normal;  padding:15px;  }
-            table.dataForm th { background-color:black; color:white;font-size: 13pt;}
-            table.dataForm td { font-size: 13pt; height:30px;}
+            table.dataForm th, table.dataForm td { font-weight:normal;  padding:10px 15px 10px 15px;  }
+            table.dataForm th { background-color:black; color:white;font-size: 12pt;}
+            table.dataForm td { font-size: 11pt; height:24px;}
             table.dataForm tbody tr { background-color: white; }
-            table.dataForm tbody tr:hover { background-color: #f0f0f0; cursor:pointer; }
+            table.dataForm tbody tr:hover { background-color: #f9f9f9; cursor:pointer; }
+            .dataForm input { font-size: 11pt; }
 
             button.dataForm { margin: 5px 0px 5px 0px; padding:5px 10px 5px 10px; }
 
             .danger { color:yellow;background-color:red;cursor:default; }
             .danger a { color:yellow; }
-            .danger a:hover { color:white; font-weight:bold;font-size: 14pt; text-decoration:none;}
+            .danger a:hover { color:white; font-weight:bold;font-size: 12pt; text-decoration:none;}
 
             div.debugArea { padding : 10px; margin : 10px; background-color: #e0e0e0; font-size: 10pt; }
         </style>
@@ -196,7 +197,7 @@
                             <td ng-class="{danger: resultRow.uiShowConfirmDelete}" style="width:130px;">
                                 <a href="" ng-hide="resultRow.uiShowConfirmDelete" ng-click="resultRow.uiShowConfirmDelete=true"><b>Delete</b></a>
                                 <span ng-show="resultRow.uiShowConfirmDelete" >
-                                    Delete?&nbsp;<a href="" ng-click="resultRow.uiShowConfirmDelete=false">Yes</a>|<a href="" ng-click="resultRow.uiShowConfirmDelete=false">No</a>
+                                    Delete?&nbsp;<a href="" ng-click="deleteEntity(resultRow)">Yes</a>|<a href="" ng-click="resultRow.uiShowConfirmDelete=false">No</a>
                                 </span>
                             </td>
                         </tr>

@@ -12,6 +12,7 @@ using MongoDB.Bson.Serialization.Attributes;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
+using NWheels.Entities.Core;
 using NWheels.Stacks.MongoDb.Core;
 
 namespace NWheels.Stacks.MongoDb.Impl
@@ -92,6 +93,11 @@ namespace NWheels.Stacks.MongoDb.Impl
 
             protected override void OnProperty(PropertyMember property, Func<PropertyDecorationBuilder> decorate)
             {
+                if ( property.PropertyDeclaration != null && property.PropertyDeclaration.DeclaringType == typeof(IEntityObject) ) // TODO: generalize this condition
+                {
+                    return;
+                }
+
                 var metaProperty = (
                     property.PropertyDeclaration != null ? 
                     _metaType.GetPropertyByDeclaration(property.PropertyDeclaration) :

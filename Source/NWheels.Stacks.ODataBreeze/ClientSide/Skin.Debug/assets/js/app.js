@@ -330,9 +330,11 @@ theApp.service('uidlService', ['$q', '$http', '$rootScope', function ($q, $http,
                 return metaType.properties[toCamelCase(name)];
             }).ToArray();
             
-            scope.entityService.queryEntity(scope.uidl.entityName).then(function(data) {
-               scope.resultSet = data.results;
-            });
+			scope.queryEntities = function() {
+	            scope.entityService.queryEntity(scope.uidl.entityName).then(function(data) {
+    	            scope.resultSet = data.results;
+        	    });
+			};
 
 			scope.editEntity = function(entity) {
                 scope.model.entity = entity;
@@ -340,13 +342,19 @@ theApp.service('uidlService', ['$q', '$http', '$rootScope', function ($q, $http,
 			};
 
 			scope.newEntity = function() {
-			    scope.model.entity = scope.entityService.createEntity(scope.uidl.entityName, { });
+			    scope.model.entity = scope.entityService.createEntity(metaType.restTypeName, { });
                 scope.uiShowCrudForm = true;
+			};
+
+			scope.deleteEntity = function(entity) {
+                scope.entityService.deleteEntityAndSave(entity);
 			};
 
 			scope.$on(scope.uidl.form.qualifiedName + ':Closing', function(input) {
 				scope.uiShowCrudForm = false;
 			});
+
+			scope.queryEntities();
         }
     };
 

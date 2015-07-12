@@ -95,6 +95,13 @@ namespace NWheels.Stacks.MongoDb.Impl
 
         #region IEntityRepository members
 
+        object IEntityRepository.New()
+        {
+            return this.New();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         void IEntityRepository.Insert(object entity)
         {
             this.Insert((TEntityContract)entity);
@@ -234,7 +241,7 @@ namespace NWheels.Stacks.MongoDb.Impl
         private static Expression<Func<TEntity, TProperty>> PropertyExpression<TEntity, TProperty>(PropertyInfo property)
         {
             var parameter = Expression.Parameter(typeof(TEntity), "e");
-            return Expression.Lambda<Func<TEntity, TProperty>>(Expression.Property(parameter, property), new[] { parameter });
+            return Expression.Lambda<Func<TEntity, TProperty>>(Expression.Convert(Expression.Property(parameter, property), typeof(TProperty)), new[] { parameter });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

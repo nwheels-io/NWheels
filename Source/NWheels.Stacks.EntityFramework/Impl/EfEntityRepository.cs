@@ -88,6 +88,13 @@ namespace NWheels.Stacks.EntityFramework.Impl
 
         #region Implementation of IEntityRepository
 
+        object IEntityRepository.New()
+        {
+            return this.New();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         void IEntityRepository.Insert(object entity)
         {
             this.Insert((TEntityContract)entity);
