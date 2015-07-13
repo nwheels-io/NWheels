@@ -86,6 +86,8 @@
     <Compile Include="Authorization\IEntityAccessControlBuilder.cs" />
     <Compile Include="Authorization\IEntityAccessRule.cs" />
     <Compile Include="Authorization\IIdentityInfo.cs" />
+    <Compile Include="Endpoints\HttpOperationAttribute.cs" />
+    <Compile Include="Endpoints\HttpOperationVerbs.cs" />
     <Compile Include="Entities\Core\IDataRepositoryCallback.cs" />
     <Compile Include="Entities\Core\IStorageInitializer.cs" />
     <Compile Include="Entities\Core\HiloGeneratorMetadataConvention.cs" />

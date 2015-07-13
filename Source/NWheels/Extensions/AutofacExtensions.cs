@@ -162,6 +162,21 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static ApiEndpointRegistration<TContract> WithHttpApiEndpoint<TContract>(
+            this ApiEndpointRegistration<TContract> registration,
+            string name = null,
+            string defaultListenUrl = null,
+            bool exposeExceptions = false)
+            where TContract : class
+        {
+            ((IHaveContainerBuilder)registration).Builder.RegisterInstance(new HttpApiEndpointRegistration(
+                name, typeof(TContract), defaultListenUrl, defaultMetadataUrl: null, publishMetadata: false, exposeExceptions: exposeExceptions));
+
+            return registration;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static ApiEndpointRegistration<TContract> WithSoapEndpoint<TContract>(
             this ApiEndpointRegistration<TContract> registration, 
             string name = null, 

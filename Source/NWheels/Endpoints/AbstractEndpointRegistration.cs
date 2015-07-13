@@ -172,6 +172,17 @@ namespace NWheels.Endpoints
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    public class HttpApiEndpointRegistration : AbstractEndpointRegistration
+    {
+        public HttpApiEndpointRegistration(
+            string name, Type contract, string defaultListenUrl, string defaultMetadataUrl, bool publishMetadata, bool exposeExceptions)
+            : base(name, contract, defaultListenUrl, publishMetadata, defaultMetadataUrl, exposeExceptions)
+        {
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
     public class SoapApiEndpointRegistration : AbstractEndpointRegistration
     {
         public SoapApiEndpointRegistration(
