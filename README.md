@@ -21,8 +21,6 @@ Unique features of a concrete application are developed in any .NET-supported la
 * Abstract application code from any concrete presentation and data storage platforms
 * Ensure that the architecture is consistently followed through the entire code base
 
-Besides that, there are no limitations on what application code can do.
-
 NWheels consists of:
 
 * Technology-agnostic Core, which defines architectural concepts, expressed through the programming model.
