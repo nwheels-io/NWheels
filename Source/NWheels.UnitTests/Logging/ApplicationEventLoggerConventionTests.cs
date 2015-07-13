@@ -268,7 +268,7 @@ namespace NWheels.UnitTests.Logging
             //-- Assert
 
             Assert.That(_logAppender.GetLogStrings(), Is.EqualTo(new[] {
-                "Log message with formatted parameters: date1=2015-01-01, date2=\"Feb 02 2015\"",
+                "Log message with formatted parameters: date1=2015-01-01, date2=\"" + date2.ToString("MMM dd yyyy") + "\"",
             }));
         }
 
@@ -296,7 +296,7 @@ namespace NWheels.UnitTests.Logging
                 Environment.NewLine + "str=ABC"
             ));
             Assert.That(_logAppender.GetLog()[0].FullDetailsText.Contains(
-                Environment.NewLine + "dateTimeOffset=\"Feb 02 2015\""
+                Environment.NewLine + "dateTimeOffset=\"" + dateTimeOffset.ToString("MMM dd yyyy") + "\""
             ));
         }
 
