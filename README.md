@@ -8,7 +8,7 @@ Re-inventing the wheels for the last time.
 
 NWheels is A-to-Z architectural recipe and implementation framework for enterprise applications and data processing systems built on the Microsoft .NET platform. 
 
-_Initiated by [Felix Berman](http://wesimplify.net/), a caffeine-driven software developer, hands-on architect, and agile practitioner._
+_Initiated by [Felix Berman](http://wesimplify.net/), a caffeine-driven software developer and hands-on architect._
 
 Introduction
 -----
