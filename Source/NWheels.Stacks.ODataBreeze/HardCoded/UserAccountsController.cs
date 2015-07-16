@@ -1,4 +1,6 @@
-﻿#pragma warning disable 0618
+﻿#if false
+
+#pragma warning disable 0618
 
 using System;
 using System.Collections.Generic;
@@ -39,59 +41,10 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
         public string Metadata()
         {
             var metadataJsonString = _contextProvider.Metadata();
-            //var metadataJsonString = File.ReadAllText(@"C:\Temp\metadata.json");
             return metadataJsonString;
         }
 
-
-        //// ~/breeze/todos/Metadata 
-        //[HttpGet]
-        //public HttpResponseMessage Metadata()
-        //{
-        //    var metadataJsonString = File.ReadAllText(@"C:\Temp\metadata.json");
-
-        //    var response = new HttpResponseMessage() {
-        //        Content = new StringContent(metadataJsonString, Encoding.UTF8, "application/json")
-        //    };
-
-        //    return response;
-
-        //    //var metadataJsonString = File.ReadAllText(@"C:\Temp\metadata.json");
-        //    ////var metadataJsonString = _contextProvider.Metadata();
-        //    //return metadataJsonString;
-        //}
-
-        //[HttpGet]
-        //public HttpResponseMessage UserAccount()
-        //{
-        //    var dataJsonString = File.ReadAllText(@"C:\Temp\data.json");
-
-        //    var response = new HttpResponseMessage()
-        //    {
-        //        Content = new StringContent(dataJsonString, Encoding.UTF8, "application/json")
-        //    };
-
-        //    return response;
-        //}
-
-        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        //// ~/breeze/todos/Metadata 
-        //[HttpGet]
-        //public HttpResponseMessage EdmxMetadata()
-        //{
-        //    var metadataXmlString = ReplaceEdmxNamespaces(_contextProvider.GetRepositoryMetadataString(fullEdmx: true));
-        //    //var metadataXmlString = File.ReadAllText(@"C:\Temp\edmx.xml");
-
-        //    var response = new HttpResponseMessage() {
-        //        Content = new StringContent(metadataXmlString, Encoding.UTF8, "application/xml")
-        //    };
-
-        //    response.Headers.Add("DataServiceVersion", "3.0");
-        //    return response;
-        //}
-
-        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
         [Queryable]
@@ -134,18 +87,7 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
         {
             return _contextProvider.SaveChanges(saveBundle);
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        private string ReplaceEdmxNamespaces(string xml)
-        {
-            const string from1 = "<edmx:Edmx Version=\"3.0\" xmlns:edmx=\"http://schemas.microsoft.com/ado/2009/11/edmx\">";
-            const string to1 = "<edmx:Edmx Version=\"1.0\" xmlns:edmx=\"http://schemas.microsoft.com/ado/2007/06/edmx\">";
-
-            const string from2 = "<edmx:DataServices>";
-            const string to2 = "<edmx:DataServices m:DataServiceVersion=\"3.0\" xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\">";
-
-            return xml.Replace(from1, to1).Replace(from2, to2);
-        }
     }
 }
+
+#endif

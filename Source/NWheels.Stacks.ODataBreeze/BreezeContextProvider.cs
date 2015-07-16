@@ -1,6 +1,4 @@
-﻿#if false
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,45 +10,31 @@ using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Csdl;
 using Microsoft.Data.Edm.Library;
 using NWheels.DataObjects;
-using NWheels.Domains.Security;
 using NWheels.Extensions;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 
-namespace NWheels.Stacks.ODataBreeze.HardCoded
+namespace NWheels.Stacks.ODataBreeze
 {
-    public class UserAccountsContextProvider : ContextProvider
+    public class BreezeContextProvider<TDataRepo> : ContextProvider
+        where TDataRepo : class, IApplicationDataRepository
     {
         private readonly IFramework _framework;
         private readonly ITypeMetadataCache _metadataCache;
-        private readonly IUserAccountDataRepository _querySource;
+        private readonly TDataRepo _querySource;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UserAccountsContextProvider(IFramework framework, ITypeMetadataCache metadataCache)
+        public BreezeContextProvider(IFramework framework, ITypeMetadataCache metadataCache)
         {
             _framework = framework;
             _metadataCache = metadataCache;
-            _querySource = framework.NewUnitOfWork<IUserAccountDataRepository>(autoCommit: false);
+            _querySource = framework.NewUnitOfWork<TDataRepo>(autoCommit: false);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string GetRepositoryMetadataString(bool fullEdmx)
-        {
-            var builder = new EdmModelBuilder(_metadataCache);
-
-            builder.AddEntity(_metadataCache.GetTypeMetadata(typeof(IUserAccountEntity)));
-            builder.AddEntity(_metadataCache.GetTypeMetadata(typeof(IUserRoleEntity)));
-            builder.AddEntity(_metadataCache.GetTypeMetadata(typeof(IOperationPermissionEntity)));
-            builder.AddEntity(_metadataCache.GetTypeMetadata(typeof(IEntityAccessRuleEntity)));
-
-            return builder.GetModelXmlString();
-        }
-        
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public IUserAccountDataRepository QuerySource
+        public TDataRepo QuerySource
         {
             get { return _querySource; }
         }
@@ -61,10 +45,12 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
         {
             var builder = new BreezeMetadataBuilder(_metadataCache);
 
-            builder.AddDataService("rest/UserAccounts/");
-            builder.AddEntity(typeof(IUserAccountEntity));
-            builder.AddEntity(typeof(IFrontEndUserAccountEntity));
-            builder.AddEntity(typeof(IBackEndUserAccountEntity));
+            builder.AddDataService("rest/");
+
+            foreach ( var contractType in _querySource.GetEntityContractsInRepository() )
+            {
+                builder.AddEntity(contractType);
+            }
 
             return builder.GetMetadataJsonString();
         }
@@ -94,7 +80,7 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
         {
             saveWorkState.KeyMappings = new List<KeyMapping>();
 
-            using ( var data = _framework.NewUnitOfWork<IUserAccountDataRepository>() )
+            using ( var data = _framework.NewUnitOfWork<TDataRepo>() )
             {
                 var entityRepositories = data.GetEntityRepositories().Where(repo => repo != null).ToDictionary(repo => repo.ImplementationType);
 
@@ -148,5 +134,3 @@ namespace NWheels.Stacks.ODataBreeze.HardCoded
         }
     }
 }
-
-#endif

@@ -19,10 +19,10 @@ namespace NWheels.Stacks.ODataBreeze
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<ODataEndpointComponent>().InstancePerDependency();
+            builder.RegisterType<BreezeEndpointComponent>().InstancePerDependency();
 
             builder.RegisterAdapter<RestApiEndpointRegistration, ILifecycleEventListener>(
-                (context, endpoint) => context.Resolve<ODataEndpointComponent>(TypedParameter.From(endpoint)));
+                (context, endpoint) => context.Resolve<BreezeEndpointComponent>(TypedParameter.From(endpoint)));
 
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
         }

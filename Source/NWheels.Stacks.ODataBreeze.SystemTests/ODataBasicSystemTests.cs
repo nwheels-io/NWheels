@@ -38,8 +38,8 @@ namespace NWheels.Stacks.ODataBreeze.SystemTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test]
-        public void CanStartNodeWithRestEndpoint()
+        [Test, Category("Manual")]
+        public void ManualRestEndpointTest()
         {
             System.Windows.Forms.MessageBox.Show("SERVER RUNNING. PRESS OK TO STOP.");
         }
@@ -51,7 +51,7 @@ namespace NWheels.Stacks.ODataBreeze.SystemTests
         {
             using ( var client = new WebClient() )
             {
-                var metadata = client.DownloadString(TestEndpointUrl + "breeze/UserAccounts/Metadata");
+                var metadata = client.DownloadString(TestEndpointUrl + "Metadata");
                 Console.WriteLine(metadata);
             }
         }

@@ -82,6 +82,7 @@
     <Compile Include="LogIs.cs" />
     <Compile Include="SystemTestBase.cs" />
     <Compile Include="TestFramework.cs" />
+    <Compile Include="TestHelpers.cs" />
     <Compile Include="TestNodeHost.cs" />
     <Compile Include="TestThreadLogAppender.cs" />
     <Compile Include="UnitTestBase.cs" />

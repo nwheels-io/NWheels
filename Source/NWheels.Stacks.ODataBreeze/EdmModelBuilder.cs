@@ -1,4 +1,6 @@
-﻿using Microsoft.Data.Edm.Library;
+﻿#if false
+
+using Microsoft.Data.Edm.Library;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -490,3 +492,5 @@ namespace NWheels.Stacks.ODataBreeze
         }
     }
 }
+
+#endif

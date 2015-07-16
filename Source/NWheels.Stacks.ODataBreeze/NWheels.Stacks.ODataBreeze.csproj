@@ -66,12 +66,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.10.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil, Version=0.9.11.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.10\lib\net45\Hapil.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.11\lib\net45\Hapil.dll</HintPath>
     </Reference>
     <Reference Include="Hapil.Applied">
-      <HintPath>..\packages\FelixB.Hapil.0.9.10\lib\net45\Hapil.Applied.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.11\lib\net45\Hapil.Applied.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Data.Edm, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -150,21 +150,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BreezeApiControllerFactory.cs" />
     <Compile Include="BreezeMetadataBuilder.cs" />
     <Compile Include="BreezeWebApiConfig.cs" />
-    <Compile Include="EdmModelBuilder - Copy.cs" />
     <Compile Include="EdmModelBuilder.cs" />
     <Compile Include="HardCoded\UserAccountsController.cs" />
     <Compile Include="HardCoded\UserAccountsContextProvider.cs" />
     <Compile Include="ModuleLoader.cs" />
-    <Compile Include="ODataEndpointComponent.cs" />
+    <Compile Include="BreezeEndpointComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BreezeContextProvider.cs" />
+    <Compile Include="BreezeApiControllerBase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NWheels.Domains.Security\NWheels.Domains.Security.csproj">
-      <Project>{76a8a84a-ed77-42d3-94fe-22c5b8634f98}</Project>
-      <Name>NWheels.Domains.Security</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NWheels\NWheels.csproj">
       <Project>{f0ecf554-bf54-4843-b62f-c67c4deb2764}</Project>
       <Name>NWheels</Name>

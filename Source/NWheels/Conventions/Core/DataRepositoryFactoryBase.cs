@@ -80,6 +80,27 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static void ValidateContractProperty(PropertyInfo property, out Type entityContractType)
+        {
+            var type = property.PropertyType;
+
+            if ( !type.IsGenericType || type.IsGenericTypeDefinition || type.GetGenericTypeDefinition() != typeof(IEntityRepository<>) )
+            {
+                throw new ContractConventionException(
+                    typeof(DataRepositoryConvention), property.DeclaringType, property, "Property must be of type IEntityRepository<T>");
+            }
+
+            if ( property.GetGetMethod() == null || property.GetSetMethod() != null )
+            {
+                throw new ContractConventionException(
+                    typeof(DataRepositoryConvention), property.DeclaringType, property, "Property must be read-only");
+            }
+
+            entityContractType = property.PropertyType.GetGenericArguments()[0];
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public abstract class DataRepositoryConvention : ImplementationConvention
         {
             private readonly ITypeMetadataCache _metadataCache;
@@ -101,25 +122,6 @@ namespace NWheels.Conventions.Core
                 _initializers = new List<Action<ConstructorWriter>>();
 
                 this.RepositoryBaseType = typeof(DataRepositoryBase);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public void ValidateContractProperty(PropertyInfo property, out Type entityContractType)
-            {
-                var type = property.PropertyType;
-
-                if ( !type.IsGenericType || type.IsGenericTypeDefinition || type.GetGenericTypeDefinition() != typeof(IEntityRepository<>) )
-                {
-                    throw new ContractConventionException(this, property.DeclaringType, property, "Property must be of type IEntityRepository<T>");
-                }
-
-                if ( property.GetGetMethod() == null || property.GetSetMethod() != null )
-                {
-                    throw new ContractConventionException(this, property.DeclaringType, property, "Property must be read-only");
-                }
-
-                entityContractType = property.PropertyType.GetGenericArguments()[0];
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
