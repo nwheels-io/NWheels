@@ -25,11 +25,12 @@ namespace NWheels.Stacks.ODataBreeze
 {
     public class BreezeEndpointComponent : LifecycleEventListenerBase
     {
-        private readonly ILifetimeScope _baseContainer;
+        private readonly IComponentContext _baseContainer;
         private readonly DynamicModule _dyanmicModule;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly RestApiEndpointRegistration _endpointRegistration;
         private readonly ILogger _logger;
+        private ILifetimeScope _containerLifetimeScope = null;
         private IDisposable _host = null;
         private Type _apiControllerType = null;
 
@@ -44,7 +45,7 @@ namespace NWheels.Stacks.ODataBreeze
         {
             _dyanmicModule = dyanmicModule;
             _metadataCache = metadataCache;
-            _baseContainer = (ILifetimeScope)components;
+            _baseContainer = components;
             _endpointRegistration = endpointRegistration;
             _logger = logger.Instance;
         }
@@ -53,6 +54,7 @@ namespace NWheels.Stacks.ODataBreeze
 
         public override void Load()
         {
+            _containerLifetimeScope = ((ILifetimeScope)_baseContainer).BeginLifetimeScope();
             GenerateBreezeApiController();
         }
 
@@ -95,6 +97,14 @@ namespace NWheels.Stacks.ODataBreeze
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void Unload()
+        {
+            _containerLifetimeScope.Dispose();
+            _containerLifetimeScope = null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void GenerateBreezeApiController()
         {
             var factory = new BreezeApiControllerFactory(_dyanmicModule, _metadataCache);
@@ -114,13 +124,13 @@ namespace NWheels.Stacks.ODataBreeze
             var containerUpdater = new ContainerBuilder();
             containerUpdater.RegisterWebApiFilterProvider(config);
             containerUpdater.RegisterType(_apiControllerType);
-            containerUpdater.Update(_baseContainer.ComponentRegistry);
+            containerUpdater.Update(_containerLifetimeScope.ComponentRegistry);
 
             config.Services.Replace(typeof(IHttpControllerTypeResolver), new SingleControllerTypeResolver(_apiControllerType));
             config.MapHttpAttributeRoutes(new DirectRouteProviderWithInheritance());
-            config.DependencyResolver = new AutofacWebApiDependencyResolver(_baseContainer);
+            config.DependencyResolver = new AutofacWebApiDependencyResolver(_containerLifetimeScope);
 
-            app.UseAutofacMiddleware(_baseContainer);
+            app.UseAutofacMiddleware(_containerLifetimeScope);
             app.UseAutofacWebApi(config);
             app.UseWebApi(config);
         }
