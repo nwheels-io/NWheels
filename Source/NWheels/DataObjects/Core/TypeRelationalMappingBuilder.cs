@@ -22,7 +22,7 @@
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void AcceptVisitor(IMetadataElementVisitor visitor)
+        public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {
             PrimaryTableName = visitor.VisitAttribute("PrimaryTableName", PrimaryTableName);
             InheritanceKind = visitor.VisitAttribute("InheritanceKind", InheritanceKind);

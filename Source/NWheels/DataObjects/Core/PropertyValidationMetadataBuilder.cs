@@ -39,7 +39,7 @@
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void AcceptVisitor(IMetadataElementVisitor visitor)
+        public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {
             IsRequired = visitor.VisitAttribute("IsRequired", IsRequired);
             IsUnique = visitor.VisitAttribute("IsUnique", IsUnique);

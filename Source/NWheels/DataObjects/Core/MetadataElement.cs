@@ -7,7 +7,7 @@ namespace NWheels.DataObjects.Core
     {
         #region IMetadataElement Members
 
-        public abstract void AcceptVisitor(IMetadataElementVisitor visitor);
+        public abstract void AcceptVisitor(ITypeMetadataVisitor visitor);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

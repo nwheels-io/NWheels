@@ -48,7 +48,7 @@ namespace NWheels.Entities
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
-    public class AggregationEntityContractAttribute : DataObjectContractAttribute
+    public class AggregationEntityContractAttribute : EntityContractAttribute
     {
         #region Overrides of DataObjectContractAttribute
 

@@ -39,7 +39,7 @@ namespace NWheels.Stacks.MongoDb.Impl
         public MongoDataRepositoryFactory(
             DynamicModule module,
             MongoEntityObjectFactory entityFactory,
-            ITypeMetadataCache metadataCache,
+            TypeMetadataCache metadataCache,
             IFrameworkDatabaseConfig config = null)
             : base(module, metadataCache)
         {
@@ -73,7 +73,7 @@ namespace NWheels.Stacks.MongoDb.Impl
 
         public class MongoDataRepositoryConvention : ConnectedModelDataRepositoryConvention<MongoDatabase, object>
         {
-            public MongoDataRepositoryConvention(EntityObjectFactory entityFactory, ITypeMetadataCache metadataCache)
+            public MongoDataRepositoryConvention(EntityObjectFactory entityFactory, TypeMetadataCache metadataCache)
                 : base(entityFactory, metadataCache)
             {
                 this.RepositoryBaseType = typeof(MongoDataRepositoryBase);

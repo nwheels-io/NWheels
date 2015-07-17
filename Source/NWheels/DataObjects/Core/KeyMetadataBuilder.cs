@@ -50,7 +50,7 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void AcceptVisitor(IMetadataElementVisitor visitor)
+        public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {
             Name = visitor.VisitAttribute("Name", Name);
             Kind = visitor.VisitAttribute("Kind", Kind);

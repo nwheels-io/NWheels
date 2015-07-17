@@ -95,6 +95,25 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void AcceptVisitor(ITypeMetadataVisitor visitor, Func<TypeMetadataBuilder, bool> predicate = null)
+        {
+            AcceptVisitor(() => visitor, predicate);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void AcceptVisitor(Func<ITypeMetadataVisitor> visitorFactory, Func<TypeMetadataBuilder, bool> predicate = null)
+        {
+            var snapshotOfTypesInCache = _metadataByContractType.ToArray().Select(kvp => kvp.Value).ToArray();
+
+            foreach ( var type in snapshotOfTypesInCache.Where(type => predicate == null || predicate(type)) )
+            {
+                type.AcceptVisitor(visitorFactory());
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public MetadataConventionSet Conventions
         {
             get { return _conventions; }

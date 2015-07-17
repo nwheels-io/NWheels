@@ -27,7 +27,7 @@
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void AcceptVisitor(IMetadataElementVisitor visitor)
+        public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {
             StorageType = visitor.VisitAttribute("StorageType", StorageType);
             TableName = visitor.VisitAttribute("TableName", TableName);

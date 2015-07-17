@@ -5,6 +5,7 @@ using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Entities;
 
 namespace NWheels.Testing.Entities.Impl
@@ -15,7 +16,7 @@ namespace NWheels.Testing.Entities.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TestDataRepositoryFactory(DynamicModule module, ITypeMetadataCache metadataCache, EntityObjectFactory entityFactory)
+        public TestDataRepositoryFactory(DynamicModule module, TypeMetadataCache metadataCache, EntityObjectFactory entityFactory)
             : base(module, metadataCache)
         {
             _entityFactory = entityFactory;
@@ -41,7 +42,7 @@ namespace NWheels.Testing.Entities.Impl
 
         public class TestEntityDataRepositoryConvention : DataRepositoryConvention
         {
-            public TestEntityDataRepositoryConvention(ITypeMetadataCache metadataCache, EntityObjectFactory entityFactory)
+            public TestEntityDataRepositoryConvention(TypeMetadataCache metadataCache, EntityObjectFactory entityFactory)
                 : base(metadataCache, entityFactory)
             {
                 base.RepositoryBaseType = typeof(TestDataRepositoryBase);

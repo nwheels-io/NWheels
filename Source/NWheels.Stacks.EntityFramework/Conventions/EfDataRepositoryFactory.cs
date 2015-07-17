@@ -43,7 +43,7 @@ namespace NWheels.Stacks.EntityFramework.Conventions
         public EfDataRepositoryFactory(
             DynamicModule module,
             EntityObjectFactory entityFactory,
-            ITypeMetadataCache metadataCache,
+            TypeMetadataCache metadataCache,
             DbProviderFactory dbProvider = null,
             Auto<IFrameworkDatabaseConfig> config = null)
             : base(module, metadataCache)
@@ -78,7 +78,7 @@ namespace NWheels.Stacks.EntityFramework.Conventions
 
         public class EfDataRepositoryConvention : ConnectedModelDataRepositoryConvention<DbConnection, DbCompiledModel>
         {
-            public EfDataRepositoryConvention(EntityObjectFactory entityFactory, ITypeMetadataCache metadataCache)
+            public EfDataRepositoryConvention(EntityObjectFactory entityFactory, TypeMetadataCache metadataCache)
                 : base(entityFactory, metadataCache)
             {
                 this.RepositoryBaseType = typeof(EfDataRepositoryBase);

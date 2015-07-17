@@ -67,7 +67,19 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string Name { get; set; }
+        private string _name;
+
+        public string Name
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                _name = value;
+            }
+        }
         public Type ContractType { get; set; }
         public bool IsAbstract { get; set; }
         public string DefaultDisplayFormat { get; set; }
@@ -151,13 +163,14 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void AcceptVisitor(IMetadataElementVisitor visitor)
+        public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {
+
             Name = visitor.VisitAttribute("Name", Name);
             ContractType = visitor.VisitAttribute("ContractType", ContractType);
             IsAbstract = visitor.VisitAttribute("IsAbstract", IsAbstract);
 
-            BaseType = visitor.VisitElement<ITypeMetadata, TypeMetadataBuilder>(BaseType);
+            BaseType = visitor.VisitElementReference<ITypeMetadata, TypeMetadataBuilder>("BaseType", BaseType);
 
             visitor.VisitElementList<ITypeMetadata, TypeMetadataBuilder>("DerivedTypes", DerivedTypes);
             visitor.VisitElementList<IPropertyMetadata, PropertyMetadataBuilder>("Properties", Properties);
@@ -256,21 +269,6 @@ namespace NWheels.DataObjects.Core
             {
                 property.UpdateImplementation(factoryType, implementationProperties[property.Name]);
             }
-
-            //var implementationProperties = implementationType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            //var implementationPropertyInfoByGetterMethod = implementationProperties.ToDictionary(p => p.GetMethod);
-
-            //var map = implementationType.GetInterfaceMap(this.ContractType);
-
-            //for ( int i = 0 ; i < map.InterfaceMethods.Length ; i++ )
-            //{
-            //    if ( map.InterfaceMethods[i].IsSpecialName && map.InterfaceMethods[i].Name.StartsWith("get_") )
-            //    {
-            //        var implementationPropertyInfo = implementationPropertyInfoByGetterMethod[map.TargetMethods[i]];
-            //        var metadataProperty = _propertyByName[implementationPropertyInfo.Name.Split('.').Last()];
-            //        metadataProperty.ImplementationPropertyInfo = implementationPropertyInfo;
-            //    }
-            //}
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

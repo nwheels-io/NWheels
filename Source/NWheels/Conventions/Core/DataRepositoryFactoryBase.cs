@@ -28,13 +28,13 @@ namespace NWheels.Conventions.Core
 {
     public abstract class DataRepositoryFactoryBase : ConventionObjectFactory, IDataRepositoryFactory, IAutoObjectFactory
     {
-        private readonly ITypeMetadataCache _metadataCache;
+        private readonly TypeMetadataCache _metadataCache;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected DataRepositoryFactoryBase(
             DynamicModule module,
-            ITypeMetadataCache metadataCache)
+            TypeMetadataCache metadataCache)
             : base(module)
         {
             _metadataCache = metadataCache;
@@ -73,7 +73,7 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ITypeMetadataCache MetadataCache
+        public TypeMetadataCache MetadataCache
         {
             get { return _metadataCache; }
         }
@@ -103,7 +103,7 @@ namespace NWheels.Conventions.Core
 
         public abstract class DataRepositoryConvention : ImplementationConvention
         {
-            private readonly ITypeMetadataCache _metadataCache;
+            private readonly TypeMetadataCache _metadataCache;
             private readonly List<EntityInRepository> _entitiesInRepository;
             private readonly HashSet<Type> _entityContractsInRepository;
             private readonly EntityObjectFactory _entityFactory;
@@ -112,7 +112,7 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected DataRepositoryConvention(ITypeMetadataCache metadataCache, EntityObjectFactory entityFactory)
+            protected DataRepositoryConvention(TypeMetadataCache metadataCache, EntityObjectFactory entityFactory)
                 : base(Will.InspectDeclaration | Will.ImplementPrimaryInterface)
             {
                 _metadataCache = metadataCache;
@@ -405,6 +405,8 @@ namespace NWheels.Conventions.Core
                         
                     _metadataCache.GetTypeMetadata(entityContractType); // force entity metadata to be created now, if not yet
                 });
+
+                _metadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(_metadataCache));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -450,7 +452,7 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected ConnectedModelDataRepositoryConvention(EntityObjectFactory entityFactory, ITypeMetadataCache metadataCache)
+            protected ConnectedModelDataRepositoryConvention(EntityObjectFactory entityFactory, TypeMetadataCache metadataCache)
                 : base(metadataCache, entityFactory)
             {
             }

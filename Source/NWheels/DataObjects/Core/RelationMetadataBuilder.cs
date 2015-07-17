@@ -59,7 +59,7 @@
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void AcceptVisitor(IMetadataElementVisitor visitor)
+        public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {
             Kind = visitor.VisitAttribute("Kind", Kind);
             Multiplicity = visitor.VisitAttribute("RelationKind", Multiplicity);

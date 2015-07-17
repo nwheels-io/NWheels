@@ -6,10 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Hapil;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 
 namespace NWheels.Testing.DataObjects
 {
-    public class Jsonlike : IMetadataElementVisitor
+    public class Jsonlike : ITypeMetadataVisitor
     {
         private readonly HashSet<Type> _elementTypeFilter;
         private readonly StringBuilder _output = new StringBuilder();
@@ -29,7 +30,7 @@ namespace NWheels.Testing.DataObjects
 
         #region IMetadataElementVisitor Members
 
-        TValue IMetadataElementVisitor.VisitAttribute<TValue>(string name, TValue value)
+        TValue ITypeMetadataVisitor.VisitAttribute<TValue>(string name, TValue value)
         {
             if ( (object)value != null && !value.Equals(default(TValue)))
             {
@@ -49,7 +50,7 @@ namespace NWheels.Testing.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        TElementImpl IMetadataElementVisitor.VisitElement<TElement, TElementImpl>(TElementImpl element)
+        TElementImpl ITypeMetadataVisitor.VisitElement<TElement, TElementImpl>(TElementImpl element)
         {
             if ( element == null )
             {
@@ -57,12 +58,12 @@ namespace NWheels.Testing.DataObjects
             }
 
             var elementName = GetDefaultElementName(element);
-            return ((IMetadataElementVisitor)this).VisitElement<TElement, TElementImpl>(elementName, element);
+            return ((ITypeMetadataVisitor)this).VisitElement<TElement, TElementImpl>(elementName, element);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        TElementImpl IMetadataElementVisitor.VisitElement<TElement, TElementImpl>(string name, TElementImpl element)
+        TElementImpl ITypeMetadataVisitor.VisitElement<TElement, TElementImpl>(string name, TElementImpl element)
         {
             if ( element == null )
             {
@@ -85,7 +86,7 @@ namespace NWheels.Testing.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void IMetadataElementVisitor.VisitElementList<TElement, TElementImpl>(string listName, IList<TElementImpl> elementList)
+        void ITypeMetadataVisitor.VisitElementList<TElement, TElementImpl>(string listName, IList<TElementImpl> elementList)
         {
             if ( elementList == null || !elementList.Any(ShouldIncludeElement) )
             {
@@ -118,7 +119,7 @@ namespace NWheels.Testing.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        TElementImpl IMetadataElementVisitor.VisitElementReference<TElement, TElementImpl>(string name, TElementImpl element)
+        TElementImpl ITypeMetadataVisitor.VisitElementReference<TElement, TElementImpl>(string name, TElementImpl element)
         {
             if ( element == null )
             {
@@ -136,7 +137,7 @@ namespace NWheels.Testing.DataObjects
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void IMetadataElementVisitor.VisitElementReferenceList<TElement, TElementImpl>(string listName, IList<TElementImpl> elementList)
+        void ITypeMetadataVisitor.VisitElementReferenceList<TElement, TElementImpl>(string listName, IList<TElementImpl> elementList)
         {
             if ( elementList == null || !elementList.Any(ShouldIncludeElement) )
             {

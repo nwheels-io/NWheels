@@ -42,6 +42,10 @@ namespace NWheels.Hosting.Core
 {
     public class NodeHost : INodeHost
     {
+        public const string DynamicAssemblyName = "NWheels.RunTimeTypes";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private readonly BootConfiguration _bootConfig;
         private readonly Action<ContainerBuilder> _registerHostComponents;
         private int _initializationCount = 0;
@@ -57,6 +61,8 @@ namespace NWheels.Hosting.Core
         {
             _bootConfig = bootConfig;
             _registerHostComponents = registerHostComponents;
+
+            CleanDynamicAssemblyFromDisk();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -211,7 +217,7 @@ namespace NWheels.Hosting.Core
             }
 
             _dynamicModule = new DynamicModule(
-                simpleName: "NWheels.RunTimeTypes",
+                simpleName: DynamicAssemblyName,
                 allowSave: true,
                 saveDirectory: PathUtility.HostBinPath());
 
@@ -312,6 +318,18 @@ namespace NWheels.Hosting.Core
 
         //    return new IInitializableHostComponent[0];
         //}
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void CleanDynamicAssemblyFromDisk()
+        {
+            var dynamicAssemblyPath = PathUtility.HostBinPath(DynamicAssemblyName + ".dll");
+
+            if ( File.Exists(dynamicAssemblyPath) )
+            {
+                File.Delete(dynamicAssemblyPath);
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

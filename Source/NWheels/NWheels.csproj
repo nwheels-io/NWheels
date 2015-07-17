@@ -86,6 +86,8 @@
     <Compile Include="Authorization\IEntityAccessControlBuilder.cs" />
     <Compile Include="Authorization\IEntityAccessRule.cs" />
     <Compile Include="Authorization\IIdentityInfo.cs" />
+    <Compile Include="DataObjects\Core\CrossTypeFixupMetadataVisitor.cs" />
+    <Compile Include="DataObjects\Core\TypeMetadataVisitorBase.cs" />
     <Compile Include="Endpoints\HttpOperationAttribute.cs" />
     <Compile Include="Endpoints\HttpOperationVerbs.cs" />
     <Compile Include="Entities\Core\IDataRepositoryCallback.cs" />
@@ -184,7 +186,7 @@
     <Compile Include="DataObjects\DataObjectPartContractAttribute.cs" />
     <Compile Include="DataObjects\IDataObject.cs" />
     <Compile Include="DataObjects\IMetadataElement.cs" />
-    <Compile Include="DataObjects\IMetadataElementVisitor.cs" />
+    <Compile Include="DataObjects\Core\ITypeMetadataVisitor.cs" />
     <Compile Include="DataObjects\IObjectCollection.cs" />
     <Compile Include="DataObjects\Core\IPropertyContractAttribute.cs" />
     <Compile Include="DataObjects\IPropertyValueValidator.cs" />

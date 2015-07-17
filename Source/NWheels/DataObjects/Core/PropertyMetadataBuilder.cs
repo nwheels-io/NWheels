@@ -169,7 +169,7 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void AcceptVisitor(IMetadataElementVisitor visitor)
+        public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {
             Name = visitor.VisitAttribute("Name", Name);
             DeclaringContract = visitor.VisitAttribute("DeclaringContract", DeclaringContract);

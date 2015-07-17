@@ -24,7 +24,7 @@ namespace NWheels.Testing.UnitTests.Entities.Impl
         {
             _factoryUnderTest = new TestDataRepositoryFactory(
                 base.DyamicModule,
-                Framework.MetadataCache,
+                (TypeMetadataCache)Framework.MetadataCache,
                 new EntityObjectFactory(Framework.Components, base.DyamicModule, (TypeMetadataCache)Framework.MetadataCache));
         }
 

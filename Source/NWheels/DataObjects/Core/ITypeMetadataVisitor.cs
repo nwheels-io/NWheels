@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace NWheels.DataObjects
+namespace NWheels.DataObjects.Core
 {
-    public interface IMetadataElementVisitor
+    public interface ITypeMetadataVisitor
     {
         TValue VisitAttribute<TValue>(string name, TValue value);
 
