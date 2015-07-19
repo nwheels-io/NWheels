@@ -1,0 +1,8 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <BitmapImage x:Key="StartPageLogoImage" UriSource="../../Resources/StartPageLogo.png" />
+    <SolidColorBrush x:Key="StartPageBackroundBrush" Color="White"></SolidColorBrush>
+    <SolidColorBrush x:Key="StartPageHeadingBrush" Color="#1D70B9"></SolidColorBrush>
+    <SolidColorBrush x:Key="StartPageItemAlternateBrush" Color="#DFEFFF"></SolidColorBrush>
+</ResourceDictionary>
