@@ -71,13 +71,33 @@ namespace NWheels.Processing.Workflows
 
         public void ReceiveTrigger(TTrigger trigger)
         {
-            StateMachineFeedbackEventArgs<TState, TTrigger> eventArgs;
+            ReceiveTrigger(trigger, context: null);
+        }
 
-            do
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void ReceiveTrigger(TTrigger trigger, object context)
+        {
+            var stateChanged = false;
+
+            try
             {
-                eventArgs = PerformTrigger(trigger);
-                trigger = eventArgs.Feedback;
-            } while ( eventArgs.HasFeedback );
+                StateMachineFeedbackEventArgs<TState, TTrigger> eventArgs;
+                
+                do
+                {
+                    eventArgs = PerformTrigger(trigger, context);
+                    trigger = eventArgs.Feedback;
+                    stateChanged = true;
+                } while ( eventArgs.HasFeedback );
+            }
+            finally
+            {
+                if ( stateChanged )
+                {
+                    RaiseCurrentStateChanged();
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -89,6 +109,10 @@ namespace NWheels.Processing.Workflows
                 return _currentState.Value;
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public event EventHandler CurrentStateChanged;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -104,7 +128,7 @@ namespace NWheels.Processing.Workflows
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private StateMachineFeedbackEventArgs<TState, TTrigger> PerformTrigger(TTrigger trigger)
+        private StateMachineFeedbackEventArgs<TState, TTrigger> PerformTrigger(TTrigger trigger, object context)
         {
             var currentState = _currentState;
             var transition = currentState.ValidateTransition(trigger);
@@ -114,7 +138,7 @@ namespace NWheels.Processing.Workflows
                 throw _logger.TransitionNotDefined(_codeBehind.GetType(), currentState.Value, trigger);
             }
 
-            var eventArgs = new StateMachineFeedbackEventArgs<TState, TTrigger>(_currentState.Value, transition.DestinationStateValue, trigger, context: null);
+            var eventArgs = new StateMachineFeedbackEventArgs<TState, TTrigger>(_currentState.Value, transition.DestinationStateValue, trigger, context);
 
             _currentState.Leave(eventArgs);
 
@@ -132,6 +156,16 @@ namespace NWheels.Processing.Workflows
             _currentState.Enter(eventArgs);
 
             return eventArgs;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void RaiseCurrentStateChanged()
+        {
+            if ( CurrentStateChanged != null )
+            {
+                CurrentStateChanged(this, EventArgs.Empty);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
