@@ -95,6 +95,13 @@ namespace NWheels.Stacks.EntityFramework.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        object IEntityRepository.New(Type concreteContract)
+        {
+            return this.New(concreteContract);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         void IEntityRepository.Insert(object entity)
         {
             this.Insert((TEntityContract)entity);
@@ -155,6 +162,19 @@ namespace NWheels.Stacks.EntityFramework.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TConcreteEntity New<TConcreteEntity>() where TConcreteEntity : class, TEntityContract
+        {
+            return _ownerRepo.EntityFactory.NewEntity<TConcreteEntity>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TEntityContract New(Type concreteContract)
+        {
+            return (TEntityContract)_ownerRepo.EntityFactory.NewEntity(concreteContract);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IQueryable<TEntityContract> Include(Expression<Func<TEntityContract, object>>[] properties)
         {

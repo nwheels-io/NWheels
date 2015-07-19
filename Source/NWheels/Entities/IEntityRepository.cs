@@ -11,6 +11,7 @@ namespace NWheels.Entities
     public interface IEntityRepository
     {
         object New();
+        object New(Type concreteContract);
         void Insert(object entity);
         void Update(object entity);
         void Delete(object entity);
@@ -24,6 +25,8 @@ namespace NWheels.Entities
     public interface IEntityRepository<TEntity> : IQueryable<TEntity>
     {
         TEntity New();
+        TEntity New(Type concreteContract);
+        TConcreteEntity New<TConcreteEntity>() where TConcreteEntity : class, TEntity;
         IQueryable<TEntity> Include(params Expression<Func<TEntity, object>>[] properties);
         void Insert(TEntity entity);
         void Update(TEntity entity);

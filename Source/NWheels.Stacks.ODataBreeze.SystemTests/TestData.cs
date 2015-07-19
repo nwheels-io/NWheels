@@ -30,15 +30,15 @@ namespace NWheels.Stacks.ODataBreeze.SystemTests
 
                     AddUserDataRule(data1, TestClaims.DataRuleOne);
 
-                    CreateInsertUpdateUsers(data1);
+                    CreateUsers(data1);
                 }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private static void CreateInsertUpdateUsers(IUserAccountDataRepository data1)
+            private static void CreateUsers(IUserAccountDataRepository data1)
             {
-                var admin1 = data1.NewBackEndUser();
+                var admin1 = data1.AllUsers.New<IBackEndUserAccountEntity>();
                 admin1.LoginName = "admin";
                 admin1.FullName = "Administrator";
                 var adminPass1 = data1.NewPassword();
@@ -47,7 +47,7 @@ namespace NWheels.Stacks.ODataBreeze.SystemTests
                 admin1.AssociatedRoles = new[] { TestClaims.RoleOne };
                 data1.AllUsers.Insert(admin1);
 
-                var subscriber1 = data1.NewFrontEndUser();
+                var subscriber1 = data1.AllUsers.New<IFrontEndUserAccountEntity>();
                 subscriber1.LoginName = "johns";
                 subscriber1.FullName = "John Smith";
                 subscriber1.EmailAddress = "john.smith@email.com";

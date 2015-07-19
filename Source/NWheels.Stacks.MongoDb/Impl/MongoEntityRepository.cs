@@ -102,6 +102,13 @@ namespace NWheels.Stacks.MongoDb.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        object IEntityRepository.New(Type concreteContract)
+        {
+            return this.New(concreteContract);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         void IEntityRepository.Insert(object entity)
         {
             this.Insert((TEntityContract)entity);
@@ -159,6 +166,22 @@ namespace NWheels.Stacks.MongoDb.Impl
         {
             _ownerRepo.ValidateOperationalState();
             return _objectFactory.NewEntity<TEntityContract>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TConcreteEntity New<TConcreteEntity>() where TConcreteEntity : class, TEntityContract
+        {
+            _ownerRepo.ValidateOperationalState();
+            return _objectFactory.NewEntity<TConcreteEntity>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TEntityContract New(Type concreteContract)
+        {
+            _ownerRepo.ValidateOperationalState();
+            return (TEntityContract)_objectFactory.NewEntity(concreteContract);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

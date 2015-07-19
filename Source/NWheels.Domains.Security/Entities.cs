@@ -17,8 +17,6 @@ namespace NWheels.Domains.Security
         IEntityRepository<IUserRoleEntity> UserRoles { get; }
         IEntityRepository<IOperationPermissionEntity> OperationPermissions { get; }
         IEntityRepository<IEntityAccessRuleEntity> EntityAccessRules { get; }
-        IBackEndUserAccountEntity NewBackEndUser();
-        IFrontEndUserAccountEntity NewFrontEndUser();
         IPasswordEntity NewPassword();
     }
 
