@@ -80,7 +80,7 @@ namespace NWheels.Processing.Workflows
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void ReceiveFeedack(TTrigger feedback)
+        public void ReceiveFeedback(TTrigger feedback)
         {
             this.HasFeedback = true;
             this.Feedback = feedback;

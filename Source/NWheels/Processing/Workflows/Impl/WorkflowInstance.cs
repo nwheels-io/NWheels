@@ -311,12 +311,12 @@ namespace NWheels.Processing.Workflows.Impl
                     result = _processorInstance.Run();
                 }
 
-                e.ReceiveFeedack(result == ProcessorResult.Completed ? WorkflowProcessorTrigger.Completed : WorkflowProcessorTrigger.Suspended);
+                e.ReceiveFeedback(result == ProcessorResult.Completed ? WorkflowProcessorTrigger.Completed : WorkflowProcessorTrigger.Suspended);
             }
             catch ( Exception exc )
             {
                 AddFailureException(exc);
-                e.ReceiveFeedack(WorkflowProcessorTrigger.Failure);
+                e.ReceiveFeedback(WorkflowProcessorTrigger.Failure);
             }
         }
 
@@ -406,11 +406,11 @@ namespace NWheels.Processing.Workflows.Impl
             catch ( Exception e )
             {
                 AddFailureException(e);
-                eventArgs.ReceiveFeedack(WorkflowProcessorTrigger.Failure);
+                eventArgs.ReceiveFeedback(WorkflowProcessorTrigger.Failure);
                 return;
             }
 
-            eventArgs.ReceiveFeedack(WorkflowProcessorTrigger.Success);
+            eventArgs.ReceiveFeedback(WorkflowProcessorTrigger.Success);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

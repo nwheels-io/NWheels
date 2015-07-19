@@ -396,7 +396,7 @@ namespace NWheels.Hosting.Core
             {
                 _lifetime = _owner.CreateNodeLifetime();
                 var success = _lifetime.ExecuteLoadPhase();
-                e.ReceiveFeedack(success ? NodeTrigger.LoadSuccess : NodeTrigger.LoadFailure);
+                e.ReceiveFeedback(success ? NodeTrigger.LoadSuccess : NodeTrigger.LoadFailure);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -404,7 +404,7 @@ namespace NWheels.Hosting.Core
             private void ActivatingEntered(object sender, StateMachineFeedbackEventArgs<NodeState, NodeTrigger> e)
             {
                 var success = _lifetime.ExecuteActivatePhase();
-                e.ReceiveFeedack(success ? NodeTrigger.ActivateSuccess : NodeTrigger.ActivateFailure);
+                e.ReceiveFeedback(success ? NodeTrigger.ActivateSuccess : NodeTrigger.ActivateFailure);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -412,7 +412,7 @@ namespace NWheels.Hosting.Core
             private void DeactivatingEntered(object sender, StateMachineFeedbackEventArgs<NodeState, NodeTrigger> e)
             {
                 _lifetime.ExecuteDeactivatePhase();
-                e.ReceiveFeedack(NodeTrigger.DeactivateDone);
+                e.ReceiveFeedback(NodeTrigger.DeactivateDone);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -420,7 +420,7 @@ namespace NWheels.Hosting.Core
             private void UnloadingEntered(object sender, StateMachineFeedbackEventArgs<NodeState, NodeTrigger> e)
             {
                 _lifetime.ExecuteUnloadPhase();
-                e.ReceiveFeedack(NodeTrigger.UnloadDone);
+                e.ReceiveFeedback(NodeTrigger.UnloadDone);
                 _lifetime.Dispose();
                 _lifetime = null;
             }

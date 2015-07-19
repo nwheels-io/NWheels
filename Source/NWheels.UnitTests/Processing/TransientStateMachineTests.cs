@@ -417,7 +417,7 @@ namespace NWheels.UnitTests.Processing
 
                 if ( FeedBackFromEating )
                 {
-                    e.ReceiveFeedack(PhilisopherTrigger.Full);
+                    e.ReceiveFeedback(PhilisopherTrigger.Full);
                 }
             }
 
