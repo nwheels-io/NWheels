@@ -4,10 +4,12 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Caliburn.Micro;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
 using Gemini.Framework.Threading;
 using NWheels.Tools.TestBoard.Modules.ApplicationExplorer;
+using NWheels.Tools.TestBoard.Services;
 
 namespace NWheels.Tools.TestBoard.Modules.StartPage
 {
@@ -63,7 +65,11 @@ namespace NWheels.Tools.TestBoard.Modules.StartPage
 
             if ( existingStartPageDocument != null )
             {
-                
+                _shell.ActiveLayoutItem = existingStartPageDocument;
+            }
+            else
+            {
+                _shell.OpenDocument(IoC.Get<StartPageViewModel>());
             }
 
             return TaskUtility.Completed;

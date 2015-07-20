@@ -95,7 +95,7 @@
                                         Margin="0"
                                         Style="{StaticResource RecentAppButton}" 
                                         Grid.Column="0" Grid.Row="0" 
-                                        cal:Message.Attach="BeginLoadApp($dataContext)">
+                                        cal:Message.Attach="LoadRecentApp($dataContext)">
                                         <Border Padding="15 5 5 10" Style="{StaticResource RecentAppBorder}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>

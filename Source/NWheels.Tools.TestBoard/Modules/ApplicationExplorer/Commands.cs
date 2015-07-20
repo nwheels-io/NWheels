@@ -9,6 +9,8 @@ using Caliburn.Micro;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
 using Gemini.Framework.Threading;
+using NWheels.Tools.TestBoard.Modules.StartPage;
+using NWheels.Tools.TestBoard.Services;
 
 namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 {
@@ -103,21 +105,28 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
     [CommandHandler]
     public class StartApplicationCommandHandler : CommandHandlerBase<StartApplicationCommandDefinition>
     {
-        private readonly IApplicationExplorer _explorer;
+        private readonly IApplicationControllerService _controller;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
-        public StartApplicationCommandHandler(IApplicationExplorer explorer)
+        public StartApplicationCommandHandler(IApplicationControllerService controller)
         {
-            _explorer = explorer;
+            _controller = controller;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void Update(Command command)
+        {
+            command.Enabled = _controller.CanStart();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override Task Run(Command command)
         {
-            return _explorer.Controller.StartAsync();
+            return _controller.StartAsync();
         }
     }
 
@@ -159,14 +168,21 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
     [CommandHandler]
     public class LoadNewApplicationCommandHandler : CommandHandlerBase<LoadNewApplicationCommandDefinition>
     {
-        private readonly IApplicationExplorer _explorer;
+        private readonly IApplicationControllerService _controller;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
-        public LoadNewApplicationCommandHandler(IApplicationExplorer explorer)
+        public LoadNewApplicationCommandHandler(IApplicationControllerService controller)
         {
-            _explorer = explorer;
+            _controller = controller;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void Update(Command command)
+        {
+            command.Enabled = _controller.CanLoad();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -181,10 +197,68 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
             if ( dlg.ShowDialog() == true )
             {
-                MessageBox.Show("Now loading app from: " + dlg.FileName);
+                _controller.LoadAsync(bootConfigFilePath: dlg.FileName);
             }
 
             return TaskUtility.Completed;
+        }
+    }
+
+    #endregion
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    #region LoadRecentApplication
+
+    [CommandDefinition]
+    public class LoadRecentApplicationCommandDefinition : CommandListDefinition
+    {
+        public const string CommandName = "Application.LoadRecent";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string Name
+        {
+            get { return CommandName; }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [CommandHandler]
+    public class LoadRecentApplicationCommandHandler : ICommandListHandler<LoadRecentApplicationCommandDefinition>
+    {
+        private readonly IApplicationControllerService _controller;
+        private readonly IRecentAppListService _recentAppList;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ImportingConstructor]
+        public LoadRecentApplicationCommandHandler(IApplicationControllerService controller, IRecentAppListService recentAppList)
+        {
+            _controller = controller;
+            _recentAppList = recentAppList;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Populate(Command command, List<Command> commands)
+        {
+            foreach ( var app in _recentAppList.GetRecentApps() )
+            {
+                commands.Add(new Command(command.CommandDefinition) {
+                    Text = app.BootConfigFilePath,
+                    Tag = app.BootConfigFilePath
+                });
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Task Run(Command command)
+        {
+            var bootConfigFilePath = (string)command.Tag;
+            return _controller.LoadAsync(bootConfigFilePath);
         }
     }
 

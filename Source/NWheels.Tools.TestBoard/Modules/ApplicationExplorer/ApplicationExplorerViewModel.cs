@@ -7,30 +7,21 @@ using System.Threading.Tasks;
 using Gemini.Framework;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
+using NWheels.Tools.TestBoard.Services;
 
 namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 {
     [Export(typeof(IApplicationExplorer))]
     public class ApplicationExplorerViewModel : Tool, IApplicationExplorer
     {
-        private readonly ApplicationController _controller;
+        private readonly IApplicationControllerService _controller;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
-        public ApplicationExplorerViewModel(IShell shell)
+        public ApplicationExplorerViewModel(IShell shell, IApplicationControllerService controller)
         {
-            _controller = new ApplicationController();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public ApplicationController Controller
-        {
-            get
-            {
-                return _controller;
-            }
+            _controller = controller;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

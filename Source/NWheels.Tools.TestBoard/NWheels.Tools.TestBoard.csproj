@@ -145,13 +145,13 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Messages\AppLoadedMessage.cs" />
+    <Compile Include="Services\RecentAppListService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\ApplicationLoadCommandDefinition.cs" />
-    <Compile Include="Commands\ApplicationLoadCommandHandler.cs" />
     <Compile Include="Modules\ApplicationExplorer\ApplicationExplorerModule.cs" />
     <Compile Include="Modules\ApplicationExplorer\ApplicationExplorerViewModel.cs" />
-    <Compile Include="Modules\ApplicationExplorer\ApplicationController.cs" />
+    <Compile Include="Services\ApplicationControllerService.cs" />
     <Compile Include="Modules\ApplicationExplorer\ApplicationState.cs" />
     <Compile Include="Modules\ApplicationExplorer\Commands.cs" />
     <Compile Include="Modules\ApplicationExplorer\IApplicationExplorer.cs" />
@@ -223,6 +223,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Commands\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

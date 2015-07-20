@@ -23,20 +23,27 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Export]
-        public static MenuItemGroupDefinition ViewMenuGroup = 
-            new MenuItemGroupDefinition(Gemini.Modules.MainMenu.MenuDefinitions.ViewMenu, 0);
-        
-        [Export]
         public static MenuItemDefinition ViewApplicationExplorerMenuItem =
-            new CommandMenuItemDefinition<ViewApplicationExplorerCommandDefinition>(ViewMenuGroup, 0);
+            new CommandMenuItemDefinition<ViewApplicationExplorerCommandDefinition>(MainModule.ViewMenuGroup, 0);
 
         [Export]
-        public static MenuItemGroupDefinition ApplicationMenuGroup = 
-            new MenuItemGroupDefinition(MainModule.ApplicationMenu, 0);
+        public static MenuItemDefinition ApplicationLoadMenuItem =
+            new CommandMenuItemDefinition<LoadNewApplicationCommandDefinition>(MainModule.ApplicationMenuGroup, 0);
 
         [Export]
-        public static MenuItemDefinition ApplicationLoadMenuItem = 
-            new CommandMenuItemDefinition<LoadNewApplicationCommandDefinition>(ApplicationMenuGroup, 0);
+        public static MenuItemDefinition RecentAppsMenuItem =
+            new TextMenuItemDefinition(MainModule.ApplicationMenuGroup, 1, "_Recent");
+
+        [Export]
+        public static MenuItemGroupDefinition RecentAppsMenuGroup =
+            new MenuItemGroupDefinition(RecentAppsMenuItem, 1);
+
+        [Export]
+        public static MenuItemDefinition RecentAppMenuItemList = 
+            new CommandMenuItemDefinition<LoadRecentApplicationCommandDefinition>(RecentAppsMenuGroup, 0);
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         //[Export]
         //public static MenuItemGroupDefinition ViewMenuGroup =

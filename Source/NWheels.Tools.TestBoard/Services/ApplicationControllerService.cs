@@ -1,17 +1,37 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.ComponentModel.Composition;
 using System.Threading.Tasks;
+using Caliburn.Micro;
 using NWheels.Exceptions;
+using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Hosting.Core;
 using NWheels.Processing.Workflows;
+using NWheels.Tools.TestBoard.Modules.ApplicationExplorer;
 
-namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
+namespace NWheels.Tools.TestBoard.Services
 {
-    public class ApplicationController
+    public interface IApplicationControllerService
     {
+        bool CanLoad();
+        bool CanStart();
+        bool CanStop();
+        bool CanUnload();
+        Task LoadAsync(string bootConfigFilePath);
+        Task StartAsync();
+        Task StopAsync();
+        Task UnloadAsync();
+        BootConfiguration BootConfig { get; }
+        ApplicationState CurrentState { get; }
+        event EventHandler CurrentStateChanged;
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [Export(typeof(IApplicationControllerService))]
+    public class ApplicationControllerService : IApplicationControllerService
+    {
+        private readonly IEventAggregator _eventAggregator;
         private readonly TransientStateMachine<ApplicationState, ApplicationTrigger> _stateMachine;
         private string _bootConfigFilePath;
         private BootConfiguration _bootConfig;
@@ -19,8 +39,11 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ApplicationController()
+        [ImportingConstructor]
+        public ApplicationControllerService(IEventAggregator eventAggregator)
         {
+            _eventAggregator = eventAggregator;
+            
             _stateMachine = new TransientStateMachine<ApplicationState, ApplicationTrigger>(
                 new StateMachineCodeBehind(this), 
                 (TransientStateMachine<ApplicationState, ApplicationTrigger>.ILogger)new StateMachineLogger());
@@ -35,7 +58,6 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         public Task LoadAsync(string bootConfigFilePath)
         {
-
             return Task.Run(() => _stateMachine.ReceiveTrigger(ApplicationTrigger.LoadRequested, context: bootConfigFilePath));
         }
 
@@ -58,6 +80,34 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         public Task UnloadAsync()
         {
             return Task.Run(() => _stateMachine.ReceiveTrigger(ApplicationTrigger.UnloadRequested));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool CanUnload()
+        {
+            return (_stateMachine.CurrentState == ApplicationState.Stopped);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool CanLoad()
+        {
+            return _stateMachine.CurrentState.IsIn(ApplicationState.NotLoaded, ApplicationState.Stopped);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool CanStart()
+        {
+            return (_stateMachine.CurrentState == ApplicationState.Stopped);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool CanStop()
+        {
+            return (_stateMachine.CurrentState == ApplicationState.Running);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -94,6 +144,10 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             {
                 _bootConfig = BootConfiguration.LoadFromFile(bootConfigFilePath);
                 _bootConfig.Validate();
+                
+                _eventAggregator.Publish(
+                    new Messages.AppLoadedMessage(bootConfigFilePath, _bootConfig), 
+                    action => action());
             }
             catch
             {
@@ -169,11 +223,11 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         private class StateMachineCodeBehind : IStateMachineCodeBehind<ApplicationState, ApplicationTrigger>
         {
-            private readonly ApplicationController _ownerHost;
+            private readonly ApplicationControllerService _ownerHost;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public StateMachineCodeBehind(ApplicationController ownerHost)
+            public StateMachineCodeBehind(ApplicationControllerService ownerHost)
             {
                 _ownerHost = ownerHost;
             }
@@ -192,6 +246,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
                     .OnTrigger(ApplicationTrigger.Failure).TransitionTo(ApplicationState.NotLoaded);
 
                 machine.State(ApplicationState.Stopped)
+                    .OnTrigger(ApplicationTrigger.LoadRequested).TransitionTo(ApplicationState.Loading, OnTransitioningFromStoppedToLoading)
                     .OnTrigger(ApplicationTrigger.StartRequested).TransitionTo(ApplicationState.Starting)
                     .OnTrigger(ApplicationTrigger.UnloadRequested).TransitionTo(ApplicationState.Unloading);
 
@@ -212,6 +267,13 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
                     .OnEntered(OnStoppingEntered)
                     .OnTrigger(ApplicationTrigger.Success).TransitionTo(ApplicationState.Stopped)
                     .OnTrigger(ApplicationTrigger.Failure).TransitionTo(ApplicationState.Stopped);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void OnTransitioningFromStoppedToLoading(object sender, StateMachineEventArgs<ApplicationState, ApplicationTrigger> e)
+            {
+                _ownerHost.Unload();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -14,6 +14,7 @@ using Gemini.Framework.Menus;
 using Gemini.Framework.Services;
 using Gemini.Modules.Inspector;
 using Gemini.Modules.Output;
+using Gemini.Modules.Output.Commands;
 using NWheels.Tools.TestBoard.Modules.ApplicationExplorer;
 using NWheels.Tools.TestBoard.Properties;
 
@@ -103,6 +104,18 @@ namespace NWheels.Tools.TestBoard.Modules.Main
         public static MenuDefinition ApplicationMenu = 
             new MenuDefinition(Gemini.Modules.MainMenu.MenuDefinitions.MainMenuBar, 0, "_Application");
 
+        [Export]
+        public static MenuItemGroupDefinition ApplicationMenuGroup =
+            new MenuItemGroupDefinition(MainModule.ApplicationMenu, 0);
+
+        [Export]
+        public static MenuItemGroupDefinition ViewMenuGroup =
+            new MenuItemGroupDefinition(Gemini.Modules.MainMenu.MenuDefinitions.ViewMenu, 0);
+
+        [Export]
+        public static MenuItemDefinition ViewOutputMenuItem = 
+            new CommandMenuItemDefinition<ViewOutputCommandDefinition>(ViewMenuGroup, 10);
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Export]
@@ -132,5 +145,13 @@ namespace NWheels.Tools.TestBoard.Modules.Main
         [Export]
         public static ExcludeMenuItemDefinition ExcludeViewHistoryMenuItem =
             new ExcludeMenuItemDefinition(Gemini.Modules.UndoRedo.MenuDefinitions.ViewHistoryMenuItem);
+
+        [Export]
+        public static ExcludeMenuItemGroupDefinition ExcludeViewOptionsMenuGroup =
+            new ExcludeMenuItemGroupDefinition(Gemini.Modules.MainMenu.MenuDefinitions.ViewPropertiesMenuGroup);
+
+        [Export]
+        public static ExcludeMenuItemGroupDefinition ExcludeViewToolsMenuGroup =
+            new ExcludeMenuItemGroupDefinition(Gemini.Modules.MainMenu.MenuDefinitions.ViewToolsMenuGroup);
     }
 }

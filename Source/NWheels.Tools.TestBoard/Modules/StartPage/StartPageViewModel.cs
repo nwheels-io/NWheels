@@ -12,6 +12,7 @@ using System.Windows;
 using Gemini.Framework.Commands;
 using Newtonsoft.Json;
 using NWheels.Tools.TestBoard.Modules.ApplicationExplorer;
+using NWheels.Tools.TestBoard.Services;
 
 namespace NWheels.Tools.TestBoard.Modules.StartPage
 {
@@ -20,14 +21,22 @@ namespace NWheels.Tools.TestBoard.Modules.StartPage
     {
         private readonly ICommandService _commandService;
         private readonly ICommandRouter _commandRouter;
+        private readonly IRecentAppListService _recentAppList;
+        private readonly IApplicationControllerService _controller;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
-        public StartPageViewModel(ICommandService commandService, ICommandRouter commandRouter)
+        public StartPageViewModel(
+            ICommandService commandService, 
+            ICommandRouter commandRouter, 
+            IRecentAppListService recentAppList,
+            IApplicationControllerService controller)
         {
             _commandRouter = commandRouter;
             _commandService = commandService;
+            _recentAppList = recentAppList;
+            _controller = controller;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,9 +51,16 @@ namespace NWheels.Tools.TestBoard.Modules.StartPage
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void BeginLoadApp(RecentApp app)
+        public void LoadRecentApp(IRecentApp app)
         {
-            MessageBox.Show("Now loading app from: " + app.BootConfigFilePath);
+            if ( _controller.CanLoad() )
+            {
+                _controller.LoadAsync(app.BootConfigFilePath);
+            }
+            else
+            {
+                MessageBox.Show("Cannot load application at this moment.");
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -63,198 +79,12 @@ namespace NWheels.Tools.TestBoard.Modules.StartPage
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public List<RecentApp> RecentApps { get; private set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override void OnInitialize()
+        public IEnumerable<IRecentApp> RecentApps
         {
-            LoadRecentApps();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private string GetRecentAppsFilePath()
-        {
-            return PathUtility.HostBinPath("ntest.mru");
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void LoadRecentApps()
-        {
-            var filePath = GetRecentAppsFilePath();
-
-            if ( File.Exists(filePath) )
+            get
             {
-                var fileStuctrue = JsonConvert.DeserializeObject<RecentAppsFileStructure>(File.ReadAllText(filePath));
-                this.RecentApps = fileStuctrue.RecentApps;
+                return _recentAppList.GetRecentApps();
             }
-            else
-            {
-                this.RecentApps = new List<RecentApp>() {
-                    new RecentApp() {
-                        BootConfigFilePath = @"C:\PathOne\AppOne\boot.config",
-                        BootConfigFileExists = true,
-                        BootConfigIsValid = true,
-                        BootConfig = new BootConfiguration() {
-                            ApplicationName = "Test Application One",
-                            NodeName = "AppServer",
-                            EnvironmentName = "Local",
-                            EnvironmentType = "DEV",
-                            FrameworkModules = new List<BootConfiguration.ModuleConfig>() {
-                                new BootConfiguration.ModuleConfig() { Name = "Framework.Module1" },
-                                new BootConfiguration.ModuleConfig() { Name = "Framework.Module2" },
-                            },
-                            ApplicationModules = new List<BootConfiguration.ModuleConfig>() {
-                                new BootConfiguration.ModuleConfig() { Name = "Application.Module1" },
-                                new BootConfiguration.ModuleConfig() { Name = "Application.Module2" },
-                            }
-                        }
-                    },
-                    new RecentApp() {
-                        BootConfigFilePath = @"C:\PathTwo\AppTwo\boot.config",
-                        BootConfigFileExists = true,
-                        BootConfigIsValid = true,
-                        BootConfig = new BootConfiguration() {
-                            ApplicationName = "Test Application Two",
-                            NodeName = "ClientConnector",
-                            EnvironmentName = "QA1",
-                            EnvironmentType = "QA",
-                            FrameworkModules = new List<BootConfiguration.ModuleConfig>() {
-                                new BootConfiguration.ModuleConfig() { Name = "Framework.Module1" },
-                                new BootConfiguration.ModuleConfig() { Name = "Framework.Module2" },
-                            },
-                            ApplicationModules = new List<BootConfiguration.ModuleConfig>() {
-                                new BootConfiguration.ModuleConfig() { Name = "Application.Module1" },
-                                new BootConfiguration.ModuleConfig() { Name = "Application.Module2" },
-                            }
-                        }
-                    },
-                };
-            }
-
-            ReloadBootConfigs();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void SaveRecentApps()
-        {
-            var filePath = GetRecentAppsFilePath();
-
-            if ( RecentApps != null )
-            {
-                var fileStuctrue = new RecentAppsFileStructure {
-                    RecentApps = this.RecentApps
-                };
-
-                File.WriteAllText(filePath, JsonConvert.SerializeObject(fileStuctrue));
-            }
-            else if  ( File.Exists(filePath) )
-            {
-                File.Delete(filePath);
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void ReloadBootConfigs()
-        {
-            foreach ( var app in this.RecentApps )
-            {
-                app.BootConfigFileExists = File.Exists(app.BootConfigFilePath);
-
-                if ( app.BootConfigFileExists )
-                {
-                    app.BootConfig = BootConfiguration.LoadFromFile(app.BootConfigFilePath);
-                }
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class RecentApp
-        {
-            public string BootConfigFilePath { get; set; }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            [JsonIgnore]
-            public bool BootConfigFileExists { get; set; }
-            [JsonIgnore]
-            public bool BootConfigIsValid { get; set; }
-            [JsonIgnore]
-            public BootConfiguration BootConfig { get; set; }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public string ApplicationText
-            {
-                get
-                {
-                    return (
-                        BootConfig != null ? 
-                        string.Format("{0} / {1}", BootConfig.ApplicationName, BootConfig.NodeName) : 
-                        "N/A");
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public string EnvironmentText
-            {
-                get
-                {
-                    return (
-                        BootConfig != null ?
-                        string.Format("{0} (type {1})", BootConfig.EnvironmentName, BootConfig.EnvironmentType) :
-                        "N/A");
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public string ModulesText
-            {
-                get
-                {
-                    return (
-                        BootConfig != null ?
-                        string.Join(", ", BootConfig.FrameworkModules.Concat(BootConfig.ApplicationModules).Select(m => m.Name)) :
-                        "N/A");
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public string ErrorText
-            {
-                get
-                {
-                    return (
-                        !BootConfigFileExists ? "Boot.config not found" : 
-                        !BootConfigIsValid ? "Boot.config is not valid" : 
-                        "");
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public bool HasErrors
-            {
-                get
-                {
-                    return (!BootConfigFileExists || !BootConfigIsValid);
-                }
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class RecentAppsFileStructure
-        {
-            public List<RecentApp> RecentApps { get; set; }
         }
     }
 }
