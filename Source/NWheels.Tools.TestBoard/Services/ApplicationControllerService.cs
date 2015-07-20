@@ -7,6 +7,7 @@ using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Hosting.Core;
 using NWheels.Processing.Workflows;
+using NWheels.Tools.TestBoard.Messages;
 using NWheels.Tools.TestBoard.Modules.ApplicationExplorer;
 
 namespace NWheels.Tools.TestBoard.Services
@@ -193,8 +194,12 @@ namespace NWheels.Tools.TestBoard.Services
 
         private void Unload()
         {
+            var appUnloadedMessage = new Messages.AppUnloadedMessage(_bootConfigFilePath, _bootConfig);
+
             _bootConfig = null;
             _bootConfigFilePath = null;
+
+            _eventAggregator.Publish(appUnloadedMessage, action => action());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -205,6 +210,8 @@ namespace NWheels.Tools.TestBoard.Services
             {
                 CurrentStateChanged(this, EventArgs.Empty);
             }
+
+            _eventAggregator.Publish(new AppControllerStateChangedMessage(_stateMachine.CurrentState), action => action());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

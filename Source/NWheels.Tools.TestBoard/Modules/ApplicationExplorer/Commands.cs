@@ -76,7 +76,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
     [CommandDefinition]
     public class StartApplicationCommandDefinition : CommandDefinition
     {
-        public const string CommandName = "Application.ViewExplorer";
+        public const string CommandName = "Application.Start";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -89,14 +89,14 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         public override string Text
         {
-            get { return "Application Explorer"; }
+            get { return "Start"; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override string ToolTip
         {
-            get { return "Open Application Explorer tool window"; }
+            get { return "Start current application"; }
         }
     }
 
@@ -127,6 +127,69 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         public override Task Run(Command command)
         {
             return _controller.StartAsync();
+        }
+    }
+
+    #endregion
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    #region StopApplicationCommandDefinition
+
+    [CommandDefinition]
+    public class StopApplicationCommandDefinition : CommandDefinition
+    {
+        public const string CommandName = "Application.Stop";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string Name
+        {
+            get { return CommandName; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string Text
+        {
+            get { return "Stop"; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string ToolTip
+        {
+            get { return "Stop current application"; }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [CommandHandler]
+    public class StopApplicationCommandHandler : CommandHandlerBase<StopApplicationCommandDefinition>
+    {
+        private readonly IApplicationControllerService _controller;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ImportingConstructor]
+        public StopApplicationCommandHandler(IApplicationControllerService controller)
+        {
+            _controller = controller;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void Update(Command command)
+        {
+            command.Enabled = _controller.CanStop();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override Task Run(Command command)
+        {
+            return _controller.StopAsync();
         }
     }
 
@@ -259,6 +322,69 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         {
             var bootConfigFilePath = (string)command.Tag;
             return _controller.LoadAsync(bootConfigFilePath);
+        }
+    }
+
+    #endregion
+    
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    #region UnloadApplication
+
+    [CommandDefinition]
+    public class UnloadApplicationCommandDefinition : CommandDefinition
+    {
+        public const string CommandName = "Application.Unload";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string Name
+        {
+            get { return CommandName; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string Text
+        {
+            get { return "Unload"; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string ToolTip
+        {
+            get { return "Unload current application"; }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [CommandHandler]
+    public class UnloadApplicationCommandHandler : CommandHandlerBase<UnloadApplicationCommandDefinition>
+    {
+        private readonly IApplicationControllerService _controller;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ImportingConstructor]
+        public UnloadApplicationCommandHandler(IApplicationControllerService controller)
+        {
+            _controller = controller;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void Update(Command command)
+        {
+            command.Enabled = _controller.CanUnload();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override Task Run(Command command)
+        {
+            return _controller.UnloadAsync();
         }
     }
 

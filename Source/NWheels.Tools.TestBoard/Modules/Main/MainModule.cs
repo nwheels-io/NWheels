@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,32 +10,45 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Menus;
 using Gemini.Framework.Services;
 using Gemini.Modules.Inspector;
 using Gemini.Modules.Output;
 using Gemini.Modules.Output.Commands;
+using NWheels.Extensions;
+using NWheels.Tools.TestBoard.Messages;
 using NWheels.Tools.TestBoard.Modules.ApplicationExplorer;
 using NWheels.Tools.TestBoard.Properties;
 
 namespace NWheels.Tools.TestBoard.Modules.Main
 {
     [Export(typeof(IModule))]
-    public class MainModule : ModuleBase
+    public class MainModule : 
+        ModuleBase, 
+        IHandle<AppLoadedMessage>, 
+        IHandle<AppUnloadedMessage>,
+        IHandle<AppControllerStateChangedMessage>
     {
+        public const string MainWindowTitle = "NWheels Test Board";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private readonly IMainWindow _mainWindow;
         private readonly IOutput _output;
-        private readonly IInspectorTool _inspectorTool;
+        private readonly IEventAggregator _eventAggregator;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
-        public MainModule(IMainWindow mainWindow, IOutput output, IInspectorTool inspectorTool)
+        public MainModule(IMainWindow mainWindow, IOutput output, IEventAggregator eventAggregator)
         {
             _mainWindow = mainWindow;
             _output = output;
-            _inspectorTool = inspectorTool;
+            _eventAggregator = eventAggregator;
+
+            _eventAggregator.Subscribe(this);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,16 +61,35 @@ namespace NWheels.Tools.TestBoard.Modules.Main
             _mainWindow.Icon = ToImageSource(Resources.AppIcon);
 
             //MainWindow.WindowState = WindowState.Maximized;
-            MainWindow.Title = "NWheels Test Board";
+            MainWindow.Title = MainWindowTitle;
 
-            Shell.StatusBar.AddItem("Ready", new GridLength(1, GridUnitType.Star));
-            Shell.StatusBar.AddItem("No App Loaded", new GridLength(1, GridUnitType.Auto));
+            Shell.StatusBar.AddItem("", new GridLength(1, GridUnitType.Star));
+            Shell.StatusBar.AddItem("", new GridLength(1, GridUnitType.Auto));
             Shell.StatusBar.AddItem("", new GridLength(25, GridUnitType.Pixel));
 
-            _output.AppendLine("Started up");
+            _output.AppendLine(string.Format("Welcome to NWheels Test Board, version {0}", this.GetType().Assembly.GetName().Version));
+            UpdateStatusBar(ApplicationState.NotLoaded);
+        }
 
-            Shell.ActiveDocumentChanged += (sender, e) => RefreshInspector();
-            RefreshInspector();
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IHandle<AppLoadedMessage>.Handle(AppLoadedMessage message)
+        {
+            _mainWindow.Title = string.Format("{0} - {1}", message.BootConfig.ApplicationName, MainWindowTitle);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IHandle<AppUnloadedMessage>.Handle(AppUnloadedMessage message)
+        {
+            _mainWindow.Title = MainWindowTitle;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IHandle<AppControllerStateChangedMessage>.Handle(AppControllerStateChangedMessage message)
+        {
+            UpdateStatusBar(message.NewState);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -67,22 +100,6 @@ namespace NWheels.Tools.TestBoard.Modules.Main
             {
                 yield return typeof(IApplicationExplorer);
                 yield return typeof(IOutput);
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void RefreshInspector()
-        {
-            if ( Shell.ActiveItem != null )
-            {
-                _inspectorTool.SelectedObject =
-                    new InspectableObjectBuilder().WithObjectProperties(Shell.ActiveItem, pd => pd.ComponentType == Shell.ActiveItem.GetType())
-                        .ToInspectableObject();
-            }
-            else
-            {
-                _inspectorTool.SelectedObject = null;
             }
         }
 
@@ -100,9 +117,31 @@ namespace NWheels.Tools.TestBoard.Modules.Main
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private void UpdateStatusBar(ApplicationState state)
+        {
+            if (state == ApplicationState.NotLoaded)
+            {
+                Shell.StatusBar.Items[0].Message = "Ready";
+                Shell.StatusBar.Items[1].Message = "No App Loaded";
+            }
+            else
+            {
+                bool isReady = !state.IsIn(ApplicationState.Loading, ApplicationState.Starting, ApplicationState.Stopping, ApplicationState.Unloading);
+
+                Shell.StatusBar.Items[0].Message = (isReady ? "Ready" : state.ToString().SplitPascalCase().ToLower() + " application...");
+                Shell.StatusBar.Items[1].Message = (isReady ? "App: " + state.ToString().SplitPascalCase() : "");
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [Export]
         public static MenuDefinition ApplicationMenu = 
             new MenuDefinition(Gemini.Modules.MainMenu.MenuDefinitions.MainMenuBar, 0, "_Application");
+
+        [Export]
+        public static MenuItemGroupDefinition ApplicationExitMenuGroup =
+            new MenuItemGroupDefinition(MainModule.ApplicationMenu, 10);
 
         [Export]
         public static MenuItemGroupDefinition ApplicationMenuGroup =
@@ -115,6 +154,10 @@ namespace NWheels.Tools.TestBoard.Modules.Main
         [Export]
         public static MenuItemDefinition ViewOutputMenuItem = 
             new CommandMenuItemDefinition<ViewOutputCommandDefinition>(ViewMenuGroup, 10);
+
+        [Export]
+        public static MenuItemDefinition ApplicationExitMenuItem =
+            new CommandMenuItemDefinition<Gemini.Modules.Shell.Commands.ExitCommandDefinition>(ApplicationExitMenuGroup, 0);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -145,7 +145,12 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Messages\AppControllerStateChangedMessage.cs" />
+    <Compile Include="Messages\AppUnloadedMessage.cs" />
     <Compile Include="Messages\AppLoadedMessage.cs" />
+    <Compile Include="Modules\ApplicationExplorer\ApplicationExplorerView.xaml.cs">
+      <DependentUpon>ApplicationExplorerView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Services\RecentAppListService.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -215,6 +220,10 @@
     <SplashScreen Include="Resources\Splash.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Modules\ApplicationExplorer\ApplicationExplorerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Modules\StartPage\StartPageResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -42,6 +42,21 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         public static MenuItemDefinition RecentAppMenuItemList = 
             new CommandMenuItemDefinition<LoadRecentApplicationCommandDefinition>(RecentAppsMenuGroup, 0);
 
+        [Export]
+        public static MenuItemGroupDefinition ApplicationControlMenuGroup =
+            new MenuItemGroupDefinition(MainModule.ApplicationMenu, 2);
+
+        [Export]
+        public static MenuItemDefinition ApplicationStartMenuItem =
+            new CommandMenuItemDefinition<StartApplicationCommandDefinition>(ApplicationControlMenuGroup, 0);
+
+        [Export]
+        public static MenuItemDefinition ApplicationStopMenuItem =
+            new CommandMenuItemDefinition<StopApplicationCommandDefinition>(ApplicationControlMenuGroup, 1);
+
+        [Export]
+        public static MenuItemDefinition ApplicationUnloadMenuItem =
+            new CommandMenuItemDefinition<UnloadApplicationCommandDefinition>(ApplicationControlMenuGroup, 2);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
