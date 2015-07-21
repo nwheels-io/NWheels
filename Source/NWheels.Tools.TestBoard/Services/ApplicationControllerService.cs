@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using NWheels.Exceptions;
@@ -23,6 +25,7 @@ namespace NWheels.Tools.TestBoard.Services
         Task StopAsync();
         Task UnloadAsync();
         BootConfiguration BootConfig { get; }
+        NodeHost NodeHost { get; }
         ApplicationState CurrentState { get; }
         event EventHandler CurrentStateChanged;
     }
@@ -33,6 +36,7 @@ namespace NWheels.Tools.TestBoard.Services
     public class ApplicationControllerService : IApplicationControllerService
     {
         private readonly IEventAggregator _eventAggregator;
+        private readonly IApplicationComponentInjector[] _componentInjectors;
         private readonly TransientStateMachine<ApplicationState, ApplicationTrigger> _stateMachine;
         private string _bootConfigFilePath;
         private BootConfiguration _bootConfig;
@@ -41,9 +45,12 @@ namespace NWheels.Tools.TestBoard.Services
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
-        public ApplicationControllerService(IEventAggregator eventAggregator)
+        public ApplicationControllerService(
+            IEventAggregator eventAggregator, 
+            [ImportMany] IEnumerable<IApplicationComponentInjector> componentInjectors)
         {
             _eventAggregator = eventAggregator;
+            _componentInjectors = componentInjectors.ToArray();
             
             _stateMachine = new TransientStateMachine<ApplicationState, ApplicationTrigger>(
                 new StateMachineCodeBehind(this), 
@@ -118,6 +125,16 @@ namespace NWheels.Tools.TestBoard.Services
             get
             {
                 return _bootConfig;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public NodeHost NodeHost
+        {
+            get
+            {
+                return _nodeHost;
             }
         }
 

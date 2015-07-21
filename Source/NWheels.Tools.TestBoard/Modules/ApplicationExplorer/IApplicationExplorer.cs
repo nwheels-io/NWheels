@@ -10,6 +10,5 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 {
     public interface IApplicationExplorer : ITool
     {
-        ApplicationState CurrentState { get; }
     }
 }

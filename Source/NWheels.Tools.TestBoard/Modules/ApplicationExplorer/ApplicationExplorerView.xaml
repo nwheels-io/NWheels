@@ -3,14 +3,49 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NWheels.Tools.TestBoard.Modules.ApplicationExplorer"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <TreeView Grid.Column="0" ItemsSource="{Binding ExplorerItems}">
-            
+        <TextBlock 
+            Grid.Column="0"
+            Margin="15"
+            Foreground="{x:Static SystemColors.ControlDarkBrush}"
+            TextWrapping="Wrap"
+            Text="No application is currently loaded. Choose application to load from the Application menu or on the Start Page.">
+            <TextBlock.Style>
+                <Style TargetType="{x:Type TextBlock}">
+                    <Setter Property="Visibility" Value="Collapsed"></Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path='ExplorerItems.Count'}" Value="0">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        <TreeView Grid.Column="0" ItemsSource="{Binding ExplorerItems}" Margin="5" >
+            <TreeView.Style>
+                <Style TargetType="{x:Type TreeView}">
+                    <Setter Property="Border.BorderThickness" Value="0"></Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path='ExplorerItems.Count'}" Value="0">
+                            <Setter Property="Visibility" Value="Hidden" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TreeView.Style>
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type local:ApplicationExplorerViewModel+ExplorerItem}" ItemsSource="{Binding SubItems}">
+                    <StackPanel Orientation="Horizontal"  VerticalAlignment="Center" ToolTip="{Binding Text}">
+                        <Image Source="{Binding Icon}" VerticalAlignment="Center"></Image>
+                        <TextBlock Text="{Binding Text}" FontSize="{Binding FontSize}" VerticalAlignment="Center" Margin="5 0 0 0" />
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.Resources>
         </TreeView>
     </Grid>
 </UserControl>
