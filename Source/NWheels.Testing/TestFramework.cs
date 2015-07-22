@@ -279,27 +279,52 @@ namespace NWheels.Testing
 
         public static TypeMetadataCache CreateMetadataCacheWithDefaultConventions(params MixinRegistration[] mixinRegistrations)
         {
-            return CreateMetadataCacheWithDefaultConventions(new TestIdMetadataConvention(), mixinRegistrations);
+            return CreateMetadataCacheWithDefaultConventions(
+                new IMetadataConvention[] { new TestIdMetadataConvention() }, 
+                mixinRegistrations);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static TypeMetadataCache CreateMetadataCacheWithDefaultConventions(
-            IMetadataConvention defaultIdConvention, 
-            params MixinRegistration[] mixinRegistrations)
+            IMetadataConvention[] customMetadataConventions, 
+            MixinRegistration[] mixinRegistrations = null,
+            ConcretizationRegistration[] concretizationRegistrations = null)
         {
-            var conventions = new MetadataConventionSet(
+            var metadataConventions = 
                 new IMetadataConvention[] {
                     new ContractMetadataConvention(), 
                     new AttributeMetadataConvention(), 
                     new RelationMetadataConvention(), 
-                    defaultIdConvention
-                },
-                new IRelationalMappingConvention[] {
-                    new PascalCaseRelationalMappingConvention(usePluralTableNames: true)
-                });
+                }
+                .Concat(customMetadataConventions)
+                .ToArray();
 
-            return new TypeMetadataCache(conventions, mixinRegistrations, concretizationRegistrations: new ConcretizationRegistration[0]);
+            var relationalMappingConventions = new IRelationalMappingConvention[] {
+                new PascalCaseRelationalMappingConvention(usePluralTableNames: true)
+            };
+
+            return CreateMetadataCache(
+                metadataConventions, 
+                relationalMappingConventions, 
+                mixinRegistrations ?? new MixinRegistration[0],
+                concretizationRegistrations ?? new ConcretizationRegistration[0]);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static TypeMetadataCache CreateMetadataCache(
+            IMetadataConvention[] metadataConventions,
+            IRelationalMappingConvention[] relationalMappingConventions,
+            MixinRegistration[] mixinRegistrations,
+            ConcretizationRegistration[] concretizationRegistrations)
+        {
+            var conventionSet = new MetadataConventionSet(metadataConventions, relationalMappingConventions);
+            
+            return new TypeMetadataCache(
+                conventionSet, 
+                mixinRegistrations,
+                concretizationRegistrations);
         }
     }
 }

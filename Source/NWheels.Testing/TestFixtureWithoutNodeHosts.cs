@@ -1,52 +1,54 @@
-﻿#if false
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using Autofac;
 using NUnit.Framework;
 using NWheels.DataObjects;
-using NWheels.DataObjects.Core;
 using NWheels.Entities;
 
 namespace NWheels.Testing
 {
     [TestFixture]
-    public abstract class CoreUnitTestBase : UnitTestBase
+    public abstract class TestFixtureWithoutNodeHosts
     {
-        private TypeMetadataCache _metadataCache;
+        private TestFramework _framework;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [SetUp]
-        public void CoreBaseSetUp()
+        public void BaseSetUp()
         {
+            _framework = new TestFramework();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [TearDown]
-        public void CoreBaseTearDown()
+        public void BaseTearDown()
         {
-            _metadataCache = null;
+            _framework = null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected TypeMetadataCache CreateMetadataCache(params MixinRegistration[] mixinRegistrations)
+        protected T Resolve<T>() where T : class
         {
-            _metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(mixinRegistrations);
-            return _metadataCache;
+            return _framework.Components.Resolve<T>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected TypeMetadataCache MetadataCache
+        protected Auto<T> ResolveAuto<T>() where T : class
         {
-            get { return _metadataCache; }
+            return _framework.Components.Resolve<Auto<T>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+        protected TestFramework Framework
+        {
+            get
+            {
+                return _framework;
+            }
         }
     }
 }
-
-#endif

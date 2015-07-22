@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationControllerTests.cs" />
     <Compile Include="Entities\Impl\TestDataRepositoryFactoryTests.cs" />
     <Compile Include="LogAssertTests.cs" />
     <Compile Include="LogexTests.cs" />

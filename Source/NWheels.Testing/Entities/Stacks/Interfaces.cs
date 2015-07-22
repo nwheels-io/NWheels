@@ -16,37 +16,65 @@ namespace NWheels.Testing.Entities.Stacks
                 PaymentReceived = 2,
                 ProductsShipped = 3
             }
+
             public interface IOnlineStoreRepository : IApplicationDataRepository
             {
                 IOrderLine NewOrderLine(IOrder order, IProduct product, int quantity);
+                IEntityRepository<ICategory> Categories { get; }
                 IEntityRepository<IProduct> Products { get; }
                 IEntityRepository<IOrder> Orders { get; }
             }
+
+            [EntityContract]
+            public interface ICategory : IEntityPartUniqueDisplayName
+            {
+                int Id { get; set; }
+            }
+
             [EntityContract]
             public interface IProduct
             {
                 [PropertyContract.Storage.RelationalMapping(Column = "Id")]
                 int Id { get; set; }
-                [PropertyContract.Storage.RelationalMapping(Column = "Name")]
+
+                string CatalogNo { get; set; }
+
                 string Name { get; set; }
-                [PropertyContract.Storage.RelationalMapping(Column = "Price")]
+                
                 decimal Price { get; set; }
+
+                [PropertyContract.Relation.Aggregation, PropertyContract.Relation.ManyToMany]
+                ICollection<ICategory> Categories { get; }
             }
+
             [EntityContract]
             public interface IOrder
             {
                 int Id { get; set; }
+
+                string OrderNo { get; set; }
+
                 DateTime PlacedAt { get; set; }
+
+                [PropertyContract.Relation.Composition]
                 ICollection<IOrderLine> OrderLines { get; }
+                
                 [PropertyContract.DefaultValue(OrderStatus.New)]
                 OrderStatus Status { get; set; }
             }
+
             [EntityContract]
             public interface IOrderLine
             {
                 int Id { get; set; }
+                
+                [PropertyContract.Relation.CompositionParent]
                 IOrder Order { get; set; }
+
+                [PropertyContract.Relation.Aggregation]
                 IProduct Product { get; set; }
+
+                [PropertyContract.Validation.MinValue(0)]
                 int Quantity { get; set; }
             }
         }
