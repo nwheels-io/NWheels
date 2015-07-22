@@ -160,5 +160,54 @@ namespace NWheels.Extensions
                 return s;
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string AddEnglishVerbIngSuffix(this string s)
+        {
+            if ( s == null || s.Length < 2 )
+            {
+                return s;
+            }
+
+            var length = s.Length;
+            var isLower = char.IsLower(s[length - 1]);
+            var lastChar = char.ToLower(s[length - 1]);
+            var suffix = (isLower ? "ing" : "ING");
+
+            if ( lastChar == 'e' )
+            {
+                if ( s[length - 2] != 'i' )
+                {
+                    return s.Substring(0, length - 1) + suffix;
+                }
+                else
+                {
+                    return s.Substring(0, length - 2) + (isLower ? 'y' : 'Y') + suffix;
+                }
+            }
+
+            if ( lastChar == 'w' || lastChar == 'x' || lastChar == 'y' )
+            {
+                return s + suffix;
+            }
+
+            if ( length >= 3 )
+            {
+                var endsWithConsonantVowelConsonant = (s[length-1].IsEnglishConsonant() && s[length-2].IsEnglishVowel() && s[length-3].IsEnglishConsonant());
+
+                if ( endsWithConsonantVowelConsonant )
+                {
+                    var vowelCount = s.Count(CharExtensions.IsEnglishVowel);
+
+                    if ( vowelCount < 2 )
+                    {
+                        return s + s[length - 1] + suffix;
+                    }
+                }
+            }
+
+            return s + suffix;
+        }
     }
 }
