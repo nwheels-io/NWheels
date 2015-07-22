@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using Caliburn.Micro;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
@@ -119,14 +120,15 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         public override void Update(Command command)
         {
-            command.Enabled = _controller.CanStart();
+            //command.Enabled = _controller.CanStart();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override Task Run(Command command)
         {
-            return _controller.StartAsync();
+            //return _controller.StartAsync();
+            return TaskUtility.Completed;
         }
     }
 
@@ -182,14 +184,15 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         public override void Update(Command command)
         {
-            command.Enabled = _controller.CanStop();
+            //command.Enabled = _controller.CanStop();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override Task Run(Command command)
         {
-            return _controller.StopAsync();
+            //return _controller.StopAsync();
+            return TaskUtility.Completed;
         }
     }
 
@@ -200,9 +203,9 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
     #region LoadNewApplication
 
     [CommandDefinition]
-    public class LoadNewApplicationCommandDefinition : CommandDefinition
+    public class OpenApplicationCommandDefinition : CommandDefinition
     {
-        public const string CommandName = "Application.LoadNew";
+        public const string CommandName = "Application.Open";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -215,37 +218,47 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         public override string Text
         {
-            get { return "Load..."; }
+            get { return "Open..."; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override KeyGesture KeyGesture
+        {
+            get
+            {
+                return new KeyGesture(Key.O, ModifierKeys.Control);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override string ToolTip
         {
-            get { return "Choose an application to load"; }
+            get { return "Open an application in Application Explorer"; }
         }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [CommandHandler]
-    public class LoadNewApplicationCommandHandler : CommandHandlerBase<LoadNewApplicationCommandDefinition>
+    public class OpenApplicationCommandHandler : CommandHandlerBase<OpenApplicationCommandDefinition>
     {
-        private readonly IApplicationControllerService _controller;
+        private readonly IApplicationControllerService _controllerService;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
-        public LoadNewApplicationCommandHandler(IApplicationControllerService controller)
+        public OpenApplicationCommandHandler(IApplicationControllerService controller)
         {
-            _controller = controller;
+            _controllerService = controller;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void Update(Command command)
         {
-            command.Enabled = _controller.CanLoad();
+            //command.Enabled = _controllerService.CanLoad();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -254,13 +267,13 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         {
             var dlg = new Microsoft.Win32.OpenFileDialog();
 
-            dlg.Title = "Load Appplication";
+            dlg.Title = "Open Appplication";
             dlg.DefaultExt = ".config";
             dlg.Filter = "Boot Config Files (boot.config)|boot.config|All Config Files (*.config)|*.config|All Files (*.*)|*.*";
 
             if ( dlg.ShowDialog() == true )
             {
-                _controller.LoadAsync(bootConfigFilePath: dlg.FileName);
+                _controllerService.Open(bootConfigFilePath: dlg.FileName);
             }
 
             return TaskUtility.Completed;
@@ -274,9 +287,9 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
     #region LoadRecentApplication
 
     [CommandDefinition]
-    public class LoadRecentApplicationCommandDefinition : CommandListDefinition
+    public class OpenRecentApplicationCommandDefinition : CommandListDefinition
     {
-        public const string CommandName = "Application.LoadRecent";
+        public const string CommandName = "Application.OpenRecent";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -289,7 +302,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [CommandHandler]
-    public class LoadRecentApplicationCommandHandler : ICommandListHandler<LoadRecentApplicationCommandDefinition>
+    public class OpenRecentApplicationCommandHandler : ICommandListHandler<OpenRecentApplicationCommandDefinition>
     {
         private readonly IApplicationControllerService _controller;
         private readonly IRecentAppListService _recentAppList;
@@ -297,7 +310,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
-        public LoadRecentApplicationCommandHandler(IApplicationControllerService controller, IRecentAppListService recentAppList)
+        public OpenRecentApplicationCommandHandler(IApplicationControllerService controller, IRecentAppListService recentAppList)
         {
             _controller = controller;
             _recentAppList = recentAppList;
@@ -321,7 +334,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         public Task Run(Command command)
         {
             var bootConfigFilePath = (string)command.Tag;
-            return _controller.LoadAsync(bootConfigFilePath);
+            return Task.Run(() => _controller.Open(bootConfigFilePath));
         }
     }
 
@@ -329,12 +342,12 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
     
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    #region UnloadApplication
+    #region CloseAllApplications
 
     [CommandDefinition]
-    public class UnloadApplicationCommandDefinition : CommandDefinition
+    public class CloseAllApplicationsCommandDefinition : CommandDefinition
     {
-        public const string CommandName = "Application.Unload";
+        public const string CommandName = "Application.CloseAll";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -347,28 +360,28 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         public override string Text
         {
-            get { return "Unload"; }
+            get { return "Close All"; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override string ToolTip
         {
-            get { return "Unload current application"; }
+            get { return "Close all applications"; }
         }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [CommandHandler]
-    public class UnloadApplicationCommandHandler : CommandHandlerBase<UnloadApplicationCommandDefinition>
+    public class CloseAllApplicationsCommandHandler : CommandHandlerBase<CloseAllApplicationsCommandDefinition>
     {
         private readonly IApplicationControllerService _controller;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
-        public UnloadApplicationCommandHandler(IApplicationControllerService controller)
+        public CloseAllApplicationsCommandHandler(IApplicationControllerService controller)
         {
             _controller = controller;
         }
@@ -377,14 +390,14 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         public override void Update(Command command)
         {
-            command.Enabled = _controller.CanUnload();
+            command.Enabled = (_controller.Applications.Count > 0);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override Task Run(Command command)
         {
-            return _controller.UnloadAsync();
+            return Task.Run(() => _controller.CloseAll());
         }
     }
 

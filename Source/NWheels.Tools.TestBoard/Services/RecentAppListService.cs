@@ -38,8 +38,8 @@ namespace NWheels.Tools.TestBoard.Services
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [Export(typeof(IRecentAppListService))]
-    [Export(typeof(IHandle<AppLoadedMessage>))]
-    public class RecentAppListService : IHandle<AppLoadedMessage>, IRecentAppListService
+    [Export(typeof(IHandle<AppOpenedMessage>))]
+    public class RecentAppListService : IHandle<AppOpenedMessage>, IRecentAppListService
     {
         private readonly IEventAggregator _eventAggregator;
         private List<RecentApp> _recentApps;
@@ -64,13 +64,13 @@ namespace NWheels.Tools.TestBoard.Services
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void IHandle<AppLoadedMessage>.Handle(AppLoadedMessage message)
+        void IHandle<AppOpenedMessage>.Handle(AppOpenedMessage message)
         {
-            if ( !_recentApps.Any(app => app.BootConfigFilePath.EqualsIgnoreCase(message.BootConfigFilePath)) )
+            if ( !_recentApps.Any(app => app.BootConfigFilePath.EqualsIgnoreCase(message.App.BootConfig.LoadedFromFile)) )
             {
                 _recentApps.Add(new RecentApp() {
-                    BootConfig = message.BootConfig,
-                    BootConfigFilePath = message.BootConfigFilePath,
+                    BootConfig = message.App.BootConfig,
+                    BootConfigFilePath = message.App.BootConfig.LoadedFromFile,
                     BootConfigIsValid = true,
                     BootConfigFileExists = true
                 });

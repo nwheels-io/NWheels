@@ -16,6 +16,7 @@ using NWheels.Hosting.Core;
 using NWheels.Tools.TestBoard.Messages;
 using NWheels.Tools.TestBoard.Services;
 using Action = System.Action;
+using NWheels.Testing.Controllers;
 
 namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 {
@@ -23,8 +24,9 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
     public class ApplicationExplorerViewModel : 
         Tool, 
         IApplicationExplorer, 
-        IHandle<AppLoadedMessage>,
-        IHandle<AppUnloadedMessage>
+        IHandle<AppOpenedMessage>,
+        IHandle<AppClosedMessage>,
+        IHandle<AppStateChangedMessage>
     {
         private readonly IApplicationControllerService _controller;
 
@@ -62,16 +64,23 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void IHandle<AppLoadedMessage>.Handle(AppLoadedMessage message)
+        void IHandle<AppOpenedMessage>.Handle(AppOpenedMessage message)
         {
-            Execute.OnUIThreadAsync(() => AddApplicationItem(message.BootConfig));
+            Execute.OnUIThreadAsync(() => AddApplicationItem(message.App));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void IHandle<AppUnloadedMessage>.Handle(AppUnloadedMessage message)
+        void IHandle<AppClosedMessage>.Handle(AppClosedMessage message)
         {
-            Execute.OnUIThreadAsync(() => RemoveApplicationItem(message.BootConfig));
+            Execute.OnUIThreadAsync(() => RemoveApplicationItem(message.App));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IHandle<AppStateChangedMessage>.Handle(AppStateChangedMessage message)
+        {
+            Execute.OnUIThreadAsync(() => UpdateApplicationItem(message.App));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -80,33 +89,38 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void AddApplicationItem(BootConfiguration bootConfig)
+        private void AddApplicationItem(ApplicationController app)
         {
-            ExplorerItems.Add(new ApplicationItem(bootConfig));
+            ExplorerItems.Add(new ApplicationItem(app));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void RemoveApplicationItem(BootConfiguration bootConfig)
+        private void RemoveApplicationItem(ApplicationController app)
         {
-            var itemsToRemove = ExplorerItems
+            var itemToRemove = ExplorerItems
                 .OfType<ApplicationItem>()
-                .Where(item => item.BootConfig.ApplicationName == bootConfig.ApplicationName)
-                .ToArray();
+                .Single(item => item.Controller == app);
 
-            foreach ( var item in itemsToRemove )
-            {
-                ExplorerItems.Remove(item);
-            }
+            ExplorerItems.Remove(itemToRemove);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void UpdateApplicationItem(ApplicationController app)
+        {
+            throw new NotImplementedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public enum ExplorerItemSize
         {
-            Small = 12,
+            Smallest = 12,
+            Small = 13,
             Medium = 14,
-            Large = 16
+            Large = 15,
+            Largest = 16
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -203,17 +217,95 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class ApplicationItem : ExplorerItem
+        public abstract class ControllerItem<TController> : ExplorerItem
+            where TController : ControllerBase
         {
-            private readonly BootConfiguration _bootConfig;
+            private readonly TController _controller;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ApplicationItem(BootConfiguration bootConfig)
-                : base(text: FormatItemText(bootConfig), icon: AppIcons.Get("AppExplorerIconApplication"))
+            protected ControllerItem(TController controller, ImageSource icon, ExplorerItemSize itemSize)
+                : base(controller.DisplayName, icon)
             {
-                _bootConfig = bootConfig;
-                base.ItemSize = ExplorerItemSize.Large;
+                _controller = controller;
+                base.ItemSize = itemSize;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TController Controller
+            {
+                get { return _controller; }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ApplicationItem : ControllerItem<ApplicationController>
+        {
+            public ApplicationItem(ApplicationController app)
+                : base(app, AppIcons.AppExplorerIconApplication, ExplorerItemSize.Largest)
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override IEnumerable<ExplorerItem> SubItems
+            {
+                get
+                {
+                    return Controller.SubControllers.Select(env => new EnvironmentItem(env));
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class EnvironmentItem : ControllerItem<EnvironmentController>
+        {
+            public EnvironmentItem(EnvironmentController env)
+                : base(env, AppIcons.AppExplorerIconEnvironment, ExplorerItemSize.Large)
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override IEnumerable<ExplorerItem> SubItems
+            {
+                get
+                {
+                    return Controller.SubControllers.Select(node => new NodeItem(node));
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class NodeItem : ControllerItem<NodeController>
+        {
+            public NodeItem(NodeController node)
+                : base(node, AppIcons.AppExplorerIconNode, ExplorerItemSize.Medium)
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override IEnumerable<ExplorerItem> SubItems
+            {
+                get
+                {
+                    return Controller.SubControllers.Select(instance => new NodeInstanceItem(instance));
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class NodeInstanceItem : ControllerItem<NodeInstanceController>
+        {
+            public NodeInstanceItem(NodeInstanceController instance)
+                : base(instance, AppIcons.AppExplorerIconNodeInstance, ExplorerItemSize.Small)
+            {
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -222,25 +314,9 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             //{
             //    get
             //    {
-                                                     
+
             //    }
             //}
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public BootConfiguration BootConfig
-            {
-                get { return _bootConfig; }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private static string FormatItemText(BootConfiguration bootConfig)
-            {
-                return string.Format(
-                    "{0}/{1} @ {2}({3})", 
-                    bootConfig.ApplicationName, bootConfig.NodeName, bootConfig.EnvironmentName, bootConfig.EnvironmentType);
-            }
         }
     }
 }

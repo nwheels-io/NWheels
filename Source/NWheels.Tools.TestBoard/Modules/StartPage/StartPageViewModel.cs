@@ -43,9 +43,9 @@ namespace NWheels.Tools.TestBoard.Modules.StartPage
 
         public void LoadNewApp()
         {
-            var commandDefinition = _commandService.GetCommandDefinition(typeof(LoadNewApplicationCommandDefinition));
+            var commandDefinition = _commandService.GetCommandDefinition(typeof(OpenApplicationCommandDefinition));
             var command = _commandService.GetCommand(commandDefinition);
-            var commandHandler = _commandRouter.GetCommandHandler(_commandService.GetCommandDefinition(typeof(LoadNewApplicationCommandDefinition)));
+            var commandHandler = _commandRouter.GetCommandHandler(_commandService.GetCommandDefinition(typeof(OpenApplicationCommandDefinition)));
             commandHandler.Run(command);
         }
 
@@ -53,14 +53,7 @@ namespace NWheels.Tools.TestBoard.Modules.StartPage
 
         public void LoadRecentApp(IRecentApp app)
         {
-            if ( _controller.CanLoad() )
-            {
-                _controller.LoadAsync(app.BootConfigFilePath);
-            }
-            else
-            {
-                MessageBox.Show("Cannot load application at this moment.");
-            }
+            _controller.Open(app.BootConfigFilePath);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

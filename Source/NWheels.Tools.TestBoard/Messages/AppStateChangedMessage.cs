@@ -3,19 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Testing.Controllers;
 using NWheels.Tools.TestBoard.Modules.ApplicationExplorer;
 
 namespace NWheels.Tools.TestBoard.Messages
 {
-    public class AppControllerStateChangedMessage
+    public class AppStateChangedMessage
     {
-        public AppControllerStateChangedMessage(ApplicationState newState)
+        public AppStateChangedMessage(ApplicationController app)
         {
-            this.NewState = newState;
+            this.App = app;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ApplicationState NewState { get; private set; }
+        public ApplicationController App { get; private set; }
     }
 }

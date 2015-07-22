@@ -18,18 +18,21 @@ using Gemini.Modules.Inspector;
 using Gemini.Modules.Output;
 using Gemini.Modules.Output.Commands;
 using NWheels.Extensions;
+using NWheels.Hosting;
+using NWheels.Testing.Controllers;
 using NWheels.Tools.TestBoard.Messages;
 using NWheels.Tools.TestBoard.Modules.ApplicationExplorer;
 using NWheels.Tools.TestBoard.Properties;
+using NWheels.Tools.TestBoard.Services;
 
 namespace NWheels.Tools.TestBoard.Modules.Main
 {
     [Export(typeof(IModule))]
     public class MainModule : 
         ModuleBase, 
-        IHandle<AppLoadedMessage>, 
-        IHandle<AppUnloadedMessage>,
-        IHandle<AppControllerStateChangedMessage>
+        IHandle<AppOpenedMessage>, 
+        IHandle<AppClosedMessage>,
+        IHandle<AppStateChangedMessage>
     {
         public const string MainWindowTitle = "NWheels Test Board";
 
@@ -38,12 +41,14 @@ namespace NWheels.Tools.TestBoard.Modules.Main
         private readonly IMainWindow _mainWindow;
         private readonly IOutput _output;
         private readonly IEventAggregator _eventAggregator;
+        private readonly IApplicationControllerService _controllerService;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
-        public MainModule(IMainWindow mainWindow, IOutput output, IEventAggregator eventAggregator)
+        public MainModule(IMainWindow mainWindow, IOutput output, IEventAggregator eventAggregator, IApplicationControllerService controllerService)
         {
+            _controllerService = controllerService;
             _mainWindow = mainWindow;
             _output = output;
             _eventAggregator = eventAggregator;
@@ -68,28 +73,28 @@ namespace NWheels.Tools.TestBoard.Modules.Main
             Shell.StatusBar.AddItem("", new GridLength(25, GridUnitType.Pixel));
 
             _output.AppendLine(string.Format("Welcome to NWheels Test Board, version {0}", this.GetType().Assembly.GetName().Version));
-            UpdateStatusBar(ApplicationState.NotLoaded);
+            UpdateStatusBar(app: null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void IHandle<AppLoadedMessage>.Handle(AppLoadedMessage message)
+        void IHandle<AppOpenedMessage>.Handle(AppOpenedMessage message)
         {
-            _mainWindow.Title = string.Format("{0} - {1}", message.BootConfig.ApplicationName, MainWindowTitle);
+            UpdateWindowTitle();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void IHandle<AppUnloadedMessage>.Handle(AppUnloadedMessage message)
+        void IHandle<AppClosedMessage>.Handle(AppClosedMessage message)
         {
-            _mainWindow.Title = MainWindowTitle;
+            UpdateWindowTitle();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        void IHandle<AppControllerStateChangedMessage>.Handle(AppControllerStateChangedMessage message)
+        void IHandle<AppStateChangedMessage>.Handle(AppStateChangedMessage message)
         {
-            UpdateStatusBar(message.NewState);
+            UpdateStatusBar(message.App);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -117,19 +122,37 @@ namespace NWheels.Tools.TestBoard.Modules.Main
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void UpdateStatusBar(ApplicationState state)
+        private void UpdateWindowTitle()
         {
-            if (state == ApplicationState.NotLoaded)
+            if ( _controllerService.Applications.Count == 0 )
+            {
+                _mainWindow.Title = MainWindowTitle;
+            }
+            else if ( _controllerService.Applications.Count == 1 )
+            {
+                _mainWindow.Title = string.Format("{0} - {1}", _controllerService.Applications[0].DisplayName, MainWindowTitle);
+            }
+            else
+            {
+                _mainWindow.Title = string.Format("{0} - {1}", "Multiple Apps", MainWindowTitle);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void UpdateStatusBar(ApplicationController app)
+        {
+            if ( app == null )
             {
                 Shell.StatusBar.Items[0].Message = "Ready";
                 Shell.StatusBar.Items[1].Message = "No App Loaded";
             }
             else
             {
-                bool isReady = !state.IsIn(ApplicationState.Loading, ApplicationState.Starting, ApplicationState.Stopping, ApplicationState.Unloading);
+                bool isReady = !app.CurrentState.IsIn(NodeState.Loading, NodeState.Activating, NodeState.Deactivating, NodeState.Unloading);
 
-                Shell.StatusBar.Items[0].Message = (isReady ? "Ready" : state.ToString().SplitPascalCase().ToLower() + " application...");
-                Shell.StatusBar.Items[1].Message = (isReady ? "App: " + state.ToString().SplitPascalCase() : "");
+                Shell.StatusBar.Items[0].Message = (isReady ? "Ready" : app.CurrentState.ToString().SplitPascalCase().ToLower() + " application...");
+                Shell.StatusBar.Items[1].Message = (isReady ? "App: " + app.CurrentState.ToString().SplitPascalCase() : "");
             }
         }
 

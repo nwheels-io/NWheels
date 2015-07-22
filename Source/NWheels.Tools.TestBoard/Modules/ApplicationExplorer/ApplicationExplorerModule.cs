@@ -28,7 +28,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         [Export]
         public static MenuItemDefinition ApplicationLoadMenuItem =
-            new CommandMenuItemDefinition<LoadNewApplicationCommandDefinition>(MainModule.ApplicationMenuGroup, 0);
+            new CommandMenuItemDefinition<OpenApplicationCommandDefinition>(MainModule.ApplicationMenuGroup, 0);
 
         [Export]
         public static MenuItemDefinition RecentAppsMenuItem =
@@ -40,7 +40,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         [Export]
         public static MenuItemDefinition RecentAppMenuItemList = 
-            new CommandMenuItemDefinition<LoadRecentApplicationCommandDefinition>(RecentAppsMenuGroup, 0);
+            new CommandMenuItemDefinition<OpenRecentApplicationCommandDefinition>(RecentAppsMenuGroup, 0);
 
         [Export]
         public static MenuItemGroupDefinition ApplicationControlMenuGroup =
@@ -55,8 +55,8 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             new CommandMenuItemDefinition<StopApplicationCommandDefinition>(ApplicationControlMenuGroup, 1);
 
         [Export]
-        public static MenuItemDefinition ApplicationUnloadMenuItem =
-            new CommandMenuItemDefinition<UnloadApplicationCommandDefinition>(ApplicationControlMenuGroup, 2);
+        public static MenuItemDefinition ApplicationCloseAllMenuItem =
+            new CommandMenuItemDefinition<CloseAllApplicationsCommandDefinition>(ApplicationControlMenuGroup, 2);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
