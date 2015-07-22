@@ -81,6 +81,7 @@ namespace NWheels.Tools.TestBoard.Modules.Main
         void IHandle<AppOpenedMessage>.Handle(AppOpenedMessage message)
         {
             UpdateWindowTitle();
+            UpdateStatusBar(message.App);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -88,6 +89,11 @@ namespace NWheels.Tools.TestBoard.Modules.Main
         void IHandle<AppClosedMessage>.Handle(AppClosedMessage message)
         {
             UpdateWindowTitle();
+
+            if ( _controllerService.Applications.Count == 0 )
+            {
+                UpdateStatusBar(null);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -28,7 +28,7 @@
                 </Style>
             </TextBlock.Style>
         </TextBlock>
-        <TreeView Grid.Column="0" ItemsSource="{Binding ExplorerItems}" Margin="5" >
+        <TreeView Grid.Column="0" ItemsSource="{Binding ExplorerItems}" Margin="5" PreviewMouseRightButtonDown="OnPreviewMouseRightButtonDown">
             <TreeView.Style>
                 <Style TargetType="{x:Type TreeView}">
                     <Setter Property="Border.BorderThickness" Value="0"></Setter>
@@ -44,7 +44,8 @@
                     <StackPanel Orientation="Horizontal"  VerticalAlignment="Center" ToolTip="{Binding Text}">
                         <StackPanel.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="{Binding DisplayName}"></MenuItem>
+                                <MenuItem Header="{Binding FullPath}" FontWeight="Bold" Foreground="{x:Static SystemColors.ControlTextBrush}" IsEnabled="False" />
+                                <Separator />
                                 <MenuItem Header="Start" cal:Message.Attach="Start()"></MenuItem>
                                 <MenuItem Header="Stop" cal:Message.Attach="Stop()"></MenuItem>
                                 <Separator />

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NWheels.Tools.TestBoard.Extensions;
 
 namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 {
@@ -23,6 +24,19 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         public ApplicationExplorerView()
         {
             InitializeComponent();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void OnPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            TreeViewItem treeViewItem = ((DependencyObject)e.OriginalSource).VisualUpwardSearch<TreeViewItem>();
+
+            if ( treeViewItem != null )
+            {
+                treeViewItem.Focus();
+                e.Handled = true;
+            }
         }
     }
 }

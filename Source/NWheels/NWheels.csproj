@@ -99,6 +99,8 @@
     <Compile Include="Extensions\AutofacExtensions.Pipeline.cs" />
     <Compile Include="Extensions\CharExtensions.cs" />
     <Compile Include="Hosting\ApplicationConfiguration.cs" />
+    <Compile Include="Hosting\Core\DefaultAssemblySearchPathProvider.cs" />
+    <Compile Include="Hosting\IAssemblySearchPathProvider.cs" />
     <Compile Include="Pipeline.cs" />
     <Compile Include="UI\AuthorizationContract.cs" />
     <Compile Include="UI\Toolbox\Chart.cs" />

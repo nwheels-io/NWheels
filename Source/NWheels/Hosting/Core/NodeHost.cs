@@ -263,6 +263,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<StupidXmlThreadLogPersistor>().As<IThreadLogPersistor, ILifecycleEventListener>().SingleInstance();
 
             builder.RegisterType<BootTimeFramework>().As<IFramework>().WithParameter(new TypedParameter(typeof(BootConfiguration), _bootConfig)).SingleInstance();
+            builder.RegisterType<DefaultAssemblySearchPathProvider>().As<IAssemblySearchPathProvider>();
 
             builder.RegisterType<LoggerObjectFactory>().As<LoggerObjectFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<ConfigurationObjectFactory>().As<ConfigurationObjectFactory, IConfigurationObjectFactory, IAutoObjectFactory>().SingleInstance();
@@ -684,26 +685,23 @@ namespace NWheels.Hosting.Core
 
             private bool LoadModuleAssemblyByFilePath(BootConfiguration.ModuleConfig module, out Assembly assembly)
             {
-                var coreBinPath = PathUtility.HostBinPath(module.Assembly);
-                var appBinPath = Path.Combine(_nodeConfig.LoadedFromDirectory, module.Assembly);
+                var probeFilePaths = _lifetimeContainer.Resolve<IAssemblySearchPathProvider>().GetAssemblySearchPaths(_nodeConfig, module);
 
-                if ( File.Exists(coreBinPath) )
+                foreach ( var filePath in probeFilePaths )
                 {
-                    assembly = Assembly.LoadFrom(coreBinPath);
-                    return true;
+                    if ( File.Exists(filePath) )
+                    {
+                        assembly = Assembly.LoadFrom(filePath);
+                        return true;
+                    }
+                    else
+                    {
+                        _logger.ProbedModuleAssemblyLocation(filePath);
+                    }
                 }
-                else if ( File.Exists(appBinPath) )
-                {
-                    assembly = Assembly.LoadFrom(appBinPath);
-                    return true;
-                }
-                else
-                {
-                    _logger.ProbedModuleAssemblyLocation(coreBinPath);
-                    _logger.ProbedModuleAssemblyLocation(appBinPath);
-                    assembly = null;
-                    return false;
-                }
+
+                assembly = null;
+                return false;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

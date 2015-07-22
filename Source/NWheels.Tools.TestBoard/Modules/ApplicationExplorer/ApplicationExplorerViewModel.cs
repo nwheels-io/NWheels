@@ -11,6 +11,7 @@ using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
+using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Hosting.Core;
 using NWheels.Tools.TestBoard.Messages;
@@ -28,14 +29,14 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         IHandle<AppClosedMessage>,
         IHandle<AppStateChangedMessage>
     {
-        private readonly IApplicationControllerService _controller;
+        private readonly IApplicationControllerService _controllerService;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
-        public ApplicationExplorerViewModel(IEventAggregator events, IShell shell, IApplicationControllerService controller)
+        public ApplicationExplorerViewModel(IEventAggregator events, IShell shell, IApplicationControllerService controllerService)
         {
-            _controller = controller;
+            _controllerService = controllerService;
             this.ExplorerItems = new ObservableCollection<ExplorerItem>();
 
             events.Subscribe(this);
@@ -91,7 +92,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         private void AddApplicationItem(ApplicationController app)
         {
-            ExplorerItems.Add(new ApplicationItem(app));
+            ExplorerItems.Add(new ApplicationItem(this, app));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -109,7 +110,6 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         private void UpdateApplicationItem(ApplicationController app)
         {
-            throw new NotImplementedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -125,8 +125,9 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class ExplorerItem
+        public class ExplorerItem : PropertyChangedBase
         {
+            private readonly ExplorerItem _parent;
             private readonly string _text;
             private readonly ImageSource _icon;
             private readonly string _tooltipText;
@@ -137,6 +138,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public ExplorerItem(
+                ExplorerItem parent,
                 string text,
                 ImageSource icon = null,
                 string tooltipText = null,
@@ -144,6 +146,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
                 Action selectCallbeck = null,
                 Action doubleClickCallbck = null)
             {
+                _parent = parent;
                 _text = text;
                 _icon = icon;
                 _tooltipText = tooltipText;
@@ -195,6 +198,23 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public virtual string FullPath
+            {
+                get
+                {
+                    if ( _parent != null )
+                    {
+                        return _parent.FullPath + " / " + this._text;
+                    }
+                    else
+                    {
+                        return this._text;
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public virtual IEnumerable<ExplorerItem> SubItems
             {
                 get { return _subItemFactory(); }
@@ -224,12 +244,81 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected ControllerItem(TController controller, ImageSource icon, ExplorerItemSize itemSize)
-                : base(controller.DisplayName, icon)
+            protected ControllerItem(ExplorerItem parent, TController controller, ImageSource icon, ExplorerItemSize itemSize)
+                : base(parent, controller.DisplayName, icon)
             {
                 _controller = controller;
+                _controller.CurrentStateChanged += OnControllerStateChanged;
                 base.ItemSize = itemSize;
             }
+
+            void OnControllerStateChanged(object sender, ControllerStateEventArgs e)
+            {
+                NotifyOfPropertyChange(() => this.CurrentState);
+                NotifyOfPropertyChange(() => this.CanStart);
+                NotifyOfPropertyChange(() => this.CanStop);
+                NotifyOfPropertyChange(() => this.CanClose);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual void Start()
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual void Stop()
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual void Close()
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual bool CanStart
+            {
+                get { return false; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public virtual bool CanStop
+            {
+                get { return false; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public virtual bool CanClose
+            {
+                get { return false; }
+            }
+
+            ////-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            //public virtual bool CanStart()
+            //{
+            //    return false;
+            //}
+
+            ////-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            //public virtual bool CanStop()
+            //{
+            //    return false;
+            //}
+
+            ////-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            //public virtual bool CanClose()
+            //{
+            //    return false;
+            //}
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -237,16 +326,83 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             {
                 get { return _controller; }
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public NodeState CurrentState
+            {
+                get { return _controller.CurrentState; }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class ApplicationItem : ControllerItem<ApplicationController>
         {
-            public ApplicationItem(ApplicationController app)
-                : base(app, AppIcons.AppExplorerIconApplication, ExplorerItemSize.Largest)
+            private readonly ApplicationExplorerViewModel _ownerViewModel;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ApplicationItem(ApplicationExplorerViewModel ownerViewModel, ApplicationController app)
+                : base(null, app, AppIcons.AppExplorerIconApplication, ExplorerItemSize.Largest)
             {
+                _ownerViewModel = ownerViewModel;
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void Start()
+            {
+                Task.Run(() => Controller.LoadAndActivate());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void Stop()
+            {
+                Task.Run(() => Controller.DeactivateAndUnload());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void Close()
+            {
+                Task.Run(() => _ownerViewModel._controllerService.Close(this.Controller));
+            }
+
+            public override bool CanStart
+            {
+                get { return Controller.CanLoad(); }
+            }
+            public override bool CanStop
+            {
+                get { return Controller.CanDeactivate(); }
+            }
+            public override bool CanClose
+            {
+                get { return true; }
+            }
+
+            ////-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            //public override bool CanStart()
+            //{
+            //    return Controller.CanLoad();
+            //}
+
+            ////-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            //public override bool CanStop()
+            //{
+            //    return Controller.CanDeactivate();
+            //}
+
+            ////-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            //public override bool CanClose()
+            //{
+            //    return true;
+            //}
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -254,7 +410,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             {
                 get
                 {
-                    return Controller.SubControllers.Select(env => new EnvironmentItem(env));
+                    return Controller.SubControllers.Select(env => new EnvironmentItem(this, env));
                 }
             }
         }
@@ -263,8 +419,8 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         public class EnvironmentItem : ControllerItem<EnvironmentController>
         {
-            public EnvironmentItem(EnvironmentController env)
-                : base(env, AppIcons.AppExplorerIconEnvironment, ExplorerItemSize.Large)
+            public EnvironmentItem(ApplicationItem parent, EnvironmentController env)
+                : base(parent, env, AppIcons.AppExplorerIconEnvironment, ExplorerItemSize.Large)
             {
             }
 
@@ -274,7 +430,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             {
                 get
                 {
-                    return Controller.SubControllers.Select(node => new NodeItem(node));
+                    return Controller.SubControllers.Select(node => new NodeItem(this, node));
                 }
             }
         }
@@ -283,8 +439,8 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         public class NodeItem : ControllerItem<NodeController>
         {
-            public NodeItem(NodeController node)
-                : base(node, AppIcons.AppExplorerIconNode, ExplorerItemSize.Medium)
+            public NodeItem(EnvironmentItem parent, NodeController node)
+                : base(parent, node, AppIcons.AppExplorerIconNode, ExplorerItemSize.Medium)
             {
             }
 
@@ -294,7 +450,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             {
                 get
                 {
-                    return Controller.SubControllers.Select(instance => new NodeInstanceItem(instance));
+                    return Controller.SubControllers.Select(instance => new NodeInstanceItem(this, instance));
                 }
             }
         }
@@ -303,8 +459,8 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         public class NodeInstanceItem : ControllerItem<NodeInstanceController>
         {
-            public NodeInstanceItem(NodeInstanceController instance)
-                : base(instance, AppIcons.AppExplorerIconNodeInstance, ExplorerItemSize.Small)
+            public NodeInstanceItem(NodeItem parent, NodeInstanceController instance)
+                : base(parent, instance, AppIcons.AppExplorerIconNodeInstance, ExplorerItemSize.Small)
             {
             }
 
