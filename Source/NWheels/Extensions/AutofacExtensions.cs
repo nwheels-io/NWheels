@@ -162,6 +162,19 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static ApiEndpointRegistration<TContract> WithNetworkEndpoint<TContract>(
+            this ApiEndpointRegistration<TContract> fluentRegistration,
+            string name = null,
+            string defaultUrl = null)
+            where TContract : class
+        {
+            var registration = new NetworkApiEndpointRegistration(name, typeof(TContract), defaultUrl);
+            ((IHaveContainerBuilder)fluentRegistration).Builder.RegisterInstance(registration);
+            return fluentRegistration;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static ApiEndpointRegistration<TContract> WithHttpApiEndpoint<TContract>(
             this ApiEndpointRegistration<TContract> registration,
             string name = null,
@@ -254,7 +267,7 @@ namespace NWheels.Extensions
             }
         }
 
-        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class HostingFeature
         {

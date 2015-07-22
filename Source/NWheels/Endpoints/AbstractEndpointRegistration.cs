@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Hapil;
 
 namespace NWheels.Endpoints
@@ -210,6 +206,16 @@ namespace NWheels.Endpoints
         public WebAppEndpointRegistration(
             string name, Type contract, string defaultUrl, bool exposeExceptions)
             : base(name, contract, defaultUrl, publishMetadata: false, defaultMetadataUrl: null, exposeExceptionDatails: exposeExceptions)
+        {
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class NetworkApiEndpointRegistration : AbstractEndpointRegistration
+    {
+        public NetworkApiEndpointRegistration(string name, Type contract, string defaultUrl)
+            : base(name, contract, defaultUrl, publishMetadata: false, defaultMetadataUrl: null, exposeExceptionDatails: false)
         {
         }
     }
