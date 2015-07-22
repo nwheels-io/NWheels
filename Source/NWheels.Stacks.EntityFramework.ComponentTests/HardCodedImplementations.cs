@@ -26,6 +26,10 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 {
     public static class HardCodedImplementations
     {
+        private static int _s_nextIntId = 1;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static class Repository1
         {
             public static void RegisterEntityFineTunings(ContainerBuilder builder)
@@ -36,7 +40,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 
                 builder.NWheelsFeatures().Entities().RegisterRelationalMappingFineTune<Interfaces.Repository1.IOrder>(ft => ft
                     .Table("MY_ORDERS")
-                    .Column(o => o.Id, columnName: "MY_SPECIAL_ORDER_ID_COLUMN"));
+                    .Column(o => o.OrderNo, columnName: "MY_SPECIAL_ORDER_NO_COLUMN"));
 
                 builder.NWheelsFeatures().Entities().RegisterRelationalMappingFineTune<Interfaces.Repository1.IOrderLine>(ft => ft
                     .Table("MY_ORDER_LINES")
@@ -47,19 +51,46 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 
             public class DataRepositoryObject_DataRepository : EfDataRepositoryBase, Interfaces.Repository1.IOnlineStoreRepository
             {
-                private IEntityRepository<Interfaces.Repository1.IOrder> m_Orders;
-                private IEntityRepository<Interfaces.Repository1.IProduct> m_Products;
+                private EfEntityRepository<Interfaces.Repository1.ICategory, EntityObject_Category> m_Categories;
+                private EfEntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order> m_Orders;
+                private EfEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product> m_Products;
 
                 public DataRepositoryObject_DataRepository(DbConnection connection, bool autoCommit)
                     : base(new HardCodedEntityFactory(), GetOrBuildDbCompoledModel(connection), connection, autoCommit)
                 {
+                    this.m_Categories = new EfEntityRepository<Interfaces.Repository1.ICategory, EntityObject_Category>(this);
                     this.m_Products = new EfEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product>(this);
                     this.m_Orders = new EfEntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order>(this);
                 }
 
                 public override sealed Type[] GetEntityTypesInRepository()
                 {
-                    return new Type[] { typeof(EntityObject_Product), typeof(EntityObject_Order) };
+                    return new Type[] {
+                        typeof(EntityObject_Category), 
+                        typeof(EntityObject_Product), 
+                        typeof(EntityObject_Order), 
+                        typeof(EntityObject_OrderLine)
+                    };
+                }
+
+                public override Type[] GetEntityContractsInRepository()
+                {
+                    return new Type[] {
+                        typeof(Interfaces.Repository1.ICategory), 
+                        typeof(Interfaces.Repository1.IProduct), 
+                        typeof(Interfaces.Repository1.IOrder), 
+                        typeof(Interfaces.Repository1.IOrderLine)
+                    };
+                }
+
+                public override IEntityRepository[] GetEntityRepositories()
+                {
+                    return new IEntityRepository[] {
+                        m_Categories, 
+                        m_Orders, 
+                        m_Products, 
+                        null
+                    };
                 }
 
                 public Interfaces.Repository1.IOrderLine NewOrderLine(
@@ -72,6 +103,14 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                     orderLine.Product = product;
                     orderLine.Quantity = quantity;
                     return orderLine;
+                }
+
+                public IEntityRepository<Interfaces.Repository1.ICategory> Categories
+                {
+                    get
+                    {
+                        return this.m_Categories;
+                    }
                 }
 
                 public IEntityRepository<Interfaces.Repository1.IOrder> Orders
@@ -117,35 +156,52 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 
                     return _s_compiledModel;
                 }
-
-                public override Type[] GetEntityContractsInRepository()
-                {
-                    throw new NotImplementedException();
-                }
-
-                public override IEntityRepository[] GetEntityRepositories()
-                {
-                    throw new NotImplementedException();
-                }
             }
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public class DataRepositoryObject_CustomNames : EfDataRepositoryBase, Interfaces.Repository1.IOnlineStoreRepository
             {
-                private IEntityRepository<Interfaces.Repository1.IOrder> m_Orders;
-                private IEntityRepository<Interfaces.Repository1.IProduct> m_Products;
+                private EfEntityRepository<Interfaces.Repository1.ICategory, EntityObject_Category> m_Categories;
+                private EfEntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order> m_Orders;
+                private EfEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product> m_Products;
 
                 public DataRepositoryObject_CustomNames(ITypeMetadataCache metadataCache, DbConnection connection, bool autoCommit)
                     : base(new HardCodedEntityFactory(), GetOrBuildDbCompiledModel(metadataCache, connection), connection, autoCommit)
                 {
+                    this.m_Categories = new EfEntityRepository<Interfaces.Repository1.ICategory, EntityObject_Category>(this);
                     this.m_Products = new EfEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product>(this);
                     this.m_Orders = new EfEntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order>(this);
                 }
 
                 public override sealed Type[] GetEntityTypesInRepository()
                 {
-                    return new Type[] { typeof(EntityObject_Product), typeof(EntityObject_Order) };
+                    return new Type[] {
+                        typeof(EntityObject_Category), 
+                        typeof(EntityObject_Product), 
+                        typeof(EntityObject_Order), 
+                        typeof(EntityObject_OrderLine)
+                    };
+                }
+
+                public override Type[] GetEntityContractsInRepository()
+                {
+                    return new Type[] {
+                        typeof(Interfaces.Repository1.ICategory), 
+                        typeof(Interfaces.Repository1.IProduct), 
+                        typeof(Interfaces.Repository1.IOrder), 
+                        typeof(Interfaces.Repository1.IOrderLine)
+                    };
+                }
+
+                public override IEntityRepository[] GetEntityRepositories()
+                {
+                    return new IEntityRepository[] {
+                        m_Categories, 
+                        m_Orders, 
+                        m_Products, 
+                        null
+                    };
                 }
 
                 public Interfaces.Repository1.IOrderLine NewOrderLine(
@@ -158,6 +214,14 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                     orderLine.Product = product;
                     orderLine.Quantity = quantity;
                     return orderLine;
+                }
+
+                public IEntityRepository<Interfaces.Repository1.ICategory> Categories
+                {
+                    get
+                    {
+                        return this.m_Categories;
+                    }
                 }
 
                 public IEntityRepository<Interfaces.Repository1.IOrder> Orders
@@ -194,6 +258,14 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 
                                 modelBuilder.Conventions.Add(new NoUnderscoreForeignKeyNamingConvention());
 
+                                // CATEGORY
+
+                                typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.ICategory));
+                                typeConfiguration = EfModelApi.EntityType<EntityObject_Category>(modelBuilder, typeMetadata);
+
+                                EfModelApi.ValueTypePrimitiveProperty<EntityObject_Category, int>((EntityTypeConfiguration<EntityObject_Category>)typeConfiguration, typeMetadata.GetPropertyByName("Id"));
+                                EfModelApi.StringProperty<EntityObject_Category>((EntityTypeConfiguration<EntityObject_Category>)typeConfiguration, typeMetadata.GetPropertyByName("Name"));
+
                                 // PRODUCT
 
                                 typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IProduct));
@@ -202,6 +274,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                                 EfModelApi.ValueTypePrimitiveProperty<EntityObject_Product, int>((EntityTypeConfiguration<EntityObject_Product>)typeConfiguration, typeMetadata.GetPropertyByName("Id"));
                                 EfModelApi.StringProperty<EntityObject_Product>((EntityTypeConfiguration<EntityObject_Product>)typeConfiguration, typeMetadata.GetPropertyByName("Name"));
                                 EfModelApi.ValueTypePrimitiveProperty<EntityObject_Product, decimal>((EntityTypeConfiguration<EntityObject_Product>)typeConfiguration, typeMetadata.GetPropertyByName("Price"));
+                                
 
                                 // ORDER
 
@@ -230,16 +303,6 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 
                     return _s_compiledModel;
                 }
-
-                public override Type[] GetEntityContractsInRepository()
-                {
-                    throw new NotImplementedException();
-                }
-
-                public override IEntityRepository[] GetEntityRepositories()
-                {
-                    throw new NotImplementedException();
-                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -260,6 +323,10 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                     {
                         return (TEntityContract)(object)new EntityObject_Product();
                     }
+                    if ( typeof(TEntityContract) == typeof(Interfaces.Repository1.ICategory) )
+                    {
+                        return (TEntityContract)(object)new EntityObject_Category();
+                    }
 
                     throw new NotSupportedException(
                         string.Format("Entity contract '{0}' is not supported by HardCodedEntityFactory.", typeof(TEntityContract).Name));
@@ -278,6 +345,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
             public class EntityObject_Order : Interfaces.Repository1.IOrder
             {
                 private int m_Id;
+                private string m_OrderNo;
                 private ICollection<EntityObject_OrderLine> m_OrderLines = new HashSet<EntityObject_OrderLine>();
                 private EntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine> m_OrderLines_Adapter;
                 private DateTime m_PlacedAt;
@@ -288,12 +356,19 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                     this.m_OrderLines_Adapter =
                         new EntityObjectFactory.CollectionAdapter<EntityObject_OrderLine, Interfaces.Repository1.IOrderLine>(this.m_OrderLines);
                     this.m_Status = Interfaces.Repository1.OrderStatus.New;
-               }
+                    this.m_Id = _s_nextIntId++;
+                }
 
                 public int Id
                 {
                     get { return this.m_Id; }
                     set { this.m_Id = value; }
+                }
+
+                public string OrderNo
+                {
+                    get { return this.m_OrderNo; }
+                    set { this.m_OrderNo = value; }
                 }
 
                 ICollection<Interfaces.Repository1.IOrderLine> Interfaces.Repository1.IOrder.OrderLines
@@ -333,10 +408,10 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                 private EntityObject_Product m_Product;
                 private int m_Quantity;
 
-                public int Id
+                public int Id 
                 {
-                    get { return this.m_Id; }
-                    set { this.m_Id = value; }
+                    get { return m_Id; }
+                    set { m_Id = value; }
                 }
 
                 Interfaces.Repository1.IOrder Interfaces.Repository1.IOrderLine.Order
@@ -380,13 +455,29 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
             public class EntityObject_Product : Interfaces.Repository1.IProduct
             {
                 private int m_Id;
+                private string m_CatalogNo;
                 private string m_Name;
                 private decimal m_Price;
+                private ICollection<EntityObject_Category> m_Categories = new HashSet<EntityObject_Category>();
+                private EntityObjectFactory.CollectionAdapter<EntityObject_Category, Interfaces.Repository1.ICategory> m_Categories_Adapter;
+
+                public EntityObject_Product()
+                {
+                    this.m_Categories_Adapter =
+                        new EntityObjectFactory.CollectionAdapter<EntityObject_Category, Interfaces.Repository1.ICategory>(this.m_Categories);
+                    this.m_Id = _s_nextIntId++;
+                }
 
                 public int Id
                 {
                     get { return this.m_Id; }
                     set { this.m_Id = value; }
+                }
+
+                public string CatalogNo
+                {
+                    get { return this.m_CatalogNo; }
+                    set { this.m_CatalogNo = value; }
                 }
 
                 public string Name
@@ -399,6 +490,46 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                 {
                     get { return this.m_Price; }
                     set { this.m_Price = value; }
+                }
+
+                ICollection<Interfaces.Repository1.ICategory> Interfaces.Repository1.IProduct.Categories
+                {
+                    get { return this.m_Categories_Adapter; }
+                }
+
+                public virtual ICollection<EntityObject_Category> Categories
+                {
+                    get { return this.m_Categories; }
+                    set
+                    {
+                        this.m_Categories_Adapter = new EntityObjectFactory.CollectionAdapter<EntityObject_Category, Interfaces.Repository1.ICategory>(value);
+                        this.m_Categories = value;
+                    }
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class EntityObject_Category : Interfaces.Repository1.ICategory
+            {
+                private int m_Id;
+                private string m_Name;
+
+                public EntityObject_Category()
+                {
+                    this.m_Id = _s_nextIntId++;
+                }
+
+                public int Id
+                {
+                    get { return this.m_Id; }
+                    set { this.m_Id = value; }
+                }
+
+                public string Name
+                {
+                    get { return this.m_Name; }
+                    set { this.m_Name = value; }
                 }
             }
         }

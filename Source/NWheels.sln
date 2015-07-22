@@ -99,6 +99,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.AspNet", "NW
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.AspNet.Tests", "NWheels.Stacks.AspNet.Tests\NWheels.Stacks.AspNet.Tests.csproj", "{31DD3CD3-EB7F-41B0-89C7-BE58315A0D7F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.MongoDb.Tests", "NWheels.Stacks.MongoDb.Tests\NWheels.Stacks.MongoDb.Tests.csproj", "{B4BF637D-E80B-46D8-B4E2-82352866FCD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -205,6 +207,10 @@ Global
 		{31DD3CD3-EB7F-41B0-89C7-BE58315A0D7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31DD3CD3-EB7F-41B0-89C7-BE58315A0D7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31DD3CD3-EB7F-41B0-89C7-BE58315A0D7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4BF637D-E80B-46D8-B4E2-82352866FCD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4BF637D-E80B-46D8-B4E2-82352866FCD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4BF637D-E80B-46D8-B4E2-82352866FCD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4BF637D-E80B-46D8-B4E2-82352866FCD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -246,5 +252,6 @@ Global
 		{FBACB755-3309-4263-976C-C2BFB3358B07} = {4829A9A2-7B02-4FD7-8581-FC59B4029699}
 		{8AD9F50A-FFA0-4CAE-8737-1777C9E5CEE2} = {FBACB755-3309-4263-976C-C2BFB3358B07}
 		{31DD3CD3-EB7F-41B0-89C7-BE58315A0D7F} = {FBACB755-3309-4263-976C-C2BFB3358B07}
+		{B4BF637D-E80B-46D8-B4E2-82352866FCD6} = {A67D2D34-0D89-48D0-87C5-79CF6B9BB608}
 	EndGlobalSection
 EndGlobal

@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:cal="http://www.caliburnproject.org"
              xmlns:local="clr-namespace:NWheels.Tools.TestBoard.Modules.ApplicationExplorer"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
@@ -41,6 +42,15 @@
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type local:ApplicationExplorerViewModel+ExplorerItem}" ItemsSource="{Binding SubItems}">
                     <StackPanel Orientation="Horizontal"  VerticalAlignment="Center" ToolTip="{Binding Text}">
+                        <StackPanel.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="{Binding DisplayName}"></MenuItem>
+                                <MenuItem Header="Start" cal:Message.Attach="Start()"></MenuItem>
+                                <MenuItem Header="Stop" cal:Message.Attach="Stop()"></MenuItem>
+                                <Separator />
+                                <MenuItem Header="Close" cal:Message.Attach="Close()"></MenuItem>
+                            </ContextMenu>
+                        </StackPanel.ContextMenu>
                         <Image Source="{Binding Icon}" VerticalAlignment="Center"></Image>
                         <TextBlock Text="{Binding Text}" FontSize="{Binding FontSize}" VerticalAlignment="Center" Margin="5 0 0 0" />
                     </StackPanel>

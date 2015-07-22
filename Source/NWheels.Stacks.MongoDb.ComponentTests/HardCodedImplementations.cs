@@ -74,6 +74,12 @@ namespace NWheels.Stacks.MongoDb.ComponentTests
             {
                 throw new NotImplementedException();
             }
+
+
+            public Entities.IEntityRepository<IR1.ICategory> Categories
+            {
+                get { throw new NotImplementedException(); }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -124,6 +130,18 @@ namespace NWheels.Stacks.MongoDb.ComponentTests
             {
                 get { return m_Status; }
                 set { m_Status = value; }
+            }
+
+            public string OrderNo
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+                set
+                {
+                    throw new NotImplementedException();
+                }
             }
         }
 
@@ -200,6 +218,23 @@ namespace NWheels.Stacks.MongoDb.ComponentTests
             {
                 get { return this.m_Price; }
                 set { this.m_Price = value; }
+            }
+
+            public string CatalogNo
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+                set
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            public ICollection<IR1.ICategory> Categories
+            {
+                get { throw new NotImplementedException(); }
             }
         }
     }

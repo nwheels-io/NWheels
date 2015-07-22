@@ -84,7 +84,7 @@ namespace NWheels.DataObjects
                 }
                 public Type RequiredBase { get; private set; }
 
-                public void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
                 {
                     property.SafeGetRelationalMapping().StorageType = cache.GetStorageTypeInstance(typeof(ClrTypeStorageType), property.ClrType);
                 }
@@ -320,12 +320,16 @@ namespace NWheels.DataObjects
 
             public class AggregationAttribute : PropertyContractAttribute
             {
-                public void ApplyTo(PropertyMetadataBuilder metadata)
+                public override void ApplyTo(PropertyMetadataBuilder metadata, TypeMetadataCache cache)
                 {
                     var relation = metadata.SafeGetRelation();
-                    
                     relation.Kind = RelationKind.Aggregation;
-                    relation.Multiplicity = metadata.IsCollection ? RelationMultiplicity.OneToMany : RelationMultiplicity.OneToOne;
+
+                    if ( relation.Multiplicity != RelationMultiplicity.ManyToMany )
+                    {
+                        relation.Multiplicity = metadata.IsCollection ? RelationMultiplicity.OneToMany : RelationMultiplicity.OneToOne;
+                    }
+                    
                     relation.ThisPartyKind = RelationPartyKind.Principal;
                 }
             }

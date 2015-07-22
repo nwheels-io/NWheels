@@ -138,6 +138,7 @@ namespace NWheels.Hosting
 
         public string InstanceId { get; set; }
         public string LoadedFromDirectory { get; set; }
+        public string LoadedFromFile { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -148,6 +149,7 @@ namespace NWheels.Hosting
                 var serializer = new DataContractSerializer(typeof(BootConfiguration));
                 var config = (BootConfiguration)serializer.ReadObject(file);
 
+                config.LoadedFromFile = filePath;
                 config.LoadedFromDirectory = Path.GetDirectoryName(filePath);
 
                 return config;

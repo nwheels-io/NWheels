@@ -109,7 +109,10 @@ namespace NWheels.DataObjects.Core.Conventions
             _metadataCache.Conventions.ApplyTypeConventions(property.Relation.RelatedPartyType, doPreview: true, doApply: true, doFinalize: false);
 
             var relatedProperty = property.Relation.RelatedPartyType.Properties.FirstOrDefault(p => p.ClrType == type.ContractType);
-            var relatedKey = (relatedProperty != null ? FindOrAddForeignKey(property.Relation.RelatedPartyType, relatedProperty) : null);
+            var relatedKey = (
+                relatedProperty != null ? 
+                FindOrAddForeignKey(property.Relation.RelatedPartyType, relatedProperty) : 
+                FindOrAddPrimaryKey(property.Relation.RelatedPartyType));
 
             property.Relation.ThisPartyKey = type.PrimaryKey;
             property.Relation.ThisPartyKind = RelationPartyKind.Principal;

@@ -54,6 +54,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
         {
             var modelBuilder = new DbModelBuilder();
 
+            modelBuilder.Entity<HR1.EntityObject_Category>().HasEntitySetName("Category");
             modelBuilder.Entity<HR1.EntityObject_Product>().HasEntitySetName("Product");
             modelBuilder.Entity<HR1.EntityObject_Order>().HasEntitySetName("Order");
             modelBuilder.Entity<HR1.EntityObject_OrderLine>().HasEntitySetName("OrderLine");

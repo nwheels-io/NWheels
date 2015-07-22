@@ -9,7 +9,9 @@ using Hapil;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
 using NWheels.Conventions.Core;
+using NWheels.DataObjects.Core.Conventions;
 using NWheels.Entities;
+using NWheels.Entities.Core;
 using NWheels.Stacks.EntityFramework.Conventions;
 using NWheels.Stacks.EntityFramework.Impl;
 using NWheels.Testing;
@@ -76,8 +78,8 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
             var ordersTable = SelectFromTable("Orders");
             var orderLinesTable = SelectFromTable("OrderLines");
 
-            Assert.That(GetCommaSeparatedColumnList(productsTable), Is.EqualTo("Id:Int32,Name:String,Price:Decimal"));
-            Assert.That(GetCommaSeparatedColumnList(ordersTable), Is.EqualTo("Id:Int32,PlacedAt:DateTime,Status:Int32"));
+            Assert.That(GetCommaSeparatedColumnList(productsTable), Is.EqualTo("Id:Int32,CatalogNo:String,Name:String,Price:Decimal"));
+            Assert.That(GetCommaSeparatedColumnList(ordersTable), Is.EqualTo("Id:Int32,OrderNo:String,PlacedAt:DateTime,Status:Int32"));
             Assert.That(GetCommaSeparatedColumnList(orderLinesTable), Is.EqualTo("Id:Int32,Quantity:Int32,OrderId:Int32,ProductId:Int32"));
         }
 
@@ -155,7 +157,9 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
             var configAuto = ResolveAuto<IFrameworkDatabaseConfig>();
             configAuto.Instance.ConnectionString = ConnectionString;
 
-            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions();
+            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new IMetadataConvention[] {
+                new DefaultIdMetadataConvention(typeof(int)) 
+            });
             var entityFactory = new EntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
             var repoFactory = new EfDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, configAuto);
             

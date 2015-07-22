@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
 using NWheels.Conventions.Core;
+using NWheels.DataObjects.Core.Conventions;
 using NWheels.Entities.Core;
 using NWheels.Stacks.EntityFramework.Conventions;
 using NWheels.Stacks.EntityFramework.Impl;
@@ -29,13 +30,13 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 
             var obj = factory.NewEntity<Interfaces.Repository1.IProduct>();
 
-            obj.Id = 123;
+            obj.CatalogNo = "CN111";
             obj.Name = "ABC";
             obj.Price = 123.45m;
 
             //-- Assert
 
-            Assert.That(obj.Id,Is.EqualTo(123));
+            Assert.That(obj.CatalogNo, Is.EqualTo("CN111"));
             Assert.That(obj.Name, Is.EqualTo("ABC"));
             Assert.That(obj.Price, Is.EqualTo(123.45m));
         }
@@ -340,7 +341,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
             var factory = CreateEntityObjectFactory();
             var product = factory.NewEntity<Interfaces.Repository1.IProduct>();
 
-            product.Id = 123;
+            ((IEntityObject)product).SetId(123);
 
             //-- Act
 
@@ -374,14 +375,17 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 
             //-- Assert
 
-            Assert.That(product.Id, Is.EqualTo(123));
+            Assert.That(((IEntityObject)product).GetId().Value, Is.EqualTo(123));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private EntityObjectFactory CreateEntityObjectFactory()
         {
-            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions();
+            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(customMetadataConventions: new IMetadataConvention[] {
+                new DefaultIdMetadataConvention(typeof(int)), 
+            });
+            
             return new EntityObjectFactory(Framework.Components, base.DyamicModule, metadataCache);
         }
 
