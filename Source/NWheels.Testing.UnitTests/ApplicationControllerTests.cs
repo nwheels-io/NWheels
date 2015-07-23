@@ -35,8 +35,9 @@ namespace NWheels.Testing.UnitTests
 
             var controller = new ApplicationController(
                 new ConsolePlainLog("CONTROLLER", LogLevel.Debug, _clock), 
-                CreateBootConfig(),
-                onInjectComponents: InjectHostComponents);
+                CreateBootConfig());
+
+            controller.InjectingComponents += InjectHostComponents;
 
             //-- act
 
@@ -68,9 +69,9 @@ namespace NWheels.Testing.UnitTests
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void InjectHostComponents(Autofac.ContainerBuilder builder)
+        private void InjectHostComponents(object sender, ComponentInjectionEventArgs args)
         {
-            builder.RegisterInstance(new ConsolePlainLog("APP-NODE", LogLevel.Debug, _clock)).As<IPlainLog>();
+            args.ContainerBuilder.RegisterInstance(new ConsolePlainLog("APP-NODE", LogLevel.Debug, _clock)).As<IPlainLog>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

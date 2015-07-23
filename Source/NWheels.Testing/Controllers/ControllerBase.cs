@@ -9,6 +9,7 @@ using NWheels.Hosting;
 using NWheels.Processing.Workflows;
 using NWheels.Hosting.Core;
 using NWheels.Logging.Core;
+using Autofac;
 
 namespace NWheels.Testing.Controllers
 {
@@ -187,6 +188,7 @@ namespace NWheels.Testing.Controllers
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public event EventHandler<ComponentInjectionEventArgs> InjectingComponents;
         public event EventHandler<ControllerStateEventArgs> CurrentStateChanged;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -195,6 +197,21 @@ namespace NWheels.Testing.Controllers
         protected abstract void OnActivate();
         protected abstract void OnDeactivate();
         protected abstract void OnUnload();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void OnInjectingComponents(Autofac.ContainerBuilder containerBuilder)
+        {
+            if ( _parentController != null )
+            {
+                _parentController.OnInjectingComponents(containerBuilder);
+            }
+
+            if ( InjectingComponents != null )
+            {
+                InjectingComponents(this, new ComponentInjectionEventArgs(containerBuilder));
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

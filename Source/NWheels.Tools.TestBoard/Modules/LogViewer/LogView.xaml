@@ -1,0 +1,182 @@
+﻿<UserControl x:Class="NWheels.Tools.TestBoard.Modules.LogViewer.LogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:logViewer="clr-namespace:NWheels.Tools.TestBoard.Modules.LogViewer"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <Style x:Key="Data-ListItem-ExpandHandle-Z2" TargetType="Image">
+            <Setter Property="Height" Value="12" />
+            <Setter Property="Width" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Stretch" Value="None" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Source" Value="{Binding Path=ImagePath}" />
+            <Setter Property="Margin" Value="{Binding Path=IndentSize, Converter={StaticResource ThicknessConverter}, ConverterParameter='X,1,5,0'}" />
+            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ItemExpandImage_MouseLeftButtonDown" />
+        </Style>
+
+        <Style x:Key="Data-ListItem-Z2" TargetType="ListViewItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border 
+                            x:Name="brdItem"
+                            SnapsToDevicePixels="True"
+                            BorderThickness="0,0,0,0.5" 
+                            BorderBrush="#FFC7C7C7"
+                            Background="{TemplateBinding Background}">
+                            <logViewer:GridViewRowPresenterWithGridLines 
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="LightBlue"/>
+                            </Trigger>
+                            <DataTrigger Binding="{Binding Path=Data.IsRootActivity}" Value="true">
+                                <Setter TargetName="brdItem" Property="BorderBrush" Value="#FF878787" />
+                                <Setter TargetName="brdItem" Property="BorderThickness" Value="0,0,0,0.5" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Margin" Value="2,0,0,0"/>
+            <Setter Property="Padding" Value="0,2"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <EventSetter Event="PreviewKeyDown" Handler="ListViewItem_PreviewKeyDown" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ThreadSuccess">
+                    <Setter Property="Background" Value="#FFDEDEDE" />
+                    <Setter Property="Foreground" Value="#FF4D4D4D" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ThreadWarning">
+                    <Setter Property="Background" Value="#FFDEDEDE" />
+                    <Setter Property="Foreground" Value="DarkOrange" />
+                    <Setter Property="FontWeight" Value="DemiBold" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ThreadFailure">
+                    <Setter Property="Background" Value="#FFDEDEDE" />
+                    <Setter Property="Foreground" Value="#FFCD1717" />
+                    <Setter Property="FontWeight" Value="DemiBold" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ActivitySuccess">
+                    <Setter Property="Background" Value="#FFEEEEEE" />
+                    <Setter Property="Foreground" Value="#FF8B8B8B" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ActivityWarning">
+                    <Setter Property="Background" Value="#FFEEEEEE" />
+                    <Setter Property="Foreground" Value="#FFDC7A02" />
+                    <Setter Property="FontWeight" Value="DemiBold" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ActivityFailure">
+                    <Setter Property="Background" Value="#FFEEEEEE" />
+                    <Setter Property="Foreground" Value="#FFCD1717" />
+                    <Setter Property="FontWeight" Value="DemiBold" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="LogDebug">
+                    <Setter Property="Foreground" Value="#FFAEAEAE" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="LogVerbose">
+                    <Setter Property="Foreground" Value="#FF939393" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="LogInfo">
+                    <Setter Property="Foreground" Value="Navy" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="LogWarning">
+                    <Setter Property="Foreground" Value="#FFDC7A02" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="LogError">
+                    <Setter Property="Foreground" Value="#FFCD1717" />
+                    <Setter Property="FontWeight" Value="DemiBold" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="LogCritical">
+                    <Setter Property="Foreground" Value="Red" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                </DataTrigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="SkyBlue" />
+                </Trigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsMouseOver" Value="true" />
+                        <Condition Property="IsSelected" Value="false" />
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Background" Value="#FFD9EFF7" />
+                </MultiTrigger>
+            </Style.Triggers>
+            
+        </Style>
+    </UserControl.Resources>
+    
+    <DockPanel LastChildFill="True">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <ListView 
+                Grid.Row="0"
+			    x:Name="lvwLogs" 
+			    Background="Transparent" 
+			    BorderThickness="0" 
+			    ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                ItemContainerStyle="{StaticResource Data-ListItem-Z2}"
+                ItemsSource="{Binding Path=Items}" 
+                SelectionChanged="ListView_SelectionChanged">
+                <ListView.View>
+                    <GridView x:Name="lvwLogsGridView">
+                        <GridViewColumn Width="500" Header="Activity/Message">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="-2 3 0 3">
+                                        <Image Style="{StaticResource Data-ListItem-ExpandHandle-Z2}" />
+                                        <!--Image Width="16" Height="16" Source="{Binding Path=Data.StatusColor, Converter={StaticResource StatusColorImageSourceConverter}}" SnapsToDevicePixels="False" Stretch="None" Margin="3,0,5,0"/-->
+                                        <TextBlock Text="{Binding Path=Data.SingleLineText}">
+                                            <TextBlock.Style>
+                                                <Style>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Data.IsErrorNode}" Value="true">
+                                                            <Setter Property="TextBlock.FontWeight" Value="Bold" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="160" Header="Recorded at - UTC"  DisplayMemberBinding="{Binding Path=Data.TimestampText}" />
+                        <GridViewColumn Width="70" Header="Duration" DisplayMemberBinding="{Binding Path=Data.LogNode.Duration}" />
+                        <GridViewColumn Width="70" Header="DB Count" DisplayMemberBinding="{Binding Path=Data.RandomCount}" />
+                        <GridViewColumn Width="70" Header="DB Duration" DisplayMemberBinding="{Binding Path=Data.RandomDuration}" />
+                        <GridViewColumn Width="70" Header="Lock Wait" DisplayMemberBinding="{Binding Path=Data.RandomCount}"/>
+                        <GridViewColumn Width="70" Header="Lock Hold" DisplayMemberBinding="{Binding Path=Data.RandomDuration}"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <!--this is you Expander-->
+            <GridSplitter Grid.Row="1" Height="5" Background="Gray" ResizeDirection="Rows" HorizontalAlignment="Stretch"/>
+            <!--this GridSplitter represents the glyph-->
+            <TextBox 
+                Grid.Row="2" 
+                Background="LightGray" 
+                FontFamily="Consolas" 
+                FontSize="13" 
+                IsReadOnly="True"
+                VerticalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Auto"
+                Text="{Binding Path=SelectedNode, Converter={StaticResource LogNodeDetailsTextConverter}}">
+            </TextBox>
+        </Grid>
+
+    </DockPanel>
+</UserControl>

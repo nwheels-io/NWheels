@@ -49,6 +49,8 @@
                                 <MenuItem Header="Start" cal:Message.Attach="Start()"></MenuItem>
                                 <MenuItem Header="Stop" cal:Message.Attach="Stop()"></MenuItem>
                                 <Separator />
+                                <MenuItem Header="View Logs" cal:Message.Attach="ViewLogs()"></MenuItem>
+                                <Separator />
                                 <MenuItem Header="Close" cal:Message.Attach="Close()"></MenuItem>
                             </ContextMenu>
                         </StackPanel.ContextMenu>

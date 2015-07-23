@@ -11,6 +11,7 @@ using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
+using Gemini.Framework.Threading;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Hosting.Core;
@@ -18,6 +19,7 @@ using NWheels.Tools.TestBoard.Messages;
 using NWheels.Tools.TestBoard.Services;
 using Action = System.Action;
 using NWheels.Testing.Controllers;
+using NWheels.Tools.TestBoard.Modules.LogViewer;
 
 namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 {
@@ -30,13 +32,16 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         IHandle<AppStateChangedMessage>
     {
         private readonly IApplicationControllerService _controllerService;
+        private readonly IShell _shell;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
         public ApplicationExplorerViewModel(IEventAggregator events, IShell shell, IApplicationControllerService controllerService)
         {
+            _shell = shell;
             _controllerService = controllerService;
+            
             this.ExplorerItems = new ObservableCollection<ExplorerItem>();
 
             events.Subscribe(this);
@@ -114,6 +119,13 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private IShell Shell
+        {
+            get { return _shell; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public enum ExplorerItemSize
         {
             Smallest = 12,
@@ -153,6 +165,8 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
                 _subItemFactory = subItemFactory;
                 _selectCallback = selectCallbeck;
                 _doubleClickCallback = doubleClickCallbck;
+
+                this.OwnerViewModel = (parent != null ? parent.OwnerViewModel : null);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -217,7 +231,17 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
             public virtual IEnumerable<ExplorerItem> SubItems
             {
-                get { return _subItemFactory(); }
+                get
+                {
+                    if ( _subItemFactory != null )
+                    {
+                        return _subItemFactory();
+                    }
+                    else
+                    {
+                        return new ExplorerItem[0];
+                    }
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -233,6 +257,10 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected ExplorerItemSize ItemSize { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected ApplicationExplorerViewModel OwnerViewModel { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -252,14 +280,6 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
                 base.ItemSize = itemSize;
             }
 
-            void OnControllerStateChanged(object sender, ControllerStateEventArgs e)
-            {
-                NotifyOfPropertyChange(() => this.CurrentState);
-                NotifyOfPropertyChange(() => this.CanStart);
-                NotifyOfPropertyChange(() => this.CanStop);
-                NotifyOfPropertyChange(() => this.CanClose);
-            }
-
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public virtual void Start()
@@ -276,6 +296,22 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
             public virtual void Close()
             {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual void ViewLogs()
+            {
+                var existingLogDocument = OwnerViewModel.Shell.Documents.OfType<LogViewerViewModel>().FirstOrDefault(doc => doc.Controller == _controller);
+
+                if ( existingLogDocument != null )
+                {
+                    OwnerViewModel.Shell.ActiveLayoutItem = existingLogDocument;
+                }
+                else
+                {
+                    OwnerViewModel.Shell.OpenDocument(new LogViewerViewModel(this.FullPath, _controller));
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -299,27 +335,6 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
                 get { return false; }
             }
 
-            ////-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            //public virtual bool CanStart()
-            //{
-            //    return false;
-            //}
-
-            ////-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            //public virtual bool CanStop()
-            //{
-            //    return false;
-            //}
-
-            ////-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            //public virtual bool CanClose()
-            //{
-            //    return false;
-            //}
-
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public TController Controller
@@ -333,20 +348,26 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             {
                 get { return _controller.CurrentState; }
             }
+            
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void OnControllerStateChanged(object sender, ControllerStateEventArgs e)
+            {
+                NotifyOfPropertyChange(() => this.CurrentState);
+                NotifyOfPropertyChange(() => this.CanStart);
+                NotifyOfPropertyChange(() => this.CanStop);
+                NotifyOfPropertyChange(() => this.CanClose);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class ApplicationItem : ControllerItem<ApplicationController>
         {
-            private readonly ApplicationExplorerViewModel _ownerViewModel;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
             public ApplicationItem(ApplicationExplorerViewModel ownerViewModel, ApplicationController app)
                 : base(null, app, AppIcons.AppExplorerIconApplication, ExplorerItemSize.Largest)
             {
-                _ownerViewModel = ownerViewModel;
+                base.OwnerViewModel = ownerViewModel;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -354,6 +375,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             public override void Start()
             {
                 Task.Run(() => Controller.LoadAndActivate());
+                base.ViewLogs();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -367,7 +389,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
             public override void Close()
             {
-                Task.Run(() => _ownerViewModel._controllerService.Close(this.Controller));
+                Task.Run(() => OwnerViewModel._controllerService.Close(this.Controller));
             }
 
             public override bool CanStart
@@ -382,27 +404,6 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             {
                 get { return true; }
             }
-
-            ////-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            //public override bool CanStart()
-            //{
-            //    return Controller.CanLoad();
-            //}
-
-            ////-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            //public override bool CanStop()
-            //{
-            //    return Controller.CanDeactivate();
-            //}
-
-            ////-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            //public override bool CanClose()
-            //{
-            //    return true;
-            //}
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -463,16 +464,6 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
                 : base(parent, instance, AppIcons.AppExplorerIconNodeInstance, ExplorerItemSize.Small)
             {
             }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            //public override IEnumerable<ExplorerItem> SubItems
-            //{
-            //    get
-            //    {
-
-            //    }
-            //}
         }
     }
 }

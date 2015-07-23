@@ -97,7 +97,8 @@ namespace NWheels.Tools.TestBoard.Services
             {
                 if ( !_applicationByFilePath.ContainsKey(bootConfigFilePath) )
                 {
-                    var newController = new ApplicationController(_plainLog, bootConfig, InjectHostComponents);
+                    var newController = new ApplicationController(_plainLog, bootConfig);
+                    newController.InjectingComponents += OnInjectingHostComponents;
 
                     _applications.Add(newController);
                     _applicationByFilePath.Add(bootConfigFilePath, newController);
@@ -156,10 +157,10 @@ namespace NWheels.Tools.TestBoard.Services
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void InjectHostComponents(Autofac.ContainerBuilder containerBuilder)
+        private void OnInjectingHostComponents(object sender, ComponentInjectionEventArgs e)
         {
-            containerBuilder.RegisterInstance(_plainLog).As<IPlainLog>();
-            containerBuilder.RegisterInstance(new AssemblySearchPathProvider()).As<IAssemblySearchPathProvider>();
+            e.ContainerBuilder.RegisterInstance(_plainLog).As<IPlainLog>();
+            e.ContainerBuilder.RegisterInstance(new AssemblySearchPathProvider()).As<IAssemblySearchPathProvider>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

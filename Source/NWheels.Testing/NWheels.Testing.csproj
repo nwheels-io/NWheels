@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Controllers\ApplicationController.cs" />
     <Compile Include="BootConfigurationExtensions.cs" />
+    <Compile Include="Controllers\ComponentInjectionEventArgs.cs" />
     <Compile Include="Controllers\CompositeControllerBase.cs" />
     <Compile Include="Controllers\ControllerBase.cs" />
     <Compile Include="Controllers\ControllerRequestFailedException.cs" />

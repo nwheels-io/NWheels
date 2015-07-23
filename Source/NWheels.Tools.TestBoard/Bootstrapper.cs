@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,7 +8,9 @@ using System.Windows;
 using System.Windows.Threading;
 using Gemini;
 using Gemini.Modules.Output;
+using NWheels.Hosting.Core;
 using NWheels.Tools.TestBoard.Modules.Main;
+using NWheels.Utilities;
 
 namespace NWheels.Tools.TestBoard
 {
@@ -41,6 +44,25 @@ namespace NWheels.Tools.TestBoard
                 catch
                 {
                 }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        static Bootstrapper()
+        {
+            DeleteStaleRuntimeTypesAssembly();
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void DeleteStaleRuntimeTypesAssembly()
+        {
+            var assemblyPath = PathUtility.HostBinPath(NodeHost.DynamicAssemblyName + ".dll");
+
+            if ( File.Exists(assemblyPath) )
+            {
+                File.Delete(assemblyPath);
             }
         }
     }

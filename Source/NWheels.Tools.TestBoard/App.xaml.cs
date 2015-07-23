@@ -13,5 +13,8 @@ namespace NWheels.Tools.TestBoard
     /// </summary>
     public partial class App : Application
     {
+        public App()
+        {
+        }
     }
 }

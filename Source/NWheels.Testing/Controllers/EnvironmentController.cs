@@ -14,11 +14,11 @@ namespace NWheels.Testing.Controllers
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EnvironmentController(ApplicationController parentController, BootConfiguration bootConfig, Action<Autofac.ContainerBuilder> onInjectComponents)
+        public EnvironmentController(ApplicationController parentController, BootConfiguration bootConfig)
             : base(parentController)
         {
             _bootConfig = bootConfig;
-            base.AddSubController(new NodeController(this, bootConfig, onInjectComponents));
+            base.AddSubController(new NodeController(this, bootConfig));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

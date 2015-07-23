@@ -12,7 +12,6 @@ namespace NWheels.Testing.Controllers
     public class NodeInstanceController : ControllerBase
     {
         private readonly BootConfiguration _bootConfig;
-        private readonly Action<ContainerBuilder> _onInjectComponents;
         private readonly string _instanceId;
         private NodeHost _nodeHost;
 
@@ -21,12 +20,10 @@ namespace NWheels.Testing.Controllers
         public NodeInstanceController(
             NodeController parentController,
             BootConfiguration bootConfig, 
-            Action<Autofac.ContainerBuilder> onInjectComponents, 
             string instanceId)
             : base(parentController)
         {
             _bootConfig = bootConfig;
-            _onInjectComponents = onInjectComponents;
             _instanceId = instanceId;
         }
 
@@ -41,7 +38,7 @@ namespace NWheels.Testing.Controllers
 
         protected override void OnLoad()
         {
-            _nodeHost = new NodeHost(_bootConfig, _onInjectComponents);
+            _nodeHost = new NodeHost(_bootConfig, OnInjectingComponents);
             _nodeHost.Load();
         }
 
@@ -65,6 +62,13 @@ namespace NWheels.Testing.Controllers
         {
             _nodeHost.Unload();
             _nodeHost = null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnInjectingComponents(ContainerBuilder containerBuilder)
+        {
+            base.OnInjectingComponents(containerBuilder);
         }
     }
 }

@@ -107,6 +107,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
@@ -169,6 +170,15 @@
     </Compile>
     <Compile Include="AppIcons.cs" />
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Converters\DateTimeDateConverter.cs" />
+    <Compile Include="Converters\EnumStringConverter.cs" />
+    <Compile Include="Converters\IsFirstItemConverter.cs" />
+    <Compile Include="Converters\LogNodeDetailsTextConverter.cs" />
+    <Compile Include="Converters\LogNodeKindImageSourceConverter.cs" />
+    <Compile Include="Converters\MoneyStringConverter.cs" />
+    <Compile Include="Converters\PercentageConverter.cs" />
+    <Compile Include="Converters\ThicknessBindingConverter.cs" />
+    <Compile Include="Converters\TupleConverter.cs" />
     <Compile Include="Extensions\DependencyObjectExtensions.cs" />
     <Compile Include="Messages\AppStateChangedMessage.cs" />
     <Compile Include="Messages\AppClosedMessage.cs" />
@@ -176,6 +186,22 @@
     <Compile Include="Modules\ApplicationExplorer\ApplicationExplorerView.xaml.cs">
       <DependentUpon>ApplicationExplorerView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\LogViewer\GridViewRowPresenterWithGridLines.cs" />
+    <Compile Include="Modules\LogViewer\ILogConnection.cs" />
+    <Compile Include="Modules\LogViewer\LogNodeKind.cs" />
+    <Compile Include="Modules\LogViewer\LogPanelViewModel.cs" />
+    <Compile Include="Modules\LogViewer\LogView.xaml.cs">
+      <DependentUpon>LogView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\LogViewer\LogViewerCommands.cs" />
+    <Compile Include="Modules\LogViewer\LogViewerViewModel.cs" />
+    <Compile Include="Modules\LogViewer\LogViewerView.xaml.cs">
+      <DependentUpon>LogViewerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\LogViewer\LogViewerModule.cs" />
+    <Compile Include="Modules\LogViewer\NodeInstanceLogConnection.cs" />
+    <Compile Include="Modules\LogViewer\ThreadLogViewModel.cs" />
+    <Compile Include="Modules\LogViewer\TreeNodeItem.cs" />
     <Compile Include="Services\IApplicationComponentInjector.cs" />
     <Compile Include="Services\IApplicationControllerService.cs" />
     <Compile Include="Services\IMessageBoxService.cs" />
@@ -247,6 +273,8 @@
     <Content Include="3rdParty\Gemini.pdb" />
     <Content Include="3rdParty\MahApps.Metro.dll" />
     <Content Include="3rdParty\Xceed.Wpf.AvalonDock.Themes.VS2013.dll" />
+    <Resource Include="Resources\IconExpanded.png" />
+    <Resource Include="Resources\IconCollapsed.png" />
     <Resource Include="Resources\AppExplorerIconConfigFile.png" />
     <Resource Include="Resources\AppExplorerIconConfigurationEditor.png" />
     <Resource Include="Resources\AppExplorerIconConfigurationFolder.png" />
@@ -266,6 +294,14 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Modules\ApplicationExplorer\ApplicationExplorerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\LogViewer\LogView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Modules\LogViewer\LogViewerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
