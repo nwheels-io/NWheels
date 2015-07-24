@@ -122,6 +122,46 @@ namespace NWheels.Tools.TestBoard
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static ImageSource AppExplorerIconControllerStopped
+        {
+            get
+            {
+                return Get("AppExplorerIconControllerStopped");
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ImageSource AppExplorerIconControllerPaused
+        {
+            get
+            {
+                return Get("AppExplorerIconControllerPaused");
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ImageSource AppExplorerIconControllerRunning
+        {
+            get
+            {
+                return Get("AppExplorerIconControllerRunning");
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ImageSource AppExplorerIconControllerErrors
+        {
+            get
+            {
+                return Get("AppExplorerIconControllerErrors");
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static ImageSource CreateImageSource(string pngImageName)
         {
             var packUri = "pack://application:,,,/ntest;component/Resources/" + pngImageName + ".png";

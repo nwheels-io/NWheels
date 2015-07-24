@@ -7,7 +7,7 @@
              xmlns:local="clr-namespace:NWheels.Tools.TestBoard.Modules.ApplicationExplorer"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
+    <Grid Background="{x:Static SystemColors.ControlBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
@@ -41,22 +41,30 @@
             </TreeView.Style>
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type local:ApplicationExplorerViewModel+ExplorerItem}" ItemsSource="{Binding SubItems}">
-                    <StackPanel Orientation="Horizontal"  VerticalAlignment="Center" ToolTip="{Binding Text}">
-                        <StackPanel.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="{Binding FullPath}" FontWeight="Bold" Foreground="{x:Static SystemColors.ControlTextBrush}" IsEnabled="False" />
-                                <Separator />
-                                <MenuItem Header="Start" cal:Message.Attach="Start()"></MenuItem>
-                                <MenuItem Header="Stop" cal:Message.Attach="Stop()"></MenuItem>
-                                <Separator />
-                                <MenuItem Header="View Logs" cal:Message.Attach="ViewLogs()"></MenuItem>
-                                <Separator />
-                                <MenuItem Header="Close" cal:Message.Attach="Close()"></MenuItem>
-                            </ContextMenu>
-                        </StackPanel.ContextMenu>
-                        <Image Source="{Binding Icon}" VerticalAlignment="Center"></Image>
-                        <TextBlock Text="{Binding Text}" FontSize="{Binding FontSize}" VerticalAlignment="Center" Margin="5 0 0 0" />
-                    </StackPanel>
+                    <Border Padding="2 2 5 2">
+                        <StackPanel Orientation="Horizontal"  VerticalAlignment="Center" ToolTip="{Binding Text}">
+                            <StackPanel.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="{Binding FullPath}" FontWeight="Bold" Foreground="{x:Static SystemColors.ControlTextBrush}" IsEnabled="False" />
+                                    <Separator />
+                                    <MenuItem Header="Start" cal:Message.Attach="Start()"></MenuItem>
+                                    <MenuItem Header="Stop" cal:Message.Attach="Stop()"></MenuItem>
+                                    <Separator />
+                                    <MenuItem Header="View Logs" cal:Message.Attach="ViewLogs()"></MenuItem>
+                                    <Separator />
+                                    <MenuItem Header="Close" cal:Message.Attach="Close()"></MenuItem>
+                                </ContextMenu>
+                            </StackPanel.ContextMenu>
+                            <Image Source="{Binding Icon}" VerticalAlignment="Center"></Image>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="{Binding Text}" FontSize="{Binding FontSize}" VerticalAlignment="Center" Margin="5 0 0 0" />
+                                <StackPanel Orientation="Horizontal" Margin="5 0 0 0">
+                                    <Image Source="{Binding StatusIcon}" VerticalAlignment="Center"></Image>
+                                    <TextBlock Text="{Binding StatusText}" FontSize="12" Foreground="{x:Static SystemColors.ControlDarkDarkBrush}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
         </TreeView>

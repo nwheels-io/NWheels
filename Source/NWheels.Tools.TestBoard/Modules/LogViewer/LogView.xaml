@@ -26,10 +26,10 @@
                         <Border 
                             x:Name="brdItem"
                             SnapsToDevicePixels="True"
-                            BorderThickness="0,0,0,0.5" 
-                            BorderBrush="#FFC7C7C7"
+                            BorderBrush="White"
                             Background="{TemplateBinding Background}">
                             <logViewer:GridViewRowPresenterWithGridLines 
+                                x:Name="gvrPresenter"
                                 VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
                                 SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                         </Border>
@@ -38,8 +38,15 @@
                                 <Setter Property="Background" Value="LightBlue"/>
                             </Trigger>
                             <DataTrigger Binding="{Binding Path=Data.IsRootActivity}" Value="true">
-                                <Setter TargetName="brdItem" Property="BorderBrush" Value="#FF878787" />
-                                <Setter TargetName="brdItem" Property="BorderThickness" Value="0,0,0,0.5" />
+                                <Setter TargetName="brdItem" Property="BorderBrush" Value="#FFB7B7B7" />
+                                <Setter TargetName="brdItem" Property="BorderThickness" Value="0 1 0 0" />
+                                <Setter TargetName="brdItem" Property="Height" Value="32" />
+                                <Setter TargetName="gvrPresenter" Property="Height" Value="32" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=Data.IsRootActivity}" Value="false">
+                                <Setter TargetName="brdItem" Property="BorderThickness" Value="0" />
+                                <Setter TargetName="brdItem" Property="Height" Value="24" />
+                                <Setter TargetName="gvrPresenter" Property="Height" Value="24" />
                             </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -154,12 +161,81 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Width="160" Header="Recorded at - UTC"  DisplayMemberBinding="{Binding Path=Data.TimestampText}" />
-                        <GridViewColumn Width="70" Header="Duration" DisplayMemberBinding="{Binding Path=Data.LogNode.Duration}" />
-                        <GridViewColumn Width="70" Header="DB Count" DisplayMemberBinding="{Binding Path=Data.RandomCount}" />
-                        <GridViewColumn Width="70" Header="DB Duration" DisplayMemberBinding="{Binding Path=Data.RandomDuration}" />
-                        <GridViewColumn Width="70" Header="Lock Wait" DisplayMemberBinding="{Binding Path=Data.RandomCount}"/>
-                        <GridViewColumn Width="70" Header="Lock Hold" DisplayMemberBinding="{Binding Path=Data.RandomDuration}"/>
+                        <GridViewColumn Width="150" Header="Recorded at - UTC">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Data.TimestampText}" TextAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="150" Header="Run At">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical">
+                                        <StackPanel.Style>
+                                            <Style>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=Data.IsRootActivity}" Value="False">
+                                                        <Setter Property="StackPanel.Visibility" Value="Hidden" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+                                        <TextBlock Text="{Binding Path=Data.NodeInstanceText}" />
+                                        <TextBlock Text="{Binding Path=Data.EnvironmentMachineText}" Foreground="#FFAEAEAE" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="70" Header="Duration">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Data.LogNode.Duration}" TextAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="70" Header="CPU Time">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Data.RandomDuration}" TextAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="70" Header="IO Time">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Data.RandomDuration}" TextAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="70" Header="DB Count">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Data.RandomCount}" TextAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="70" Header="DB Duration">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Data.RandomDuration}" TextAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="70" Header="Lock Wait">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Data.RandomCount}" TextAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="70" Header="Lock Hold">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Data.RandomDuration}" TextAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
                     </GridView>
                 </ListView.View>
             </ListView>

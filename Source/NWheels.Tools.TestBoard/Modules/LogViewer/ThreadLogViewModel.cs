@@ -111,6 +111,12 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
                     text.AppendFormat("{0} = {1}\r\n", pair.Name, pair.Value);
                 }
 
+                if ( !string.IsNullOrEmpty(log.ExceptionDetails) )
+                {
+                    text.AppendLine("------ Exception ------");
+                    text.AppendLine(log.ExceptionDetails);
+                }
+
                 return text.ToString();
             }
 
@@ -136,6 +142,54 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
                     }
 
                     return _singleLineText;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string NodeInstanceText
+            {
+                get
+                {
+                    if ( IsRootActivity )
+                    {
+                        if ( !string.IsNullOrEmpty(ThreadLog.NodeInstance) )
+                        {
+                            return ThreadLog.NodeName + "[" + ThreadLog.NodeInstance + "]";
+                        }
+                        else
+                        {
+                            return ThreadLog.NodeName;
+                        }
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string EnvironmentMachineText
+            {
+                get
+                {
+                    if ( IsRootActivity )
+                    {
+                        if (!string.IsNullOrEmpty(ThreadLog.MachineName) && !string.IsNullOrEmpty(ThreadLog.EnvironmentName) )
+                        {
+                            return ThreadLog.MachineName + "@" + ThreadLog.EnvironmentName;
+                        }
+                        else
+                        {
+                            return (ThreadLog.MachineName ?? "") + (ThreadLog.EnvironmentName ?? "");
+                        }
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
             }
 

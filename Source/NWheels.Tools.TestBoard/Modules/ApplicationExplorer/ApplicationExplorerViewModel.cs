@@ -183,7 +183,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
             public virtual void Select()
             {
-                if ( _selectCallback != null)
+                if ( _selectCallback != null )
                 {
                     _selectCallback();
                 }
@@ -201,6 +201,20 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             public virtual ImageSource Icon
             {
                 get { return _icon; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual ImageSource StatusIcon
+            {
+                get { return null; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual string StatusText
+            {
+                get { return null; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -348,7 +362,42 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             {
                 get { return _controller.CurrentState; }
             }
-            
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override ImageSource StatusIcon
+            {
+                get
+                {
+                    switch ( _controller.CurrentState )
+                    {
+                        case NodeState.Down:
+                            return (_controller.Errors.Count == 0 ? AppIcons.AppExplorerIconControllerStopped : AppIcons.AppExplorerIconControllerErrors);
+                        case NodeState.Active:
+                            return AppIcons.AppExplorerIconControllerRunning;
+                        default:
+                            return AppIcons.AppExplorerIconControllerPaused;
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override string StatusText
+            {
+                get
+                {
+                    if ( _controller.CurrentState == NodeState.Down )
+                    {
+                        return (_controller.Errors.Count == 0 ? "Stopped" : "Failed");
+                    }
+                    else
+                    {
+                        return _controller.CurrentState.ToString();
+                    }
+                }
+            }
+
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private void OnControllerStateChanged(object sender, ControllerStateEventArgs e)
@@ -357,6 +406,8 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
                 NotifyOfPropertyChange(() => this.CanStart);
                 NotifyOfPropertyChange(() => this.CanStop);
                 NotifyOfPropertyChange(() => this.CanClose);
+                NotifyOfPropertyChange(() => this.StatusIcon);
+                NotifyOfPropertyChange(() => this.StatusText);
             }
         }
 

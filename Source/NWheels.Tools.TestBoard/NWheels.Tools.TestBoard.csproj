@@ -273,6 +273,10 @@
     <Content Include="3rdParty\Gemini.pdb" />
     <Content Include="3rdParty\MahApps.Metro.dll" />
     <Content Include="3rdParty\Xceed.Wpf.AvalonDock.Themes.VS2013.dll" />
+    <Resource Include="Resources\AppExplorerIconControllerErrors.png" />
+    <Resource Include="Resources\AppExplorerIconControllerPaused.png" />
+    <Resource Include="Resources\AppExplorerIconControllerRunning.png" />
+    <Resource Include="Resources\AppExplorerIconControllerStopped.png" />
     <Resource Include="Resources\IconExpanded.png" />
     <Resource Include="Resources\IconCollapsed.png" />
     <Resource Include="Resources\AppExplorerIconConfigFile.png" />
