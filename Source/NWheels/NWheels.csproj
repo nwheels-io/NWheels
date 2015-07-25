@@ -96,12 +96,16 @@
     <Compile Include="Authorization\IEntityAccessRule.cs" />
     <Compile Include="Authorization\IIdentityInfo.cs" />
     <Compile Include="DataObjects\Core\CrossTypeFixupMetadataVisitor.cs" />
+    <Compile Include="DataObjects\Core\IHaveDependencies.cs" />
+    <Compile Include="DataObjects\Core\IHaveNestedObjects.cs" />
+    <Compile Include="DataObjects\Core\IObject.cs" />
     <Compile Include="DataObjects\Core\TypeMetadataVisitorBase.cs" />
     <Compile Include="Endpoints\Core\CompactBinaryReader.cs" />
     <Compile Include="Endpoints\Core\CompactBinaryWriter.cs" />
     <Compile Include="Endpoints\HttpOperationAttribute.cs" />
     <Compile Include="Endpoints\HttpOperationVerbs.cs" />
     <Compile Include="Entities\Core\IDataRepositoryCallback.cs" />
+    <Compile Include="Entities\Core\IEntityPartObject.cs" />
     <Compile Include="Entities\Core\IStorageInitializer.cs" />
     <Compile Include="Entities\Core\HiloGeneratorMetadataConvention.cs" />
     <Compile Include="Entities\Core\HiloIntegerIdGenerator.cs" />
@@ -111,6 +115,7 @@
     <Compile Include="Extensions\CharExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Extensions\CompactBinaryReaderWriterExtensions.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Hosting\ApplicationConfiguration.cs" />
     <Compile Include="Hosting\Core\DefaultAssemblySearchPathProvider.cs" />
     <Compile Include="Hosting\IAssemblySearchPathProvider.cs" />
@@ -457,7 +462,7 @@
     <Compile Include="UI\ViewModelPropertyContract.cs" />
     <Compile Include="UI\TemplateAttribute.cs" />
     <Compile Include="UI\WidgetBase.cs" />
-    <Compile Include="Utilities\EntityUtility.cs" />
+    <Compile Include="Utilities\ObjectUtility.cs" />
     <Compile Include="Utilities\ParseUtility.cs" />
     <Compile Include="Utilities\PathUtility.cs" />
     <Compile Include="Utilities\Core\UtilityToolBase.cs" />

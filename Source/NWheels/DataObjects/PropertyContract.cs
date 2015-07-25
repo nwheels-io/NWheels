@@ -109,7 +109,8 @@ namespace NWheels.DataObjects
             public class XmlAttribute : DataTypeAttribute { public XmlAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class JsonAttribute : DataTypeAttribute { public JsonAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class DisplayNameAttribute : DataTypeAttribute { public DisplayNameAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class PercentageAttribute : DataTypeAttribute { public PercentageAttribute() : base(typeof(SemanticType.DefaultOf<decimal>)) { } } 
+            public class PercentageAttribute : DataTypeAttribute { public PercentageAttribute() : base(typeof(SemanticType.DefaultOf<decimal>)) { } }
+            public class OrderByAttribute : DataTypeAttribute { public OrderByAttribute() : base(typeof(SemanticType.DefaultOf<int>)) { } }
         }
 
         public static class Aggregation

@@ -20,22 +20,27 @@ namespace NWheels.Testing.Entities.Stacks
             public interface IOnlineStoreRepository : IApplicationDataRepository
             {
                 IOrderLine NewOrderLine(IOrder order, IProduct product, int quantity);
+                IAttributeValue NewAttributeValue(string value, int displayOrder);
+                IAttributeValueChoice NewAttributeValueChoice(IAttribute attribute, string value);
+                
                 IEntityRepository<ICategory> Categories { get; }
                 IEntityRepository<IProduct> Products { get; }
                 IEntityRepository<IOrder> Orders { get; }
+                IEntityRepository<IOrderLine> OrdersLines { get; }
+                IEntityRepository<IAttribute> Attributes { get; }
             }
 
             [EntityContract]
             public interface ICategory : IEntityPartUniqueDisplayName
             {
-                int Id { get; set; }
+                //int Id { get; set; }
             }
 
             [EntityContract]
             public interface IProduct
             {
-                [PropertyContract.Storage.RelationalMapping(Column = "Id")]
-                int Id { get; set; }
+                //[PropertyContract.Storage.RelationalMapping(Column = "Id")]
+                //int Id { get; set; }
 
                 string CatalogNo { get; set; }
 
@@ -45,12 +50,46 @@ namespace NWheels.Testing.Entities.Stacks
 
                 [PropertyContract.Relation.Aggregation, PropertyContract.Relation.ManyToMany]
                 ICollection<ICategory> Categories { get; }
+
+                [PropertyContract.Relation.Composition, PropertyContract.Relation.ManyToMany]
+                ICollection<IAttribute> Attributes { get; }
+            }
+
+            [EntityContract]
+            public interface IAttribute : IEntityPartUniqueDisplayName
+            {
+                //int Id { get; set; }
+
+                string TitleForUser { get; set; }
+
+                [PropertyContract.Storage.Json]
+                IList<IAttributeValue> Values { get; }
+            }
+
+            [EntityPartContract]
+            public interface IAttributeValue
+            {
+                [PropertyContract.Semantic.OrderBy]
+                int DisplayOrder { get; set; }
+
+                [PropertyContract.Required(AllowEmpty = false)]
+                string Value { get; set; }
+            }
+
+            [EntityPartContract]
+            public interface IAttributeValueChoice
+            {
+                [PropertyContract.Relation.Aggregation]
+                IAttribute Attribute { get; set; }
+
+                [PropertyContract.Required(AllowEmpty = false)]
+                string Value { get; set; }
             }
 
             [EntityContract]
             public interface IOrder
             {
-                int Id { get; set; }
+                //int Id { get; set; }
 
                 string OrderNo { get; set; }
 
@@ -66,7 +105,7 @@ namespace NWheels.Testing.Entities.Stacks
             [EntityContract]
             public interface IOrderLine
             {
-                int Id { get; set; }
+                //int Id { get; set; }
                 
                 [PropertyContract.Relation.CompositionParent]
                 IOrder Order { get; set; }
@@ -76,6 +115,9 @@ namespace NWheels.Testing.Entities.Stacks
 
                 [PropertyContract.Validation.MinValue(0)]
                 int Quantity { get; set; }
+
+                [PropertyContract.Relation.Composition]
+                ICollection<IAttributeValueChoice> Attributes { get; }
             }
         }
 

@@ -48,6 +48,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\FelixB.Hapil.Testing.NUnit.0.9.12\lib\net45\Hapil.Testing.NUnit.dll</HintPath>
     </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\packages\Moq.4.2.1507.0118\lib\net40\Moq.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
@@ -106,6 +109,7 @@
     <Compile Include="Processing\Spikes\ProtobufSerializationTests.cs" />
     <Compile Include="Processing\TransientStateMachineTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\ObjectUtilityTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

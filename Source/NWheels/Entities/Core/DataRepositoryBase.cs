@@ -2,21 +2,24 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using Autofac;
 
 namespace NWheels.Entities.Core
 {
     public abstract class DataRepositoryBase : IApplicationDataRepository
     {
         private readonly Dictionary<Type, Action<IDataRepositoryCallback>> _genericCallbacksByContractType;
+        private readonly IComponentContext _components;
         private readonly bool _autoCommit;
         private UnitOfWorkState _currentState;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected DataRepositoryBase(bool autoCommit)
+        protected DataRepositoryBase(IComponentContext components, bool autoCommit)
         {
             _genericCallbacksByContractType = new Dictionary<Type, Action<IDataRepositoryCallback>>();
             _autoCommit = autoCommit;
+            _components = components;
             _currentState = UnitOfWorkState.Untouched;
         }
 
@@ -88,6 +91,16 @@ namespace NWheels.Entities.Core
             get
             {
                 return _currentState;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IComponentContext Components
+        {
+            get
+            {
+                return _components;
             }
         }
 

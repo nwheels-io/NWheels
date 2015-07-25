@@ -11,6 +11,7 @@ namespace NWheels.Testing.Entities.Stacks
         {
             public static void ExecuteBasic(Func<Interfaces.Repository1.IOnlineStoreRepository> repoFactory)
             {
+                InsertAttributes(repoFactory());
                 InsertCategories(repoFactory());
                 InsertProducts(repoFactory());
                 RetrieveProductsByName(repoFactory());
@@ -25,6 +26,7 @@ namespace NWheels.Testing.Entities.Stacks
 
             public static void ExecuteAdvancedRetrievals(Func<Interfaces.Repository1.IOnlineStoreRepository> repoFactory)
             {
+                InsertAttributes(repoFactory());
                 InsertCategories(repoFactory());
                 InsertProducts(repoFactory());
                 InsertOrder1(repoFactory());
@@ -59,6 +61,32 @@ namespace NWheels.Testing.Entities.Stacks
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private static void InsertAttributes(Interfaces.Repository1.IOnlineStoreRepository repo)
+            {
+                using ( repo )
+                {
+                    var attr1 = repo.Attributes.New();
+                    attr1.Name = "Size";
+                    attr1.TitleForUser = "Size";
+                    attr1.Values.Add(repo.NewAttributeValue("S", 1));
+                    attr1.Values.Add(repo.NewAttributeValue("M", 2));
+                    attr1.Values.Add(repo.NewAttributeValue("L", 3));
+
+                    var attr2 = repo.Attributes.New();
+                    attr2.Name = "Color";
+                    attr2.TitleForUser = "Color";
+                    attr2.Values.Add(repo.NewAttributeValue("White", 1));
+                    attr2.Values.Add(repo.NewAttributeValue("Black", 2));
+
+                    repo.Attributes.Insert(attr1);
+                    repo.Attributes.Insert(attr2);
+
+                    repo.CommitChanges();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private static void InsertProducts(Interfaces.Repository1.IOnlineStoreRepository repo)
             {
                 using ( repo )
@@ -76,8 +104,8 @@ namespace NWheels.Testing.Entities.Stacks
                     product2.CatalogNo = "CN222";
                     product2.Name = "DEF";
                     product2.Price = 678.90m;
-                    product1.Categories.Add(categories[0]);
-                    product1.Categories.Add(categories[2]);
+                    product2.Categories.Add(categories[0]);
+                    product2.Categories.Add(categories[2]);
 
                     repo.Products.Insert(product1);
                     repo.Products.Insert(product2);
@@ -92,16 +120,25 @@ namespace NWheels.Testing.Entities.Stacks
             {
                 using ( repo )
                 {
-                    var product1 = repo.Products.Single(p => p.Name == "ABC");
-                    var product2 = repo.Products.Single(p => p.Name == "DEF");
+                    var product1 = repo.Products.Include(p => p.Categories).Where(p => p.Name == "ABC").ToArray().First();
+                    var product2 = repo.Products.Include(p => p.Categories).Where(p => p.Name == "DEF").ToArray().First();
 
                     Assert.That(product1.CatalogNo, Is.EqualTo("CN111"));
                     Assert.That(product1.Name, Is.EqualTo("ABC"));
                     Assert.That(product1.Price, Is.EqualTo(123.45m));
 
+                    Assert.That(product1.Categories, Is.Not.Null);
+                    Assert.That(product1.Categories.Count(), Is.EqualTo(1));
+                    Assert.That(product1.Categories.Count(c => c.Name == "CAT1"), Is.EqualTo(1));
+
                     Assert.That(product2.CatalogNo, Is.EqualTo("CN222"));
                     Assert.That(product2.Name, Is.EqualTo("DEF"));
                     Assert.That(product2.Price, Is.EqualTo(678.90m));
+
+                    Assert.That(product2.Categories, Is.Not.Null);
+                    Assert.That(product2.Categories.Count(), Is.EqualTo(2));
+                    Assert.That(product2.Categories.Count(c => c.Name == "CAT1"), Is.EqualTo(1));
+                    Assert.That(product2.Categories.Count(c => c.Name == "CAT3"), Is.EqualTo(1));
                 }
             }
 

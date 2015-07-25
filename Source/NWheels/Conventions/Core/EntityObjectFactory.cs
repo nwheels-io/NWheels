@@ -664,6 +664,60 @@ namespace NWheels.Conventions.Core
                 return _innerCollection.GetEnumerator();
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ListAdapter<TFrom, TTo> : CollectionAdapter<TFrom, TTo>, IList<TTo>
+        {
+            private readonly IList<TFrom> _innerList;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ListAdapter(IList<TFrom> innerList)
+                : base(innerList)
+            {
+                _innerList = innerList;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IList<TTo>
+
+            public int IndexOf(TTo item)
+            {
+                return _innerList.IndexOf((TFrom)(object)item);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Insert(int index, TTo item)
+            {
+                _innerList.Insert(index, (TFrom)(object)item);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RemoveAt(int index)
+            {
+                _innerList.RemoveAt(index);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TTo this[int index]
+            {
+                get
+                {
+                    return (TTo)(object)_innerList[index];
+                }
+                set
+                {
+                    _innerList[index] = (TFrom)(object)value;
+                }
+            }
+
+            #endregion
+        }
     }
 }
 

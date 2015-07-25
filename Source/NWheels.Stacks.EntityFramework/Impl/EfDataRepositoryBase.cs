@@ -30,8 +30,13 @@ namespace NWheels.Stacks.EntityFramework.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected EfDataRepositoryBase(IEntityObjectFactory entityFactory, DbCompiledModel compiledModel, DbConnection connection, bool autoCommit)
-            : base(autoCommit)
+        protected EfDataRepositoryBase(
+            IComponentContext components, 
+            IEntityObjectFactory entityFactory, 
+            DbCompiledModel compiledModel, 
+            DbConnection connection, 
+            bool autoCommit)
+            : base(components, autoCommit)
         {
             _entityFactory = entityFactory;
             _compiledModel = compiledModel;

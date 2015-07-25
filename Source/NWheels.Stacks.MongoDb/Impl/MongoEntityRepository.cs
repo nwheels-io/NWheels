@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Autofac;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using MongoDB.Driver.Linq;
@@ -10,6 +11,7 @@ using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Extensions;
+using NWheels.Utilities;
 
 namespace NWheels.Stacks.MongoDb.Impl
 {
@@ -20,13 +22,13 @@ namespace NWheels.Stacks.MongoDb.Impl
         private readonly MongoDataRepositoryBase _ownerRepo;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly ITypeMetadata _metadata;
-        private readonly EntityObjectFactory _objectFactory;
+        private readonly IEntityObjectFactory _objectFactory;
         private readonly MongoCollection<TEntityImpl> _objectSet;
         private InterceptingQueryProvider _queryProvider;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MongoEntityRepository(MongoDataRepositoryBase ownerRepo, ITypeMetadataCache metadataCache, EntityObjectFactory objectFactory)
+        public MongoEntityRepository(MongoDataRepositoryBase ownerRepo, ITypeMetadataCache metadataCache, IEntityObjectFactory objectFactory)
         {
             _ownerRepo = ownerRepo;
             _metadataCache = metadataCache;
@@ -38,18 +40,21 @@ namespace NWheels.Stacks.MongoDb.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IEnumerator<TEntityContract> IEnumerable<TEntityContract>.GetEnumerator()
+        public IEnumerator<TEntityContract> GetEnumerator()
         {
             _ownerRepo.ValidateOperationalState();
-            return _objectSet.AsQueryable().GetEnumerator();
+            
+            var actualEnumerator = _objectSet.AsQueryable().GetEnumerator();
+            var dependencyInjectionWrapper = new ObjectUtility.DependencyInjectingEnumerator<TEntityContract>(actualEnumerator, _ownerRepo.Components);
+            
+            return dependencyInjectionWrapper;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            _ownerRepo.ValidateOperationalState();
-            return _objectSet.AsQueryable().GetEnumerator();
+            return this.GetEnumerator();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -292,7 +297,7 @@ namespace NWheels.Stacks.MongoDb.Impl
             {
                 var specializedExpression = _expressionSpecializer.Specialize(expression);
                 var query = _actualQueryProvider.CreateQuery<TElement>(specializedExpression);
-                return query;
+                return new InterceptingQuery<TElement>(_ownerRepo, query);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -301,7 +306,7 @@ namespace NWheels.Stacks.MongoDb.Impl
             {
                 var specializedExpression = _expressionSpecializer.Specialize(expression);
                 var query = _actualQueryProvider.CreateQuery(specializedExpression);
-                return query;
+                return new InterceptingQuery(query);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -309,17 +314,138 @@ namespace NWheels.Stacks.MongoDb.Impl
             public TResult Execute<TResult>(Expression expression)
             {
                 var specializedExpression = _expressionSpecializer.Specialize(expression);
-                return _actualQueryProvider.Execute<TResult>(specializedExpression);
+                var result = _actualQueryProvider.Execute<TResult>(specializedExpression);
+                return result;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public object Execute(Expression expression)
             {
-                return _actualQueryProvider.Execute(expression);
+                var result = _actualQueryProvider.Execute(expression);
+                return result;
             }
 
             #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class InterceptingQuery<T> : IOrderedQueryable<T>
+        {
+            private readonly MongoEntityRepository<TEntityContract, TEntityImpl> _ownerRepo;
+            private readonly IQueryable<T> _underlyingQuery;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public InterceptingQuery(MongoEntityRepository<TEntityContract, TEntityImpl> ownerRepo, IQueryable<T> underlyingQuery)
+            {
+                _ownerRepo = ownerRepo;
+                _underlyingQuery = underlyingQuery;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                var enumerator = _underlyingQuery.GetEnumerator();
+                return new ObjectUtility.DependencyInjectingEnumerator<T>(enumerator, _ownerRepo._ownerRepo.Components);
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type ElementType
+            {
+                get
+                {
+                    var elementType = _underlyingQuery.ElementType;
+                    return elementType;
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Expression Expression
+            {
+                get
+                {
+                    var expression = _underlyingQuery.Expression;
+                    return expression;
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IQueryProvider Provider
+            {
+                get
+                {
+                    var provider = _underlyingQuery.Provider;
+                    return provider;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class InterceptingQuery : IOrderedQueryable
+        {
+            private readonly IQueryable _underlyingQuery;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public InterceptingQuery(IQueryable underlyingQuery)
+            {
+                _underlyingQuery = underlyingQuery;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                var enumerator = _underlyingQuery.GetEnumerator();
+                return enumerator;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type ElementType
+            {
+                get
+                {
+                    var elementType = _underlyingQuery.ElementType;
+                    return elementType;
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Expression Expression
+            {
+                get
+                {
+                    var expression = _underlyingQuery.Expression;
+                    return expression;
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IQueryProvider Provider
+            {
+                get
+                {
+                    var provider = _underlyingQuery.Provider;
+                    return provider;
+                }
+            }
         }
     }
 }

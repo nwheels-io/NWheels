@@ -231,8 +231,8 @@ namespace NWheels.Conventions.Core
 
             protected virtual void ImplementConstructor(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
-                writer.Constructor<EntityObjectFactory, bool>((cw, entityFactory, autoCommit) => {
-                    cw.Base(autoCommit);
+                writer.Constructor<IComponentContext, EntityObjectFactory, bool>((cw, components, entityFactory, autoCommit) => {
+                    cw.Base(components, autoCommit);
                     _entityFactoryField.Assign(entityFactory);
                     Initializers.ForEach(init => init(cw));
                 });
@@ -476,9 +476,10 @@ namespace NWheels.Conventions.Core
 
             protected override void ImplementConstructor(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
-                writer.Constructor<EntityObjectFactory, ITypeMetadataCache, TConnection, bool>(
-                    (cw, entityFactory, metadata, connection, autoCommit) => {
+                writer.Constructor<IComponentContext, EntityObjectFactory, ITypeMetadataCache, TConnection, bool>(
+                    (cw, components, entityFactory, metadata, connection, autoCommit) => {
                         cw.Base(
+                            components,
                             entityFactory,
                             Static.Func<TModel>(_methodGetOrBuildDbCompieldModel, metadata, connection),
                             connection,

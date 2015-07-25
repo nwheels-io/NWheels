@@ -1,6 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Autofac;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Builders;
 using NWheels.Conventions.Core;
+using NWheels.DataObjects.Core;
 using NWheels.Entities.Core;
 
 namespace NWheels.Stacks.MongoDb.Impl
@@ -11,8 +17,13 @@ namespace NWheels.Stacks.MongoDb.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected MongoDataRepositoryBase(EntityObjectFactory objectFactory, object emptyModel, MongoDatabase database, bool autoCommit)
-            : base(autoCommit)
+        protected MongoDataRepositoryBase(
+            IComponentContext components,
+            IEntityObjectFactory objectFactory, 
+            object emptyModel, 
+            MongoDatabase database, 
+            bool autoCommit)
+            : base(components, autoCommit)
         {
             _database = database;
         }

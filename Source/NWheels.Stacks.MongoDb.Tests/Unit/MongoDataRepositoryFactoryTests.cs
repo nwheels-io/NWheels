@@ -73,7 +73,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
 
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions();
             var entityFactory = new MongoEntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
-            var repoFactory = new MongoDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache, configAuto.Instance);
+            var repoFactory = new MongoDataRepositoryFactory(Framework.Components, _dyamicModule, entityFactory, metadataCache, configAuto.Instance);
             
             return repoFactory;
         }

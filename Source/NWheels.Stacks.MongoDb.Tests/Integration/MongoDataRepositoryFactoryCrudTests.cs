@@ -10,7 +10,7 @@ using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;
 namespace NWheels.Stacks.MongoDb.Tests.Integration
 {
     [TestFixture]
-    public class MongoDataRepositoryFactoryTests : IntegrationTestBase
+    public class MongoDataRepositoryFactoryCrudTests : IntegrationTestBase
     {
         public const string TestDatabaseName = "NWheelsTest";
 
@@ -24,7 +24,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
         public void FixtureSetUp()
         {
             _dyamicModule = new DynamicModule(
-                "EmittedByMongoDataRepositoryFactoryTests",
+                "EmittedByMongoDataRepositoryFactoryCrudTests",
                 allowSave: true,
                 saveDirectory: TestContext.CurrentContext.TestDirectory);
         }
@@ -82,7 +82,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions();
             var entityFactory = new MongoEntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
-            var repoFactory = new MongoDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache, configAuto.Instance);
+            var repoFactory = new MongoDataRepositoryFactory(Framework.Components, _dyamicModule, entityFactory, metadataCache, configAuto.Instance);
             
             return repoFactory;
         }

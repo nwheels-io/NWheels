@@ -24,14 +24,14 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
     [TestFixture, Category("Integration")]
     public class EfDataRepositoryFactoryTests : DatabaseTestBase
     {
-        private Hapil.DynamicModule _dyamicModule;
+        private Hapil.DynamicModule _dynamicModule;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [TestFixtureSetUp]
         public void FixtureSetUp()
         {
-            _dyamicModule = new DynamicModule(
+            _dynamicModule = new DynamicModule(
                 "EmittedByEfDataRepositoryFactoryTests", 
                 allowSave: true, 
                 saveDirectory: TestContext.CurrentContext.TestDirectory);
@@ -42,7 +42,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
         [TestFixtureTearDown]
         public void FixtureTearDown()
         {
-            _dyamicModule.SaveAssembly();
+            _dynamicModule.SaveAssembly();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -160,8 +160,8 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new IMetadataConvention[] {
                 new DefaultIdMetadataConvention(typeof(int)) 
             });
-            var entityFactory = new EntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
-            var repoFactory = new EfDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, configAuto);
+            var entityFactory = new EntityObjectFactory(Framework.Components, _dynamicModule, metadataCache);
+            var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, configAuto);
             
             return repoFactory;
         }

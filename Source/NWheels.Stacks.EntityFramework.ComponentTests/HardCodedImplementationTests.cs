@@ -103,7 +103,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 
             Assert.That(GetCommaSeparatedColumnList(productsTable), Is.EqualTo("Id:Int32,CatalogNo:String,Name:String,Price:Decimal"));
             Assert.That(GetCommaSeparatedColumnList(ordersTable), Is.EqualTo("Id:Int32,OrderNo:String,PlacedAt:DateTime,Status:Int32"));
-            Assert.That(GetCommaSeparatedColumnList(orderLinesTable), Is.EqualTo("Id:Int32,Quantity:Int32,OrderId:Int32,ProductId:Int32"));
+            Assert.That(GetCommaSeparatedColumnList(orderLinesTable), Is.EqualTo("Id:Int32,Quantity:Int32,Attributes:String,OrderId:Int32,ProductId:Int32"));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -298,6 +298,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 
             var modelBuilder = new DbModelBuilder();
 
+            modelBuilder.Entity<HR1.EntityObject_Category>().HasEntitySetName("Category");
             modelBuilder.Entity<HR1.EntityObject_Product>().HasEntitySetName("Product");
             modelBuilder.Entity<HR1.EntityObject_Order>().HasEntitySetName("Order");
             modelBuilder.Entity<HR1.EntityObject_OrderLine>().HasEntitySetName("OrderLine");

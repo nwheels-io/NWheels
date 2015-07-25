@@ -30,6 +30,7 @@ namespace NWheels.Stacks.MongoDb.Impl
 {
     public class MongoDataRepositoryFactory : DataRepositoryFactoryBase
     {
+        private readonly IComponentContext _components;
         private readonly IFrameworkDatabaseConfig _config;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly MongoEntityObjectFactory _entityFactory;
@@ -37,12 +38,14 @@ namespace NWheels.Stacks.MongoDb.Impl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public MongoDataRepositoryFactory(
+            IComponentContext components,
             DynamicModule module,
             MongoEntityObjectFactory entityFactory,
             TypeMetadataCache metadataCache,
             IFrameworkDatabaseConfig config = null)
             : base(module, metadataCache)
         {
+            _components = components;
             _entityFactory = entityFactory;
             _config = config;
             _metadataCache = metadataCache;
@@ -57,7 +60,12 @@ namespace NWheels.Stacks.MongoDb.Impl
             var server = client.GetServer();
             var database = server.GetDatabase(connectionString.DatabaseName);
 
-            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(_entityFactory, _metadataCache, database, autoCommit);
+            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(
+                _components, 
+                _entityFactory, 
+                _metadataCache, 
+                database, 
+                autoCommit);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
