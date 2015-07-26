@@ -16,7 +16,6 @@ namespace NWheels.Entities
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public interface IEntityId<in TEntity> : IEntityId
-        where TEntity : class
     {
     }
 }

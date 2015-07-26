@@ -109,6 +109,7 @@
     <Compile Include="Entities\Core\IStorageInitializer.cs" />
     <Compile Include="Entities\Core\HiloGeneratorMetadataConvention.cs" />
     <Compile Include="Entities\Core\HiloIntegerIdGenerator.cs" />
+    <Compile Include="Entities\Core\UnitOfWorkDataRepositoryBase.cs" />
     <Compile Include="Entities\IDataRepositoryPopulator.cs" />
     <Compile Include="Entities\Impl\DatabaseInitializer.cs" />
     <Compile Include="Extensions\AutofacExtensions.Pipeline.cs" />

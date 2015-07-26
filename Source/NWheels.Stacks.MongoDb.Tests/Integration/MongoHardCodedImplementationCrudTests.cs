@@ -1,9 +1,12 @@
 ﻿using System;
 using Hapil;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using NUnit.Framework;
 using NWheels.DataObjects.Core;
+using NWheels.DataObjects.Core.Conventions;
 using NWheels.Entities;
+using NWheels.Entities.Core;
 using NWheels.Logging.Core;
 using NWheels.Stacks.MongoDb.Impl;
 using NWheels.Testing;
@@ -95,7 +98,10 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             var configAuto = ResolveAuto<IFrameworkDatabaseConfig>();
             configAuto.Instance.ConnectionString = string.Format("server=localhost;database={0}", TestDatabaseName);
 
-            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions();
+            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new IMetadataConvention[] {
+                new DefaultIdMetadataConvention(typeof(ObjectId))
+            });
+
             UpdateHardCodedImplementationTypes(metadataCache);
 
             var entityFactory = new HardCodedImplementations.HardCodedEntityFactory(base.Framework.Components);

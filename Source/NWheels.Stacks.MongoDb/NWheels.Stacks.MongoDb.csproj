@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\MongoDBRefStorageType.cs" />
+    <Compile Include="Impl\IMongoEntityRepository.cs" />
     <Compile Include="Impl\MongoDatabaseInitializer.cs" />
     <Compile Include="Impl\MongoDataRepositoryFactory.cs" />
     <Compile Include="Impl\MongoDataRepositoryBase.cs" />

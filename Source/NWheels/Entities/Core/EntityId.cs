@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 namespace NWheels.Entities.Core
 {
     public class EntityId<TEntityContract, TValue> : IEntityId<TEntityContract>
-        where TEntityContract : class
     {
         private readonly TValue _value;
 

@@ -21,6 +21,7 @@ using System.Linq.Expressions;
 using Newtonsoft.Json;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.StorageTypes;
 using NWheels.Entities.Core;
 using NWheels.Testing.Entities.Stacks;
@@ -819,11 +820,6 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                         }
                         return this.m_Values_ContractValue;
                     }
-                    set
-                    {
-                        this.m_Values_ContractValue = value;
-                        this.m_Values_ValueState = DualValueStates.Contract;
-                    }
                 }
 
                 public int Id
@@ -832,7 +828,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                     set { this.m_Id = value; }
                 }
 
-                Type IEntityObject.ContractType
+                Type IObject.ContractType
                 {
                     get { return typeof(Interfaces.Repository1.IAttribute); }
                 }

@@ -484,17 +484,19 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             private Interfaces.Repository1.IOrderLine[] LazyLoad_OrderLines(ObjectId[] ids)
             {
+                return MongoDataRepositoryBase.ResolveFrom(_components).LazyLoadByIdList<Interfaces.Repository1.IOrderLine, ObjectId>(ids).ToArray();
+
                 //using ( var repo = _components.Resolve<IFramework>().NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>() )
-                using (var repo = CurrentDataRepoFactory())
-                {
-                    var mongoRepo = (MongoDataRepositoryBase)repo;
-                    var query = mongoRepo.GetCollection<EntityObject_OrderLine>("OrderLine").Find(Query.In("_id", new BsonArray(ids)));
-                    var queryResults = query.Cast<Interfaces.Repository1.IOrderLine>().ToArray();
+                //using (var repo = CurrentDataRepoFactory())
+                //{
+                //    var mongoRepo = (MongoDataRepositoryBase)repo;
+                //    var query = mongoRepo.GetCollection<EntityObject_OrderLine>("OrderLine").Find(Query.In("_id", new BsonArray(ids)));
+                //    var queryResults = query.Cast<Interfaces.Repository1.IOrderLine>().ToArray();
 
-                    ObjectUtility.InjectDependenciesToManyObjects(queryResults, _components);
+                //    ObjectUtility.InjectDependenciesToManyObjects(queryResults, _components);
 
-                    return queryResults;
-                }
+                //    return queryResults;
+                //}
             }
 
             #endregion
@@ -554,6 +556,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             {
                 InjectDependencies(components);
 
+                this.m_Id = ObjectId.GenerateNewId();
                 this.m_Attributes_Adapter =
                     new EntityObjectFactory.CollectionAdapter<EntityPartObject_AttributeValueChoice, Interfaces.Repository1.IAttributeValueChoice>(this.m_Attributes);
             }
@@ -685,17 +688,19 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             private Interfaces.Repository1.IProduct LazyLoad_Product(ObjectId id)
             {
+                return MongoDataRepositoryBase.ResolveFrom(_components).LazyLoadById<Interfaces.Repository1.IProduct, ObjectId>(id);
+
                 //using (var repo = _components.Resolve<IFramework>().NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>())
-                using (var repo = CurrentDataRepoFactory())
-                {
-                    var mongoRepo = (MongoDataRepositoryBase)repo;
-                    var query = Query.EQ("_id", new BsonObjectId(id));
-                    var queryResult = mongoRepo.GetCollection<EntityObject_Product>("Product").FindOne(query);
+                //using (var repo = CurrentDataRepoFactory())
+                //{
+                //    var mongoRepo = (MongoDataRepositoryBase)repo;
+                //    var query = Query.EQ("_id", new BsonObjectId(id));
+                //    var queryResult = mongoRepo.GetCollection<EntityObject_Product>("Product").FindOne(query);
                     
-                    ObjectUtility.InjectDependenciesToObject(queryResult, _components);
+                //    ObjectUtility.InjectDependenciesToObject(queryResult, _components);
                  
-                    return queryResult;
-                }
+                //    return queryResult;
+                //}
             }
 
             #endregion
@@ -747,17 +752,19 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             private Interfaces.Repository1.IOrder LazyLoad_Order(ObjectId id)
             {
-                //using (var repo = _components.Resolve<IFramework>().NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>())
-                using (var repo = CurrentDataRepoFactory())
-                {
-                    var mongoRepo = (MongoDataRepositoryBase)repo;
-                    var query = Query.EQ("_id", new BsonObjectId(id));
-                    var queryResult = mongoRepo.GetCollection<EntityObject_Order>("Order").FindOne(query);
+                return MongoDataRepositoryBase.ResolveFrom(_components).LazyLoadById<Interfaces.Repository1.IOrder, ObjectId>(id);
 
-                    ObjectUtility.InjectDependenciesToObject(queryResult, _components);
+                //using (var repo = _components.Resolve<IFramework>().NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>())
+                //using (var repo = CurrentDataRepoFactory())
+                //{
+                //    var mongoRepo = (MongoDataRepositoryBase)repo;
+                //    var query = Query.EQ("_id", new BsonObjectId(id));
+                //    var queryResult = mongoRepo.GetCollection<EntityObject_Order>("Order").FindOne(query);
+
+                //    ObjectUtility.InjectDependenciesToObject(queryResult, _components);
                     
-                    return queryResult;
-                }
+                //    return queryResult;
+                //}
             }
 
             #endregion
@@ -998,13 +1005,15 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             private Interfaces.Repository1.ICategory[] LazyLoad_Categories(ObjectId[] ids)
             {
+                return MongoDataRepositoryBase.ResolveFrom(_components).LazyLoadByIdList<Interfaces.Repository1.ICategory, ObjectId>(ids).ToArray();
+
                 //using ( var repo = _components.Resolve<IFramework>().NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>() )
-                using (var repo = CurrentDataRepoFactory())
-                {
-                    var mongoRepo = (MongoDataRepositoryBase)repo;
-                    var query = mongoRepo.GetCollection<EntityObject_Category>("Category").Find(Query.In("_id", new BsonArray(ids)));
-                    return query.InjectDependenciesFrom(_components).Cast<Interfaces.Repository1.ICategory>().ToArray();
-                }
+                //using (var repo = CurrentDataRepoFactory())
+                //{
+                //    var mongoRepo = (MongoDataRepositoryBase)repo;
+                //    var query = mongoRepo.GetCollection<EntityObject_Category>("Category").Find(Query.In("_id", new BsonArray(ids)));
+                //    return query.InjectDependenciesFrom(_components).Cast<Interfaces.Repository1.ICategory>().ToArray();
+                //}
             }
 
             #endregion
@@ -1051,13 +1060,15 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             private Interfaces.Repository1.IAttribute[] LazyLoad_Attributes(ObjectId[] ids)
             {
+                return MongoDataRepositoryBase.ResolveFrom(_components).LazyLoadByIdList<Interfaces.Repository1.IAttribute, ObjectId>(ids).ToArray();
+
                 //using (var repo = _components.Resolve<IFramework>().NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>())
-                using (var repo = CurrentDataRepoFactory())
-                {
-                    var mongoRepo = (MongoDataRepositoryBase)repo;
-                    var query = mongoRepo.GetCollection<EntityObject_Attribute>("Attribute").Find(Query.In("_id", new BsonArray(ids)));
-                    return query.InjectDependenciesFrom(_components).Cast<Interfaces.Repository1.IAttribute>().ToArray();
-                }
+                //using (var repo = CurrentDataRepoFactory())
+                //{
+                //    var mongoRepo = (MongoDataRepositoryBase)repo;
+                //    var query = mongoRepo.GetCollection<EntityObject_Attribute>("Attribute").Find(Query.In("_id", new BsonArray(ids)));
+                //    return query.InjectDependenciesFrom(_components).Cast<Interfaces.Repository1.IAttribute>().ToArray();
+                //}
             }
 
             #endregion
@@ -1445,17 +1456,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             private Interfaces.Repository1.IAttribute LazyLoad_Attribute(ObjectId id)
             {
-                //using ( var repo = _components.Resolve<IFramework>().NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>() )
-                using ( var repo = CurrentDataRepoFactory() )
-                {
-                    var mongoRepo = (MongoDataRepositoryBase)repo;
-                    var query = Query.EQ("_id", new BsonObjectId(id));
-                    var queryResult = mongoRepo.GetCollection<EntityObject_Attribute>("Attribute").FindOne(query);
-
-                    ObjectUtility.InjectDependenciesToObject(queryResult, _components);
-                    
-                    return queryResult;
-                }
+                return MongoDataRepositoryBase.ResolveFrom(_components).LazyLoadById<Interfaces.Repository1.IAttribute, ObjectId>(id);
             }
 
             #endregion

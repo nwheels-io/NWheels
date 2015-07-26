@@ -29,11 +29,14 @@ namespace NWheels.Entities.Core
 
         public void Preview(TypeMetadataBuilder type)
         {
-            if ( type.PrimaryKey == null &&
-                !type.Properties.Any(p => p.Role == PropertyRole.Key) &&
-                !type.MixinContractTypes.Any(IsEntityPartIdMixinType) )
-            {
-                type.MixinContractTypes.Add(_entityPartIdMixinType);
+            if ( EntityContractAttribute.IsEntityContract(type.ContractType) ) // filter out entity part contracts
+            { 
+                if ( type.PrimaryKey == null &&
+                    !type.Properties.Any(p => p.Role == PropertyRole.Key) &&
+                    !type.MixinContractTypes.Any(IsEntityPartIdMixinType) )
+                {
+                    type.MixinContractTypes.Add(_entityPartIdMixinType);
+                }
             }
         }
 

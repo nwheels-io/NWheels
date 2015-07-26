@@ -8,19 +8,23 @@ namespace NWheels.Entities.Core
 {
     public abstract class DataRepositoryBase : IApplicationDataRepository
     {
+        private readonly Dictionary<Type, IEntityRepository> _entityRepositoryByContractType;
         private readonly Dictionary<Type, Action<IDataRepositoryCallback>> _genericCallbacksByContractType;
         private readonly IComponentContext _components;
         private readonly bool _autoCommit;
         private UnitOfWorkState _currentState;
+        private ILifetimeScope _componentLifetimeScope;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected DataRepositoryBase(IComponentContext components, bool autoCommit)
         {
+            _entityRepositoryByContractType = new Dictionary<Type, IEntityRepository>();
             _genericCallbacksByContractType = new Dictionary<Type, Action<IDataRepositoryCallback>>();
             _autoCommit = autoCommit;
             _components = components;
             _currentState = UnitOfWorkState.Untouched;
+            _componentLifetimeScope = null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -71,6 +75,7 @@ namespace NWheels.Entities.Core
 
         public void RegisterEntityRepository<TEntityContract, TEntityImpl>(IEntityRepository<TEntityContract> repo)
         {
+            _entityRepositoryByContractType.Add(typeof(TEntityContract), (IEntityRepository)repo); 
             _genericCallbacksByContractType.Add(typeof(TEntityContract), callback => callback.Invoke<TEntityContract, TEntityImpl>(repo));
         }
 
@@ -100,7 +105,7 @@ namespace NWheels.Entities.Core
         {
             get
             {
-                return _components;
+                return (_componentLifetimeScope ?? _components);
             }
         }
 
@@ -114,6 +119,42 @@ namespace NWheels.Entities.Core
         protected void ResetCurrentState(UnitOfWorkState newState)
         {
             _currentState = newState;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected void BeginLifetimeScope()
+        {
+            if ( _componentLifetimeScope != null )
+            {
+                throw new InvalidOperationException("Component lifetime scope already initialized.");
+            }
+
+            _componentLifetimeScope = ((ILifetimeScope)_components).BeginLifetimeScope(builder => {
+                builder
+                    .RegisterInstance(this)
+                    .As(typeof(DataRepositoryBase), this.GetType());
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected void EndLifetimeScope()
+        {
+            if ( _componentLifetimeScope == null)
+            {
+                throw new InvalidOperationException("Component lifetime scope not initialized.");
+            }
+
+            _componentLifetimeScope.Dispose();
+            _componentLifetimeScope = null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected IEntityRepository GetEntityRepository(Type contractType)
+        {
+            return _entityRepositoryByContractType[contractType];
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

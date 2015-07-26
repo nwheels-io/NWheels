@@ -155,8 +155,14 @@ namespace NWheels.Testing.Entities.Stacks
                     order.OrderNo = "ORD001";
                     order.PlacedAt = new DateTime(2015, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
-                    order.OrderLines.Add(repo.NewOrderLine(order, product1, quantity: 22));
-                    order.OrderLines.Add(repo.NewOrderLine(order, product2, quantity: 11));
+                    var orderLine1 = repo.NewOrderLine(order, product1, quantity: 22);
+                    var orderLine2 = repo.NewOrderLine(order, product2, quantity: 11);
+
+                    order.OrderLines.Add(orderLine1);
+                    order.OrderLines.Add(orderLine2);
+
+                    repo.OrdersLines.Insert(orderLine1);
+                    repo.OrdersLines.Insert(orderLine2);
 
                     repo.Orders.Insert(order);
                     repo.CommitChanges();
@@ -176,8 +182,14 @@ namespace NWheels.Testing.Entities.Stacks
                     order.OrderNo = "ORD002";
                     order.PlacedAt = new DateTime(2015, 1, 2, 12, 0, 0, DateTimeKind.Utc);
 
-                    order.OrderLines.Add(repo.NewOrderLine(order, product1, quantity: 11));
-                    order.OrderLines.Add(repo.NewOrderLine(order, product2, quantity: 22));
+                    var orderLine1 = repo.NewOrderLine(order, product1, quantity: 11);
+                    var orderLine2 = repo.NewOrderLine(order, product2, quantity: 22);
+
+                    order.OrderLines.Add(orderLine1);
+                    order.OrderLines.Add(orderLine2);
+
+                    repo.OrdersLines.Insert(orderLine1);
+                    repo.OrdersLines.Insert(orderLine2);
 
                     repo.Orders.Insert(order);
                     repo.CommitChanges();
@@ -196,7 +208,11 @@ namespace NWheels.Testing.Entities.Stacks
                     order.OrderNo = "ORD003";
                     order.PlacedAt = new DateTime(2015, 1, 2, 13, 0, 0, DateTimeKind.Utc);
 
-                    order.OrderLines.Add(repo.NewOrderLine(order, product2, quantity: 33));
+                    var orderLine1 = repo.NewOrderLine(order, product2, quantity: 33);
+
+                    order.OrderLines.Add(orderLine1);
+
+                    repo.OrdersLines.Insert(orderLine1);
 
                     repo.Orders.Insert(order);
                     repo.CommitChanges();
@@ -225,67 +241,73 @@ namespace NWheels.Testing.Entities.Stacks
 
             private static void RetrieveOrdersWithOrderLinesAndProducts(Interfaces.Repository1.IOnlineStoreRepository repo)
             {
-                Interfaces.Repository1.IOrder order1;
-                Interfaces.Repository1.IOrder order2;
-                Interfaces.Repository1.IOrder order3;
-
                 using ( repo )
                 {
-                    order1 = repo.Orders.Include(o => o.OrderLines.Select(ol => ol.Product)).Single(o => o.OrderNo == "ORD001");
-                    order2 = repo.Orders.Include(o => o.OrderLines.Select(ol => ol.Product)).Single(o => o.OrderNo == "ORD002");
-                    order3 = repo.Orders.Include(o => o.OrderLines.Select(ol => ol.Product)).Single(o => o.OrderNo == "ORD003");
+                    Interfaces.Repository1.IOrder order1;
+                    Interfaces.Repository1.IOrder order2;
+                    Interfaces.Repository1.IOrder order3;
+
+                    order1 = repo.Orders /*.Include(o => o.OrderLines.Select(ol => ol.Product))*/.Where(o => o.OrderNo == "ORD001").ToArray().First();
+                    order2 = repo.Orders /*.Include(o => o.OrderLines.Select(ol => ol.Product))*/.Where(o => o.OrderNo == "ORD002").ToArray().First();
+                    order3 = repo.Orders /*.Include(o => o.OrderLines.Select(ol => ol.Product))*/.Where(o => o.OrderNo == "ORD003").ToArray().First();
+
+                    #region Assert order1
+
+                    Assert.That(order1.OrderNo, Is.EqualTo("ORD001"));
+                    Assert.That(order1.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 1, 12, 0, 0, DateTimeKind.Utc)));
+                    Assert.That(order1.Status, Is.EqualTo(Interfaces.Repository1.OrderStatus.ProductsShipped));
+
+                    var order1Lines = order1.OrderLines.ToArray();
+                    Assert.That(order1Lines.Length, Is.EqualTo(2));
+
+                    Assert.That(order1Lines[0].Order, Is.SameAs(order1));
+                    Assert.That(order1Lines[0].Product.CatalogNo, Is.EqualTo("CN111"));
+                    Assert.That(order1Lines[0].Quantity, Is.EqualTo(22));
+
+                    Assert.That(order1Lines[1].Order, Is.SameAs(order1));
+                    Assert.That(order1Lines[1].Product.CatalogNo, Is.EqualTo("CN222"));
+                    Assert.That(order1Lines[1].Quantity, Is.EqualTo(11));
+
+                    #endregion
+
+                    #region Assert order2
+
+                    Assert.That(order2.OrderNo, Is.EqualTo("ORD002"));
+                    Assert.That(order2.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 2, 12, 0, 0, DateTimeKind.Utc)));
+                    Assert.That(order2.Status, Is.EqualTo(Interfaces.Repository1.OrderStatus.PaymentReceived));
+
+                    var order2Lines = order2.OrderLines.ToArray();
+                    Assert.That(order2Lines.Length, Is.EqualTo(2));
+
+                    Assert.That(order2Lines[0].Order, Is.SameAs(order2));
+                    Assert.That(order2Lines[0].Product.CatalogNo, Is.EqualTo("CN111"));
+                    Assert.That(order2Lines[0].Quantity, Is.EqualTo(11));
+
+                    Assert.That(order2Lines[1].Order, Is.SameAs(order2));
+                    Assert.That(order2Lines[1].Product.CatalogNo, Is.EqualTo("CN222"));
+                    Assert.That(order2Lines[1].Quantity, Is.EqualTo(22));
+
+                    #endregion
+
+                    #region Assert order3
+
+                    Assert.That(order3.OrderNo, Is.EqualTo("ORD003"));
+                    Assert.That(order3.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 2, 13, 0, 0, DateTimeKind.Utc)));
+                    Assert.That(order3.Status, Is.EqualTo(Interfaces.Repository1.OrderStatus.New));
+
+                    var order3Lines = order3.OrderLines.ToArray();
+                    Assert.That(order3Lines.Length, Is.EqualTo(1));
+
+                    Assert.That(order3Lines[0].Order, Is.SameAs(order3));
+                    Assert.That(order3Lines[0].Product.CatalogNo, Is.EqualTo("CN222"));
+                    Assert.That(order3Lines[0].Quantity, Is.EqualTo(33));
+
+                    #endregion
+
+                    Assert.That(order1Lines[0].Product, Is.SameAs(order2Lines[0].Product));
+                    Assert.That(order1Lines[1].Product, Is.SameAs(order2Lines[1].Product));
+                    Assert.That(order1Lines[1].Product, Is.SameAs(order3Lines[0].Product));
                 }
-
-                #region Assert order1
-                Assert.That(order1.OrderNo, Is.EqualTo("ORD001"));
-                Assert.That(order1.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 1, 12, 0, 0, DateTimeKind.Utc)));
-                Assert.That(order1.Status, Is.EqualTo(Interfaces.Repository1.OrderStatus.ProductsShipped));
-                
-                var order1Lines = order1.OrderLines.ToArray();
-                Assert.That(order1Lines.Length, Is.EqualTo(2));
-
-                Assert.That(order1Lines[0].Order, Is.SameAs(order1));
-                Assert.That(order1Lines[0].Product.CatalogNo, Is.EqualTo("CN111"));
-                Assert.That(order1Lines[0].Quantity, Is.EqualTo(22));
-
-                Assert.That(order1Lines[1].Order, Is.SameAs(order1));
-                Assert.That(order1Lines[1].Product.CatalogNo, Is.EqualTo("CN222"));
-                Assert.That(order1Lines[1].Quantity, Is.EqualTo(11));
-                #endregion
-
-                #region Assert order2
-                Assert.That(order2.OrderNo, Is.EqualTo("ORD002"));
-                Assert.That(order2.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 2, 12, 0, 0, DateTimeKind.Utc)));
-                Assert.That(order2.Status, Is.EqualTo(Interfaces.Repository1.OrderStatus.PaymentReceived));
-
-                var order2Lines = order2.OrderLines.ToArray();
-                Assert.That(order2Lines.Length, Is.EqualTo(2));
-
-                Assert.That(order2Lines[0].Order, Is.SameAs(order2));
-                Assert.That(order2Lines[0].Product.CatalogNo, Is.EqualTo("CN111"));
-                Assert.That(order2Lines[0].Quantity, Is.EqualTo(11));
-
-                Assert.That(order2Lines[1].Order, Is.SameAs(order2));
-                Assert.That(order2Lines[1].Product.CatalogNo, Is.EqualTo("CN222"));
-                Assert.That(order2Lines[1].Quantity, Is.EqualTo(22));
-                #endregion
-
-                #region Assert order3
-                Assert.That(order3.OrderNo, Is.EqualTo("ORD003"));
-                Assert.That(order3.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 2, 13, 0, 0, DateTimeKind.Utc)));
-                Assert.That(order3.Status, Is.EqualTo(Interfaces.Repository1.OrderStatus.New));
-
-                var order3Lines = order3.OrderLines.ToArray();
-                Assert.That(order3Lines.Length, Is.EqualTo(1));
-
-                Assert.That(order3Lines[0].Order, Is.SameAs(order3));
-                Assert.That(order3Lines[0].Product.CatalogNo, Is.EqualTo("CN222"));
-                Assert.That(order3Lines[0].Quantity, Is.EqualTo(33));
-                #endregion
-
-                Assert.That(order1Lines[0].Product, Is.SameAs(order2Lines[0].Product));
-                Assert.That(order1Lines[1].Product, Is.SameAs(order2Lines[1].Product));
-                Assert.That(order1Lines[1].Product, Is.SameAs(order3Lines[0].Product));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
