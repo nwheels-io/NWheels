@@ -76,7 +76,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [Test]
+        [Test, Ignore("Depends on LINQ-to-aggregation-framework support by mongocsharpdriver")]
         public void CanPerformAdvancedRetrievals()
         {
             //-- Arrange
@@ -147,6 +147,10 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IAttributeValueChoice))).UpdateImplementation(
                 typeof(MongoEntityObjectFactory),
                 typeof(HardCodedImplementations.EntityPartObject_AttributeValueChoice));
+
+            ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IPostalAddress))).UpdateImplementation(
+                typeof(MongoEntityObjectFactory),
+                typeof(HardCodedImplementations.EntityPartObject_PostalAddress));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

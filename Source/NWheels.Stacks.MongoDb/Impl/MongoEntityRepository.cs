@@ -416,6 +416,16 @@ namespace NWheels.Stacks.MongoDb.Impl
             {
                 var specializedExpression = _expressionSpecializer.Specialize(expression);
                 var result = _actualQueryProvider.Execute<TResult>(specializedExpression);
+
+                var entity = result as IEntityObject;
+
+                if ( entity != null )
+                {
+                    ObjectUtility.InjectDependenciesToObject(entity, _ownerRepo._ownerRepo.Components);
+                    _ownerRepo._ownerRepo.TrackEntity(ref entity, EntityState.RetrievedPristine);
+                    result = (TResult)entity;
+                }
+
                 return result;
             }
 
@@ -424,6 +434,15 @@ namespace NWheels.Stacks.MongoDb.Impl
             public object Execute(Expression expression)
             {
                 var result = _actualQueryProvider.Execute(expression);
+                var entity = result as IEntityObject;
+
+                if ( entity != null )
+                {
+                    ObjectUtility.InjectDependenciesToObject(entity, _ownerRepo._ownerRepo.Components);
+                    _ownerRepo._ownerRepo.TrackEntity(ref entity, EntityState.RetrievedPristine);
+                    result = entity;
+                }
+                
                 return result;
             }
 
@@ -488,7 +507,7 @@ namespace NWheels.Stacks.MongoDb.Impl
             {
                 get
                 {
-                    var provider = _underlyingQuery.Provider;
+                    var provider = new InterceptingQueryProvider(_ownerRepo);// _underlyingQuery.Provider;
                     return provider;
                 }
             }

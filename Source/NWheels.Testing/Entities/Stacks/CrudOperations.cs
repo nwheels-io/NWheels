@@ -94,11 +94,16 @@ namespace NWheels.Testing.Entities.Stacks
                     var categories = repo.Categories.OrderBy(c => c.Name).ToArray();
                     Assert.That(categories.Select(c => c.Name), Is.EqualTo(new[] { "CAT1", "CAT2", "CAT3" }));
 
+                    var attributes = repo.Attributes.OrderBy(a => a.Name).ToArray();
+                    Assert.That(attributes.Select(a => a.Name), Is.EqualTo(new[] { "Color", "Size" }));
+
                     var product1 = repo.Products.New();
                     product1.CatalogNo = "CN111";
                     product1.Name = "ABC";
                     product1.Price = 123.45m;
                     product1.Categories.Add(categories[0]);
+                    product1.Attributes.Add(attributes[0]);
+                    product1.Attributes.Add(attributes[1]);
 
                     var product2 = repo.Products.New();
                     product2.CatalogNo = "CN222";
@@ -106,6 +111,7 @@ namespace NWheels.Testing.Entities.Stacks
                     product2.Price = 678.90m;
                     product2.Categories.Add(categories[0]);
                     product2.Categories.Add(categories[2]);
+                    product2.Attributes.Add(attributes[0]);
 
                     repo.Products.Insert(product1);
                     repo.Products.Insert(product2);
@@ -120,8 +126,8 @@ namespace NWheels.Testing.Entities.Stacks
             {
                 using ( repo )
                 {
-                    var product1 = repo.Products.Include(p => p.Categories).Where(p => p.Name == "ABC").ToArray().First();
-                    var product2 = repo.Products.Include(p => p.Categories).Where(p => p.Name == "DEF").ToArray().First();
+                    var product1 = repo.Products.Include(p => p.Categories).Single(p => p.Name == "ABC");
+                    var product2 = repo.Products.Include(p => p.Categories).Single(p => p.Name == "DEF");
 
                     Assert.That(product1.CatalogNo, Is.EqualTo("CN111"));
                     Assert.That(product1.Name, Is.EqualTo("ABC"));
@@ -131,6 +137,11 @@ namespace NWheels.Testing.Entities.Stacks
                     Assert.That(product1.Categories.Count(), Is.EqualTo(1));
                     Assert.That(product1.Categories.Count(c => c.Name == "CAT1"), Is.EqualTo(1));
 
+                    Assert.That(product1.Attributes, Is.Not.Null);
+                    Assert.That(product1.Attributes.Count(), Is.EqualTo(2));
+                    Assert.That(product1.Attributes.Count(a => a.Name == "Color"), Is.EqualTo(1));
+                    Assert.That(product1.Attributes.Count(a => a.Name == "Size"), Is.EqualTo(1));
+
                     Assert.That(product2.CatalogNo, Is.EqualTo("CN222"));
                     Assert.That(product2.Name, Is.EqualTo("DEF"));
                     Assert.That(product2.Price, Is.EqualTo(678.90m));
@@ -139,6 +150,10 @@ namespace NWheels.Testing.Entities.Stacks
                     Assert.That(product2.Categories.Count(), Is.EqualTo(2));
                     Assert.That(product2.Categories.Count(c => c.Name == "CAT1"), Is.EqualTo(1));
                     Assert.That(product2.Categories.Count(c => c.Name == "CAT3"), Is.EqualTo(1));
+
+                    Assert.That(product2.Attributes, Is.Not.Null);
+                    Assert.That(product2.Attributes.Count(), Is.EqualTo(1));
+                    Assert.That(product2.Attributes.Count(a => a.Name == "Color"), Is.EqualTo(1));
                 }
             }
 
@@ -148,6 +163,8 @@ namespace NWheels.Testing.Entities.Stacks
             {
                 using ( repo )
                 {
+                    var attributes = repo.Attributes.OrderBy(a => a.Name).ToDictionary(a => a.Name);
+
                     var product1 = repo.Products.Single(p => p.Name == "ABC");
                     var product2 = repo.Products.Single(p => p.Name == "DEF");
 
@@ -156,7 +173,11 @@ namespace NWheels.Testing.Entities.Stacks
                     order.PlacedAt = new DateTime(2015, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
                     var orderLine1 = repo.NewOrderLine(order, product1, quantity: 22);
+                    orderLine1.Attributes.Add(repo.NewAttributeValueChoice(attributes["Color"], "Black"));
+                    orderLine1.Attributes.Add(repo.NewAttributeValueChoice(attributes["Size"], "L"));
+
                     var orderLine2 = repo.NewOrderLine(order, product2, quantity: 11);
+                    orderLine2.Attributes.Add(repo.NewAttributeValueChoice(attributes["Color"], "White"));
 
                     order.OrderLines.Add(orderLine1);
                     order.OrderLines.Add(orderLine2);
@@ -212,6 +233,16 @@ namespace NWheels.Testing.Entities.Stacks
 
                     order.OrderLines.Add(orderLine1);
 
+                    order.DeliveryAddress.StreetAddress = "85 Scottish Street";
+                    order.DeliveryAddress.City = "London";
+                    order.DeliveryAddress.ZipCode = "E1WS21";
+                    order.DeliveryAddress.Country = "UK";
+
+                    order.BillingAddress.StreetAddress = "123 Main Street";
+                    order.BillingAddress.City = "London";
+                    order.BillingAddress.ZipCode = "W127RJ";
+                    order.BillingAddress.Country = "UK";
+
                     repo.OrdersLines.Insert(orderLine1);
 
                     repo.Orders.Insert(order);
@@ -247,9 +278,11 @@ namespace NWheels.Testing.Entities.Stacks
                     Interfaces.Repository1.IOrder order2;
                     Interfaces.Repository1.IOrder order3;
 
-                    order1 = repo.Orders /*.Include(o => o.OrderLines.Select(ol => ol.Product))*/.Where(o => o.OrderNo == "ORD001").ToArray().First();
-                    order2 = repo.Orders /*.Include(o => o.OrderLines.Select(ol => ol.Product))*/.Where(o => o.OrderNo == "ORD002").ToArray().First();
-                    order3 = repo.Orders /*.Include(o => o.OrderLines.Select(ol => ol.Product))*/.Where(o => o.OrderNo == "ORD003").ToArray().First();
+                    order1 = repo.Orders.Include(o => o.OrderLines.Select(ol => ol.Product)).Single(o => o.OrderNo == "ORD001");
+                    order2 = repo.Orders.Include(o => o.OrderLines.Select(ol => ol.Product)).Single(o => o.OrderNo == "ORD002");
+                    order3 = repo.Orders.Include(o => o.OrderLines.Select(ol => ol.Product)).Single(o => o.OrderNo == "ORD003");
+
+                    var attributes = repo.Attributes.OrderBy(a => a.Name).ToDictionary(a => a.Name);
 
                     #region Assert order1
 
@@ -263,10 +296,22 @@ namespace NWheels.Testing.Entities.Stacks
                     Assert.That(order1Lines[0].Order, Is.SameAs(order1));
                     Assert.That(order1Lines[0].Product.CatalogNo, Is.EqualTo("CN111"));
                     Assert.That(order1Lines[0].Quantity, Is.EqualTo(22));
+                    
+                    Assert.That(order1Lines[0].Attributes, Is.Not.Null);
+                    Assert.That(order1Lines[0].Attributes.Count, Is.EqualTo(2));
+                    Assert.That(order1Lines[0].Attributes.First().Attribute, Is.SameAs(attributes["Color"]));
+                    Assert.That(order1Lines[0].Attributes.First().Value, Is.EqualTo("Black"));
+                    Assert.That(order1Lines[0].Attributes.Last().Attribute, Is.SameAs(attributes["Size"]));
+                    Assert.That(order1Lines[0].Attributes.Last().Value, Is.EqualTo("L"));
 
                     Assert.That(order1Lines[1].Order, Is.SameAs(order1));
                     Assert.That(order1Lines[1].Product.CatalogNo, Is.EqualTo("CN222"));
                     Assert.That(order1Lines[1].Quantity, Is.EqualTo(11));
+
+                    Assert.That(order1Lines[1].Attributes, Is.Not.Null);
+                    Assert.That(order1Lines[1].Attributes.Count, Is.EqualTo(1));
+                    Assert.That(order1Lines[1].Attributes.First().Attribute, Is.SameAs(attributes["Color"]));
+                    Assert.That(order1Lines[1].Attributes.First().Value, Is.EqualTo("White"));
 
                     #endregion
 
@@ -301,6 +346,18 @@ namespace NWheels.Testing.Entities.Stacks
                     Assert.That(order3Lines[0].Order, Is.SameAs(order3));
                     Assert.That(order3Lines[0].Product.CatalogNo, Is.EqualTo("CN222"));
                     Assert.That(order3Lines[0].Quantity, Is.EqualTo(33));
+
+                    Assert.That(order3.DeliveryAddress, Is.Not.Null);
+                    Assert.That(order3.DeliveryAddress.StreetAddress, Is.EqualTo("85 Scottish Street"));
+                    Assert.That(order3.DeliveryAddress.City, Is.EqualTo("London"));
+                    Assert.That(order3.DeliveryAddress.ZipCode, Is.EqualTo("E1WS21"));
+                    Assert.That(order3.DeliveryAddress.Country, Is.EqualTo("UK"));
+
+                    Assert.That(order3.BillingAddress, Is.Not.Null);
+                    Assert.That(order3.BillingAddress.StreetAddress, Is.EqualTo("123 Main Street"));
+                    Assert.That(order3.BillingAddress.City, Is.EqualTo("London"));
+                    Assert.That(order3.BillingAddress.ZipCode, Is.EqualTo("W127RJ"));
+                    Assert.That(order3.BillingAddress.Country, Is.EqualTo("UK"));
 
                     #endregion
 

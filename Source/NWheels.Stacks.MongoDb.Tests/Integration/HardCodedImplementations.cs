@@ -169,6 +169,24 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+            #region Method NewPostalAdderss
+
+            public IR1.IPostalAddress NewPostalAddress(string streetAddress, string city, string zipCode, string country)
+            {
+                var entity = _entityFactory.NewEntity<IR1.IPostalAddress>();
+
+                entity.StreetAddress = streetAddress;
+                entity.City = city;
+                entity.ZipCode = zipCode;
+                entity.Country = country;
+
+                return entity;
+            }
+
+            #endregion
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
             #region Entity Repository Categories
 
             private IEntityRepository<IR1.ICategory> m_Categories; 
@@ -316,6 +334,10 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 {
                     return (TEntityContract)(object)new EntityPartObject_AttributeValueChoice(_components);
                 }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IPostalAddress))
+                {
+                    return (TEntityContract)(object)new EntityPartObject_PostalAddress(_components);
+                }
 
                 throw new NotSupportedException(
                     string.Format("Entity contract '{0}' is not supported by HardCodedEntityFactory.", typeof(TEntityContract).Name));
@@ -356,9 +378,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             {
                 InjectDependencies(components);
 
+                // For property OrderLines
                 this.m_OrderLines_ContractValue = new List<Interfaces.Repository1.IOrderLine>();
                 this.m_OrderLines_ValueState = DualValueStates.Contract;
+
+                // For property BillingAddress
+                this.m_BillingAddress = new EntityPartObject_PostalAddress(components);
+
+                // For property DeliveryAddress
+                this.m_DeliveryAddress = new EntityPartObject_PostalAddress(components);
+                    
+                // For property Status
                 this.m_Status = Interfaces.Repository1.OrderStatus.New;
+
+                // For property Id
                 this.m_Id = ObjectId.GenerateNewId();
             }
 
@@ -485,18 +518,52 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             private Interfaces.Repository1.IOrderLine[] LazyLoad_OrderLines(ObjectId[] ids)
             {
                 return MongoDataRepositoryBase.ResolveFrom(_components).LazyLoadByIdList<Interfaces.Repository1.IOrderLine, ObjectId>(ids).ToArray();
+            }
 
-                //using ( var repo = _components.Resolve<IFramework>().NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>() )
-                //using (var repo = CurrentDataRepoFactory())
-                //{
-                //    var mongoRepo = (MongoDataRepositoryBase)repo;
-                //    var query = mongoRepo.GetCollection<EntityObject_OrderLine>("OrderLine").Find(Query.In("_id", new BsonArray(ids)));
-                //    var queryResults = query.Cast<Interfaces.Repository1.IOrderLine>().ToArray();
+            #endregion
 
-                //    ObjectUtility.InjectDependenciesToManyObjects(queryResults, _components);
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-                //    return queryResults;
-                //}
+            #region Property BillingAddress
+
+            private EntityPartObject_PostalAddress m_BillingAddress;
+
+            [BsonIgnore]
+            Interfaces.Repository1.IPostalAddress Interfaces.Repository1.IOrder.BillingAddress
+            {
+                get
+                {
+                    return this.m_BillingAddress;
+                }
+            }
+
+            public virtual EntityPartObject_PostalAddress BillingAddress
+            {
+                get { return m_BillingAddress; }
+                set { m_BillingAddress = value; }
+            }
+
+            #endregion
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Property DeliveryAddress
+
+            private EntityPartObject_PostalAddress m_DeliveryAddress;
+
+            [BsonIgnore]
+            Interfaces.Repository1.IPostalAddress Interfaces.Repository1.IOrder.DeliveryAddress
+            {
+                get
+                {
+                    return this.m_DeliveryAddress;
+                }
+            }
+
+            public virtual EntityPartObject_PostalAddress DeliveryAddress
+            {
+                get { return m_DeliveryAddress; }
+                set { m_DeliveryAddress = value; }
             }
 
             #endregion
@@ -1471,6 +1538,93 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             {
                 get { return m_Value; }
                 set { m_Value = value; }
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Entity Part PostalAddress
+
+        public class EntityPartObject_PostalAddress : Interfaces.Repository1.IPostalAddress, IEntityPartObject
+        {
+            #region Constructors
+
+            public EntityPartObject_PostalAddress()
+            {
+            }
+            public EntityPartObject_PostalAddress(IComponentContext components)
+            {
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region IEntityPartObject
+
+            Type IObject.ContractType
+            {
+                get { return typeof(Interfaces.Repository1.IPostalAddress); }
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Property StreetAddress
+
+            private string m_StreetAddress;
+
+            public string StreetAddress
+            {
+                get { return m_StreetAddress; }
+                set { m_StreetAddress = value; }
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Property City
+
+            private string m_City;
+
+            public string City
+            {
+                get { return m_City; }
+                set { m_City = value; }
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Property ZipCode
+
+            private string m_ZipCode;
+
+            public string ZipCode
+            {
+                get { return m_ZipCode; }
+                set { m_ZipCode = value; }
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Property Country
+
+            private string m_Country;
+
+            public string Country
+            {
+                get { return m_Country; }
+                set { m_Country = value; }
             }
 
             #endregion

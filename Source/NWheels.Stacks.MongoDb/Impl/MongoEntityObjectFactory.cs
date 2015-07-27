@@ -31,6 +31,8 @@ namespace NWheels.Stacks.MongoDb.Impl
             var metaType = MetadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
 
             return new IObjectFactoryConvention[] {
+                
+                
                 //new MongoDBRefConvention(MetadataCache, (TypeMetadataBuilder)metaType),
                 new EntityObjectConvention(MetadataCache),
                 new BsonIgnoreConvention(MetadataCache, metaType),

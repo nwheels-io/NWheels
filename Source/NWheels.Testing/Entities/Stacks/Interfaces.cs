@@ -22,6 +22,7 @@ namespace NWheels.Testing.Entities.Stacks
                 IOrderLine NewOrderLine(IOrder order, IProduct product, int quantity);
                 IAttributeValue NewAttributeValue(string value, int displayOrder);
                 IAttributeValueChoice NewAttributeValueChoice(IAttribute attribute, string value);
+                IPostalAddress NewPostalAddress(string streetAddress, string city, string zipCode, string country);
                 
                 IEntityRepository<ICategory> Categories { get; }
                 IEntityRepository<IProduct> Products { get; }
@@ -97,7 +98,13 @@ namespace NWheels.Testing.Entities.Stacks
 
                 [PropertyContract.Relation.Composition]
                 ICollection<IOrderLine> OrderLines { get; }
-                
+
+                [PropertyContract.Relation.Composition]
+                IPostalAddress DeliveryAddress { get; }
+
+                [PropertyContract.Relation.Composition]
+                IPostalAddress BillingAddress { get; }
+
                 [PropertyContract.DefaultValue(OrderStatus.New)]
                 OrderStatus Status { get; set; }
             }
@@ -118,6 +125,22 @@ namespace NWheels.Testing.Entities.Stacks
 
                 [PropertyContract.Relation.Composition]
                 ICollection<IAttributeValueChoice> Attributes { get; }
+            }
+
+            [EntityPartContract]
+            public interface IPostalAddress
+            {
+                [PropertyContract.Required]
+                string StreetAddress { get; set; }
+                
+                [PropertyContract.Required]
+                string City { get; set; }
+                
+                [PropertyContract.Required]
+                string ZipCode { get; set; }
+                
+                [PropertyContract.Required]
+                string Country { get; set; }
             }
         }
 

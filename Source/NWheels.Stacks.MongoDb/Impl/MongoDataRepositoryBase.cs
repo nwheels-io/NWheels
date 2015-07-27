@@ -79,17 +79,17 @@ namespace NWheels.Stacks.MongoDb.Impl
 
         protected override void OnCommitChanges()
         {
-            foreach ( var entityToInsert in base.InsertQueue )
+            foreach ( var entityToInsert in base.InsertBatch )
             {
                 ((IMongoEntityRepository)base.GetEntityRepository(entityToInsert.ContractType)).CommitInsert(entityToInsert);
             }
             
-            foreach ( var entityToUpdate in base.UpdateQueue )
+            foreach ( var entityToUpdate in base.UpdateBatch )
             {
                 ((IMongoEntityRepository)base.GetEntityRepository(entityToUpdate.ContractType)).CommitUpdate(entityToUpdate);
             }
 
-            foreach ( var entityToDelete in base.DeleteQueue )
+            foreach ( var entityToDelete in base.DeleteBatch )
             {
                 ((IMongoEntityRepository)base.GetEntityRepository(entityToDelete.ContractType)).CommitDelete(entityToDelete);
             }

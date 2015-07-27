@@ -44,13 +44,12 @@ namespace NWheels.Entities.Core
             if ( !_entityCache.ContainsKey(key) )
             {
                 _entityCache.Add(key, (IEntityObject)entity);
+                NotifyEntityState((IEntityObject)entity, state);
             }
             else
             {
                 entity = (TEntityContract)_entityCache[key];
             }
-
-            NotifyEntityState((IEntityObject)entity, state);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -93,21 +92,21 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected HashSet<IEntityObject> InsertQueue
+        protected HashSet<IEntityObject> InsertBatch
         {
             get { return _insertBatch; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected HashSet<IEntityObject> UpdateQueue
+        protected HashSet<IEntityObject> UpdateBatch
         {
             get { return _updateBatch; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected HashSet<IEntityObject> DeleteQueue
+        protected HashSet<IEntityObject> DeleteBatch
         {
             get { return _deleteBatch; }
         }

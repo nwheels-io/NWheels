@@ -4,6 +4,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Configuration;
+using NWheels.Entities;
 
 namespace NWheels.Extensions
 {
@@ -104,6 +106,27 @@ namespace NWheels.Extensions
             }
 
             return type;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool IsConfigurationContract(this Type contract)
+        {
+            return (contract.IsInterface && ConfigurationSectionAttribute.IsConfigSection(contract));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool IsEntityContract(this Type contract)
+        {
+            return (contract.IsInterface && EntityContractAttribute.IsEntityContract(contract));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool IsEntityPartContract(this Type contract)
+        {
+            return (contract.IsInterface && EntityPartContractAttribute.IsEntityPartContract(contract));
         }
     }
 }

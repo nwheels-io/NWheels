@@ -74,7 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Integration\MongoHardCodedImplementationCrudTests.cs" />
-    <Compile Include="Integration\MongoDataRepositoryFactoryCrudTests.cs" />
+    <Compile Include="MongoDataRepositoryFactoryCrudTests.cs" />
     <Compile Include="Integration\HardCodedImplementations.cs" />
     <Compile Include="Unit\MongoDataRepositoryFactoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
