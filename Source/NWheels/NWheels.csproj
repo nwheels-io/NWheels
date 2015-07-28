@@ -102,6 +102,12 @@
     <Compile Include="Hosting\Core\DefaultAssemblySearchPathProvider.cs" />
     <Compile Include="Hosting\IAssemblySearchPathProvider.cs" />
     <Compile Include="Pipeline.cs" />
+    <Compile Include="Processing\Messages\ExampleOfConcreteMessage.cs" />
+    <Compile Include="Processing\Messages\IMessageHeader.cs" />
+    <Compile Include="Processing\Messages\IMessageObject.cs" />
+    <Compile Include="Processing\Messages\IServiceBus.cs" />
+    <Compile Include="Processing\Messages\MessageActionHeader.cs" />
+    <Compile Include="Processing\Messages\MessageIdHeader.cs" />
     <Compile Include="UI\AuthorizationContract.cs" />
     <Compile Include="UI\Toolbox\Chart.cs" />
     <Compile Include="UI\Toolbox\Crud.cs" />
