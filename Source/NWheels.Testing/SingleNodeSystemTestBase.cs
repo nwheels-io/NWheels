@@ -46,7 +46,7 @@ namespace NWheels.Testing
 
         protected virtual void OnRegisteringHostComponents(Autofac.ContainerBuilder builder)
         {
-            builder.RegisterInstance(this).As<SystemTestBase>();
+            builder.RegisterInstance(this).As<SingleNodeSystemTestBase>();
 
             builder.RegisterModule<NWheels.Stacks.Nlog.ModuleLoader>();
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
