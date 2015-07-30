@@ -41,13 +41,17 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Autofac.Extras.Multitenant.3.1.1\lib\net40\Autofac.Extras.Multitenant.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.12.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <!--merge-solution:Hapil;<Reference Include="Hapil, Version=0.9.13.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.12\lib\net45\Hapil.dll</HintPath>
-    </Reference>
-    <Reference Include="Hapil.Applied, Version=0.9.12.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+      <HintPath>..\packages\FelixB.Hapil.0.9.13\lib\net45\Hapil.dll</HintPath>
+    </Reference>-->
+    <ProjectReference Include="..\..\..\Hapil\Source\Hapil\Hapil.csproj">
+      <Project>{25e37cc2-7e18-4592-8102-dfbaa4ddd2a7}</Project>
+      <Name>Hapil</Name>
+    </ProjectReference>
+    <Reference Include="Hapil.Applied, Version=0.9.13.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.12\lib\net45\Hapil.Applied.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.13\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -95,6 +99,13 @@
     <Compile Include="Authorization\IEntityAccessControlBuilder.cs" />
     <Compile Include="Authorization\IEntityAccessRule.cs" />
     <Compile Include="Authorization\IIdentityInfo.cs" />
+    <Compile Include="Entities\Factories\ImplementIEntityPartObjectConvention.cs" />
+    <Compile Include="Entities\Factories\ImplementIEntityObjectConvention.cs" />
+    <Compile Include="TypeModel\Core\Factories\BaseTypeConvention.cs" />
+    <Compile Include="TypeModel\Core\Factories\CollectionAdapterDualValueStrategy.cs" />
+    <Compile Include="TypeModel\Core\Factories\DualValueStrategy.cs" />
+    <Compile Include="TypeModel\Core\Factories\CollectionAdapterJsonStringStrategy.cs" />
+    <Compile Include="TypeModel\Core\Factories\CollectionAdapterStrategy.cs" />
     <Compile Include="TypeModel\Core\Factories\DependencyInjectionConvention.cs" />
     <Compile Include="TypeModel\Core\Factories\ImplementIObjectConvention.cs" />
     <Compile Include="TypeModel\Core\Factories\InitializationConstructorConvention.cs" />
@@ -104,6 +115,10 @@
     <Compile Include="TypeModel\Core\CrossTypeFixupMetadataVisitor.cs" />
     <Compile Include="TypeModel\Core\Factories\PropertyImplementationStrategyMap.cs" />
     <Compile Include="TypeModel\Core\Factories\PropertyImplementationConvention.cs" />
+    <Compile Include="TypeModel\Core\Factories\AutomaticPropertyStrategy.cs" />
+    <Compile Include="TypeModel\Core\Factories\ScalarTypecastStrategy.cs" />
+    <Compile Include="TypeModel\Core\Factories\StorageDataTypeStrategy.cs" />
+    <Compile Include="TypeModel\Core\Factories\RelationTypecastStrategy.cs" />
     <Compile Include="TypeModel\Core\IHaveDependencies.cs" />
     <Compile Include="TypeModel\Core\IHaveNestedObjects.cs" />
     <Compile Include="TypeModel\Core\IObject.cs" />
@@ -181,7 +196,6 @@
     <Compile Include="TypeModel\Core\StorageTypes\DualValueStates.cs" />
     <Compile Include="TypeModel\RelationKind.cs" />
     <Compile Include="Entities\Core\EntityId.cs" />
-    <Compile Include="Entities\Core\EntityObjectBase.cs" />
     <Compile Include="Entities\Core\IEntityObject.cs" />
     <Compile Include="Entities\EntityId.cs" />
     <Compile Include="Entities\EntityState.cs" />

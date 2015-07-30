@@ -36,18 +36,26 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.12.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <!--merge-solution:Hapil;<Reference Include="Hapil, Version=0.9.13.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.12\lib\net45\Hapil.dll</HintPath>
-    </Reference>
-    <Reference Include="Hapil.Applied, Version=0.9.12.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+      <HintPath>..\packages\FelixB.Hapil.0.9.13\lib\net45\Hapil.dll</HintPath>
+    </Reference>-->
+    <ProjectReference Include="..\..\..\Hapil\Source\Hapil\Hapil.csproj">
+      <Project>{25e37cc2-7e18-4592-8102-dfbaa4ddd2a7}</Project>
+      <Name>Hapil</Name>
+    </ProjectReference>
+    <Reference Include="Hapil.Applied, Version=0.9.13.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.12\lib\net45\Hapil.Applied.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.13\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil.Testing.NUnit">
-      <HintPath>..\packages\FelixB.Hapil.Testing.NUnit.0.9.12\lib\net45\Hapil.Testing.NUnit.dll</HintPath>
+    <!--merge-solution:Hapil.Testing.NUnit;<Reference Include="Hapil.Testing.NUnit" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+      <HintPath>..\packages\FelixB.Hapil.Testing.NUnit.0.9.13\lib\net45\Hapil.Testing.NUnit.dll</HintPath>
       <Private>True</Private>
-    </Reference>
+    </Reference>-->
+    <ProjectReference Include="..\..\..\Hapil\Source\Hapil.Testing.NUnit\Hapil.Testing.NUnit.csproj">
+      <Project>{b02584d9-46fc-4d39-b3fa-8c58238b540a}</Project>
+      <Name>Hapil.Testing.NUnit</Name>
+    </ProjectReference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>

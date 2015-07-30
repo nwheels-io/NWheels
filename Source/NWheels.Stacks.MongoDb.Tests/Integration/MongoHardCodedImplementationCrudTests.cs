@@ -8,7 +8,7 @@ using NWheels.DataObjects.Core.Conventions;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Logging.Core;
-using NWheels.Stacks.MongoDb.Impl;
+using NWheels.Stacks.MongoDb.Factories;
 using NWheels.Testing;
 using NWheels.Testing.Entities.Stacks;
 using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;

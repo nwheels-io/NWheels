@@ -13,28 +13,15 @@ namespace NWheels.DataObjects.Core.Factories
 {
     public class PropertyImplementationStrategyMap
     {
-        private readonly ObjectFactoryContext _factoryContext;
-        private readonly ITypeMetadata _metaType;
-        private readonly PropertyImplementationStrategy[] _strategyPrototypes;
-        private readonly HashSet<PropertyInfo> _baseContractProperties;
+        private readonly List<StrategyRule> _strategyRules;
         private readonly Dictionary<IPropertyMetadata, PropertyImplementationStrategy> _map;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public PropertyImplementationStrategyMap(
-            ObjectFactoryContext factoryContext,
-            ITypeMetadata metaType, 
-            params PropertyImplementationStrategy[] strategyPrototypes)
+        private PropertyImplementationStrategyMap()
         {
-            _factoryContext = factoryContext;
-            _metaType = metaType;
-            _strategyPrototypes = strategyPrototypes;
-
-            _baseContractProperties = new HashSet<PropertyInfo>();
-            PopulateBaseContractProperties();
-
+            _strategyRules = new List<StrategyRule>();
             _map = new Dictionary<IPropertyMetadata, PropertyImplementationStrategy>();
-            BuildMap();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -48,13 +35,7 @@ namespace NWheels.DataObjects.Core.Factories
 
         public void InvokeStrategies(Func<PropertyImplementationStrategy, bool> predicate, Action<PropertyImplementationStrategy> action)
         {
-            foreach ( var strategy in this.Strategies.Where(predicate) )
-            {
-                using ( TT.CreateScope<TT.TProperty>(strategy.MetaProperty.ClrType) )
-                {
-                    action(strategy);
-                }
-            }
+            InvokeStrategies(this.Strategies.Where(predicate), action);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -89,41 +70,136 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void PopulateBaseContractProperties()
+        private void AddStrategyRule(
+            Func<ITypeMetadataCache, ITypeMetadata, IPropertyMetadata, bool> condition,
+            Func<IPropertyMetadata, PropertyImplementationStrategy> strategyFactory)
         {
-            if (_metaType.BaseType != null)
-            {
-                _baseContractProperties.UnionWith(_metaType.BaseType.Properties.Select(p => p.ContractPropertyInfo));
-            }
+            _strategyRules.Add(new StrategyRule(condition, strategyFactory));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void BuildMap()
+        private HashSet<PropertyInfo> GetBaseContractProperties(ITypeMetadata metaType)
         {
-            foreach ( var metaProperty in _metaType.Properties.Where(NotImplementedByBaseEntity) )
-            {
-                var strategyPrototype = _strategyPrototypes.FirstOrDefault(s => s.ShouldApply(metaProperty));
+            var baseProperties = new HashSet<PropertyInfo>();
 
-                if ( strategyPrototype == null )
+            if  ( metaType.BaseType != null )
+            {
+                baseProperties.UnionWith(metaType.BaseType.Properties.Select(p => p.ContractPropertyInfo));
+            }
+
+            return baseProperties;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void BuildMap(ITypeMetadataCache metadataCache, ITypeMetadata metaType)
+        {
+            var baseProperties = GetBaseContractProperties(metaType);
+            Func<IPropertyMetadata, bool> notImplementedByBaseEntity = p => !baseProperties.Contains(p.ContractPropertyInfo);
+
+            foreach ( var metaProperty in metaType.Properties.Where(notImplementedByBaseEntity) )
+            {
+                var effectiveRule = _strategyRules.FirstOrDefault(rule => rule.Condition(metadataCache, metaType, metaProperty));
+
+                if ( effectiveRule == null )
                 {
                     throw new ContractConventionException(
                         typeof(PropertyImplementationConvention), 
-                        _metaType.ContractType, 
+                        metaType.ContractType, 
                         metaProperty.ContractPropertyInfo, 
                         "No implementation strategy found for this property.");
                 }
 
-                var strategyClone = strategyPrototype.Clone(metaProperty);
-                _map.Add(metaProperty, strategyClone);
+                var strategyInstance = effectiveRule.StrategyFactory(metaProperty);
+                _map.Add(metaProperty, strategyInstance);
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private bool NotImplementedByBaseEntity(IPropertyMetadata property)
+        public static void InvokeStrategies(IEnumerable<PropertyImplementationStrategy> strategies, Action<PropertyImplementationStrategy> action)
         {
-            return !_baseContractProperties.Contains(property.ContractPropertyInfo);
+            foreach ( var strategy in strategies )
+            {
+                using ( TT.CreateScope<TT.TProperty>(strategy.MetaProperty.ClrType) )
+                {
+                    action(strategy);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class Builder
+        {
+            private PropertyImplementationStrategyMap _mapBeingBuilt;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Builder()
+            {
+                _mapBeingBuilt = new PropertyImplementationStrategyMap();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void AddRule(
+                Func<IPropertyMetadata, bool> condition, 
+                Func<IPropertyMetadata, PropertyImplementationStrategy> strategyFactory)
+            {
+                AddRule((cache, type, property) => condition(property), strategyFactory);
+            }
+            
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void AddRule(
+                Func<ITypeMetadata, IPropertyMetadata, bool> condition, 
+                Func<IPropertyMetadata, PropertyImplementationStrategy> strategyFactory)
+            {
+                AddRule((cache, type, property) => condition(type, property), strategyFactory);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void AddRule(
+                Func<ITypeMetadataCache, ITypeMetadata, IPropertyMetadata, bool> condition, 
+                Func<IPropertyMetadata, PropertyImplementationStrategy> strategyFactory)
+            {
+                if ( _mapBeingBuilt == null )
+                {
+                    throw new InvalidOperationException("Cannot add rules after the map has been built.");
+                }
+
+                _mapBeingBuilt.AddStrategyRule(condition, strategyFactory);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PropertyImplementationStrategyMap Build(ITypeMetadataCache metadataCache, ITypeMetadata metaType)
+            {
+                _mapBeingBuilt.BuildMap(metadataCache, metaType);
+                
+                var result = _mapBeingBuilt;
+                _mapBeingBuilt = null;
+                return result;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class StrategyRule
+        {
+            public StrategyRule(Func<ITypeMetadataCache, ITypeMetadata, IPropertyMetadata, bool> condition, Func<IPropertyMetadata, PropertyImplementationStrategy> strategyFactory)
+            {
+                this.Condition = condition;
+                this.StrategyFactory = strategyFactory;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Func<ITypeMetadataCache, ITypeMetadata, IPropertyMetadata, bool> Condition { get; private set; }
+            public Func<IPropertyMetadata, PropertyImplementationStrategy> StrategyFactory { get; private set; }
         }
     }
 }

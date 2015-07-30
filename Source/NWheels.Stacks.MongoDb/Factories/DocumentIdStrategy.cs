@@ -1,34 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autofac;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
-using Newtonsoft.Json;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
-using NWheels.DataObjects.Core.Factories;
-using NWheels.Extensions;
+using NWheels.DataObjects.Core.StorageTypes;
+using NWheels.Entities;
+using NWheels.Entities.Core;
+using NWheels.TypeModel.Core.Factories;
 using TT = Hapil.TypeTemplate;
 
-namespace NWheels.TypeModel.Core.Factories
+namespace NWheels.Stacks.MongoDb.Factories
 {
-    public class CollectionAdapterAsJsonStringStrategy : DualValueStrategy
+    public class DocumentIdStrategy : DualValueStrategy
     {
-        private Type _itemContractType;
-        private Type _itemStorageType;
+        private Field<IComponentContext> _componentsField;
+        private Type _implementationType;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CollectionAdapterAsJsonStringStrategy(
+        public DocumentIdStrategy(
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
             IPropertyMetadata metaProperty)
-            : base(factoryContext, metadataCache, metaType, metaProperty, storageType: typeof(string))
+            : base(factoryContext, metadataCache, metaType, metaProperty, storageType: metaProperty.Relation.RelatedPartyType.PrimaryKey.Properties[0].ClrType)
         {
         }
 
@@ -36,45 +34,56 @@ namespace NWheels.TypeModel.Core.Factories
 
         #region Overrides of PropertyImplementationStrategy
 
-        protected override bool OnShouldApply(IPropertyMetadata metaProperty)
-        {
-            return (metaProperty.Kind == PropertyKind.Part && metaProperty.ClrType.IsCollectionType());
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override PropertyImplementationStrategy OnClone(IPropertyMetadata metaProperty)
-        {
-            return new CollectionAdapterAsJsonStringStrategy(base.FactoryContext, base.MetadataCache, base.MetaType, metaProperty);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override void OnBeforeImplementation(ClassWriterBase writer)
+        protected override void OnBeforeImplementation(ImplementationClassWriter<TT.TInterface> writer)
         {
             base.OnBeforeImplementation(writer);
 
-            MetaProperty.ContractPropertyInfo.PropertyType.IsCollectionType(out _itemContractType);
-            _itemStorageType = FindStorageType(_itemContractType);
+            _implementationType = FindImpementationType(MetaProperty.ClrType);
+            _componentsField = writer.DependencyField<IComponentContext>("$components");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void OnWritingInitializationConstructor(MethodWriterBase writer, IOperand<IComponentContext> components)
+        protected override void OnWritingDeepListNestedObjects(MethodWriterBase writer, IOperand<HashSet<object>> nestedObjects)
         {
-            base.ContractField.Assign(writer.New<TT.TProperty>());
+            var m = writer;
+
+            m.If(base.StateField.EnumHasFlag(DualValueStates.Contract)).Then(() => {
+                nestedObjects.Add(base.ContractField);
+
+                if ( typeof(IHaveNestedObjects).IsAssignableFrom(_implementationType) )
+                {
+                    base.ContractField.CastTo<IHaveNestedObjects>().Void(x => x.DeepListNestedObjects, nestedObjects);
+                }
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override bool OnHasDependencies()
+        {
+            return true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override bool OnHasNestedObjects()
+        {
+            return true;
         }
 
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of DualValueStrategy
+
         protected override void OnWritingContractToStorageConversion(
             MethodWriterBase method, 
             IOperand<TT.TProperty> contractValue, 
             MutableOperand<TT.TValue> storageValue)
         {
-            storageValue.Assign(Static.Func(JsonConvert.SerializeObject, contractValue.CastTo<object>()).CastTo<TypeTemplate.TValue>());
+            storageValue.Assign(contractValue.CastTo<IEntityObject>().Func<IEntityId>(x => x.GetId).Func<TT.TValue>(x => x.ValueAs<TT.TValue>));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -84,12 +93,11 @@ namespace NWheels.TypeModel.Core.Factories
             MutableOperand<TT.TProperty> contractValue, 
             IOperand<TT.TValue> storageValue)
         {
-            var concreteCollectionType = GetConcreteCollectionType(MetaProperty.ClrType, _itemStorageType);
-
-            using ( TT.CreateScope<TT.TValue>(concreteCollectionType) )
-            {
-                contractValue.Assign(Static.Func(JsonConvert.DeserializeObject<TT.TValue>, storageValue.CastTo<string>()).CastTo<TT.TProperty>());
-            }
+            contractValue.Assign(
+                Static.Func(MongoDataRepositoryBase.ResolveFrom, _componentsField)
+                    .Func<TT.TValue, TT.TProperty>(x => x.LazyLoadById<TT.TProperty, TT.TValue>, storageValue));
         }
+
+        #endregion
     }
 }

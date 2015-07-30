@@ -326,7 +326,8 @@ namespace NWheels.Conventions.Core
 
             protected bool IsNewEntityMethod(MethodInfo method)
             {
-                var result = (method.Name.StartsWith("New") && EntityContractsInRepository.Any(contract => contract.IsAssignableFrom(method.ReturnType)));
+                var result = (method.Name.StartsWith("New") && (method.ReturnType.IsEntityContract() || method.ReturnType.IsEntityPartContract()));
+                //EntityContractsInRepository.Any(contract => contract.IsAssignableFrom(method.ReturnType)));
                 return result;
             }
 

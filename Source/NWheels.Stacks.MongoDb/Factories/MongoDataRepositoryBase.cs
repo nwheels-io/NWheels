@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Autofac;
-using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 using NWheels.Conventions.Core;
-using NWheels.DataObjects.Core;
-using NWheels.Entities;
 using NWheels.Entities.Core;
-using NWheels.Utilities;
 
-namespace NWheels.Stacks.MongoDb.Impl
+namespace NWheels.Stacks.MongoDb.Factories
 {
     public abstract class MongoDataRepositoryBase : UnitOfWorkDataRepositoryBase
     {

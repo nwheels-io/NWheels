@@ -17,7 +17,7 @@ using NWheels.DataObjects.Core.StorageTypes;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
-using NWheels.Stacks.MongoDb.Impl;
+using NWheels.Stacks.MongoDb.Factories;
 using NWheels.Testing.Entities.Stacks;
 using NWheels.Utilities;
 using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;

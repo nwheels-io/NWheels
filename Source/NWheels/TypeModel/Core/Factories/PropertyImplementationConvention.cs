@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Hapil;
 using Hapil.Writers;
 using NWheels.Exceptions;
+using TT = Hapil.TypeTemplate;
 
 namespace NWheels.DataObjects.Core.Factories
 {
@@ -17,7 +18,7 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected PropertyImplementationConvention(
+        public PropertyImplementationConvention(
             ITypeMetadata metaType, 
             PropertyImplementationStrategyMap propertyStrategyMap)
             : base(Will.ImplementPrimaryInterface)
@@ -32,10 +33,22 @@ namespace NWheels.DataObjects.Core.Factories
 
         protected override void OnImplementPrimaryInterface(ImplementationClassWriter<TypeTemplate.TInterface> writer)
         {
-            _propertyStrategyMap.InvokeStrategies(
-                strategy => {
-                    strategy.WritePropertyImplementation(writer);
-                });
+            var strategyGroupsByDeclaringInterface = 
+                _propertyStrategyMap.Strategies.GroupBy(strategy => strategy.MetaProperty.ContractPropertyInfo.DeclaringType);
+
+            foreach ( var group in strategyGroupsByDeclaringInterface )
+            {
+                var interfaceType = group.Key;
+
+                using ( TT.CreateScope<TT.TInterface>(interfaceType) )
+                {
+                    var explicitImplementation = writer.ImplementInterfaceExplicitly<TT.TInterface>();
+
+                    PropertyImplementationStrategyMap.InvokeStrategies(group, strategy => {
+                        strategy.WritePropertyImplementation(explicitImplementation);
+                    });
+                }
+            }
         }
 
         #endregion

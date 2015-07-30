@@ -1,0 +1,3 @@
+Hapil
+Hapil.UnitTests
+Hapil.Testing.NUnit

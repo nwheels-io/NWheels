@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Autofac;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
@@ -15,7 +14,7 @@ using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.Utilities;
 
-namespace NWheels.Stacks.MongoDb.Impl
+namespace NWheels.Stacks.MongoDb.Factories
 {
     public class MongoEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>, IEntityRepository, IMongoEntityRepository
         where TEntityContract : class

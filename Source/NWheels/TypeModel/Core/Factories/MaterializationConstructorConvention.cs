@@ -18,7 +18,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected MaterializationConstructorConvention(
+        public MaterializationConstructorConvention(
             ITypeMetadata metaType,
             PropertyImplementationStrategyMap propertyStrategyMap)
             : base(Will.ImplementBaseClass)
@@ -33,7 +33,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
         {
-            writer.Constructor(cw => {
+            writer.DefaultConstructor(cw => {
                 _propertyStrategyMap.InvokeStrategies(
                     strategy => {
                         strategy.WriteMaterialization(cw);

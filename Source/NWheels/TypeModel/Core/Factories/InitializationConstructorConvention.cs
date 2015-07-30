@@ -18,7 +18,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected InitializationConstructorConvention(
+        public InitializationConstructorConvention(
             ITypeMetadata metaType, 
             PropertyImplementationStrategyMap propertyStrategyMap)
             : base(Will.ImplementBaseClass)

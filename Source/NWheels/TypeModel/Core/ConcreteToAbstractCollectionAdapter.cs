@@ -138,17 +138,17 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected ICollection<TConcrete> InnerCollection
+        public ICollection<TConcrete> InnerCollection
         {
             get
             {
-                return _innerCollection;
+                return (_innerList ?? _innerCollection);
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected IList<TConcrete> InnerList
+        public IList<TConcrete> InnerList
         {
             get
             {

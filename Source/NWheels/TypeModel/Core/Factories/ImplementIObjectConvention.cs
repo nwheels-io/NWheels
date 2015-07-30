@@ -24,7 +24,7 @@ namespace NWheels.TypeModel.Core.Factories
         {
             var objectContractType = writer.OwnerClass.Key.PrimaryInterface;
 
-            writer.ImplementInterface<IObject>()
+            writer.ImplementInterfaceExplicitly<IObject>()
                 .Property<Type>(x => x.ContractType).Implement(p => 
                     p.Get(w => 
                         w.Return(w.Const(objectContractType)

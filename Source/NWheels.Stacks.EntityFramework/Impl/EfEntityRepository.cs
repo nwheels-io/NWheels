@@ -197,7 +197,7 @@ namespace NWheels.Stacks.EntityFramework.Impl
             _ownerRepo.ValidateOperationalState();
             
             _objectSet.Attach((TEntityImpl)entity);
-            _ownerRepo.ObjectContext.ObjectStateManager.ChangeObjectState(entity, EntityState.Modified);
+            _ownerRepo.ObjectContext.ObjectStateManager.ChangeObjectState(entity, System.Data.Entity.EntityState.Modified);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#if false
+
+using System;
 using Autofac;
 using Hapil;
 using Hapil.Decorators;
@@ -13,9 +11,8 @@ using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities.Core;
-using NWheels.Stacks.MongoDb.Core;
 
-namespace NWheels.Stacks.MongoDb.Impl
+namespace NWheels.Stacks.MongoDb.Factories
 {
     public class MongoEntityObjectFactory : EntityObjectFactory
     {
@@ -40,40 +37,40 @@ namespace NWheels.Stacks.MongoDb.Impl
             };
         }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class MongoDBRefConvention : ImplementationConvention
-        {
-            private readonly TypeMetadataCache _metadataCache;
-            private readonly TypeMetadataBuilder _metaType;
+        //public class MongoDBRefConvention : ImplementationConvention
+        //{
+        //    private readonly TypeMetadataCache _metadataCache;
+        //    private readonly TypeMetadataBuilder _metaType;
 
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //    //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public MongoDBRefConvention(TypeMetadataCache metadataCache, TypeMetadataBuilder metaType)
-                : base(Will.InspectDeclaration)
-            {
-                _metadataCache = metadataCache;
-                _metaType = (TypeMetadataBuilder)metaType;
-            }
+        //    public MongoDBRefConvention(TypeMetadataCache metadataCache, TypeMetadataBuilder metaType)
+        //        : base(Will.InspectDeclaration)
+        //    {
+        //        _metadataCache = metadataCache;
+        //        _metaType = (TypeMetadataBuilder)metaType;
+        //    }
 
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //    //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected override void OnInspectDeclaration(ObjectFactoryContext context)
-            {
-                foreach ( var property in _metaType.Properties )
-                {
-                    if ( property.Kind == PropertyKind.Relation && property.Relation.Kind != RelationKind.Composition && !property.IsCollection )
-                    {
-                        var relationalMapping = property.SafeGetRelationalMapping();
+        //    protected override void OnInspectDeclaration(ObjectFactoryContext context)
+        //    {
+        //        foreach ( var property in _metaType.Properties )
+        //        {
+        //            if ( property.Kind == PropertyKind.Relation && property.Relation.Kind != RelationKind.Composition && !property.IsCollection )
+        //            {
+        //                var relationalMapping = property.SafeGetRelationalMapping();
 
-                        if ( relationalMapping.StorageType == null )
-                        {
-                            relationalMapping.StorageType = _metadataCache.GetStorageTypeInstance(typeof(MongoDBRefStorageType<>), property.ClrType);
-                        }
-                    }
-                }
-            }
-        }
+        //                if ( relationalMapping.StorageType == null )
+        //                {
+        //                    relationalMapping.StorageType = _metadataCache.GetStorageTypeInstance(typeof(MongoDBRefStorageType<>), property.ClrType);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -161,3 +158,6 @@ namespace NWheels.Stacks.MongoDb.Impl
         }
     }
 }
+
+
+#endif

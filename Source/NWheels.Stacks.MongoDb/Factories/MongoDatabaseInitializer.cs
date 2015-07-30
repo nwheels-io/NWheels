@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MongoDB.Driver;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 
-namespace NWheels.Stacks.MongoDb.Impl
+namespace NWheels.Stacks.MongoDb.Factories
 {
     public class MongoDatabaseInitializer : IStorageInitializer
     {

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using NWheels.DataObjects;
 using System.Reflection;
+using NWheels.DataObjects;
 using NWheels.Extensions;
 
-namespace NWheels.Stacks.MongoDb.Impl
+namespace NWheels.Stacks.MongoDb.Factories
 {
     public class MongoQueryExpressionSpecializer
     {

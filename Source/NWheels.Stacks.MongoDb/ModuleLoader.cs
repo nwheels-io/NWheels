@@ -10,9 +10,9 @@ using NWheels.Conventions;
 using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Hosting;
-using NWheels.Stacks.MongoDb.Impl;
 using MongoDB.Bson;
 using NWheels.Entities.Core;
+using NWheels.Stacks.MongoDb.Factories;
 
 namespace NWheels.Stacks.MongoDb
 {

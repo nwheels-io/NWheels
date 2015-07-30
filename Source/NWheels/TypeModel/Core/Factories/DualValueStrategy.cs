@@ -40,32 +40,32 @@ namespace NWheels.TypeModel.Core.Factories
 
         #region Overrides of PropertyImplementationStrategy
 
-        protected override void OnBeforeImplementation(ClassWriterBase writer)
+        protected override void OnBeforeImplementation(ImplementationClassWriter<TT.TInterface> writer)
         {
             using ( TT.CreateScope<TT.TValue>(_storageType) )
             {
-                _contractField = writer.Field<TT.TProperty>("pcf_" + MetaProperty.Name);
-                _storageField = writer.Field<TT.TValue>("psf_" + MetaProperty.Name);
-                _stateField = writer.Field<DualValueStates>("pff_" + MetaProperty.Name);
+                _contractField = writer.Field<TT.TProperty>("m_" + MetaProperty.Name + "$contract");
+                _storageField = writer.Field<TT.TValue>("m_" + MetaProperty.Name + "$storage");
+                _stateField = writer.Field<DualValueStates>("m_" + MetaProperty.Name + "$state");
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void OnImplementContractProperty(ClassWriterBase writer)
+        protected override void OnImplementContractProperty(ImplementationClassWriter<TT.TInterface> writer)
         {
             using ( TT.CreateScope<TT.TValue>(_storageType) )
             {
-                writer.ImplementInterfaceExplicitly<TT.TInterface>().Property(MetaProperty.ContractPropertyInfo).Implement(
+                writer.Property(MetaProperty.ContractPropertyInfo).Implement(
                     getter: p => p.Get(m => {
                         m.If(_stateField == DualValueStates.Storage).Then(() => {
                             OnWritingStorageToContractConversion(m, _contractField, _storageField);
                             _stateField.Assign(_stateField | DualValueStates.Contract);
                         });
-                        m.Return(_contractField.CastTo<TT.TProperty>());
+                        m.Return(_contractField);
                     }),
                     setter: p => p.Set((m, value) => {
-                        _contractField.Assign(value.CastTo<TT.TProperty>());
+                        _contractField.Assign(value);
                         _stateField.Assign(DualValueStates.Contract);
                     })
                 );
@@ -74,7 +74,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void OnImplementStorageProperty(ClassWriterBase writer)
+        protected override void OnImplementStorageProperty(ImplementationClassWriter<TT.TInterface> writer)
         {
             using ( TT.CreateScope<TT.TValue>(_storageType) )
             {

@@ -1,8 +1,10 @@
-﻿using Hapil;
+﻿#if false
+
+using Hapil;
 using MongoDB.Driver;
 using NUnit.Framework;
 using NWheels.Entities;
-using NWheels.Stacks.MongoDb.Impl;
+using NWheels.Stacks.MongoDb.Factories;
 using NWheels.Testing;
 using NWheels.Testing.Entities.Stacks;
 using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;
@@ -103,3 +105,6 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
         }
     }
 }
+
+
+#endif

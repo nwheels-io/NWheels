@@ -63,8 +63,8 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                 private EfEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product> m_Products;
                 private EfEntityRepository<Interfaces.Repository1.IAttribute, EntityObject_Attribute> m_Attributes;
 
-                public DataRepositoryObject_DataRepository(DbConnection connection, bool autoCommit)
-                    : base(new HardCodedEntityFactory(), GetOrBuildDbCompoledModel(connection), connection, autoCommit)
+                public DataRepositoryObject_DataRepository(IComponentContext components, DbConnection connection, bool autoCommit)
+                    : base(components, new HardCodedEntityFactory(), GetOrBuildDbCompoledModel(connection), connection, autoCommit)
                 {
                     this.m_Categories = new EfEntityRepository<Interfaces.Repository1.ICategory, EntityObject_Category>(this);
                     this.m_Products = new EfEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product>(this);
@@ -200,6 +200,12 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                 {
                     get { throw new NotImplementedException(); }
                 }
+
+
+                public Interfaces.Repository1.IPostalAddress NewPostalAddress(string streetAddress, string city, string zipCode, string country)
+                {
+                    throw new NotImplementedException();
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -210,8 +216,8 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                 private EfEntityRepository<Interfaces.Repository1.IOrder, EntityObject_Order> m_Orders;
                 private EfEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product> m_Products;
 
-                public DataRepositoryObject_CustomNames(ITypeMetadataCache metadataCache, DbConnection connection, bool autoCommit)
-                    : base(new HardCodedEntityFactory(), GetOrBuildDbCompiledModel(metadataCache, connection), connection, autoCommit)
+                public DataRepositoryObject_CustomNames(IComponentContext components, ITypeMetadataCache metadataCache, DbConnection connection, bool autoCommit)
+                    : base(components, new HardCodedEntityFactory(), GetOrBuildDbCompiledModel(metadataCache, connection), connection, autoCommit)
                 {
                     this.m_Categories = new EfEntityRepository<Interfaces.Repository1.ICategory, EntityObject_Category>(this);
                     this.m_Products = new EfEntityRepository<Interfaces.Repository1.IProduct, EntityObject_Product>(this);
@@ -460,6 +466,12 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                 {
                     throw new NotImplementedException();
                 }
+
+
+                public Interfaces.Repository1.IPostalAddress NewPostalAddress(string streetAddress, string city, string zipCode, string country)
+                {
+                    throw new NotImplementedException();
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -562,6 +574,17 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                     get { return m_Status; }
                     set { m_Status = value; }
                 }
+
+
+                public Interfaces.Repository1.IPostalAddress DeliveryAddress
+                {
+                    get { throw new NotImplementedException(); }
+                }
+
+                public Interfaces.Repository1.IPostalAddress BillingAddress
+                {
+                    get { throw new NotImplementedException(); }
+                }
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -641,11 +664,11 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                         }
                         return this.m_Attributes_ContractValue;
                     }
-                    set
-                    {
-                        this.m_Attributes_ContractValue = value;
-                        this.m_Attributes_ValueState = DualValueStates.Contract;
-                    }
+                    //set
+                    //{
+                    //    this.m_Attributes_ContractValue = value;
+                    //    this.m_Attributes_ValueState = DualValueStates.Contract;
+                    //}
                 }
 
                 public virtual string Attributes

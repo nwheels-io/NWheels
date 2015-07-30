@@ -1,32 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data;
 using Autofac;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
-using MongoDB.Driver;
-using NWheels.DataObjects;
-using NWheels.Entities;
-using NWheels.Exceptions;
-using System.Reflection;
-using Hapil.Members;
-using NWheels.Conventions;
-using NWheels.DataObjects.Core;
-using System.Data;
-using System.Linq.Expressions;
 using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
 using NWheels.Conventions.Core;
-using NWheels.Extensions;
+using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
+using NWheels.Entities;
 using TT = Hapil.TypeTemplate;
 
 // ReSharper disable ConvertToLambdaExpression
 
-namespace NWheels.Stacks.MongoDb.Impl
+namespace NWheels.Stacks.MongoDb.Factories
 {
     public class MongoDataRepositoryFactory : DataRepositoryFactoryBase
     {

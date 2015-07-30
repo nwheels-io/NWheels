@@ -16,12 +16,6 @@ namespace NWheels.DataObjects.Core.Factories
         private readonly ObjectFactoryContext _factoryContext;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly ITypeMetadata _metaType;
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        /// <summary>
-        /// Can be null; if null, this instance is a prototype, otherwise this instance is a property-specific clone
-        /// </summary>
         private readonly IPropertyMetadata _metaProperty;
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -36,15 +30,17 @@ namespace NWheels.DataObjects.Core.Factories
             {
                 throw new ArgumentNullException("factoryContext");
             }
-
             if ( metadataCache == null )
             {
                 throw new ArgumentNullException("metadataCache");
             }
-
             if ( metaType == null )
             {
                 throw new ArgumentNullException("metaType");
+            }
+            if ( metaProperty == null )
+            {
+                throw new ArgumentNullException("metaProperty");
             }
 
             _factoryContext = factoryContext;
@@ -55,37 +51,18 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool ShouldApply(IPropertyMetadata metaProperty)
+        public void WritePropertyImplementation(ImplementationClassWriter<TT.TInterface> implementationWriter)
         {
-            ValidateCurrentInstanceIsPrototype();
-            return OnShouldApply(metaProperty);
+            OnBeforeImplementation(implementationWriter);
+            OnImplementContractProperty(implementationWriter);
+            OnImplementStorageProperty(implementationWriter);
+            OnAfterImplementation(implementationWriter);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public PropertyImplementationStrategy Clone(IPropertyMetadata metaProperty)
+        public void WriteInitialization(MethodWriterBase initializationConstructorWriter, Operand<IComponentContext> components)
         {
-            ValidateCurrentInstanceIsPrototype();
-            return OnClone(metaProperty);
-        }
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void WritePropertyImplementation(ClassWriterBase classWriter)
-        {
-            ValidateCurrentInstanceIsClone();
-            
-            OnBeforeImplementation(classWriter);
-            OnImplementContractProperty(classWriter);
-            OnImplementStorageProperty(classWriter);
-            OnAfterImplementation(classWriter);
-        }
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void WriteInitialization(MethodWriterBase initializationConstructorWriter, IOperand<IComponentContext> components)
-        {
-            ValidateCurrentInstanceIsClone();
             OnWritingInitializationConstructor(initializationConstructorWriter, components);
         }
 
@@ -93,23 +70,20 @@ namespace NWheels.DataObjects.Core.Factories
 
         public void WriteMaterialization(MethodWriterBase materializationConstructorWriter)
         {
-            ValidateCurrentInstanceIsClone();
             OnWritingMaterializationConstructor(materializationConstructorWriter);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void WriteResolveDependencies(MethodWriterBase writer, IOperand<IComponentContext> components)
+        public void WriteResolveDependencies(ClassWriterBase classWriter, MethodWriterBase methodWriter, Operand<IComponentContext> components)
         {
-            ValidateCurrentInstanceIsClone();
-            OnWritingResolveDependencies(writer, components);
+            OnWritingResolveDependencies(classWriter, methodWriter, components);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void WriteDeepListNestedObjects(MethodWriterBase writer, IOperand<HashSet<object>> nestedObjects)
+        public void WriteDeepListNestedObjects(MethodWriterBase writer, Operand<HashSet<object>> nestedObjects)
         {
-            ValidateCurrentInstanceIsClone();
             OnWritingDeepListNestedObjects(writer, nestedObjects);
         }
 
@@ -117,7 +91,6 @@ namespace NWheels.DataObjects.Core.Factories
 
         public void WriteSerializingCallback(MethodWriterBase callbackMethodWriter)
         {
-            ValidateCurrentInstanceIsClone();
             OnWritingSerializingCallback(callbackMethodWriter);
         }
 
@@ -125,7 +98,6 @@ namespace NWheels.DataObjects.Core.Factories
 
         public void WriteDeserializedCallback(MethodWriterBase callbackMethodWriter)
         {
-            ValidateCurrentInstanceIsClone();
             OnWritingDeserializedCallback(callbackMethodWriter);
         }
 
@@ -171,16 +143,6 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool IsPrototype
-        {
-            get
-            {
-                return (_metaProperty == null);
-            }
-        }
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
         public bool HasDependencies
         {
             get
@@ -201,19 +163,11 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected Type FindStorageType(Type contractType)
+        protected Type FindImpementationType(Type contractType)
         {
             var storageTypeKey = new TypeKey(primaryInterface: contractType);
             return _factoryContext.Factory.FindDynamicType(storageTypeKey);
         }
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected abstract bool OnShouldApply(IPropertyMetadata metaProperty);
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected abstract PropertyImplementationStrategy OnClone(IPropertyMetadata metaProperty);
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -231,27 +185,27 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void OnBeforeImplementation(ClassWriterBase writer)
+        protected virtual void OnBeforeImplementation(ImplementationClassWriter<TT.TInterface> writer)
         {
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
         
-        protected abstract void OnImplementContractProperty(ClassWriterBase writer);
+        protected abstract void OnImplementContractProperty(ImplementationClassWriter<TT.TInterface> writer);
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected abstract void OnImplementStorageProperty(ClassWriterBase writer);
+        protected abstract void OnImplementStorageProperty(ImplementationClassWriter<TT.TInterface> writer);
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void OnAfterImplementation(ClassWriterBase writer)
+        protected virtual void OnAfterImplementation(ImplementationClassWriter<TT.TInterface> writer)
         {
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void OnWritingInitializationConstructor(MethodWriterBase writer, IOperand<IComponentContext> components)
+        protected virtual void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components)
         {
         }
 
@@ -263,7 +217,7 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void OnWritingResolveDependencies(MethodWriterBase writer, IOperand<IComponentContext> components)
+        protected virtual void OnWritingResolveDependencies(ClassWriterBase classWriter, MethodWriterBase methodWriter, Operand<IComponentContext> components)
         {
         }
 
@@ -287,27 +241,73 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ValidateCurrentInstanceIsPrototype()
+        protected void HelpInitializeDefaultValue(MethodWriterBase constructorWriter, Operand<IComponentContext> components)
         {
-            if ( !IsPrototype )
+            if ( MetaProperty.DefaultValue != null )
             {
-                throw new InvalidOperationException("Current instance is a clone, not a prototype. Requested operation is only allowed on prototype instances.");
+                WriteInitializeWithDefaultValue(constructorWriter, components);
+            }
+            else if ( MetaProperty.DefaultValueGeneratorType != null )
+            {
+                WriteInitializeWithGeneratedValue(constructorWriter, components);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        private void WriteInitializeWithDefaultValue(MethodWriterBase constructorWriter, Operand<IComponentContext> components)
+        {
+            var cw = constructorWriter;
+
+            IOperand<TT.TProperty> defaultValue;
+
+            if ( MetaProperty.TryGetDefaultValueOperand(cw, out defaultValue))
+            {
+                var backingField = cw.OwnerClass.GetPropertyBackingField(MetaProperty.ContractPropertyInfo).AsOperand<TT.TProperty>();
+                backingField.Assign(defaultValue);
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ValidateCurrentInstanceIsClone()
+        private void WriteInitializeWithGeneratedValue(MethodWriterBase constructorWriter, Operand<IComponentContext> components)
         {
-            if ( IsPrototype )
+            var cw = constructorWriter;
+
+            using ( TT.CreateScope<TT.TService>(MetaProperty.DefaultValueGeneratorType) )
             {
-                throw new InvalidOperationException("Current instance is a prototype, not a clone. Requested operation is only allowed on clone instances.");
+                var backingField = cw.OwnerClass.GetPropertyBackingField(MetaProperty.ContractPropertyInfo).AsOperand<TT.TProperty>();
+                backingField.Assign(
+                    components.Func<TT.TService>(x => x.Resolve<TT.TService>)
+                    .CastTo<IPropertyValueGenerator<TT.TProperty>>()
+                    .Func<string, TT.TProperty>(x => x.GenerateValue, cw.Const(MetaProperty.ContractQualifiedName)));
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static Type GetConcreteCollectionType(Type abstractCollectionType, Type elementType)
+        public static Type HelpGetConcreteCollectionOpenType(Type abstractCollectionType)
+        {
+            if ( !abstractCollectionType.IsConstructedGenericType || !abstractCollectionType.IsInterface) 
+            {
+                throw new ArgumentException("Expected generic collection interface", "abstractCollectionType");
+            }
+
+            var definition = abstractCollectionType.GetGenericTypeDefinition();
+
+            if ( definition == typeof(IList<>) )
+            {
+                return typeof(List<>);
+            }
+            else
+            {
+                return typeof(HashSet<>);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Type HelpGetConcreteCollectionType(Type abstractCollectionType, Type elementType)
         {
             if ( !abstractCollectionType.IsConstructedGenericType || !abstractCollectionType.IsInterface )
             {

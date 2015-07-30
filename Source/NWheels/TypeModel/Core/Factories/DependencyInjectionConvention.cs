@@ -17,12 +17,28 @@ namespace NWheels.TypeModel.Core.Factories
 {
     public class DependencyInjectionConvention : CompositeConvention
     {
+        private readonly PropertyImplementationStrategyMap _propertyStrategyMap;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public DependencyInjectionConvention(PropertyImplementationStrategyMap propertyStrategyMap)
             : base(
                 new ImplementIHaveDependencies(propertyStrategyMap), 
                 new CallInjectDependenciesFromInitializationConstructor())
         {
+            _propertyStrategyMap = propertyStrategyMap;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of CompositeConvention
+
+        public override bool ShouldApply(ObjectFactoryContext context)
+        {
+            return _propertyStrategyMap.Strategies.Any(strategy => strategy.HasDependencies);
+        }
+
+        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -44,9 +60,11 @@ namespace NWheels.TypeModel.Core.Factories
             {
                 writer.ImplementInterface<IHaveDependencies>()
                     .Method<IComponentContext>(x => x.InjectDependencies).Implement((m, components) => {
+                        writer.DependencyField<IComponentContext>("$components").Assign(components);
+                        
                         _propertyStrategyMap.InvokeStrategies(
                             predicate: strategy => strategy.HasDependencies,
-                            action: strategy => strategy.WriteResolveDependencies(m, components));
+                            action: strategy => strategy.WriteResolveDependencies(writer, m, components));
                     });
             }
         }
@@ -68,7 +86,7 @@ namespace NWheels.TypeModel.Core.Factories
 
             protected override void OnClass(ClassType classType, DecoratingClassWriter classWriter)
             {
-                _componentsField = classWriter.DependencyField<IComponentContext>("_components");
+                _componentsField = classWriter.DependencyField<IComponentContext>("$components");
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -77,7 +95,7 @@ namespace NWheels.TypeModel.Core.Factories
             {
                 if ( IsInitializationConstructor(member) )
                 {
-                    decorate().OnAfter(
+                    decorate().OnBefore(
                         m => {
                             m.This<IHaveDependencies>().Void<IComponentContext>(x => x.InjectDependencies, _componentsField);
                         });

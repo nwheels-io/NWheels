@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Hapil;
+using Hapil.Operands;
+using Hapil.Writers;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects.Core;
 
@@ -11,6 +14,7 @@ namespace NWheels.DataObjects
         bool HasContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute;
         TAttribute TryGetContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute;
         bool TryGetImplementation(Type factoryType, out PropertyInfo implementationProperty);
+        bool TryGetDefaultValueOperand(MethodWriterBase writer, out IOperand<TypeTemplate.TProperty> valueOperand);
         IEnumerable<KeyValuePair<Type, PropertyInfo>> GetAllImplementations();
         ITypeMetadata DeclaringContract { get; }
         string Name { get; }

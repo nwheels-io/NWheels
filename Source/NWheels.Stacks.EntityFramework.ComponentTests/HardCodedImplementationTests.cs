@@ -245,7 +245,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
             
             var connection = CreateDbConnection();
             connection.Open();
-            var repo = new HR1.DataRepositoryObject_DataRepository(connection, autoCommit: false);
+            var repo = new HR1.DataRepositoryObject_DataRepository(Framework.Components, connection, autoCommit: false);
             base.CompiledModel = repo.CompiledModel;
             return repo;
         }
@@ -282,7 +282,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 
             var connection = CreateDbConnection();
             connection.Open();
-            var repo = new HR1.DataRepositoryObject_CustomNames(metadataCache, connection, autoCommit: false);
+            var repo = new HR1.DataRepositoryObject_CustomNames(Framework.Components, metadataCache, connection, autoCommit: false);
             base.CompiledModel = repo.CompiledModel;
             return repo;
         }
