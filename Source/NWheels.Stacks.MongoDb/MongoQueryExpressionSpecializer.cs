@@ -4,8 +4,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using NWheels.DataObjects;
 using NWheels.Extensions;
+using NWheels.Stacks.MongoDb.Factories;
 
-namespace NWheels.Stacks.MongoDb.Factories
+namespace NWheels.Stacks.MongoDb
 {
     public class MongoQueryExpressionSpecializer
     {

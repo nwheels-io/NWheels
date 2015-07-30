@@ -4,8 +4,9 @@ using Autofac;
 using MongoDB.Driver;
 using NWheels.Conventions.Core;
 using NWheels.Entities.Core;
+using NWheels.Stacks.MongoDb.Factories;
 
-namespace NWheels.Stacks.MongoDb.Factories
+namespace NWheels.Stacks.MongoDb
 {
     public abstract class MongoDataRepositoryBase : UnitOfWorkDataRepositoryBase
     {

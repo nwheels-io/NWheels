@@ -10,7 +10,6 @@ using NUnit.Framework;
 using NWheels.Conventions.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
-using NWheels.Stacks.MongoDb.Impl;
 using NWheels.Testing;
 using NWheels.Testing.Entities.Stacks;
 using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;

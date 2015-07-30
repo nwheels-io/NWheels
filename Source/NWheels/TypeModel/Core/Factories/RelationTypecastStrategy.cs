@@ -77,7 +77,10 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components)
         {
-            HelpInitializeDefaultValue(writer, components);
+            using ( TT.CreateScope<TT.TValue>(_storageType) )
+            {
+                _storageField.Assign(writer.New<TT.TValue>(components));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

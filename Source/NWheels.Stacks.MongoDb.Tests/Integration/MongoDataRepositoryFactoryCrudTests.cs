@@ -18,7 +18,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
     [TestFixture]
     public class MongoDataRepositoryFactoryCrudTests : IntegrationTestBase
     {
-        public const string TestDatabaseName = "NWheelsHardCodedTest";
+        public const string TestDatabaseName = "NWheelsMongoCrudTests";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

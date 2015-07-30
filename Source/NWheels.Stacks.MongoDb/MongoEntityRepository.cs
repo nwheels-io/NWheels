@@ -12,9 +12,10 @@ using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
+using NWheels.Stacks.MongoDb.Factories;
 using NWheels.Utilities;
 
-namespace NWheels.Stacks.MongoDb.Factories
+namespace NWheels.Stacks.MongoDb
 {
     public class MongoEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>, IEntityRepository, IMongoEntityRepository
         where TEntityContract : class

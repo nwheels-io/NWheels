@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NWheels.Entities.Core;
 
-namespace NWheels.Stacks.MongoDb.Factories
+namespace NWheels.Stacks.MongoDb
 {
     internal interface IMongoEntityRepository
     {
