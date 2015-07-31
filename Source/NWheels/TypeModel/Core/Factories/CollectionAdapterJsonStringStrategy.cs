@@ -33,7 +33,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnWritingConcreteCollectionToStorageConversion(
             MethodWriterBase method, 
-            IOperand<TT.TConcrete2> concreteCollection, 
+            IOperand<TT.TConcreteCollection<TT.TConcrete>> concreteCollection, 
             MutableOperand<TT.TValue> storageValue)
         {
             storageValue.Assign(Static.Func(JsonConvert.SerializeObject, concreteCollection.CastTo<object>()).CastTo<TT.TValue>());
@@ -42,11 +42,14 @@ namespace NWheels.TypeModel.Core.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void OnWritingStorageToConcreteCollectionConversion(
-            MethodWriterBase method, 
-            MutableOperand<TT.TConcrete2> concreteCollection, 
+            MethodWriterBase method,
+            MutableOperand<TT.TConcreteCollection<TT.TConcrete>> concreteCollection, 
             IOperand<TT.TValue> storageValue)
         {
-            concreteCollection.Assign(Static.Func(JsonConvert.DeserializeObject<TT.TValue>, storageValue.CastTo<string>()).CastTo<TT.TConcrete2>());
+            concreteCollection.Assign(
+                Static.Func(JsonConvert.DeserializeObject<TT.TConcreteCollection<TT.TConcrete>>, storageValue.CastTo<string>())
+                .CastTo<TT.TConcreteCollection<TT.TConcrete>>()
+            );
         }
 
         #endregion

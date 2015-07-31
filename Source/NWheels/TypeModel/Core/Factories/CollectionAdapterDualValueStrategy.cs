@@ -22,8 +22,9 @@ namespace NWheels.TypeModel.Core.Factories
         private Type _itemContractType;
         private Type _itemConcreteType;
         private Type _concreteCollectionType;
-        private Field<ConcreteToAbstractCollectionAdapter<TT.TConcrete, TT.TAbstract>> _collectionAdapterField;
-        private Field<TT.TConcrete2> _concreteCollectionField;
+        private Type _collectionAdapterType;
+        private Field<TT.TAbstractCollection<TT.TAbstract>> _collectionAdapterField;
+        private Field<TT.TConcreteCollection<TT.TConcrete>> _concreteCollectionField;
         private Field<TT.TValue> _storageField;
         private Field<DualValueStates> _stateField;
 
@@ -49,14 +50,18 @@ namespace NWheels.TypeModel.Core.Factories
             MetaProperty.ContractPropertyInfo.PropertyType.IsCollectionType(out _itemContractType);
             _itemConcreteType = FindImpementationType(_itemContractType);
             _concreteCollectionType = HelpGetConcreteCollectionType(MetaProperty.ClrType, _itemConcreteType);
+            _collectionAdapterType = HelpGetCollectionAdapterType(MetaProperty.ClrType, _itemContractType, _itemConcreteType);
 
-            using ( TT.CreateScope<TT.TValue, TT.TConcrete, TT.TAbstract, TT.TConcrete2>(
-                _storageType, _itemConcreteType, _itemContractType, _concreteCollectionType) )
+            using ( TT.CreateScope<TT.TValue>(_storageType) )
             {
-                _collectionAdapterField = writer.Field<ConcreteToAbstractCollectionAdapter<TT.TConcrete, TT.TAbstract>>("m_" + MetaProperty.Name + "$adapter");
-                _concreteCollectionField = writer.Field<TT.TConcrete2>("m_" + MetaProperty.Name + "$concrete");
-                _storageField = writer.Field<TT.TValue>("m_" + MetaProperty.Name + "$storage");
-                _stateField = writer.Field<DualValueStates>("m_" + MetaProperty.Name + "$state");
+                using ( TT.CreateScope<TT.TAbstract, TT.TConcrete, TT.TAbstractCollection<TT.TAbstract>, TT.TConcreteCollection<TT.TConcrete>>(
+                    _itemContractType, _itemConcreteType, _collectionAdapterType, _concreteCollectionType) )
+                {
+                    _collectionAdapterField = writer.Field<TT.TAbstractCollection<TT.TAbstract>>("m_" + MetaProperty.Name + "$adapter");
+                    _concreteCollectionField = writer.Field<TT.TConcreteCollection<TT.TConcrete>>("m_" + MetaProperty.Name + "$concrete");
+                    _storageField = writer.Field<TT.TValue>("m_" + MetaProperty.Name + "$storage");
+                    _stateField = writer.Field<DualValueStates>("m_" + MetaProperty.Name + "$state");
+                }
             }
         }
 
@@ -64,13 +69,14 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnImplementContractProperty(ImplementationClassWriter<TT.TInterface> writer)
         {
-            using ( TT.CreateScope<TT.TValue, TT.TConcrete, TT.TAbstract>(_storageType, _itemConcreteType, _itemContractType) )
+            using ( TT.CreateScope<TT.TValue, TT.TConcreteCollection<TT.TConcrete>, TT.TAbstractCollection<TT.TAbstract>>(
+                _storageType, _concreteCollectionType, _collectionAdapterType) )
             {
                 writer.ImplementInterfaceExplicitly<TT.TInterface>().Property(MetaProperty.ContractPropertyInfo).Implement(
                     getter: p => p.Get(m => {
                         m.If(_stateField == DualValueStates.Storage).Then(() => {
                             OnWritingStorageToConcreteCollectionConversion(m, _concreteCollectionField, _storageField);
-                            _collectionAdapterField.Assign(m.New<ConcreteToAbstractCollectionAdapter<TT.TConcrete, TT.TAbstract>>(_concreteCollectionField));
+                            _collectionAdapterField.Assign(m.New<TT.TAbstractCollection<TT.TAbstract>>(_concreteCollectionField));
                             _stateField.Assign(_stateField | DualValueStates.Contract);
                         });
                         m.Return(_collectionAdapterField.CastTo<TT.TProperty>());
@@ -107,13 +113,38 @@ namespace NWheels.TypeModel.Core.Factories
         {
             base.OnWritingInitializationConstructor(writer, components);
 
-            using ( TT.CreateScope<TT.TContract, TT.TImpl, TT.TConcrete, TT.TConcrete2>(
-                _itemContractType, _itemConcreteType, _concreteCollectionType, _concreteCollectionType) )
+            using ( TT.CreateScope<TT.TAbstractCollection<TT.TAbstract>, TT.TConcreteCollection<TT.TConcrete>>(_collectionAdapterType, _concreteCollectionType) )
             {
-                _concreteCollectionField.Assign(writer.New<TT.TConcrete2>());
-                _collectionAdapterField.Assign(writer.New<ConcreteToAbstractCollectionAdapter<TT.TConcrete, TT.TAbstract>>(_concreteCollectionField));
+                _concreteCollectionField.Assign(writer.New<TT.TConcreteCollection<TT.TConcrete>>());
+                _collectionAdapterField.Assign(writer.New<TT.TAbstractCollection<TT.TAbstract>>(_concreteCollectionField));
                 _stateField.Assign(DualValueStates.Contract);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnWritingDeepListNestedObjects(MethodWriterBase writer, IOperand<HashSet<object>> nestedObjects)
+        {
+            var m = writer;
+
+            using ( TT.CreateScope<TT.TContract>(_itemContractType) )
+            {
+                nestedObjects.UnionWith(_collectionAdapterField.CastTo<IEnumerable<TT.TContract>>().Cast<object>());
+
+                if ( typeof(IHaveNestedObjects).IsAssignableFrom(_itemConcreteType) )
+                {
+                    m.ForeachElementIn(_collectionAdapterField.CastTo<IEnumerable<TT.TContract>>().OfType<IHaveNestedObjects>()).Do((loop, item) => {
+                        item.Void(x => x.DeepListNestedObjects, nestedObjects);
+                    });
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override bool OnHasNestedObjects()
+        {
+            return true;
         }
 
         #endregion
@@ -122,14 +153,14 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected abstract void OnWritingConcreteCollectionToStorageConversion(
             MethodWriterBase method,
-            IOperand<TT.TConcrete2> concreteCollection,
+            IOperand<TT.TConcreteCollection<TT.TConcrete>> concreteCollection,
             MutableOperand<TT.TValue> storageValue);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected abstract void OnWritingStorageToConcreteCollectionConversion(
             MethodWriterBase method,
-            MutableOperand<TT.TConcrete2> concreteCollection,
+            MutableOperand<TT.TConcreteCollection<TT.TConcrete>> concreteCollection,
             IOperand<TT.TValue> storageValue);
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

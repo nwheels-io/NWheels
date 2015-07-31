@@ -60,7 +60,7 @@ namespace NWheels.Testing.Entities.Impl
 
             builder.AddRule(
                 p => !(p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite),
-                p => new ScalarTypecastStrategy(context, MetadataCache, metaType, p));
+                p => new PublicAccessorWrapperStrategy(context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite,

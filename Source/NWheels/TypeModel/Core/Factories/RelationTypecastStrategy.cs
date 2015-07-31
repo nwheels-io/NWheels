@@ -77,9 +77,12 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components)
         {
-            using ( TT.CreateScope<TT.TValue>(_storageType) )
+            if ( MetaProperty.ClrType.IsEntityPartContract() )
             {
-                _storageField.Assign(writer.New<TT.TValue>(components));
+                using ( TT.CreateScope<TT.TValue>(_storageType) )
+                {
+                    _storageField.Assign(writer.New<TT.TValue>(components));
+                }
             }
         }
 

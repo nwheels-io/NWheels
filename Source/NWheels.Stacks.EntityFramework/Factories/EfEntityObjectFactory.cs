@@ -18,25 +18,25 @@ namespace NWheels.Stacks.EntityFramework.Factories
         {
         }
 
-        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
-        //{
-        //    var metaType = MetadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
-        //    var propertyMap = BuildPropertyStrategyMap(context, metaType);
+        protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
+        {
+            var metaType = MetadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
+            var propertyMap = BuildPropertyStrategyMap(context, metaType);
 
-        //    return new IObjectFactoryConvention[] {
-        //        new BaseTypeConvention(MetadataCache, metaType), 
-        //        new PropertyImplementationConvention(metaType, propertyMap),
-        //        new MaterializationConstructorConvention(metaType, propertyMap),
-        //        new InitializationConstructorConvention(metaType, propertyMap),
-        //        new ImplementIObjectConvention(), 
-        //        new ImplementIEntityObjectConvention(metaType), 
-        //        new ImplementIEntityPartObjectConvention(metaType), 
-        //        new DependencyInjectionConvention(propertyMap), 
-        //        new NestedObjectsConvention(propertyMap)
-        //    };
-        //}
+            return new IObjectFactoryConvention[] {
+                new BaseTypeConvention(MetadataCache, metaType), 
+                new PropertyImplementationConvention(metaType, propertyMap),
+                new MaterializationConstructorConvention(metaType, propertyMap),
+                new InitializationConstructorConvention(metaType, propertyMap),
+                new ImplementIObjectConvention(), 
+                new ImplementIEntityObjectConvention(metaType, propertyMap), 
+                new ImplementIEntityPartObjectConvention(metaType), 
+                new DependencyInjectionConvention(propertyMap), 
+                new NestedObjectsConvention(propertyMap)
+            };
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -44,14 +44,6 @@ namespace NWheels.Stacks.EntityFramework.Factories
         {
             var builder = new PropertyImplementationStrategyMap.Builder();
             Type collectionItemType;
-
-            //builder.AddRule(
-            //    p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityContract(),
-            //    p => new ArrayOfDocumentIdsStrategy(context, MetadataCache, metaType, p));
-
-            //builder.AddRule(
-            //    p => p.ClrType.IsEntityContract(),
-            //    p => new DocumentIdStrategy(context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityContract(),
@@ -62,12 +54,12 @@ namespace NWheels.Stacks.EntityFramework.Factories
                 p => new CollectionAdapterJsonStringStrategy(context, MetadataCache, metaType, p));
 
             builder.AddRule(
-                p => p.ClrType.IsEntityPartContract(),
+                p => p.ClrType.IsEntityContract() || p.ClrType.IsEntityPartContract(),
                 p => new RelationTypecastStrategy(context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Scalar && !(p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite),
-                p => new ScalarTypecastStrategy(context, MetadataCache, metaType, p));
+                p => new PublicAccessorWrapperStrategy(context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Scalar && p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite,

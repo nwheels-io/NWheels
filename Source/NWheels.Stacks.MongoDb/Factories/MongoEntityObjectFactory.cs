@@ -66,7 +66,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Scalar && !(p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite),
-                p => new ScalarTypecastStrategy(context, MetadataCache, metaType, p));
+                p => new PublicAccessorWrapperStrategy(context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Scalar && p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite,

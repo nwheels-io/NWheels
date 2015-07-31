@@ -30,7 +30,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnImplementContractProperty(ImplementationClassWriter<TT.TInterface> writer)
         {
-            writer.ImplementInterface<TT.TInterface>().Property(MetaProperty.ContractPropertyInfo).ImplementAutomatic();
+            writer.ImplementInterfaceVirtual<TT.TInterface>().Property(MetaProperty.ContractPropertyInfo).ImplementAutomatic();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

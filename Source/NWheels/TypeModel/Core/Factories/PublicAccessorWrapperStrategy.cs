@@ -15,13 +15,13 @@ using NWheels.DataObjects.Core;
 
 namespace NWheels.TypeModel.Core.Factories
 {
-    public class ScalarTypecastStrategy : PropertyImplementationStrategy
+    public class PublicAccessorWrapperStrategy : PropertyImplementationStrategy
     {
         private Field<TT.TProperty> _storageField;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ScalarTypecastStrategy(
+        public PublicAccessorWrapperStrategy(
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 

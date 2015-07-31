@@ -34,7 +34,7 @@ namespace NWheels.Testing
         private readonly LoggerObjectFactory _loggerFactory;
         private readonly ConfigurationObjectFactory _configurationFactory;
         private readonly TestDataRepositoryFactory _dataRepositoryFactory;
-        private readonly TypeMetadataCache _metadataCache;
+        //private readonly TypeMetadataCache _metadataCache;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -58,7 +58,7 @@ namespace NWheels.Testing
                 EnvironmentType = "TEST-ENV-TYPE"
             };
 
-            _metadataCache = CreateMetadataCacheWithDefaultConventions();
+            //_metadataCache = CreateMetadataCacheWithDefaultConventions();
             _dynamicModule = dynamicModule;
             _logAppender = new TestThreadLogAppender(this);
             _loggerFactory = new LoggerObjectFactory(_dynamicModule, _logAppender);
@@ -240,7 +240,10 @@ namespace NWheels.Testing
 
         public ITypeMetadataCache MetadataCache
         {
-            get { return _metadataCache; }
+            get
+            {
+                return _components.Resolve<ITypeMetadataCache>() /*_metadataCache*/;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -253,7 +256,10 @@ namespace NWheels.Testing
             builder.RegisterInstance(_dynamicModule).As<DynamicModule>();
             builder.RegisterType<ThreadRegistry>().SingleInstance();
             builder.RegisterGeneric(typeof(Auto<>)).SingleInstance();
-            builder.RegisterInstance(_metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();
+
+            var metadataCache = CreateMetadataCacheWithDefaultConventions();
+            builder.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();
+            
             builder.RegisterInstance(_loggerFactory).As<LoggerObjectFactory, IAutoObjectFactory>();
             builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory, IConfigurationObjectFactory, ConfigurationObjectFactory>().SingleInstance();
             builder.RegisterType<TestEntityObjectFactory>().As<IEntityObjectFactory, EntityObjectFactory, TestEntityObjectFactory>().SingleInstance();
