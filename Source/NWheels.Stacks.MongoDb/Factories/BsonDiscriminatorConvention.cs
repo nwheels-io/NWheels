@@ -26,7 +26,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         protected override bool ShouldApply(ObjectFactoryContext context)
         {
-            return true;//(_metaType.BaseType != null || _metaType.DerivedTypes.Count > 0);
+            return (_metaType.BaseType != null || _metaType.DerivedTypes.Count > 0);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

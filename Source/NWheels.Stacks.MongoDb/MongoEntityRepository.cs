@@ -197,14 +197,14 @@ namespace NWheels.Stacks.MongoDb
 
         void IMongoEntityRepository.CommitInsert(IEntityObject entity)
         {
-            _mongoCollection.Insert(entity);
+            _mongoCollection.Insert<TEntityImpl>((TEntityImpl)entity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         void IMongoEntityRepository.CommitUpdate(IEntityObject entity)
         {
-            _mongoCollection.Save(entity);
+            _mongoCollection.Save<TEntityImpl>((TEntityImpl)entity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -219,7 +219,7 @@ namespace NWheels.Stacks.MongoDb
         
         void IMongoEntityRepository.CommitInsert(IEnumerable<IEntityObject> entities)
         {
-            _mongoCollection.InsertBatch(entities.Cast<TEntityImpl>());
+            _mongoCollection.InsertBatch<TEntityImpl>(entities.Cast<TEntityImpl>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -228,7 +228,7 @@ namespace NWheels.Stacks.MongoDb
         {
             foreach ( var entity in entities )
             {
-                _mongoCollection.Save(entity);
+                _mongoCollection.Save<TEntityImpl>((TEntityImpl)entity);
             }
         }
 
