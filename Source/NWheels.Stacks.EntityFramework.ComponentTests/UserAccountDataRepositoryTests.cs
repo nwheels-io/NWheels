@@ -9,8 +9,7 @@ using NUnit.Framework;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.Entities;
-using NWheels.Stacks.EntityFramework.Conventions;
-using NWheels.Stacks.EntityFramework.Impl;
+using NWheels.Stacks.EntityFramework.Factories;
 using NWheels.Testing;
 using NWheels.Testing.DataObjects;
 using IR3A = NWheels.Testing.Entities.Stacks.Interfaces.Repository3A;
@@ -101,7 +100,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
         private EfDataRepositoryFactory CreateDataRepositoryFactory()
         {
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(GetRepositoryMixinsRegistrations());
-            var entityFactory = new EntityObjectFactory(Framework.Components, _dynamicModule, metadataCache);
+            var entityFactory = new EfEntityObjectFactory(Framework.Components, _dynamicModule, metadataCache);
             var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, ResolveAuto<IFrameworkDatabaseConfig>());
 
             return repoFactory;

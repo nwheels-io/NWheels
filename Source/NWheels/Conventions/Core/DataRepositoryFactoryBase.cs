@@ -289,6 +289,8 @@ namespace NWheels.Conventions.Core
 
             protected virtual void ImplementNewEntityMethods(ImplementationClassWriter<TT.TInterface> writer)
             {
+                EnsureAllContractsImplemented();
+
                 writer.AllMethods(IsNewEntityMethod).Implement(m => {
                     var entity = FindEntityInRepositoryByContract(m.OwnerMethod.Signature.ReturnType);
                     var entityImplementationType = EntityFactory.FindDynamicType(new TypeKey(primaryInterface: entity.ContractType));
@@ -305,6 +307,14 @@ namespace NWheels.Conventions.Core
                         m.Return(entityObjectLocal);
                     }
                 });
+            }
+
+            private void EnsureAllContractsImplemented()
+            {
+                foreach ( var entity in EntitiesInRepository )
+                {
+                    entity.EnsureImplementationType();
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

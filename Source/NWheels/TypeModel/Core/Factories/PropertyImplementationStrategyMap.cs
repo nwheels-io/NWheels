@@ -15,6 +15,7 @@ namespace NWheels.DataObjects.Core.Factories
     {
         private readonly List<StrategyRule> _strategyRules;
         private readonly Dictionary<IPropertyMetadata, PropertyImplementationStrategy> _map;
+        private HashSet<PropertyInfo> _baseProperties;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -36,6 +37,18 @@ namespace NWheels.DataObjects.Core.Factories
         public void InvokeStrategies(Func<PropertyImplementationStrategy, bool> predicate, Action<PropertyImplementationStrategy> action)
         {
             InvokeStrategies(this.Strategies.Where(predicate), action);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsImplementedByBaseEntity(PropertyInfo property)
+        {
+            if ( _baseProperties == null )
+            {
+                throw new InvalidOperationException("IsImplementedByBaseEntity can only be called after the map is built.");
+            }
+
+            return _baseProperties.Contains(property);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -95,8 +108,8 @@ namespace NWheels.DataObjects.Core.Factories
 
         private void BuildMap(ITypeMetadataCache metadataCache, ITypeMetadata metaType)
         {
-            var baseProperties = GetBaseContractProperties(metaType);
-            Func<IPropertyMetadata, bool> notImplementedByBaseEntity = p => !baseProperties.Contains(p.ContractPropertyInfo);
+            _baseProperties = GetBaseContractProperties(metaType);
+            Func<IPropertyMetadata, bool> notImplementedByBaseEntity = p => !_baseProperties.Contains(p.ContractPropertyInfo);
 
             foreach ( var metaProperty in metaType.Properties.Where(notImplementedByBaseEntity) )
             {

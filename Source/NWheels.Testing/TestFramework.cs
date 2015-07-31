@@ -256,7 +256,7 @@ namespace NWheels.Testing
             builder.RegisterInstance(_metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();
             builder.RegisterInstance(_loggerFactory).As<LoggerObjectFactory, IAutoObjectFactory>();
             builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory, IConfigurationObjectFactory, ConfigurationObjectFactory>().SingleInstance();
-            builder.RegisterType<EntityObjectFactory>().SingleInstance();
+            builder.RegisterType<TestEntityObjectFactory>().As<IEntityObjectFactory, EntityObjectFactory, TestEntityObjectFactory>().SingleInstance();
             builder.RegisterType<TestDataRepositoryFactory>().As<TestDataRepositoryFactory, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
             

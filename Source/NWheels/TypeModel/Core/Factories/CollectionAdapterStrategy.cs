@@ -21,8 +21,10 @@ namespace NWheels.TypeModel.Core.Factories
     {
         private Type _itemContractType;
         private Type _itemStorageType;
-        private Field<ICollection<TT.TImpl>> _storageField;
-        private Field<ConcreteToAbstractCollectionAdapter<TT.TImpl, TT.TContract>> _contractField;
+        private Type _storageCollectionType;
+        private Type _collectionAdapterType;
+        private Field<TT.TConcreteCollection<TT.TImpl>> _storageField;
+        private Field<TT.TAbstractCollection<TT.TContract>> _contractField;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -43,11 +45,14 @@ namespace NWheels.TypeModel.Core.Factories
         {
             MetaProperty.ContractPropertyInfo.PropertyType.IsCollectionType(out _itemContractType);
             _itemStorageType = FindImpementationType(_itemContractType);
+            _storageCollectionType = HelpGetConcreteCollectionType(MetaProperty.ClrType, _itemStorageType);
+            _collectionAdapterType = HelpGetCollectionAdapterType(MetaProperty.ClrType, _itemContractType, _itemStorageType); 
 
-            using ( TT.CreateScope<TT.TContract, TT.TImpl>(_itemContractType, _itemStorageType) )
+            using ( TT.CreateScope<TT.TContract, TT.TImpl, TT.TConcreteCollection<TT.TImpl>, TT.TAbstractCollection<TT.TContract>>(
+                _itemContractType, _itemStorageType, _storageCollectionType, _collectionAdapterType) )
             {
-                _storageField = writer.Field<ICollection<TT.TImpl>>("m_" + MetaProperty.Name + "$storage");
-                _contractField = writer.Field<ConcreteToAbstractCollectionAdapter<TT.TImpl, TT.TContract>>("m_" + MetaProperty.Name + "$adapter");
+                _storageField = writer.Field<TT.TConcreteCollection<TT.TImpl>>("m_" + MetaProperty.Name + "$storage");
+                _contractField = writer.Field<TT.TAbstractCollection<TT.TContract>>("m_" + MetaProperty.Name + "$adapter");
             }
         }
 
@@ -66,14 +71,15 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnImplementStorageProperty(ImplementationClassWriter<TT.TInterface> writer)
         {
-            using ( TT.CreateScope<TT.TContract, TT.TImpl>(_itemContractType, _itemStorageType) )
+            using (TT.CreateScope<TT.TContract, TT.TImpl, TT.TConcreteCollection<TT.TImpl>, TT.TAbstractCollection<TT.TContract>>(
+                _itemContractType, _itemStorageType, _storageCollectionType, _collectionAdapterType))
             {
-                writer.ImplementBase<object>().NewVirtualWritableProperty<ICollection<TT.TImpl>>(MetaProperty.Name).Implement(
+                writer.ImplementBase<object>().NewVirtualWritableProperty<TT.TConcreteCollection<TT.TImpl>>(MetaProperty.Name).Implement(
                     getter: p => p.Get(m => {
                         m.Return(_storageField);
                     }),
                     setter: p => p.Set((m, value) => {
-                        _contractField.Assign(m.New<ConcreteToAbstractCollectionAdapter<TT.TImpl, TT.TContract>>(value));
+                        _contractField.Assign(m.New<TT.TAbstractCollection<TT.TContract>>(value));
                         _storageField.Assign(value);
                     }));
             }
@@ -83,12 +89,14 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components)
         {
-            var concreteCollectionType = HelpGetConcreteCollectionType(MetaProperty.ClrType, _itemStorageType); 
+            var concreteCollectionType = HelpGetConcreteCollectionType(MetaProperty.ClrType, _itemStorageType);
+            var collectionAdapterType = HelpGetCollectionAdapterType(MetaProperty.ClrType, _itemContractType, _itemStorageType);
 
-            using ( TT.CreateScope<TT.TContract, TT.TImpl, TT.TCollection<TT.TImpl>>(_itemContractType, _itemStorageType, concreteCollectionType) )
+            using (TT.CreateScope<TT.TContract, TT.TImpl, TT.TConcreteCollection<TT.TImpl>, TT.TAbstractCollection<TT.TContract>>(
+                _itemContractType, _itemStorageType, _storageCollectionType, _collectionAdapterType))
             {
-                _storageField.Assign(writer.New<TT.TCollection<TT.TImpl>>());
-                _contractField.Assign(writer.New<ConcreteToAbstractCollectionAdapter<TT.TImpl, TT.TContract>>(_storageField));
+                _storageField.Assign(writer.New<TT.TConcreteCollection<TT.TImpl>>());
+                _contractField.Assign(writer.New<TT.TAbstractCollection<TT.TContract>>(_storageField));
             }
         }
 
@@ -98,13 +106,13 @@ namespace NWheels.TypeModel.Core.Factories
         {
             var m = writer;
 
-            using ( TT.CreateScope<TT.TItem>(_itemContractType) )
+            using ( TT.CreateScope<TT.TImpl>(_itemContractType) )
             {
-                nestedObjects.UnionWith(_contractField.CastTo<IEnumerable<TT.TItem>>().Cast<object>());
+                nestedObjects.UnionWith(_contractField.CastTo<IEnumerable<TT.TImpl>>().Cast<object>());
 
                 if ( typeof(IHaveNestedObjects).IsAssignableFrom(_itemStorageType) )
                 {
-                    m.ForeachElementIn(_contractField.CastTo<IEnumerable<TT.TItem>>().OfType<IHaveNestedObjects>()).Do((loop, item) => {
+                    m.ForeachElementIn(_contractField.CastTo<IEnumerable<TT.TImpl>>().OfType<IHaveNestedObjects>()).Do((loop, item) => {
                         item.Void(x => x.DeepListNestedObjects, nestedObjects);
                     });
                 }

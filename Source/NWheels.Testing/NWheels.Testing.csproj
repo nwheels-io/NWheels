@@ -83,6 +83,8 @@
     <Compile Include="DynamicTypeUnitTestBase.cs" />
     <Compile Include="Entities\Impl\TestDataRepositoryBase.cs" />
     <Compile Include="Entities\Impl\TestDataRepositoryFactory.cs" />
+    <Compile Include="Entities\Impl\TestEntityObjectFactory.cs" />
+    <Compile Include="Entities\Impl\TestIdGeneratorConvention.cs" />
     <Compile Include="Entities\Impl\TestIdMetadataConvention.cs" />
     <Compile Include="Entities\Impl\TestIntIdValueGenerator.cs" />
     <Compile Include="Entities\Stacks\CrudOperations.cs" />

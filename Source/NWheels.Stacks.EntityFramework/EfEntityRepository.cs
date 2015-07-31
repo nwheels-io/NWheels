@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Data.Entity.Core.Objects;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data.Entity;
-using Autofac;
 using NWheels.DataObjects;
 using NWheels.Entities;
 
-namespace NWheels.Stacks.EntityFramework.Impl
+namespace NWheels.Stacks.EntityFramework
 {
     public class EfEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>, IEntityRepository
         where TEntityContract : class

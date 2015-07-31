@@ -10,11 +10,11 @@ namespace NWheels.DataObjects.Core
     public class TypeMetadataBuilder : MetadataElement<ITypeMetadata>, ITypeMetadata
     {
         private readonly object _relationalMappingSyncRoot = new object();
-        private readonly ConcreteToAbstractCollectionAdapter<TypeMetadataBuilder, ITypeMetadata> _derivedTypesAdapter;
-        private readonly ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _propertiesAdapter;
-        private readonly ConcreteToAbstractCollectionAdapter<KeyMetadataBuilder, IKeyMetadata> _allKeysAdapter;
-        private readonly ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultDisplayPropertiesAdapter;
-        private readonly ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultSortPropertiesAdapter;
+        private readonly ConcreteToAbstractListAdapter<TypeMetadataBuilder, ITypeMetadata> _derivedTypesAdapter;
+        private readonly ConcreteToAbstractListAdapter<PropertyMetadataBuilder, IPropertyMetadata> _propertiesAdapter;
+        private readonly ConcreteToAbstractListAdapter<KeyMetadataBuilder, IKeyMetadata> _allKeysAdapter;
+        private readonly ConcreteToAbstractListAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultDisplayPropertiesAdapter;
+        private readonly ConcreteToAbstractListAdapter<PropertyMetadataBuilder, IPropertyMetadata> _defaultSortPropertiesAdapter;
         private readonly ConcurrentDictionary<Type, Type> _implementationTypeByFactoryType;
         private Dictionary<string, PropertyMetadataBuilder> _propertyByName;
         private Dictionary<PropertyInfo, PropertyMetadataBuilder> _propertyByDeclaration;
@@ -30,11 +30,11 @@ namespace NWheels.DataObjects.Core
             this.DefaultDisplayProperties = new List<PropertyMetadataBuilder>();
             this.DefaultSortProperties = new List<PropertyMetadataBuilder>();
 
-            _derivedTypesAdapter = new ConcreteToAbstractCollectionAdapter<TypeMetadataBuilder, ITypeMetadata>(this.DerivedTypes);
-            _propertiesAdapter = new ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.Properties);
-            _allKeysAdapter = new ConcreteToAbstractCollectionAdapter<KeyMetadataBuilder, IKeyMetadata>(this.AllKeys);
-            _defaultDisplayPropertiesAdapter = new ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.DefaultDisplayProperties);
-            _defaultSortPropertiesAdapter = new ConcreteToAbstractCollectionAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.DefaultSortProperties);
+            _derivedTypesAdapter = new ConcreteToAbstractListAdapter<TypeMetadataBuilder, ITypeMetadata>(this.DerivedTypes);
+            _propertiesAdapter = new ConcreteToAbstractListAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.Properties);
+            _allKeysAdapter = new ConcreteToAbstractListAdapter<KeyMetadataBuilder, IKeyMetadata>(this.AllKeys);
+            _defaultDisplayPropertiesAdapter = new ConcreteToAbstractListAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.DefaultDisplayProperties);
+            _defaultSortPropertiesAdapter = new ConcreteToAbstractListAdapter<PropertyMetadataBuilder, IPropertyMetadata>(this.DefaultSortProperties);
             _implementationTypeByFactoryType = new ConcurrentDictionary<Type, Type>();
         }
 

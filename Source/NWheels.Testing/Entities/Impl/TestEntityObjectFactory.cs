@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Autofac;
 using Hapil;
 using NWheels.Conventions.Core;
@@ -9,11 +13,11 @@ using NWheels.Entities.Factories;
 using NWheels.Extensions;
 using NWheels.TypeModel.Core.Factories;
 
-namespace NWheels.Stacks.MongoDb.Factories
+namespace NWheels.Testing.Entities.Impl
 {
-    public class MongoEntityObjectFactory : EntityObjectFactory
+    public class TestEntityObjectFactory : EntityObjectFactory
     {
-        public MongoEntityObjectFactory(IComponentContext components, DynamicModule module, TypeMetadataCache metadataCache)
+        public TestEntityObjectFactory(IComponentContext components, DynamicModule module, TypeMetadataCache metadataCache)
             : base(components, module, metadataCache)
         {
         }
@@ -24,7 +28,7 @@ namespace NWheels.Stacks.MongoDb.Factories
         {
             var metaType = MetadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
             var propertyMap = BuildPropertyStrategyMap(context, metaType);
-            
+
             return new IObjectFactoryConvention[] {
                 new BaseTypeConvention(MetadataCache, metaType), 
                 new PropertyImplementationConvention(metaType, propertyMap),
@@ -35,9 +39,7 @@ namespace NWheels.Stacks.MongoDb.Factories
                 new ImplementIEntityPartObjectConvention(metaType), 
                 new DependencyInjectionConvention(propertyMap), 
                 new NestedObjectsConvention(propertyMap), 
-                new ObjectIdGeneratorConvention(metaType), 
-                new BsonIgnoreConvention(MetadataCache, metaType),
-                new BsonDiscriminatorConvention(context, MetadataCache, metaType) 
+                new TestIdGeneratorConvention(metaType), 
             };
         }
 
@@ -49,15 +51,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             Type collectionItemType;
 
             builder.AddRule(
-                p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityContract(), 
-                p => new ArrayOfDocumentIdsStrategy(context, MetadataCache, metaType, p));
-
-            builder.AddRule(
-                p => p.ClrType.IsEntityContract(),
-                p => new DocumentIdStrategy(context, MetadataCache, metaType, p));
-            
-            builder.AddRule(
-                p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityPartContract(),
+                p => p.ClrType.IsCollectionType(out collectionItemType) && (collectionItemType.IsEntityPartContract() || collectionItemType.IsEntityContract()),
                 p => new CollectionAdapterStrategy(context, MetadataCache, metaType, p));
 
             builder.AddRule(
@@ -65,11 +59,11 @@ namespace NWheels.Stacks.MongoDb.Factories
                 p => new RelationTypecastStrategy(context, MetadataCache, metaType, p));
 
             builder.AddRule(
-                p => p.Kind == PropertyKind.Scalar && !(p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite),
+                p => !(p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite),
                 p => new ScalarTypecastStrategy(context, MetadataCache, metaType, p));
 
             builder.AddRule(
-                p => p.Kind == PropertyKind.Scalar && p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite,
+                p => p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite,
                 p => new AutomaticPropertyStrategy(context, MetadataCache, metaType, p));
 
             return builder.Build(MetadataCache, metaType);

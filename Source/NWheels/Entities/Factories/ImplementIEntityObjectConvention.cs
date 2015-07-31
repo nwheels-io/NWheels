@@ -1,6 +1,7 @@
 ﻿using Hapil;
 using Hapil.Writers;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core.Factories;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
@@ -10,13 +11,15 @@ namespace NWheels.Entities.Factories
     public class ImplementIEntityObjectConvention : ImplementationConvention
     {
         private readonly ITypeMetadata _metaType;
+        private readonly PropertyImplementationStrategyMap _propertStrategyrMap;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ImplementIEntityObjectConvention(ITypeMetadata metaType)
+        public ImplementIEntityObjectConvention(ITypeMetadata metaType, PropertyImplementationStrategyMap propertStrategyrMap)
             : base(Will.ImplementBaseClass)
         {
             _metaType = metaType;
+            _propertStrategyrMap = propertStrategyrMap;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,7 +30,9 @@ namespace NWheels.Entities.Factories
         {
             return (
                 context.TypeKey.PrimaryInterface.IsEntityContract() && 
-                _metaType.PrimaryKey.Properties[0].DeclaringContract == _metaType);
+                _metaType.PrimaryKey != null &&
+                _metaType.PrimaryKey.Properties[0].DeclaringContract == _metaType &&
+                !_propertStrategyrMap.IsImplementedByBaseEntity(_metaType.PrimaryKey.Properties[0].ContractPropertyInfo));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -51,6 +56,7 @@ namespace NWheels.Entities.Factories
                     }
                 });
 
+            
         }
 
         #endregion

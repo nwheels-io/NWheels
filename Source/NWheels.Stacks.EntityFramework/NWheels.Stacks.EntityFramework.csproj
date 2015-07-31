@@ -74,17 +74,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Conventions\EfDataRepositoryFactory.cs" />
-    <Compile Include="Conventions\EfEntityObjectFactory.cs" />
+    <Compile Include="Factories\EfDataRepositoryFactory.cs" />
+    <Compile Include="Factories\EfEntityObjectFactory.cs" />
     <Compile Include="EFConventions\NoUnderscoreForeignKeyNamingConvention.cs" />
-    <Compile Include="Conventions\EfEntityConfigurationWriter.cs" />
-    <Compile Include="Impl\EfModelApi.cs" />
-    <Compile Include="Impl\EfDataRepositoryBase.cs" />
-    <Compile Include="Impl\EfEntityRepository.cs" />
-    <Compile Include="Impl\IDbCommandLogger.cs" />
-    <Compile Include="Impl\EfLoggingDbCommandInterceptor.cs" />
-    <Compile Include="Impl\QueryExpressionSpecializer.cs" />
-    <Compile Include="Impl\UnitOfWork.cs" />
+    <Compile Include="Factories\EfEntityConfigurationWriter.cs" />
+    <Compile Include="EfModelApi.cs" />
+    <Compile Include="EfDataRepositoryBase.cs" />
+    <Compile Include="EfEntityRepository.cs" />
+    <Compile Include="IDbCommandLogger.cs" />
+    <Compile Include="EfLoggingDbCommandInterceptor.cs" />
+    <Compile Include="QueryExpressionSpecializer.cs" />
+    <Compile Include="UnitOfWork.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="MySqlFeatureLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

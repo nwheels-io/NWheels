@@ -12,8 +12,7 @@ using NWheels.Conventions.Core;
 using NWheels.DataObjects.Core.Conventions;
 using NWheels.Entities;
 using NWheels.Entities.Core;
-using NWheels.Stacks.EntityFramework.Conventions;
-using NWheels.Stacks.EntityFramework.Impl;
+using NWheels.Stacks.EntityFramework.Factories;
 using NWheels.Testing;
 using NWheels.Testing.Entities.Stacks;
 using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;
@@ -160,7 +159,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new IMetadataConvention[] {
                 new DefaultIdMetadataConvention(typeof(int)) 
             });
-            var entityFactory = new EntityObjectFactory(Framework.Components, _dynamicModule, metadataCache);
+            var entityFactory = new EfEntityObjectFactory(Framework.Components, _dynamicModule, metadataCache);
             var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, configAuto);
             
             return repoFactory;

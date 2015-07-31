@@ -278,7 +278,7 @@ namespace NWheels.DataObjects.Core.Factories
             {
                 var backingField = cw.OwnerClass.GetPropertyBackingField(MetaProperty.ContractPropertyInfo).AsOperand<TT.TProperty>();
                 backingField.Assign(
-                    components.Func<TT.TService>(x => x.Resolve<TT.TService>)
+                    Static.Func(ResolutionExtensions.Resolve<TT.TService>, components)
                     .CastTo<IPropertyValueGenerator<TT.TProperty>>()
                     .Func<string, TT.TProperty>(x => x.GenerateValue, cw.Const(MetaProperty.ContractQualifiedName)));
             }
@@ -323,6 +323,27 @@ namespace NWheels.DataObjects.Core.Factories
             else
             {
                 return typeof(HashSet<>).MakeGenericType(elementType);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Type HelpGetCollectionAdapterType(Type abstractCollectionType, Type abstractElementType, Type concreteElementType)
+        {
+            if ( !abstractCollectionType.IsConstructedGenericType || !abstractCollectionType.IsInterface)
+            {
+                throw new ArgumentException("Expected generic collection interface", "abstractCollectionType");
+            }
+
+            var definition = abstractCollectionType.GetGenericTypeDefinition();
+
+            if (definition == typeof(IList<>))
+            {
+                return typeof(ConcreteToAbstractListAdapter<,>).MakeGenericType(concreteElementType, abstractElementType);
+            }
+            else
+            {
+                return typeof(ConcreteToAbstractCollectionAdapter<,>).MakeGenericType(concreteElementType, abstractElementType);
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using Autofac;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
@@ -12,13 +13,19 @@ namespace NWheels.Testing.Entities.Impl
 {
     public class TestDataRepositoryFactory : DataRepositoryFactoryBase
     {
+        private readonly IComponentContext _components;
         private readonly EntityObjectFactory _entityFactory;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TestDataRepositoryFactory(DynamicModule module, TypeMetadataCache metadataCache, EntityObjectFactory entityFactory)
+        public TestDataRepositoryFactory(
+            IComponentContext components, 
+            DynamicModule module, 
+            TypeMetadataCache metadataCache, 
+            TestEntityObjectFactory entityFactory)
             : base(module, metadataCache)
         {
+            _components = components;
             _entityFactory = entityFactory;
         }
 
@@ -26,7 +33,7 @@ namespace NWheels.Testing.Entities.Impl
 
         public override IApplicationDataRepository NewUnitOfWork(Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
         {
-            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(_entityFactory, autoCommit);
+            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(_components, _entityFactory, autoCommit);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -34,15 +41,15 @@ namespace NWheels.Testing.Entities.Impl
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
             return new IObjectFactoryConvention[] {
-                new TestEntityDataRepositoryConvention(base.MetadataCache, _entityFactory)
+                new TestDataRepositoryConvention(base.MetadataCache, _entityFactory)
             };
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class TestEntityDataRepositoryConvention : DataRepositoryConvention
+        public class TestDataRepositoryConvention : DataRepositoryConvention
         {
-            public TestEntityDataRepositoryConvention(TypeMetadataCache metadataCache, EntityObjectFactory entityFactory)
+            public TestDataRepositoryConvention(TypeMetadataCache metadataCache, EntityObjectFactory entityFactory)
                 : base(metadataCache, entityFactory)
             {
                 base.RepositoryBaseType = typeof(TestDataRepositoryBase);

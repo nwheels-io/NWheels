@@ -4,21 +4,17 @@ using System.Collections.Generic;
 namespace NWheels.DataObjects.Core
 {
     public class ConcreteToAbstractCollectionAdapter<TConcrete, TAbstract> : 
-        ICollection<TAbstract>, 
-        IList<TAbstract>, 
-        IReadOnlyCollection<TAbstract>, 
-        IReadOnlyList<TAbstract>
+        ICollection<TAbstract>,
+        IReadOnlyCollection<TAbstract>
         where TConcrete : TAbstract
     {
         private readonly ICollection<TConcrete> _innerCollection;
-        private readonly IList<TConcrete> _innerList;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ConcreteToAbstractCollectionAdapter(ICollection<TConcrete> innerCollection)
         {
             _innerCollection = innerCollection;
-            _innerList = (innerCollection as IList<TConcrete>);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,26 +53,6 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public int Count
-        {
-            get
-            {
-                return _innerCollection.Count;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public bool IsReadOnly
-        {
-            get
-            {
-                return _innerCollection.IsReadOnly;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public bool Remove(TAbstract item)
         {
             return _innerCollection.Remove((TConcrete)item);
@@ -98,41 +74,21 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public int IndexOf(TAbstract item)
-        {
-            ValidateInnerList();
-            return _innerList.IndexOf((TConcrete)item);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void Insert(int index, TAbstract item)
-        {
-            ValidateInnerList();
-            _innerList.Insert(index, (TConcrete)item);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void RemoveAt(int index)
-        {
-            ValidateInnerList();
-            _innerList.RemoveAt(index);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public TAbstract this[int index]
+        public int Count
         {
             get
             {
-                ValidateInnerList();
-                return _innerList[index];
+                return _innerCollection.Count;
             }
-            set
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsReadOnly
+        {
+            get
             {
-                ValidateInnerList();
-                _innerList[index] = (TConcrete)value;
+                return _innerCollection.IsReadOnly;
             }
         }
 
@@ -142,7 +98,61 @@ namespace NWheels.DataObjects.Core
         {
             get
             {
-                return (_innerList ?? _innerCollection);
+                return _innerCollection;
+            }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    public class ConcreteToAbstractListAdapter<TConcrete, TAbstract> : 
+        ConcreteToAbstractCollectionAdapter<TConcrete, TAbstract>, 
+        IList<TAbstract>,
+        IReadOnlyList<TAbstract>
+        where TConcrete : TAbstract
+    {
+        private readonly IList<TConcrete> _innerList;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public ConcreteToAbstractListAdapter(IList<TConcrete> innerList)
+            : base(innerList)
+        {
+            _innerList = innerList;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public int IndexOf(TAbstract item)
+        {
+            return _innerList.IndexOf((TConcrete)item);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Insert(int index, TAbstract item)
+        {
+            _innerList.Insert(index, (TConcrete)item);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RemoveAt(int index)
+        {
+            _innerList.RemoveAt(index);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TAbstract this[int index]
+        {
+            get
+            {
+                return _innerList[index];
+            }
+            set
+            {
+                _innerList[index] = (TConcrete)value;
             }
         }
 
@@ -153,16 +163,6 @@ namespace NWheels.DataObjects.Core
             get
             {
                 return _innerList;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected void ValidateInnerList()
-        {
-            if ( _innerList == null )
-            {
-                throw new InvalidOperationException("The inner collection is not an IList<T>.");
             }
         }
     }

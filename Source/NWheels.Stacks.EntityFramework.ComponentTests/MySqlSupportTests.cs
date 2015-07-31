@@ -12,11 +12,10 @@ using MySql.Data.MySqlClient;
 using NUnit.Framework;
 using NWheels.Conventions.Core;
 using NWheels.Entities;
-using NWheels.Stacks.EntityFramework.Conventions;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
 using NWheels.Entities.Core;
-using NWheels.Stacks.EntityFramework.Impl;
+using NWheels.Stacks.EntityFramework.Factories;
 using NWheels.Testing;
 using NWheels.Testing.Entities.Stacks;
 using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;
@@ -172,7 +171,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                 new IRelationalMappingConvention[] { new PascalCaseRelationalMappingConvention(usePluralTableNames: true) });
 
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions();
-            var entityFactory = new EntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
+            var entityFactory = new EfEntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
             var repoFactory = new EfDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache, new MySqlClientFactory(), configAuto);
             return repoFactory;
         }

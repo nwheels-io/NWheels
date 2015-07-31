@@ -274,6 +274,16 @@ namespace NWheels.Conventions.Core
                         getter: p => p.Get(m => m.Return(backingField.CastTo<TT.TProperty>())),
                         setter: p => p.Set((m, value) => backingField.Assign(value.CastTo<TT.TValue>()))
                     );
+
+                    _initializers.Add(new Action<ConstructorWriter>(cw => {
+                        if ( cw.OwnerMethod.Signature.ArgumentCount > 0 )
+                        {
+                            using ( TT.CreateScope<TT.TValue>(entityType) )
+                            {
+                                backingField.Assign(cw.New<TT.TValue>(cw.Arg1<IComponentContext>()));
+                            }
+                        }
+                    }));
                 }
             }
 
@@ -289,23 +299,23 @@ namespace NWheels.Conventions.Core
                 var entityTypeKey = new TypeKey(primaryInterface: entityContractType);
                 var entityType = base.Context.Factory.FindDynamicType(entityTypeKey);
 
-                using ( TT.CreateScope<TT.TValue, TT.TItem>(entityType, entityContractType) )
+                using ( TT.CreateScope<TT.TConcrete, TT.TAbstract>(entityType, entityContractType) )
                 {
-                    var backingField = explicitImplementation.Field<ICollection<TT.TValue>>("m_" + property.Name);
-                    var adapterField = explicitImplementation.Field<CollectionAdapter<TT.TValue, TT.TItem>>("m_" + property.Name + "_Adapter");
+                    var backingField = explicitImplementation.Field<ICollection<TT.TConcrete>>("m_" + property.Name);
+                    var adapterField = explicitImplementation.Field<ConcreteToAbstractCollectionAdapter<TT.TConcrete, TT.TAbstract>>("m_" + property.Name + "_Adapter");
 
                     _initializers.Add(new Action<ConstructorWriter>(cw => {
-                        using ( TT.CreateScope<TT.TValue, TT.TItem>(entityType, entityContractType) )
+                        using ( TT.CreateScope<TT.TConcrete, TT.TAbstract>(entityType, entityContractType) )
                         {
-                            backingField.Assign(cw.New<HashSet<TT.TValue>>());
-                            adapterField.Assign(cw.New<CollectionAdapter<TT.TValue, TT.TItem>>(backingField));
+                            backingField.Assign(cw.New<HashSet<TT.TConcrete>>());
+                            adapterField.Assign(cw.New<ConcreteToAbstractCollectionAdapter<TT.TConcrete, TT.TAbstract>>(backingField));
                         }
                     }));
 
-                    explicitImplementation.NewVirtualWritableProperty<ICollection<TT.TValue>>(property.Name).Implement(
+                    explicitImplementation.NewVirtualWritableProperty<ICollection<TT.TConcrete>>(property.Name).Implement(
                         getter: p => p.Get(m => m.Return(backingField)),
                         setter: p => p.Set((m, value) => {
-                            adapterField.Assign(m.New<CollectionAdapter<TT.TValue, TT.TItem>>(value));
+                            adapterField.Assign(m.New<ConcreteToAbstractCollectionAdapter<TT.TConcrete, TT.TAbstract>>(value));
                             backingField.Assign(value);
                         }));
 
@@ -489,6 +499,7 @@ namespace NWheels.Conventions.Core
                 return (
                     propertyMetadata.Kind == PropertyKind.Scalar &&
                     propertyMetadata.RelationalMapping.StorageType == null &&
+                    !property.PropertyType.IsCollectionType() &&
                     !(property.CanRead && property.CanWrite));
             }
 
@@ -526,7 +537,7 @@ namespace NWheels.Conventions.Core
                     return false;
                 }
 
-                return (!property.PropertyType.IsCollectionType() && IsEntityContract(property.PropertyType));
+                return (!property.PropertyType.IsCollectionType() && (property.PropertyType.IsEntityContract() || property.PropertyType.IsEntityPartContract()));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -539,7 +550,7 @@ namespace NWheels.Conventions.Core
                 }
 
                 Type itemType;
-                return (property.PropertyType.IsCollectionType(out itemType) && IsEntityContract(itemType));
+                return (property.PropertyType.IsCollectionType(out itemType) && (itemType.IsEntityContract() || itemType.IsEntityPartContract()));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

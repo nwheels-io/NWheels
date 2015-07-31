@@ -12,8 +12,7 @@ using NWheels.Conventions.Core;
 using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Hosting;
-using NWheels.Stacks.EntityFramework.Conventions;
-using NWheels.Stacks.EntityFramework.Impl;
+using NWheels.Stacks.EntityFramework.Factories;
 
 namespace NWheels.Stacks.EntityFramework
 {
@@ -21,6 +20,7 @@ namespace NWheels.Stacks.EntityFramework
     {
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterType<EfEntityObjectFactory>().SingleInstance();
             builder.RegisterType<EfDataRepositoryFactory>().As<IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterInstance(SqlClientFactory.Instance).As<DbProviderFactory>();
 

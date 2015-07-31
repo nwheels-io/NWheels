@@ -63,7 +63,6 @@ namespace NWheels.Testing.Entities.Stacks
 
                 string TitleForUser { get; set; }
 
-                [PropertyContract.Storage.Json]
                 IList<IAttributeValue> Values { get; }
             }
 

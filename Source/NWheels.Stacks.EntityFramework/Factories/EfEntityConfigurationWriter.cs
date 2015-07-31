@@ -1,25 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration;
-using System.Data.Entity.ModelConfiguration.Configuration;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
-using NWheels.Entities;
-using NWheels.DataObjects;
-using System.Linq.Expressions;
-using Hapil.Members;
 using NWheels.Conventions.Core;
+using NWheels.DataObjects;
 using NWheels.Extensions;
-using NWheels.Stacks.EntityFramework.Impl;
 using TT = Hapil.TypeTemplate;
 
-namespace NWheels.Stacks.EntityFramework.Conventions
+namespace NWheels.Stacks.EntityFramework.Factories
 {
     internal class EfEntityConfigurationWriter
     {

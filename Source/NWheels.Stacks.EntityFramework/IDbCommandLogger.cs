@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.Logging;
+﻿using NWheels.Logging;
 
-namespace NWheels.Stacks.EntityFramework.Impl
+namespace NWheels.Stacks.EntityFramework
 {
     public interface IDbCommandLogger : IApplicationEventLogger
     {

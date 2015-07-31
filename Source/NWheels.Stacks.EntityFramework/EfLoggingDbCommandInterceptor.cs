@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity.Infrastructure.Interception;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data.Entity.Infrastructure.Interception;
 using NWheels.Hosting;
 
-namespace NWheels.Stacks.EntityFramework.Impl
+namespace NWheels.Stacks.EntityFramework
 {
     internal class EfLoggingDbCommandInterceptor : LifecycleEventListenerBase, IDbCommandInterceptor
     {
