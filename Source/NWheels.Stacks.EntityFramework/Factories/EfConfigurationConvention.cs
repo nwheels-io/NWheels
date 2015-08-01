@@ -6,9 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
+using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core.Factories;
+using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Stacks.EntityFramework.Factories
@@ -37,18 +39,39 @@ namespace NWheels.Stacks.EntityFramework.Factories
             {
                 writer.NewStaticVoidMethod<ITypeMetadataCache, DbModelBuilder>("ConfigureEfModel", arg1: "metadataCache", arg2: "modelBuilder")
                     .Implement((w, metadataCache, builder) => {
-                        var typeMetadataLocal = w.Local<ITypeMetadata>();
-                        var entityTypeConfigLocal = w.Local<EntityTypeConfiguration<TT.TImpl>>();
-
-                        typeMetadataLocal.Assign(metadataCache.Func<Type, ITypeMetadata>(x => x.GetTypeMetadata, w.Const(_metaType.ContractType)));
-                        entityTypeConfigLocal.Assign(Static.Func(EfModelApi.EntityType<TT.TImpl>, builder, typeMetadataLocal));
-
-                        foreach ( var strategy in _propertyMap.Strategies.OfType<EfPropertyImplementationStrategy>() )
+                        if ( _metaType.ContractType.IsEntityContract() )
                         {
-                            strategy.Configurator.OnWritingEfModelConfiguration(w, builder, typeMetadataLocal, entityTypeConfigLocal);
+                            ConfigureEntityType(w, metadataCache, builder);
+                        }
+                        else
+                        {
+                            ConfigureComplexType(w, metadataCache, builder);
                         }
                     });
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ConfigureEntityType(VoidMethodWriter w, Argument<ITypeMetadataCache> metadataCache, Argument<DbModelBuilder> builder)
+        {
+            var typeMetadataLocal = w.Local<ITypeMetadata>();
+            var entityTypeConfigLocal = w.Local<EntityTypeConfiguration<TT.TImpl>>();
+
+            typeMetadataLocal.Assign(metadataCache.Func<Type, ITypeMetadata>(x => x.GetTypeMetadata, w.Const(_metaType.ContractType)));
+            entityTypeConfigLocal.Assign(Static.Func(EfModelApi.EntityType<TT.TImpl>, builder, typeMetadataLocal));
+
+            foreach ( var strategy in _propertyMap.Strategies.OfType<EfPropertyImplementationStrategy>() )
+            {
+                strategy.Configurator.OnWritingEfModelConfiguration(w, builder, typeMetadataLocal, entityTypeConfigLocal);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ConfigureComplexType(VoidMethodWriter w, Argument<ITypeMetadataCache> metadataCache, Argument<DbModelBuilder> builder)
+        {
+            Static.Void(EfModelApi.ComplexType<TT.TImpl>, builder);
         }
     }
 }

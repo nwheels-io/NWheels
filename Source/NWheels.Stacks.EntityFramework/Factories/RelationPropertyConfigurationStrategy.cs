@@ -36,7 +36,8 @@ namespace NWheels.Stacks.EntityFramework.Factories
             switch ( MetaProperty.Relation.Multiplicity )
             {
                 case RelationMultiplicity.ManyToOne:
-                    using ( TT.CreateScope<TT.TImpl2>(relatedPartyImplementationType) )
+                case RelationMultiplicity.ManyToMany:
+                    using (TT.CreateScope<TT.TImpl2>(relatedPartyImplementationType))
                     {
                         Static.GenericFunc(
                             (e, p) => EfModelApi.ManyToOneRelationProperty<TT.TImpl, TT.TImpl2>(e, p),
@@ -44,8 +45,8 @@ namespace NWheels.Stacks.EntityFramework.Factories
                             typeMetadata.Func<string, IPropertyMetadata>(x => x.GetPropertyByName, m.Const(MetaProperty.Name)));
                     }
                     break;
-                case RelationMultiplicity.ManyToMany:
-                    break;
+                //case RelationMultiplicity.ManyToMany:
+                //    break;
             }
         }
 

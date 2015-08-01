@@ -8,6 +8,7 @@ using System.Reflection;
 using Hapil;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core.Factories;
 using NWheels.Extensions;
 using NWheels.Stacks.EntityFramework.Factories;
 
@@ -39,6 +40,14 @@ namespace NWheels.Stacks.EntityFramework
             }
 
             return entityConfiguration;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void ComplexType<TEntity>(DbModelBuilder builder)
+            where TEntity : class
+        {
+            builder.ComplexType<TEntity>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -117,6 +126,34 @@ namespace NWheels.Stacks.EntityFramework
             foreignKey.Map(m => m.MapKey(new[] { manyProperty.RelationalMapping.ColumnName }));
             return foreignKey;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //public static ForeignKeyNavigationPropertyConfiguration ManyToManyRelationProperty<TThisEntity, TOtherEntity>(
+        //    EntityTypeConfiguration<TThisEntity> thisEntity,
+        //    PropertyImplementationStrategy implementor)
+        //    where TThisEntity : class
+        //    where TOtherEntity : class
+        //{
+        //    var required = thisEntity
+        //        .HasMany<TOtherEntity>(PropertyExpression<TThisEntity, ICollection<TOtherEntity>>(thisProperty.GetImplementationBy<EfEntityObjectFactory>()))
+        //        .WithMany(PropertyExpression<TOtherEntity, ICollection<TThisEntity>>(thisProperty.))
+
+        //    ForeignKeyNavigationPropertyConfiguration foreignKey;
+
+        //    if (thisProperty.Relation.InverseProperty != null && thisProperty.Relation.InverseProperty.ClrType.IsCollectionType())
+        //    {
+        //        foreignKey = required.WithMany(PropertyExpression<TOneEntity, ICollection<TManyEntity>>(
+        //            thisProperty.Relation.InverseProperty.GetImplementationBy<EfEntityObjectFactory>()));
+        //    }
+        //    else
+        //    {
+        //        foreignKey = required.WithMany();
+        //    }
+
+        //    foreignKey.Map(m => m.MapKey(new[] { thisProperty.RelationalMapping.ColumnName }));
+        //    return foreignKey;
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

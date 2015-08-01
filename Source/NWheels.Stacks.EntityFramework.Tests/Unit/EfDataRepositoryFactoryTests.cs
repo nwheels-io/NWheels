@@ -19,14 +19,22 @@ namespace NWheels.Stacks.EntityFramework.Tests.Unit
     public class EfDataRepositoryFactoryTests : DynamicTypeUnitTestBase
     {
         [Test]
-        public void CanCreateDataRepository()
+        public void CanCreateHardCodedDataRepository()
         {
-            FactoryOperations.Repository1.ExecuteDataRepositoryCreation(Framework, CreateDataRepositoryFactory);
+            FactoryOperations.Repository1.ExecuteDataRepositoryCreation(Framework, CreateHardCodedDataRepositoryFactory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private DataRepositoryFactoryBase CreateDataRepositoryFactory()
+        [Test]
+        public void CanCreateDynamicDataRepository()
+        {
+            FactoryOperations.Repository1.ExecuteDataRepositoryCreation(Framework, CreateDynamicDataRepositoryFactory);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private DataRepositoryFactoryBase CreateDynamicDataRepositoryFactory()
         {
             var connectionString = ConfigurationManager.ConnectionStrings["test"];
             var dbProviderName = connectionString.ProviderName;
@@ -41,6 +49,22 @@ namespace NWheels.Stacks.EntityFramework.Tests.Unit
                 (TypeMetadataCache)Framework.MetadataCache,
                 dbProviderFactory,
                 Auto.Of(dbConfig));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private DataRepositoryFactoryBase CreateHardCodedDataRepositoryFactory()
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["test"];
+            var dbProviderName = connectionString.ProviderName;
+            var dbProviderFactory = DbProviderFactories.GetFactory(dbProviderName);
+            var dbConfig = Framework.ConfigSection<IFrameworkDatabaseConfig>();
+            dbConfig.ConnectionString = connectionString.ConnectionString;
+
+            return new HardCodedImplementations.DataRepositoryFactory_OnlineStoreRepository(
+                Framework,
+                base.DyamicModule,
+                (TypeMetadataCache)Framework.MetadataCache);
         }
     }
 }
