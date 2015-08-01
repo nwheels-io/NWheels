@@ -5,11 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using Hapil;
+using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core.Factories;
 using TT = Hapil.TypeTemplate;
+using System.Reflection;
 
 namespace NWheels.TypeModel.Core.Factories
 {
@@ -30,7 +32,13 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnImplementContractProperty(ImplementationClassWriter<TT.TInterface> writer)
         {
-            writer.ImplementInterfaceVirtual<TT.TInterface>().Property(MetaProperty.ContractPropertyInfo).ImplementAutomatic();
+            writer.ImplementInterfaceVirtual<TT.TInterface>().Property(MetaProperty.ContractPropertyInfo).Implement(
+                p => p.Get(m => {
+                    base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+                    m.Return(p.BackingField);
+                }),
+                p => p.Set((m, value) => p.BackingField.Assign(value))
+            );
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

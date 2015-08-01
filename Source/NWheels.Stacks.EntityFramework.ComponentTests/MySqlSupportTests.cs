@@ -172,7 +172,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
 
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions();
             var entityFactory = new EfEntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
-            var repoFactory = new EfDataRepositoryFactory(_dyamicModule, entityFactory, metadataCache, new MySqlClientFactory(), configAuto);
+            var repoFactory = new EfDataRepositoryFactory(Framework.Components, _dyamicModule, entityFactory, metadataCache, new MySqlClientFactory(), configAuto);
             return repoFactory;
         }
 

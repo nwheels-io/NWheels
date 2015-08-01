@@ -11,7 +11,7 @@ using TT = Hapil.TypeTemplate;
 
 namespace NWheels.DataObjects.Core.Factories
 {
-    public abstract class PropertyImplementationStrategy
+    public abstract class PropertyImplementationStrategy : IPropertyImplementationStrategy
     {
         private readonly ObjectFactoryContext _factoryContext;
         private readonly ITypeMetadataCache _metadataCache;
@@ -163,6 +163,24 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public PropertyInfo ImplementedContractProperty { get; protected set; }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public PropertyInfo ImplementedStorageProperty { get; protected set; }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public PropertyInfo ImplementedStorageOrContractProperty
+        {
+            get
+            {
+                return ImplementedStorageProperty ?? ImplementedContractProperty;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected Type FindImpementationType(Type contractType)
         {
             var storageTypeKey = new TypeKey(primaryInterface: contractType);
@@ -190,7 +208,7 @@ namespace NWheels.DataObjects.Core.Factories
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
-        
+
         protected abstract void OnImplementContractProperty(ImplementationClassWriter<TT.TInterface> writer);
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -47,8 +47,20 @@ namespace NWheels.TypeModel.Core.Factories
             var canWrite = MetaProperty.ContractPropertyInfo.CanWrite;
 
             writer.Property(MetaProperty.ContractPropertyInfo).Implement(
-                getter: p => canRead ? p.Get(m => m.Return(_storageField)) : null,
-                setter: p => canWrite ? p.Set((m, value) => _storageField.Assign(value)) : null
+                getter: p => 
+                    canRead 
+                    ? p.Get(m => {
+                        base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+                        m.Return(_storageField);
+                    }) 
+                    : null,
+                setter: p => 
+                    canWrite 
+                    ? p.Set((m, value) => {
+                        base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+                        _storageField.Assign(value);
+                    }) 
+                    : null
             );
 
             writer.OwnerClass.SetPropertyBackingField(base.MetaProperty.ContractPropertyInfo, _storageField);
@@ -58,7 +70,15 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnImplementStorageProperty(ImplementationClassWriter<TT.TInterface> writer)
         {
-            writer.ImplementBase<object>().NewVirtualWritableProperty<TT.TProperty>(MetaProperty.Name).ImplementAutomatic(_storageField);
+            writer.ImplementBase<object>().NewVirtualWritableProperty<TT.TProperty>(MetaProperty.Name).Implement(
+                p => p.Get(m => {
+                    base.ImplementedStorageProperty = p.OwnerProperty.PropertyBuilder;
+                    m.Return(_storageField);
+                }),
+                p => p.Set((m, value) => 
+                    _storageField.Assign(value)
+                )
+            );
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

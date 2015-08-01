@@ -58,10 +58,13 @@ namespace NWheels.TypeModel.Core.Factories
             {
                 writer.Property(MetaProperty.ContractPropertyInfo).Implement(
                     getter: p => p.Get(m => {
+                        base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+
                         m.If(_stateField == DualValueStates.Storage).Then(() => {
                             OnWritingStorageToContractConversion(m, _contractField, _storageField);
                             _stateField.Assign(_stateField | DualValueStates.Contract);
                         });
+
                         m.Return(_contractField);
                     }),
                     setter: p => p.Set((m, value) => {
@@ -80,10 +83,13 @@ namespace NWheels.TypeModel.Core.Factories
             {
                 writer.ImplementBase<object>().NewVirtualWritableProperty<TT.TValue>(MetaProperty.Name).Implement(
                     getter: p => p.Get(m => {
+                        base.ImplementedStorageProperty = p.OwnerProperty.PropertyBuilder;
+                        
                         m.If(_stateField == DualValueStates.Contract).Then(() => {
                             OnWritingContractToStorageConversion(m, _contractField, _storageField);
                             _stateField.Assign(_stateField | DualValueStates.Storage);
                         });
+
                         m.Return(_storageField);
                     }),
                     setter: p => p.Set((m, value) => {

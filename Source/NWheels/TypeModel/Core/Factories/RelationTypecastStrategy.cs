@@ -55,8 +55,20 @@ namespace NWheels.TypeModel.Core.Factories
             using ( TT.CreateScope<TT.TValue>(_storageType) )
             {
                 writer.Property(MetaProperty.ContractPropertyInfo).Implement(
-                    getter: p => canRead ? p.Get(m => m.Return(_storageField.CastTo<TT.TProperty>())) : null,
-                    setter: p => canWrite ? p.Set((m, value) => _storageField.Assign(value.CastTo<TT.TValue>())) : null
+                    getter: p => 
+                        canRead 
+                        ? p.Get(m => {
+                            base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+                            m.Return(_storageField.CastTo<TT.TProperty>());
+                        }) 
+                        : null,
+                    setter: p => 
+                        canWrite 
+                        ? p.Set((m, value) => {
+                            base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+                            _storageField.Assign(value.CastTo<TT.TValue>());
+                        }) 
+                        : null
                 );
 
                 writer.OwnerClass.SetPropertyBackingField(base.MetaProperty.ContractPropertyInfo, _storageField);
@@ -69,7 +81,15 @@ namespace NWheels.TypeModel.Core.Factories
         {
             using ( TT.CreateScope<TT.TValue>(_storageType) )
             {
-                writer.ImplementBase<object>().NewVirtualWritableProperty<TT.TValue>(MetaProperty.Name).ImplementAutomatic(_storageField);
+                writer.ImplementBase<object>().NewVirtualWritableProperty<TT.TValue>(MetaProperty.Name).Implement(
+                    p => p.Get(m => {
+                        base.ImplementedStorageProperty = p.OwnerProperty.PropertyBuilder;
+                        m.Return(_storageField);
+                    }),
+                    p => p.Set((m, value) =>
+                        _storageField.Assign(value)
+                    )
+                );
             }
         }
 

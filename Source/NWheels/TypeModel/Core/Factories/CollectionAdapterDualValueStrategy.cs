@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
@@ -13,6 +14,7 @@ using NWheels.DataObjects.Core.Factories;
 using NWheels.DataObjects.Core.StorageTypes;
 using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
+using Hapil.Members;
 
 namespace NWheels.TypeModel.Core.Factories
 {
@@ -74,11 +76,14 @@ namespace NWheels.TypeModel.Core.Factories
             {
                 writer.ImplementInterfaceExplicitly<TT.TInterface>().Property(MetaProperty.ContractPropertyInfo).Implement(
                     getter: p => p.Get(m => {
+                        base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+                        
                         m.If(_stateField == DualValueStates.Storage).Then(() => {
                             OnWritingStorageToConcreteCollectionConversion(m, _concreteCollectionField, _storageField);
                             _collectionAdapterField.Assign(m.New<TT.TAbstractCollection<TT.TAbstract>>(_concreteCollectionField));
                             _stateField.Assign(_stateField | DualValueStates.Contract);
                         });
+                        
                         m.Return(_collectionAdapterField.CastTo<TT.TProperty>());
                     })
                 );
@@ -93,10 +98,13 @@ namespace NWheels.TypeModel.Core.Factories
             {
                 writer.ImplementBase<object>().NewVirtualWritableProperty<TT.TValue>(MetaProperty.Name).Implement(
                     getter: p => p.Get(m => {
+                        base.ImplementedStorageProperty = p.OwnerProperty.PropertyBuilder;
+
                         m.If(_stateField == DualValueStates.Contract).Then(() => {
                             OnWritingConcreteCollectionToStorageConversion(m, _concreteCollectionField, _storageField);
                             _stateField.Assign(_stateField | DualValueStates.Storage);
                         });
+
                         m.Return(_storageField);
                     }),
                     setter: p => p.Set((m, value) => {

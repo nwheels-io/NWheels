@@ -46,7 +46,42 @@ namespace NWheels.Testing.Entities.Stacks
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public static void ExecuteDataRepositoryCreation(TestFramework framework, Func<DataRepositoryFactoryBase> factoryFactory)
+            {
+                //-- arrange
+
+                SetupFrameworkForDataRepositoryFactory(framework);
+                var factory = factoryFactory();
+
+                //-- act
+
+                var repository = factory.NewUnitOfWork<IR1.IOnlineStoreRepository>(autoCommit: false);
+
+                //-- assert
+
+                Assert.That(repository.Products, Is.Not.Null);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private static void SetupFrameworkForEntityFactory(TestFramework framework)
+            {
+                SetupFrameworkForDataRepositoryFactory(framework);
+
+                var metadataCache = (TypeMetadataCache)framework.MetadataCache;
+
+                var attributeMetaType = metadataCache.GetTypeMetadata(typeof(IR1.IAttribute));
+                var categoryMetaType = metadataCache.GetTypeMetadata(typeof(IR1.ICategory));
+                var productMetaType = metadataCache.GetTypeMetadata(typeof(IR1.IProduct));
+                var orderMetaType = metadataCache.GetTypeMetadata(typeof(IR1.IOrder));
+                var orderLineMetaType = metadataCache.GetTypeMetadata(typeof(IR1.IOrderLine));
+
+                metadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(metadataCache));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static void SetupFrameworkForDataRepositoryFactory(TestFramework framework)
             {
                 var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new IMetadataConvention[] {
                     new DefaultIdMetadataConvention(typeof(int)),

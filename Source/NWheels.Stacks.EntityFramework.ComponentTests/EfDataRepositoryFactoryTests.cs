@@ -160,7 +160,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
                 new DefaultIdMetadataConvention(typeof(int)) 
             });
             var entityFactory = new EfEntityObjectFactory(Framework.Components, _dynamicModule, metadataCache);
-            var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, configAuto);
+            var repoFactory = new EfDataRepositoryFactory(Framework.Components, _dynamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, configAuto);
             
             return repoFactory;
         }

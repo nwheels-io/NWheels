@@ -101,7 +101,7 @@ namespace NWheels.Stacks.EntityFramework.ComponentTests
         {
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(GetRepositoryMixinsRegistrations());
             var entityFactory = new EfEntityObjectFactory(Framework.Components, _dynamicModule, metadataCache);
-            var repoFactory = new EfDataRepositoryFactory(_dynamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, ResolveAuto<IFrameworkDatabaseConfig>());
+            var repoFactory = new EfDataRepositoryFactory(Framework.Components, _dynamicModule, entityFactory, metadataCache, SqlClientFactory.Instance, ResolveAuto<IFrameworkDatabaseConfig>());
 
             return repoFactory;
         }

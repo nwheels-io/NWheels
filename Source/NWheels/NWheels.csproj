@@ -109,10 +109,12 @@
     <Compile Include="TypeModel\Core\Factories\DependencyInjectionConvention.cs" />
     <Compile Include="TypeModel\Core\Factories\ImplementIObjectConvention.cs" />
     <Compile Include="TypeModel\Core\Factories\InitializationConstructorConvention.cs" />
+    <Compile Include="TypeModel\Core\Factories\IPropertyImplementationStrategy.cs" />
     <Compile Include="TypeModel\Core\Factories\MaterializationConstructorConvention.cs" />
     <Compile Include="TypeModel\Core\Factories\NestedObjectsConvention.cs" />
     <Compile Include="TypeModel\Core\Factories\PropertyImplementationStrategy.cs" />
     <Compile Include="TypeModel\Core\CrossTypeFixupMetadataVisitor.cs" />
+    <Compile Include="TypeModel\Core\Factories\PropertyImplementationStrategyDecorator.cs" />
     <Compile Include="TypeModel\Core\Factories\PropertyImplementationStrategyMap.cs" />
     <Compile Include="TypeModel\Core\Factories\PropertyImplementationConvention.cs" />
     <Compile Include="TypeModel\Core\Factories\AutomaticPropertyStrategy.cs" />

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using Hapil;
+using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
@@ -61,9 +63,10 @@ namespace NWheels.TypeModel.Core.Factories
         protected override void OnImplementContractProperty(ImplementationClassWriter<TT.TInterface> writer)
         {
             writer.Property(MetaProperty.ContractPropertyInfo).Implement(
-                getter: p => p.Get(
-                    m => m.Return(_contractField.CastTo<TT.TProperty>())
-                )
+                getter: p => p.Get(m => {
+                    base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+                    m.Return(_contractField.CastTo<TT.TProperty>());
+                })
             );
         }
 
@@ -71,11 +74,12 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnImplementStorageProperty(ImplementationClassWriter<TT.TInterface> writer)
         {
-            using (TT.CreateScope<TT.TContract, TT.TImpl, TT.TConcreteCollection<TT.TImpl>, TT.TAbstractCollection<TT.TContract>>(
-                _itemContractType, _itemStorageType, _storageCollectionType, _collectionAdapterType))
+            using ( TT.CreateScope<TT.TContract, TT.TImpl, TT.TConcreteCollection<TT.TImpl>, TT.TAbstractCollection<TT.TContract>>(
+                _itemContractType, _itemStorageType, _storageCollectionType, _collectionAdapterType) )
             {
                 writer.ImplementBase<object>().NewVirtualWritableProperty<TT.TConcreteCollection<TT.TImpl>>(MetaProperty.Name).Implement(
                     getter: p => p.Get(m => {
+                        base.ImplementedStorageProperty = p.OwnerProperty.PropertyBuilder;
                         m.Return(_storageField);
                     }),
                     setter: p => p.Set((m, value) => {

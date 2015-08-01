@@ -4,6 +4,8 @@ using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.ModelConfiguration.Conventions;
+using System.Reflection;
+using Autofac;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
@@ -20,6 +22,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
 {
     public class EfDataRepositoryFactory : DataRepositoryFactoryBase
     {
+        private readonly IComponentContext _components;
         private readonly DbProviderFactory _dbProvider;
         private readonly IFrameworkDatabaseConfig _config;
         private readonly ITypeMetadataCache _metadataCache;
@@ -28,6 +31,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public EfDataRepositoryFactory(
+            IComponentContext components,
             DynamicModule module,
             EfEntityObjectFactory entityFactory,
             TypeMetadataCache metadataCache,
@@ -35,9 +39,10 @@ namespace NWheels.Stacks.EntityFramework.Factories
             Auto<IFrameworkDatabaseConfig> config = null)
             : base(module, metadataCache)
         {
+            _components = components;
             _entityFactory = entityFactory;
             _dbProvider = dbProvider;
-            _config = config.Instance;
+            _config = (config != null ? config.Instance : null);
             _metadataCache = metadataCache;
         }
 
@@ -49,7 +54,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
             connection.ConnectionString = _config.ConnectionString;
             connection.Open();
 
-            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(_entityFactory, _metadataCache, connection, autoCommit);
+            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(_components, _entityFactory, _metadataCache, connection, autoCommit);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -84,22 +89,24 @@ namespace NWheels.Stacks.EntityFramework.Factories
                     m.New<NoUnderscoreForeignKeyNamingConvention>()
                 ));
 
-                var typeMetadataLocal = m.Local<ITypeMetadata>();
-                var entityTypeConfigurationLocal = m.Local<object>();
+                //var typeMetadataLocal = m.Local<ITypeMetadata>();
+                //var entityTypeConfigurationLocal = m.Local<object>();
 
                 foreach ( var entity in base.EntitiesInRepository )
                 {
                     entity.EnsureImplementationType();
 
-                    var entityConfigurationWriter = new EfEntityConfigurationWriter(
-                        entity.Metadata,
-                        m,
-                        modelBuilderLocal,
-                        metadataCache,
-                        typeMetadataLocal,
-                        entityTypeConfigurationLocal);
-
-                    entityConfigurationWriter.WriteEntityTypeConfiguration();
+                    var entityConfigurationMethod = entity.ImplementationType.GetMethod("ConfigureEfModel", BindingFlags.Public | BindingFlags.Static);
+                    Static.Void(entityConfigurationMethod, metadataCache, modelBuilderLocal);
+                    
+                    //var entityConfigurationWriter = new EfEntityConfigurationWriter(
+                    //    entity.Metadata,
+                    //    m,
+                    //    modelBuilderLocal,
+                    //    metadataCache,
+                    //    typeMetadataLocal,
+                    //    entityTypeConfigurationLocal);
+                    //entityConfigurationWriter.WriteEntityTypeConfiguration();
                 }
 
                 var modelLocal = m.Local(initialValue: modelBuilderLocal.Func<DbConnection, DbModel>(x => x.Build, connection));

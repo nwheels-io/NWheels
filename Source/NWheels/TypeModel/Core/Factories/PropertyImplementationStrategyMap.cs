@@ -14,7 +14,7 @@ namespace NWheels.DataObjects.Core.Factories
     public class PropertyImplementationStrategyMap
     {
         private readonly List<StrategyRule> _strategyRules;
-        private readonly Dictionary<IPropertyMetadata, PropertyImplementationStrategy> _map;
+        private readonly Dictionary<IPropertyMetadata, IPropertyImplementationStrategy> _map;
         private HashSet<PropertyInfo> _baseProperties;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -22,19 +22,19 @@ namespace NWheels.DataObjects.Core.Factories
         private PropertyImplementationStrategyMap()
         {
             _strategyRules = new List<StrategyRule>();
-            _map = new Dictionary<IPropertyMetadata, PropertyImplementationStrategy>();
+            _map = new Dictionary<IPropertyMetadata, IPropertyImplementationStrategy>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void InvokeStrategies(Action<PropertyImplementationStrategy> action)
+        public void InvokeStrategies(Action<IPropertyImplementationStrategy> action)
         {
             InvokeStrategies(strategy => true, action);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void InvokeStrategies(Func<PropertyImplementationStrategy, bool> predicate, Action<PropertyImplementationStrategy> action)
+        public void InvokeStrategies(Func<IPropertyImplementationStrategy, bool> predicate, Action<IPropertyImplementationStrategy> action)
         {
             InvokeStrategies(this.Strategies.Where(predicate), action);
         }
@@ -63,7 +63,7 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEnumerable<PropertyImplementationStrategy> Strategies
+        public IEnumerable<IPropertyImplementationStrategy> Strategies
         {
             get
             {
@@ -73,7 +73,7 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public PropertyImplementationStrategy this[IPropertyMetadata metaProperty]
+        public IPropertyImplementationStrategy this[IPropertyMetadata metaProperty]
         {
             get
             {
@@ -85,7 +85,7 @@ namespace NWheels.DataObjects.Core.Factories
 
         private void AddStrategyRule(
             Func<ITypeMetadataCache, ITypeMetadata, IPropertyMetadata, bool> condition,
-            Func<IPropertyMetadata, PropertyImplementationStrategy> strategyFactory)
+            Func<IPropertyMetadata, IPropertyImplementationStrategy> strategyFactory)
         {
             _strategyRules.Add(new StrategyRule(condition, strategyFactory));
         }
@@ -131,7 +131,7 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void InvokeStrategies(IEnumerable<PropertyImplementationStrategy> strategies, Action<PropertyImplementationStrategy> action)
+        public static void InvokeStrategies(IEnumerable<IPropertyImplementationStrategy> strategies, Action<IPropertyImplementationStrategy> action)
         {
             foreach ( var strategy in strategies )
             {
@@ -159,7 +159,7 @@ namespace NWheels.DataObjects.Core.Factories
 
             public void AddRule(
                 Func<IPropertyMetadata, bool> condition, 
-                Func<IPropertyMetadata, PropertyImplementationStrategy> strategyFactory)
+                Func<IPropertyMetadata, IPropertyImplementationStrategy> strategyFactory)
             {
                 AddRule((cache, type, property) => condition(property), strategyFactory);
             }
@@ -168,7 +168,7 @@ namespace NWheels.DataObjects.Core.Factories
 
             public void AddRule(
                 Func<ITypeMetadata, IPropertyMetadata, bool> condition, 
-                Func<IPropertyMetadata, PropertyImplementationStrategy> strategyFactory)
+                Func<IPropertyMetadata, IPropertyImplementationStrategy> strategyFactory)
             {
                 AddRule((cache, type, property) => condition(type, property), strategyFactory);
             }
@@ -177,7 +177,7 @@ namespace NWheels.DataObjects.Core.Factories
 
             public void AddRule(
                 Func<ITypeMetadataCache, ITypeMetadata, IPropertyMetadata, bool> condition, 
-                Func<IPropertyMetadata, PropertyImplementationStrategy> strategyFactory)
+                Func<IPropertyMetadata, IPropertyImplementationStrategy> strategyFactory)
             {
                 if ( _mapBeingBuilt == null )
                 {
@@ -203,7 +203,7 @@ namespace NWheels.DataObjects.Core.Factories
 
         private class StrategyRule
         {
-            public StrategyRule(Func<ITypeMetadataCache, ITypeMetadata, IPropertyMetadata, bool> condition, Func<IPropertyMetadata, PropertyImplementationStrategy> strategyFactory)
+            public StrategyRule(Func<ITypeMetadataCache, ITypeMetadata, IPropertyMetadata, bool> condition, Func<IPropertyMetadata, IPropertyImplementationStrategy> strategyFactory)
             {
                 this.Condition = condition;
                 this.StrategyFactory = strategyFactory;
@@ -212,7 +212,7 @@ namespace NWheels.DataObjects.Core.Factories
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public Func<ITypeMetadataCache, ITypeMetadata, IPropertyMetadata, bool> Condition { get; private set; }
-            public Func<IPropertyMetadata, PropertyImplementationStrategy> StrategyFactory { get; private set; }
+            public Func<IPropertyMetadata, IPropertyImplementationStrategy> StrategyFactory { get; private set; }
         }
     }
 }
