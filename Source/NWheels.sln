@@ -104,7 +104,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Network", "Network", "{6D002239-752E-44DE-8694-8DFC26A1A3FA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.Network", "NWheels.Stacks.Network\NWheels.Stacks.Network.csproj", "{EF5AE36A-4539-4DB0-8CBF-DCB906B6AA59}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.EntityFramework.Tests", "NWheels.Stacks.EntityFramework.Tests\NWheels.Stacks.EntityFramework.Tests.csproj", "{CE8B64BC-8E6B-4DF7-8DE7-48EB436007CA}"
 EndProject
 Global

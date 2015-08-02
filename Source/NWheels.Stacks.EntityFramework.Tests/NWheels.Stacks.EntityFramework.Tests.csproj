@@ -83,10 +83,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Hapil\Source\Hapil\Hapil.csproj">
-      <Project>{25e37cc2-7e18-4592-8102-dfbaa4ddd2a7}</Project>
-      <Name>Hapil</Name>
-    </ProjectReference>
+    
     <ProjectReference Include="..\NWheels.Stacks.EntityFramework\NWheels.Stacks.EntityFramework.csproj">
       <Project>{fa1fd78f-2906-477e-ad2f-55bb8ae19a75}</Project>
       <Name>NWheels.Stacks.EntityFramework</Name>

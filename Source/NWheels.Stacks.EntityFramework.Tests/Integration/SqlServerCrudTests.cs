@@ -21,7 +21,7 @@ using NWheels.Testing.Entities.Stacks;
 
 namespace NWheels.Stacks.EntityFramework.Tests.Integration
 {
-    [TestFixture]
+    [TestFixture, Category(TestCategory.Integration)]
     public class SqlServerCrudTests : DatabaseTestBase
     {
         private Hapil.DynamicModule _dynamicModule;
