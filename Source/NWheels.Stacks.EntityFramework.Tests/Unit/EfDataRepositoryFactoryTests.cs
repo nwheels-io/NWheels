@@ -64,7 +64,8 @@ namespace NWheels.Stacks.EntityFramework.Tests.Unit
             return new HardCodedImplementations.DataRepositoryFactory_OnlineStoreRepository(
                 Framework,
                 base.DyamicModule,
-                (TypeMetadataCache)Framework.MetadataCache);
+                (TypeMetadataCache)Framework.MetadataCache,
+                connectionString);
         }
     }
 }

@@ -22,7 +22,7 @@ using NWheels.Testing.Entities.Stacks;
 namespace NWheels.Stacks.EntityFramework.Tests.Integration
 {
     [TestFixture]
-    public class CrudTests : DatabaseTestBase
+    public class SqlServerCrudTests : DatabaseTestBase
     {
         private Hapil.DynamicModule _dynamicModule;
 
@@ -32,7 +32,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
         public void FixtureSetUp()
         {
             _dynamicModule = new DynamicModule(
-                "EmittedByEfDataRepositoryFactoryTests",
+                "EmittedBySqlServerCrudTests",
                 allowSave: true,
                 saveDirectory: TestContext.CurrentContext.TestDirectory);
         }
@@ -167,7 +167,8 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
             return new HardCodedImplementations.DataRepositoryFactory_OnlineStoreRepository(
                 Framework,
                 _dynamicModule,
-                (TypeMetadataCache)Framework.MetadataCache);
+                (TypeMetadataCache)Framework.MetadataCache,
+                connectionString);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

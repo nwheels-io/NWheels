@@ -71,7 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HardCodedImplementations.cs" />
-    <Compile Include="Integration\CrudTests.cs" />
+    <Compile Include="Integration\MySqlCrudTests.cs" />
+    <Compile Include="Integration\SqlServerCrudTests.cs" />
     <Compile Include="Integration\DatabaseTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Unit\EfDataRepositoryFactoryTests.cs" />

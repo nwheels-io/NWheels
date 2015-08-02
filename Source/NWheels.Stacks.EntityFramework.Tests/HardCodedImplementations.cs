@@ -35,12 +35,18 @@ namespace NWheels.Stacks.EntityFramework.Tests
         {
             private readonly TestFramework _framework;
             private readonly IComponentContext _components;
+            private readonly ConnectionStringSettings _connectionSettings;
 
-            public DataRepositoryFactory_OnlineStoreRepository(TestFramework framework, DynamicModule module, TypeMetadataCache metadataCache)
+            public DataRepositoryFactory_OnlineStoreRepository(
+                TestFramework framework, 
+                DynamicModule module, 
+                TypeMetadataCache metadataCache, 
+                ConnectionStringSettings connectionSettings)
                 : base(module, metadataCache)
             {
                 _framework = framework;
                 _components = framework.Components;
+                _connectionSettings = connectionSettings;
             }
 
             public override IApplicationDataRepository NewUnitOfWork(Type repositoryType, bool autoCommit, System.Data.IsolationLevel? isolationLevel = null)
@@ -61,14 +67,13 @@ namespace NWheels.Stacks.EntityFramework.Tests
 
                 base.MetadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(base.MetadataCache));
 
-                var connectionString = ConfigurationManager.ConnectionStrings["test"];
-                var dbProviderName = connectionString.ProviderName;
+                var dbProviderName = _connectionSettings.ProviderName;
                 var dbProviderFactory = DbProviderFactories.GetFactory(dbProviderName);
                 var dbConfig = _framework.ConfigSection<IFrameworkDatabaseConfig>();
-                dbConfig.ConnectionString = connectionString.ConnectionString;
+                dbConfig.ConnectionString = _connectionSettings.ConnectionString;
 
                 var connection = dbProviderFactory.CreateConnection();
-                connection.ConnectionString = connectionString.ConnectionString;
+                connection.ConnectionString = _connectionSettings.ConnectionString;
                 connection.Open();
 
                 return new EfDataRepository_OnlineStoreRepository(
