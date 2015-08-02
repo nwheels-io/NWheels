@@ -306,7 +306,7 @@ namespace NWheels.DataObjects.Core.Factories
 
         public static Type HelpGetConcreteCollectionOpenType(Type abstractCollectionType)
         {
-            if ( !abstractCollectionType.IsConstructedGenericType || !abstractCollectionType.IsInterface) 
+            if ( !abstractCollectionType.IsConstructedGenericType || !abstractCollectionType.IsInterface ) 
             {
                 throw new ArgumentException("Expected generic collection interface", "abstractCollectionType");
             }
@@ -346,21 +346,27 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static Type HelpGetCollectionAdapterType(Type abstractCollectionType, Type abstractElementType, Type concreteElementType)
+        public static Type HelpGetCollectionAdapterType(
+            Type abstractCollectionType, 
+            Type abstractElementType, 
+            Type concreteElementType, 
+            out bool isOrderedCollection)
         {
-            if ( !abstractCollectionType.IsConstructedGenericType || !abstractCollectionType.IsInterface)
+            if ( !abstractCollectionType.IsConstructedGenericType || !abstractCollectionType.IsInterface )
             {
                 throw new ArgumentException("Expected generic collection interface", "abstractCollectionType");
             }
 
             var definition = abstractCollectionType.GetGenericTypeDefinition();
 
-            if (definition == typeof(IList<>))
+            if ( definition == typeof(IList<>) )
             {
+                isOrderedCollection = true;
                 return typeof(ConcreteToAbstractListAdapter<,>).MakeGenericType(concreteElementType, abstractElementType);
             }
             else
             {
+                isOrderedCollection = false;
                 return typeof(ConcreteToAbstractCollectionAdapter<,>).MakeGenericType(concreteElementType, abstractElementType);
             }
         }

@@ -52,7 +52,7 @@ namespace NWheels.Testing.Entities.Stacks
                 [PropertyContract.Relation.Aggregation, PropertyContract.Relation.ManyToMany]
                 ICollection<ICategory> Categories { get; }
 
-                [PropertyContract.Relation.Composition, PropertyContract.Relation.ManyToMany]
+                [PropertyContract.Relation.Aggregation, PropertyContract.Relation.ManyToMany]
                 ICollection<IAttribute> Attributes { get; }
             }
 
@@ -116,7 +116,7 @@ namespace NWheels.Testing.Entities.Stacks
                 [PropertyContract.Relation.CompositionParent]
                 IOrder Order { get; set; }
 
-                [PropertyContract.Relation.Aggregation]
+                [PropertyContract.Relation.AggregationParent]
                 IProduct Product { get; set; }
 
                 [PropertyContract.Validation.MinValue(0)]

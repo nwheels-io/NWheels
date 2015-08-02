@@ -63,6 +63,16 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IEnumerable<IPropertyMetadata> GetIncomingRelations(ITypeMetadata targetType, Func<IPropertyMetadata, bool> sourcePredicate = null)
+        {
+            return _metadataByContractType.Values
+                .SelectMany(type => type.Properties.Where(p => p.Kind == PropertyKind.Relation && p.Relation != null && p.Relation.RelatedPartyType == targetType))
+                .Distinct()
+                .Where(p => sourcePredicate == null || sourcePredicate(p));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void EnsureRelationalMapping(ITypeMetadata type)
         {
             var metadata = (TypeMetadataBuilder)type;

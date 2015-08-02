@@ -104,7 +104,6 @@
     <Compile Include="Logging\Impl\LogexImpl.cs" />
     <Compile Include="LogIs.cs" />
     <Compile Include="SingleNodeSystemTestBase.cs" />
-    <Compile Include="TestDatabase.cs" />
     <Compile Include="TestFixtureWithNodeHosts.cs" />
     <Compile Include="SystemTestBase.cs" />
     <Compile Include="TestCategory.cs" />

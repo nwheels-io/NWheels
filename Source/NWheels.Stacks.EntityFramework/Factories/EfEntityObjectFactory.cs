@@ -37,12 +37,14 @@ namespace NWheels.Stacks.EntityFramework.Factories
                 new ImplementIEntityPartObjectConvention(metaType), 
                 new DependencyInjectionConvention(propertyMap), 
                 new NestedObjectsConvention(propertyMap),
-                new EfConfigurationConvention(MetadataCache, metaType, propertyMap)
+                new InverseManyToManyCollectionConvention(context, MetadataCache, metaType),
+                new EfConfigurationConvention(MetadataCache, metaType, propertyMap),
+                new EfNotMappedConvention(metaType)
             };
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
+        
         private PropertyImplementationStrategyMap BuildPropertyStrategyMap(ObjectFactoryContext context, ITypeMetadata metaType)
         {
             var builder = new PropertyImplementationStrategyMap.Builder();

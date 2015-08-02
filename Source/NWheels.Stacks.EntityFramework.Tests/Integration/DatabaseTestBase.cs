@@ -1,18 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.Common;
+using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Infrastructure;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NUnit.Framework;
+using NWheels.Testing;
 
-namespace NWheels.Testing
+namespace NWheels.Stacks.EntityFramework.Tests.Integration
 {
-    public class TestDatabase
+    [TestFixture]
+    public abstract class DatabaseTestBase : UnitTestBase
     {
         public const string DatabaseName = "NWheelsEFTests";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [SetUp]
+        public void DatabaseTestSetUp()
+        {
+            this.CompiledModel = null;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -74,7 +84,7 @@ namespace NWheels.Testing
         {
             var factory = DbProviderFactories.GetFactory(ConnectionStringProviderName);
 
-            using (var connection = CreateDbConnection())
+            using ( var connection = CreateDbConnection() )
             {
                 connection.Open();
 
@@ -85,38 +95,42 @@ namespace NWheels.Testing
 
                 var table = new DataTable();
                 adapter.Fill(table);
-
+                
                 return table;
             }
         }
 
-        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //protected void CreateTestDatabaseObjects()
-        //{
-        //    using (var connection = CreateDbConnection())
-        //    {
-        //        var objectContext = CompiledModel.CreateObjectContext<ObjectContext>(connection);
-        //        var script = objectContext.CreateDatabaseScript();
+        protected void CreateTestDatabaseObjects()
+        {
+            using ( var connection = CreateDbConnection() )
+            {
+                var objectContext = CompiledModel.CreateObjectContext<ObjectContext>(connection);
+                var script = objectContext.CreateDatabaseScript();
 
-        //        using (var command = connection.CreateCommand())
-        //        {
-        //            command.CommandType = CommandType.Text;
-        //            command.CommandText = script;
+                using ( var command = connection.CreateCommand() )
+                {
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = script;
 
-        //            Console.WriteLine(script);
+                    Console.WriteLine(script);
 
-        //            connection.Open();
-        //            command.ExecuteNonQuery();
-        //        }
-        //    }
-        //}
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void DropAndCreateSqlServerTestDatabase()
+        protected DbCompiledModel CompiledModel { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void DropAndCreateSqlServerTestDatabase()
         {
-            using (var connection = new SqlConnection(this.MasterConnectionString))
+            using ( var connection = new SqlConnection(this.MasterConnectionString) )
             {
                 connection.Open();
 

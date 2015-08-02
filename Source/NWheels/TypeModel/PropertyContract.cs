@@ -285,21 +285,21 @@ namespace NWheels.DataObjects
 
             public class AggregationParentAttribute : PropertyContractAttribute
             {
-                public void ApplyTo(PropertyMetadataBuilder metadata)
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
                 {
-                    var relation = metadata.SafeGetRelation();
+                    var relation = property.SafeGetRelation();
 
                     relation.Kind = RelationKind.Aggregation;
-                    relation.Multiplicity = metadata.IsCollection ? RelationMultiplicity.ManyToMany : RelationMultiplicity.ManyToOne;
+                    relation.Multiplicity = property.IsCollection ? RelationMultiplicity.ManyToMany : RelationMultiplicity.ManyToOne;
                     relation.ThisPartyKind = RelationPartyKind.Dependent;
                 }
             }
 
             public class CompositionParentAttribute : PropertyContractAttribute
             {
-                public void ApplyTo(PropertyMetadataBuilder metadata)
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
                 {
-                    var relation = metadata.SafeGetRelation();
+                    var relation = property.SafeGetRelation();
 
                     relation.Kind = RelationKind.Composition;
                     relation.Multiplicity = RelationMultiplicity.ManyToOne;
@@ -309,12 +309,12 @@ namespace NWheels.DataObjects
 
             public class CompositionAttribute : PropertyContractAttribute
             {
-                public void ApplyTo(PropertyMetadataBuilder metadata)
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
                 {
-                    var relation = metadata.SafeGetRelation();
+                    var relation = property.SafeGetRelation();
                     
                     relation.Kind = RelationKind.Composition;
-                    relation.Multiplicity = metadata.IsCollection ? RelationMultiplicity.OneToMany : RelationMultiplicity.OneToOne;
+                    relation.Multiplicity = property.IsCollection ? RelationMultiplicity.OneToMany : RelationMultiplicity.OneToOne;
                     relation.ThisPartyKind = RelationPartyKind.Principal;
                 }
             }

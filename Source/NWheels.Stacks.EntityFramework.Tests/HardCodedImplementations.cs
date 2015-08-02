@@ -59,6 +59,8 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IAttributeValueChoice)));
                 base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IPostalAddress)));
 
+                base.MetadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(base.MetadataCache));
+
                 var connectionString = ConfigurationManager.ConnectionStrings["test"];
                 var dbProviderName = connectionString.ProviderName;
                 var dbProviderFactory = DbProviderFactories.GetFactory(dbProviderName);
@@ -115,7 +117,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
                 if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IAttributeValueChoice))
                 {
-                    return (TEntityContract)(object)new EfEntityObject_AttributeValue();
+                    return (TEntityContract)(object)new EfEntityObject_AttributeValueChoice();
                 }
 
                 throw new NotSupportedException(
@@ -212,15 +214,6 @@ namespace NWheels.Stacks.EntityFramework.Tests
                             DbModelBuilder modelBuilder = new DbModelBuilder();
                             IConvention[] conventions = new IConvention[] { new NoUnderscoreForeignKeyNamingConvention() };
                             modelBuilder.Conventions.Add(conventions);
-
-                            //modelBuilder.Entity<EfEntityObject_Category>();
-                            //modelBuilder.Entity<EfEntityObject_Product>();
-                            //modelBuilder.Entity<EfEntityObject_Order>();
-                            //modelBuilder.Entity<EfEntityObject_OrderLine>();
-                            //modelBuilder.Entity<EfEntityObject_Attribute>();
-                            //modelBuilder.ComplexType<EfEntityObject_AttributeValue>();
-                            ////modelBuilder.ComplexType<EfEntityObject_AttributeValueChoice>();
-                            //modelBuilder.ComplexType<EfEntityObject_PostalAddress>();
 
                             EfEntityObject_Category.ConfigureEfModel(metadataCache, modelBuilder);
                             EfEntityObject_Product.ConfigureEfModel(metadataCache, modelBuilder);
@@ -463,7 +456,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
             }
 
-            public virtual ICollection<EfEntityObject_Product> Products { get; set; }
+            public virtual ICollection<EfEntityObject_Product> Inverse_Product_Attributes { get; set; }
         }
 
         public class EfEntityObject_AttributeValue : Interfaces.Repository1.IAttributeValue, IObject, IEntityPartObject
@@ -698,7 +691,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
             }
 
-            public virtual ICollection<EfEntityObject_Product> Products { get; set; }
+            public virtual ICollection<EfEntityObject_Product> Inverse_Product_Categories { get; set; }
         }
 
         public class EfEntityObject_Order : Interfaces.Repository1.IOrder, IEntityPartId<int>, IObject, IEntityObject, IHaveNestedObjects
@@ -941,6 +934,12 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IOrderLine));
                 EntityTypeConfiguration<EfEntityObject_OrderLine> manyEntity = EfModelApi.EntityType<EfEntityObject_OrderLine>(modelBuilder, typeMetadata);
                 EfModelApi.ManyToOneRelationProperty<EfEntityObject_OrderLine, EfEntityObject_Order>(manyEntity, typeMetadata.GetPropertyByName("Order"));
+                
+                //BEGIN CHANGE
+                //-added:
+                EfModelApi.ManyToOneRelationProperty<EfEntityObject_OrderLine, EfEntityObject_Product>(manyEntity, typeMetadata.GetPropertyByName("Product"));
+                //END CHANGE
+
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_OrderLine, int>(manyEntity, typeMetadata.GetPropertyByName("Quantity"));
                 EfModelApi.StringProperty<EfEntityObject_OrderLine>(manyEntity, typeMetadata.GetPropertyByName("Attributes"));
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_OrderLine, int>(manyEntity, typeMetadata.GetPropertyByName("Id"));
@@ -1228,22 +1227,29 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 EfModelApi.StringProperty<EfEntityObject_Product>(entity, typeMetadata.GetPropertyByName("CatalogNo"));
                 EfModelApi.StringProperty<EfEntityObject_Product>(entity, typeMetadata.GetPropertyByName("Name"));
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Product, decimal>(entity, typeMetadata.GetPropertyByName("Price"));
-                
+
+                //BEGIN CHANGE
+                //-removed:
                 //EfModelApi.ManyToOneRelationProperty<EfEntityObject_Product, EfEntityObject_Category>(entity, typeMetadata.GetPropertyByName("Categories"));
                 //EfModelApi.ManyToOneRelationProperty<EfEntityObject_Product, EfEntityObject_Attribute>(entity, typeMetadata.GetPropertyByName("Attributes"));
-
-                entity.HasMany(x => x.Attributes).WithMany(x => x.Products).Map(cfg => {
-                    cfg.MapLeftKey("ProductId");
-                    cfg.MapRightKey("CategoryId");
-                    cfg.ToTable("Products_Categories");
-                }); ;
-
-                entity.HasMany(x => x.Categories).WithMany(x => x.Products).Map(cfg => {
-                    cfg.MapLeftKey("ProductId");
-                    cfg.MapRightKey("AttributeId");
-                    cfg.ToTable("Products_Attributes");
-                }); ;
+                //-added:
+                EfModelApi.ManyToManyRelationProperty<EfEntityObject_Product, EfEntityObject_Category>(entity, typeMetadata.GetPropertyByName("Categories"));
+                EfModelApi.ManyToManyRelationProperty<EfEntityObject_Product, EfEntityObject_Attribute>(entity, typeMetadata.GetPropertyByName("Attributes"));
                 
+                //entity.HasMany(x => x.Attributes).WithMany(x => x.Inverse_Product_Categories).Map(cfg =>
+                //{
+                //    cfg.MapLeftKey("ProductId");
+                //    cfg.MapRightKey("CategoryId");
+                //    cfg.ToTable("Products_Categories");
+                //});
+
+                //entity.HasMany(x => x.Categories).WithMany(x => x.Inverse_Product_Attributes).Map(cfg => {
+                //    cfg.MapLeftKey("ProductId");
+                //    cfg.MapRightKey("AttributeId");
+                //    cfg.ToTable("Products_Attributes");
+                //});
+                //END CHANGE
+
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Product, int>(entity, typeMetadata.GetPropertyByName("Id"));
             }
 

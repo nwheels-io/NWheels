@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Design.PluralizationServices;
 using System.Data.Entity.ModelConfiguration;
 using System.Data.Entity.ModelConfiguration.Configuration;
+using System.Globalization;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Hapil;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core.Factories;
+using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Stacks.EntityFramework.Factories;
 
@@ -129,31 +133,51 @@ namespace NWheels.Stacks.EntityFramework
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //public static ForeignKeyNavigationPropertyConfiguration ManyToManyRelationProperty<TThisEntity, TOtherEntity>(
-        //    EntityTypeConfiguration<TThisEntity> thisEntity,
-        //    PropertyImplementationStrategy implementor)
-        //    where TThisEntity : class
-        //    where TOtherEntity : class
-        //{
-        //    var required = thisEntity
-        //        .HasMany<TOtherEntity>(PropertyExpression<TThisEntity, ICollection<TOtherEntity>>(thisProperty.GetImplementationBy<EfEntityObjectFactory>()))
-        //        .WithMany(PropertyExpression<TOtherEntity, ICollection<TThisEntity>>(thisProperty.))
+        public static ManyToManyNavigationPropertyConfiguration<TThisEntity, TOtherEntity> ManyToManyRelationProperty<TThisEntity, TOtherEntity>(
+            EntityTypeConfiguration<TThisEntity> thisEntity,
+            IPropertyMetadata thisProperty)
+            where TThisEntity : class
+            where TOtherEntity : class
+        {
+            var otherEntityType = thisProperty.Relation.RelatedPartyType.GetImplementationBy<EfEntityObjectFactory>();
+            var inverseProperty = otherEntityType.GetProperty(GetGeneratedInversePropertyName(thisProperty));
 
-        //    ForeignKeyNavigationPropertyConfiguration foreignKey;
+            var toManyConfig = thisEntity.HasMany<TOtherEntity>(
+                PropertyExpression<TThisEntity, ICollection<TOtherEntity>>(
+                    thisProperty.GetImplementationBy<EfEntityObjectFactory>()));
 
-        //    if (thisProperty.Relation.InverseProperty != null && thisProperty.Relation.InverseProperty.ClrType.IsCollectionType())
-        //    {
-        //        foreignKey = required.WithMany(PropertyExpression<TOneEntity, ICollection<TManyEntity>>(
-        //            thisProperty.Relation.InverseProperty.GetImplementationBy<EfEntityObjectFactory>()));
-        //    }
-        //    else
-        //    {
-        //        foreignKey = required.WithMany();
-        //    }
+            var manyToManyConfig = toManyConfig.WithMany(PropertyExpression<TOtherEntity, ICollection<TThisEntity>>(inverseProperty));
+            
+            var leftKeyColumnName = string.Format(
+                "{0}{1}",
+                thisProperty.DeclaringContract.Name,
+                thisProperty.DeclaringContract.PrimaryKey.Properties.First().Name);
+            
+            var rightKeyColumnName = string.Format(
+                "{0}{1}",
+                thisProperty.Relation.RelatedPartyType.Name,
+                thisProperty.Relation.RelatedPartyType.PrimaryKey.Properties.First().Name);
 
-        //    foreignKey.Map(m => m.MapKey(new[] { thisProperty.RelationalMapping.ColumnName }));
-        //    return foreignKey;
-        //}
+            var relationTableName = string.Format(
+                "{0}{1}",
+                thisProperty.DeclaringContract.Name,
+                thisProperty.Name);
+
+            manyToManyConfig.Map(cfg => {
+                cfg.MapLeftKey(leftKeyColumnName);
+                cfg.MapRightKey(rightKeyColumnName);
+                cfg.ToTable(relationTableName);
+            });
+
+            return manyToManyConfig;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetGeneratedInversePropertyName(IPropertyMetadata property)
+        {
+            return string.Format("Inverse_{0}_{1}", property.DeclaringContract.Name, property.Name);
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

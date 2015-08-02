@@ -25,6 +25,7 @@ namespace NWheels.TypeModel.Core.Factories
         private Type _itemConcreteType;
         private Type _concreteCollectionType;
         private Type _collectionAdapterType;
+        private bool _isOrderedCollection;
         private Field<TT.TAbstractCollection<TT.TAbstract>> _collectionAdapterField;
         private Field<TT.TConcreteCollection<TT.TConcrete>> _concreteCollectionField;
         private Field<TT.TValue> _storageField;
@@ -52,7 +53,7 @@ namespace NWheels.TypeModel.Core.Factories
             MetaProperty.ContractPropertyInfo.PropertyType.IsCollectionType(out _itemContractType);
             _itemConcreteType = FindImpementationType(_itemContractType);
             _concreteCollectionType = HelpGetConcreteCollectionType(MetaProperty.ClrType, _itemConcreteType);
-            _collectionAdapterType = HelpGetCollectionAdapterType(MetaProperty.ClrType, _itemContractType, _itemConcreteType);
+            _collectionAdapterType = HelpGetCollectionAdapterType(MetaProperty.ClrType, _itemContractType, _itemConcreteType, out _isOrderedCollection);
 
             using ( TT.CreateScope<TT.TValue>(_storageType) )
             {

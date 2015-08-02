@@ -37,13 +37,14 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private KeyMetadataBuilder FindOrAddPrimaryKey(TypeMetadataBuilder type)
         {
-            if ( type.PrimaryKey == null )
+            if (type.PrimaryKey == null)
             {
-                foreach ( var property in type.Properties.Where(p => p.Role == PropertyRole.Key) )
+                foreach (var property in type.Properties.Where(p => p.Role == PropertyRole.Key))
                 {
-                    if ( type.PrimaryKey == null )
+                    if (type.PrimaryKey == null)
                     {
-                        type.PrimaryKey = new KeyMetadataBuilder {
+                        type.PrimaryKey = new KeyMetadataBuilder
+                        {
                             Kind = KeyKind.Primary,
                             Name = "PK_" + type.Name
                         };
@@ -62,7 +63,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private void CompleteRelations(TypeMetadataBuilder type)
         {
-            foreach ( var property in type.Properties.Where(p => p.Kind == PropertyKind.Relation) )
+            foreach (var property in type.Properties.Where(p => p.Kind == PropertyKind.Relation))
             {
                 CompleteRelationMetadata(type, property);
             }
@@ -72,7 +73,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private void CompleteRelationMetadata(TypeMetadataBuilder type, PropertyMetadataBuilder property)
         {
-            switch ( property.Relation.Multiplicity )
+            switch (property.Relation.Multiplicity)
             {
                 case RelationMultiplicity.OneToOne:
                 case RelationMultiplicity.ManyToOne:
@@ -99,7 +100,8 @@ namespace NWheels.DataObjects.Core.Conventions
             property.Relation.RelatedPartyKey = FindOrAddPrimaryKey(property.Relation.RelatedPartyType);
 
             property.Relation.InverseProperty =
-                property.Relation.RelatedPartyType.Properties.FirstOrDefault(p => p.Kind == PropertyKind.Relation && p.Relation.RelatedPartyType == type);
+                property.Relation.RelatedPartyType.Properties
+                    .FirstOrDefault(p => p.Kind == PropertyKind.Relation && p.Relation.RelatedPartyType.ContractType == type.ContractType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -110,8 +112,8 @@ namespace NWheels.DataObjects.Core.Conventions
 
             var relatedProperty = property.Relation.RelatedPartyType.Properties.FirstOrDefault(p => p.ClrType == type.ContractType);
             var relatedKey = (
-                relatedProperty != null ? 
-                FindOrAddForeignKey(property.Relation.RelatedPartyType, relatedProperty) : 
+                relatedProperty != null ?
+                FindOrAddForeignKey(property.Relation.RelatedPartyType, relatedProperty) :
                 FindOrAddPrimaryKey(property.Relation.RelatedPartyType));
 
             property.Relation.ThisPartyKey = type.PrimaryKey;
@@ -120,16 +122,17 @@ namespace NWheels.DataObjects.Core.Conventions
             property.Relation.RelatedPartyKey = relatedKey;
 
             property.Relation.InverseProperty =
-                property.Relation.RelatedPartyType.Properties.FirstOrDefault(p => p.Kind == PropertyKind.Relation && p.Relation.RelatedPartyType == type);
+                property.Relation.RelatedPartyType.Properties
+                    .FirstOrDefault(p => p.Kind == PropertyKind.Relation && p.Relation.RelatedPartyType.ContractType == type.ContractType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static KeyMetadataBuilder FindOrAddForeignKey(TypeMetadataBuilder type, PropertyMetadataBuilder relationProperty)
         {
-            var existingKey = type.AllKeys.FirstOrDefault(k => k.Properties.SingleOrDefault() == relationProperty);
+            var existingKey = type.AllKeys.FirstOrDefault(k => k.Properties.Select(p => p.ClrType).SingleOrDefault() == relationProperty.ClrType);
 
-            if ( existingKey != null )
+            if (existingKey != null)
             {
                 return existingKey;
             }

@@ -16,9 +16,24 @@
         #region IRelationMetadata Members
 
         public RelationKind Kind { get; set; }
-        public RelationMultiplicity Multiplicity { get; set; }
         public RelationPartyKind ThisPartyKind { get; set; }
         public RelationPartyKind RelatedPartyKind { get; set; }
+
+        private RelationMultiplicity _multiplicity;
+        public RelationMultiplicity Multiplicity
+        {
+            get
+            {
+                return _multiplicity;
+            }
+            set
+            {
+                _multiplicity = value;
+            }
+        }
+
+
+
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

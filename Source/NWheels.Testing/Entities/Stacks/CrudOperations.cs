@@ -126,8 +126,8 @@ namespace NWheels.Testing.Entities.Stacks
             {
                 using ( repo )
                 {
-                    var product1 = repo.Products.Include(p => p.Categories).Single(p => p.Name == "ABC");
-                    var product2 = repo.Products.Include(p => p.Categories).Single(p => p.Name == "DEF");
+                    var product1 = repo.Products.Include(p => p.Categories, p => p.Attributes).Single(p => p.Name == "ABC");
+                    var product2 = repo.Products.Include(p => p.Categories, p => p.Attributes).Single(p => p.Name == "DEF");
 
                     Assert.That(product1.CatalogNo, Is.EqualTo("CN111"));
                     Assert.That(product1.Name, Is.EqualTo("ABC"));
@@ -299,9 +299,15 @@ namespace NWheels.Testing.Entities.Stacks
                     
                     Assert.That(order1Lines[0].Attributes, Is.Not.Null);
                     Assert.That(order1Lines[0].Attributes.Count, Is.EqualTo(2));
-                    Assert.That(order1Lines[0].Attributes.First().Attribute, Is.SameAs(attributes["Color"]));
+
+                    //Assert.That(order1Lines[0].Attributes.First().Attribute, Is.SameAs(attributes["Color"]));
+                    //Assert.That(order1Lines[0].Attributes.First().Value, Is.EqualTo("Black"));
+                    //Assert.That(order1Lines[0].Attributes.Last().Attribute, Is.SameAs(attributes["Size"]));
+                    //Assert.That(order1Lines[0].Attributes.Last().Value, Is.EqualTo("L"));
+
+                    Assert.That(order1Lines[0].Attributes.First().Attribute.Name, Is.EqualTo("Color"));
                     Assert.That(order1Lines[0].Attributes.First().Value, Is.EqualTo("Black"));
-                    Assert.That(order1Lines[0].Attributes.Last().Attribute, Is.SameAs(attributes["Size"]));
+                    Assert.That(order1Lines[0].Attributes.Last().Attribute.Name, Is.EqualTo("Size"));
                     Assert.That(order1Lines[0].Attributes.Last().Value, Is.EqualTo("L"));
 
                     Assert.That(order1Lines[1].Order, Is.SameAs(order1));
@@ -310,7 +316,11 @@ namespace NWheels.Testing.Entities.Stacks
 
                     Assert.That(order1Lines[1].Attributes, Is.Not.Null);
                     Assert.That(order1Lines[1].Attributes.Count, Is.EqualTo(1));
-                    Assert.That(order1Lines[1].Attributes.First().Attribute, Is.SameAs(attributes["Color"]));
+                    
+                    //Assert.That(order1Lines[1].Attributes.First().Attribute, Is.SameAs(attributes["Color"]));
+                    //Assert.That(order1Lines[1].Attributes.First().Value, Is.EqualTo("White"));
+
+                    Assert.That(order1Lines[1].Attributes.First().Attribute.Name, Is.EqualTo("Color"));
                     Assert.That(order1Lines[1].Attributes.First().Value, Is.EqualTo("White"));
 
                     #endregion

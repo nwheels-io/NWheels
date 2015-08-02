@@ -25,6 +25,7 @@ namespace NWheels.TypeModel.Core.Factories
         private Type _itemStorageType;
         private Type _storageCollectionType;
         private Type _collectionAdapterType;
+        private bool _isOrderedCollection;
         private Field<TT.TConcreteCollection<TT.TImpl>> _storageField;
         private Field<TT.TAbstractCollection<TT.TContract>> _contractField;
 
@@ -48,7 +49,8 @@ namespace NWheels.TypeModel.Core.Factories
             MetaProperty.ContractPropertyInfo.PropertyType.IsCollectionType(out _itemContractType);
             _itemStorageType = FindImpementationType(_itemContractType);
             _storageCollectionType = HelpGetConcreteCollectionType(MetaProperty.ClrType, _itemStorageType);
-            _collectionAdapterType = HelpGetCollectionAdapterType(MetaProperty.ClrType, _itemContractType, _itemStorageType); 
+            _collectionAdapterType = HelpGetCollectionAdapterType(MetaProperty.ClrType, _itemContractType, _itemStorageType, out _isOrderedCollection); 
+
 
             using ( TT.CreateScope<TT.TContract, TT.TImpl, TT.TConcreteCollection<TT.TImpl>, TT.TAbstractCollection<TT.TContract>>(
                 _itemContractType, _itemStorageType, _storageCollectionType, _collectionAdapterType) )
@@ -83,7 +85,11 @@ namespace NWheels.TypeModel.Core.Factories
                         m.Return(_storageField);
                     }),
                     setter: p => p.Set((m, value) => {
-                        _contractField.Assign(m.New<TT.TAbstractCollection<TT.TContract>>(value));
+                        _contractField.Assign(
+                            Static.Func<object, bool, object>(RuntimeTypeModelHelpers.CreateCollectionAdapter<TT.TImpl,TT.TContract>, 
+                                value, 
+                                m.Const(_isOrderedCollection))
+                            .CastTo<TT.TAbstractCollection<TT.TContract>>());
                         _storageField.Assign(value);
                     }));
             }
@@ -93,14 +99,15 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components)
         {
-            var concreteCollectionType = HelpGetConcreteCollectionType(MetaProperty.ClrType, _itemStorageType);
-            var collectionAdapterType = HelpGetCollectionAdapterType(MetaProperty.ClrType, _itemContractType, _itemStorageType);
-
-            using (TT.CreateScope<TT.TContract, TT.TImpl, TT.TConcreteCollection<TT.TImpl>, TT.TAbstractCollection<TT.TContract>>(
-                _itemContractType, _itemStorageType, _storageCollectionType, _collectionAdapterType))
+            using ( TT.CreateScope<TT.TContract, TT.TImpl, TT.TConcreteCollection<TT.TImpl>, TT.TAbstractCollection<TT.TContract>>(
+                _itemContractType, _itemStorageType, _storageCollectionType, _collectionAdapterType) )
             {
                 _storageField.Assign(writer.New<TT.TConcreteCollection<TT.TImpl>>());
-                _contractField.Assign(writer.New<TT.TAbstractCollection<TT.TContract>>(_storageField));
+                _contractField.Assign(
+                    Static.Func<object, bool, object>(RuntimeTypeModelHelpers.CreateCollectionAdapter<TT.TImpl, TT.TContract>,
+                        _storageField,
+                        writer.Const(_isOrderedCollection))
+                    .CastTo<TT.TAbstractCollection<TT.TContract>>());
             }
         }
 

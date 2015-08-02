@@ -17,7 +17,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Unit
     public class EfEntityObjectFactoryTests : DynamicTypeUnitTestBase
     {
         [Test]
-        public void TestEntityCreation()
+        public void CanCreateEntityObjects()
         {
             FactoryOperations.Repository1.ExecuteEntityCreation(Framework, CreateEntityObjectFactory);
         }

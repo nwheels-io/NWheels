@@ -367,7 +367,7 @@ namespace NWheels.Conventions.Core
 
                 foreach ( var property in type.Properties )
                 {
-                    if ( property.Relation != null )
+                    if ( property.Relation != null && property.Relation.RelatedPartyType != null )
                     {
                         FindEntityContractsInRepository(property.Relation.RelatedPartyType);
                     }

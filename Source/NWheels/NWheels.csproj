@@ -101,6 +101,7 @@
     <Compile Include="Authorization\IIdentityInfo.cs" />
     <Compile Include="Entities\Factories\ImplementIEntityPartObjectConvention.cs" />
     <Compile Include="Entities\Factories\ImplementIEntityObjectConvention.cs" />
+    <Compile Include="TypeModel\Core\ConcreteToAbstractListAdapter.cs" />
     <Compile Include="TypeModel\Core\Factories\BaseTypeConvention.cs" />
     <Compile Include="TypeModel\Core\Factories\CollectionAdapterDualValueStrategy.cs" />
     <Compile Include="TypeModel\Core\Factories\DualValueStrategy.cs" />
@@ -119,6 +120,7 @@
     <Compile Include="TypeModel\Core\Factories\PropertyImplementationConvention.cs" />
     <Compile Include="TypeModel\Core\Factories\AutomaticPropertyStrategy.cs" />
     <Compile Include="TypeModel\Core\Factories\PublicAccessorWrapperStrategy.cs" />
+    <Compile Include="TypeModel\Core\Factories\RuntimeTypeModelHelpers.cs" />
     <Compile Include="TypeModel\Core\Factories\StorageDataTypeStrategy.cs" />
     <Compile Include="TypeModel\Core\Factories\RelationTypecastStrategy.cs" />
     <Compile Include="TypeModel\Core\IHaveDependencies.cs" />

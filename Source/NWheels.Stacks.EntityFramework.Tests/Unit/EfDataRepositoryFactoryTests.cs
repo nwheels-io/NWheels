@@ -56,8 +56,8 @@ namespace NWheels.Stacks.EntityFramework.Tests.Unit
         private DataRepositoryFactoryBase CreateHardCodedDataRepositoryFactory()
         {
             var connectionString = ConfigurationManager.ConnectionStrings["test"];
-            var dbProviderName = connectionString.ProviderName;
-            var dbProviderFactory = DbProviderFactories.GetFactory(dbProviderName);
+            //var dbProviderName = connectionString.ProviderName;
+            //var dbProviderFactory = DbProviderFactories.GetFactory(dbProviderName);
             var dbConfig = Framework.ConfigSection<IFrameworkDatabaseConfig>();
             dbConfig.ConnectionString = connectionString.ConnectionString;
 
