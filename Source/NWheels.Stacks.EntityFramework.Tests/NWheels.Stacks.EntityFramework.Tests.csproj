@@ -44,6 +44,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\EntityFramework.6.1.2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Hapil, Version=0.9.14.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\FelixB.Hapil.0.9.14\lib\net45\Hapil.dll</HintPath>
+    </Reference>
+    <Reference Include="Hapil.Applied, Version=0.9.14.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\FelixB.Hapil.0.9.14\lib\net45\Hapil.Applied.dll</HintPath>
+    </Reference>
     <Reference Include="MySql.Data, Version=6.9.6.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\packages\MySql.Data.6.9.6\lib\net45\MySql.Data.dll</HintPath>
@@ -83,7 +91,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    
     <ProjectReference Include="..\NWheels.Stacks.EntityFramework\NWheels.Stacks.EntityFramework.csproj">
       <Project>{fa1fd78f-2906-477e-ad2f-55bb8ae19a75}</Project>
       <Name>NWheels.Stacks.EntityFramework</Name>
