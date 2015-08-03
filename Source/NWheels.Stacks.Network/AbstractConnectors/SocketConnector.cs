@@ -8,7 +8,7 @@ using NWheels.Endpoints;
 //AbstractConnector
 namespace NWheels.Stacks.Network
 {
-    public class ConnectoerDisconnectedException : Exception
+    public class ConnectorDisconnectedException : Exception
     {
     }
 
@@ -90,7 +90,7 @@ namespace NWheels.Stacks.Network
                 doResetTimer = false;
                 if (IsOnExcpCalled == false && IsOnGracefulCloseCalled == false)
                 {
-                    DoOnExcp(new ConnectoerDisconnectedException());
+                    DoOnExcp(new ConnectorDisconnectedException());
                 }
                 this.Dispose();
             }
