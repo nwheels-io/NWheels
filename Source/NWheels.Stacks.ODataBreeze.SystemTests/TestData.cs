@@ -38,24 +38,24 @@ namespace NWheels.Stacks.ODataBreeze.SystemTests
 
             private static void CreateUsers(IUserAccountDataRepository data1)
             {
-                var admin1 = data1.AllUsers.New<IBackEndUserAccountEntity>();
-                admin1.LoginName = "admin";
-                admin1.FullName = "Administrator";
-                var adminPass1 = data1.NewPassword();
-                adminPass1.Hash = Encoding.ASCII.GetBytes("adminPass1");
-                admin1.Passwords.Add(adminPass1);
-                admin1.AssociatedRoles = new[] { TestClaims.RoleOne };
-                data1.AllUsers.Insert(admin1);
+                //var admin1 = data1.AllUsers.New<IBackEndUserAccountEntity>();
+                //admin1.LoginName = "admin";
+                //admin1.FullName = "Administrator";
+                //var adminPass1 = data1.NewPassword();
+                //adminPass1.Hash = Encoding.ASCII.GetBytes("adminPass1");
+                //admin1.Passwords.Add(adminPass1);
+                //admin1.AssociatedRoles = new[] { TestClaims.RoleOne };
+                //data1.AllUsers.Insert(admin1);
 
-                var subscriber1 = data1.AllUsers.New<IFrontEndUserAccountEntity>();
-                subscriber1.LoginName = "johns";
-                subscriber1.FullName = "John Smith";
-                subscriber1.EmailAddress = "john.smith@email.com";
-                var subscriberPassword1 = data1.NewPassword();
-                subscriberPassword1.Hash = Encoding.ASCII.GetBytes("johnsPass1");
-                subscriber1.Passwords.Add(subscriberPassword1);
-                subscriber1.AssociatedRoles = new[] { TestClaims.RoleTwo, TestClaims.RoleThree };
-                data1.AllUsers.Insert(subscriber1);
+                //var subscriber1 = data1.AllUsers.New<IFrontEndUserAccountEntity>();
+                //subscriber1.LoginName = "johns";
+                //subscriber1.FullName = "John Smith";
+                //subscriber1.EmailAddress = "john.smith@email.com";
+                //var subscriberPassword1 = data1.NewPassword();
+                //subscriberPassword1.Hash = Encoding.ASCII.GetBytes("johnsPass1");
+                //subscriber1.Passwords.Add(subscriberPassword1);
+                //subscriber1.AssociatedRoles = new[] { TestClaims.RoleTwo, TestClaims.RoleThree };
+                //data1.AllUsers.Insert(subscriber1);
 
                 data1.CommitChanges();
             }

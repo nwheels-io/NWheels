@@ -35,13 +35,13 @@ namespace NWheels.Testing.Entities.Stacks
                 IEntityRepository<IEmailContactDetail> ContactEmails { get; }
             }
 
-            [EntityContract]
+            [EntityContract(UseCodeNamespace = true)]
             public interface ICategory : IEntityPartUniqueDisplayName
             {
                 //int Id { get; set; }
             }
 
-            [EntityContract]
+            [EntityContract(UseCodeNamespace = true)]
             public interface IProduct
             {
                 //[PropertyContract.Storage.RelationalMapping(Column = "Id")]
@@ -60,7 +60,7 @@ namespace NWheels.Testing.Entities.Stacks
                 ICollection<IAttribute> Attributes { get; }
             }
 
-            [EntityContract]
+            [EntityContract(UseCodeNamespace = true)]
             public interface IAttribute : IEntityPartUniqueDisplayName
             {
                 //int Id { get; set; }
@@ -90,7 +90,7 @@ namespace NWheels.Testing.Entities.Stacks
                 string Value { get; set; }
             }
 
-            [EntityContract]
+            [EntityContract(UseCodeNamespace = true)]
             public interface IOrder
             {
                 //int Id { get; set; }
@@ -112,7 +112,7 @@ namespace NWheels.Testing.Entities.Stacks
                 OrderStatus Status { get; set; }
             }
 
-            [EntityContract]
+            [EntityContract(UseCodeNamespace = true)]
             public interface IOrderLine
             {
                 //int Id { get; set; }
@@ -146,7 +146,7 @@ namespace NWheels.Testing.Entities.Stacks
                 string Country { get; set; }
             }
 
-            [EntityContract]
+            [EntityContract(UseCodeNamespace = true)]
             public interface ICustomer
             {
                 [PropertyContract.Required]
@@ -156,26 +156,26 @@ namespace NWheels.Testing.Entities.Stacks
                 ICollection<IContactDetail> ContactDetails { get; }
             }
 
-            [EntityContract(IsAbstract = true)]
+            [EntityContract(IsAbstract = true, UseCodeNamespace = true)]
             public interface IContactDetail
             {
             }
-            
-            [EntityContract]
+
+            [EntityContract(UseCodeNamespace = true)]
             public interface IEmailContactDetail : IContactDetail
             {
                 [PropertyContract.Semantic.EmailAddress]
                 string Email { get; set; }
             }
 
-            [EntityContract]
+            [EntityContract(UseCodeNamespace = true)]
             public interface IPhoneContactDetail : IContactDetail
             {
                 [PropertyContract.Semantic.PhoneNumber]
                 string Phone { get; set; }
             }
 
-            [EntityContract]
+            [EntityContract(UseCodeNamespace = true)]
             public interface IPostContactDetail : IContactDetail
             {
                 [PropertyContract.Relation.Composition]

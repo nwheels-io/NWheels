@@ -424,7 +424,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public static void ConfigureEfModel(ITypeMetadataCache metadataCache, DbModelBuilder modelBuilder)
             {
                 ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IAttribute));
-                EntityTypeConfiguration<EfEntityObject_Attribute> entity = EfModelApi.EntityType<EfEntityObject_Attribute>(modelBuilder, typeMetadata);
+                EntityTypeConfiguration<EfEntityObject_Attribute> entity = EfModelApi.EntityType<EfEntityObject_Attribute>(modelBuilder, typeMetadata, metadataCache);
                 EfModelApi.StringProperty<EfEntityObject_Attribute>(entity, typeMetadata.GetPropertyByName("TitleForUser"));
                 EfModelApi.StringProperty<EfEntityObject_Attribute>(entity, typeMetadata.GetPropertyByName("Values"));
                 EfModelApi.StringProperty<EfEntityObject_Attribute>(entity, typeMetadata.GetPropertyByName("Name"));
@@ -710,7 +710,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public static void ConfigureEfModel(ITypeMetadataCache metadataCache, DbModelBuilder modelBuilder)
             {
                 ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.ICategory));
-                EntityTypeConfiguration<EfEntityObject_Category> entity = EfModelApi.EntityType<EfEntityObject_Category>(modelBuilder, typeMetadata);
+                EntityTypeConfiguration<EfEntityObject_Category> entity = EfModelApi.EntityType<EfEntityObject_Category>(modelBuilder, typeMetadata, metadataCache);
                 EfModelApi.StringProperty<EfEntityObject_Category>(entity, typeMetadata.GetPropertyByName("Name"));
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Category, int>(entity, typeMetadata.GetPropertyByName("Id"));
             }
@@ -809,7 +809,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public static void ConfigureEfModel(ITypeMetadataCache metadataCache, DbModelBuilder modelBuilder)
             {
                 ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IOrder));
-                EntityTypeConfiguration<EfEntityObject_Order> entity = EfModelApi.EntityType<EfEntityObject_Order>(modelBuilder, typeMetadata);
+                EntityTypeConfiguration<EfEntityObject_Order> entity = EfModelApi.EntityType<EfEntityObject_Order>(modelBuilder, typeMetadata, metadataCache);
                 EfModelApi.StringProperty<EfEntityObject_Order>(entity, typeMetadata.GetPropertyByName("OrderNo"));
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Order, DateTime>(entity, typeMetadata.GetPropertyByName("PlacedAt"));
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Order, Interfaces.Repository1.OrderStatus>(entity, typeMetadata.GetPropertyByName("Status"));
@@ -1024,7 +1024,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public static void ConfigureEfModel(ITypeMetadataCache metadataCache, DbModelBuilder modelBuilder)
             {
                 ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IOrderLine));
-                EntityTypeConfiguration<EfEntityObject_OrderLine> manyEntity = EfModelApi.EntityType<EfEntityObject_OrderLine>(modelBuilder, typeMetadata);
+                EntityTypeConfiguration<EfEntityObject_OrderLine> manyEntity = EfModelApi.EntityType<EfEntityObject_OrderLine>(modelBuilder, typeMetadata, metadataCache);
                 EfModelApi.ManyToOneRelationProperty<EfEntityObject_OrderLine, EfEntityObject_Order>(manyEntity, typeMetadata.GetPropertyByName("Order"));
                 
                 //BEGIN CHANGE
@@ -1315,7 +1315,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public static void ConfigureEfModel(ITypeMetadataCache metadataCache, DbModelBuilder modelBuilder)
             {
                 ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IProduct));
-                EntityTypeConfiguration<EfEntityObject_Product> entity = EfModelApi.EntityType<EfEntityObject_Product>(modelBuilder, typeMetadata);
+                EntityTypeConfiguration<EfEntityObject_Product> entity = EfModelApi.EntityType<EfEntityObject_Product>(modelBuilder, typeMetadata, metadataCache);
                 EfModelApi.StringProperty<EfEntityObject_Product>(entity, typeMetadata.GetPropertyByName("CatalogNo"));
                 EfModelApi.StringProperty<EfEntityObject_Product>(entity, typeMetadata.GetPropertyByName("Name"));
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Product, decimal>(entity, typeMetadata.GetPropertyByName("Price"));
@@ -1511,7 +1511,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public static void ConfigureEfModel(ITypeMetadataCache metadataCache, DbModelBuilder modelBuilder)
             {
                 ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.ICustomer));
-                EntityTypeConfiguration<EfEntityObject_Customer> entity = EfModelApi.EntityType<EfEntityObject_Customer>(modelBuilder, typeMetadata);
+                EntityTypeConfiguration<EfEntityObject_Customer> entity = EfModelApi.EntityType<EfEntityObject_Customer>(modelBuilder, typeMetadata, metadataCache);
                 EfModelApi.StringProperty<EfEntityObject_Customer>(entity, typeMetadata.GetPropertyByName("FullName"));
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Customer, int>(entity, typeMetadata.GetPropertyByName("Id"));
                 
@@ -1626,7 +1626,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public static void ConfigureEfModel(ITypeMetadataCache metadataCache, DbModelBuilder modelBuilder)
             {
                 ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IContactDetail));
-                var entity = EfModelApi.EntityType<EfEntityObject_ContactDetail>(modelBuilder, typeMetadata);
+                var entity = EfModelApi.EntityType<EfEntityObject_ContactDetail>(modelBuilder, typeMetadata, metadataCache);
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_ContactDetail, int>(entity, typeMetadata.GetPropertyByName("Id"));
             }
 

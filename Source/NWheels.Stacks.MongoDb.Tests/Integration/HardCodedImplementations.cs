@@ -315,6 +315,116 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             #endregion
 
 
+
+            IR1.IOrderLine IR1.IOnlineStoreRepository.NewOrderLine(IR1.IOrder order, IR1.IProduct product, int quantity)
+            {
+                throw new NotImplementedException();
+            }
+
+            IR1.IAttributeValue IR1.IOnlineStoreRepository.NewAttributeValue(string value, int displayOrder)
+            {
+                throw new NotImplementedException();
+            }
+
+            IR1.IAttributeValueChoice IR1.IOnlineStoreRepository.NewAttributeValueChoice(IR1.IAttribute attribute, string value)
+            {
+                throw new NotImplementedException();
+            }
+
+            IR1.IPostalAddress IR1.IOnlineStoreRepository.NewPostalAddress(string streetAddress, string city, string zipCode, string country)
+            {
+                throw new NotImplementedException();
+            }
+
+            IR1.IEmailContactDetail IR1.IOnlineStoreRepository.NewEmailContactDetail(string email)
+            {
+                throw new NotImplementedException();
+            }
+
+            IEntityRepository<IR1.ICategory> IR1.IOnlineStoreRepository.Categories
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            IEntityRepository<IR1.IProduct> IR1.IOnlineStoreRepository.Products
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            IEntityRepository<IR1.IOrder> IR1.IOnlineStoreRepository.Orders
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            IEntityRepository<IR1.IOrderLine> IR1.IOnlineStoreRepository.OrdersLines
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            IEntityRepository<IR1.IAttribute> IR1.IOnlineStoreRepository.Attributes
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            IEntityRepository<IR1.ICustomer> IR1.IOnlineStoreRepository.Customers
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            IEntityRepository<IR1.IContactDetail> IR1.IOnlineStoreRepository.ContactDetails
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            IEntityRepository<IR1.IEmailContactDetail> IR1.IOnlineStoreRepository.ContactEmails
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            void IApplicationDataRepository.InvokeGenericOperation(Type contractType, IDataRepositoryCallback callback)
+            {
+                throw new NotImplementedException();
+            }
+
+            Type[] IApplicationDataRepository.GetEntityTypesInRepository()
+            {
+                throw new NotImplementedException();
+            }
+
+            Type[] IApplicationDataRepository.GetEntityContractsInRepository()
+            {
+                throw new NotImplementedException();
+            }
+
+            IEntityRepository[] IApplicationDataRepository.GetEntityRepositories()
+            {
+                throw new NotImplementedException();
+            }
+
+            void IUnitOfWork.CommitChanges()
+            {
+                throw new NotImplementedException();
+            }
+
+            void IUnitOfWork.RollbackChanges()
+            {
+                throw new NotImplementedException();
+            }
+
+            bool IUnitOfWork.IsAutoCommitMode
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            UnitOfWorkState IUnitOfWork.UnitOfWorkState
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            void IDisposable.Dispose()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         #endregion

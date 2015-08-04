@@ -77,7 +77,7 @@
     <Compile Include="DataObjects\TypeMetadataBuilderConstructorTests.cs" />
     <Compile Include="DataObjects\TypeMetadataCacheTests.cs" />
     <Compile Include="Endpoints\Core\CompactBinarySerializersTests.cs" />
-    <Compile Include="Entities\DomainObjectTests.cs" />
+    <Compile Include="Entities\DomainObjectExample.cs" />
     <Compile Include="Extensions\AutofacExtensionTests.cs" />
     <Compile Include="Extensions\TypeExtensionTests.cs" />
     <Compile Include="Hosting\AutofacRegistrationTests.cs" />

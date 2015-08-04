@@ -10,7 +10,7 @@ using NWheels.Testing;
 namespace NWheels.UnitTests.Entities
 {
     [TestFixture]
-    public class DomainObjectTests : UnitTestBase
+    public class DomainObjectExample : UnitTestBase
     {
         [Test]
         public void Example_RenewContract()
