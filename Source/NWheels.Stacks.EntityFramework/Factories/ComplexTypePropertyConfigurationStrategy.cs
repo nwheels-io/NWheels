@@ -31,9 +31,34 @@ namespace NWheels.Stacks.EntityFramework.Factories
             Operand<EntityTypeConfiguration<TypeTemplate.TImpl>> typeConfig)
         {
             var m = method;
-            Type implementationType = FindImpementationType(MetaProperty.ClrType);
+            var entityMetaPropertyLocal = m.Local<IPropertyMetadata>();
+            var complexMetaPropertyLocal = m.Local<IPropertyMetadata>();
 
-            // TODO: configure complex type
+            Type complexIimplementationType = FindImpementationType(MetaProperty.ClrType);
+
+            using ( TT.CreateScope<TT.TImpl2>(complexIimplementationType) )
+            {
+                entityMetaPropertyLocal.Assign(typeMetadata.Func<string, IPropertyMetadata>(x => x.GetPropertyByName, m.Const(MetaProperty.Name)));
+                modelBuilder.Func<ComplexTypeConfiguration<TT.TImpl2>>(x => x.ComplexType<TT.TImpl2>);
+
+                foreach ( var complexTypeProperty in MetaProperty.Relation.RelatedPartyType.Properties )
+                {
+                    using ( TT.CreateScope<TT.TProperty>(complexTypeProperty.ClrType) )
+                    {
+                        complexMetaPropertyLocal.Assign(
+                            entityMetaPropertyLocal
+                            .Prop(x => x.Relation)
+                            .Prop(x => x.RelatedPartyType)
+                            .Func<string, IPropertyMetadata>(x => x.GetPropertyByName, m.Const(complexTypeProperty.Name)));
+
+                        Static.Void(EfModelApi.ComplexTypeProperty<TT.TImpl, TT.TProperty>, 
+                            modelBuilder,
+                            typeConfig,
+                            entityMetaPropertyLocal,
+                            complexMetaPropertyLocal);
+                    }
+                }
+            }
         }
 
         #endregion

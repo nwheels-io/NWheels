@@ -190,10 +190,14 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
         private void InitializeMetadata()
         {
-            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new IMetadataConvention[] {
-                new DefaultIdMetadataConvention(typeof(int)),
-                new TestIdMetadataConvention(), 
-            });
+            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(
+                new IMetadataConvention[] {
+                    new DefaultIdMetadataConvention(typeof(int)),
+                    new TestIdMetadataConvention(), 
+                },
+                relationalMappingConventions: new IRelationalMappingConvention[] {
+                    new UnderscoreRelationalMappingConvention(usePluralTableNames: true)
+                });
 
             var updater = new ContainerBuilder();
             updater.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();

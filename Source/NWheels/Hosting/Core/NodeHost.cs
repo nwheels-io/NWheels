@@ -785,6 +785,9 @@ namespace NWheels.Hosting.Core
 
             private void LoadDataRepositories()
             {
+                var loggingConfiguration = _ownerLifetime.LifetimeContainer.Resolve<IFrameworkLoggingConfiguration>();
+                _suppressDynamicArtifacts = loggingConfiguration.SuppressDynamicArtifacts;
+
                 using ( _logger.InitializingDataRepositories() )
                 {
                     var repositoryFactory = _ownerLifetime.LifetimeContainer.Resolve<IDataRepositoryFactory>();

@@ -19,9 +19,8 @@ namespace NWheels.TypeModel.Core.Factories
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
-            IPropertyMetadata metaProperty, 
-            Type storageType)
-            : base(factoryContext, metadataCache, metaType, metaProperty, storageType)
+            IPropertyMetadata metaProperty)
+            : base(factoryContext, metadataCache, metaType, metaProperty, metaProperty.RelationalMapping.StorageType.StorageDataType)
         {
         }
 

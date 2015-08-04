@@ -37,14 +37,13 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private KeyMetadataBuilder FindOrAddPrimaryKey(TypeMetadataBuilder type)
         {
-            if (type.PrimaryKey == null)
+            if ( type.PrimaryKey == null )
             {
-                foreach (var property in type.Properties.Where(p => p.Role == PropertyRole.Key))
+                foreach ( var property in type.Properties.Where(p => p.Role == PropertyRole.Key) )
                 {
-                    if (type.PrimaryKey == null)
+                    if ( type.PrimaryKey == null )
                     {
-                        type.PrimaryKey = new KeyMetadataBuilder
-                        {
+                        type.PrimaryKey = new KeyMetadataBuilder {
                             Kind = KeyKind.Primary,
                             Name = "PK_" + type.Name
                         };
@@ -63,7 +62,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private void CompleteRelations(TypeMetadataBuilder type)
         {
-            foreach (var property in type.Properties.Where(p => p.Kind == PropertyKind.Relation))
+            foreach ( var property in type.Properties.Where(p => p.Kind == PropertyKind.Relation) )
             {
                 CompleteRelationMetadata(type, property);
             }
@@ -73,7 +72,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private void CompleteRelationMetadata(TypeMetadataBuilder type, PropertyMetadataBuilder property)
         {
-            switch (property.Relation.Multiplicity)
+            switch ( property.Relation.Multiplicity )
             {
                 case RelationMultiplicity.OneToOne:
                 case RelationMultiplicity.ManyToOne:
@@ -132,13 +131,12 @@ namespace NWheels.DataObjects.Core.Conventions
         {
             var existingKey = type.AllKeys.FirstOrDefault(k => k.Properties.Select(p => p.ClrType).SingleOrDefault() == relationProperty.ClrType);
 
-            if (existingKey != null)
+            if ( existingKey != null )
             {
                 return existingKey;
             }
 
-            var newKey = new KeyMetadataBuilder
-            {
+            var newKey = new KeyMetadataBuilder {
                 Kind = KeyKind.Foreign,
                 Name = "FK_" + relationProperty.Name
             };

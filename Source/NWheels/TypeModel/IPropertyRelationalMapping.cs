@@ -6,5 +6,7 @@
         string TableName { get; }
         string ColumnName { get; }
         string ColumnType { get; }
+        string RelatedColumnName { get; }
+        string RelatedColumnType { get; }
     }
 }

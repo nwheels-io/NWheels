@@ -26,6 +26,7 @@ using NWheels.Stacks.EntityFramework.Factories;
 using System.Configuration;
 using NWheels.Testing;
 using System.ComponentModel.DataAnnotations.Schema;
+using NWheels.TypeModel.Core.Factories;
 
 namespace NWheels.Stacks.EntityFramework.Tests
 {
@@ -56,6 +57,20 @@ namespace NWheels.Stacks.EntityFramework.Tests
                     throw new NotSupportedException("Not supported by hard-coded data repository factory.");
                 }
 
+                base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.ICategory));
+                base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IProduct));
+                base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IOrder));
+                base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IOrderLine));
+                base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IAttribute));
+                base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IAttributeValue));
+                base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IAttributeValueChoice));
+                base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IPostalAddress));
+                base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.ICustomer));
+                base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IContactDetail));
+                base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IEmailContactDetail));
+
+                base.MetadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(base.MetadataCache));
+
                 base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.ICategory)));
                 base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IProduct)));
                 base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IOrder)));
@@ -64,8 +79,9 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IAttributeValue)));
                 base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IAttributeValueChoice)));
                 base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IPostalAddress)));
-
-                base.MetadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(base.MetadataCache));
+                base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.ICustomer)));
+                base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IContactDetail)));
+                base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IEmailContactDetail)));
 
                 var dbProviderName = _connectionSettings.ProviderName;
                 var dbProviderFactory = DbProviderFactories.GetFactory(dbProviderName);
@@ -124,6 +140,14 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 {
                     return (TEntityContract)(object)new EfEntityObject_AttributeValueChoice();
                 }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.ICustomer))
+                {
+                    return (TEntityContract)(object)new EfEntityObject_Customer();
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IEmailContactDetail))
+                {
+                    return (TEntityContract)(object)new EfEntityObject_EmailContactDetail();
+                }
 
                 throw new NotSupportedException(
                     string.Format("Entity contract '{0}' is not supported by hard-coded entity factory.", typeof(TEntityContract).Name));
@@ -147,6 +171,8 @@ namespace NWheels.Stacks.EntityFramework.Tests
             private IEntityRepository<Interfaces.Repository1.IOrder> m_Orders;
             private IEntityRepository<Interfaces.Repository1.IOrderLine> m_OrdersLines;
             private IEntityRepository<Interfaces.Repository1.IProduct> m_Products;
+            private IEntityRepository<Interfaces.Repository1.ICustomer> m_Customers;
+            private IEntityRepository<Interfaces.Repository1.IContactDetail> m_ContactDetails;
 
             // Methods
             public EfDataRepository_OnlineStoreRepository(IComponentContext arg0, IEntityObjectFactory arg1, ITypeMetadataCache arg2, DbConnection arg3, bool arg4)
@@ -164,6 +190,10 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 base.RegisterEntityRepository<Interfaces.Repository1.IOrderLine, EfEntityObject_OrderLine>(this.m_OrdersLines);
                 this.m_Attributes = new EfEntityRepository<Interfaces.Repository1.IAttribute, EfEntityObject_Attribute>(this);
                 base.RegisterEntityRepository<Interfaces.Repository1.IAttribute, EfEntityObject_Attribute>(this.m_Attributes);
+                this.m_Customers = new EfEntityRepository<Interfaces.Repository1.ICustomer, EfEntityObject_Customer>(this);
+                base.RegisterEntityRepository<Interfaces.Repository1.ICustomer, EfEntityObject_Customer>(this.m_Customers);
+                this.m_ContactDetails = new EfEntityRepository<Interfaces.Repository1.IContactDetail, EfEntityObject_ContactDetail>(this);
+                base.RegisterEntityRepository<Interfaces.Repository1.IContactDetail, EfEntityObject_ContactDetail>(this.m_ContactDetails);
             }
 
             public static object FactoryMethod_1(IComponentContext context1, EntityObjectFactory factory1, ITypeMetadataCache cache1, DbConnection connection1, bool flag1)
@@ -215,10 +245,13 @@ namespace NWheels.Stacks.EntityFramework.Tests
                             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IAttributeValue))).UpdateImplementation(typeof(EfEntityObjectFactory), typeof(EfEntityObject_AttributeValue));
                             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IAttributeValueChoice))).UpdateImplementation(typeof(EfEntityObjectFactory), typeof(EfEntityObject_AttributeValueChoice));
                             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IPostalAddress))).UpdateImplementation(typeof(EfEntityObjectFactory), typeof(EfEntityObject_PostalAddress));
+                            ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.ICustomer))).UpdateImplementation(typeof(EfEntityObjectFactory), typeof(EfEntityObject_Customer));
+                            ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IContactDetail))).UpdateImplementation(typeof(EfEntityObjectFactory), typeof(EfEntityObject_ContactDetail));
+                            ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IEmailContactDetail))).UpdateImplementation(typeof(EfEntityObjectFactory), typeof(EfEntityObject_EmailContactDetail));
 
                             DbModelBuilder modelBuilder = new DbModelBuilder();
-                            IConvention[] conventions = new IConvention[] { new NoUnderscoreForeignKeyNamingConvention() };
-                            modelBuilder.Conventions.Add(conventions);
+                            //IConvention[] conventions = new IConvention[] { new NoUnderscoreForeignKeyNamingConvention() };
+                            //modelBuilder.Conventions.Add(conventions);
 
                             EfEntityObject_Category.ConfigureEfModel(metadataCache, modelBuilder);
                             EfEntityObject_Product.ConfigureEfModel(metadataCache, modelBuilder);
@@ -228,6 +261,9 @@ namespace NWheels.Stacks.EntityFramework.Tests
                             EfEntityObject_AttributeValue.ConfigureEfModel(metadataCache, modelBuilder);
                             EfEntityObject_AttributeValueChoice.ConfigureEfModel(metadataCache, modelBuilder);
                             EfEntityObject_PostalAddress.ConfigureEfModel(metadataCache, modelBuilder);
+                            EfEntityObject_Customer.ConfigureEfModel(metadataCache, modelBuilder);
+                            EfEntityObject_ContactDetail.ConfigureEfModel(metadataCache, modelBuilder);
+                            EfEntityObject_EmailContactDetail.ConfigureEfModel(metadataCache, modelBuilder);
 
                             _s_compiledModel = modelBuilder.Build(connection).Compile();
                         }
@@ -275,6 +311,13 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 return address;
             }
 
+            public Interfaces.Repository1.IEmailContactDetail NewEmailContactDetail(string email)
+            {
+                Interfaces.Repository1.IEmailContactDetail contactDeatil = this.EntityFactory.NewEntity<Interfaces.Repository1.IEmailContactDetail>();
+                contactDeatil.Email = email;
+                return contactDeatil;
+            }
+
             // Properties
             public IEntityRepository<Interfaces.Repository1.IAttribute> Attributes
             {
@@ -313,6 +356,22 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 get
                 {
                     return this.m_Products;
+                }
+            }
+
+            public IEntityRepository<Interfaces.Repository1.ICustomer> Customers
+            {
+                get
+                {
+                    return this.m_Customers;
+                }
+            }
+
+            public IEntityRepository<Interfaces.Repository1.IContactDetail> ContactDetails
+            {
+                get
+                {
+                    return this.m_ContactDetails;
                 }
             }
         }
@@ -744,6 +803,23 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Order, DateTime>(entity, typeMetadata.GetPropertyByName("PlacedAt"));
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Order, Interfaces.Repository1.OrderStatus>(entity, typeMetadata.GetPropertyByName("Status"));
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Order, int>(entity, typeMetadata.GetPropertyByName("Id"));
+
+                modelBuilder.ComplexType<EfEntityObject_PostalAddress>();
+                var complexMetaProperty1 = typeMetadata.GetPropertyByName("BillingAddress");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty1, complexMetaProperty1.Relation.RelatedPartyType.GetPropertyByName("City"));
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty1, complexMetaProperty1.Relation.RelatedPartyType.GetPropertyByName("Country"));
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty1, complexMetaProperty1.Relation.RelatedPartyType.GetPropertyByName("StreetAddress"));
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty1, complexMetaProperty1.Relation.RelatedPartyType.GetPropertyByName("ZipCode"));
+
+                modelBuilder.ComplexType<EfEntityObject_PostalAddress>();
+                var complexMetaProperty2 = typeMetadata.GetPropertyByName("DeliveryAddress");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty2, complexMetaProperty2.Relation.RelatedPartyType.GetPropertyByName("City"));
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty2, complexMetaProperty2.Relation.RelatedPartyType.GetPropertyByName("Country"));
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty2, complexMetaProperty2.Relation.RelatedPartyType.GetPropertyByName("StreetAddress"));
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty2, complexMetaProperty2.Relation.RelatedPartyType.GetPropertyByName("ZipCode"));
+
+                //modelBuilder.ComplexType<EfEntityObject_PostalAddress>();
+                //modelBuilder.Types<EfEntityObject_Order>().Configure(cfg => cfg.Property(x => x.BillingAddress.City).HasColumnName("bbb_aaa"));
             }
 
             public void DeepListNestedObjects(HashSet<object> nestedObjects)
@@ -1391,6 +1467,247 @@ namespace NWheels.Stacks.EntityFramework.Tests
             }
         }
 
+        public class EfEntityObject_Customer : Interfaces.Repository1.ICustomer, IEntityPartId<int>, IObject, IEntityObject, IHaveNestedObjects
+        {
+            // Fields
+            private ConcreteToAbstractCollectionAdapter<EfEntityObject_ContactDetail, Interfaces.Repository1.IContactDetail> m_ContactDetails_adapter;
+            private HashSet<EfEntityObject_ContactDetail> m_ContactDetails_storage;
+            private string m_FullName;
+            private int m_Id_storage;
 
+            // Methods
+            public EfEntityObject_Customer()
+            {
+            }
+
+            public EfEntityObject_Customer(IComponentContext arg0)
+            {
+                this.m_ContactDetails_storage = new HashSet<EfEntityObject_ContactDetail>();
+                this.m_ContactDetails_adapter = (ConcreteToAbstractCollectionAdapter<EfEntityObject_ContactDetail, Interfaces.Repository1.IContactDetail>) RuntimeTypeModelHelpers.CreateCollectionAdapter<EfEntityObject_ContactDetail, Interfaces.Repository1.IContactDetail>(this.m_ContactDetails_storage, false);
+                this.m_Id_storage = arg0.Resolve<TestIntIdValueGenerator>().GenerateValue("Customer.Id");
+            }
+
+            public static object FactoryMethod1()
+            {
+                return new EfEntityObject_Customer();
+            }
+
+            public static object FactoryMethod2(IComponentContext context1)
+            {
+                return new EfEntityObject_Customer(context1);
+            }
+
+            public static void ConfigureEfModel(ITypeMetadataCache metadataCache, DbModelBuilder modelBuilder)
+            {
+                ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.ICustomer));
+                EntityTypeConfiguration<EfEntityObject_Customer> entity = EfModelApi.EntityType<EfEntityObject_Customer>(modelBuilder, typeMetadata);
+                EfModelApi.StringProperty<EfEntityObject_Customer>(entity, typeMetadata.GetPropertyByName("FullName"));
+                EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Customer, int>(entity, typeMetadata.GetPropertyByName("Id"));
+                
+                EfModelApi.OneToManyNoInverseRelationProperty<EfEntityObject_Customer, EfEntityObject_ContactDetail>(entity, typeMetadata.GetPropertyByName("ContactDetails"));
+                
+                //modelBuilder.Entity<EfEntityObject_Customer>().HasMany(x => x.ContactDetails).WithRequired().Map(cfg => cfg.MapKey(typeMetadata.GetPropertyByName("ContactDetails").RelationalMapping.RelatedColumnName));
+            }
+
+            public void DeepListNestedObjects(HashSet<object> nestedObjects)
+            {
+                nestedObjects.UnionWith(this.m_ContactDetails_adapter.Cast<object>());
+            }
+
+            IEntityId IEntityObject.GetId()
+            {
+                return new EntityId<Interfaces.Repository1.ICustomer, int>(this.m_Id_storage);
+            }
+
+            void IEntityObject.SetId(object value)
+            {
+                this.m_Id_storage = (int) value;
+            }
+
+            // Properties
+            public virtual HashSet<EfEntityObject_ContactDetail> ContactDetails
+            {
+                get
+                {
+                    return this.m_ContactDetails_storage;
+                }
+                set
+                {
+                    this.m_ContactDetails_adapter = (ConcreteToAbstractCollectionAdapter<EfEntityObject_ContactDetail, Interfaces.Repository1.IContactDetail>) RuntimeTypeModelHelpers.CreateCollectionAdapter<EfEntityObject_ContactDetail, Interfaces.Repository1.IContactDetail>(value, false);
+                    this.m_ContactDetails_storage = value;
+                }
+            }
+
+            public virtual string FullName
+            {
+                get
+                {
+                    return this.m_FullName;
+                }
+                set
+                {
+                    this.m_FullName = value;
+                }
+            }
+
+            ICollection<Interfaces.Repository1.IContactDetail> Interfaces.Repository1.ICustomer.ContactDetails
+            {
+                get
+                {
+                    return this.m_ContactDetails_adapter;
+                }
+            }
+
+            public virtual int Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+                set
+                {
+                    this.m_Id_storage = value;
+                }
+            }
+
+            int IEntityPartId<int>.Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.ICustomer);
+                }
+            }
+        }
+
+        public abstract class EfEntityObject_ContactDetail : Interfaces.Repository1.IContactDetail, IEntityPartId<int>, IObject, IEntityObject
+        {
+            // Fields
+            private int m_Id_storage;
+
+            // Methods
+            public EfEntityObject_ContactDetail()
+            {
+            }
+
+            public EfEntityObject_ContactDetail(IComponentContext arg0)
+            {
+                this.m_Id_storage = arg0.Resolve<TestIntIdValueGenerator>().GenerateValue("ContactDetail.Id");
+            }
+
+            //public static object FactoryMethod1()
+            //{
+            //    return new EfEntityObject_ContactDetail();
+            //}
+
+            //public static object FactoryMethod2(IComponentContext context1)
+            //{
+            //    return new EfEntityObject_ContactDetail(context1);
+            //}
+
+            public static void ConfigureEfModel(ITypeMetadataCache metadataCache, DbModelBuilder modelBuilder)
+            {
+                ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IContactDetail));
+                var entity = EfModelApi.EntityType<EfEntityObject_ContactDetail>(modelBuilder, typeMetadata);
+                EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_ContactDetail, int>(entity, typeMetadata.GetPropertyByName("Id"));
+            }
+
+            IEntityId IEntityObject.GetId()
+            {
+                return new EntityId<Interfaces.Repository1.IContactDetail, int>(this.m_Id_storage);
+            }
+
+            void IEntityObject.SetId(object value)
+            {
+                this.m_Id_storage = (int)value;
+            }
+
+            // Properties
+            public virtual int Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+                set
+                {
+                    this.m_Id_storage = value;
+                }
+            }
+
+            int IEntityPartId<int>.Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.IContactDetail);
+                }
+            }
+        }
+
+        public class EfEntityObject_EmailContactDetail : EfEntityObject_ContactDetail, Interfaces.Repository1.IEmailContactDetail
+        {
+            // Fields
+            private string m_Email;
+
+            // Methods
+            public EfEntityObject_EmailContactDetail()
+            {
+            }
+
+            public EfEntityObject_EmailContactDetail(IComponentContext arg0) : base(arg0)
+            {
+            }
+
+            public static object FactoryMethod1()
+            {
+                return new EfEntityObject_EmailContactDetail();
+            }
+
+            public static object FactoryMethod2(IComponentContext context1)
+            {
+                return new EfEntityObject_EmailContactDetail(context1);
+            }
+
+            public static new void ConfigureEfModel(ITypeMetadataCache metadataCache, DbModelBuilder modelBuilder)
+            {
+                ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IEmailContactDetail));
+                //var thisEntity = modelBuilder.Entity<EfEntityObject_EmailContactDetail>();
+                //EntityTypeConfiguration<EfEntityObject_EmailContactDetail> thisEntity = EfModelApi.EntityType<EfEntityObject_EmailContactDetail>(modelBuilder, typeMetadata);
+
+                //var baseEntity = modelBuilder.Entity<EfEntityObject_ContactDetail>();
+                //baseEntity.Map<EfEntityObject_EmailContactDetail>(m => m.Requires("_t").HasValue("EmailContactDetail"));
+
+                var thisEntity = EfModelApi.InheritedEntityType<EfEntityObject_ContactDetail, EfEntityObject_EmailContactDetail>(modelBuilder, typeMetadata, "_t", "Email");
+                EfModelApi.StringProperty(thisEntity, typeMetadata.GetPropertyByName("Email"));
+            }
+
+            // Properties
+            public virtual string Email
+            {
+                get
+                {
+                    return this.m_Email;
+                }
+                set
+                {
+                    this.m_Email = value;
+                }
+            }
+        }
     }
 }

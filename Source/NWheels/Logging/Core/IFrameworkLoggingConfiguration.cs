@@ -7,21 +7,21 @@ namespace NWheels.Logging.Core
     public interface IFrameworkLoggingConfiguration : IConfigurationSection
     {
         [DefaultValue("..\\Logs\\PlainLog")]
-        string PlainLogFolder { get; }
+        string PlainLogFolder { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DefaultValue("..\\Logs\\ThreadLog")]
-        string ThreadLogFolder { get; }
+        string ThreadLogFolder { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DefaultValue(true)]
-        bool SuppressDynamicArtifacts { get; }
+        bool SuppressDynamicArtifacts { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DefaultValue(LogLevel.Info)]
-        LogLevel Level { get; }
+        LogLevel Level { get; set; }
     }
 }

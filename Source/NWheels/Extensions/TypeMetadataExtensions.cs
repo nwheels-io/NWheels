@@ -54,5 +54,16 @@ namespace NWheels.Extensions
         {
             return GetImplementationBy(metadata, factory.GetType());
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ITypeMetadata GetRootBaseType(this ITypeMetadata metadata)
+        {
+            ITypeMetadata rootBaseType;
+
+            for ( rootBaseType = metadata ; rootBaseType.BaseType != null ; rootBaseType = rootBaseType.BaseType );
+
+            return rootBaseType;
+        }
     }
 }

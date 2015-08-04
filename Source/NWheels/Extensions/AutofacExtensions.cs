@@ -19,6 +19,7 @@ using NWheels.Endpoints;
 using NWheels.Endpoints.Core.Wcf;
 using NWheels.Entities;
 using NWheels.Entities.Core;
+using NWheels.Entities.Impl;
 using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.UI;
@@ -457,6 +458,14 @@ namespace NWheels.Extensions
             {
                 var fineTuner = new RelationalMappingFineTuner<TEntity>(fineTuneAction);
                 _builder.RegisterInstance<RelationalMappingFineTuner<TEntity>>(fineTuner);
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void UseStorageInitializerOnStartup()
+            {
+                _builder.NWheelsFeatures().Logging().RegisterLogger<DatabaseInitializer.ILogger>();
+                _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>();
             }
         }
 

@@ -182,6 +182,5 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
             repo.Dispose();
         }
-
     }
 }

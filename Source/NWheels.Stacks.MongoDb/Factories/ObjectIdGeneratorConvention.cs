@@ -11,18 +11,21 @@ using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using MongoDB.Bson;
+using NWheels.DataObjects.Core.Factories;
 
 namespace NWheels.Stacks.MongoDb.Factories
 {
     public class ObjectIdGeneratorConvention : DecorationConvention
     {
+        private readonly PropertyImplementationStrategyMap _propertyStrategyMap;
         private readonly IPropertyMetadata _keyProperty;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ObjectIdGeneratorConvention(ITypeMetadata metaType)
+        public ObjectIdGeneratorConvention(PropertyImplementationStrategyMap propertyStrategyMap, ITypeMetadata metaType)
             : base(Will.DecorateConstructors)
         {
+            _propertyStrategyMap = propertyStrategyMap;
             _keyProperty = (
                 metaType.PrimaryKey != null ? 
                 metaType.PrimaryKey.Properties.FirstOrDefault(p => p.ClrType == typeof(ObjectId) && p.DefaultValueGeneratorType == null) : 
@@ -33,7 +36,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         protected override bool ShouldApply(ObjectFactoryContext context)
         {
-            return (_keyProperty != null);
+            return (_keyProperty != null && !_propertyStrategyMap.IsImplementedByBaseEntity(_keyProperty.ContractPropertyInfo));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

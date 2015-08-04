@@ -34,6 +34,7 @@ namespace NWheels.TypeModel.Core.Factories
         protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
         {
             writer.DefaultConstructor(cw => {
+                cw.Base();
                 _propertyStrategyMap.InvokeStrategies(
                     strategy => {
                         strategy.WriteMaterialization(cw);

@@ -23,6 +23,13 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected override string NameTypeRelationTable(TypeMetadataBuilder type1, TypeMetadataBuilder type2)
+        {
+            return type1.Name.TrimSuffix("Entity") + NameTypePrimaryTable(type2);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override string NamePropertyColumnTable(TypeMetadataBuilder type, PropertyMetadataBuilder property)
         {
             return type.RelationalMapping.PrimaryTableName;

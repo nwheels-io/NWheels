@@ -97,6 +97,7 @@
     <Compile Include="Authorization\IIdentityInfo.cs" />
     <Compile Include="Entities\Factories\ImplementIEntityPartObjectConvention.cs" />
     <Compile Include="Entities\Factories\ImplementIEntityObjectConvention.cs" />
+    <Compile Include="Extensions\ExceptionExtensions.cs" />
     <Compile Include="TypeModel\Core\ConcreteToAbstractListAdapter.cs" />
     <Compile Include="TypeModel\Core\Factories\BaseTypeConvention.cs" />
     <Compile Include="TypeModel\Core\Factories\CollectionAdapterDualValueStrategy.cs" />

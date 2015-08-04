@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NWheels.Entities
 {
-    internal class RelationalMappingConventionDefault
+    public class RelationalMappingConventionDefault
     {
         private readonly ConventionType _type;
         private readonly bool _usePluralTableNames;

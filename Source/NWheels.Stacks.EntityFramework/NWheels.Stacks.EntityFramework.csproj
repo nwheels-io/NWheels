@@ -89,6 +89,7 @@
     <Compile Include="Factories\JsonStringPropertyConfigurationStrategy.cs" />
     <Compile Include="IDbCommandLogger.cs" />
     <Compile Include="EfLoggingDbCommandInterceptor.cs" />
+    <Compile Include="MySqlSchemaInitializer.cs" />
     <Compile Include="QueryExpressionSpecializer.cs" />
     <Compile Include="UnitOfWork.cs" />
     <Compile Include="ModuleLoader.cs" />

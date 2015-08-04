@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using Hapil;
+using NWheels.Exceptions;
 using NWheels.Extensions;
 
 namespace NWheels.DataObjects.Core.Conventions
@@ -19,6 +21,8 @@ namespace NWheels.DataObjects.Core.Conventions
 
         public void Preview(TypeMetadataBuilder type)
         {
+            ApplyInheritance(type);
+
             foreach ( var property in type.Properties )
             {
                 ApplyToProperty(property);
@@ -35,6 +39,24 @@ namespace NWheels.DataObjects.Core.Conventions
 
         public void Finalize(TypeMetadataBuilder type)
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ApplyInheritance(TypeMetadataBuilder type)
+        {
+            var baseContracts = type.ContractType.GetInterfaces().Where(DataObjectContractAttribute.IsDataObjectContract).ToArray();
+
+            if ( baseContracts.Length > 1 )
+            {
+                throw new ContractConventionException(typeof(ContractMetadataConvention), type.ContractType, "Multiple inheritance is not allowed");
+            }
+
+            if ( baseContracts.Length == 1 )
+            {
+                type.BaseType = _metadataCache.FindTypeMetadataAllowIncomplete(baseContracts[0]);
+                type.BaseType.RegisterDerivedType(type);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -123,6 +145,15 @@ namespace NWheels.DataObjects.Core.Conventions
         private void ThisIsContractPartProperty(PropertyMetadataBuilder property)
         {
             property.Kind = PropertyKind.Part;
+
+            if ( property.Relation == null )
+            {
+                property.Relation = new RelationMetadataBuilder();
+            }
+
+            property.Relation.RelatedPartyType = _metadataCache.FindTypeMetadataAllowIncomplete(property.ClrType);
+            property.Relation.Multiplicity = RelationMultiplicity.OneToOne;
+            property.Relation.Kind = RelationKind.Composition;
         }
     }
 }

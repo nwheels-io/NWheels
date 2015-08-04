@@ -22,6 +22,8 @@
         public string TableName { get; set; }
         public string ColumnName { get; set; }
         public string ColumnType { get; set; }
+        public string RelatedColumnName { get; set; }
+        public string RelatedColumnType { get; set; }
 
         #endregion
 
@@ -33,6 +35,8 @@
             TableName = visitor.VisitAttribute("TableName", TableName);
             ColumnName = visitor.VisitAttribute("ColumnName", ColumnName);
             ColumnType = visitor.VisitAttribute("ColumnType", ColumnType);
+            RelatedColumnName = visitor.VisitAttribute("RelatedColumnName", RelatedColumnName);
+            RelatedColumnType = visitor.VisitAttribute("RelatedColumnType", RelatedColumnType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

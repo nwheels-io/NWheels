@@ -47,5 +47,14 @@ namespace NWheels.Extensions
         {
             return GetImplementationBy(metadata, factory.GetType());
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Type StorageClrType(this IPropertyMetadata metadata)
+        {
+            return (metadata.RelationalMapping.StorageType != null
+                ? metadata.RelationalMapping.StorageType.StorageDataType
+                : metadata.ClrType);
+        }
     }
 }

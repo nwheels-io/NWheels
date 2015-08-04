@@ -33,26 +33,33 @@ namespace NWheels.Stacks.EntityFramework.Factories
             var m = method;
             var relatedPartyImplementationType = FindImpementationType(MetaProperty.Relation.RelatedPartyType.ContractType);
 
-            switch ( MetaProperty.Relation.Multiplicity )
+            using ( TT.CreateScope<TT.TImpl2>(relatedPartyImplementationType) )
             {
-                case RelationMultiplicity.ManyToOne:
-                    using ( TT.CreateScope<TT.TImpl2>(relatedPartyImplementationType) )
-                    {
+                switch ( MetaProperty.Relation.Multiplicity )
+                {
+                    case RelationMultiplicity.OneToMany:
+                        if ( MetaProperty.Relation.InverseProperty == null )
+                        {
+                            Static.GenericFunc(
+                                (e, p) => EfModelApi.OneToManyNoInverseRelationProperty<TT.TImpl, TT.TImpl2>(e, p),
+                                typeConfig,
+                                typeMetadata.Func<string, IPropertyMetadata>(x => x.GetPropertyByName, m.Const(MetaProperty.Name)));
+                            //EfModelApi.OneToManyNoInverseRelationProperty<EfEntityObject_Customer, EfEntityObject_ContactDetail>(entity, typeMetadata.GetPropertyByName("ContactDetails"));
+                        }
+                        break;
+                    case RelationMultiplicity.ManyToOne:
                         Static.GenericFunc(
                             (e, p) => EfModelApi.ManyToOneRelationProperty<TT.TImpl, TT.TImpl2>(e, p),
                             typeConfig,
                             typeMetadata.Func<string, IPropertyMetadata>(x => x.GetPropertyByName, m.Const(MetaProperty.Name)));
-                    }
-                    break;
-                case RelationMultiplicity.ManyToMany:
-                    using ( TT.CreateScope<TT.TImpl2>(relatedPartyImplementationType) )
-                    {
+                        break;
+                    case RelationMultiplicity.ManyToMany:
                         Static.GenericFunc(
                             (e, p) => EfModelApi.ManyToManyRelationProperty<TT.TImpl, TT.TImpl2>(e, p),
                             typeConfig,
                             typeMetadata.Func<string, IPropertyMetadata>(x => x.GetPropertyByName, m.Const(MetaProperty.Name)));
-                    }
-                    break;
+                        break;
+                }
             }
         }
 

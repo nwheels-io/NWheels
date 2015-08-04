@@ -1,4 +1,5 @@
-﻿using Hapil;
+﻿using System.Linq;
+using Hapil;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Extensions;
@@ -21,6 +22,12 @@ namespace NWheels.Entities.Core
         protected override string NameTypePrimaryTable(TypeMetadataBuilder type)
         {
             return ToUnderscoreConvention(_usePluralTableNames ? base.PluralizationService.Pluralize(type.Name.TrimSuffix("Entity")) : type.Name);
+        }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override string NameTypeRelationTable(TypeMetadataBuilder type1, TypeMetadataBuilder type2)
+        {
+            return ToUnderscoreConvention(type1.Name.TrimSuffix("Entity")) + "_" + NameTypePrimaryTable(type2);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,16 +53,26 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string NameKeyPropertyColumn(TypeMetadataBuilder type, KeyMetadataBuilder key, PropertyMetadataBuilder property)
+        protected override string NameForeignKeyPropertyColumn(TypeMetadataBuilder type, PropertyMetadataBuilder property)
         {
-            if ( key.Kind == KeyKind.Foreign )
-            {
-                return NamePropertyColumn(type, property) + "_id";
-            }
-            else
-            {
-                return NamePropertyColumn(type, property);
-            }
+            return (
+                NamePropertyColumn(type, property) + 
+                "_" + 
+                NamePropertyColumn(property.Relation.RelatedPartyType, property.Relation.RelatedPartyType.PrimaryKey.Properties.First()));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override string NameRelationTableForeignKeyColumn(TypeMetadataBuilder type)
+        {
+            return ToUnderscoreConvention(type.Name) + "_" + ToUnderscoreConvention(type.PrimaryKey.Properties[0].Name);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override string NameEntityPartColumnPrefix(TypeMetadataBuilder type, PropertyMetadataBuilder property)
+        {
+            return ToUnderscoreConvention(property.Name) + "_";
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

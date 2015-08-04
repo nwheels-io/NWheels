@@ -12,12 +12,14 @@ namespace NWheels.Domains.Security
     public interface IUserAccountDataRepository : IApplicationDataRepository
     {
         IEntityRepository<IUserAccountEntity> AllUsers { get; }
-        IEntityRepository<IBackEndUserAccountEntity> BackEndUsers { get; }
-        IEntityRepository<IFrontEndUserAccountEntity> FrontEndUsers { get; }
+        //IEntityRepository<IBackEndUserAccountEntity> BackEndUsers { get; }
+        //IEntityRepository<IFrontEndUserAccountEntity> FrontEndUsers { get; }
         IEntityRepository<IUserRoleEntity> UserRoles { get; }
         IEntityRepository<IOperationPermissionEntity> OperationPermissions { get; }
         IEntityRepository<IEntityAccessRuleEntity> EntityAccessRules { get; }
         IPasswordEntity NewPassword();
+        IBackEndUserAccountEntity NewBackEndUser();
+        IFrontEndUserAccountEntity NewFrontEndUser();
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -133,17 +135,17 @@ namespace NWheels.Domains.Security
     [EntityPartContract]
     public interface IEntityPartClaimsContainer
     {
-        [PropertyContract.Relation.Composition]
+        [PropertyContract.Relation.Composition, PropertyContract.Storage.Json]
         string[] AssociatedRoles { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Relation.Composition]
+        [PropertyContract.Relation.Composition, PropertyContract.Storage.Json]
         string[] AssociatedPermissions { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Relation.Composition]
+        [PropertyContract.Relation.Composition, PropertyContract.Storage.Json]
         string[] AssociatedDataRules { get; set; }
     }
 
@@ -166,7 +168,7 @@ namespace NWheels.Domains.Security
     [EntityContract]
     public interface IEntityAccessRuleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim, IEntityPartId<int>
     {
-        [PropertyContract.Semantic.InheritorOf(typeof(IEntityAccessRule))]
+        [PropertyContract.Semantic.InheritorOf(typeof(IEntityAccessRule)), PropertyContract.Storage.ClrType]
         Type RuleObject { get; set; }
     }
 

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
+using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
@@ -17,18 +18,32 @@ namespace NWheels.Stacks.EntityFramework.Factories
 {
     public class EfConfigurationConvention : ImplementationConvention
     {
+        public const string DiscriminatorColumnName = "_t";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private readonly ITypeMetadataCache _metadataCache;
         private readonly ITypeMetadata _metaType;
         private readonly PropertyImplementationStrategyMap _propertyMap;
+        private ObjectFactoryContext _facotryContext;
+        private Local<ITypeMetadata> _typeMetadataLocal;
+        private Local<EntityTypeConfiguration<TypeTemplate.TImpl>> _entityTypeConfigLocal;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public EfConfigurationConvention(ITypeMetadataCache metadataCache, ITypeMetadata metaType, PropertyImplementationStrategyMap propertyMap)
-            : base(Will.ImplementBaseClass)
+            : base(Will.InspectDeclaration | Will.ImplementBaseClass)
         {
             _metadataCache = metadataCache;
             _metaType = metaType;
             _propertyMap = propertyMap;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnInspectDeclaration(ObjectFactoryContext context)
+        {
+            _facotryContext = context;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,16 +70,76 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
         private void ConfigureEntityType(VoidMethodWriter w, Argument<ITypeMetadataCache> metadataCache, Argument<DbModelBuilder> builder)
         {
-            var typeMetadataLocal = w.Local<ITypeMetadata>();
-            var entityTypeConfigLocal = w.Local<EntityTypeConfiguration<TT.TImpl>>();
+            _typeMetadataLocal = w.Local<ITypeMetadata>();
+            _entityTypeConfigLocal = w.Local<EntityTypeConfiguration<TT.TImpl>>();
 
-            typeMetadataLocal.Assign(metadataCache.Func<Type, ITypeMetadata>(x => x.GetTypeMetadata, w.Const(_metaType.ContractType)));
-            entityTypeConfigLocal.Assign(Static.Func(EfModelApi.EntityType<TT.TImpl>, builder, typeMetadataLocal));
+            _typeMetadataLocal.Assign(metadataCache.Func<Type, ITypeMetadata>(x => x.GetTypeMetadata, w.Const(_metaType.ContractType)));
 
+            if ( IsInheritanceConfigurationRequired() )
+            {
+                WriteInheritanceConfiguration(w, builder, _typeMetadataLocal);
+            }
+            else
+            {
+                _entityTypeConfigLocal.Assign(Static.Func(EfModelApi.EntityType<TT.TImpl>, builder, _typeMetadataLocal));
+            }
+
+            WritePropertyConfigurations(w, builder);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool IsInheritanceConfigurationRequired()
+        {
+            return (_metaType.BaseType != null || _metaType.DerivedTypes.Count > 0) && !_metaType.IsAbstract;
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void WriteInheritanceConfiguration(VoidMethodWriter w, Argument<DbModelBuilder> builder, Local<ITypeMetadata> typeMetadataLocal)
+        {
+            ITypeMetadata rootBaseType;
+            var rootBaseTypeImplementation = GetRootBaseTypeImplementation(w.OwnerClass, out rootBaseType);
+            var discriminatorValue = (_metaType.BaseType != null ? _metaType.Name.TrimTail(rootBaseType.Name) : _metaType.Name);
+
+            using ( TT.CreateScope<TT.TContract>(rootBaseTypeImplementation) )
+            {
+                _entityTypeConfigLocal.Assign(Static.Func(EfModelApi.InheritedEntityType<TT.TContract, TT.TImpl>, 
+                    builder, 
+                    typeMetadataLocal, 
+                    w.Const(DiscriminatorColumnName),
+                    w.Const(discriminatorValue)));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void WritePropertyConfigurations(VoidMethodWriter w, Argument<DbModelBuilder> builder)
+        {
             foreach ( var strategy in _propertyMap.Strategies.OfType<EfPropertyImplementationStrategy>() )
             {
-                strategy.Configurator.OnWritingEfModelConfiguration(w, builder, typeMetadataLocal, entityTypeConfigLocal);
+                strategy.Configurator.OnWritingEfModelConfiguration(w, builder, _typeMetadataLocal, _entityTypeConfigLocal);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Type GetRootBaseTypeImplementation(ClassType thisClassType, out ITypeMetadata rootBaseType)
+        {
+            rootBaseType = _metaType.GetRootBaseType();
+            
+            Type rootBaseTypeImplementation;
+
+            if ( _metaType != rootBaseType )
+            {
+                rootBaseTypeImplementation = _facotryContext.Factory.FindDynamicType(new TypeKey(primaryInterface: rootBaseType.ContractType));
+            }
+            else
+            {
+                rootBaseTypeImplementation = thisClassType.TypeBuilder;
+            }
+
+            return rootBaseTypeImplementation;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

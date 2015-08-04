@@ -75,6 +75,12 @@ namespace NWheels.Stacks.EntityFramework.Factories
                     configurator: new ComplexTypePropertyConfigurationStrategy(context, metaType, p)));
 
             builder.AddRule(
+                p => p.Kind == PropertyKind.Scalar && p.RelationalMapping.StorageType != null,
+                p => new EfPropertyImplementationStrategy(
+                    implementor: new StorageDataTypeStrategy(context, MetadataCache, metaType, p), 
+                    configurator: new ScalarPropertyConfigurationStrategy(context, metaType, p)));
+
+            builder.AddRule(
                 p => p.Kind == PropertyKind.Scalar && !(p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite),
                 p => new EfPropertyImplementationStrategy( 
                     implementor: new PublicAccessorWrapperStrategy(context, MetadataCache, metaType, p),

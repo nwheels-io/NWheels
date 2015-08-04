@@ -35,7 +35,7 @@ namespace NWheels.Stacks.MongoDb.Factories
                 new ImplementIEntityPartObjectConvention(metaType), 
                 new DependencyInjectionConvention(propertyMap), 
                 new NestedObjectsConvention(propertyMap), 
-                new ObjectIdGeneratorConvention(metaType), 
+                new ObjectIdGeneratorConvention(propertyMap, metaType), 
                 new BsonIgnoreConvention(MetadataCache, metaType),
                 new BsonDiscriminatorConvention(context, MetadataCache, metaType) 
             };

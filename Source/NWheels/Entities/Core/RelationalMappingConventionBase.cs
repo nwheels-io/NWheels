@@ -75,6 +75,7 @@ namespace NWheels.Entities.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected abstract string NameTypePrimaryTable(TypeMetadataBuilder type);
+        protected abstract string NameTypeRelationTable(TypeMetadataBuilder type1, TypeMetadataBuilder type2);
         protected abstract string NamePropertyColumnTable(TypeMetadataBuilder type, PropertyMetadataBuilder property);
         protected abstract string NamePropertyColumn(TypeMetadataBuilder type, PropertyMetadataBuilder property);
         protected abstract string NamePropertyColumnType(TypeMetadataBuilder type, PropertyMetadataBuilder property);
@@ -99,7 +100,7 @@ namespace NWheels.Entities.Core
         {
             if ( key.Kind == KeyKind.Foreign )
             {
-                return NamePropertyColumn(type, property) + "Id";
+                return NameForeignKeyPropertyColumn(type, property);
             }
             else
             {
@@ -109,9 +110,30 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected virtual string NameForeignKeyPropertyColumn(TypeMetadataBuilder type, PropertyMetadataBuilder property)
+        {
+            return NamePropertyColumn(type, property) + property.Relation.RelatedPartyType.PrimaryKey.Properties.First().Name;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual string NameRelationTableForeignKeyColumn(TypeMetadataBuilder type)
+        {
+            return type.Name + type.PrimaryKey.Properties[0].Name;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected virtual string NameKeyPropertyColumnTable(TypeMetadataBuilder type, KeyMetadataBuilder key, PropertyMetadataBuilder property)
         {
             return NamePropertyColumnTable(type, property);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual string NameEntityPartColumnPrefix(TypeMetadataBuilder type, PropertyMetadataBuilder property)
+        {
+            return property.Name;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -150,11 +172,43 @@ namespace NWheels.Entities.Core
 
         private void SetNonKeyPropertyDefaultMapping(TypeMetadataBuilder type, PropertyMetadataBuilder property)
         {
-            SetPropertyDefaultMapping(
-                property,
-                defaultTableName: NamePropertyColumnTable(type, property),
-                defaultColumnName: NamePropertyColumn(type, property),
-                defaultColumnType: NamePropertyColumnType(type, property));
+            if ( property.Kind == PropertyKind.Relation && property.Relation.Multiplicity == RelationMultiplicity.ManyToMany )
+            {
+                SetPropertyDefaultMapping(
+                    property,
+                    defaultTableName: NameTypeRelationTable(type, property.Relation.RelatedPartyType),
+                    defaultColumnName: NameRelationTableForeignKeyColumn(type),
+                    defaultColumnType: NamePropertyColumnType(type, type.PrimaryKey.Properties[0]),
+                    defaultRelatedColumnName: NameRelationTableForeignKeyColumn(property.Relation.RelatedPartyType),
+                    defaultRelatedColumnType:
+                        NamePropertyColumnType(property.Relation.RelatedPartyType, property.Relation.RelatedPartyType.PrimaryKey.Properties[0]));
+            }
+            else if ( property.Kind == PropertyKind.Relation && property.Relation.Multiplicity == RelationMultiplicity.OneToMany )
+            {
+                SetPropertyDefaultMapping(
+                    property,
+                    defaultTableName: null,
+                    defaultColumnName: null,
+                    defaultColumnType: null,
+                    defaultRelatedColumnName: NameRelationTableForeignKeyColumn(type),
+                    defaultRelatedColumnType: NamePropertyColumnType(type, type.PrimaryKey.Properties[0]));
+            }
+            else if ( property.Kind == PropertyKind.Part )
+            {
+                SetPropertyDefaultMapping(
+                    property,
+                    defaultTableName: null,
+                    defaultColumnName: NameEntityPartColumnPrefix(type, property),
+                    defaultColumnType: null);
+            }
+            else
+            {
+                SetPropertyDefaultMapping(
+                    property,
+                    defaultTableName: NamePropertyColumnTable(type, property),
+                    defaultColumnName: NamePropertyColumn(type, property),
+                    defaultColumnType: NamePropertyColumnType(type, property));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -166,6 +220,31 @@ namespace NWheels.Entities.Core
                 defaultTableName: NameKeyPropertyColumnTable(type, key, property),
                 defaultColumnName: NameKeyPropertyColumn(type, key, property),
                 defaultColumnType: NameKeyPropertyColumnType(type, key, property));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void SetPropertyDefaultMapping(
+            PropertyMetadataBuilder property, 
+            string defaultTableName, 
+            string defaultColumnName, 
+            string defaultColumnType,
+            string defaultRelatedColumnName,
+            string defaultRelatedColumnType)
+        {
+            SetPropertyDefaultMapping(property, defaultTableName, defaultColumnName, defaultColumnType);
+            
+            var mapping = property.SafeGetRelationalMapping();
+
+            if ( string.IsNullOrWhiteSpace(mapping.RelatedColumnName) )
+            {
+                mapping.RelatedColumnName = defaultRelatedColumnName;
+            }
+
+            if ( string.IsNullOrWhiteSpace(mapping.RelatedColumnType) )
+            {
+                mapping.RelatedColumnType = defaultRelatedColumnType;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

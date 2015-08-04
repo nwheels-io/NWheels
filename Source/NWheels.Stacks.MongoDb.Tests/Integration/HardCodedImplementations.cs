@@ -69,6 +69,10 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 m_OrdersLines = new MongoEntityRepository<IR1.IOrderLine, EntityObject_OrderLine>(this, metadataCache, objectFactory);
                 base.RegisterEntityRepository<IR1.IOrderLine, EntityObject_OrderLine>(m_OrdersLines);
+
+                m_Customers = null;//TODO: add EntityObject_Customer
+                //m_Customers = new MongoEntityRepository<IR1.IOrderLine, EntityObject_Cus>(this, metadataCache, objectFactory);
+                //base.RegisterEntityRepository<IR1.IOrderLine, EntityObject_OrderLine>(m_OrdersLines);
             }
 
             #endregion
@@ -185,6 +189,19 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             #endregion
 
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Method NewEmailContactDetail
+
+            public Interfaces.Repository1.IEmailContactDetail NewEmailContactDetail(string email)
+            {
+                Interfaces.Repository1.IEmailContactDetail contactDeatil = this._entityFactory.NewEntity<Interfaces.Repository1.IEmailContactDetail>();
+                contactDeatil.Email = email;
+                return contactDeatil;
+            }
+
+            #endregion
+
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
             #region Entity Repository Categories
@@ -252,6 +269,19 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            #region Entity Repository Customers
+
+            private IEntityRepository<IR1.ICustomer> m_Customers;
+
+            public IEntityRepository<IR1.ICustomer> Customers
+            {
+                get { return m_Customers; }
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             #region GetOrBuildDbCompiledModel
 
             private static object _s_compiledModel;
@@ -283,6 +313,8 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
 
             #endregion
+
+
         }
 
         #endregion

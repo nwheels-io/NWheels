@@ -34,6 +34,11 @@ namespace NWheels.TypeModel.Core.Factories
         protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
         {
             writer.Constructor<IComponentContext>((cw, components) => {
+                if ( _metaType.BaseType != null )
+                {
+                    cw.Base(components);    
+                }
+
                 _propertyStrategyMap.InvokeStrategies(
                     strategy => {
                         strategy.WriteInitialization(cw, components);

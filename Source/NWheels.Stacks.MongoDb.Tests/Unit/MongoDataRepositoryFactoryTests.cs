@@ -60,20 +60,15 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
             Assert.That(
                 repository.GetEntityRepositories().Select(repo => repo != null ? repo.ContractType : null),
                 Is.EquivalentTo(new[] {
-                    typeof(IR1.ICategory), typeof(IR1.IAttribute), typeof(IR1.IProduct), typeof(IR1.IOrder), typeof(IR1.IOrderLine), null, null, null
+                    typeof(IR1.ICategory), typeof(IR1.IAttribute), typeof(IR1.IProduct), typeof(IR1.IOrder), typeof(IR1.IOrderLine), typeof(IR1.ICustomer), 
+                    null, null, null, null, null
                 }));
             
             Assert.That(
                 repository.GetEntityContractsInRepository(),
                 Is.EquivalentTo(new[] {
-                    typeof(IR1.ICategory), typeof(IR1.IAttribute), typeof(IR1.IProduct), typeof(IR1.IOrder), typeof(IR1.IOrderLine), 
-                    typeof(IR1.IAttributeValue), typeof(IR1.IAttributeValueChoice), typeof(IR1.IPostalAddress)
-                }));
-            
-            Assert.That(
-                repository.GetEntityTypesInRepository().Select(type => type.GetInterfaces().FirstOrDefault(EntityContractAttribute.IsEntityContract)),
-                Is.EquivalentTo(new[] {
-                    typeof(IR1.ICategory), typeof(IR1.IAttribute), typeof(IR1.IProduct), typeof(IR1.IOrder), typeof(IR1.IOrderLine), null, null, null
+                    typeof(IR1.ICategory), typeof(IR1.IAttribute), typeof(IR1.IProduct), typeof(IR1.IOrder), typeof(IR1.IOrderLine), typeof(IR1.ICustomer), 
+                    typeof(IR1.IAttributeValue), typeof(IR1.IAttributeValueChoice), typeof(IR1.IPostalAddress), typeof(IR1.IContactDetail), typeof(IR1.IEmailContactDetail)
                 }));
         }
 

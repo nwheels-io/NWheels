@@ -334,6 +334,17 @@ namespace NWheels.DataObjects
                     relation.ThisPartyKind = RelationPartyKind.Principal;
                 }
             }
+
+            public class AssociationAttribute : PropertyContractAttribute
+            {
+                public override void ApplyTo(PropertyMetadataBuilder metadata, TypeMetadataCache cache)
+                {
+                    var relation = metadata.SafeGetRelation();
+                    relation.Kind = RelationKind.Association;
+                    relation.Multiplicity = metadata.IsCollection ? RelationMultiplicity.ManyToMany : RelationMultiplicity.ManyToOne;
+                    relation.ThisPartyKind = RelationPartyKind.Dependent;
+                }
+            }
         }
 
         public static class Security

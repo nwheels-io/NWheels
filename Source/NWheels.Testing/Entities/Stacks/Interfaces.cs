@@ -23,12 +23,14 @@ namespace NWheels.Testing.Entities.Stacks
                 IAttributeValue NewAttributeValue(string value, int displayOrder);
                 IAttributeValueChoice NewAttributeValueChoice(IAttribute attribute, string value);
                 IPostalAddress NewPostalAddress(string streetAddress, string city, string zipCode, string country);
-                
+                IEmailContactDetail NewEmailContactDetail(string email);
+
                 IEntityRepository<ICategory> Categories { get; }
                 IEntityRepository<IProduct> Products { get; }
                 IEntityRepository<IOrder> Orders { get; }
                 IEntityRepository<IOrderLine> OrdersLines { get; }
                 IEntityRepository<IAttribute> Attributes { get; }
+                IEntityRepository<ICustomer> Customers { get; }
             }
 
             [EntityContract]
@@ -140,6 +142,42 @@ namespace NWheels.Testing.Entities.Stacks
                 
                 [PropertyContract.Required]
                 string Country { get; set; }
+            }
+
+            [EntityContract]
+            public interface ICustomer
+            {
+                [PropertyContract.Required]
+                string FullName { get; set; }
+
+                [PropertyContract.Relation.Composition]
+                ICollection<IContactDetail> ContactDetails { get; }
+            }
+
+            [EntityContract(IsAbstract = true)]
+            public interface IContactDetail
+            {
+            }
+            
+            [EntityContract]
+            public interface IEmailContactDetail : IContactDetail
+            {
+                [PropertyContract.Semantic.EmailAddress]
+                string Email { get; set; }
+            }
+
+            [EntityContract]
+            public interface IPhoneContactDetail : IContactDetail
+            {
+                [PropertyContract.Semantic.PhoneNumber]
+                string Phone { get; set; }
+            }
+
+            [EntityContract]
+            public interface IPostContactDetail : IContactDetail
+            {
+                [PropertyContract.Relation.Composition]
+                IPostalAddress PostalAddress { get; }
             }
         }
 

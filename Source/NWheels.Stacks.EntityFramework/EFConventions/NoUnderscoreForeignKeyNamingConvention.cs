@@ -6,6 +6,7 @@ using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Extensions;
 
 namespace NWheels.Stacks.EntityFramework.EFConventions
 {
@@ -55,7 +56,8 @@ namespace NWheels.Stacks.EntityFramework.EFConventions
         {
             for ( int i = 0 ; i < properties.Count ; ++i )
             {
-                string defaultPropertyName = properties[i].Name;
+                string defaultPropertyName = properties[i].Name.TrimLead("EfEntityObject_");
+
                 int ichUnderscore = defaultPropertyName.IndexOf('_');
                 
                 if ( ichUnderscore <= 0 )

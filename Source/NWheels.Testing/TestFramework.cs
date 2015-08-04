@@ -295,7 +295,8 @@ namespace NWheels.Testing
         public static TypeMetadataCache CreateMetadataCacheWithDefaultConventions(
             IMetadataConvention[] customMetadataConventions, 
             MixinRegistration[] mixinRegistrations = null,
-            ConcretizationRegistration[] concretizationRegistrations = null)
+            ConcretizationRegistration[] concretizationRegistrations = null,
+            IRelationalMappingConvention[] relationalMappingConventions = null)
         {
             var metadataConventions = 
                 new IMetadataConvention[] {
@@ -306,13 +307,13 @@ namespace NWheels.Testing
                 .Concat(customMetadataConventions)
                 .ToArray();
 
-            var relationalMappingConventions = new IRelationalMappingConvention[] {
+            var effectiveRelationalMappingConventions = relationalMappingConventions ?? new IRelationalMappingConvention[] {
                 new PascalCaseRelationalMappingConvention(usePluralTableNames: true)
             };
 
             return CreateMetadataCache(
-                metadataConventions, 
-                relationalMappingConventions, 
+                metadataConventions,
+                effectiveRelationalMappingConventions, 
                 mixinRegistrations ?? new MixinRegistration[0],
                 concretizationRegistrations ?? new ConcretizationRegistration[0]);
         }

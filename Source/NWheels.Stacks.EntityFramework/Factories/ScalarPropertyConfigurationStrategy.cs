@@ -9,6 +9,7 @@ using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
+using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Stacks.EntityFramework.Factories
@@ -36,8 +37,9 @@ namespace NWheels.Stacks.EntityFramework.Factories
             }
 
             var m = method;
+            var storageClrType = MetaProperty.StorageClrType();
 
-            if ( MetaProperty.ClrType.IsNullableValueType() )
+            if ( storageClrType.IsNullableValueType() )
             {
                 using ( TT.CreateScope<TT.TStruct>(Nullable.GetUnderlyingType(MetaProperty.ClrType)) )
                 {
@@ -47,7 +49,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
                         typeMetadata.Func<string, IPropertyMetadata>(x => x.GetPropertyByName, m.Const(MetaProperty.Name)));
                 }
             }
-            else if ( MetaProperty.ClrType.IsValueType )
+            else if ( storageClrType.IsValueType )
             {
                 using ( TT.CreateScope<TT.TStruct>(MetaProperty.ClrType) )
                 {
@@ -57,14 +59,14 @@ namespace NWheels.Stacks.EntityFramework.Factories
                         typeMetadata.Func<string, IPropertyMetadata>(x => x.GetPropertyByName, m.Const(MetaProperty.Name)));
                 }
             }
-            else if ( MetaProperty.ClrType == typeof(string) )
+            else if ( storageClrType == typeof(string) )
             {
                 Static.GenericFunc(
                     (e, p) => EfModelApi.StringProperty<TT.TImpl>(e, p),
                     typeConfig.CastTo<EntityTypeConfiguration<TT.TImpl>>(),
                     typeMetadata.Func<string, IPropertyMetadata>(x => x.GetPropertyByName, m.Const(MetaProperty.Name)));
             }
-            else if ( MetaProperty.ClrType == typeof(byte[]) )
+            else if ( storageClrType == typeof(byte[]) )
             {
                 Static.GenericFunc(
                     (e, p) => EfModelApi.ByteArrayProperty<TT.TImpl>(e, p),

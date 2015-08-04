@@ -85,12 +85,10 @@ namespace NWheels.Stacks.EntityFramework.Factories
             {
                 var m = writer;
                 var modelBuilderLocal = m.Local<DbModelBuilder>(initialValue: m.New<DbModelBuilder>());
-                modelBuilderLocal.Prop(x => x.Conventions).Void(x => x.Add, m.NewArray<IConvention>(values:
-                    m.New<NoUnderscoreForeignKeyNamingConvention>()
-                ));
-
-                //var typeMetadataLocal = m.Local<ITypeMetadata>();
-                //var entityTypeConfigurationLocal = m.Local<object>();
+                
+                //modelBuilderLocal.Prop(x => x.Conventions).Void(x => x.Add, m.NewArray<IConvention>(values:
+                //    m.New<NoUnderscoreForeignKeyNamingConvention>()
+                //));
 
                 foreach ( var entity in base.EntitiesInRepository )
                 {
@@ -98,15 +96,6 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
                     var entityConfigurationMethod = entity.ImplementationType.GetMethod("ConfigureEfModel", BindingFlags.Public | BindingFlags.Static);
                     Static.Void(entityConfigurationMethod, metadataCache, modelBuilderLocal);
-                    
-                    //var entityConfigurationWriter = new EfEntityConfigurationWriter(
-                    //    entity.Metadata,
-                    //    m,
-                    //    modelBuilderLocal,
-                    //    metadataCache,
-                    //    typeMetadataLocal,
-                    //    entityTypeConfigurationLocal);
-                    //entityConfigurationWriter.WriteEntityTypeConfiguration();
                 }
 
                 var modelLocal = m.Local(initialValue: modelBuilderLocal.Func<DbConnection, DbModel>(x => x.Build, connection));

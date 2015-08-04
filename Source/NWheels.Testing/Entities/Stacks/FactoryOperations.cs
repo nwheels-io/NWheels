@@ -34,6 +34,8 @@ namespace NWheels.Testing.Entities.Stacks
                 var productEntity = factory.NewEntity<IR1.IProduct>();
                 var orderEntity = factory.NewEntity<IR1.IOrder>();
                 var orderLineEntity = factory.NewEntity<IR1.IOrderLine>();
+                var customerEntity = factory.NewEntity<IR1.ICustomer>();
+                var emailContactDetailEntity = factory.NewEntity<IR1.IEmailContactDetail>();
 
                 //-- assert
 
@@ -42,6 +44,8 @@ namespace NWheels.Testing.Entities.Stacks
                 Assert.That(productEntity, Is.InstanceOf<IR1.IProduct>().And.InstanceOf<IEntityObject>().And.InstanceOf<IEntityPartId<int>>());
                 Assert.That(orderEntity, Is.InstanceOf<IR1.IOrder>().And.InstanceOf<IEntityObject>().And.InstanceOf<IEntityPartId<int>>());
                 Assert.That(orderLineEntity, Is.InstanceOf<IR1.IOrderLine>().And.InstanceOf<IEntityObject>().And.InstanceOf<IEntityPartId<int>>());
+                Assert.That(customerEntity, Is.InstanceOf<IR1.ICustomer>().And.InstanceOf<IEntityObject>().And.InstanceOf<IEntityPartId<int>>());
+                Assert.That(emailContactDetailEntity, Is.InstanceOf<IR1.IEmailContactDetail>().And.InstanceOf<IEntityObject>().And.InstanceOf<IEntityPartId<int>>());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -75,6 +79,9 @@ namespace NWheels.Testing.Entities.Stacks
                 var productMetaType = metadataCache.GetTypeMetadata(typeof(IR1.IProduct));
                 var orderMetaType = metadataCache.GetTypeMetadata(typeof(IR1.IOrder));
                 var orderLineMetaType = metadataCache.GetTypeMetadata(typeof(IR1.IOrderLine));
+                var customerMetaType = metadataCache.GetTypeMetadata(typeof(IR1.ICustomer));
+                var contactDetailMetaType = metadataCache.GetTypeMetadata(typeof(IR1.IContactDetail));
+                var emailContactDetailMetaType = metadataCache.GetTypeMetadata(typeof(IR1.IEmailContactDetail));
 
                 metadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(metadataCache));
             }
