@@ -56,6 +56,7 @@ namespace NWheels.Stacks.MongoDb
 
             protected override Expression VisitMethodCall(MethodCallExpression node)
             {
+                
                 if ( node.Method.IsGenericMethod && node.Method.GetGenericArguments().Any(ShouldReplaceType) )
                 {
                     var replacedTypeArguments = node.Method.GetGenericArguments().Select(t => t.Replace(ShouldReplaceType, GetReplacingType)).ToArray();
@@ -83,7 +84,7 @@ namespace NWheels.Stacks.MongoDb
 
                     return specialized;
                 }
-                else if ( node.Arguments.Any(arg => ShouldReplaceType(arg.Type)) )
+                else //if ( node.Arguments.Any(arg => ShouldReplaceType(arg.Type)) )
                 {
                     var specialized = Expression.Call(
                         _ownerSpecializer.Specialize(node.Object),
