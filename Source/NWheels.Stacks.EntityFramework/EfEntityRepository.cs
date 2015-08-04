@@ -9,12 +9,13 @@ using NWheels.Entities;
 
 namespace NWheels.Stacks.EntityFramework
 {
-    public class EfEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>, IEntityRepository
+    public class EfEntityRepository<TEntityContract, TBaseImpl, TEntityImpl> : IEntityRepository<TEntityContract>, IEntityRepository
         where TEntityContract : class
-        where TEntityImpl : class, TEntityContract
+        where TBaseImpl : class
+        where TEntityImpl : class, TEntityContract, TBaseImpl
     {
         private readonly EfDataRepositoryBase _ownerRepo;
-        private readonly ObjectSet<TEntityImpl> _objectSet;
+        private readonly ObjectSet<TBaseImpl> _objectSet;
         private InterceptingQueryProvider _queryProvider;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -22,7 +23,7 @@ namespace NWheels.Stacks.EntityFramework
         public EfEntityRepository(EfDataRepositoryBase ownerRepo)
         {
             _ownerRepo = ownerRepo;
-            _objectSet = ownerRepo.CreateObjectSet<TEntityImpl>();
+            _objectSet = ownerRepo.CreateObjectSet<TBaseImpl>();
             _queryProvider = null;
         }
 
@@ -31,7 +32,7 @@ namespace NWheels.Stacks.EntityFramework
         IEnumerator<TEntityContract> IEnumerable<TEntityContract>.GetEnumerator()
         {
             _ownerRepo.ValidateOperationalState();
-            return _objectSet.AsEnumerable().GetEnumerator();
+            return _objectSet.AsEnumerable().OfType<TEntityImpl>().Cast<TEntityContract>().GetEnumerator();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,7 +40,7 @@ namespace NWheels.Stacks.EntityFramework
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             _ownerRepo.ValidateOperationalState();
-            return _objectSet.AsEnumerable().GetEnumerator();
+            return _objectSet.AsEnumerable().OfType<TEntityImpl>().Cast<TEntityContract>().GetEnumerator();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -49,7 +50,7 @@ namespace NWheels.Stacks.EntityFramework
             get
             {
                 _ownerRepo.ValidateOperationalState();
-                return _objectSet.AsQueryable().ElementType;
+                return _objectSet.AsQueryable().OfType<TEntityImpl>().ElementType;
             }
         }
 
@@ -60,7 +61,7 @@ namespace NWheels.Stacks.EntityFramework
             get
             {
                 _ownerRepo.ValidateOperationalState();
-                return _objectSet.AsQueryable().Expression;
+                return _objectSet.AsQueryable().OfType<TEntityImpl>().Expression;
             }
         }
 
@@ -176,7 +177,7 @@ namespace NWheels.Stacks.EntityFramework
         public IQueryable<TEntityContract> Include(Expression<Func<TEntityContract, object>>[] properties)
         {
             _ownerRepo.ValidateOperationalState();
-            return QueryWithIncludedProperties(_objectSet, properties);
+            return QueryWithIncludedProperties(_objectSet.OfType<TEntityImpl>(), properties);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -207,7 +208,7 @@ namespace NWheels.Stacks.EntityFramework
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ObjectSet<TEntityImpl> ObjectSet
+        public ObjectSet<TBaseImpl> ObjectSet
         {
             get
             {
@@ -228,12 +229,12 @@ namespace NWheels.Stacks.EntityFramework
 
         private class InterceptingQueryProvider : IQueryProvider
         {
-            private readonly EfEntityRepository<TEntityContract, TEntityImpl> _ownerRepo;
+            private readonly EfEntityRepository<TEntityContract, TBaseImpl, TEntityImpl> _ownerRepo;
             private readonly IQueryProvider _actualQueryProvider;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public InterceptingQueryProvider(EfEntityRepository<TEntityContract, TEntityImpl> ownerRepo)
+            public InterceptingQueryProvider(EfEntityRepository<TEntityContract, TBaseImpl, TEntityImpl> ownerRepo)
             {
                 _ownerRepo = ownerRepo;
                 _actualQueryProvider = ownerRepo.ObjectSet.AsQueryable().Provider;

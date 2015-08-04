@@ -12,20 +12,16 @@ namespace NWheels.Domains.Security
     public interface IUserAccountDataRepository : IApplicationDataRepository
     {
         IEntityRepository<IUserAccountEntity> AllUsers { get; }
-        //IEntityRepository<IBackEndUserAccountEntity> BackEndUsers { get; }
-        //IEntityRepository<IFrontEndUserAccountEntity> FrontEndUsers { get; }
         IEntityRepository<IUserRoleEntity> UserRoles { get; }
         IEntityRepository<IOperationPermissionEntity> OperationPermissions { get; }
         IEntityRepository<IEntityAccessRuleEntity> EntityAccessRules { get; }
         IPasswordEntity NewPassword();
-        IBackEndUserAccountEntity NewBackEndUser();
-        IFrontEndUserAccountEntity NewFrontEndUser();
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [EntityContract(IsAbstract = true)]
-    public interface IUserAccountEntity : IEntityPartClaimsContainer, IEntityPartId<int>
+    [EntityContract]
+    public interface IUserAccountEntity : IEntityPartClaimsContainer
     {
         [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Semantic.LoginName]
         string LoginName { get; set; }
@@ -34,6 +30,13 @@ namespace NWheels.Domains.Security
 
         [PropertyContract.Required, PropertyContract.Validation.Length(min: 2, max: 100)]
         string FullName { get; set; }
+
+        [PropertyContract.Required, PropertyContract.Semantic.EmailAddress]
+        string EmailAddress { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        DateTime? EmailVerifiedAtUtc { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -56,28 +59,8 @@ namespace NWheels.Domains.Security
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [EntityContract(BaseEntity = typeof(IUserAccountEntity))]
-    public interface IBackEndUserAccountEntity : IUserAccountEntity
-    {
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    [EntityContract(BaseEntity = typeof(IUserAccountEntity))]
-    public interface IFrontEndUserAccountEntity : IUserAccountEntity
-    {
-        [PropertyContract.Required, PropertyContract.Semantic.EmailAddress]
-        string EmailAddress { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        DateTime? EmailVerifiedAtUtc { get; set; }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
     [EntityContract]
-    public interface IPasswordEntity : IEntityPartId<int>
+    public interface IPasswordEntity
     {
         [PropertyContract.Required, PropertyContract.Relation.CompositionParent]
         IUserAccountEntity User { get; set; }
@@ -152,21 +135,21 @@ namespace NWheels.Domains.Security
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IUserRoleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim, IEntityPartClaimsContainer, IEntityPartId<int>
+    public interface IUserRoleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim, IEntityPartClaimsContainer
     {
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IOperationPermissionEntity : IEntityPartUniqueDisplayName, IEntityPartClaim, IEntityPartId<int>
+    public interface IOperationPermissionEntity : IEntityPartUniqueDisplayName, IEntityPartClaim
     {
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [EntityContract]
-    public interface IEntityAccessRuleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim, IEntityPartId<int>
+    public interface IEntityAccessRuleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim
     {
         [PropertyContract.Semantic.InheritorOf(typeof(IEntityAccessRule)), PropertyContract.Storage.ClrType]
         Type RuleObject { get; set; }

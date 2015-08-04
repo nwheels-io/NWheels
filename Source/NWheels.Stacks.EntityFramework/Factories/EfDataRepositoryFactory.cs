@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.ModelConfiguration.Conventions;
+using System.Linq;
 using System.Reflection;
 using Autofac;
 using Hapil;
@@ -13,6 +14,7 @@ using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
+using NWheels.Extensions;
 using NWheels.Stacks.EntityFramework.EFConventions;
 using TT = Hapil.TypeTemplate;
 
@@ -90,7 +92,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
                 //    m.New<NoUnderscoreForeignKeyNamingConvention>()
                 //));
 
-                foreach ( var entity in base.EntitiesInRepository )
+                foreach ( var entity in base.EntitiesInRepository.OrderBy(EntityInheritanceDepth) )
                 {
                     entity.EnsureImplementationType();
 
@@ -106,7 +108,49 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
             protected override IOperand<IEntityRepository<TT.TContract>> GetNewEntityRepositoryExpression(MethodWriterBase writer)
             {
-                return writer.New<EfEntityRepository<TT.TContract, TT.TImpl>>(writer.This<EfDataRepositoryBase>());
+                var thisMetaType = base.MetadataCache.GetTypeMetadata(TT.Resolve<TT.TContract>());
+                var rootBaseMetaType = thisMetaType.GetRootBaseType();
+
+                using ( TT.CreateScope<TT2.TEntityContract, TT2.TBaseEntity, TT2.TDerivedEntity>(
+                    thisMetaType.ContractType, 
+                    rootBaseMetaType.GetImplementationBy<EfEntityObjectFactory>(),
+                    thisMetaType.GetImplementationBy<EfEntityObjectFactory>()) )
+                {
+                    return writer
+                        .New<EfEntityRepository<TT2.TEntityContract, TT2.TBaseEntity, TT2.TDerivedEntity>>(writer.This<EfDataRepositoryBase>())
+                        .CastTo<IEntityRepository<TT.TContract>>();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private int EntityInheritanceDepth(EntityInRepository entity)
+            {
+                int depth = 0;
+
+                for ( var metaType = entity.Metadata ;
+                    metaType.BaseType != null ;
+                    metaType = metaType.BaseType, depth++ )
+                {
+                }
+
+                return depth;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // ReSharper disable InconsistentNaming
+        public static class TT2
+        {
+            public interface TEntityContract : TypeTemplate.ITemplateType<TEntityContract>
+            {
+            }
+            public interface TBaseEntity : TT2.TEntityContract, TypeTemplate.ITemplateType<TBaseEntity>
+            {
+            }
+            public interface TDerivedEntity : TT2.TBaseEntity, TypeTemplate.ITemplateType<TDerivedEntity>
+            {
             }
         }
     }

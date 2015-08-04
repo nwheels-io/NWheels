@@ -31,6 +31,8 @@ namespace NWheels.Testing.Entities.Stacks
                 IEntityRepository<IOrderLine> OrdersLines { get; }
                 IEntityRepository<IAttribute> Attributes { get; }
                 IEntityRepository<ICustomer> Customers { get; }
+                IEntityRepository<IContactDetail> ContactDetails { get; }
+                IEntityRepository<IEmailContactDetail> ContactEmails { get; }
             }
 
             [EntityContract]

@@ -5,7 +5,7 @@ using NWheels.Processing.Workflows.Core;
 
 namespace NWheels.Processing.Workflows
 {
-    [EntityContract]
+    [EntityContract(IsAbstract = true)]
     public interface IWorkflowInstanceEntity
     {
         Guid WorkflowInstanceId { get; set; }

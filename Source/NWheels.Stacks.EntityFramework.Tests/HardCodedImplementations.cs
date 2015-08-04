@@ -173,6 +173,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
             private IEntityRepository<Interfaces.Repository1.IProduct> m_Products;
             private IEntityRepository<Interfaces.Repository1.ICustomer> m_Customers;
             private IEntityRepository<Interfaces.Repository1.IContactDetail> m_ContactDetails;
+            private IEntityRepository<Interfaces.Repository1.IEmailContactDetail> m_ContactEmails;
 
             // Methods
             public EfDataRepository_OnlineStoreRepository(IComponentContext arg0, IEntityObjectFactory arg1, ITypeMetadataCache arg2, DbConnection arg3, bool arg4)
@@ -180,20 +181,22 @@ namespace NWheels.Stacks.EntityFramework.Tests
             {
                 this.EntityFactory = arg1;
                 this._metadataCache = arg2;
-                this.m_Categories = new EfEntityRepository<Interfaces.Repository1.ICategory, EfEntityObject_Category>(this);
+                this.m_Categories = new EfEntityRepository<Interfaces.Repository1.ICategory, EfEntityObject_Category, EfEntityObject_Category>(this);
                 base.RegisterEntityRepository<Interfaces.Repository1.ICategory, EfEntityObject_Category>(this.m_Categories);
-                this.m_Products = new EfEntityRepository<Interfaces.Repository1.IProduct, EfEntityObject_Product>(this);
+                this.m_Products = new EfEntityRepository<Interfaces.Repository1.IProduct, EfEntityObject_Product, EfEntityObject_Product>(this);
                 base.RegisterEntityRepository<Interfaces.Repository1.IProduct, EfEntityObject_Product>(this.m_Products);
-                this.m_Orders = new EfEntityRepository<Interfaces.Repository1.IOrder, EfEntityObject_Order>(this);
+                this.m_Orders = new EfEntityRepository<Interfaces.Repository1.IOrder, EfEntityObject_Order, EfEntityObject_Order>(this);
                 base.RegisterEntityRepository<Interfaces.Repository1.IOrder, EfEntityObject_Order>(this.m_Orders);
-                this.m_OrdersLines = new EfEntityRepository<Interfaces.Repository1.IOrderLine, EfEntityObject_OrderLine>(this);
+                this.m_OrdersLines = new EfEntityRepository<Interfaces.Repository1.IOrderLine, EfEntityObject_OrderLine, EfEntityObject_OrderLine>(this);
                 base.RegisterEntityRepository<Interfaces.Repository1.IOrderLine, EfEntityObject_OrderLine>(this.m_OrdersLines);
-                this.m_Attributes = new EfEntityRepository<Interfaces.Repository1.IAttribute, EfEntityObject_Attribute>(this);
+                this.m_Attributes = new EfEntityRepository<Interfaces.Repository1.IAttribute, EfEntityObject_Attribute, EfEntityObject_Attribute>(this);
                 base.RegisterEntityRepository<Interfaces.Repository1.IAttribute, EfEntityObject_Attribute>(this.m_Attributes);
-                this.m_Customers = new EfEntityRepository<Interfaces.Repository1.ICustomer, EfEntityObject_Customer>(this);
+                this.m_Customers = new EfEntityRepository<Interfaces.Repository1.ICustomer, EfEntityObject_Customer, EfEntityObject_Customer>(this);
                 base.RegisterEntityRepository<Interfaces.Repository1.ICustomer, EfEntityObject_Customer>(this.m_Customers);
-                this.m_ContactDetails = new EfEntityRepository<Interfaces.Repository1.IContactDetail, EfEntityObject_ContactDetail>(this);
+                this.m_ContactDetails = new EfEntityRepository<Interfaces.Repository1.IContactDetail, EfEntityObject_ContactDetail, EfEntityObject_ContactDetail>(this);
                 base.RegisterEntityRepository<Interfaces.Repository1.IContactDetail, EfEntityObject_ContactDetail>(this.m_ContactDetails);
+                this.m_ContactEmails = new EfEntityRepository<Interfaces.Repository1.IEmailContactDetail, EfEntityObject_ContactDetail, EfEntityObject_EmailContactDetail>(this);
+                base.RegisterEntityRepository<Interfaces.Repository1.IEmailContactDetail, EfEntityObject_EmailContactDetail>(this.m_ContactEmails);
             }
 
             public static object FactoryMethod_1(IComponentContext context1, EntityObjectFactory factory1, ITypeMetadataCache cache1, DbConnection connection1, bool flag1)
@@ -372,6 +375,14 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 get
                 {
                     return this.m_ContactDetails;
+                }
+            }
+            
+            public IEntityRepository<Interfaces.Repository1.IEmailContactDetail> ContactEmails
+            {
+                get
+                {
+                    return this.m_ContactEmails;
                 }
             }
         }
@@ -1686,12 +1697,6 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public static new void ConfigureEfModel(ITypeMetadataCache metadataCache, DbModelBuilder modelBuilder)
             {
                 ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IEmailContactDetail));
-                //var thisEntity = modelBuilder.Entity<EfEntityObject_EmailContactDetail>();
-                //EntityTypeConfiguration<EfEntityObject_EmailContactDetail> thisEntity = EfModelApi.EntityType<EfEntityObject_EmailContactDetail>(modelBuilder, typeMetadata);
-
-                //var baseEntity = modelBuilder.Entity<EfEntityObject_ContactDetail>();
-                //baseEntity.Map<EfEntityObject_EmailContactDetail>(m => m.Requires("_t").HasValue("EmailContactDetail"));
-
                 var thisEntity = EfModelApi.InheritedEntityType<EfEntityObject_ContactDetail, EfEntityObject_EmailContactDetail>(modelBuilder, typeMetadata, "_t", "Email");
                 EfModelApi.StringProperty(thisEntity, typeMetadata.GetPropertyByName("Email"));
             }

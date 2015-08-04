@@ -104,8 +104,7 @@ namespace NWheels.Domains.Security.Core
         {
             get
             {
-                var frontEndAccount = _userAccount as IFrontEndUserAccountEntity;
-                return (frontEndAccount != null ? frontEndAccount.EmailAddress : null);
+                return _userAccount.EmailAddress;
             }
         }
 
