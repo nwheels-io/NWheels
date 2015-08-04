@@ -13,6 +13,7 @@ using Hapil;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core.Factories;
+using NWheels.Entities.Core;
 using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Stacks.EntityFramework.Factories;
@@ -50,7 +51,10 @@ namespace NWheels.Stacks.EntityFramework
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static EntityTypeConfiguration<TEntity> EntityType<TEntity>(DbModelBuilder builder, ITypeMetadata entity)
+        public static EntityTypeConfiguration<TEntity> EntityType<TEntity>(
+            DbModelBuilder builder, 
+            ITypeMetadata entity, 
+            ITypeMetadataCache metadataCache)
             where TEntity : class
         {
             var entityConfiguration = builder.Entity<TEntity>();
@@ -61,7 +65,19 @@ namespace NWheels.Stacks.EntityFramework
             {
                 if ( !string.IsNullOrEmpty(entity.RelationalMapping.PrimaryTableName) )
                 {
-                    entityConfiguration.ToTable(entity.RelationalMapping.PrimaryTableName);
+                    string tableName;
+
+                    if ( !string.IsNullOrEmpty(entity.NamespaceQualifier) )
+                    {
+                        var namingConvention = metadataCache.Conventions.RelationalMappingConventions.OfType<IStorageSchemaNamingConvention>().First();
+                        tableName = namingConvention.QualifyTableNameWithNamespace(entity, entity.RelationalMapping.PrimaryTableName, entity.NamespaceQualifier);
+                    }
+                    else
+                    {
+                        tableName = entity.RelationalMapping.PrimaryTableName;
+                    }
+
+                    entityConfiguration.ToTable(tableName);
                 }
             }
 

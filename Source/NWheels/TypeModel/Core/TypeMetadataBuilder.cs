@@ -67,19 +67,8 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private string _name;
-
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                _name = value;
-            }
-        }
+        public string Name { get; set; }
+        public string NamespaceQualifier { get; set; }
         public Type ContractType { get; set; }
         public bool IsAbstract { get; set; }
         public string DefaultDisplayFormat { get; set; }
@@ -165,8 +154,8 @@ namespace NWheels.DataObjects.Core
 
         public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {
-
             Name = visitor.VisitAttribute("Name", Name);
+            NamespaceQualifier = visitor.VisitAttribute("NamespaceQualifier", NamespaceQualifier);
             ContractType = visitor.VisitAttribute("ContractType", ContractType);
             IsAbstract = visitor.VisitAttribute("IsAbstract", IsAbstract);
 

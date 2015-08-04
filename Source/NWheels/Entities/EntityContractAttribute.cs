@@ -28,6 +28,7 @@ namespace NWheels.Entities
             }
 
             type.Name = type.Name.TrimSuffix("Entity");
+            type.NamespaceQualifier = GetNamespaceQualifier(type);
         }
 
         #endregion
@@ -36,6 +37,30 @@ namespace NWheels.Entities
 
         public bool IsAbstract { get; set; }
         public Type BaseEntity { get; set; }
+        public string Namespace { get; set; }
+        public bool UseCodeNamespace { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string GetNamespaceQualifier(TypeMetadataBuilder type)
+        {
+            if ( !string.IsNullOrWhiteSpace(this.Namespace) )
+            {
+                return this.Namespace;
+            }
+
+            if ( UseCodeNamespace && type.ContractType.Namespace != null )
+            {
+                var dotSeparatedParts = type.ContractType.Namespace.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if ( dotSeparatedParts.Length > 0 )
+                {
+                    return dotSeparatedParts[dotSeparatedParts.Length - 1];
+                }
+            }
+
+            return null;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

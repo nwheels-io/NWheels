@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if false
+
+using System;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration;
 using Hapil;
@@ -132,3 +134,5 @@ namespace NWheels.Stacks.EntityFramework.Factories
         }
     }
 }
+
+#endif

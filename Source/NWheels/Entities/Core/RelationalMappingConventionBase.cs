@@ -8,7 +8,7 @@ using NWheels.DataObjects.Core;
 
 namespace NWheels.Entities.Core
 {
-    public abstract class RelationalMappingConventionBase : IRelationalMappingConvention
+    public abstract class RelationalMappingConventionBase : IRelationalMappingConvention, IStorageSchemaNamingConvention
     {
         private PluralizationService _pluralizationService;
 
@@ -74,11 +74,12 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected abstract string NameTypePrimaryTable(TypeMetadataBuilder type);
-        protected abstract string NameTypeRelationTable(TypeMetadataBuilder type1, TypeMetadataBuilder type2);
-        protected abstract string NamePropertyColumnTable(TypeMetadataBuilder type, PropertyMetadataBuilder property);
-        protected abstract string NamePropertyColumn(TypeMetadataBuilder type, PropertyMetadataBuilder property);
-        protected abstract string NamePropertyColumnType(TypeMetadataBuilder type, PropertyMetadataBuilder property);
+        public abstract string NameTypePrimaryTable(TypeMetadataBuilder type);
+        public abstract string NameTypeRelationTable(TypeMetadataBuilder type1, TypeMetadataBuilder type2);
+        public abstract string NamePropertyColumnTable(TypeMetadataBuilder type, PropertyMetadataBuilder property);
+        public abstract string NamePropertyColumn(TypeMetadataBuilder type, PropertyMetadataBuilder property);
+        public abstract string NamePropertyColumnType(TypeMetadataBuilder type, PropertyMetadataBuilder property);
+        public abstract string QualifyTableNameWithNamespace(ITypeMetadata type, string tableName, string namespaceName);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -89,14 +90,14 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual string NameKeyPropertyColumnType(TypeMetadataBuilder type, KeyMetadataBuilder key, PropertyMetadataBuilder property)
+        public virtual string NameKeyPropertyColumnType(TypeMetadataBuilder type, KeyMetadataBuilder key, PropertyMetadataBuilder property)
         {
             return NamePropertyColumnType(type, property);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual string NameKeyPropertyColumn(TypeMetadataBuilder type, KeyMetadataBuilder key, PropertyMetadataBuilder property)
+        public virtual string NameKeyPropertyColumn(TypeMetadataBuilder type, KeyMetadataBuilder key, PropertyMetadataBuilder property)
         {
             if ( key.Kind == KeyKind.Foreign )
             {
@@ -110,28 +111,28 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual string NameForeignKeyPropertyColumn(TypeMetadataBuilder type, PropertyMetadataBuilder property)
+        public virtual string NameForeignKeyPropertyColumn(TypeMetadataBuilder type, PropertyMetadataBuilder property)
         {
             return NamePropertyColumn(type, property) + property.Relation.RelatedPartyType.PrimaryKey.Properties.First().Name;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual string NameRelationTableForeignKeyColumn(TypeMetadataBuilder type)
+        public virtual string NameRelationTableForeignKeyColumn(TypeMetadataBuilder type)
         {
             return type.Name + type.PrimaryKey.Properties[0].Name;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual string NameKeyPropertyColumnTable(TypeMetadataBuilder type, KeyMetadataBuilder key, PropertyMetadataBuilder property)
+        public virtual string NameKeyPropertyColumnTable(TypeMetadataBuilder type, KeyMetadataBuilder key, PropertyMetadataBuilder property)
         {
             return NamePropertyColumnTable(type, property);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual string NameEntityPartColumnPrefix(TypeMetadataBuilder type, PropertyMetadataBuilder property)
+        public virtual string NameEntityPartColumnPrefix(TypeMetadataBuilder type, PropertyMetadataBuilder property)
         {
             return property.Name;
         }

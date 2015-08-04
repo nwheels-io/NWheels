@@ -95,6 +95,7 @@
     <Compile Include="Authorization\IEntityAccessControlBuilder.cs" />
     <Compile Include="Authorization\IEntityAccessRule.cs" />
     <Compile Include="Authorization\IIdentityInfo.cs" />
+    <Compile Include="Entities\Core\IStorageSchemaNamingConvention.cs" />
     <Compile Include="Entities\Factories\ImplementIEntityPartObjectConvention.cs" />
     <Compile Include="Entities\Factories\ImplementIEntityObjectConvention.cs" />
     <Compile Include="Extensions\ExceptionExtensions.cs" />

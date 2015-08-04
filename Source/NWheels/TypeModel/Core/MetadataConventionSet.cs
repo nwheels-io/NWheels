@@ -8,7 +8,7 @@ namespace NWheels.DataObjects.Core
 {
     public class MetadataConventionSet
     {
-        private readonly IMetadataConvention[]_metadataConventions;
+        private readonly IMetadataConvention[] _metadataConventions;
         private readonly IRelationalMappingConvention[] _relationalMappingConventions;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

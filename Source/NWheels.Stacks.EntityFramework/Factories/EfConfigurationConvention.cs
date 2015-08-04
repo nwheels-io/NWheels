@@ -81,7 +81,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
             }
             else
             {
-                _entityTypeConfigLocal.Assign(Static.Func(EfModelApi.EntityType<TT.TImpl>, builder, _typeMetadataLocal));
+                _entityTypeConfigLocal.Assign(Static.Func(EfModelApi.EntityType<TT.TImpl>, builder, _typeMetadataLocal, metadataCache));
             }
 
             WritePropertyConfigurations(w, builder);

@@ -20,7 +20,7 @@ namespace NWheels.Domains.Security
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [EntityContract]
+    [EntityContract(UseCodeNamespace = true)]
     public interface IUserAccountEntity : IEntityPartClaimsContainer
     {
         [PropertyContract.Required, PropertyContract.Unique, PropertyContract.Semantic.LoginName]
@@ -59,7 +59,7 @@ namespace NWheels.Domains.Security
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [EntityContract]
+    [EntityContract(UseCodeNamespace = true)]
     public interface IPasswordEntity
     {
         [PropertyContract.Required, PropertyContract.Relation.CompositionParent]
@@ -134,21 +134,21 @@ namespace NWheels.Domains.Security
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [EntityContract]
+    [EntityContract(UseCodeNamespace = true)]
     public interface IUserRoleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim, IEntityPartClaimsContainer
     {
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [EntityContract]
+    [EntityContract(UseCodeNamespace = true)]
     public interface IOperationPermissionEntity : IEntityPartUniqueDisplayName, IEntityPartClaim
     {
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [EntityContract]
+    [EntityContract(UseCodeNamespace = true)]
     public interface IEntityAccessRuleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim
     {
         [PropertyContract.Semantic.InheritorOf(typeof(IEntityAccessRule)), PropertyContract.Storage.ClrType]
@@ -157,7 +157,7 @@ namespace NWheels.Domains.Security
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [EntityContract, EntityKeyGenerator.Sequential]
+    [EntityContract(UseCodeNamespace = true), EntityKeyGenerator.Sequential]
     public interface IDataAuditJournalEntryEntity : IEntityPartId<long>, IEntityPartCorrelationId
     {
         [PropertyContract.Required]
