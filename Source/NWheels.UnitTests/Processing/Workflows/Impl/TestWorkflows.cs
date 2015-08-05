@@ -410,7 +410,7 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [EntityContract]
-        public interface IOrderItemEntity : IInstanceEntity, IStateMachineInstanceEntity<OrderItemState>
+        public interface IOrderItemEntity : IStateMachineInstanceEntity<OrderItemState>
         {
         }
 

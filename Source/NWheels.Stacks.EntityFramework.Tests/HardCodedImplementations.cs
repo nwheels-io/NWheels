@@ -1325,8 +1325,8 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 //EfModelApi.ManyToOneRelationProperty<EfEntityObject_Product, EfEntityObject_Category>(entity, typeMetadata.GetPropertyByName("Categories"));
                 //EfModelApi.ManyToOneRelationProperty<EfEntityObject_Product, EfEntityObject_Attribute>(entity, typeMetadata.GetPropertyByName("Attributes"));
                 //-added:
-                EfModelApi.ManyToManyRelationProperty<EfEntityObject_Product, EfEntityObject_Category>(entity, typeMetadata.GetPropertyByName("Categories"));
-                EfModelApi.ManyToManyRelationProperty<EfEntityObject_Product, EfEntityObject_Attribute>(entity, typeMetadata.GetPropertyByName("Attributes"));
+                EfModelApi.ManyToManyRelationProperty<EfEntityObject_Product, EfEntityObject_Category>(entity, typeMetadata.GetPropertyByName("Categories"), metadataCache);
+                EfModelApi.ManyToManyRelationProperty<EfEntityObject_Product, EfEntityObject_Attribute>(entity, typeMetadata.GetPropertyByName("Attributes"), metadataCache);
                 
                 //entity.HasMany(x => x.Attributes).WithMany(x => x.Inverse_Product_Categories).Map(cfg =>
                 //{

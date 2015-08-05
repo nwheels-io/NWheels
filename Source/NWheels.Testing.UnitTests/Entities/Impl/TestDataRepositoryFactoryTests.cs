@@ -88,7 +88,7 @@ namespace NWheels.Testing.UnitTests.Entities.Impl
             //-- assert
 
             Assert.That(repo, Is.Not.Null);
-            Assert.That(repo.GetEntityTypesInRepository().Length, Is.EqualTo(8));
+            Assert.That(repo.GetEntityTypesInRepository().Length, Is.EqualTo(11));
 
             repo.GetEntityTypesInRepository().Single(t => typeof(IR1.ICategory).IsAssignableFrom(t));
             repo.GetEntityTypesInRepository().Single(t => typeof(IR1.IOrder).IsAssignableFrom(t));

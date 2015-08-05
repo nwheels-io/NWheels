@@ -27,7 +27,8 @@ namespace NWheels.Stacks.EntityFramework.Factories
         public override void OnWritingEfModelConfiguration(
             MethodWriterBase method, 
             Operand<DbModelBuilder> modelBuilder, 
-            Operand<ITypeMetadata> typeMetadata, 
+            Operand<ITypeMetadata> typeMetadata,
+            Operand<ITypeMetadataCache> metadataCache, 
             Operand<EntityTypeConfiguration<TypeTemplate.TImpl>> typeConfig)
         {
             var m = method;
@@ -55,9 +56,10 @@ namespace NWheels.Stacks.EntityFramework.Factories
                         break;
                     case RelationMultiplicity.ManyToMany:
                         Static.GenericFunc(
-                            (e, p) => EfModelApi.ManyToManyRelationProperty<TT.TImpl, TT.TImpl2>(e, p),
+                            (e, p, c) => EfModelApi.ManyToManyRelationProperty<TT.TImpl, TT.TImpl2>(e, p, c),
                             typeConfig,
-                            typeMetadata.Func<string, IPropertyMetadata>(x => x.GetPropertyByName, m.Const(MetaProperty.Name)));
+                            typeMetadata.Func<string, IPropertyMetadata>(x => x.GetPropertyByName, m.Const(MetaProperty.Name)),
+                            metadataCache);
                         break;
                 }
             }

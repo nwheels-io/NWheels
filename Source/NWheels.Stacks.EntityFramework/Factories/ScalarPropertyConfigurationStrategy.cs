@@ -27,8 +27,9 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
         public override void OnWritingEfModelConfiguration(
             MethodWriterBase method, 
-            Operand<DbModelBuilder> modelBuilder, 
-            Operand<ITypeMetadata> typeMetadata, 
+            Operand<DbModelBuilder> modelBuilder,
+            Operand<ITypeMetadata> typeMetadata,
+            Operand<ITypeMetadataCache> metadataCache, 
             Operand<EntityTypeConfiguration<TypeTemplate.TImpl>> typeConfig)
         {
             if ( MetaProperty.RelationalMapping == null || string.IsNullOrEmpty(MetaProperty.RelationalMapping.ColumnName) )

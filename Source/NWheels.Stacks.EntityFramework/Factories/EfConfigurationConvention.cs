@@ -84,7 +84,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
                 _entityTypeConfigLocal.Assign(Static.Func(EfModelApi.EntityType<TT.TImpl>, builder, _typeMetadataLocal, metadataCache));
             }
 
-            WritePropertyConfigurations(w, builder);
+            WritePropertyConfigurations(w, builder, metadataCache);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -114,11 +114,11 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void WritePropertyConfigurations(VoidMethodWriter w, Argument<DbModelBuilder> builder)
+        private void WritePropertyConfigurations(VoidMethodWriter w, Argument<DbModelBuilder> builder, Argument<ITypeMetadataCache> metadataCache)
         {
             foreach ( var strategy in _propertyMap.Strategies.OfType<EfPropertyImplementationStrategy>() )
             {
-                strategy.Configurator.OnWritingEfModelConfiguration(w, builder, _typeMetadataLocal, _entityTypeConfigLocal);
+                strategy.Configurator.OnWritingEfModelConfiguration(w, builder, _typeMetadataLocal, metadataCache, _entityTypeConfigLocal);
             }
         }
 

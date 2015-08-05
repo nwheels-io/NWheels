@@ -28,6 +28,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
             MethodWriterBase method, 
             Operand<DbModelBuilder> modelBuilder,
             Operand<ITypeMetadata> typeMetadata,
+            Operand<ITypeMetadataCache> metadataCache,
             Operand<EntityTypeConfiguration<TT.TImpl>> typeConfig);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

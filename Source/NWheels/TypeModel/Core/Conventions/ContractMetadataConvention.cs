@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Hapil;
 using NWheels.Exceptions;
@@ -45,18 +46,33 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private void ApplyInheritance(TypeMetadataBuilder type)
         {
-            var baseContracts = type.ContractType.GetInterfaces().Where(DataObjectContractAttribute.IsDataObjectContract).ToArray();
+            var baseContracts = GetBaseContracts(type);
 
-            if ( baseContracts.Length > 1 )
+            if ( baseContracts.Count > 1 )
             {
                 throw new ContractConventionException(typeof(ContractMetadataConvention), type.ContractType, "Multiple inheritance is not allowed");
             }
 
-            if ( baseContracts.Length == 1 )
+            if ( baseContracts.Count == 1 )
             {
-                type.BaseType = _metadataCache.FindTypeMetadataAllowIncomplete(baseContracts[0]);
+                type.BaseType = _metadataCache.FindTypeMetadataAllowIncomplete(baseContracts.Single());
                 type.BaseType.RegisterDerivedType(type);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private HashSet<Type> GetBaseContracts(TypeMetadataBuilder type)
+        {
+            var allContracts = type.ContractType.GetInterfaces().Where(DataObjectContractAttribute.IsDataObjectContract).ToArray();
+            var baseContractSet = new HashSet<Type>(allContracts);
+
+            foreach ( var contract in allContracts )
+            {
+                baseContractSet.ExceptWith(contract.GetInterfaces());
+            }
+
+            return baseContractSet;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

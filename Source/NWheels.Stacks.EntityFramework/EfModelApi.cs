@@ -205,7 +205,8 @@ namespace NWheels.Stacks.EntityFramework
 
         public static ManyToManyNavigationPropertyConfiguration<TThisEntity, TOtherEntity> ManyToManyRelationProperty<TThisEntity, TOtherEntity>(
             EntityTypeConfiguration<TThisEntity> thisEntity,
-            IPropertyMetadata thisProperty)
+            IPropertyMetadata thisProperty,
+            ITypeMetadataCache metadataCache)
             where TThisEntity : class
             where TOtherEntity : class
         {
@@ -232,6 +233,12 @@ namespace NWheels.Stacks.EntityFramework
                 "{0}{1}",
                 thisProperty.DeclaringContract.Name,
                 thisProperty.Name);
+
+            var namingConvention = metadataCache.Conventions.RelationalMappingConventions.OfType<IStorageSchemaNamingConvention>().First();
+            relationTableName = namingConvention.QualifyTableNameWithNamespace(
+                thisProperty.DeclaringContract, 
+                relationTableName, 
+                thisProperty.DeclaringContract.NamespaceQualifier);
 
             manyToManyConfig.Map(cfg => {
                 cfg.MapLeftKey(leftKeyColumnName);

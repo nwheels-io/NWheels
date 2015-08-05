@@ -79,7 +79,7 @@ namespace NWheels.Entities.Core
 
         public override string QualifyTableNameWithNamespace(ITypeMetadata type, string tableName, string namespaceName)
         {
-            if (!string.IsNullOrEmpty(namespaceName))
+            if ( !string.IsNullOrEmpty(namespaceName) )
             {
                 return ToUnderscoreConvention(namespaceName) + "_" + tableName;
             }
