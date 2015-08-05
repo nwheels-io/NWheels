@@ -16,6 +16,16 @@ namespace NWheels.Tools.TestBoard
 {
     public class Bootstrapper : AppBootstrapper
     {
+        protected override void OnStartup(object sender, StartupEventArgs e)
+        {
+            if ( e.Args.Length > 0 )
+            {
+                //base.Application.
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             try

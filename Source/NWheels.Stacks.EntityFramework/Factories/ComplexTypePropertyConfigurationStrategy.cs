@@ -3,19 +3,25 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core.Factories;
+using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Stacks.EntityFramework.Factories
 {
     public class ComplexTypePropertyConfigurationStrategy : PropertyConfigurationStrategy
     {
-        public ComplexTypePropertyConfigurationStrategy(ObjectFactoryContext factoryContext, ITypeMetadata metaType, IPropertyMetadata metaProperty)
+        public ComplexTypePropertyConfigurationStrategy(
+            ObjectFactoryContext factoryContext, 
+            ITypeMetadata metaType, 
+            IPropertyMetadata metaProperty)
             : base(factoryContext, metaType, metaProperty)
         {
         }
@@ -44,7 +50,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
                 foreach ( var complexTypeProperty in MetaProperty.Relation.RelatedPartyType.Properties )
                 {
-                    using ( TT.CreateScope<TT.TProperty>(complexTypeProperty.ClrType) )
+                    using ( TT.CreateScope<TT.TProperty>(complexTypeProperty.StorageClrType()) )
                     {
                         complexMetaPropertyLocal.Assign(
                             entityMetaPropertyLocal

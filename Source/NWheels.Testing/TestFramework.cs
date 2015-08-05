@@ -70,6 +70,13 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public T New<T>() where T : class
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, IsolationLevel? isolationLevel = null) 
             where TRepository : class, IApplicationDataRepository
         {

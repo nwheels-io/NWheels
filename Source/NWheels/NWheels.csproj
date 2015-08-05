@@ -95,11 +95,17 @@
     <Compile Include="Authorization\IEntityAccessControlBuilder.cs" />
     <Compile Include="Authorization\IEntityAccessRule.cs" />
     <Compile Include="Authorization\IIdentityInfo.cs" />
+    <Compile Include="Core\ICoreFramework.cs" />
     <Compile Include="Entities\Core\IStorageSchemaNamingConvention.cs" />
+    <Compile Include="Entities\EntityStateInfo.cs" />
     <Compile Include="Entities\Factories\ImplementIEntityPartObjectConvention.cs" />
     <Compile Include="Entities\Factories\ImplementIEntityObjectConvention.cs" />
     <Compile Include="Exceptions\BusinessRuleException.cs" />
+    <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Extensions\ExceptionExtensions.cs" />
+    <Compile Include="Extensions\FrameworkExtensions.cs" />
+    <Compile Include="Processing\Messages\MessageObjectContractAttribute.cs" />
+    <Compile Include="Processing\Messages\ServiceRequestMessage.cs" />
     <Compile Include="Processing\Workflows\WorkflowInstanceEntity.cs" />
     <Compile Include="TypeModel\Core\ConcreteToAbstractListAdapter.cs" />
     <Compile Include="TypeModel\Core\Factories\BaseTypeConvention.cs" />

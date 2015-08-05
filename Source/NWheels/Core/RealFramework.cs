@@ -14,7 +14,7 @@ using NWheels.Logging.Core;
 
 namespace NWheels.Core
 {
-    internal class RealFramework : IFramework
+    internal class RealFramework : IFramework, ICoreFramework
     {
         private readonly IComponentContext _components;
         private readonly INodeConfiguration _nodeConfig;
@@ -27,6 +27,13 @@ namespace NWheels.Core
             _components = components;
             _nodeConfig = nodeConfig;
             _threadLogAnchor = threadLogAnchor;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public T New<T>() where T : class
+        {
+            throw new NotImplementedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -71,6 +78,16 @@ namespace NWheels.Core
         public IResourceLock NewLock(ResourceLockMode mode, string resourceNameFormat, params object[] formatArgs)
         {
             return new ResourceLock(mode, resourceNameFormat.FormatIf(formatArgs));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IComponentContext Components
+        {
+            get
+            {
+                return _components;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
