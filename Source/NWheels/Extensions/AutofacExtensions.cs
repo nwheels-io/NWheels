@@ -20,6 +20,7 @@ using NWheels.Endpoints.Core.Wcf;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Entities.Impl;
+using NWheels.Exceptions;
 using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.UI;
@@ -611,7 +612,28 @@ namespace NWheels.Extensions
 
             public void With<TConcrete>() where TConcrete : class, TGeneral
             {
-                var concretization = new ConcretizationRegistration(typeof(TGeneral), typeof(TConcrete));
+                var concretization = 
+                    typeof(TConcrete).IsInterface 
+                    ? new ConcretizationRegistration(typeof(TGeneral), typeof(TConcrete), domainObject: null)
+                    : new ConcretizationRegistration(typeof(TGeneral), typeof(TGeneral), domainObject: typeof(TConcrete));
+
+                _builder.RegisterInstance(concretization).As<ConcretizationRegistration>();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void With<TConcrete, TDomain>() 
+                where TConcrete : class, TGeneral
+                where TDomain : class, TConcrete
+            {
+                if ( !typeof(TConcrete).IsInterface || !typeof(TDomain).IsClass )
+                {
+                    throw new ContractConventionException(
+                        "Invalid concretization. Type '{0}' must be an interface and type '{1}' must be a class.", 
+                        typeof(TConcrete).FullName, typeof(TDomain).FullName);
+                }
+
+                var concretization = new ConcretizationRegistration(typeof(TGeneral), typeof(TConcrete), typeof(TDomain));
                 _builder.RegisterInstance(concretization).As<ConcretizationRegistration>();
             }
         }

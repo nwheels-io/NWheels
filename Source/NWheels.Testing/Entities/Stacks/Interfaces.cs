@@ -181,6 +181,20 @@ namespace NWheels.Testing.Entities.Stacks
                 [PropertyContract.Relation.Composition]
                 IPostalAddress PostalAddress { get; }
             }
+
+            public abstract class Customer : ICustomer
+            {
+                protected Customer()
+                {
+                }
+
+                #region Implementation of ICustomer
+
+                public abstract string FullName { get; set; }
+                public abstract ICollection<IContactDetail> ContactDetails { get; }
+
+                #endregion
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

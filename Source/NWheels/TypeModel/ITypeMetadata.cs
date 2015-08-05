@@ -14,6 +14,7 @@ namespace NWheels.DataObjects
         string NamespaceQualifier { get; }
         Type ContractType { get; }
         IReadOnlyList<Type> MixinContractTypes { get; }
+        Type DomainObjectType { get; }
         bool TryGetImplementation(Type factoryType, out Type implementationType);
         IEnumerable<KeyValuePair<Type, Type>> GetAllImplementations();
         bool IsAbstract { get; }

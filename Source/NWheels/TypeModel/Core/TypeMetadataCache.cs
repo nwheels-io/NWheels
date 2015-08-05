@@ -198,13 +198,14 @@ namespace NWheels.DataObjects.Core
 
         private TypeMetadataBuilder BuildTypeMetadata(Type primaryContract, Type[] mixinContracts, TypeMetadataBuilder builder)
         {
+            TypeMetadataBuilder metaType;
             ConcretizationRegistration concretization;
 
             if ( _concretizationsByPrimaryContract.TryGetValue(primaryContract, out concretization) && concretization.ConcreteContract != primaryContract )
             {
                 var concretizationMixinContracts = GetRegisteredMixinContracts(concretization.ConcreteContract);
                 
-                return BuildTypeMetadata(
+                metaType = BuildTypeMetadata(
                     concretization.ConcreteContract, 
                     mixinContracts.Union(concretizationMixinContracts).ToArray());
             }
@@ -215,13 +216,20 @@ namespace NWheels.DataObjects.Core
 
                 if ( constructor.ConstructMetadata(primaryContract, mixinContracts, builder, this, out addedMixinContracts) && addedMixinContracts.Length == 0 )
                 {
-                    return builder;
+                    metaType = builder;
                 }
                 else
                 {
-                    return BuildTypeMetadata(primaryContract, mixinContracts.Union(addedMixinContracts).ToArray());
+                    metaType = BuildTypeMetadata(primaryContract, mixinContracts.Union(addedMixinContracts).ToArray());
                 }
             }
+
+            if ( concretization != null && concretization.DomainObject != null && metaType.DomainObjectType == null )
+            {
+                metaType.DomainObjectType = concretization.DomainObject;
+            }
+
+            return metaType;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

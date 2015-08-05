@@ -70,6 +70,7 @@ namespace NWheels.DataObjects.Core
         public string Name { get; set; }
         public string NamespaceQualifier { get; set; }
         public Type ContractType { get; set; }
+        public Type DomainObjectType { get; set; }
         public bool IsAbstract { get; set; }
         public string DefaultDisplayFormat { get; set; }
 
@@ -157,6 +158,7 @@ namespace NWheels.DataObjects.Core
             Name = visitor.VisitAttribute("Name", Name);
             NamespaceQualifier = visitor.VisitAttribute("NamespaceQualifier", NamespaceQualifier);
             ContractType = visitor.VisitAttribute("ContractType", ContractType);
+            DomainObjectType = visitor.VisitAttribute("DomainObjectType", DomainObjectType);
             IsAbstract = visitor.VisitAttribute("IsAbstract", IsAbstract);
 
             BaseType = visitor.VisitElementReference<ITypeMetadata, TypeMetadataBuilder>("BaseType", BaseType);
