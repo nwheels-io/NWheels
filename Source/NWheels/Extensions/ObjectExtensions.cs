@@ -19,5 +19,12 @@ namespace NWheels.Extensions
         {
             return (value.HasValue ? value.Value.ToString() : defaultValue);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static T As<T>(this object obj) where T : class
+        {
+            return (T)obj;
+        }
     }
 }

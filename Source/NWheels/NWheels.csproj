@@ -98,7 +98,9 @@
     <Compile Include="Entities\Core\IStorageSchemaNamingConvention.cs" />
     <Compile Include="Entities\Factories\ImplementIEntityPartObjectConvention.cs" />
     <Compile Include="Entities\Factories\ImplementIEntityObjectConvention.cs" />
+    <Compile Include="Exceptions\BusinessRuleException.cs" />
     <Compile Include="Extensions\ExceptionExtensions.cs" />
+    <Compile Include="Processing\Workflows\WorkflowInstanceEntity.cs" />
     <Compile Include="TypeModel\Core\ConcreteToAbstractListAdapter.cs" />
     <Compile Include="TypeModel\Core\Factories\BaseTypeConvention.cs" />
     <Compile Include="TypeModel\Core\Factories\CollectionAdapterDualValueStrategy.cs" />

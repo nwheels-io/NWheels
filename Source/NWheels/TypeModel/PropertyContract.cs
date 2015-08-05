@@ -22,6 +22,12 @@ namespace NWheels.DataObjects
             public bool AllowEmpty { get; set; }
         }
 
+        [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+        public class CalculatedAttribute : PropertyContractAttribute
+        {
+            public bool AllowEmpty { get; set; }
+        }
+
         public class ReadOnlyAttribute : PropertyContractAttribute { }
 
         public class WriteOnlyAttribute : PropertyContractAttribute { }
