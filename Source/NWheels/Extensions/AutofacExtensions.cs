@@ -26,6 +26,8 @@ using NWheels.Logging;
 using NWheels.UI;
 using NWheels.Processing;
 using NWheels.Processing.Jobs;
+using NWheels.Processing.Messages;
+using NWheels.Processing.Messages.Impl;
 using NWheels.Processing.Workflows;
 using NWheels.Processing.Workflows.Core;
 using NWheels.Processing.Workflows.Impl;
@@ -526,6 +528,27 @@ namespace NWheels.Extensions
                 _builder.NWheelsFeatures().Logging().RegisterLogger<TransientStateMachine<TState, TTrigger>.ILogger>();
 
                 RegisterWorkflow<StateMachineWorkflow<TState, TTrigger, TDataEntity>, TDataRepository, TDataEntity>(entitySelector);
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IRegistrationBuilder<TActor, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterActor<TActor>()
+            {
+                foreach ( var messageHandlerInterface in typeof(TActor).GetInterfaces().Where(IsMessageHandlerInterface) )
+                {
+                    var messageType = messageHandlerInterface.GetGenericArguments()[0];
+                    var adapterClosedType = typeof(MessageHandlerAdapter<>).MakeGenericType(messageType);
+                    _builder.RegisterType(adapterClosedType).As<IMessageHandlerAdapter>();
+                }
+
+                return _builder.RegisterType<TActor>();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool IsMessageHandlerInterface(Type interfaceType)
+            {
+                return (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IMessageHandler<>));
             }
         }
 

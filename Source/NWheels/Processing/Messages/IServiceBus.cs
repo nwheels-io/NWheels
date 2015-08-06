@@ -9,5 +9,6 @@ namespace NWheels.Processing.Messages
     public interface IServiceBus
     {
         void EnqueueMessage(IMessageObject message);
+        void DispatchMessageOnCurrentThread(IMessageObject message);
     }
 }

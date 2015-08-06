@@ -104,6 +104,12 @@
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Extensions\ExceptionExtensions.cs" />
     <Compile Include="Extensions\FrameworkExtensions.cs" />
+    <Compile Include="Processing\Messages\IMessageHandler.cs" />
+    <Compile Include="Processing\Messages\Impl\IMessageHandlerAdapter.cs" />
+    <Compile Include="Processing\Messages\Impl\MessageHandlerAdapter.cs" />
+    <Compile Include="Processing\Messages\Impl\MessageHandlerRegistration.cs" />
+    <Compile Include="Processing\Messages\Impl\ServiceBus.cs" />
+    <Compile Include="Processing\Messages\IServiceBusEventLogger.cs" />
     <Compile Include="Processing\Messages\MessageObjectContractAttribute.cs" />
     <Compile Include="Processing\Messages\ServiceRequestMessage.cs" />
     <Compile Include="Processing\Workflows\WorkflowInstanceEntity.cs" />
