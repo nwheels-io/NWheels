@@ -28,7 +28,7 @@ namespace NWheels.Stacks.Network
         private readonly Random _rndObj;
         private TimeOutResolution _timeOutResolution;
 
-        private DateTime GetDateInTimeOutResolutionResolution(DateTime fullTime)
+        private DateTime GetDateInTimeOutResolution(DateTime fullTime)
         {
             DateTime timeByResolution;
 
@@ -110,8 +110,9 @@ namespace NWheels.Stacks.Network
         {
             try
             {
-                DateTime nowRoundedByResolution = GetDateInTimeOutResolutionResolution(DateTime.UtcNow);
+                DateTime nowRoundedByResolution = GetDateInTimeOutResolution(DateTime.UtcNow);
                 List<TimeOutHandle> allTimeOutEventsToInvoke = new List<TimeOutHandle>();
+                int timerInterval = GetTimerInterval();
 
                 lock (_timeOutEvents)
                 {
@@ -127,7 +128,7 @@ namespace NWheels.Stacks.Network
 
                         if (_lastTimeChecked < nowRoundedByResolution)
                         {
-                            _lastTimeChecked = _lastTimeChecked.AddMilliseconds(GetTimerInterval());
+                            _lastTimeChecked = _lastTimeChecked.AddMilliseconds(timerInterval);
                         }
                         else
                         {
@@ -175,7 +176,7 @@ namespace NWheels.Stacks.Network
             _managerTimeOutInvoker = managerTimeOutInvoker;
             _timeOutResolution = timeResolution;
             _isRunning = true;
-            _lastTimeChecked = GetDateInTimeOutResolutionResolution(DateTime.UtcNow);
+            _lastTimeChecked = GetDateInTimeOutResolution(DateTime.UtcNow);
 
             _timer.Interval = GetTimerInterval();
             _timer.Start();
@@ -193,21 +194,27 @@ namespace NWheels.Stacks.Network
                 return null;
             }
 
+            DateTime startTime = DateTime.UtcNow;
+
             lock (_timeOutEvents)
             {
                 // NOTE: Lock is around the time calculation so we will not be interrupted in the middle and might miss this event time!!!
-                DateTime fullTimeOutTime = DateTime.UtcNow;
+                DateTime fullTimeOutTime = startTime;
                 fullTimeOutTime = fullTimeOutTime.AddSeconds(timeOutInSeconds);
                 fullTimeOutTime = fullTimeOutTime.AddMilliseconds(999);       // round the calculation up
-                DateTime finalTimeOut = GetDateInTimeOutResolutionResolution(fullTimeOutTime);
-
+                DateTime now = DateTime.UtcNow;
+                if (fullTimeOutTime < now)
+                {
+                    fullTimeOutTime = now.AddMilliseconds(999);
+                }
+                DateTime finalTimeOut = GetDateInTimeOutResolution(fullTimeOutTime);
                 return AddFinalTimeOutEvent(finalTimeOut, timeOutdlgt, timeOutdlgtParam);
             }
         }
 
         ///////////////////////////////////////////////////////////////////////
 
-        public TimeOutHandle AddMilliSecTimeOutEvent(
+        public TimeOutHandle AddMsTimeOutEvent(
             UInt32 timeOutInMilliSeconds,
             OnTimeOutDlgt timeOutdlgt,
             object timeOutdlgtParam)
@@ -217,15 +224,22 @@ namespace NWheels.Stacks.Network
                 return null;
             }
 
+            DateTime startTime = DateTime.UtcNow;
+
             lock (_timeOutEvents)
             {
                 // NOTE: Lock is around the time calculation so we will not be interrupted in the middle and might miss this event time!!!
-                DateTime fullTimeOutTime = DateTime.UtcNow;
+                DateTime fullTimeOutTime = startTime;
                 fullTimeOutTime = fullTimeOutTime.AddMilliseconds(timeOutInMilliSeconds);
-                int milliSecToRound = GetTimerInterval() - 1;
+                int timerInterval = GetTimerInterval();
+                int milliSecToRound = timerInterval - 1;
                 fullTimeOutTime = fullTimeOutTime.AddMilliseconds(milliSecToRound);       // round the calculation up
-                DateTime finalTimeOut = GetDateInTimeOutResolutionResolution(fullTimeOutTime);
-
+                DateTime now = DateTime.UtcNow;
+                if (fullTimeOutTime < now)
+                {
+                    fullTimeOutTime = now.AddMilliseconds(milliSecToRound);
+                }
+                DateTime finalTimeOut = GetDateInTimeOutResolution(fullTimeOutTime);
                 return AddFinalTimeOutEvent(finalTimeOut, timeOutdlgt, timeOutdlgtParam);
             }
         }

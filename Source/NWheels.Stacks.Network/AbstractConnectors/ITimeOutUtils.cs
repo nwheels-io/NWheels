@@ -9,7 +9,7 @@ namespace NWheels.Stacks.Network
         void Run(OnTimeOutInvokerDlgt managerTimeOutInvoker, TimeOutResolution timeResolution);
         TimeOutHandle AddTimeOutEvent(UInt32 timeOutInSeconds, OnTimeOutDlgt timeOutdlgt, object timeOutdlgtParam);
 
-        TimeOutHandle AddMilliSecTimeOutEvent(UInt32 timeOutInMilliSeconds, OnTimeOutDlgt timeOutdlgt, object timeOutdlgtParam);
+        TimeOutHandle AddMsTimeOutEvent(UInt32 timeOutInMilliSeconds, OnTimeOutDlgt timeOutdlgt, object timeOutdlgtParam);
 
         void CancelTimeOutEvent(TimeOutHandle handle);
     }
