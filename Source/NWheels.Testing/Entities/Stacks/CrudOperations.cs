@@ -14,6 +14,7 @@ namespace NWheels.Testing.Entities.Stacks
                 InsertAttributes(repoFactory());
                 InsertCategories(repoFactory());
                 InsertProducts(repoFactory());
+                InsertCustomers(repoFactory());
                 RetrieveProductsByName(repoFactory());
                 InsertOrder1(repoFactory());
                 InsertOrder2(repoFactory());
@@ -29,6 +30,7 @@ namespace NWheels.Testing.Entities.Stacks
                 InsertAttributes(repoFactory());
                 InsertCategories(repoFactory());
                 InsertProducts(repoFactory());
+                InsertCustomers(repoFactory());
                 InsertOrder1(repoFactory());
                 InsertOrder2(repoFactory());
                 InsertOrder3(repoFactory());
@@ -122,6 +124,58 @@ namespace NWheels.Testing.Entities.Stacks
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private static void InsertCustomers(Interfaces.Repository1.IOnlineStoreRepository repo)
+            {
+                using ( repo )
+                {
+                    #region Customer #1
+
+                    var customer1 = repo.Customers.New();
+                    customer1.FullName = "John Smith";
+
+                    var customer1Email1 = repo.NewEmailContactDetail(email: "john.smith@email.com", isPrimary: true);
+                    var customer1Email2 = repo.NewEmailContactDetail(email: "jsmith@nomail.com", isPrimary: false);
+                    var customer1Phone1 = repo.NewPhoneContactDetail(phone: "555-555-555-555", isPrimary: true);
+
+                    customer1.ContactDetails.Add(customer1Email1);
+                    customer1.ContactDetails.Add(customer1Email2);
+                    customer1.ContactDetails.Add(customer1Phone1);
+
+                    #endregion
+
+                    #region Customer #2
+
+                    var customer2 = repo.Customers.New();
+                    customer2.FullName = "Maria Garcia";
+
+                    var customer2Email1 = repo.NewEmailContactDetail(email: "maria.garcia@email.com", isPrimary: true);
+                    var customer2Post1 = repo.NewPostContactDetail(isPrimary: true);
+                    customer2Post1.PostalAddress.StreetAddress = "Luna, 10-3";
+                    customer2Post1.PostalAddress.ZipCode = "28300";
+                    customer2Post1.PostalAddress.City = "ARANJUEZ (MADRID)";
+                    customer2Post1.PostalAddress.Country = "SPAIN";
+
+                    customer2.ContactDetails.Add(customer2Email1);
+                    customer2.ContactDetails.Add(customer2Post1);
+
+                    #endregion
+
+                    repo.ContactDetails.Insert(customer1Email1);
+                    repo.ContactDetails.Insert(customer1Email2);
+                    repo.ContactDetails.Insert(customer1Phone1);
+
+                    repo.ContactDetails.Insert(customer2Email1);
+                    repo.ContactDetails.Insert(customer2Post1);
+
+                    repo.Customers.Insert(customer1);
+                    repo.Customers.Insert(customer2);
+
+                    repo.CommitChanges();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private static void RetrieveProductsByName(Interfaces.Repository1.IOnlineStoreRepository repo)
             {
                 using ( repo )
@@ -185,6 +239,8 @@ namespace NWheels.Testing.Entities.Stacks
                     repo.OrdersLines.Insert(orderLine1);
                     repo.OrdersLines.Insert(orderLine2);
 
+                    order.Customer = repo.Customers.First(c => c.FullName == "John Smith");
+
                     repo.Orders.Insert(order);
                     repo.CommitChanges();
                 }
@@ -211,6 +267,8 @@ namespace NWheels.Testing.Entities.Stacks
 
                     repo.OrdersLines.Insert(orderLine1);
                     repo.OrdersLines.Insert(orderLine2);
+
+                    order.Customer = repo.Customers.First(c => c.FullName == "Maria Garcia");
 
                     repo.Orders.Insert(order);
                     repo.CommitChanges();
@@ -244,6 +302,8 @@ namespace NWheels.Testing.Entities.Stacks
                     order.BillingAddress.Country = "UK";
 
                     repo.OrdersLines.Insert(orderLine1);
+
+                    order.Customer = repo.Customers.First(c => c.FullName == "John Smith");
 
                     repo.Orders.Insert(order);
                     repo.CommitChanges();

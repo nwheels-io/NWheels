@@ -4,8 +4,13 @@ using System.Data.Entity;
 using System.Data.Entity.Core.Objects;
 using System.Linq;
 using System.Linq.Expressions;
+using Autofac;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Entities;
+using NWheels.Entities.Core;
+using NWheels.Extensions;
+using NWheels.Utilities;
 
 namespace NWheels.Stacks.EntityFramework
 {
@@ -15,6 +20,7 @@ namespace NWheels.Stacks.EntityFramework
         where TEntityImpl : class, TEntityContract, TBaseImpl
     {
         private readonly EfDataRepositoryBase _ownerRepo;
+        private readonly IDomainObjectFactory _domainObjectFactory;
         private readonly ObjectSet<TBaseImpl> _objectSet;
         private InterceptingQueryProvider _queryProvider;
 
@@ -23,24 +29,28 @@ namespace NWheels.Stacks.EntityFramework
         public EfEntityRepository(EfDataRepositoryBase ownerRepo)
         {
             _ownerRepo = ownerRepo;
+            _domainObjectFactory = ownerRepo.Components.Resolve<IDomainObjectFactory>();
             _objectSet = ownerRepo.CreateObjectSet<TBaseImpl>();
             _queryProvider = null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IEnumerator<TEntityContract> IEnumerable<TEntityContract>.GetEnumerator()
+        public IEnumerator<TEntityContract> GetEnumerator()
         {
             _ownerRepo.ValidateOperationalState();
-            return _objectSet.AsEnumerable().OfType<TEntityImpl>().Cast<TEntityContract>().GetEnumerator();
+            
+            var actualEnumerator = _objectSet.AsEnumerable().OfType<TEntityImpl>().Cast<TEntityContract>().GetEnumerator();
+            var resultInterceptor = new InterceptingResultEnumerator<TEntityContract>(_ownerRepo, actualEnumerator);
+
+            return resultInterceptor;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            _ownerRepo.ValidateOperationalState();
-            return _objectSet.AsEnumerable().OfType<TEntityImpl>().Cast<TEntityContract>().GetEnumerator();
+            return this.GetEnumerator();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -155,21 +165,30 @@ namespace NWheels.Stacks.EntityFramework
 
         public TEntityContract New()
         {
-            return _ownerRepo.EntityFactory.NewEntity<TEntityContract>();
+            var persistableObject = _ownerRepo.EntityFactory.NewEntity<TEntityContract>();
+            var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>(persistableObject);
+
+            return domainObject;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TConcreteEntity New<TConcreteEntity>() where TConcreteEntity : class, TEntityContract
         {
-            return _ownerRepo.EntityFactory.NewEntity<TConcreteEntity>();
+            var persistableObject = _ownerRepo.EntityFactory.NewEntity<TConcreteEntity>();
+            var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TConcreteEntity>(persistableObject);
+
+            return domainObject;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TEntityContract New(Type concreteContract)
         {
-            return (TEntityContract)_ownerRepo.EntityFactory.NewEntity(concreteContract);
+            var persistableObject = (TEntityContract)_ownerRepo.EntityFactory.NewEntity(concreteContract);
+            var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>(persistableObject);
+
+            return domainObject;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -185,7 +204,9 @@ namespace NWheels.Stacks.EntityFramework
         public void Insert(TEntityContract entity)
         {
             _ownerRepo.ValidateOperationalState();
-            _objectSet.AddObject((TEntityImpl)entity);
+            var persistableObject = entity.As<IPersistableObject>();
+
+            _objectSet.AddObject((TEntityImpl)persistableObject);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -193,9 +214,10 @@ namespace NWheels.Stacks.EntityFramework
         public void Update(TEntityContract entity)
         {
             _ownerRepo.ValidateOperationalState();
-            
-            _objectSet.Attach((TEntityImpl)entity);
-            _ownerRepo.ObjectContext.ObjectStateManager.ChangeObjectState(entity, System.Data.Entity.EntityState.Modified);
+            var persistableObject = entity.As<IPersistableObject>();
+
+            _objectSet.Attach((TEntityImpl)persistableObject);
+            _ownerRepo.ObjectContext.ObjectStateManager.ChangeObjectState(persistableObject, System.Data.Entity.EntityState.Modified);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -203,7 +225,9 @@ namespace NWheels.Stacks.EntityFramework
         public void Delete(TEntityContract entity)
         {
             _ownerRepo.ValidateOperationalState();
-            _objectSet.DeleteObject((TEntityImpl)entity);
+            var persistableObject = entity.As<IPersistableObject>();
+
+            _objectSet.DeleteObject((TEntityImpl)persistableObject);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -248,7 +272,7 @@ namespace NWheels.Stacks.EntityFramework
             {
                 var specializedExpression = QueryExpressionSpecializer.Specialize(expression);
                 var query = _actualQueryProvider.CreateQuery<TElement>(specializedExpression);
-                return query;
+                return new InterceptingQuery<TElement>(_ownerRepo, query);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -257,24 +281,344 @@ namespace NWheels.Stacks.EntityFramework
             {
                 var specializedExpression = QueryExpressionSpecializer.Specialize(expression);
                 var query = _actualQueryProvider.CreateQuery(specializedExpression);
-                return query;
+                return new InterceptingQuery(_ownerRepo, query);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public TResult Execute<TResult>(Expression expression)
             {
-                return _actualQueryProvider.Execute<TResult>(expression);
+                var result = _actualQueryProvider.Execute<TResult>(expression);
+                var entity = result as IEntityObject;
+
+                if ( entity != null )
+                {
+                    ObjectUtility.InjectDependenciesToObject(entity, _ownerRepo._ownerRepo.Components);
+                    return (TResult)(object)_ownerRepo._domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)entity);
+
+                }
+
+                return result;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public object Execute(Expression expression)
             {
-                return _actualQueryProvider.Execute(expression);
+                var result = _actualQueryProvider.Execute(expression);
+                var entity = result as IEntityObject;
+
+                if ( entity != null )
+                {
+                    ObjectUtility.InjectDependenciesToObject(entity, _ownerRepo._ownerRepo.Components);
+                    return _ownerRepo._domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)entity);
+                }
+
+                return result;
             }
 
             #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class InterceptingQuery<T> : IOrderedQueryable<T>
+        {
+            private readonly EfEntityRepository<TEntityContract, TBaseImpl, TEntityImpl> _ownerRepo;
+            private readonly IQueryable<T> _underlyingQuery;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public InterceptingQuery(EfEntityRepository<TEntityContract, TBaseImpl, TEntityImpl> ownerRepo, IQueryable<T> underlyingQuery)
+            {
+                _ownerRepo = ownerRepo;
+                _underlyingQuery = underlyingQuery;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                var enumerator = _underlyingQuery.GetEnumerator();
+                return new InterceptingResultEnumerator<T>(_ownerRepo._ownerRepo, enumerator);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type ElementType
+            {
+                get
+                {
+                    var elementType = _underlyingQuery.ElementType;
+                    return elementType;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Expression Expression
+            {
+                get
+                {
+                    var expression = _underlyingQuery.Expression;
+                    return expression;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IQueryProvider Provider
+            {
+                get
+                {
+                    var provider = new InterceptingQueryProvider(_ownerRepo);// _underlyingQuery.Provider;
+                    return provider;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class InterceptingQuery : IOrderedQueryable
+        {
+            private readonly EfEntityRepository<TEntityContract, TBaseImpl, TEntityImpl> _ownerRepo;
+            private readonly IQueryable _underlyingQuery;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public InterceptingQuery(EfEntityRepository<TEntityContract, TBaseImpl, TEntityImpl> ownerRepo, IQueryable underlyingQuery)
+            {
+                _ownerRepo = ownerRepo;
+                _underlyingQuery = underlyingQuery;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                var enumerator = _underlyingQuery.GetEnumerator();
+                return new InterceptingResultEnumerator(_ownerRepo._ownerRepo, enumerator);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type ElementType
+            {
+                get
+                {
+                    var elementType = _underlyingQuery.ElementType;
+                    return elementType;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Expression Expression
+            {
+                get
+                {
+                    var expression = _underlyingQuery.Expression;
+                    return expression;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IQueryProvider Provider
+            {
+                get
+                {
+                    var provider = _underlyingQuery.Provider;
+                    return provider;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class InterceptingResultEnumerator<T> : IEnumerator<T>
+        {
+            private readonly EfDataRepositoryBase _ownerUnitOfWork;
+            private readonly IDomainObjectFactory _domainObjectFactory;
+            private readonly IEnumerator<T> _underlyingEnumerator;
+            private T _current;
+            private bool _hasCurrent;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public InterceptingResultEnumerator(EfDataRepositoryBase ownerUnitOfWork, IEnumerator<T> underlyingEnumerator)
+            {
+                _ownerUnitOfWork = ownerUnitOfWork;
+                _domainObjectFactory = ownerUnitOfWork.Components.Resolve<IDomainObjectFactory>();
+                _underlyingEnumerator = underlyingEnumerator;
+                _hasCurrent = false;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Dispose()
+            {
+                _underlyingEnumerator.Dispose();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool MoveNext()
+            {
+                if (_underlyingEnumerator.MoveNext())
+                {
+                    var currentEntityObject = _underlyingEnumerator.Current;
+
+                    ObjectUtility.InjectDependenciesToObject(currentEntityObject, _ownerUnitOfWork.Components);
+
+                    _current = (currentEntityObject is IObject ? _domainObjectFactory.CreateDomainObjectInstance(currentEntityObject) : currentEntityObject);
+                    _hasCurrent = true;
+                }
+                else
+                {
+                    _hasCurrent = false;
+                }
+
+                return _hasCurrent;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Reset()
+            {
+                _underlyingEnumerator.Reset();
+                _hasCurrent = false;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public T Current
+            {
+                get
+                {
+                    if (_hasCurrent)
+                    {
+                        return _current;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Current value is not available. Probably at end of sequence.");
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            object System.Collections.IEnumerator.Current
+            {
+                get
+                {
+                    return this.Current;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class InterceptingResultEnumerator : System.Collections.IEnumerator
+        {
+            private readonly EfDataRepositoryBase _ownerUnitOfWork;
+            private readonly IDomainObjectFactory _domainObjectFactory;
+            private readonly System.Collections.IEnumerator _underlyingEnumerator;
+            private object _current;
+            private bool _hasCurrent;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public InterceptingResultEnumerator(EfDataRepositoryBase ownerUnitOfWork, System.Collections.IEnumerator underlyingEnumerator)
+            {
+                _ownerUnitOfWork = ownerUnitOfWork;
+                _domainObjectFactory = ownerUnitOfWork.Components.Resolve<IDomainObjectFactory>();
+                _underlyingEnumerator = underlyingEnumerator;
+                _hasCurrent = false;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool MoveNext()
+            {
+                if ( _underlyingEnumerator.MoveNext() )
+                {
+                    var currentEntityObject = _underlyingEnumerator.Current;
+
+                    ObjectUtility.InjectDependenciesToObject(currentEntityObject, _ownerUnitOfWork.Components);
+
+                    _current = (currentEntityObject is IObject ? _domainObjectFactory.CreateDomainObjectInstance(currentEntityObject) : currentEntityObject);
+                }
+                else
+                {
+                    _hasCurrent = false;
+                }
+
+                return _hasCurrent;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Reset()
+            {
+                _underlyingEnumerator.Reset();
+                _hasCurrent = false;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public object Current
+            {
+                get
+                {
+                    if (_hasCurrent)
+                    {
+                        return _current;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Current value is not available. Probably at end of sequence.");
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class InterceptingResultEnumerable<T> : IEnumerable<T>
+        {
+            private readonly EfDataRepositoryBase _ownerUnitOfWork;
+            private readonly IEnumerable<T> _underlyingEnumerable;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public InterceptingResultEnumerable(EfDataRepositoryBase ownerUnitOfWork, IEnumerable<T> underlyingEnumerable)
+            {
+                _ownerUnitOfWork = ownerUnitOfWork;
+                _underlyingEnumerable = underlyingEnumerable;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                return new InterceptingResultEnumerator<T>(_ownerUnitOfWork, _underlyingEnumerable.GetEnumerator());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

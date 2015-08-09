@@ -9,5 +9,6 @@ namespace NWheels.DataObjects.Core
     public interface IObject
     {
         Type ContractType { get; }
+        Type FactoryType { get; }
     }
 }

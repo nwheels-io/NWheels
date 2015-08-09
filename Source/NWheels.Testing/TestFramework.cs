@@ -21,6 +21,7 @@ using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
 using NWheels.Endpoints;
 using NWheels.Entities.Core;
+using NWheels.Entities.Factories;
 using NWheels.Logging.Core;
 using NWheels.Testing.Entities.Impl;
 
@@ -233,6 +234,23 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void RebuildMetadataCache(
+            IMetadataConvention[] customMetadataConventions = null,
+            MixinRegistration[] mixinRegistrations = null,
+            ConcretizationRegistration[] concretizationRegistrations = null,
+            IRelationalMappingConvention[] relationalMappingConventions = null)
+        {
+            var metadataCache = CreateMetadataCacheWithDefaultConventions(
+                customMetadataConventions ?? _components.Resolve<IEnumerable<IMetadataConvention>>().ToArray(),
+                mixinRegistrations ?? _components.Resolve<IEnumerable<MixinRegistration>>().ToArray(),
+                concretizationRegistrations ?? _components.Resolve<IEnumerable<ConcretizationRegistration>>().ToArray(),
+                relationalMappingConventions ?? _components.Resolve<IEnumerable<IRelationalMappingConvention>>().ToArray());
+            
+            UpdateComponents(builder => builder.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Queue<Guid> PresetGuids { get; private set; }
         public Queue<int> PresetRandomInt32 { get; private set; }
         public Queue<long> PresetRandomInt64 { get; private set; }
@@ -271,6 +289,7 @@ namespace NWheels.Testing
             builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory, IConfigurationObjectFactory, ConfigurationObjectFactory>().SingleInstance();
             builder.RegisterType<TestEntityObjectFactory>().As<IEntityObjectFactory, EntityObjectFactory, TestEntityObjectFactory>().SingleInstance();
             builder.RegisterType<TestDataRepositoryFactory>().As<TestDataRepositoryFactory, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
+            builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory>().SingleInstance();
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
             
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
@@ -339,6 +358,16 @@ namespace NWheels.Testing
                 conventionSet, 
                 mixinRegistrations,
                 concretizationRegistrations);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal static DynamicModule DefaultDynamicModule
+        {
+            get
+            {
+                return _s_defaultDynamicModule;
+            }
         }
     }
 }

@@ -11,14 +11,25 @@ namespace NWheels.TypeModel.Core.Factories
 {
     public class ImplementIObjectConvention : ImplementationConvention
     {
+        private Type _factoryType;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public ImplementIObjectConvention()
-            : base(Will.ImplementBaseClass)
+            : base(Will.InspectDeclaration | Will.ImplementBaseClass)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Overrides of ImplementationConvention
+
+        protected override void OnInspectDeclaration(ObjectFactoryContext context)
+        {
+            _factoryType = context.Factory.GetType();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
         {
@@ -27,8 +38,13 @@ namespace NWheels.TypeModel.Core.Factories
             writer.ImplementInterfaceExplicitly<IObject>()
                 .Property<Type>(x => x.ContractType).Implement(p => 
                     p.Get(w => 
-                        w.Return(w.Const(objectContractType)
-                    ))
+                        w.Return(w.Const(objectContractType))
+                    )
+                )
+                .Property<Type>(x => x.FactoryType).Implement(p =>
+                    p.Get(w =>
+                        w.Return(w.Const(_factoryType))
+                    )
                 );
         }
 

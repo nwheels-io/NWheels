@@ -1,5 +1,6 @@
 ﻿using System;
 using Autofac;
+using Hapil;
 using NUnit.Framework;
 using NWheels.DataObjects;
 using NWheels.Entities;
@@ -16,7 +17,7 @@ namespace NWheels.Testing
         [SetUp]
         public void BaseSetUp()
         {
-            _framework = new TestFramework();
+            _framework = new TestFramework(CreateDynamicModule());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,6 +40,13 @@ namespace NWheels.Testing
         protected Auto<T> ResolveAuto<T>() where T : class
         {
             return _framework.Components.Resolve<Auto<T>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual DynamicModule CreateDynamicModule()
+        {
+            return TestFramework.DefaultDynamicModule;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

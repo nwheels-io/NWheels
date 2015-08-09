@@ -151,6 +151,18 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IPostalAddress))).UpdateImplementation(
                 typeof(MongoEntityObjectFactory),
                 typeof(HardCodedImplementations.EntityPartObject_PostalAddress));
+
+            ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.ICustomer))).UpdateImplementation(
+                typeof(MongoEntityObjectFactory),
+                typeof(HardCodedImplementations.EntityObject_Customer));
+
+            ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IContactDetail))).UpdateImplementation(
+                typeof(MongoEntityObjectFactory),
+                typeof(HardCodedImplementations.EntityObject_ContactDetail));
+
+            ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IEmailContactDetail))).UpdateImplementation(
+                typeof(MongoEntityObjectFactory),
+                typeof(HardCodedImplementations.EntityObject_EmailContactDetail));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

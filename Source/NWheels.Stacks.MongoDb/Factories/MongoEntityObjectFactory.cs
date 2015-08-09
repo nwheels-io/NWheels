@@ -28,6 +28,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             return new IObjectFactoryConvention[] {
                 new BaseTypeConvention(MetadataCache, metaType), 
                 new PropertyImplementationConvention(metaType, propertyMap),
+                new EntityContractMethodsNotSupportedConvention(),
                 new MaterializationConstructorConvention(metaType, propertyMap),
                 new InitializationConstructorConvention(metaType, propertyMap),
                 new ImplementIObjectConvention(), 

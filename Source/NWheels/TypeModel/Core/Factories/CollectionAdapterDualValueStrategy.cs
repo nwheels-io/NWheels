@@ -118,7 +118,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components)
+        protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
             base.OnWritingInitializationConstructor(writer, components);
 
@@ -136,16 +136,20 @@ namespace NWheels.TypeModel.Core.Factories
         {
             var m = writer;
 
-            using ( TT.CreateScope<TT.TContract>(_itemContractType) )
+            using ( TT.CreateScope<TT.TAbstract>(_itemContractType) )
             {
-                nestedObjects.UnionWith(_collectionAdapterField.CastTo<IEnumerable<TT.TContract>>().Cast<object>());
+                Static.Void(RuntimeTypeModelHelpers.DeepListNestedObjectCollection, _collectionAdapterField.CastTo<System.Collections.IEnumerable>(), nestedObjects);
 
-                if ( typeof(IHaveNestedObjects).IsAssignableFrom(_itemConcreteType) )
-                {
-                    m.ForeachElementIn(_collectionAdapterField.CastTo<IEnumerable<TT.TContract>>().OfType<IHaveNestedObjects>()).Do((loop, item) => {
-                        item.Void(x => x.DeepListNestedObjects, nestedObjects);
-                    });
-                }
+                //m.If(_collectionAdapterField.IsNotNull()).Then(() => {
+                //    nestedObjects.UnionWith(_collectionAdapterField.Cast<object>());
+
+                //    if ( typeof(IHaveNestedObjects).IsAssignableFrom(_itemConcreteType) )
+                //    {
+                //        m.ForeachElementIn(_collectionAdapterField.OfType<IHaveNestedObjects>()).Do((loop, item) => {
+                //            item.Void(x => x.DeepListNestedObjects, nestedObjects);
+                //        });
+                //    }
+                //});
             }
         }
 

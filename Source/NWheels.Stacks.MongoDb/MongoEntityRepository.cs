@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Autofac;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using MongoDB.Driver.Linq;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
@@ -23,6 +25,7 @@ namespace NWheels.Stacks.MongoDb
     {
         private readonly MongoDataRepositoryBase _ownerRepo;
         private readonly ITypeMetadataCache _metadataCache;
+        private readonly IDomainObjectFactory _domainObjectFactory;
         private readonly ITypeMetadata _metadata;
         private readonly IEntityObjectFactory _objectFactory;
         private readonly MongoCollection<TEntityImpl> _mongoCollection;
@@ -35,6 +38,7 @@ namespace NWheels.Stacks.MongoDb
         {
             _ownerRepo = ownerRepo;
             _metadataCache = metadataCache;
+            _domainObjectFactory = ownerRepo.Components.Resolve<IDomainObjectFactory>();
             _metadata = metadataCache.GetTypeMetadata(typeof(TEntityContract));
             _keyPropertyExpression = GetKeyPropertyExpression(_metadata);
             _objectFactory = objectFactory;
@@ -49,9 +53,9 @@ namespace NWheels.Stacks.MongoDb
             _ownerRepo.ValidateOperationalState();
             
             var actualEnumerator = _mongoCollection.AsQueryable().GetEnumerator();
-            var dependencyInjectionWrapper = new ObjectUtility.DependencyInjectingEnumerator<TEntityContract>(actualEnumerator, _ownerRepo.Components);
-            
-            return dependencyInjectionWrapper;
+            var resultInterceptor = new InterceptingResultEnumerator<TEntityContract>(_ownerRepo, actualEnumerator);
+
+            return resultInterceptor;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -250,11 +254,15 @@ namespace NWheels.Stacks.MongoDb
         public TEntityContract New()
         {
             _ownerRepo.ValidateOperationalState();
+
+            var persistableObject = _objectFactory.NewEntity<TEntityContract>();
+            _ownerRepo.TrackEntity(ref persistableObject, EntityState.NewPristine);
             
-            var entity = _objectFactory.NewEntity<TEntityContract>();
-            _ownerRepo.TrackEntity(ref entity, EntityState.NewPristine);
+            var domainObject = 
+                (persistableObject.AsOrNull<IDomainObject>() as TEntityContract) ??
+                _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>(persistableObject);
             
-            return entity;
+            return domainObject;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -263,10 +271,14 @@ namespace NWheels.Stacks.MongoDb
         {
             _ownerRepo.ValidateOperationalState();
 
-            var entity = _objectFactory.NewEntity<TConcreteEntity>();
-            _ownerRepo.TrackEntity(ref entity, EntityState.NewPristine);
+            var persistableObject = _objectFactory.NewEntity<TConcreteEntity>();
+            _ownerRepo.TrackEntity(ref persistableObject, EntityState.NewPristine);
 
-            return entity;
+            var domainObject =
+                (persistableObject.AsOrNull<IDomainObject>() as TConcreteEntity) ??
+                _domainObjectFactory.CreateDomainObjectInstance<TConcreteEntity>(persistableObject);
+            
+            return domainObject;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -275,10 +287,14 @@ namespace NWheels.Stacks.MongoDb
         {
             _ownerRepo.ValidateOperationalState();
 
-            var entity = (TEntityContract)_objectFactory.NewEntity(concreteContract);
-            _ownerRepo.TrackEntity(ref entity, EntityState.NewPristine);
+            var persistableObject = (TEntityContract)_objectFactory.NewEntity(concreteContract);
+            _ownerRepo.TrackEntity(ref persistableObject, EntityState.NewPristine);
 
-            return entity;
+            var domainObject =
+                (persistableObject.AsOrNull<IDomainObject>() as TEntityContract) ??
+                _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>(persistableObject);
+
+            return domainObject;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -294,7 +310,7 @@ namespace NWheels.Stacks.MongoDb
         public void Insert(TEntityContract entity)
         {
             _ownerRepo.ValidateOperationalState();
-            _ownerRepo.NotifyEntityState((IEntityObject)entity, EntityState.NewModified);
+            _ownerRepo.NotifyEntityState((IEntityObject)entity.As<IPersistableObject>(), EntityState.NewModified);
             //_mongoCollection.Insert((TEntityImpl)entity);
         }
 
@@ -303,7 +319,7 @@ namespace NWheels.Stacks.MongoDb
         public void Update(TEntityContract entity)
         {
             _ownerRepo.ValidateOperationalState();
-            _ownerRepo.NotifyEntityState((IEntityObject)entity, EntityState.RetrievedModified);
+            _ownerRepo.NotifyEntityState((IEntityObject)entity.As<IPersistableObject>(), EntityState.RetrievedModified);
             //_mongoCollection.Save((TEntityImpl)entity);
         }
 
@@ -312,7 +328,7 @@ namespace NWheels.Stacks.MongoDb
         public void Delete(TEntityContract entity)
         {
             _ownerRepo.ValidateOperationalState();
-            _ownerRepo.NotifyEntityState((IEntityObject)entity, EntityState.RetrievedDeleted);
+            _ownerRepo.NotifyEntityState((IEntityObject)entity.As<IPersistableObject>(), EntityState.RetrievedDeleted);
 
             //var query = Query<TEntityImpl>.EQ(_keyPropertyExpression, ((IEntityObject)entity).GetId().Value);
             //_mongoCollection.Remove(query);
@@ -423,7 +439,12 @@ namespace NWheels.Stacks.MongoDb
                 {
                     ObjectUtility.InjectDependenciesToObject(entity, _ownerRepo._ownerRepo.Components);
                     _ownerRepo._ownerRepo.TrackEntity(ref entity, EntityState.RetrievedPristine);
-                    result = (TResult)entity;
+
+                    var domainObject = 
+                        entity.AsOrNull<IDomainObject>() as TEntityContract ??
+                        _ownerRepo._domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)entity);
+                    
+                    return (TResult)(object)domainObject;
                 }
 
                 return result;
@@ -440,7 +461,12 @@ namespace NWheels.Stacks.MongoDb
                 {
                     ObjectUtility.InjectDependenciesToObject(entity, _ownerRepo._ownerRepo.Components);
                     _ownerRepo._ownerRepo.TrackEntity(ref entity, EntityState.RetrievedPristine);
-                    result = entity;
+
+                    var domainObject =
+                        entity.AsOrNull<IDomainObject>() as TEntityContract ??
+                        _ownerRepo._domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)entity);
+
+                    return domainObject;
                 }
                 
                 return result;
@@ -575,6 +601,7 @@ namespace NWheels.Stacks.MongoDb
         private class InterceptingResultEnumerator<T> : IEnumerator<T>
         {
             private readonly MongoDataRepositoryBase _ownerUnitOfWork;
+            private readonly IDomainObjectFactory _domainObjectFactory;
             private readonly IEnumerator<T> _underlyingEnumerator;
             private T _current;
             private bool _hasCurrent;
@@ -584,6 +611,7 @@ namespace NWheels.Stacks.MongoDb
             public InterceptingResultEnumerator(MongoDataRepositoryBase ownerUnitOfWork, IEnumerator<T> underlyingEnumerator)
             {
                 _ownerUnitOfWork = ownerUnitOfWork;
+                _domainObjectFactory = ownerUnitOfWork.Components.Resolve<IDomainObjectFactory>();
                 _underlyingEnumerator = underlyingEnumerator;
                 _hasCurrent = false;
             }
@@ -601,11 +629,29 @@ namespace NWheels.Stacks.MongoDb
             {
                 if ( _underlyingEnumerator.MoveNext() )
                 {
-                    _current = _underlyingEnumerator.Current;
+                    var currentEntityObject = _underlyingEnumerator.Current;
 
-                    ObjectUtility.InjectDependenciesToObject(_current, _ownerUnitOfWork.Components);
-                    _ownerUnitOfWork.TrackEntity(ref _current, EntityState.RetrievedPristine);
+                    if ( currentEntityObject is IObject )
+                    {
+                        ObjectUtility.InjectDependenciesToObject(currentEntityObject, _ownerUnitOfWork.Components);
+                        _ownerUnitOfWork.TrackEntity(ref currentEntityObject, EntityState.RetrievedPristine);
 
+                        var existingDomainObject = currentEntityObject.AsOrNull<IDomainObject>();
+
+                        if ( existingDomainObject != null )
+                        {
+                            _current = (T)existingDomainObject;
+                        }
+                        else
+                        {
+                            _current = (T)(object)_domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)(object)currentEntityObject);
+                        }
+                    }
+                    else
+                    {
+                        _current = currentEntityObject;
+                    }
+                    
                     _hasCurrent = true;
                 }
                 else
@@ -657,6 +703,7 @@ namespace NWheels.Stacks.MongoDb
         private class InterceptingResultEnumerator : System.Collections.IEnumerator
         {
             private readonly MongoDataRepositoryBase _ownerUnitOfWork;
+            private readonly IDomainObjectFactory _domainObjectFactory;
             private readonly System.Collections.IEnumerator _underlyingEnumerator;
             private object _current;
             private bool _hasCurrent;
@@ -667,6 +714,7 @@ namespace NWheels.Stacks.MongoDb
             {
                 _ownerUnitOfWork = ownerUnitOfWork;
                 _underlyingEnumerator = underlyingEnumerator;
+                _domainObjectFactory = ownerUnitOfWork.Components.Resolve<IDomainObjectFactory>();
                 _hasCurrent = false;
             }
 
@@ -676,12 +724,28 @@ namespace NWheels.Stacks.MongoDb
             {
                 if ( _underlyingEnumerator.MoveNext() )
                 {
-                    _current = _underlyingEnumerator.Current;
+                    var currentEntityObject = _underlyingEnumerator.Current;
 
-                    ObjectUtility.InjectDependenciesToObject(_current, _ownerUnitOfWork.Components);
-                    _ownerUnitOfWork.TrackEntity(ref _current, EntityState.RetrievedPristine);
+                    if ( currentEntityObject is IObject )
+                    {
+                        ObjectUtility.InjectDependenciesToObject(currentEntityObject, _ownerUnitOfWork.Components);
+                        _ownerUnitOfWork.TrackEntity(ref currentEntityObject, EntityState.RetrievedPristine);
 
-                    _hasCurrent = true;
+                        var existingDomainObject = currentEntityObject.AsOrNull<IDomainObject>();
+
+                        if ( existingDomainObject != null )
+                        {
+                            _current = existingDomainObject;
+                        }
+                        else
+                        {
+                            _current = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)currentEntityObject);
+                        }
+                    }
+                    else
+                    {
+                        _current = currentEntityObject;
+                    }
                 }
                 else
                 {

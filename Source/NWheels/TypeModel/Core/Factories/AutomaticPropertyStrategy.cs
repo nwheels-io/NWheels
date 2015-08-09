@@ -49,7 +49,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components)
+        protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
             HelpInitializeDefaultValue(writer, components);
         }

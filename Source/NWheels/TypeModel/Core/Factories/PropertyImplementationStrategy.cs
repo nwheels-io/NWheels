@@ -61,9 +61,9 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void WriteInitialization(MethodWriterBase initializationConstructorWriter, Operand<IComponentContext> components)
+        public void WriteInitialization(MethodWriterBase initializationConstructorWriter, Operand<IComponentContext> components, params IOperand[] args)
         {
-            OnWritingInitializationConstructor(initializationConstructorWriter, components);
+            OnWritingInitializationConstructor(initializationConstructorWriter, components, args);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -223,13 +223,13 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components)
+        protected virtual void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void OnWritingMaterializationConstructor(MethodWriterBase writer)
+        protected virtual void OnWritingMaterializationConstructor(MethodWriterBase writer, params IOperand[] args)
         {
         }
 
@@ -369,6 +369,20 @@ namespace NWheels.DataObjects.Core.Factories
                 isOrderedCollection = false;
                 return typeof(ConcreteToAbstractCollectionAdapter<,>).MakeGenericType(concreteElementType, abstractElementType);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetReadAccessorMethodName(IPropertyMetadata property)
+        {
+            return "ReadPropertyValue_" + property.Name;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetWriteAccessorMethodName(IPropertyMetadata property)
+        {
+            return "WritePropertyValue_" + property.Name;
         }
     }
 }

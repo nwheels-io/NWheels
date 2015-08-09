@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using IR3A = NWheels.Testing.Entities.Stacks.Interfaces.Repository3A;
@@ -23,7 +24,9 @@ namespace NWheels.Testing.Entities.Stacks
                 IAttributeValue NewAttributeValue(string value, int displayOrder);
                 IAttributeValueChoice NewAttributeValueChoice(IAttribute attribute, string value);
                 IPostalAddress NewPostalAddress(string streetAddress, string city, string zipCode, string country);
-                IEmailContactDetail NewEmailContactDetail(string email);
+                IEmailContactDetail NewEmailContactDetail(string email, bool isPrimary);
+                IPhoneContactDetail NewPhoneContactDetail(string phone, bool isPrimary);
+                IPostContactDetail NewPostContactDetail(bool isPrimary);
 
                 IEntityRepository<ICategory> Categories { get; }
                 IEntityRepository<IProduct> Products { get; }
@@ -110,6 +113,9 @@ namespace NWheels.Testing.Entities.Stacks
 
                 [PropertyContract.DefaultValue(OrderStatus.New)]
                 OrderStatus Status { get; set; }
+
+                [PropertyContract.Relation.AggregationParent]
+                ICustomer Customer { get; set; }
             }
 
             [EntityContract(UseCodeNamespace = true)]
@@ -149,6 +155,9 @@ namespace NWheels.Testing.Entities.Stacks
             [EntityContract(UseCodeNamespace = true)]
             public interface ICustomer
             {
+                bool QualifiesAsValuableCustomer();
+                bool IsInteredtedIn(IProduct product);
+
                 [PropertyContract.Required]
                 string FullName { get; set; }
 
@@ -159,6 +168,7 @@ namespace NWheels.Testing.Entities.Stacks
             [EntityContract(IsAbstract = true, UseCodeNamespace = true)]
             public interface IContactDetail
             {
+                bool IsPrimary { get; set; }
             }
 
             [EntityContract(UseCodeNamespace = true)]
@@ -186,6 +196,16 @@ namespace NWheels.Testing.Entities.Stacks
             {
                 protected Customer()
                 {
+                }
+
+                public bool QualifiesAsValuableCustomer()
+                {
+                    return (ContactDetails.Count > 2);
+                }
+
+                public bool IsInteredtedIn(IProduct product)
+                {
+                    return (product.Categories.Any(c => c.Name == "CAT2"));
                 }
 
                 #region Implementation of ICustomer

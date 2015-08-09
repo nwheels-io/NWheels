@@ -72,6 +72,25 @@ namespace NWheels.TypeModel.Core.Factories
                 );
 
                 writer.OwnerClass.SetPropertyBackingField(base.MetaProperty.ContractPropertyInfo, _storageField);
+                WriteComplementContractAccessorMethods(writer, canRead, canWrite);
+            }
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void WriteComplementContractAccessorMethods(ImplementationClassWriter<TypeTemplate.TInterface> writer, bool canRead, bool canWrite)
+        {
+            if ( !canRead )
+            {
+                writer.NewVirtualFunction<TT.TProperty>(GetReadAccessorMethodName(MetaProperty))
+                    .Implement(w => w.Return(_storageField.CastTo<TT.TProperty>()));
+            }
+
+            if ( !canWrite )
+            {
+                writer.NewVirtualVoidMethod<TT.TProperty>(GetWriteAccessorMethodName(MetaProperty))
+                    .Implement((w, value) => _storageField.Assign(value.CastTo<TT.TValue>()));
             }
         }
 
@@ -95,7 +114,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components)
+        protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
             if ( MetaProperty.ClrType.IsEntityPartContract() )
             {
@@ -112,12 +131,16 @@ namespace NWheels.TypeModel.Core.Factories
         {
             var m = writer;
 
-            nestedObjects.Add(_storageField);
+            Static.Void(RuntimeTypeModelHelpers.DeepListNestedObject, _storageField, nestedObjects);
 
-            if ( typeof(IHaveNestedObjects).IsAssignableFrom(_storageType) )
-            {
-                _storageField.CastTo<IHaveNestedObjects>().Void(x => x.DeepListNestedObjects, nestedObjects);
-            }
+            //m.If(_storageField.IsNotNull()).Then(() => {
+            //    nestedObjects.Add(_storageField);
+
+            //    if ( typeof(IHaveNestedObjects).IsAssignableFrom(_storageType) )
+            //    {
+            //        _storageField.CastTo<IHaveNestedObjects>().Void(x => x.DeepListNestedObjects, nestedObjects);
+            //    }
+            //});
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

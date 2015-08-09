@@ -6,6 +6,7 @@ using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Infrastructure;
 using System.Data.SqlClient;
 using System.Linq;
+using Hapil;
 using NUnit.Framework;
 using NWheels.Testing;
 

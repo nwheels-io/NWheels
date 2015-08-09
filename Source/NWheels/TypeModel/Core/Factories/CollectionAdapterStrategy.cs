@@ -97,7 +97,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components)
+        protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
             using ( TT.CreateScope<TT.TContract, TT.TImpl, TT.TConcreteCollection<TT.TImpl>, TT.TAbstractCollection<TT.TContract>>(
                 _itemContractType, _itemStorageType, _storageCollectionType, _collectionAdapterType) )
@@ -117,16 +117,21 @@ namespace NWheels.TypeModel.Core.Factories
         {
             var m = writer;
 
-            using ( TT.CreateScope<TT.TImpl>(_itemContractType) )
+            using ( TT.CreateScope<TT.TContract>(_itemContractType) )
             {
-                nestedObjects.UnionWith(_contractField.CastTo<IEnumerable<TT.TImpl>>().Cast<object>());
+                Static.Void(RuntimeTypeModelHelpers.DeepListNestedObjectCollection, _contractField.CastTo<System.Collections.IEnumerable>(), nestedObjects);
+                
 
-                if ( typeof(IHaveNestedObjects).IsAssignableFrom(_itemStorageType) )
-                {
-                    m.ForeachElementIn(_contractField.CastTo<IEnumerable<TT.TImpl>>().OfType<IHaveNestedObjects>()).Do((loop, item) => {
-                        item.Void(x => x.DeepListNestedObjects, nestedObjects);
-                    });
-                }
+                //m.If(_contractField.IsNotNull()).Then(() => {
+                //    nestedObjects.UnionWith(_contractField.CastTo<IEnumerable<TT.TContract>>().Cast<object>());
+
+                //    if ( typeof(IHaveNestedObjects).IsAssignableFrom(_itemStorageType) )
+                //    {
+                //        m.ForeachElementIn(_contractField.CastTo<IEnumerable<TT.TContract>>().OfType<IHaveNestedObjects>()).Do((loop, item) => {
+                //            item.Void(x => x.DeepListNestedObjects, nestedObjects);
+                //        });
+                //    }
+                //});
             }
         }
 

@@ -28,6 +28,7 @@ namespace NWheels.Stacks.EntityFramework
             _compiledModel = compiledModel;
             _connection = connection;
             _objectContext = compiledModel.CreateObjectContext<ObjectContext>(connection);
+            _objectContext.ContextOptions.ProxyCreationEnabled = false;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -63,7 +64,7 @@ namespace NWheels.Stacks.EntityFramework
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal ObjectContext ObjectContext
+        internal protected ObjectContext ObjectContext
         {
             get
             {

@@ -89,7 +89,9 @@ namespace NWheels.DataObjects.Core.Conventions
             {
                 ThisIsManyToOneProperty(property);
             }
-            else if ( property.ClrType.IsCollectionType(out collectionElementType) && DataObjectContractAttribute.IsDataObjectContract(collectionElementType) )
+            else if ( property.ClrType.IsCollectionType(out collectionElementType) && (
+                DataObjectContractAttribute.IsDataObjectContract(collectionElementType) ||
+                DataObjectPartContractAttribute.IsDataObjectPartContract(collectionElementType)) )
             {
                 ThisIsOneToManyProperty(property, collectionElementType);
             }

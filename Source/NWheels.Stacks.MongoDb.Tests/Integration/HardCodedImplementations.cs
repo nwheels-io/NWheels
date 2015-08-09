@@ -19,6 +19,7 @@ using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.Stacks.MongoDb.Factories;
 using NWheels.Testing.Entities.Stacks;
+using NWheels.TypeModel.Core.Factories;
 using NWheels.Utilities;
 using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;
 
@@ -70,9 +71,14 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 m_OrdersLines = new MongoEntityRepository<IR1.IOrderLine, EntityObject_OrderLine>(this, metadataCache, objectFactory);
                 base.RegisterEntityRepository<IR1.IOrderLine, EntityObject_OrderLine>(m_OrdersLines);
 
-                m_Customers = null;//TODO: add EntityObject_Customer
-                //m_Customers = new MongoEntityRepository<IR1.IOrderLine, EntityObject_Cus>(this, metadataCache, objectFactory);
-                //base.RegisterEntityRepository<IR1.IOrderLine, EntityObject_OrderLine>(m_OrdersLines);
+                m_Customers = new MongoEntityRepository<IR1.ICustomer, EntityObject_Customer>(this, metadataCache, objectFactory);
+                base.RegisterEntityRepository<IR1.ICustomer, EntityObject_Customer>(m_Customers);
+
+                m_ContactDetails = new MongoEntityRepository<IR1.IContactDetail, EntityObject_ContactDetail>(this, metadataCache, objectFactory);
+                base.RegisterEntityRepository<IR1.IContactDetail, EntityObject_ContactDetail>(m_ContactDetails);
+
+                m_ContactEmails = new MongoEntityRepository<IR1.IEmailContactDetail, EntityObject_EmailContactDetail>(this, metadataCache, objectFactory);
+                base.RegisterEntityRepository<IR1.IEmailContactDetail, EntityObject_EmailContactDetail>(m_ContactEmails);
             }
 
             #endregion
@@ -84,40 +90,52 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             public override Type[] GetEntityContractsInRepository()
             {
                 return new Type[] {
-                    typeof(IR1.IProduct),
-                    typeof(IR1.ICategory),
-                    typeof(IR1.IAttribute),
-                    typeof(IR1.IAttributeValue),
-                    typeof(IR1.IOrder),
-                    typeof(IR1.IOrderLine),
-                    typeof(IR1.IAttributeValueChoice),
+                    typeof(Interfaces.Repository1.ICategory), 
+                    typeof(Interfaces.Repository1.IProduct), 
+                    typeof(Interfaces.Repository1.IOrder), 
+                    typeof(Interfaces.Repository1.IOrderLine), 
+                    typeof(Interfaces.Repository1.IAttribute), 
+                    typeof(Interfaces.Repository1.ICustomer), 
+                    typeof(Interfaces.Repository1.IContactDetail), 
+                    typeof(Interfaces.Repository1.IEmailContactDetail), 
+                    typeof(Interfaces.Repository1.IPostalAddress), 
+                    typeof(Interfaces.Repository1.IAttributeValue), 
+                    typeof(Interfaces.Repository1.IAttributeValueChoice)
                 };
             }
 
             public override Type[] GetEntityTypesInRepository()
             {
                 return new Type[] {
-                    typeof(EntityObject_Product),
                     typeof(EntityObject_Category),
-                    typeof(EntityObject_Attribute),
-                    typeof(EntityPartObject_AttributeValue),
+                    typeof(EntityObject_Product),
                     typeof(EntityObject_Order),
                     typeof(EntityObject_OrderLine),
-                    typeof(EntityPartObject_AttributeValueChoice),
+                    typeof(EntityObject_Attribute),
+                    typeof(EntityObject_Customer),
+                    typeof(EntityObject_ContactDetail),
+                    typeof(EntityObject_EmailContactDetail),
+                    typeof(EntityPartObject_PostalAddress),
+                    typeof(EntityPartObject_AttributeValue),
+                    typeof(EntityPartObject_AttributeValueChoice)
                 };
             }
 
             public override IEntityRepository[] GetEntityRepositories()
             {
-                return new IEntityRepository[] {
-                    (IEntityRepository)m_Products,
-                    (IEntityRepository)m_Categories,
-                    (IEntityRepository)m_Attributes,
-                    null,
-                    (IEntityRepository)m_Orders,
-                    (IEntityRepository)m_OrdersLines,
-                    null
-                };
+                IEntityRepository[] repositoryArray = new IEntityRepository[11];
+                repositoryArray[0] = (IEntityRepository)this.m_Categories;
+                repositoryArray[1] = (IEntityRepository)this.m_Products;
+                repositoryArray[2] = (IEntityRepository)this.m_Orders;
+                repositoryArray[3] = (IEntityRepository)this.m_OrdersLines;
+                repositoryArray[4] = (IEntityRepository)this.m_Attributes;
+                repositoryArray[5] = (IEntityRepository)this.m_Customers;
+                repositoryArray[6] = (IEntityRepository)this.m_ContactDetails;
+                repositoryArray[7] = (IEntityRepository)this.m_ContactEmails;
+                repositoryArray[8] = null;
+                repositoryArray[9] = null;
+                repositoryArray[10] = null;
+                return repositoryArray;
             }
 
             #endregion
@@ -282,6 +300,32 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            #region Entity Repository ContactDetails
+
+            private IEntityRepository<IR1.IContactDetail> m_ContactDetails;
+
+            public IEntityRepository<IR1.IContactDetail> ContactDetails
+            {
+                get { return m_ContactDetails; }
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Entity Repository ContactEmails
+
+            private IEntityRepository<IR1.IEmailContactDetail> m_ContactEmails;
+
+            public IEntityRepository<IR1.IEmailContactDetail> ContactEmails
+            {
+                get { return m_ContactEmails; }
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             #region GetOrBuildDbCompiledModel
 
             private static object _s_compiledModel;
@@ -315,113 +359,17 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             #endregion
 
 
-
-            IR1.IOrderLine IR1.IOnlineStoreRepository.NewOrderLine(IR1.IOrder order, IR1.IProduct product, int quantity)
+            public IR1.IEmailContactDetail NewEmailContactDetail(string email, bool isPrimary)
             {
                 throw new NotImplementedException();
             }
 
-            IR1.IAttributeValue IR1.IOnlineStoreRepository.NewAttributeValue(string value, int displayOrder)
+            public IR1.IPhoneContactDetail NewPhoneContactDetail(string phone, bool isPrimary)
             {
                 throw new NotImplementedException();
             }
 
-            IR1.IAttributeValueChoice IR1.IOnlineStoreRepository.NewAttributeValueChoice(IR1.IAttribute attribute, string value)
-            {
-                throw new NotImplementedException();
-            }
-
-            IR1.IPostalAddress IR1.IOnlineStoreRepository.NewPostalAddress(string streetAddress, string city, string zipCode, string country)
-            {
-                throw new NotImplementedException();
-            }
-
-            IR1.IEmailContactDetail IR1.IOnlineStoreRepository.NewEmailContactDetail(string email)
-            {
-                throw new NotImplementedException();
-            }
-
-            IEntityRepository<IR1.ICategory> IR1.IOnlineStoreRepository.Categories
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            IEntityRepository<IR1.IProduct> IR1.IOnlineStoreRepository.Products
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            IEntityRepository<IR1.IOrder> IR1.IOnlineStoreRepository.Orders
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            IEntityRepository<IR1.IOrderLine> IR1.IOnlineStoreRepository.OrdersLines
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            IEntityRepository<IR1.IAttribute> IR1.IOnlineStoreRepository.Attributes
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            IEntityRepository<IR1.ICustomer> IR1.IOnlineStoreRepository.Customers
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            IEntityRepository<IR1.IContactDetail> IR1.IOnlineStoreRepository.ContactDetails
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            IEntityRepository<IR1.IEmailContactDetail> IR1.IOnlineStoreRepository.ContactEmails
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            void IApplicationDataRepository.InvokeGenericOperation(Type contractType, IDataRepositoryCallback callback)
-            {
-                throw new NotImplementedException();
-            }
-
-            Type[] IApplicationDataRepository.GetEntityTypesInRepository()
-            {
-                throw new NotImplementedException();
-            }
-
-            Type[] IApplicationDataRepository.GetEntityContractsInRepository()
-            {
-                throw new NotImplementedException();
-            }
-
-            IEntityRepository[] IApplicationDataRepository.GetEntityRepositories()
-            {
-                throw new NotImplementedException();
-            }
-
-            void IUnitOfWork.CommitChanges()
-            {
-                throw new NotImplementedException();
-            }
-
-            void IUnitOfWork.RollbackChanges()
-            {
-                throw new NotImplementedException();
-            }
-
-            bool IUnitOfWork.IsAutoCommitMode
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            UnitOfWorkState IUnitOfWork.UnitOfWorkState
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            void IDisposable.Dispose()
+            public IR1.IPostContactDetail NewPostContactDetail(bool isPrimary)
             {
                 throw new NotImplementedException();
             }
@@ -479,6 +427,14 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IPostalAddress))
                 {
                     return (TEntityContract)(object)new EntityPartObject_PostalAddress(_components);
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.ICustomer))
+                {
+                    return (TEntityContract)(object)new EntityObject_Customer(_components);
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IEmailContactDetail))
+                {
+                    return (TEntityContract)(object)new EntityObject_EmailContactDetail(_components);
                 }
 
                 throw new NotSupportedException(
@@ -554,6 +510,10 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             Type IObject.ContractType
             {
                 get { return typeof(Interfaces.Repository1.IOrder); }
+            }
+            Type IObject.FactoryType
+            {
+                get { return typeof(HardCodedEntityFactory); }
             }
 
             #endregion
@@ -737,6 +697,29 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
 
             #endregion
+
+
+            public IR1.ICustomer Customer
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+                set
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         #endregion
@@ -787,6 +770,10 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             Type IObject.ContractType
             {
                 get { return typeof(Interfaces.Repository1.IOrderLine); }
+            }
+            Type IObject.FactoryType
+            {
+                get { return typeof(HardCodedEntityFactory); }
             }
 
             #endregion
@@ -1018,6 +1005,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
 
             #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
         #endregion
@@ -1075,6 +1076,10 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             Type IObject.ContractType
             {
                 get { return typeof(Interfaces.Repository1.IProduct); }
+            }
+            Type IObject.FactoryType
+            {
+                get { return typeof(HardCodedEntityFactory); }
             }
 
             #endregion
@@ -1281,6 +1286,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
 
             #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
         #endregion
@@ -1319,6 +1338,10 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             {
                 get { return typeof(Interfaces.Repository1.ICategory); }
             }
+            Type IObject.FactoryType
+            {
+                get { return typeof(HardCodedEntityFactory); }
+            }
 
             #endregion
 
@@ -1346,6 +1369,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             {
                 get { return this.m_Name; }
                 set { this.m_Name = value; }
+            }
+
+            #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
             }
 
             #endregion
@@ -1396,6 +1433,10 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             Type IObject.ContractType
             {
                 get { return typeof(Interfaces.Repository1.IAttribute); }
+            }
+            Type IObject.FactoryType
+            {
+                get { return typeof(HardCodedEntityFactory); }
             }
 
             #endregion
@@ -1493,6 +1534,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
 
             #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
         #endregion
@@ -1522,6 +1577,10 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             {
                 get { return typeof(Interfaces.Repository1.IAttributeValue); }
             }
+            Type IObject.FactoryType
+            {
+                get { return typeof(HardCodedEntityFactory); }
+            }
 
             #endregion
 
@@ -1549,6 +1608,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             {
                 get { return m_Value; }
                 set { m_Value = value; }
+            }
+
+            #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
             }
 
             #endregion
@@ -1589,6 +1662,10 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             Type IObject.ContractType
             {
                 get { return typeof(Interfaces.Repository1.IAttributeValue); }
+            }
+            Type IObject.FactoryType
+            {
+                get { return typeof(HardCodedEntityFactory); }
             }
 
             #endregion
@@ -1683,6 +1760,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
 
             #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
         #endregion
@@ -1711,6 +1802,10 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             Type IObject.ContractType
             {
                 get { return typeof(Interfaces.Repository1.IPostalAddress); }
+            }
+            Type IObject.FactoryType
+            {
+                get { return typeof(HardCodedEntityFactory); }
             }
 
             #endregion
@@ -1770,8 +1865,377 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
 
             #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Entity Customer
+
+        public class EntityObject_Customer : Interfaces.Repository1.ICustomer, IEntityPartId<ObjectId>, IObject, IEntityObject, IHaveDependencies, IHaveNestedObjects
+        {
+            // Fields
+            private IComponentContext _components;
+            private ICollection<Interfaces.Repository1.IContactDetail> m_ContactDetails_contract;
+            private DualValueStates m_ContactDetails_state;
+            private ObjectId[] m_ContactDetails_storage;
+            private string m_FullName;
+            private ObjectId m_Id_storage;
+
+            // Methods
+            public EntityObject_Customer()
+            {
+            }
+
+            public EntityObject_Customer(IComponentContext arg0)
+            {
+                ((IHaveDependencies)this).InjectDependencies(this._components);
+                this._components = arg0;
+                this.m_ContactDetails_contract = new HashSet<Interfaces.Repository1.IContactDetail>();
+                this.m_ContactDetails_state = DualValueStates.Contract;
+                this.m_Id_storage = ObjectId.GenerateNewId();
+            }
+
+            public static object FactoryMethod1()
+            {
+                return new EntityObject_Customer();
+            }
+
+            public static object FactoryMethod2(IComponentContext context1)
+            {
+                return new EntityObject_Customer(context1);
+            }
+
+            public void DeepListNestedObjects(HashSet<object> nestedObjects)
+            {
+                if ((((int)this.m_ContactDetails_state) & 1) != 0)
+                {
+                    RuntimeTypeModelHelpers.DeepListNestedObjectCollection(this.m_ContactDetails_contract, nestedObjects);
+                }
+            }
+
+            public void InjectDependencies(IComponentContext components)
+            {
+                this._components = components;
+            }
+
+            public bool IsInteredtedIn(Interfaces.Repository1.IProduct product)
+            {
+                throw new NotSupportedException();
+            }
+
+            IEntityId IEntityObject.GetId()
+            {
+                return new EntityId<Interfaces.Repository1.ICustomer, ObjectId>(this.m_Id_storage);
+            }
+
+            void IEntityObject.SetId(object value)
+            {
+                this.m_Id_storage = (ObjectId)value;
+            }
+
+            public bool QualifiesAsValuableCustomer()
+            {
+                throw new NotSupportedException();
+            }
+
+            public virtual void WritePropertyValue_Id(ObjectId arg1)
+            {
+                this.m_Id_storage = arg1;
+            }
+
+            // Properties
+            public virtual ObjectId[] ContactDetails
+            {
+                get
+                {
+                    if (this.m_ContactDetails_state == DualValueStates.Contract)
+                    {
+                        int count = this.m_ContactDetails_contract.Count;
+                        int num2 = 0;
+                        ObjectId[] idArray = new ObjectId[count];
+                        this.m_ContactDetails_contract.Cast<IEntityObject>();
+                        IEnumerator<IEntityObject> enumerator = this.m_ContactDetails_contract.Cast<IEntityObject>().GetEnumerator();
+                        using (enumerator)
+                        {
+                            while (enumerator.MoveNext())
+                            {
+                                IEntityObject current = enumerator.Current;
+                                idArray[num2] = current.GetId().ValueAs<ObjectId>();
+                                num2++;
+                            }
+                        }
+                        this.m_ContactDetails_storage = idArray;
+                        this.m_ContactDetails_state |= DualValueStates.Storage;
+                    }
+                    return this.m_ContactDetails_storage;
+                }
+                set
+                {
+                    this.m_ContactDetails_storage = value;
+                    this.m_ContactDetails_state = DualValueStates.Storage;
+                }
+            }
+
+            public virtual string FullName
+            {
+                get
+                {
+                    return this.m_FullName;
+                }
+                set
+                {
+                    this.m_FullName = value;
+                }
+            }
+
+            ICollection<Interfaces.Repository1.IContactDetail> Interfaces.Repository1.ICustomer.ContactDetails
+            {
+                get
+                {
+                    if (this.m_ContactDetails_state == DualValueStates.Storage)
+                    {
+                        IEnumerable<Interfaces.Repository1.IContactDetail> collection = MongoDataRepositoryBase.ResolveFrom(this._components).LazyLoadByIdList<Interfaces.Repository1.IContactDetail, ObjectId>(this.m_ContactDetails_storage);
+                        this.m_ContactDetails_contract = new HashSet<Interfaces.Repository1.IContactDetail>(collection);
+                        this.m_ContactDetails_state |= DualValueStates.Contract;
+                    }
+                    return this.m_ContactDetails_contract;
+                }
+            }
+
+            public virtual ObjectId Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+                set
+                {
+                    this.m_Id_storage = value;
+                }
+            }
+
+            ObjectId IEntityPartId<ObjectId>.Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.ICustomer);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(MongoEntityObjectFactory);
+                }
+            }
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Entity ContactDetail
+
+        [BsonDiscriminator("ContactDetail", RootClass = true)]
+        public class EntityObject_ContactDetail : Interfaces.Repository1.IContactDetail, IEntityPartId<ObjectId>, IObject, IEntityObject
+        {
+            // Fields
+            private ObjectId m_Id_storage;
+
+            // Methods
+            public EntityObject_ContactDetail()
+            {
+            }
+
+            public EntityObject_ContactDetail(IComponentContext arg0)
+            {
+                this.m_Id_storage = ObjectId.GenerateNewId();
+            }
+
+            public static object FactoryMethod1()
+            {
+                return new EntityObject_ContactDetail();
+            }
+
+            public static object FactoryMethod2(IComponentContext context1)
+            {
+                return new EntityObject_ContactDetail(context1);
+            }
+
+            IEntityId IEntityObject.GetId()
+            {
+                return new EntityId<Interfaces.Repository1.IContactDetail, ObjectId>(this.m_Id_storage);
+            }
+
+            void IEntityObject.SetId(object value)
+            {
+                this.m_Id_storage = (ObjectId)value;
+            }
+
+            public virtual void WritePropertyValue_Id(ObjectId arg1)
+            {
+                this.m_Id_storage = arg1;
+            }
+
+            // Properties
+            public virtual ObjectId Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+                set
+                {
+                    this.m_Id_storage = value;
+                }
+            }
+
+            ObjectId IEntityPartId<ObjectId>.Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.IContactDetail);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(MongoEntityObjectFactory);
+                }
+            }
+
+            #region Implementation of IContactDetail
+
+            public bool IsPrimary { get; set; }
+
+            #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Entity EmailContactDetail
+
+        [BsonDiscriminator("EmailContactDetail")]
+        public class EntityObject_EmailContactDetail : EntityObject_ContactDetail, Interfaces.Repository1.IEmailContactDetail, IObject
+        {
+            // Fields
+            private string m_Email;
+
+            // Methods
+            public EntityObject_EmailContactDetail()
+            {
+            }
+
+            public EntityObject_EmailContactDetail(IComponentContext arg0)
+                : base(arg0)
+            {
+            }
+
+            public new static object FactoryMethod1()
+            {
+                return new EntityObject_EmailContactDetail();
+            }
+
+            public new static object FactoryMethod2(IComponentContext context1)
+            {
+                return new EntityObject_EmailContactDetail(context1);
+            }
+
+            // Properties
+            public virtual string Email
+            {
+                get
+                {
+                    return this.m_Email;
+                }
+                set
+                {
+                    this.m_Email = value;
+                }
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.IEmailContactDetail);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(MongoEntityObjectFactory);
+                }
+            }
+        }
+ 
         #endregion
     }
 }

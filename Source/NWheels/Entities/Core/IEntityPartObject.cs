@@ -8,7 +8,7 @@ using NWheels.DataObjects.Core;
 
 namespace NWheels.Entities.Core
 {
-    public interface IEntityPartObject : IObject
+    public interface IEntityPartObject : IObject, IPersistableObject
     {
     }
 }
