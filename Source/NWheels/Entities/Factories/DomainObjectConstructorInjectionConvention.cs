@@ -4,6 +4,7 @@ using Hapil;
 using Hapil.Members;
 using Hapil.Writers;
 using NWheels.DataObjects.Core.Factories;
+using NWheels.Entities.Core;
 using TT = Hapil.TypeTemplate;
 using TT2 = NWheels.Entities.Factories.DomainObjectFactory.TemplateTypes;
 
@@ -31,12 +32,15 @@ namespace NWheels.Entities.Factories
                 _context.MetaType.ContractType, writer.OwnerClass.TypeBuilder, _context.PersistableObjectType) )
             {
                 _context.PersistableObjectField = writer.Field<TT2.TPersistable>("$persistable");
+                _context.DomainObjectFactoryField = writer.Field<IDomainObjectFactory>("$factory");
 
                 var dependencyProperties = FindDependencyProperties(writer);
 
                 writer.Constructor<TT.TContract, IComponentContext>((cw, persistable, components) => {
                     cw.Base();
+
                     _context.PersistableObjectField.Assign(persistable.CastTo<TT2.TPersistable>());
+                    _context.DomainObjectFactoryField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IDomainObjectFactory>(c), components));
 
                     foreach ( var property in dependencyProperties )
                     {
@@ -47,6 +51,8 @@ namespace NWheels.Entities.Factories
                                 .Assign(Static.GenericFunc(c => Autofac.ResolutionExtensions.Resolve<TT.TProperty>(c), components));
                         }
                     }
+
+                    persistable.CastTo<IPersistableObject>().Void<IDomainObject>(x => x.SetContainerObject, cw.This<IDomainObject>());
 
                     PropertyImplementationStrategyMap.InvokeStrategies(
                         _context.PropertyMap.Strategies,

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Autofac;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
@@ -481,7 +482,7 @@ namespace NWheels.Stacks.EntityFramework
 
                     ObjectUtility.InjectDependenciesToObject(currentEntityObject, _ownerUnitOfWork.Components);
 
-                    _current = _domainObjectFactory.CreateDomainObjectInstance(currentEntityObject);
+                    _current = (currentEntityObject is IObject ? _domainObjectFactory.CreateDomainObjectInstance(currentEntityObject) : currentEntityObject);
                     _hasCurrent = true;
                 }
                 else
@@ -558,7 +559,7 @@ namespace NWheels.Stacks.EntityFramework
 
                     ObjectUtility.InjectDependenciesToObject(currentEntityObject, _ownerUnitOfWork.Components);
 
-                    _current = _domainObjectFactory.CreateDomainObjectInstance(currentEntityObject);
+                    _current = (currentEntityObject is IObject ? _domainObjectFactory.CreateDomainObjectInstance(currentEntityObject) : currentEntityObject);
                 }
                 else
                 {
