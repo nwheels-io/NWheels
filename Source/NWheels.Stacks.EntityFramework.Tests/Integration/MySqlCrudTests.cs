@@ -19,6 +19,7 @@ using NWheels.Stacks.EntityFramework.Factories;
 using NWheels.Testing;
 using NWheels.Testing.Entities.Impl;
 using NWheels.Testing.Entities.Stacks;
+using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;
 
 namespace NWheels.Stacks.EntityFramework.Tests.Integration
 {
@@ -124,6 +125,53 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void DynamicImplementation_CrudBasicWithDomainObjects()
+        {
+            //-- Arrange
+
+            InitializeMetadata(concretizationsFactory: () => new[] { 
+                new ConcretizationRegistration(typeof(IR1.ICustomer), typeof(IR1.ICustomer), typeof(IR1.Customer))
+            });
+
+            var factory = CreateDynamicDataRepositoryFactory();
+
+            DropAndCreateTestDatabase();
+            InitializeCompiledModel(factory);
+            CreateTestDatabaseObjects();
+
+            //-- Act & Assert
+
+            CrudOperations.Repository1.ExecuteBasic(() => factory.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void DynamicImplementation_AdvancedRetrievalsWithDomainObjects()
+        {
+            //-- Arrange
+
+            //Framework.UpdateComponents(builder => builder.NWheelsFeatures().ObjectContracts().Concretize<IR1.ICustomer>().With<IR1.Customer>());
+            //Framework.RebuildMetadataCache();
+
+            InitializeMetadata(concretizationsFactory: () => new[] { 
+                new ConcretizationRegistration(typeof(IR1.ICustomer), typeof(IR1.ICustomer), typeof(IR1.Customer))
+            });
+
+            var factory = CreateDynamicDataRepositoryFactory();
+
+            DropAndCreateTestDatabase();
+            InitializeCompiledModel(factory);
+            CreateTestDatabaseObjects();
+
+            //-- Act & Assert
+
+            CrudOperations.Repository1.ExecuteAdvancedRetrievals(() => factory.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override void DropAndCreateTestDatabase()
         {
             DropAndCreateMySqlTestDatabase();
@@ -161,6 +209,17 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of TestFixtureWithoutNodeHosts
+
+        protected override DynamicModule CreateDynamicModule()
+        {
+            return _dynamicModule;
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void DropAndCreateMySqlTestDatabase()
         {
             using (var connection = new MySqlConnection(MasterConnectionString))
@@ -188,7 +247,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void InitializeMetadata()
+        private void InitializeMetadata(Func<ConcretizationRegistration[]> concretizationsFactory = null)
         {
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(
                 new IMetadataConvention[] {
@@ -197,7 +256,13 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
                 },
                 relationalMappingConventions: new IRelationalMappingConvention[] {
                     new UnderscoreRelationalMappingConvention(usePluralTableNames: true)
-                });
+                },
+                concretizationRegistrations: (
+                    concretizationsFactory != null
+                    ? concretizationsFactory()
+                    : null
+                )
+            );
 
             var updater = new ContainerBuilder();
             updater.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();

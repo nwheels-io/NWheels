@@ -30,6 +30,7 @@ namespace NWheels.Testing.Entities.Stacks
                 InsertAttributes(repoFactory());
                 InsertCategories(repoFactory());
                 InsertProducts(repoFactory());
+                InsertCustomers(repoFactory());
                 InsertOrder1(repoFactory());
                 InsertOrder2(repoFactory());
                 InsertOrder3(repoFactory());

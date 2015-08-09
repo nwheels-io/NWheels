@@ -37,7 +37,18 @@ namespace NWheels.Entities.Factories
 
             using ( TT.CreateScope<TT.TInterface>(MetaType.ContractType) )
             {
-                writer.Property(baseProperty).ImplementPropagate(_context.PersistableObjectField.CastTo<TT.TInterface>());
+                writer.Property(baseProperty).Implement(
+                    p => MetaProperty.ContractPropertyInfo.CanRead ? 
+                        p.Get(gw => {
+                            gw.Return(_context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo));
+                        }) : 
+                        null,
+                    p => MetaProperty.ContractPropertyInfo.CanWrite ? 
+                        p.Set((sw, value) => {
+                            _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(value);
+                        }) :
+                        null
+                );
             }
         }
 

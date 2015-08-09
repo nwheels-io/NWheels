@@ -68,6 +68,8 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.ICustomer));
                 base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IContactDetail));
                 base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IEmailContactDetail));
+                base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IPhoneContactDetail));
+                base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IPostContactDetail));
 
                 base.MetadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(base.MetadataCache));
 
@@ -82,6 +84,8 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.ICustomer)));
                 base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IContactDetail)));
                 base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IEmailContactDetail)));
+                base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IPhoneContactDetail)));
+                base.MetadataCache.EnsureRelationalMapping(base.MetadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IPostContactDetail)));
 
                 var dbProviderName = _connectionSettings.ProviderName;
                 var dbProviderFactory = DbProviderFactories.GetFactory(dbProviderName);
@@ -138,23 +142,23 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
                 if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IAttributeValueChoice))
                 {
-                    return (TEntityContract)(object)new EfEntityObject_AttributeValueChoice();
+                    return (TEntityContract)(object)new EfEntityObject_AttributeValueChoice(_components);
                 }
                 if (typeof(TEntityContract) == typeof(Interfaces.Repository1.ICustomer))
                 {
-                    return (TEntityContract)(object)new EfEntityObject_Customer();
+                    return (TEntityContract)(object)new EfEntityObject_Customer(_components);
                 }
                 if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IEmailContactDetail))
                 {
-                    return (TEntityContract)(object)new EfEntityObject_EmailContactDetail();
+                    return (TEntityContract)(object)new EfEntityObject_EmailContactDetail(_components);
                 }
                 if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IPhoneContactDetail))
                 {
-                    return (TEntityContract)(object)new EfEntityObject_PhoneContactDetail();
+                    return (TEntityContract)(object)new EfEntityObject_PhoneContactDetail(_components);
                 }
                 if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IPostContactDetail))
                 {
-                    return (TEntityContract)(object)new EfEntityObject_PostContactDetail();
+                    return (TEntityContract)(object)new EfEntityObject_PostContactDetail(_components);
                 }
 
                 throw new NotSupportedException(
@@ -1964,29 +1968,147 @@ namespace NWheels.Stacks.EntityFramework.Tests
 
         public class EfEntityObject_PhoneContactDetail : EfEntityObject_ContactDetail, Interfaces.Repository1.IPhoneContactDetail, IObject
         {
-            #region Implementation of IPhoneContactDetail
+            private string m_Phone;
 
-            public string Phone { get; set; }
+            public EfEntityObject_PhoneContactDetail()
+            {
+            }
 
-            #endregion
+            public EfEntityObject_PhoneContactDetail(IComponentContext arg0)
+                : base(arg0)
+            {
+            }
+
+            public static object FactoryMethod1()
+            {
+                return new EfEntityObject_PhoneContactDetail();
+            }
+
+            public static object FactoryMethod2(IComponentContext context1)
+            {
+                return new EfEntityObject_PhoneContactDetail(context1);
+            }
+
+            public new static void ConfigureEfModel(ITypeMetadataCache metadataCache, DbModelBuilder modelBuilder)
+            {
+                ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IPhoneContactDetail));
+                EfModelApi.StringProperty<EfEntityObject_PhoneContactDetail>(EfModelApi.InheritedEntityType<EfEntityObject_ContactDetail, EfEntityObject_PhoneContactDetail>(modelBuilder, typeMetadata, "_t", "Phone"), typeMetadata.GetPropertyByName("Phone"));
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.IPhoneContactDetail);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(EfEntityObjectFactory);
+                }
+            }
+
+            public virtual string Phone
+            {
+                get
+                {
+                    return this.m_Phone;
+                }
+                set
+                {
+                    this.m_Phone = value;
+                }
+            }
         }
 
         public class EfEntityObject_PostContactDetail : EfEntityObject_ContactDetail, Interfaces.Repository1.IPostContactDetail, IObject, IHaveNestedObjects
         {
-            #region Implementation of IPostContactDetail
+            private EfEntityObject_PostalAddress m_PostalAddress_storage;
 
-            public Interfaces.Repository1.IPostalAddress PostalAddress { get; private set; }
+            public EfEntityObject_PostContactDetail()
+            {
+            }
 
-            #endregion
+            public EfEntityObject_PostContactDetail(IComponentContext arg0)
+                : base(arg0)
+            {
+                this.m_PostalAddress_storage = new EfEntityObject_PostalAddress(arg0);
+            }
 
-            #region Implementation of IHaveNestedObjects
+            public static object FactoryMethod1()
+            {
+                return new EfEntityObject_PostContactDetail();
+            }
+
+            public static object FactoryMethod2(IComponentContext context1)
+            {
+                return new EfEntityObject_PostContactDetail(context1);
+            }
+
+            public new static void ConfigureEfModel(ITypeMetadataCache metadataCache, DbModelBuilder modelBuilder)
+            {
+                ITypeMetadata typeMetadata = metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IPostContactDetail));
+                EntityTypeConfiguration<EfEntityObject_PostContactDetail> configuration = EfModelApi.InheritedEntityType<EfEntityObject_ContactDetail, EfEntityObject_PostContactDetail>(modelBuilder, typeMetadata, "_t", "Post");
+                IPropertyMetadata propertyByName = typeMetadata.GetPropertyByName("PostalAddress");
+                modelBuilder.ComplexType<EfEntityObject_PostalAddress>();
+                IPropertyMetadata metadata3 = propertyByName.Relation.RelatedPartyType.GetPropertyByName("StreetAddress");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_PostContactDetail, string>(modelBuilder, configuration, propertyByName, metadata3);
+                metadata3 = propertyByName.Relation.RelatedPartyType.GetPropertyByName("City");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_PostContactDetail, string>(modelBuilder, configuration, propertyByName, metadata3);
+                metadata3 = propertyByName.Relation.RelatedPartyType.GetPropertyByName("ZipCode");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_PostContactDetail, string>(modelBuilder, configuration, propertyByName, metadata3);
+                metadata3 = propertyByName.Relation.RelatedPartyType.GetPropertyByName("Country");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_PostContactDetail, string>(modelBuilder, configuration, propertyByName, metadata3);
+            }
 
             public void DeepListNestedObjects(HashSet<object> nestedObjects)
             {
-                //throw new NotImplementedException();
+                RuntimeTypeModelHelpers.DeepListNestedObject(this.m_PostalAddress_storage, nestedObjects);
             }
 
-            #endregion
+            public virtual void WritePropertyValue_PostalAddress(Interfaces.Repository1.IPostalAddress arg1)
+            {
+                this.m_PostalAddress_storage = (EfEntityObject_PostalAddress)arg1;
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.IPostContactDetail);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(EfEntityObjectFactory);
+                }
+            }
+
+            Interfaces.Repository1.IPostalAddress Interfaces.Repository1.IPostContactDetail.PostalAddress
+            {
+                get
+                {
+                    return this.m_PostalAddress_storage;
+                }
+            }
+
+            public virtual EfEntityObject_PostalAddress PostalAddress
+            {
+                get
+                {
+                    return this.m_PostalAddress_storage;
+                }
+                set
+                {
+                    this.m_PostalAddress_storage = value;
+                }
+            }
         }
     }
 }
