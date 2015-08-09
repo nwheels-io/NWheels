@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using NWheels.DataObjects.Core;
 
 namespace NWheels.TypeModel.Core.Factories
@@ -14,6 +15,43 @@ namespace NWheels.TypeModel.Core.Factories
             else
             {
                 return new ConcreteToAbstractCollectionAdapter<TConcrete, TAbstract>((ICollection<TConcrete>)innerCollection);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void DeepListNestedObject(object obj, HashSet<object> nestedObjects)
+        {
+            if ( obj != null )
+            {
+                nestedObjects.Add(obj);
+
+                var hasNestedObjects = obj as IHaveNestedObjects;
+
+                if ( hasNestedObjects != null )
+                {
+                    hasNestedObjects.DeepListNestedObjects(nestedObjects);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void DeepListNestedObjectCollection(System.Collections.IEnumerable collection, HashSet<object> nestedObjects)
+        {
+            if ( collection != null )
+            {
+                foreach ( var item in collection )
+                {
+                    nestedObjects.Add(item);
+
+                    var hasNestedObjects = item as IHaveNestedObjects;
+
+                    if ( hasNestedObjects != null )
+                    {
+                        hasNestedObjects.DeepListNestedObjects(nestedObjects);
+                    }
+                }
             }
         }
     }

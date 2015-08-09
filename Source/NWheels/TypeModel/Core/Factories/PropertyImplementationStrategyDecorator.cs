@@ -34,9 +34,9 @@ namespace NWheels.TypeModel.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public virtual void WriteInitialization(MethodWriterBase initializationConstructorWriter, Operand<IComponentContext> components)
+        public virtual void WriteInitialization(MethodWriterBase initializationConstructorWriter, Operand<IComponentContext> components, params IOperand[] args)
         {
-            _target.WriteInitialization(initializationConstructorWriter, components);
+            _target.WriteInitialization(initializationConstructorWriter, components, args);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

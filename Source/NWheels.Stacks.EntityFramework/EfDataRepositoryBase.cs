@@ -28,6 +28,7 @@ namespace NWheels.Stacks.EntityFramework
             _compiledModel = compiledModel;
             _connection = connection;
             _objectContext = compiledModel.CreateObjectContext<ObjectContext>(connection);
+            _objectContext.ContextOptions.ProxyCreationEnabled = false;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

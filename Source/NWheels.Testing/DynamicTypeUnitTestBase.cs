@@ -38,5 +38,16 @@ namespace NWheels.Testing
         {
             get { return _dyamicModule; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of TestFixtureWithoutNodeHosts
+
+        protected override DynamicModule CreateDynamicModule()
+        {
+            return _dyamicModule;
+        }
+
+        #endregion
     }
 }

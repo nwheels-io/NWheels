@@ -49,9 +49,9 @@ namespace NWheels.Stacks.MongoDb
             _ownerRepo.ValidateOperationalState();
             
             var actualEnumerator = _mongoCollection.AsQueryable().GetEnumerator();
-            var dependencyInjectionWrapper = new ObjectUtility.DependencyInjectingEnumerator<TEntityContract>(actualEnumerator, _ownerRepo.Components);
-            
-            return dependencyInjectionWrapper;
+            var resultInterceptor = new InterceptingResultEnumerator<TEntityContract>(_ownerRepo, actualEnumerator);
+
+            return resultInterceptor;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

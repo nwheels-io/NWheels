@@ -63,6 +63,7 @@ namespace NWheels.TypeModel.Core.Factories
                     : null
             );
 
+            WriteComplementContractAccessorMethods(writer, canRead, canWrite);
             writer.OwnerClass.SetPropertyBackingField(base.MetaProperty.ContractPropertyInfo, _storageField);
         }
 
@@ -83,11 +84,28 @@ namespace NWheels.TypeModel.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components)
+        protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
             HelpInitializeDefaultValue(writer, components);
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        private void WriteComplementContractAccessorMethods(ImplementationClassWriter<TypeTemplate.TInterface> writer, bool canRead, bool canWrite)
+        {
+            if ( !canRead )
+            {
+                writer.NewVirtualFunction<TT.TProperty>(GetReadAccessorMethodName(MetaProperty))
+                    .Implement(w => w.Return(_storageField));
+            }
+
+            if ( !canWrite )
+            {
+                writer.NewVirtualVoidMethod<TT.TProperty>(GetWriteAccessorMethodName(MetaProperty))
+                    .Implement((w, value) => _storageField.Assign(value));
+            }
+        }
     }
 }

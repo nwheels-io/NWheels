@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NWheels.DataObjects.Core
+namespace NWheels.TypeModel.Core
 {
-    public interface IObject
+    public interface IContain<out T> where T : class
     {
-        Type ContractType { get; }
-        Type FactoryType { get; }
+        T GetContainedObject();
     }
 }

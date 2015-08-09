@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Autofac;
-using NWheels.DataObjects.Core;
+using NWheels.TypeModel.Core;
 
 namespace NWheels.Entities.Core
 {
-    public interface IEntityPartObject : IObject, IPersistableObject
+    public interface IPersistableObject : IContainedIn<IDomainObject>
     {
+        void SetContainerObject(IDomainObject container);
     }
 }

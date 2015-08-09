@@ -41,10 +41,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Autofac.Extras.Multitenant.3.1.1\lib\net40\Autofac.Extras.Multitenant.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.14.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <!--merge-solution:Hapil;<Reference Include="Hapil, Version=0.9.14.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\FelixB.Hapil.0.9.14\lib\net45\Hapil.dll</HintPath>
-    </Reference>
+    </Reference>-->
+    <ProjectReference Include="..\..\..\Hapil\Source\Hapil\Hapil.csproj">
+      <Project>{25e37cc2-7e18-4592-8102-dfbaa4ddd2a7}</Project>
+      <Name>Hapil</Name>
+    </ProjectReference>
     <Reference Include="Hapil.Applied, Version=0.9.14.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\FelixB.Hapil.0.9.14\lib\net45\Hapil.Applied.dll</HintPath>
@@ -96,8 +100,22 @@
     <Compile Include="Authorization\IEntityAccessRule.cs" />
     <Compile Include="Authorization\IIdentityInfo.cs" />
     <Compile Include="Core\ICoreFramework.cs" />
+    <Compile Include="Entities\Core\IDomainObject.cs" />
+    <Compile Include="Entities\Core\IPersistableObject.cs" />
     <Compile Include="Entities\Core\IStorageSchemaNamingConvention.cs" />
     <Compile Include="Entities\EntityStateInfo.cs" />
+    <Compile Include="Entities\Factories\ContainedPersistableObjectConvention.cs" />
+    <Compile Include="Entities\Factories\DomainObjectBaseTypeConvention.cs" />
+    <Compile Include="Entities\Factories\DomainObjectConstructorInjectionConvention.cs" />
+    <Compile Include="Entities\Factories\DomainObjectFactory.cs" />
+    <Compile Include="Entities\Factories\DomainObjectFactoryContext.cs" />
+    <Compile Include="Entities\Factories\DomainObjectPropertyImplementationConvention.cs" />
+    <Compile Include="Entities\Factories\DomainPersistableCollectionCastStrategy.cs" />
+    <Compile Include="Entities\Factories\DomainPersistableDelegationStrategy.cs" />
+    <Compile Include="Entities\Factories\DomainPersistableObjectCastStrategy.cs" />
+    <Compile Include="Entities\Factories\EntityContractMethodsNotSupportedConvention.cs" />
+    <Compile Include="Entities\Factories\RuntimeEntityModelHelpers.cs" />
+    <Compile Include="Entities\IDomainObjectFactory.cs" />
     <Compile Include="Entities\Factories\ImplementIEntityPartObjectConvention.cs" />
     <Compile Include="Entities\Factories\ImplementIEntityObjectConvention.cs" />
     <Compile Include="Exceptions\BusinessRuleException.cs" />
@@ -113,7 +131,9 @@
     <Compile Include="Processing\Messages\MessageObjectContractAttribute.cs" />
     <Compile Include="Processing\Messages\ServiceRequestMessage.cs" />
     <Compile Include="Processing\Workflows\WorkflowInstanceEntity.cs" />
+    <Compile Include="TypeModel\Core\ContainedToContainerListAdapter.cs" />
     <Compile Include="TypeModel\Core\ConcreteToAbstractListAdapter.cs" />
+    <Compile Include="TypeModel\Core\ContainedToContainerCollectionAdapter.cs" />
     <Compile Include="TypeModel\Core\Factories\BaseTypeConvention.cs" />
     <Compile Include="TypeModel\Core\Factories\CollectionAdapterDualValueStrategy.cs" />
     <Compile Include="TypeModel\Core\Factories\DualValueStrategy.cs" />
@@ -135,7 +155,9 @@
     <Compile Include="TypeModel\Core\Factories\RuntimeTypeModelHelpers.cs" />
     <Compile Include="TypeModel\Core\Factories\StorageDataTypeStrategy.cs" />
     <Compile Include="TypeModel\Core\Factories\RelationTypecastStrategy.cs" />
+    <Compile Include="TypeModel\Core\IContainedIn.cs" />
     <Compile Include="TypeModel\Core\IHaveDependencies.cs" />
+    <Compile Include="TypeModel\Core\IContain.cs" />
     <Compile Include="TypeModel\Core\IHaveNestedObjects.cs" />
     <Compile Include="TypeModel\Core\IObject.cs" />
     <Compile Include="TypeModel\Core\TypeMetadataVisitorBase.cs" />

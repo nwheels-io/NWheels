@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Entities.Core;
+using NWheels.Extensions;
 
 namespace NWheels.Entities
 {
@@ -25,7 +26,7 @@ namespace NWheels.Entities
 
         private static IEntityObject GetValidatedEntityObject(object obj)
         {
-            var entityObject = obj as IEntityObject;
+            var entityObject = obj.AsOrNull<IEntityObject>();
 
             if ( entityObject == null )
             {

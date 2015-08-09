@@ -162,6 +162,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
         public class EfDataRepository_OnlineStoreRepository : EfDataRepositoryBase, Interfaces.Repository1.IOnlineStoreRepository
         {
             // Fields
+            private IDomainObjectFactory _domainFactory;
             private ITypeMetadataCache _metadataCache;
             private static DbCompiledModel _s_compiledModel;
             private static object _s_compiledModelSyncRoot = new object();
@@ -176,11 +177,12 @@ namespace NWheels.Stacks.EntityFramework.Tests
             private IEntityRepository<Interfaces.Repository1.IEmailContactDetail> m_ContactEmails;
 
             // Methods
-            public EfDataRepository_OnlineStoreRepository(IComponentContext arg0, IEntityObjectFactory arg1, ITypeMetadataCache arg2, DbConnection arg3, bool arg4)
-                : base(arg0, arg1, GetOrBuildDbCompiledModel(arg2, arg3), arg3, arg4)
+            public EfDataRepository_OnlineStoreRepository(IComponentContext components, IEntityObjectFactory entityFactory, ITypeMetadataCache metadataCache, DbConnection connection, bool autoCommit)
+                : base(components, entityFactory, GetOrBuildDbCompiledModel(metadataCache, connection), connection, autoCommit)
             {
-                this.EntityFactory = arg1;
-                this._metadataCache = arg2;
+                this.EntityFactory = entityFactory;
+                this._domainFactory = components.Resolve<IDomainObjectFactory>();
+                this._metadataCache = metadataCache;
                 this.m_Categories = new EfEntityRepository<Interfaces.Repository1.ICategory, EfEntityObject_Category, EfEntityObject_Category>(this);
                 base.RegisterEntityRepository<Interfaces.Repository1.ICategory, EfEntityObject_Category>(this.m_Categories);
                 this.m_Products = new EfEntityRepository<Interfaces.Repository1.IProduct, EfEntityObject_Product, EfEntityObject_Product>(this);
@@ -281,7 +283,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
 
             public Interfaces.Repository1.IAttributeValue NewAttributeValue(string value, int displayOrder)
             {
-                Interfaces.Repository1.IAttributeValue value2 = this.EntityFactory.NewEntity<Interfaces.Repository1.IAttributeValue>();
+                Interfaces.Repository1.IAttributeValue value2 = _domainFactory.CreateDomainObjectInstance(this.EntityFactory.NewEntity<Interfaces.Repository1.IAttributeValue>());
                 value2.Value = value;
                 value2.DisplayOrder = displayOrder;
                 return value2;
@@ -289,7 +291,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
 
             public Interfaces.Repository1.IAttributeValueChoice NewAttributeValueChoice(Interfaces.Repository1.IAttribute attribute, string value)
             {
-                Interfaces.Repository1.IAttributeValueChoice choice = this.EntityFactory.NewEntity<Interfaces.Repository1.IAttributeValueChoice>();
+                Interfaces.Repository1.IAttributeValueChoice choice = _domainFactory.CreateDomainObjectInstance(this.EntityFactory.NewEntity<Interfaces.Repository1.IAttributeValueChoice>());
                 choice.Attribute = attribute;
                 choice.Value = value;
                 return choice;
@@ -297,7 +299,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
 
             public Interfaces.Repository1.IOrderLine NewOrderLine(Interfaces.Repository1.IOrder order, Interfaces.Repository1.IProduct product, int quantity)
             {
-                Interfaces.Repository1.IOrderLine line = this.EntityFactory.NewEntity<Interfaces.Repository1.IOrderLine>();
+                Interfaces.Repository1.IOrderLine line = _domainFactory.CreateDomainObjectInstance(this.EntityFactory.NewEntity<Interfaces.Repository1.IOrderLine>());
                 line.Order = order;
                 line.Product = product;
                 line.Quantity = quantity;
@@ -306,7 +308,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
 
             public Interfaces.Repository1.IPostalAddress NewPostalAddress(string streetAddress, string city, string zipCode, string country)
             {
-                Interfaces.Repository1.IPostalAddress address = this.EntityFactory.NewEntity<Interfaces.Repository1.IPostalAddress>();
+                Interfaces.Repository1.IPostalAddress address = _domainFactory.CreateDomainObjectInstance(this.EntityFactory.NewEntity<Interfaces.Repository1.IPostalAddress>());
                 address.StreetAddress = streetAddress;
                 address.City = city;
                 address.ZipCode = zipCode;
@@ -316,7 +318,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
 
             public Interfaces.Repository1.IEmailContactDetail NewEmailContactDetail(string email)
             {
-                Interfaces.Repository1.IEmailContactDetail contactDeatil = this.EntityFactory.NewEntity<Interfaces.Repository1.IEmailContactDetail>();
+                Interfaces.Repository1.IEmailContactDetail contactDeatil = _domainFactory.CreateDomainObjectInstance(this.EntityFactory.NewEntity<Interfaces.Repository1.IEmailContactDetail>());
                 contactDeatil.Email = email;
                 return contactDeatil;
             }
@@ -433,7 +435,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
 
             public void DeepListNestedObjects(HashSet<object> nestedObjects)
             {
-                nestedObjects.UnionWith(this.m_Values_adapter.Cast<object>());
+                RuntimeTypeModelHelpers.DeepListNestedObjectCollection(m_Values_adapter, nestedObjects);
             }
 
             IEntityId IEntityObject.GetId()
@@ -489,6 +491,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
             }
 
+            Type IObject.FactoryType
+            {
+                get { return typeof(EfEntityObjectFactory); }
+            }
+
             public virtual string Name
             {
                 get
@@ -532,6 +539,22 @@ namespace NWheels.Stacks.EntityFramework.Tests
             }
 
             public virtual ICollection<EfEntityObject_Product> Inverse_Product_Attributes { get; set; }
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            private IDomainObject _domainObject;
+
+            public IDomainObject GetContainerObject()
+            {
+                return _domainObject;
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                _domainObject = container;
+            }
+
+            #endregion
         }
 
         public class EfEntityObject_AttributeValue : Interfaces.Repository1.IAttributeValue, IObject, IEntityPartObject
@@ -585,6 +608,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
             }
 
+            Type IObject.FactoryType
+            {
+                get { return typeof(EfEntityObjectFactory); }
+            }
+
             public virtual string Value
             {
                 get
@@ -596,6 +624,22 @@ namespace NWheels.Stacks.EntityFramework.Tests
                     this.m_Value = value;
                 }
             }
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            private IDomainObject _domainObject;
+
+            public IDomainObject GetContainerObject()
+            {
+                return _domainObject;
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                _domainObject = container;
+            }
+
+            #endregion
         }
 
         public class EfEntityObject_AttributeValueChoice : Interfaces.Repository1.IAttributeValueChoice, IObject, IEntityPartObject, IHaveNestedObjects
@@ -668,6 +712,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
             }
 
+            Type IObject.FactoryType
+            {
+                get { return typeof(EfEntityObjectFactory); }
+            }
+
             public virtual string Value
             {
                 get
@@ -679,6 +728,22 @@ namespace NWheels.Stacks.EntityFramework.Tests
                     this.m_Value = value;
                 }
             }
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            private IDomainObject _domainObject;
+
+            public IDomainObject GetContainerObject()
+            {
+                return _domainObject;
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                _domainObject = container;
+            }
+
+            #endregion
         }
 
         public class EfEntityObject_Category : Interfaces.Repository1.ICategory, IEntityPartUniqueDisplayName, IEntityPartId<int>, IObject, IEntityObject
@@ -754,6 +819,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
             }
 
+            Type IObject.FactoryType
+            {
+                get { return typeof(EfEntityObjectFactory); }
+            }
+
             public virtual string Name
             {
                 get
@@ -767,6 +837,22 @@ namespace NWheels.Stacks.EntityFramework.Tests
             }
 
             public virtual ICollection<EfEntityObject_Product> Inverse_Product_Categories { get; set; }
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            private IDomainObject _domainObject;
+
+            public IDomainObject GetContainerObject()
+            {
+                return _domainObject;
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                _domainObject = container;
+            }
+
+            #endregion
         }
 
         public class EfEntityObject_Order : Interfaces.Repository1.IOrder, IEntityPartId<int>, IObject, IEntityObject, IHaveNestedObjects
@@ -835,18 +921,9 @@ namespace NWheels.Stacks.EntityFramework.Tests
 
             public void DeepListNestedObjects(HashSet<object> nestedObjects)
             {
-                nestedObjects.UnionWith(this.m_OrderLines_adapter.Cast<object>());
-                this.m_OrderLines_adapter.OfType<IHaveNestedObjects>();
-                IEnumerator<IHaveNestedObjects> enumerator = this.m_OrderLines_adapter.OfType<IHaveNestedObjects>().GetEnumerator();
-                using (enumerator)
-                {
-                    while (enumerator.MoveNext())
-                    {
-                        enumerator.Current.DeepListNestedObjects(nestedObjects);
-                    }
-                }
-                nestedObjects.Add(this.m_DeliveryAddress_storage);
-                nestedObjects.Add(this.m_BillingAddress_storage);
+                RuntimeTypeModelHelpers.DeepListNestedObjectCollection(m_OrderLines_adapter, nestedObjects);
+                RuntimeTypeModelHelpers.DeepListNestedObject(m_DeliveryAddress_storage, nestedObjects);
+                RuntimeTypeModelHelpers.DeepListNestedObject(m_BillingAddress_storage, nestedObjects);
             }
 
             IEntityId IEntityObject.GetId()
@@ -936,6 +1013,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
             }
 
+            Type IObject.FactoryType
+            {
+                get { return typeof(EfEntityObjectFactory); }
+            }
+
             public virtual HashSet<EfEntityObject_OrderLine> OrderLines
             {
                 get
@@ -984,6 +1066,22 @@ namespace NWheels.Stacks.EntityFramework.Tests
                     this.m_Status = value;
                 }
             }
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            private IDomainObject _domainObject;
+
+            public IDomainObject GetContainerObject()
+            {
+                return _domainObject;
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                _domainObject = container;
+            }
+
+            #endregion
         }
 
         public class EfEntityObject_OrderLine : Interfaces.Repository1.IOrderLine, IEntityPartId<int>, IObject, IEntityObject, IHaveNestedObjects
@@ -1111,6 +1209,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
             }
 
+            Type IObject.FactoryType
+            {
+                get { return typeof(EfEntityObjectFactory); }
+            }
+
             ICollection<Interfaces.Repository1.IAttributeValueChoice> Interfaces.Repository1.IOrderLine.Attributes
             {
                 get
@@ -1184,6 +1287,22 @@ namespace NWheels.Stacks.EntityFramework.Tests
                     this.m_Quantity = value;
                 }
             }
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            private IDomainObject _domainObject;
+
+            public IDomainObject GetContainerObject()
+            {
+                return _domainObject;
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                _domainObject = container;
+            }
+
+            #endregion
         }
 
         public class EfEntityObject_PostalAddress : Interfaces.Repository1.IPostalAddress, IObject, IEntityPartObject
@@ -1251,6 +1370,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
             }
 
+            Type IObject.FactoryType
+            {
+                get { return typeof(EfEntityObjectFactory); }
+            }
+
             public virtual string StreetAddress
             {
                 get
@@ -1274,6 +1398,22 @@ namespace NWheels.Stacks.EntityFramework.Tests
                     this.m_ZipCode = value;
                 }
             }
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            private IDomainObject _domainObject;
+
+            public IDomainObject GetContainerObject()
+            {
+                return _domainObject;
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                _domainObject = container;
+            }
+
+            #endregion
         }
 
         public class EfEntityObject_Product : Interfaces.Repository1.IProduct, IEntityPartId<int>, IObject, IEntityObject, IHaveNestedObjects
@@ -1347,17 +1487,8 @@ namespace NWheels.Stacks.EntityFramework.Tests
 
             public void DeepListNestedObjects(HashSet<object> nestedObjects)
             {
-                nestedObjects.UnionWith(this.m_Categories_adapter.Cast<object>());
-                nestedObjects.UnionWith(this.m_Attributes_adapter.Cast<object>());
-                this.m_Attributes_adapter.OfType<IHaveNestedObjects>();
-                IEnumerator<IHaveNestedObjects> enumerator = this.m_Attributes_adapter.OfType<IHaveNestedObjects>().GetEnumerator();
-                using (enumerator)
-                {
-                    while (enumerator.MoveNext())
-                    {
-                        enumerator.Current.DeepListNestedObjects(nestedObjects);
-                    }
-                }
+                RuntimeTypeModelHelpers.DeepListNestedObjectCollection(m_Categories_adapter, nestedObjects);
+                RuntimeTypeModelHelpers.DeepListNestedObjectCollection(m_Attributes_adapter, nestedObjects);
             }
 
             IEntityId IEntityObject.GetId()
@@ -1437,6 +1568,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
             }
 
+            Type IObject.FactoryType
+            {
+                get { return typeof(EfEntityObjectFactory); }
+            }
+
             ICollection<Interfaces.Repository1.IAttribute> Interfaces.Repository1.IProduct.Attributes
             {
                 get
@@ -1476,6 +1612,22 @@ namespace NWheels.Stacks.EntityFramework.Tests
                     this.m_Price = value;
                 }
             }
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            private IDomainObject _domainObject;
+
+            public IDomainObject GetContainerObject()
+            {
+                return _domainObject;
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                _domainObject = container;
+            }
+
+            #endregion
         }
 
         public class EfEntityObject_Customer : Interfaces.Repository1.ICustomer, IEntityPartId<int>, IObject, IEntityObject, IHaveNestedObjects
@@ -1596,6 +1748,37 @@ namespace NWheels.Stacks.EntityFramework.Tests
                     return typeof(Interfaces.Repository1.ICustomer);
                 }
             }
+
+            Type IObject.FactoryType
+            {
+                get { return typeof(EfEntityObjectFactory); }
+            }
+
+            bool Interfaces.Repository1.ICustomer.QualifiesAsValuableCustomer()
+            {
+                throw new NotSupportedException();
+            }
+
+            bool Interfaces.Repository1.ICustomer.IsInteredtedIn(Interfaces.Repository1.IProduct product)
+            {
+                throw new NotSupportedException();
+            }
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            private IDomainObject _domainObject;
+
+            public IDomainObject GetContainerObject()
+            {
+                return _domainObject;
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                _domainObject = container;
+            }
+
+            #endregion
         }
 
         public abstract class EfEntityObject_ContactDetail : Interfaces.Repository1.IContactDetail, IEntityPartId<int>, IObject, IEntityObject
@@ -1668,6 +1851,27 @@ namespace NWheels.Stacks.EntityFramework.Tests
                     return typeof(Interfaces.Repository1.IContactDetail);
                 }
             }
+
+            Type IObject.FactoryType
+            {
+                get { return typeof(EfEntityObjectFactory); }
+            }
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            private IDomainObject _domainObject;
+
+            public IDomainObject GetContainerObject()
+            {
+                return _domainObject;
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                _domainObject = container;
+            }
+
+            #endregion
         }
 
         public class EfEntityObject_EmailContactDetail : EfEntityObject_ContactDetail, Interfaces.Repository1.IEmailContactDetail

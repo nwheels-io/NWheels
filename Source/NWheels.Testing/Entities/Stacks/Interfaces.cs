@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using IR3A = NWheels.Testing.Entities.Stacks.Interfaces.Repository3A;
@@ -149,6 +150,9 @@ namespace NWheels.Testing.Entities.Stacks
             [EntityContract(UseCodeNamespace = true)]
             public interface ICustomer
             {
+                bool QualifiesAsValuableCustomer();
+                bool IsInteredtedIn(IProduct product);
+
                 [PropertyContract.Required]
                 string FullName { get; set; }
 
@@ -186,6 +190,16 @@ namespace NWheels.Testing.Entities.Stacks
             {
                 protected Customer()
                 {
+                }
+
+                public bool QualifiesAsValuableCustomer()
+                {
+                    return (ContactDetails.Count > 2);
+                }
+
+                public bool IsInteredtedIn(IProduct product)
+                {
+                    return (product.Categories.Any(c => c.Name == "CAT2"));
                 }
 
                 #region Implementation of ICustomer

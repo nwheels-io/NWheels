@@ -8,7 +8,7 @@ using NWheels.DataObjects.Core;
 
 namespace NWheels.Entities.Core
 {
-    public interface IEntityObject : IObject
+    public interface IEntityObject : IObject, IPersistableObject
     {
         IEntityId GetId();
         void SetId(object value);

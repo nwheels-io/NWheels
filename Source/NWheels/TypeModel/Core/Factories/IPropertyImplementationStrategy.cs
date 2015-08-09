@@ -9,7 +9,7 @@ namespace NWheels.DataObjects.Core.Factories
     public interface IPropertyImplementationStrategy
     {
         void WritePropertyImplementation(ImplementationClassWriter<TypeTemplate.TInterface> implementationWriter);
-        void WriteInitialization(MethodWriterBase initializationConstructorWriter, Operand<IComponentContext> components);
+        void WriteInitialization(MethodWriterBase initializationConstructorWriter, Operand<IComponentContext> components, params IOperand[] args);
         void WriteMaterialization(MethodWriterBase materializationConstructorWriter);
         void WriteResolveDependencies(ClassWriterBase classWriter, MethodWriterBase methodWriter, Operand<IComponentContext> components);
         void WriteDeepListNestedObjects(MethodWriterBase writer, Operand<HashSet<object>> nestedObjects);

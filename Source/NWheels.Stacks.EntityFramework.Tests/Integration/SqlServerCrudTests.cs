@@ -123,6 +123,18 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of TestFixtureWithoutNodeHosts
+
+        protected override DynamicModule CreateDynamicModule()
+        {
+            return _dynamicModule;
+        }
+
+        #endregion
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void InitializeMetadata()
         {
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new IMetadataConvention[] {

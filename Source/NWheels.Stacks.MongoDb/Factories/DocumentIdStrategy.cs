@@ -49,12 +49,13 @@ namespace NWheels.Stacks.MongoDb.Factories
             var m = writer;
 
             m.If(base.StateField.EnumHasFlag(DualValueStates.Contract)).Then(() => {
-                nestedObjects.Add(base.ContractField);
+                Static.Void(RuntimeTypeModelHelpers.DeepListNestedObject, base.ContractField, nestedObjects);
+                //nestedObjects.Add(base.ContractField);
 
-                if ( typeof(IHaveNestedObjects).IsAssignableFrom(_implementationType) )
-                {
-                    base.ContractField.CastTo<IHaveNestedObjects>().Void(x => x.DeepListNestedObjects, nestedObjects);
-                }
+                //if ( typeof(IHaveNestedObjects).IsAssignableFrom(_implementationType) )
+                //{
+                //    base.ContractField.CastTo<IHaveNestedObjects>().Void(x => x.DeepListNestedObjects, nestedObjects);
+                //}
             });
         }
 
