@@ -2,10 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using NWheels.Extensions;
 using NWheels.Hosting;
 
 namespace NWheels.Processing.Messages.Impl
@@ -114,6 +111,9 @@ namespace NWheels.Processing.Messages.Impl
                 }
 
                 _logger.WorkerThreadStopped();
+            }
+            catch ( OperationCanceledException )
+            {
             }
             catch ( Exception e )
             {
