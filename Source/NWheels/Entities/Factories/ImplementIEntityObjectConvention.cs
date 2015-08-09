@@ -41,6 +41,7 @@ namespace NWheels.Entities.Factories
         {
             var keyPropertyInfo = _metaType.PrimaryKey.Properties[0].ContractPropertyInfo;
             var keyBackingField = writer.OwnerClass.GetPropertyBackingField(keyPropertyInfo);
+            var domainObjectField = writer.Field<IDomainObject>("$domainObject");
 
             writer.ImplementInterfaceExplicitly<IEntityObject>()
                 .Method<IEntityId>(intf => intf.GetId).Implement(f => {
@@ -54,9 +55,13 @@ namespace NWheels.Entities.Factories
                     {
                         keyBackingField.AsOperand<TT.TKey>().Assign(value.CastTo<TT.TKey>());
                     }
+                })
+                .Method<IDomainObject>(x => x.SetContainerObject).Implement((m, domainObject) => {
+                    domainObjectField.Assign(domainObject);
+                })
+                .Method<IDomainObject>(x => x.GetContainerObject).Implement(m => {
+                    m.Return(domainObjectField);
                 });
-
-            
         }
 
         #endregion

@@ -109,6 +109,7 @@ namespace NWheels.Conventions.Core
             private readonly EntityObjectFactory _entityFactory;
             private readonly List<Action<ConstructorWriter>> _initializers;
             private Field<EntityObjectFactory> _entityFactoryField;
+            private Field<IDomainObjectFactory> _domainObjectFactoryField;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -171,6 +172,7 @@ namespace NWheels.Conventions.Core
                 FindEntitiesInRepository(writer);
 
                 _entityFactoryField = writer.Field<EntityObjectFactory>("EntityFactory", isPublic: true);
+                _domainObjectFactoryField = writer.Field<IDomainObjectFactory>("$domainFactory");
 
                 ImplementStaticConstructor(writer);
                 ImplementEntityRepositoryProperties(writer);
@@ -233,7 +235,10 @@ namespace NWheels.Conventions.Core
             {
                 writer.Constructor<IComponentContext, EntityObjectFactory, bool>((cw, components, entityFactory, autoCommit) => {
                     cw.Base(components, autoCommit);
+                    
                     _entityFactoryField.Assign(entityFactory);
+                    _domainObjectFactoryField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IDomainObjectFactory>(c), components));
+                    
                     Initializers.ForEach(init => init(cw));
                 });
             }
@@ -297,7 +302,12 @@ namespace NWheels.Conventions.Core
 
                     using ( TT.CreateScope<TT.TImpl>(entityImplementationType) )
                     {
-                        var entityObjectLocal = m.Local<TT.TReturn>(initialValue: _entityFactoryField.Func<TT.TReturn>(x => x.NewEntity<TT.TReturn>));
+                        var entityObjectLocal = m.Local<TT.TReturn>();
+                        entityObjectLocal.Assign(
+                            _domainObjectFactoryField.Func<TT.TReturn, TT.TReturn>(x => x.CreateDomainObjectInstance, 
+                                _entityFactoryField.Func<TT.TReturn>(x => x.NewEntity<TT.TReturn>)
+                            )
+                        );
 
                         m.ForEachArgument(arg => {
                             var property = entity.FindEntityContractPropertyOrThrow(arg.Name, arg.OperandType);
@@ -307,14 +317,6 @@ namespace NWheels.Conventions.Core
                         m.Return(entityObjectLocal);
                     }
                 });
-            }
-
-            private void EnsureAllContractsImplemented()
-            {
-                foreach ( var entity in EntitiesInRepository )
-                {
-                    entity.EnsureImplementationType();
-                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -401,9 +403,26 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            protected Field<IDomainObjectFactory> DomainObjectFactoryField
+            {
+                get { return _domainObjectFactoryField; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             protected List<Action<ConstructorWriter>> Initializers
             {
                 get { return _initializers; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void EnsureAllContractsImplemented()
+            {
+                foreach (var entity in EntitiesInRepository)
+                {
+                    entity.EnsureImplementationType();
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -496,6 +515,7 @@ namespace NWheels.Conventions.Core
                             connection,
                             autoCommit);
                         EntityFactoryField.Assign(entityFactory);
+                        DomainObjectFactoryField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IDomainObjectFactory>(c), components));
                         MetadataCacheField.Assign(metadata);
                         Initializers.ForEach(init => init(cw));
                     });

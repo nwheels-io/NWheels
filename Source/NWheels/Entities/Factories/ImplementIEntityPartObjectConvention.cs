@@ -32,7 +32,15 @@ namespace NWheels.Entities.Factories
 
         protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
         {
-            writer.ImplementInterfaceExplicitly<IEntityPartObject>();
+            var domainObjectField = writer.Field<IDomainObject>("$domainObject");
+
+            writer.ImplementInterfaceExplicitly<IEntityPartObject>()
+                .Method<IDomainObject>(x => x.SetContainerObject).Implement((m, domainObject) => {
+                    domainObjectField.Assign(domainObject);
+                })
+                .Method<IDomainObject>(x => x.GetContainerObject).Implement(m => {
+                    m.Return(domainObjectField);
+                });
         }
 
         #endregion
