@@ -109,6 +109,7 @@
     <Compile Include="Entities\Factories\DomainObjectConstructorInjectionConvention.cs" />
     <Compile Include="Entities\Factories\DomainObjectFactory.cs" />
     <Compile Include="Entities\Factories\DomainObjectFactoryContext.cs" />
+    <Compile Include="Entities\Factories\DomainObjectMethodsConvention.cs" />
     <Compile Include="Entities\Factories\DomainObjectPropertyImplementationConvention.cs" />
     <Compile Include="Entities\Factories\DomainPersistableCollectionCastStrategy.cs" />
     <Compile Include="Entities\Factories\DomainPersistableDelegationStrategy.cs" />

@@ -148,6 +148,14 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 {
                     return (TEntityContract)(object)new EfEntityObject_EmailContactDetail();
                 }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IPhoneContactDetail))
+                {
+                    return (TEntityContract)(object)new EfEntityObject_PhoneContactDetail();
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IPostContactDetail))
+                {
+                    return (TEntityContract)(object)new EfEntityObject_PostContactDetail();
+                }
 
                 throw new NotSupportedException(
                     string.Format("Entity contract '{0}' is not supported by hard-coded entity factory.", typeof(TEntityContract).Name));
@@ -253,6 +261,8 @@ namespace NWheels.Stacks.EntityFramework.Tests
                             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.ICustomer))).UpdateImplementation(typeof(EfEntityObjectFactory), typeof(EfEntityObject_Customer));
                             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IContactDetail))).UpdateImplementation(typeof(EfEntityObjectFactory), typeof(EfEntityObject_ContactDetail));
                             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IEmailContactDetail))).UpdateImplementation(typeof(EfEntityObjectFactory), typeof(EfEntityObject_EmailContactDetail));
+                            ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IPhoneContactDetail))).UpdateImplementation(typeof(EfEntityObjectFactory), typeof(EfEntityObject_PhoneContactDetail));
+                            ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(Interfaces.Repository1.IPostContactDetail))).UpdateImplementation(typeof(EfEntityObjectFactory), typeof(EfEntityObject_PostContactDetail));
 
                             DbModelBuilder modelBuilder = new DbModelBuilder();
                             //IConvention[] conventions = new IConvention[] { new NoUnderscoreForeignKeyNamingConvention() };
@@ -269,6 +279,8 @@ namespace NWheels.Stacks.EntityFramework.Tests
                             EfEntityObject_Customer.ConfigureEfModel(metadataCache, modelBuilder);
                             EfEntityObject_ContactDetail.ConfigureEfModel(metadataCache, modelBuilder);
                             EfEntityObject_EmailContactDetail.ConfigureEfModel(metadataCache, modelBuilder);
+                            EfEntityObject_PhoneContactDetail.ConfigureEfModel(metadataCache, modelBuilder);
+                            EfEntityObject_PostContactDetail.ConfigureEfModel(metadataCache, modelBuilder);
 
                             _s_compiledModel = modelBuilder.Build(connection).Compile();
                         }
@@ -316,10 +328,26 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 return address;
             }
 
-            public Interfaces.Repository1.IEmailContactDetail NewEmailContactDetail(string email)
+            public Interfaces.Repository1.IEmailContactDetail NewEmailContactDetail(string email, bool isPrimary)
             {
                 Interfaces.Repository1.IEmailContactDetail contactDeatil = _domainFactory.CreateDomainObjectInstance(this.EntityFactory.NewEntity<Interfaces.Repository1.IEmailContactDetail>());
+                contactDeatil.IsPrimary = isPrimary;
                 contactDeatil.Email = email;
+                return contactDeatil;
+            }
+
+            public Interfaces.Repository1.IPhoneContactDetail NewPhoneContactDetail(string phone, bool isPrimary)
+            {
+                Interfaces.Repository1.IPhoneContactDetail contactDeatil = _domainFactory.CreateDomainObjectInstance(this.EntityFactory.NewEntity<Interfaces.Repository1.IPhoneContactDetail>());
+                contactDeatil.IsPrimary = isPrimary;
+                contactDeatil.Phone = phone;
+                return contactDeatil;
+            }
+
+            public Interfaces.Repository1.IPostContactDetail NewPostContactDetail(bool isPrimary)
+            {
+                Interfaces.Repository1.IPostContactDetail contactDeatil = _domainFactory.CreateDomainObjectInstance(this.EntityFactory.NewEntity<Interfaces.Repository1.IPostContactDetail>());
+                contactDeatil.IsPrimary = isPrimary;
                 return contactDeatil;
             }
 
@@ -1082,6 +1110,8 @@ namespace NWheels.Stacks.EntityFramework.Tests
             }
 
             #endregion
+
+            public Interfaces.Repository1.ICustomer Customer { get; set; }
         }
 
         public class EfEntityObject_OrderLine : Interfaces.Repository1.IOrderLine, IEntityPartId<int>, IObject, IEntityObject, IHaveNestedObjects
@@ -1785,6 +1815,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
         {
             // Fields
             private int m_Id_storage;
+            private bool m_IsPrimary;
 
             // Methods
             public EfEntityObject_ContactDetail()
@@ -1833,6 +1864,18 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 set
                 {
                     this.m_Id_storage = value;
+                }
+            }
+
+            public virtual bool IsPrimary
+            {
+                get
+                {
+                    return this.m_IsPrimary;
+                }
+                set
+                {
+                    this.m_IsPrimary = value;
                 }
             }
 
@@ -1917,6 +1960,33 @@ namespace NWheels.Stacks.EntityFramework.Tests
                     this.m_Email = value;
                 }
             }
+        }
+
+        public class EfEntityObject_PhoneContactDetail : EfEntityObject_ContactDetail, Interfaces.Repository1.IPhoneContactDetail, IObject
+        {
+            #region Implementation of IPhoneContactDetail
+
+            public string Phone { get; set; }
+
+            #endregion
+        }
+
+        public class EfEntityObject_PostContactDetail : EfEntityObject_ContactDetail, Interfaces.Repository1.IPostContactDetail, IObject, IHaveNestedObjects
+        {
+            #region Implementation of IPostContactDetail
+
+            public Interfaces.Repository1.IPostalAddress PostalAddress { get; private set; }
+
+            #endregion
+
+            #region Implementation of IHaveNestedObjects
+
+            public void DeepListNestedObjects(HashSet<object> nestedObjects)
+            {
+                //throw new NotImplementedException();
+            }
+
+            #endregion
         }
     }
 }

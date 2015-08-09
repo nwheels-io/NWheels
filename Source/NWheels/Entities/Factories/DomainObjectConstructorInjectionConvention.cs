@@ -37,7 +37,14 @@ namespace NWheels.Entities.Factories
                 var dependencyProperties = FindDependencyProperties(writer);
 
                 writer.Constructor<TT.TContract, IComponentContext>((cw, persistable, components) => {
-                    cw.Base();
+                    if ( _context.MetaType.BaseType != null )
+                    {
+                        cw.Base(persistable, components);
+                    }
+                    else
+                    {
+                        cw.Base();
+                    }
 
                     _context.PersistableObjectField.Assign(persistable.CastTo<TT2.TPersistable>());
                     _context.DomainObjectFactoryField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IDomainObjectFactory>(c), components));

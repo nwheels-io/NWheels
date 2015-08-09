@@ -71,7 +71,8 @@ namespace NWheels.Entities.Factories
                 new DomainObjectBaseTypeConvention(domainFactoryContext),
                 new DomainObjectConstructorInjectionConvention(domainFactoryContext), 
                 new DomainObjectPropertyImplementationConvention(domainFactoryContext), 
-                new ContainedPersistableObjectConvention(domainFactoryContext)
+                new ContainedPersistableObjectConvention(domainFactoryContext),
+                new DomainObjectMethodsConvention(domainFactoryContext)
             };
         }
 

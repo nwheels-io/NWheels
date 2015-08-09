@@ -24,7 +24,9 @@ namespace NWheels.Testing.Entities.Stacks
                 IAttributeValue NewAttributeValue(string value, int displayOrder);
                 IAttributeValueChoice NewAttributeValueChoice(IAttribute attribute, string value);
                 IPostalAddress NewPostalAddress(string streetAddress, string city, string zipCode, string country);
-                IEmailContactDetail NewEmailContactDetail(string email);
+                IEmailContactDetail NewEmailContactDetail(string email, bool isPrimary);
+                IPhoneContactDetail NewPhoneContactDetail(string phone, bool isPrimary);
+                IPostContactDetail NewPostContactDetail(bool isPrimary);
 
                 IEntityRepository<ICategory> Categories { get; }
                 IEntityRepository<IProduct> Products { get; }
@@ -111,6 +113,9 @@ namespace NWheels.Testing.Entities.Stacks
 
                 [PropertyContract.DefaultValue(OrderStatus.New)]
                 OrderStatus Status { get; set; }
+
+                //[PropertyContract.Relation.AggregationParent]
+                //ICustomer Customer { get; set; }
             }
 
             [EntityContract(UseCodeNamespace = true)]
@@ -163,6 +168,7 @@ namespace NWheels.Testing.Entities.Stacks
             [EntityContract(IsAbstract = true, UseCodeNamespace = true)]
             public interface IContactDetail
             {
+                bool IsPrimary { get; set; }
             }
 
             [EntityContract(UseCodeNamespace = true)]

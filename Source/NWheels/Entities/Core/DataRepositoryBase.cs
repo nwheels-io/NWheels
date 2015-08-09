@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using Autofac;
+using NWheels.Extensions;
 
 namespace NWheels.Entities.Core
 {
@@ -154,7 +155,22 @@ namespace NWheels.Entities.Core
 
         protected IEntityRepository GetEntityRepository(Type contractType)
         {
-            return _entityRepositoryByContractType[contractType];
+            IEntityRepository repository;
+
+            if ( _entityRepositoryByContractType.TryGetValue(contractType, out repository) )
+            {
+                return repository;
+            }
+
+            foreach ( var baseContractType in contractType.GetInterfaces().Where(intf => intf.IsEntityContract()) )
+            {
+                if ( _entityRepositoryByContractType.TryGetValue(baseContractType, out repository) )
+                {
+                    return repository;
+                }
+            }
+
+            throw new KeyNotFoundException("Entity repository for contract '" + contractType.FullName + "' could not be found in the data repository.");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -4,14 +4,14 @@ namespace NWheels.Entities.Factories
 {
     public class DomainObjectBaseTypeConvention : ImplementationConvention
     {
-        private readonly DomainObjectFactoryContext _conventionState;
+        private readonly DomainObjectFactoryContext _context;
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DomainObjectBaseTypeConvention(DomainObjectFactoryContext conventionState)
+        public DomainObjectBaseTypeConvention(DomainObjectFactoryContext context)
             : base(Will.InspectDeclaration)
         {
-            _conventionState = conventionState;
+            _context = context;
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -20,7 +20,16 @@ namespace NWheels.Entities.Factories
 
         protected override void OnInspectDeclaration(ObjectFactoryContext context)
         {
-            context.BaseType = _conventionState.MetaType.DomainObjectType;
+            if ( _context.MetaType.DomainObjectType != null )
+            {
+                context.BaseType = _context.MetaType.DomainObjectType;
+            }
+            else if ( _context.MetaType.BaseType != null )
+            {
+                context.BaseType = ((IDomainObjectFactory)_context.BaseContext.Factory).GetOrBuildDomainObjectType(
+                    _context.MetaType.BaseType.ContractType,
+                    _context.PersistableFactoryType);
+            }
         }
 
         #endregion
