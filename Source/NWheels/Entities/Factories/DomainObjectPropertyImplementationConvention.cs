@@ -25,7 +25,6 @@ namespace NWheels.Entities.Factories
             _context = context;
         }
 
-
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Overrides of ImplementationConvention

@@ -37,11 +37,13 @@ namespace NWheels.TypeModel.Core.Factories
         {
             Type mostConcreteBaseType;
 
-            if ( _metaType.DomainObjectType != null )
+            /*if ( _metaType.DomainObjectType != null )
             {
                 mostConcreteBaseType = _metaType.DomainObjectType;
             }
-            else if ( _metaType.BaseType != null )
+            else*/
+            
+            if ( _metaType.BaseType != null )
             {
                 var baseTypeKey = new TypeKey(primaryInterface: _metaType.BaseType.ContractType);
                 mostConcreteBaseType = base.Context.Factory.FindDynamicType(baseTypeKey);

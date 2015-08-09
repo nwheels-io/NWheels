@@ -35,12 +35,17 @@ namespace NWheels.Entities.Factories
 
         public PropertyInfo GetBasePropertyToImplement(IPropertyMetadata metaProperty)
         {
-            var baseProperty = (
+            var domainObjectProperty = (
                 MetaType.DomainObjectType != null
-                ? DomainObjectMembers.ImplementableProperties.Single(p => p.Name == metaProperty.Name)
-                : metaProperty.ContractPropertyInfo);
+                ? DomainObjectMembers.ImplementableProperties.FirstOrDefault(p => p.Name == metaProperty.Name)
+                : null);
 
-            return baseProperty;
+            if ( domainObjectProperty != null )
+            {
+                return domainObjectProperty;
+            }
+                
+            return metaProperty.ContractPropertyInfo;
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
