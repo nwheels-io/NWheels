@@ -241,10 +241,10 @@ namespace NWheels.Testing
             IRelationalMappingConvention[] relationalMappingConventions = null)
         {
             var metadataCache = CreateMetadataCacheWithDefaultConventions(
-                customMetadataConventions ?? _components.Resolve<IEnumerable<IMetadataConvention>>().ToArray(),
-                mixinRegistrations ?? _components.Resolve<IEnumerable<MixinRegistration>>().ToArray(),
-                concretizationRegistrations ?? _components.Resolve<IEnumerable<ConcretizationRegistration>>().ToArray(),
-                relationalMappingConventions ?? _components.Resolve<IEnumerable<IRelationalMappingConvention>>().ToArray());
+                _components.Resolve<IEnumerable<IMetadataConvention>>().ConcatIf(customMetadataConventions).ToArray(),
+                _components.Resolve<IEnumerable<MixinRegistration>>().ConcatIf(mixinRegistrations).ToArray(),
+                _components.Resolve<IEnumerable<ConcretizationRegistration>>().ConcatIf(concretizationRegistrations).ToArray(),
+                _components.Resolve<IEnumerable<IRelationalMappingConvention>>().ConcatIf(relationalMappingConventions).ToArray());
             
             UpdateComponents(builder => builder.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>());
         }
@@ -296,7 +296,7 @@ namespace NWheels.Testing
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkDatabaseConfig>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkLoggingConfiguration>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkEndpointsConfig>();
-            builder.NWheelsFeatures().Entities().UseDefaultIdsOfType<int>();
+            //builder.NWheelsFeatures().Entities().UseDefaultIdsOfType<int>();
 
             return builder.Build();
         }
@@ -312,7 +312,10 @@ namespace NWheels.Testing
         public static TypeMetadataCache CreateMetadataCacheWithDefaultConventions(params MixinRegistration[] mixinRegistrations)
         {
             return CreateMetadataCacheWithDefaultConventions(
-                new IMetadataConvention[] { new TestIdMetadataConvention() }, 
+                new IMetadataConvention[] {
+                    new DefaultIdMetadataConvention(typeof(int)), 
+                    new IntIdGeneratorMetadataConvention()
+                }, 
                 mixinRegistrations);
         }
 

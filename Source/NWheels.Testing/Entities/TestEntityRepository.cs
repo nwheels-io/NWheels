@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Autofac;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Entities;
+using NWheels.Entities.Core;
+using NWheels.Extensions;
+using NWheels.Utilities;
 
 namespace NWheels.Testing.Entities
 {
@@ -12,15 +17,18 @@ namespace NWheels.Testing.Entities
     {
         private readonly EntityObjectFactory _objectFactory;
         private readonly HashSet<TEntity> _storedEntities;
+        private readonly IDomainObjectFactory _domainObjectFactory;
+        private readonly IComponentContext _components;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TestEntityRepository(EntityObjectFactory objectFactory)
+        public TestEntityRepository(IComponentContext components, EntityObjectFactory objectFactory, IDomainObjectFactory domainObjectFactory)
         {
+            _components = components;
             _objectFactory = objectFactory;
             _storedEntities = new HashSet<TEntity>();
+            _domainObjectFactory = domainObjectFactory;
         }
-
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -95,21 +103,21 @@ namespace NWheels.Testing.Entities
 
         TEntity IEntityRepository<TEntity>.New()
         {
-            return _objectFactory.NewEntity<TEntity>();
+            return _domainObjectFactory.CreateDomainObjectInstance(_objectFactory.NewEntity<TEntity>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         TConcreteEntity IEntityRepository<TEntity>.New<TConcreteEntity>() 
         {
-            return _objectFactory.NewEntity<TConcreteEntity>();
+            return _domainObjectFactory.CreateDomainObjectInstance(_objectFactory.NewEntity<TConcreteEntity>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         TEntity IEntityRepository<TEntity>.New(Type concreteContract)
         {
-            return (TEntity)_objectFactory.NewEntity(concreteContract);
+            return _domainObjectFactory.CreateDomainObjectInstance((TEntity)_objectFactory.NewEntity(concreteContract));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

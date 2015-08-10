@@ -157,6 +157,9 @@
     <Compile Include="TypeModel\Core\IContain.cs" />
     <Compile Include="TypeModel\Core\IHaveNestedObjects.cs" />
     <Compile Include="TypeModel\Core\IObject.cs" />
+    <Compile Include="TypeModel\Core\DelegatingTransformingEnumerator.cs" />
+    <Compile Include="TypeModel\Core\DelegatingTransformingEnumerable.cs" />
+    <Compile Include="TypeModel\Core\TransformingEnumerator.cs" />
     <Compile Include="TypeModel\Core\TypeMetadataVisitorBase.cs" />
     <Compile Include="Endpoints\Core\CompactBinaryReader.cs" />
     <Compile Include="Endpoints\Core\CompactBinaryWriter.cs" />

@@ -8,6 +8,7 @@ using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
+using NWheels.Entities.Core;
 
 namespace NWheels.Testing.Entities.Impl
 {
@@ -59,7 +60,10 @@ namespace NWheels.Testing.Entities.Impl
 
             protected override IOperand<IEntityRepository<TypeTemplate.TContract>> GetNewEntityRepositoryExpression(MethodWriterBase writer)
             {
-                return writer.New<TestEntityRepository<TypeTemplate.TContract>>(base.EntityFactoryField);
+                return writer.New<TestEntityRepository<TypeTemplate.TContract>>(
+                    writer.This<DataRepositoryBase>().Prop(x => x.Components), 
+                    base.EntityFactoryField, 
+                    base.DomainObjectFactoryField);
             }
         }
     }

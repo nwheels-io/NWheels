@@ -252,7 +252,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(
                 new IMetadataConvention[] {
                     new DefaultIdMetadataConvention(typeof(int)),
-                    new TestIdMetadataConvention(), 
+                    new IntIdGeneratorMetadataConvention(), 
                 },
                 relationalMappingConventions: new IRelationalMappingConvention[] {
                     new UnderscoreRelationalMappingConvention(usePluralTableNames: true)

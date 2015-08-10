@@ -68,6 +68,7 @@
     <Compile Include="Factories\BsonDiscriminatorConvention.cs" />
     <Compile Include="Factories\BsonIgnoreConvention.cs" />
     <Compile Include="Factories\DocumentIdStrategy.cs" />
+    <Compile Include="Factories\LazyLoadDomainObjectConvention.cs" />
     <Compile Include="IMongoEntityRepository.cs" />
     <Compile Include="Factories\MongoDatabaseInitializer.cs" />
     <Compile Include="Factories\MongoDataRepositoryFactory.cs" />

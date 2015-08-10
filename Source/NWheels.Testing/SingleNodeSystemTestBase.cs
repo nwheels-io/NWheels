@@ -50,7 +50,7 @@ namespace NWheels.Testing
 
             builder.RegisterModule<NWheels.Stacks.Nlog.ModuleLoader>();
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
-            builder.RegisterType<TestIdMetadataConvention>().As<TestIdMetadataConvention, IMetadataConvention>().SingleInstance().LastInPipeline();
+            builder.RegisterType<IntIdGeneratorMetadataConvention>().As<IntIdGeneratorMetadataConvention, IMetadataConvention>().SingleInstance().LastInPipeline();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

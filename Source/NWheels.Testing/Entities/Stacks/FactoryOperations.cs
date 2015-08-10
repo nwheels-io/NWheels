@@ -92,7 +92,7 @@ namespace NWheels.Testing.Entities.Stacks
             {
                 var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new IMetadataConvention[] {
                     new DefaultIdMetadataConvention(typeof(int)),
-                    new TestIdMetadataConvention(), 
+                    new IntIdGeneratorMetadataConvention(), 
                 });
 
                 var updater = new ContainerBuilder();

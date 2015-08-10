@@ -91,6 +91,17 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of TestFixtureWithoutNodeHosts
+
+        protected override DynamicModule CreateDynamicModule()
+        {
+            return _dyamicModule;
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private Func<IR1.IOnlineStoreRepository> CreateDataRepositoryFactory()
         {
             var database = new MongoClient().GetServer().GetDatabase(TestDatabaseName);
@@ -98,21 +109,23 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             var configAuto = ResolveAuto<IFrameworkDatabaseConfig>();
             configAuto.Instance.ConnectionString = string.Format("server=localhost;database={0}", TestDatabaseName);
 
-            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new IMetadataConvention[] {
+            Framework.RebuildMetadataCache(new IMetadataConvention[] {
                 new DefaultIdMetadataConvention(typeof(ObjectId))
             });
+
+            var metadataCache = (TypeMetadataCache)Framework.MetadataCache;
 
             UpdateHardCodedImplementationTypes(metadataCache);
 
             var entityFactory = new HardCodedImplementations.HardCodedEntityFactory(base.Framework.Components);
 
             return () => {
-                return new HardCodedImplementations.DataRepositoryObject_OnlineStoreRepository(
+                return new HardCodedImplementations.MongoDataRepository_OnlineStoreRepository(
                     Framework.Components,
                     entityFactory, 
                     metadataCache, 
                     database, 
-                    autoCommit: false);    
+                    false);    
             };
         }
 
@@ -122,47 +135,55 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
         {
             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IOrder))).UpdateImplementation(
                 typeof(MongoEntityObjectFactory),
-                typeof(HardCodedImplementations.EntityObject_Order));
+                typeof(HardCodedImplementations.MongoEntityObject_Order));
             
             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IOrderLine))).UpdateImplementation(
                 typeof(MongoEntityObjectFactory),
-                typeof(HardCodedImplementations.EntityObject_OrderLine));
+                typeof(HardCodedImplementations.MongoEntityObject_OrderLine));
             
             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IProduct))).UpdateImplementation(
                 typeof(MongoEntityObjectFactory),
-                typeof(HardCodedImplementations.EntityObject_Product));
+                typeof(HardCodedImplementations.MongoEntityObject_Product));
             
             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.ICategory))).UpdateImplementation(
                 typeof(MongoEntityObjectFactory),
-                typeof(HardCodedImplementations.EntityObject_Category));
+                typeof(HardCodedImplementations.MongoEntityObject_Category));
             
             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IAttribute))).UpdateImplementation(
                 typeof(MongoEntityObjectFactory),
-                typeof(HardCodedImplementations.EntityObject_Attribute));
+                typeof(HardCodedImplementations.MongoEntityObject_Attribute));
             
             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IAttributeValue))).UpdateImplementation(
                 typeof(MongoEntityObjectFactory),
-                typeof(HardCodedImplementations.EntityPartObject_AttributeValue));
+                typeof(HardCodedImplementations.MongoEntityObject_AttributeValue));
             
             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IAttributeValueChoice))).UpdateImplementation(
                 typeof(MongoEntityObjectFactory),
-                typeof(HardCodedImplementations.EntityPartObject_AttributeValueChoice));
+                typeof(HardCodedImplementations.MongoEntityObject_AttributeValueChoice));
 
             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IPostalAddress))).UpdateImplementation(
                 typeof(MongoEntityObjectFactory),
-                typeof(HardCodedImplementations.EntityPartObject_PostalAddress));
+                typeof(HardCodedImplementations.MongoEntityObject_PostalAddress));
 
             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.ICustomer))).UpdateImplementation(
                 typeof(MongoEntityObjectFactory),
-                typeof(HardCodedImplementations.EntityObject_Customer));
+                typeof(HardCodedImplementations.MongoEntityObject_Customer));
 
             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IContactDetail))).UpdateImplementation(
                 typeof(MongoEntityObjectFactory),
-                typeof(HardCodedImplementations.EntityObject_ContactDetail));
+                typeof(HardCodedImplementations.MongoEntityObject_ContactDetail));
 
             ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IEmailContactDetail))).UpdateImplementation(
                 typeof(MongoEntityObjectFactory),
-                typeof(HardCodedImplementations.EntityObject_EmailContactDetail));
+                typeof(HardCodedImplementations.MongoEntityObject_EmailContactDetail));
+
+            ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IPhoneContactDetail))).UpdateImplementation(
+                typeof(MongoEntityObjectFactory),
+                typeof(HardCodedImplementations.MongoEntityObject_PhoneContactDetail));
+
+            ((TypeMetadataBuilder)metadataCache.GetTypeMetadata(typeof(IR1.IPostContactDetail))).UpdateImplementation(
+                typeof(MongoEntityObjectFactory),
+                typeof(HardCodedImplementations.MongoEntityObject_PostContactDetail));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

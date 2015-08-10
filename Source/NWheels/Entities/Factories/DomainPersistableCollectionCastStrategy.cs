@@ -74,7 +74,8 @@ namespace NWheels.Entities.Factories
             {
                 _adapterBackingField.Assign(
                     Static.Func(RuntimeEntityModelHelpers.CreateContainmentListAdapter<IPersistableObject, IDomainObject, TT2.TPersistableItem, TT2.TDomainItem>,
-                        args[0].CastTo<TT.TContract>().Prop<IList<TT2.TPersistableItem>>(MetaProperty.ContractPropertyInfo)
+                        args[0].CastTo<TT.TContract>().Prop<IList<TT2.TPersistableItem>>(MetaProperty.ContractPropertyInfo),
+                        _context.DomainObjectFactoryField
                     )
                     .CastTo<TT.TProperty>());
             }
@@ -82,7 +83,8 @@ namespace NWheels.Entities.Factories
             {
                 _adapterBackingField.Assign(
                     Static.Func(RuntimeEntityModelHelpers.CreateContainmentCollectionAdapter<IPersistableObject, IDomainObject, TT2.TPersistableItem, TT2.TDomainItem>,
-                        args[0].CastTo<TT.TContract>().Prop<ICollection<TT2.TPersistableItem>>(MetaProperty.ContractPropertyInfo)
+                        args[0].CastTo<TT.TContract>().Prop<ICollection<TT2.TPersistableItem>>(MetaProperty.ContractPropertyInfo),
+                        _context.DomainObjectFactoryField
                     )
                     .CastTo<TT.TProperty>());
             }

@@ -23,6 +23,7 @@ namespace NWheels.Entities.Factories
 
         protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
         {
+            writer.ImplementInterfaceExplicitly<IDomainObject>();
             writer.ImplementInterfaceExplicitly<IContain<IPersistableObject>>()
                 .Method<IPersistableObject>(intf => intf.GetContainedObject).Implement(w =>
                     w.Return(_context.PersistableObjectField.CastTo<IPersistableObject>())

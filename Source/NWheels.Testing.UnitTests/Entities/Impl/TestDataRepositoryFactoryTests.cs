@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using Hapil;
 using NUnit.Framework;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
@@ -21,17 +22,34 @@ namespace NWheels.Testing.UnitTests.Entities.Impl
     public class TestDataRepositoryFactoryTests : DynamicTypeUnitTestBase
     {
         private TestDataRepositoryFactory _factoryUnderTest;
+        private TypeMetadataCache _metadataCache;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [SetUp]
         public void SetUp()
         {
+            Framework.RebuildMetadataCache(
+                customMetadataConventions: new IMetadataConvention[] {
+                    new DefaultIdMetadataConvention(typeof(int))
+                }
+            );
+
+            _metadataCache = (TypeMetadataCache)Framework.MetadataCache;
+
+            var attributeMetaType = _metadataCache.GetTypeMetadata(typeof(IR1.IAttribute));
+            var categoryMetaType = _metadataCache.GetTypeMetadata(typeof(IR1.ICategory));
+            var productMetaType = _metadataCache.GetTypeMetadata(typeof(IR1.IProduct));
+            var orderMetaType = _metadataCache.GetTypeMetadata(typeof(IR1.IOrder));
+            var orderLineMetaType = _metadataCache.GetTypeMetadata(typeof(IR1.IOrderLine));
+
+            _metadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(_metadataCache));
+
             _factoryUnderTest = new TestDataRepositoryFactory(
                 Framework.Components,
                 base.DyamicModule,
-                (TypeMetadataCache)Framework.MetadataCache,
-                new TestEntityObjectFactory(Framework.Components, base.DyamicModule, (TypeMetadataCache)Framework.MetadataCache));
+                _metadataCache,
+                new TestEntityObjectFactory(Framework.Components, base.DyamicModule, _metadataCache));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,25 +57,9 @@ namespace NWheels.Testing.UnitTests.Entities.Impl
         [Test]
         public void CanCreateEntityObjects()
         {
-            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new IMetadataConvention[] {
-                new DefaultIdMetadataConvention(typeof(int))
-            });
-
-            var updater = new ContainerBuilder();
-            updater.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();
-            updater.Update(Framework.Components.ComponentRegistry);
-
-            var attributeMetaType = metadataCache.GetTypeMetadata(typeof(IR1.IAttribute));
-            var categoryMetaType = metadataCache.GetTypeMetadata(typeof(IR1.ICategory));
-            var productMetaType = metadataCache.GetTypeMetadata(typeof(IR1.IProduct));
-            var orderMetaType = metadataCache.GetTypeMetadata(typeof(IR1.IOrder));
-            var orderLineMetaType = metadataCache.GetTypeMetadata(typeof(IR1.IOrderLine));
-
-            metadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(metadataCache));
-
             //-- arrange
 
-            var entityFactory = new TestEntityObjectFactory(Framework.Components, base.DyamicModule, metadataCache);
+            var entityFactory = new TestEntityObjectFactory(Framework.Components, base.DyamicModule, _metadataCache);
 
             //-- act
 
@@ -123,5 +125,16 @@ namespace NWheels.Testing.UnitTests.Entities.Impl
 
             CrudOperations.Repository1.ExecuteAdvancedRetrievals(repoFactory: () => TestDataRepositoryBase.ResetState(repo));
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of DynamicTypeUnitTestBase
+
+        protected override DynamicModule CreateDynamicModule()
+        {
+            return base.DyamicModule;
+        }
+
+        #endregion
     }
 }

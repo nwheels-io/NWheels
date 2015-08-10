@@ -15,12 +15,21 @@ namespace NWheels.TypeModel.Core
         where TContainerContract : class
     {
         private readonly ICollection<TContainedContract> _innerCollection;
+        private readonly Func<TContained, TContainer> _containerFactory;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ContainedToContainerCollectionAdapter(ICollection<TContainedContract> innerCollection)
+            : this(innerCollection, containerFactory: null)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ContainedToContainerCollectionAdapter(ICollection<TContainedContract> innerCollection, Func<TContained, TContainer> containerFactory)
         {
             _innerCollection = innerCollection;
+            _containerFactory = containerFactory;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -53,7 +62,7 @@ namespace NWheels.TypeModel.Core
 
             for ( int i = 0 ; i < items.Length ; i++ )
             {
-                array[i + arrayIndex] = (TContainerContract)(object)((IContainedIn<TContainer>)items[i]).GetContainerObject();
+                array[i + arrayIndex] = (TContainerContract)(object)GetContainerFromContained((TContained)(object)items[i]);
             }
         }
 
@@ -68,14 +77,16 @@ namespace NWheels.TypeModel.Core
 
         public IEnumerator<TContainerContract> GetEnumerator()
         {
-            return (IEnumerator<TContainerContract>)_innerCollection.GetEnumerator();
+            return new DelegatingTransformingEnumerator<TContainedContract, TContainerContract>(
+                _innerCollection.GetEnumerator(), 
+                ContainedContractToContainerContract);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return _innerCollection.GetEnumerator();
+            return this.GetEnumerator();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -106,6 +117,32 @@ namespace NWheels.TypeModel.Core
             {
                 return _innerCollection;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected TContainerContract ContainedContractToContainerContract(TContainedContract contained)
+        {
+            return (TContainerContract)(object)GetContainerFromContained((TContained)(object)contained);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected TContainer GetContainerFromContained(TContained contained)
+        {
+            var existingContainer = contained.GetContainerObject();
+
+            if ( existingContainer != null )
+            {
+                return existingContainer;
+            }
+
+            if ( _containerFactory != null )
+            {
+                return _containerFactory(contained);
+            }
+
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

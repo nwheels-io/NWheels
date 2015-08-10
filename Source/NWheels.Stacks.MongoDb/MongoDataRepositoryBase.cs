@@ -38,7 +38,7 @@ namespace NWheels.Stacks.MongoDb
             else
             {
                 var entityRepo = (IMongoEntityRepository)base.GetEntityRepository(typeof(TEntityContract));
-                return (TEntityContract)entityRepo.GetById(id);
+                return entityRepo.GetById<TEntityContract>(id);
             }
         }
 
@@ -64,7 +64,7 @@ namespace NWheels.Stacks.MongoDb
             }
 
             var entityRepo = (IMongoEntityRepository)base.GetEntityRepository(typeof(TEntityContract));
-            result.AddRange(entityRepo.GetByIdList(idsNotInCache).Cast<TEntityContract>());
+            result.AddRange(entityRepo.GetByIdList<TEntityContract>(idsNotInCache));
 
             return result;
         }

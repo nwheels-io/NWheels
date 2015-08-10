@@ -15,13 +15,16 @@ namespace NWheels.Entities.Factories
         public static 
             ContainedToContainerCollectionAdapter<TContained, TContainer, TContainedContract, TContainerContract>
             CreateContainmentCollectionAdapter<TContained, TContainer, TContainedContract, TContainerContract>(
-                ICollection<TContainedContract> innerCollection)
+                ICollection<TContainedContract> innerCollection,
+                IDomainObjectFactory domainObjectFactory)
                 where TContained : class, IContainedIn<TContainer>
                 where TContainer : class, IContain<TContained>
                 where TContainedContract : class
                 where TContainerContract : class
         {
-            return new ContainedToContainerCollectionAdapter<TContained, TContainer, TContainedContract, TContainerContract>(innerCollection);
+            return new ContainedToContainerCollectionAdapter<TContained, TContainer, TContainedContract, TContainerContract>(
+                innerCollection,
+                persistable => (TContainer)(object)domainObjectFactory.CreateDomainObjectInstance<TContainerContract>((TContainerContract)(object)persistable));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -29,13 +32,16 @@ namespace NWheels.Entities.Factories
         public static 
             ContainedToContainerListAdapter<TContained, TContainer, TContainedContract, TContainerContract> 
             CreateContainmentListAdapter<TContained, TContainer, TContainedContract, TContainerContract>(
-                IList<TContainedContract> innerCollection)
+                IList<TContainedContract> innerCollection,
+                IDomainObjectFactory domainObjectFactory)
                 where TContained : class, IContainedIn<TContainer>
                 where TContainer : class, IContain<TContained>
                 where TContainedContract : class
                 where TContainerContract : class
         {
-            return new ContainedToContainerListAdapter<TContained, TContainer, TContainedContract, TContainerContract>(innerCollection);
+            return new ContainedToContainerListAdapter<TContained, TContainer, TContainedContract, TContainerContract>(
+                innerCollection,
+                persistable => (TContainer)(object)domainObjectFactory.CreateDomainObjectInstance<TContainerContract>((TContainerContract)(object)persistable));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

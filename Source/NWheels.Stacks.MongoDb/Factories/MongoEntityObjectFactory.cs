@@ -38,7 +38,8 @@ namespace NWheels.Stacks.MongoDb.Factories
                 new NestedObjectsConvention(propertyMap), 
                 new ObjectIdGeneratorConvention(propertyMap, metaType), 
                 new BsonIgnoreConvention(MetadataCache, metaType),
-                new BsonDiscriminatorConvention(context, MetadataCache, metaType) 
+                new BsonDiscriminatorConvention(context, MetadataCache, metaType),
+                //new LazyLoadDomainObjectConvention(metaType)
             };
         }
 

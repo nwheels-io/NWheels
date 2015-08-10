@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NWheels.TypeModel.Core;
 
@@ -17,7 +18,14 @@ namespace NWheels.DataObjects.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ContainedToContainerListAdapter(IList<TContainedContract> innerList)
-            : base(innerList)
+            : this(innerList, containerFactory: null)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ContainedToContainerListAdapter(IList<TContainedContract> innerList, Func<TContained, TContainer> containerFactory)
+            : base(innerList, containerFactory)
         {
             _innerList = innerList;
         }
@@ -49,7 +57,7 @@ namespace NWheels.DataObjects.Core
         {
             get
             {
-                return (TContainerContract)(object)((IContainedIn<TContainer>)_innerList[index]).GetContainerObject();
+                return base.ContainedContractToContainerContract(_innerList[index]);
             }
             set
             {

@@ -32,7 +32,7 @@ namespace NWheels.Testing.Entities.Impl
 
         protected override bool ShouldApply(ObjectFactoryContext context)
         {
-            return (_targetProperty != null);
+            return (_targetProperty != null && _metaType.BaseType == null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

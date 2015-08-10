@@ -5,8 +5,8 @@ namespace NWheels.Stacks.MongoDb
 {
     internal interface IMongoEntityRepository
     {
-        IEntityObject GetById(object id);
-        IEnumerable<IEntityObject> GetByIdList(System.Collections.IEnumerable idList);
+        TEntityContract GetById<TEntityContract>(object id);
+        IEnumerable<TEntityContract> GetByIdList<TEntityContract>(System.Collections.IEnumerable idList);
         void CommitInsert(IEntityObject entity);
         void CommitUpdate(IEntityObject entity);
         void CommitDelete(IEntityObject entity);

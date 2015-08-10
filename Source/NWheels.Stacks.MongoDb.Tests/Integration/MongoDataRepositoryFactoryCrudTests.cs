@@ -88,6 +88,17 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of TestFixtureWithoutNodeHosts
+
+        protected override DynamicModule CreateDynamicModule()
+        {
+            return _dyamicModule;
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private Func<IR1.IOnlineStoreRepository> CreateDataRepositoryFactory()
         {
             var database = new MongoClient().GetServer().GetDatabase(TestDatabaseName);

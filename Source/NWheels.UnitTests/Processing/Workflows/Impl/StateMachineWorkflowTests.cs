@@ -11,7 +11,7 @@ using NWheels.Testing;
 namespace NWheels.UnitTests.Processing.Workflows.Impl
 {
     [TestFixture]
-    public class StateMachineWorkflowTests : UnitTestBase
+    public class StateMachineWorkflowTests : DynamicTypeUnitTestBase
     {
         [Test]
         public void CanStartStateMachineWorkflow()
@@ -87,6 +87,7 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
                     .One().Message<IWorkflowEngineLogger>(x => x.ExitingProcessorRun(ProcessorResult.Suspended))
                 .End());
         }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]

@@ -8,7 +8,7 @@ using NWheels.DataObjects.Core;
 
 namespace NWheels.Testing.Entities.Impl
 {
-    public class TestIdMetadataConvention  : IMetadataConvention
+    public class IntIdGeneratorMetadataConvention  : IMetadataConvention
     {
         public void InjectCache(TypeMetadataCache cache)
         {
