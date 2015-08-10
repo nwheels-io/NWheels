@@ -34,18 +34,34 @@ namespace NWheels.Entities.Factories
         protected override void OnImplementContractProperty(ImplementationClassWriter<TypeTemplate.TInterface> writer)
         {
             var baseProperty = _context.GetBasePropertyToImplement(MetaProperty);
-
+            
             using ( TT.CreateScope<TT.TInterface>(MetaType.ContractType) )
             {
                 writer.Property(baseProperty).Implement(
-                    p => MetaProperty.ContractPropertyInfo.CanRead ? 
+                    p => baseProperty.GetMethod != null ? 
                         p.Get(gw => {
-                            gw.Return(_context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo));
+                            if ( MetaProperty.ContractPropertyInfo.CanRead )
+                            {
+                                gw.Return(_context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo));
+                            }
+                            else
+                            {
+                                var readerMethodInfo = _context.PersistableObjectMembers.Methods.First(m => m.Name == GetReadAccessorMethodName(MetaProperty));
+                                gw.Return(_context.PersistableObjectField.Func<TT.TProperty>(readerMethodInfo));
+                            }
                         }) : 
                         null,
-                    p => MetaProperty.ContractPropertyInfo.CanWrite ? 
+                    p => baseProperty.SetMethod != null ? 
                         p.Set((sw, value) => {
-                            _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(value);
+                            if ( MetaProperty.ContractPropertyInfo.CanWrite )
+                            {
+                                _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(value);
+                            }
+                            else
+                            {
+                                var writerMethodInfo = _context.PersistableObjectMembers.Methods.First(m => m.Name == GetWriteAccessorMethodName(MetaProperty));
+                                _context.PersistableObjectField.Void(writerMethodInfo, value);
+                            }
                         }) :
                         null
                 );
