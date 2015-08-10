@@ -112,10 +112,10 @@ namespace NWheels.UnitTests.Entities
             //- arrange
 
             Framework.UpdateComponents(
-                builder =>
-                {
+                builder => {
                     builder.NWheelsFeatures().ObjectContracts().Concretize<IContractEntity>().With<ContractEntity>();
-                });
+                }
+            );
             Framework.RebuildMetadataCache();
             Framework.MetadataCache.GetTypeMetadata(typeof(IContractEntity)).As<TypeMetadataBuilder>().UpdateImplementation(
                 typeof(HardCodedEntityObjectFactory),
@@ -464,6 +464,22 @@ namespace NWheels.UnitTests.Entities
             {
                 get { return typeof(HardCodedEntityObjectFactory); }
             }
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            private IDomainObject _domainObject;
+
+            public IDomainObject GetContainerObject()
+            {
+                return _domainObject; 
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                _domainObject = container;
+            }
+
+            #endregion
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
