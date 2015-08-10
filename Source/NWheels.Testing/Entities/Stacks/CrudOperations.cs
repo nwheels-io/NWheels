@@ -239,7 +239,7 @@ namespace NWheels.Testing.Entities.Stacks
                     repo.OrdersLines.Insert(orderLine1);
                     repo.OrdersLines.Insert(orderLine2);
 
-                    //order.Customer = repo.Customers.First(c => c.FullName == "John Smith");
+                    order.Customer = repo.Customers.First(c => c.FullName == "John Smith");
 
                     repo.Orders.Insert(order);
                     repo.CommitChanges();
@@ -268,7 +268,7 @@ namespace NWheels.Testing.Entities.Stacks
                     repo.OrdersLines.Insert(orderLine1);
                     repo.OrdersLines.Insert(orderLine2);
 
-                    //order.Customer = repo.Customers.First(c => c.FullName == "Maria Garcia");
+                    order.Customer = repo.Customers.First(c => c.FullName == "Maria Garcia");
 
                     repo.Orders.Insert(order);
                     repo.CommitChanges();
@@ -303,7 +303,7 @@ namespace NWheels.Testing.Entities.Stacks
 
                     repo.OrdersLines.Insert(orderLine1);
 
-                    //order.Customer = repo.Customers.First(c => c.FullName == "John Smith");
+                    order.Customer = repo.Customers.First(c => c.FullName == "John Smith");
 
                     repo.Orders.Insert(order);
                     repo.CommitChanges();

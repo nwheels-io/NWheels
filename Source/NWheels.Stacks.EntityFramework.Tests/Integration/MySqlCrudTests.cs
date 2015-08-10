@@ -63,7 +63,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
             //-- Act & Assert
 
-            CrudOperations.Repository1.ExecuteBasic(() => factory.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
+            ThisTestCrudOperations.Repository1.ExecuteBasic(() => factory.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

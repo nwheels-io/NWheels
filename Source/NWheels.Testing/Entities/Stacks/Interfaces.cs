@@ -114,8 +114,8 @@ namespace NWheels.Testing.Entities.Stacks
                 [PropertyContract.DefaultValue(OrderStatus.New)]
                 OrderStatus Status { get; set; }
 
-                //[PropertyContract.Relation.AggregationParent]
-                //ICustomer Customer { get; set; }
+                [PropertyContract.Relation.AggregationParent]
+                ICustomer Customer { get; set; }
             }
 
             [EntityContract(UseCodeNamespace = true)]

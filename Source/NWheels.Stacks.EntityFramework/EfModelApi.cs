@@ -182,7 +182,7 @@ namespace NWheels.Stacks.EntityFramework
             where TManyEntity : class
             where TOneEntity : class
         {
-            var required = manyEntity.HasRequired<TOneEntity>(
+            var required = manyEntity.HasOptional<TOneEntity>(
                 PropertyExpression<TManyEntity, TOneEntity>(manyProperty.GetImplementationBy<EfEntityObjectFactory>()));
 
             ForeignKeyNavigationPropertyConfiguration foreignKey;

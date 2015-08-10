@@ -297,10 +297,8 @@ namespace NWheels.Stacks.EntityFramework
                     return (TResult)(object)_ownerRepo._domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)entity);
 
                 }
-                else
-                {
-                    return default(TResult);
-                }
+
+                return result;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -315,10 +313,8 @@ namespace NWheels.Stacks.EntityFramework
                     ObjectUtility.InjectDependenciesToObject(entity, _ownerRepo._ownerRepo.Components);
                     return _ownerRepo._domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)entity);
                 }
-                else
-                {
-                    return null;
-                }
+
+                return result;
             }
 
             #endregion

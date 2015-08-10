@@ -64,7 +64,7 @@ namespace NWheels.Stacks.EntityFramework
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal ObjectContext ObjectContext
+        internal protected ObjectContext ObjectContext
         {
             get
             {

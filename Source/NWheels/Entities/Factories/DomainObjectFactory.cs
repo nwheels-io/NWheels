@@ -82,6 +82,10 @@ namespace NWheels.Entities.Factories
 
         private TypeEntry GetOrBuildDomainObjectTypeEntry(Type contractType, Type persistableFactoryType)
         {
+            //Type persistableObjectType;
+
+            //if ( !_metadataCache.GetTypeMetadata(contractType).)
+
             var typeKey = new TypeKey(
                 primaryInterface: contractType, 
                 baseType: _metadataCache.GetTypeMetadata(contractType).DomainObjectType,

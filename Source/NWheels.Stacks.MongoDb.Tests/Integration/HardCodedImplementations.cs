@@ -357,6 +357,22 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
 
             #endregion
+
+
+            public IR1.IEmailContactDetail NewEmailContactDetail(string email, bool isPrimary)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IR1.IPhoneContactDetail NewPhoneContactDetail(string phone, bool isPrimary)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IR1.IPostContactDetail NewPostContactDetail(bool isPrimary)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         #endregion
@@ -681,6 +697,29 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
 
             #endregion
+
+
+            public IR1.ICustomer Customer
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+                set
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         #endregion
@@ -966,6 +1005,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
 
             #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
         #endregion
@@ -1233,6 +1286,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
 
             #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
         #endregion
@@ -1302,6 +1369,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             {
                 get { return this.m_Name; }
                 set { this.m_Name = value; }
+            }
+
+            #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
             }
 
             #endregion
@@ -1453,6 +1534,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
 
             #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
         #endregion
@@ -1513,6 +1608,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             {
                 get { return m_Value; }
                 set { m_Value = value; }
+            }
+
+            #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
             }
 
             #endregion
@@ -1651,6 +1760,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
 
             #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
         #endregion
@@ -1739,6 +1862,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             {
                 get { return m_Country; }
                 set { m_Country = value; }
+            }
+
+            #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
             }
 
             #endregion
@@ -1916,6 +2053,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     return typeof(MongoEntityObjectFactory);
                 }
             }
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
         #endregion
@@ -2001,6 +2152,26 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     return typeof(MongoEntityObjectFactory);
                 }
             }
+
+            #region Implementation of IContactDetail
+
+            public bool IsPrimary { get; set; }
+
+            #endregion
+
+            #region Implementation of IContainedIn<out IDomainObject>
+
+            public IDomainObject GetContainerObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetContainerObject(IDomainObject container)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
         #endregion

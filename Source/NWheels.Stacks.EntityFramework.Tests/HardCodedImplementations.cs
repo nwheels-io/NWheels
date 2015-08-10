@@ -26,6 +26,8 @@ using NWheels.Stacks.EntityFramework.Factories;
 using System.Configuration;
 using NWheels.Testing;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity.Core.Objects;
+using NWheels.TypeModel.Core;
 using NWheels.TypeModel.Core.Factories;
 
 namespace NWheels.Stacks.EntityFramework.Tests
@@ -173,6 +175,8 @@ namespace NWheels.Stacks.EntityFramework.Tests
 
         public class EfDataRepository_OnlineStoreRepository : EfDataRepositoryBase, Interfaces.Repository1.IOnlineStoreRepository
         {
+            public static ObjectContext CurrentObjectContext { get; set; }
+
             // Fields
             private IDomainObjectFactory _domainFactory;
             private ITypeMetadataCache _metadataCache;
@@ -211,6 +215,8 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 base.RegisterEntityRepository<Interfaces.Repository1.IContactDetail, EfEntityObject_ContactDetail>(this.m_ContactDetails);
                 this.m_ContactEmails = new EfEntityRepository<Interfaces.Repository1.IEmailContactDetail, EfEntityObject_ContactDetail, EfEntityObject_EmailContactDetail>(this);
                 base.RegisterEntityRepository<Interfaces.Repository1.IEmailContactDetail, EfEntityObject_EmailContactDetail>(this.m_ContactEmails);
+
+                CurrentObjectContext = base.ObjectContext;
             }
 
             public static object FactoryMethod_1(IComponentContext context1, EntityObjectFactory factory1, ITypeMetadataCache cache1, DbConnection connection1, bool flag1)
@@ -889,8 +895,9 @@ namespace NWheels.Stacks.EntityFramework.Tests
 
         public class EfEntityObject_Order : Interfaces.Repository1.IOrder, IEntityPartId<int>, IObject, IEntityObject, IHaveNestedObjects
         {
-            // Fields
+            private IDomainObject _domainObject;
             private EfEntityObject_PostalAddress m_BillingAddress_storage;
+            private EfEntityObject_Customer m_Customer_storage;
             private EfEntityObject_PostalAddress m_DeliveryAddress_storage;
             private int m_Id_storage;
             private ConcreteToAbstractCollectionAdapter<EfEntityObject_OrderLine, Interfaces.Repository1.IOrderLine> m_OrderLines_adapter;
@@ -899,7 +906,6 @@ namespace NWheels.Stacks.EntityFramework.Tests
             private DateTime m_PlacedAt;
             private Interfaces.Repository1.OrderStatus m_Status;
 
-            // Methods
             public EfEntityObject_Order()
             {
             }
@@ -907,19 +913,19 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public EfEntityObject_Order(IComponentContext arg0)
             {
                 this.m_OrderLines_storage = new HashSet<EfEntityObject_OrderLine>();
-                this.m_OrderLines_adapter = new ConcreteToAbstractCollectionAdapter<EfEntityObject_OrderLine, Interfaces.Repository1.IOrderLine>(this.m_OrderLines_storage);
+                this.m_OrderLines_adapter = (ConcreteToAbstractCollectionAdapter<EfEntityObject_OrderLine, Interfaces.Repository1.IOrderLine>)RuntimeTypeModelHelpers.CreateCollectionAdapter<EfEntityObject_OrderLine, Interfaces.Repository1.IOrderLine>(this.m_OrderLines_storage, false);
                 this.m_DeliveryAddress_storage = new EfEntityObject_PostalAddress(arg0);
                 this.m_BillingAddress_storage = new EfEntityObject_PostalAddress(arg0);
                 this.m_Status = Interfaces.Repository1.OrderStatus.New;
                 this.m_Id_storage = arg0.Resolve<TestIntIdValueGenerator>().GenerateValue("Order.Id");
             }
 
-            public static object FactoryMethod_1()
+            public static object FactoryMethod1()
             {
                 return new EfEntityObject_Order();
             }
 
-            public static object FactoryMethod_2(IComponentContext context1)
+            public static object FactoryMethod2(IComponentContext context1)
             {
                 return new EfEntityObject_Order(context1);
             }
@@ -930,32 +936,37 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 EntityTypeConfiguration<EfEntityObject_Order> entity = EfModelApi.EntityType<EfEntityObject_Order>(modelBuilder, typeMetadata, metadataCache);
                 EfModelApi.StringProperty<EfEntityObject_Order>(entity, typeMetadata.GetPropertyByName("OrderNo"));
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Order, DateTime>(entity, typeMetadata.GetPropertyByName("PlacedAt"));
+                IPropertyMetadata propertyByName = typeMetadata.GetPropertyByName("DeliveryAddress");
+                modelBuilder.ComplexType<EfEntityObject_PostalAddress>();
+                IPropertyMetadata metadata3 = propertyByName.Relation.RelatedPartyType.GetPropertyByName("StreetAddress");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, propertyByName, metadata3);
+                metadata3 = propertyByName.Relation.RelatedPartyType.GetPropertyByName("City");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, propertyByName, metadata3);
+                metadata3 = propertyByName.Relation.RelatedPartyType.GetPropertyByName("ZipCode");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, propertyByName, metadata3);
+                metadata3 = propertyByName.Relation.RelatedPartyType.GetPropertyByName("Country");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, propertyByName, metadata3);
+                IPropertyMetadata metadata4 = typeMetadata.GetPropertyByName("BillingAddress");
+                modelBuilder.ComplexType<EfEntityObject_PostalAddress>();
+                IPropertyMetadata metadata5 = metadata4.Relation.RelatedPartyType.GetPropertyByName("StreetAddress");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, metadata4, metadata5);
+                metadata5 = metadata4.Relation.RelatedPartyType.GetPropertyByName("City");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, metadata4, metadata5);
+                metadata5 = metadata4.Relation.RelatedPartyType.GetPropertyByName("ZipCode");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, metadata4, metadata5);
+                metadata5 = metadata4.Relation.RelatedPartyType.GetPropertyByName("Country");
+                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, metadata4, metadata5);
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Order, Interfaces.Repository1.OrderStatus>(entity, typeMetadata.GetPropertyByName("Status"));
+                EfModelApi.ManyToOneRelationProperty<EfEntityObject_Order, EfEntityObject_Customer>(entity, typeMetadata.GetPropertyByName("Customer"));
                 EfModelApi.ValueTypePrimitiveProperty<EfEntityObject_Order, int>(entity, typeMetadata.GetPropertyByName("Id"));
-
-                modelBuilder.ComplexType<EfEntityObject_PostalAddress>();
-                var complexMetaProperty1 = typeMetadata.GetPropertyByName("BillingAddress");
-                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty1, complexMetaProperty1.Relation.RelatedPartyType.GetPropertyByName("City"));
-                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty1, complexMetaProperty1.Relation.RelatedPartyType.GetPropertyByName("Country"));
-                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty1, complexMetaProperty1.Relation.RelatedPartyType.GetPropertyByName("StreetAddress"));
-                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty1, complexMetaProperty1.Relation.RelatedPartyType.GetPropertyByName("ZipCode"));
-
-                modelBuilder.ComplexType<EfEntityObject_PostalAddress>();
-                var complexMetaProperty2 = typeMetadata.GetPropertyByName("DeliveryAddress");
-                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty2, complexMetaProperty2.Relation.RelatedPartyType.GetPropertyByName("City"));
-                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty2, complexMetaProperty2.Relation.RelatedPartyType.GetPropertyByName("Country"));
-                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty2, complexMetaProperty2.Relation.RelatedPartyType.GetPropertyByName("StreetAddress"));
-                EfModelApi.ComplexTypeProperty<EfEntityObject_Order, string>(modelBuilder, entity, complexMetaProperty2, complexMetaProperty2.Relation.RelatedPartyType.GetPropertyByName("ZipCode"));
-
-                //modelBuilder.ComplexType<EfEntityObject_PostalAddress>();
-                //modelBuilder.Types<EfEntityObject_Order>().Configure(cfg => cfg.Property(x => x.BillingAddress.City).HasColumnName("bbb_aaa"));
             }
 
             public void DeepListNestedObjects(HashSet<object> nestedObjects)
             {
-                RuntimeTypeModelHelpers.DeepListNestedObjectCollection(m_OrderLines_adapter, nestedObjects);
-                RuntimeTypeModelHelpers.DeepListNestedObject(m_DeliveryAddress_storage, nestedObjects);
-                RuntimeTypeModelHelpers.DeepListNestedObject(m_BillingAddress_storage, nestedObjects);
+                RuntimeTypeModelHelpers.DeepListNestedObjectCollection(this.m_OrderLines_adapter, nestedObjects);
+                RuntimeTypeModelHelpers.DeepListNestedObject(this.m_DeliveryAddress_storage, nestedObjects);
+                RuntimeTypeModelHelpers.DeepListNestedObject(this.m_BillingAddress_storage, nestedObjects);
+                RuntimeTypeModelHelpers.DeepListNestedObject(this.m_Customer_storage, nestedObjects);
             }
 
             IEntityId IEntityObject.GetId()
@@ -968,7 +979,31 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 this.m_Id_storage = (int)value;
             }
 
-            // Properties
+            void IPersistableObject.SetContainerObject(IDomainObject container)
+            {
+                this._domainObject = container;
+            }
+
+            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
+            {
+                return this._domainObject;
+            }
+
+            public virtual void WritePropertyValue_BillingAddress(Interfaces.Repository1.IPostalAddress arg1)
+            {
+                this.m_BillingAddress_storage = (EfEntityObject_PostalAddress)arg1;
+            }
+
+            public virtual void WritePropertyValue_DeliveryAddress(Interfaces.Repository1.IPostalAddress arg1)
+            {
+                this.m_DeliveryAddress_storage = (EfEntityObject_PostalAddress)arg1;
+            }
+
+            public virtual void WritePropertyValue_Id(int arg1)
+            {
+                this.m_Id_storage = arg1;
+            }
+
             public virtual EfEntityObject_PostalAddress BillingAddress
             {
                 get
@@ -978,6 +1013,18 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 set
                 {
                     this.m_BillingAddress_storage = value;
+                }
+            }
+
+            public virtual EfEntityObject_Customer Customer
+            {
+                get
+                {
+                    return this.m_Customer_storage;
+                }
+                set
+                {
+                    this.m_Customer_storage = value;
                 }
             }
 
@@ -1021,11 +1068,37 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
             }
 
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(EfEntityObjectFactory);
+                }
+            }
+
             Interfaces.Repository1.IPostalAddress Interfaces.Repository1.IOrder.BillingAddress
             {
                 get
                 {
                     return this.m_BillingAddress_storage;
+                }
+            }
+
+            Interfaces.Repository1.ICustomer Interfaces.Repository1.IOrder.Customer
+            {
+                get
+                {
+                    return this.m_Customer_storage;
+                }
+                set
+                {
+                    this.m_Customer_storage = (EfEntityObject_Customer)value;
+
+                    //if ( this.m_Customer_storage != null )
+                    //{
+                    //    EfDataRepository_OnlineStoreRepository.CurrentObjectContext.AddObject("Customer", this.m_Customer_storage);
+                    //    EfDataRepository_OnlineStoreRepository.CurrentObjectContext.AttachTo("Customer", this.m_Customer_storage);
+                    //}
                 }
             }
 
@@ -1045,11 +1118,6 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
             }
 
-            Type IObject.FactoryType
-            {
-                get { return typeof(EfEntityObjectFactory); }
-            }
-
             public virtual HashSet<EfEntityObject_OrderLine> OrderLines
             {
                 get
@@ -1058,7 +1126,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
                 set
                 {
-                    this.m_OrderLines_adapter = new ConcreteToAbstractCollectionAdapter<EfEntityObject_OrderLine, Interfaces.Repository1.IOrderLine>(value);
+                    this.m_OrderLines_adapter = (ConcreteToAbstractCollectionAdapter<EfEntityObject_OrderLine, Interfaces.Repository1.IOrderLine>)RuntimeTypeModelHelpers.CreateCollectionAdapter<EfEntityObject_OrderLine, Interfaces.Repository1.IOrderLine>(value, false);
                     this.m_OrderLines_storage = value;
                 }
             }
@@ -1098,24 +1166,6 @@ namespace NWheels.Stacks.EntityFramework.Tests
                     this.m_Status = value;
                 }
             }
-
-            #region Implementation of IContainedIn<out IDomainObject>
-
-            private IDomainObject _domainObject;
-
-            public IDomainObject GetContainerObject()
-            {
-                return _domainObject;
-            }
-
-            public void SetContainerObject(IDomainObject container)
-            {
-                _domainObject = container;
-            }
-
-            #endregion
-
-            public Interfaces.Repository1.ICustomer Customer { get; set; }
         }
 
         public class EfEntityObject_OrderLine : Interfaces.Repository1.IOrderLine, IEntityPartId<int>, IObject, IEntityObject, IHaveNestedObjects
@@ -1708,7 +1758,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
 
             public void DeepListNestedObjects(HashSet<object> nestedObjects)
             {
-                nestedObjects.UnionWith(this.m_ContactDetails_adapter.Cast<object>());
+                RuntimeTypeModelHelpers.DeepListNestedObjectCollection(this.m_ContactDetails_adapter, nestedObjects);
             }
 
             IEntityId IEntityObject.GetId()
