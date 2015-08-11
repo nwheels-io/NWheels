@@ -67,6 +67,7 @@
     <Compile Include="Factories\ArrayOfDocumentIdsStrategy.cs" />
     <Compile Include="Factories\BsonDiscriminatorConvention.cs" />
     <Compile Include="Factories\BsonIgnoreConvention.cs" />
+    <Compile Include="Factories\BsonIgnoreExtraElementsConvention.cs" />
     <Compile Include="Factories\DocumentIdStrategy.cs" />
     <Compile Include="Factories\LazyLoadDomainObjectConvention.cs" />
     <Compile Include="IMongoEntityRepository.cs" />
