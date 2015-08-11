@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>FelixB.NWheels.Testing.NUnit</id>
-    <version>0.9.4</version>
+    <version>0.9.5</version>
     <title>NWheels.Testing.NUnit</title>
     <authors>Felix Berman</authors>
     <licenseUrl>https://github.com/felix-b/NWheels/blob/master/LICENSE</licenseUrl>
@@ -17,7 +17,7 @@
     <copyright>Copyright © 2014 Felix Berman</copyright>
     <tags>Fullstack Enterprise Architecture Productivity RAD Testing</tags>
     <dependencies>
-      <dependency id="FelixB.NWheels.FullStack" version="0.9.4" />
+      <dependency id="FelixB.NWheels.FullStack" version="0.9.5" />
       <dependency id="Autofac" version="3.5.2" />
       <dependency id="NUnit" version="2.6.4" />
     </dependencies>
