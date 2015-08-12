@@ -4,13 +4,26 @@ using Hapil.Testing.NUnit;
 using NUnit.Framework;
 using NWheels.Configuration;
 using NWheels.Configuration.Core;
+using NWheels.Extensions;
 using NWheels.Testing;
 
 namespace NWheels.UnitTests.Configuration
 {
     [TestFixture]
-    public class XmlConfigurationLoaderTest : NUnitEmittedTypesTestBase
+    public class XmlConfigurationLoaderTest : DynamicTypeUnitTestBase
     {
+        [SetUp]
+        public void SetUp()
+        {
+            Framework.UpdateComponents(
+                builder => {
+                    builder.NWheelsFeatures().Configuration().RegisterSection<ISectionOne>();
+                    builder.NWheelsFeatures().Configuration().RegisterSection<ISectionTwo>();
+                });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [TestCase("dev", "dev", true)]
         [TestCase("DeV", "dEv", true)]
         [TestCase("Dev", "UAT", false)]
@@ -44,12 +57,11 @@ namespace NWheels.UnitTests.Configuration
         {
             //-- Arrange
 
-            var framework = new TestFramework(base.Module);
-            framework.NodeConfiguration.EnvironmentType = environmentType;
-            framework.NodeConfiguration.NodeName = nodeName;
+            Framework.NodeConfiguration.EnvironmentType = environmentType;
+            Framework.NodeConfiguration.NodeName = nodeName;
 
-            var one = framework.ConfigSection<ISectionOne>();
-            var two = framework.ConfigSection<ISectionTwo>();
+            var one = Framework.ConfigSection<ISectionOne>();
+            var two = Framework.ConfigSection<ISectionTwo>();
 
             var xml =
                 @"<CONFIGURATION>
@@ -72,8 +84,8 @@ namespace NWheels.UnitTests.Configuration
                 </CONFIGURATION>";
 
             var loader = new XmlConfigurationLoader(
-                framework,
-                framework.LoggerAuto<IConfigurationLogger>(),
+                Framework,
+                Framework.LoggerAuto<IConfigurationLogger>(),
                 new IConfigurationSection[] { one, two });
 
             //-- Act

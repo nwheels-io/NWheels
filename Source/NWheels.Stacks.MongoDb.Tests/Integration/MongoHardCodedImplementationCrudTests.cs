@@ -121,6 +121,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             return () => {
                 return new HardCodedImplementations.MongoDataRepository_OnlineStoreRepository(
+                    null,
                     Framework.Components,
                     entityFactory, 
                     metadataCache, 

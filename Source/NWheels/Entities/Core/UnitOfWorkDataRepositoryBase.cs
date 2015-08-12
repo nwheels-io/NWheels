@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using NWheels.Concurrency;
 
 namespace NWheels.Entities.Core
 {
@@ -16,8 +17,8 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected UnitOfWorkDataRepositoryBase(IComponentContext components, bool autoCommit)
-            : base(components, autoCommit)
+        protected UnitOfWorkDataRepositoryBase(IResourceConsumerScopeHandle consumerScope, IComponentContext components, bool autoCommit)
+            : base(consumerScope, components, autoCommit)
         {
             _entityCache = new Dictionary<IEntityId, IEntityObject>();
             _insertBatch = new HashSet<IEntityObject>();
@@ -31,8 +32,14 @@ namespace NWheels.Entities.Core
 
         public override void Dispose()
         {
-            base.EndLifetimeScope();
-            base.Dispose();
+            bool shouldDisposeResourcesNow;
+            base.DisposeConsumerScope(out shouldDisposeResourcesNow);
+
+            if ( shouldDisposeResourcesNow )
+            {
+                base.EndLifetimeScope();
+                base.Dispose();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -32,7 +32,8 @@ namespace NWheels.Entities.Factories
                 _context.MetaType.ContractType, writer.OwnerClass.TypeBuilder, _context.PersistableObjectType) )
             {
                 _context.PersistableObjectField = writer.Field<TT2.TPersistable>("$persistable");
-                _context.DomainObjectFactoryField = writer.Field<IDomainObjectFactory>("$factory");
+                _context.DomainObjectFactoryField = writer.Field<IDomainObjectFactory>("$domainFactory");
+                _context.FrameworkField = writer.Field<IFramework>("$framework");
 
                 var dependencyProperties = FindDependencyProperties(writer);
 
@@ -48,6 +49,7 @@ namespace NWheels.Entities.Factories
 
                     _context.PersistableObjectField.Assign(persistable.CastTo<TT2.TPersistable>());
                     _context.DomainObjectFactoryField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IDomainObjectFactory>(c), components));
+                    _context.FrameworkField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IFramework>(c), components));
 
                     foreach ( var property in dependencyProperties )
                     {

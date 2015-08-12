@@ -37,6 +37,7 @@ using NWheels.Processing.Workflows;
 using NWheels.Processing.Workflows.Core;
 using NWheels.Utilities;
 using Formatting = Newtonsoft.Json.Formatting;
+using NWheels.Entities.Factories;
 
 namespace NWheels.Hosting.Core
 {
@@ -271,6 +272,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterAdapter<RelationalMappingConventionDefault, IRelationalMappingConvention>(RelationalMappingConventionBase.FromDefault).SingleInstance();
             builder.RegisterType<VoidDataRepositoryFactory>().As<IDataRepositoryFactory>();
             builder.RegisterType<EntityObjectFactory>().As<EntityObjectFactory, IEntityObjectFactory>().SingleInstance();
+            builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory, DomainObjectFactory>().SingleInstance();
             builder.RegisterPipeline<IDataRepositoryPopulator>();
 
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkLoggingConfiguration>();
@@ -808,7 +810,7 @@ namespace NWheels.Hosting.Core
                 {
                     try
                     {
-                        var repoInstance = factory.NewUnitOfWork(registration.DataRepositoryType, autoCommit: false);
+                        var repoInstance = factory.NewUnitOfWork(null, registration.DataRepositoryType, autoCommit: false);
                         repoInstance.Dispose();
                     }
                     catch ( Exception e )

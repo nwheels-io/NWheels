@@ -7,6 +7,7 @@ using NWheels.Concurrency;
 using NWheels.Entities;
 using NWheels.Hosting;
 using System.Data;
+using NWheels.Authorization;
 
 namespace NWheels
 {
@@ -17,7 +18,6 @@ namespace NWheels
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, IsolationLevel? isolationLevel = null) where TRepository : class, IApplicationDataRepository;
-        IApplicationDataRepository NewUnitOfWork(Type repositoryContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
@@ -29,6 +29,7 @@ namespace NWheels
         int NewRandomInt32();
         long NewRandomInt64();
         INodeConfiguration CurrentNode { get; }
+        IIdentityInfo CurrentIdentity { get; }
         Guid CurrentCorrelationId { get; }
         DateTime UtcNow { get; }
 

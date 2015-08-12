@@ -59,7 +59,7 @@ namespace NWheels.Testing.Entities.Stacks
 
                 //-- act
 
-                var repository = factory.NewUnitOfWork<IR1.IOnlineStoreRepository>(autoCommit: false);
+                var repository = (IR1.IOnlineStoreRepository)factory.NewUnitOfWork(null, typeof(IR1.IOnlineStoreRepository), autoCommit: false);
 
                 //-- assert
 

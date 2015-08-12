@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using NWheels.Concurrency;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 
@@ -11,8 +12,8 @@ namespace NWheels.Testing.Entities.Impl
 {
     public abstract class TestDataRepositoryBase : DataRepositoryBase
     {
-        protected TestDataRepositoryBase(IComponentContext components, bool autoCommit)
-            : base(components, autoCommit)
+        protected TestDataRepositoryBase(IResourceConsumerScopeHandle consumerScope, IComponentContext components, bool autoCommit)
+            : base(consumerScope, components, autoCommit)
         {
         }
 

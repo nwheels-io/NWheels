@@ -10,6 +10,7 @@ using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using MongoDB.Driver.Linq;
 using Newtonsoft.Json;
+using NWheels.Concurrency;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
@@ -50,8 +51,8 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             private IEntityRepository<Interfaces.Repository1.IOrderLine> m_OrdersLines;
             private IEntityRepository<Interfaces.Repository1.IProduct> m_Products;
 
-            public MongoDataRepository_OnlineStoreRepository(IComponentContext arg0, IEntityObjectFactory arg1, ITypeMetadataCache arg2, MongoDatabase arg3, bool arg4)
-                : base(arg0, arg1, GetOrBuildDbCompiledModel(arg2, arg3), arg3, arg4)
+            public MongoDataRepository_OnlineStoreRepository(IResourceConsumerScopeHandle consumerScope, IComponentContext arg0, IEntityObjectFactory arg1, ITypeMetadataCache arg2, MongoDatabase arg3, bool arg4)
+                : base(consumerScope, arg0, arg1, GetOrBuildDbCompiledModel(arg2, arg3), arg3, arg4)
             {
                 this.EntityFactory = arg1;
                 this._domainFactory = arg0.Resolve<IDomainObjectFactory>();
@@ -74,9 +75,9 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 base.RegisterEntityRepository<Interfaces.Repository1.IEmailContactDetail, MongoEntityObject_EmailContactDetail>(this.m_ContactEmails);
             }
 
-            public static object FactoryMethod1(IComponentContext context1, EntityObjectFactory factory1, ITypeMetadataCache cache1, MongoDatabase database1, bool flag1)
+            public static object FactoryMethod1(IResourceConsumerScopeHandle consumerScope, IComponentContext context1, EntityObjectFactory factory1, ITypeMetadataCache cache1, MongoDatabase database1, bool flag1)
             {
-                return new MongoDataRepository_OnlineStoreRepository(context1, factory1, cache1, database1, flag1);
+                return new MongoDataRepository_OnlineStoreRepository(consumerScope, context1, factory1, cache1, database1, flag1);
             }
 
             public sealed override Type[] GetEntityContractsInRepository()
@@ -1864,6 +1865,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     return typeof(MongoEntityObjectFactory);
                 }
             }
+
+            #region Implementation of IActiveRecord
+
+            public void Save()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Delete()
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
 

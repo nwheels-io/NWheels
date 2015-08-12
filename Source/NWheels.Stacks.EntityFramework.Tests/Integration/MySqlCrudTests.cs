@@ -63,7 +63,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
             //-- Act & Assert
 
-            ThisTestCrudOperations.Repository1.ExecuteBasic(() => factory.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
+            ThisTestCrudOperations.Repository1.ExecuteBasic(() => Framework.NewUnitOfWork<IR1.IOnlineStoreRepository>(autoCommit: false));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
             //-- Act & Assert
 
-            CrudOperations.Repository1.ExecuteAdvancedRetrievals(() => factory.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
+            CrudOperations.Repository1.ExecuteAdvancedRetrievals(() => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -101,7 +101,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
             //-- Act & Assert
 
-            CrudOperations.Repository1.ExecuteBasic(() => factory.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
+            CrudOperations.Repository1.ExecuteBasic(() => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -120,7 +120,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
             //-- Act & Assert
 
-            CrudOperations.Repository1.ExecuteAdvancedRetrievals(() => factory.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
+            CrudOperations.Repository1.ExecuteAdvancedRetrievals(() => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -142,7 +142,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
             //-- Act & Assert
 
-            CrudOperations.Repository1.ExecuteBasic(() => factory.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
+            CrudOperations.Repository1.ExecuteBasic(() => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
             //-- Act & Assert
 
-            CrudOperations.Repository1.ExecuteAdvancedRetrievals(() => factory.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
+            CrudOperations.Repository1.ExecuteAdvancedRetrievals(() => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -279,6 +279,11 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
             var dbConfig = Framework.ConfigSection<IFrameworkDatabaseConfig>();
             dbConfig.ConnectionString = connectionString.ConnectionString;
 
+            Framework.UpdateComponents(builder => {
+                builder.RegisterModule<NWheels.Stacks.EntityFramework.ModuleLoader>();
+                builder.RegisterModule<NWheels.Stacks.EntityFramework.MySqlFeatureLoader>();
+            });
+
             return new EfDataRepositoryFactory(
                 Framework.Components,
                 _dynamicModule,
@@ -310,7 +315,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
         private void InitializeCompiledModel(DataRepositoryFactoryBase factory)
         {
             var connection = base.CreateDbConnection();
-            var repo = factory.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false);
+            var repo = Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false);
 
             base.CompiledModel = ((EfDataRepositoryBase)repo).CompiledModel;
 

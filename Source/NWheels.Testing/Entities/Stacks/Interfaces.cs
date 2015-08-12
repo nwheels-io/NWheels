@@ -153,7 +153,7 @@ namespace NWheels.Testing.Entities.Stacks
             }
 
             [EntityContract(UseCodeNamespace = true)]
-            public interface ICustomer
+            public interface ICustomer : IActiveRecord
             {
                 bool QualifiesAsValuableCustomer();
                 bool IsInteredtedIn(IProduct product);
@@ -212,6 +212,13 @@ namespace NWheels.Testing.Entities.Stacks
 
                 public abstract string FullName { get; set; }
                 public abstract ICollection<IContactDetail> ContactDetails { get; }
+
+                #endregion
+
+                #region Implementation of IActiveRecord
+
+                public abstract void Save();
+                public abstract void Delete();
 
                 #endregion
             }

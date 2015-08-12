@@ -1,4 +1,5 @@
 ﻿using System;
+using Autofac;
 using Hapil;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -106,17 +107,18 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             var configAuto = ResolveAuto<IFrameworkDatabaseConfig>();
             configAuto.Instance.ConnectionString = string.Format("server=localhost;database={0}", TestDatabaseName);
 
+            Framework.UpdateComponents(builder => builder.RegisterModule<NWheels.Stacks.MongoDb.ModuleLoader>());
             Framework.RebuildMetadataCache(
                 customMetadataConventions: new IMetadataConvention[] {
                     new DefaultIdMetadataConvention(typeof(ObjectId))
                 }
             );
 
-            var entityRepoFactory = new MongoEntityObjectFactory(base.Framework.Components, _dyamicModule, (TypeMetadataCache)Framework.MetadataCache);
-            var dataRepoFactory = new MongoDataRepositoryFactory(Framework.Components, _dyamicModule, entityRepoFactory, (TypeMetadataCache)Framework.MetadataCache, configAuto.Instance);
+            //var entityRepoFactory = new MongoEntityObjectFactory(base.Framework.Components, _dyamicModule, (TypeMetadataCache)Framework.MetadataCache);
+            //var dataRepoFactory = new MongoDataRepositoryFactory(Framework.Components, _dyamicModule, entityRepoFactory, (TypeMetadataCache)Framework.MetadataCache, configAuto.Instance);
 
             return () => {
-                return dataRepoFactory.NewUnitOfWork<IR1.IOnlineStoreRepository>(autoCommit: false);
+                return Framework.NewUnitOfWork<IR1.IOnlineStoreRepository>(autoCommit: false);
             };
         }
 

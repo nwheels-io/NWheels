@@ -4,6 +4,7 @@ using Autofac;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
+using NWheels.Concurrency;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
@@ -32,9 +33,9 @@ namespace NWheels.Testing.Entities.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IApplicationDataRepository NewUnitOfWork(Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
+        public override IApplicationDataRepository NewUnitOfWork(IResourceConsumerScopeHandle consumerScope, Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
         {
-            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(_components, _entityFactory, autoCommit);
+            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(consumerScope, _components, _entityFactory, autoCommit);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

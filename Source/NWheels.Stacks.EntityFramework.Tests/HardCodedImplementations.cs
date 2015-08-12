@@ -27,6 +27,8 @@ using System.Configuration;
 using NWheels.Testing;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.Core.Objects;
+using NWheels.Concurrency;
+using NWheels.Entities.Factories;
 using NWheels.TypeModel.Core;
 using NWheels.TypeModel.Core.Factories;
 
@@ -52,7 +54,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 _connectionSettings = connectionSettings;
             }
 
-            public override IApplicationDataRepository NewUnitOfWork(Type repositoryType, bool autoCommit, System.Data.IsolationLevel? isolationLevel = null)
+            public override IApplicationDataRepository NewUnitOfWork(IResourceConsumerScopeHandle consumerScope, Type repositoryType, bool autoCommit, System.Data.IsolationLevel? isolationLevel = null)
             {
                 if ( repositoryType != typeof(Interfaces.Repository1.IOnlineStoreRepository) )
                 {
@@ -99,6 +101,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 connection.Open();
 
                 return new EfDataRepository_OnlineStoreRepository(
+                    consumerScope,
                     _components, 
                     new EntityObjectFactory_OnlineStoreRepository(_components), 
                     base.MetadataCache,
@@ -193,8 +196,8 @@ namespace NWheels.Stacks.EntityFramework.Tests
             private IEntityRepository<Interfaces.Repository1.IEmailContactDetail> m_ContactEmails;
 
             // Methods
-            public EfDataRepository_OnlineStoreRepository(IComponentContext components, IEntityObjectFactory entityFactory, ITypeMetadataCache metadataCache, DbConnection connection, bool autoCommit)
-                : base(components, entityFactory, GetOrBuildDbCompiledModel(metadataCache, connection), connection, autoCommit)
+            public EfDataRepository_OnlineStoreRepository(IResourceConsumerScopeHandle consumerScope, IComponentContext components, IEntityObjectFactory entityFactory, ITypeMetadataCache metadataCache, DbConnection connection, bool autoCommit)
+                : base(consumerScope, components, entityFactory, GetOrBuildDbCompiledModel(metadataCache, connection), connection, autoCommit)
             {
                 this.EntityFactory = entityFactory;
                 this._domainFactory = components.Resolve<IDomainObjectFactory>();
@@ -219,9 +222,9 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 CurrentObjectContext = base.ObjectContext;
             }
 
-            public static object FactoryMethod_1(IComponentContext context1, EntityObjectFactory factory1, ITypeMetadataCache cache1, DbConnection connection1, bool flag1)
+            public static object FactoryMethod_1(IResourceConsumerScopeHandle consumerScope, IComponentContext context1, EntityObjectFactory factory1, ITypeMetadataCache cache1, DbConnection connection1, bool flag1)
             {
-                return new EfDataRepository_OnlineStoreRepository(context1, factory1, cache1, connection1, flag1);
+                return new EfDataRepository_OnlineStoreRepository(consumerScope, context1, factory1, cache1, connection1, flag1);
             }
 
             public sealed override Type[] GetEntityContractsInRepository()
@@ -1860,6 +1863,20 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public void SetContainerObject(IDomainObject container)
             {
                 _domainObject = container;
+            }
+
+            #endregion
+
+            #region Implementation of IActiveRecord
+
+            public void Save()
+            {
+                throw new NotSupportedException();
+            }
+
+            public void Delete()
+            {
+                throw new NotSupportedException();
             }
 
             #endregion

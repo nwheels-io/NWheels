@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using Autofac;
+using NWheels.Concurrency;
 using NWheels.Extensions;
 
 namespace NWheels.Entities.Core
@@ -13,12 +14,13 @@ namespace NWheels.Entities.Core
         private readonly Dictionary<Type, Action<IDataRepositoryCallback>> _genericCallbacksByContractType;
         private readonly IComponentContext _components;
         private readonly bool _autoCommit;
+        private readonly IResourceConsumerScopeHandle _consumerScope;
         private UnitOfWorkState _currentState;
         private ILifetimeScope _componentLifetimeScope;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected DataRepositoryBase(IComponentContext components, bool autoCommit)
+        protected DataRepositoryBase(IResourceConsumerScopeHandle consumerScope, IComponentContext components, bool autoCommit)
         {
             _entityRepositoryByContractType = new Dictionary<Type, IEntityRepository>();
             _genericCallbacksByContractType = new Dictionary<Type, Action<IDataRepositoryCallback>>();
@@ -26,19 +28,22 @@ namespace NWheels.Entities.Core
             _components = components;
             _currentState = UnitOfWorkState.Untouched;
             _componentLifetimeScope = null;
+            _consumerScope = consumerScope;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public virtual void Dispose()
         {
+            bool shouldDisposeResourcesNow;
+            DisposeConsumerScope(out shouldDisposeResourcesNow);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void InvokeGenericOperation(Type contractType, IDataRepositoryCallback callback)
+        public void InvokeGenericOperation(Type entityContractType, IDataRepositoryCallback callback)
         {
-            _genericCallbacksByContractType[contractType](callback);
+            _genericCallbacksByContractType[entityContractType](callback);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -51,18 +56,24 @@ namespace NWheels.Entities.Core
 
         public void CommitChanges()
         {
-            ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
-            OnCommitChanges();
-            _currentState = UnitOfWorkState.Committed;
+            if ( _consumerScope == null || _consumerScope.IsInnermost )
+            {
+                ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
+                OnCommitChanges();
+                _currentState = UnitOfWorkState.Committed;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void RollbackChanges()
         {
-            ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
-            OnRollbackChanges();
-            _currentState = UnitOfWorkState.RolledBack;
+            if ( _consumerScope == null || _consumerScope.IsInnermost )
+            {
+                ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
+                OnRollbackChanges();
+                _currentState = UnitOfWorkState.RolledBack;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -78,6 +89,28 @@ namespace NWheels.Entities.Core
         {
             _entityRepositoryByContractType.Add(typeof(TEntityContract), (IEntityRepository)repo); 
             _genericCallbacksByContractType.Add(typeof(TEntityContract), callback => callback.Invoke<TEntityContract, TEntityImpl>(repo));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEntityRepository GetEntityRepository(Type contractType)
+        {
+            IEntityRepository repository;
+
+            if ( _entityRepositoryByContractType.TryGetValue(contractType, out repository) )
+            {
+                return repository;
+            }
+
+            foreach ( var baseContractType in contractType.GetInterfaces().Where(intf => intf.IsEntityContract()) )
+            {
+                if ( _entityRepositoryByContractType.TryGetValue(baseContractType, out repository) )
+                {
+                    return repository;
+                }
+            }
+
+            throw new KeyNotFoundException("Entity repository for contract '" + contractType.FullName + "' could not be found in the data repository.");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -117,6 +150,42 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected void DisposeConsumerScope(out bool shouldDisposeResourcesNow)
+        {
+            try
+            {
+                if ( _consumerScope == null || _consumerScope.IsOutermost )
+                {
+                    if ( _currentState == UnitOfWorkState.Dirty )
+                    {
+                        if ( _autoCommit )
+                        {
+                            CommitChanges();
+                        }
+                        else
+                        {
+                            RollbackChanges();
+                        }
+                    }
+
+                    shouldDisposeResourcesNow = true;
+                }
+                else
+                {
+                    shouldDisposeResourcesNow = false;
+                }
+            }
+            finally
+            {
+                if ( _consumerScope != null )
+                {
+                    _consumerScope.Outermost.Dispose();
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected void ResetCurrentState(UnitOfWorkState newState)
         {
             _currentState = newState;
@@ -149,28 +218,6 @@ namespace NWheels.Entities.Core
 
             _componentLifetimeScope.Dispose();
             _componentLifetimeScope = null;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected IEntityRepository GetEntityRepository(Type contractType)
-        {
-            IEntityRepository repository;
-
-            if ( _entityRepositoryByContractType.TryGetValue(contractType, out repository) )
-            {
-                return repository;
-            }
-
-            foreach ( var baseContractType in contractType.GetInterfaces().Where(intf => intf.IsEntityContract()) )
-            {
-                if ( _entityRepositoryByContractType.TryGetValue(baseContractType, out repository) )
-                {
-                    return repository;
-                }
-            }
-
-            throw new KeyNotFoundException("Entity repository for contract '" + contractType.FullName + "' could not be found in the data repository.");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

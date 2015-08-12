@@ -19,6 +19,7 @@ using NWheels.Conventions;
 using NWheels.DataObjects.Core;
 using System.Data;
 using System.Linq.Expressions;
+using NWheels.Concurrency;
 using NWheels.Entities.Core;
 using TT = Hapil.TypeTemplate;
 
@@ -29,6 +30,7 @@ namespace NWheels.Conventions.Core
     public abstract class DataRepositoryFactoryBase : ConventionObjectFactory, IDataRepositoryFactory, IAutoObjectFactory
     {
         private readonly TypeMetadataCache _metadataCache;
+        private readonly Dictionary<Type, Type> _repositoryContractByEntityContract;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -38,27 +40,33 @@ namespace NWheels.Conventions.Core
             : base(module)
         {
             _metadataCache = metadataCache;
+            _repositoryContractByEntityContract = new Dictionary<Type, Type>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public abstract IApplicationDataRepository NewUnitOfWork(Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null);
+        public abstract IApplicationDataRepository NewUnitOfWork(IResourceConsumerScopeHandle consumerScope, Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public virtual TRepository NewUnitOfWork<TRepository>(bool autoCommit, IsolationLevel? isolationLevel = null) where TRepository : class, IApplicationDataRepository
-        {
-            return (TRepository)NewUnitOfWork(typeof(TRepository), autoCommit, isolationLevel);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
+        //TODO: remove IAutoObjectFactory support 
         public TService CreateService<TService>() where TService : class
         {
             const bool autoCommit = false;
             const IsolationLevel isolationLevel = IsolationLevel.ReadCommitted;
 
-            return (TService)NewUnitOfWork(typeof(TService), autoCommit, isolationLevel);
+            return (TService)NewUnitOfWork(null, typeof(TService), autoCommit, isolationLevel);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Type GetDataRepositoryContract(Type entityContractType)
+        {
+            return _repositoryContractByEntityContract.GetOrThrow(
+                entityContractType,
+                key => new RegistrationMissingException(string.Format(
+                    "Entity contract '{0}' could not be found in any of registered repositories.",
+                    key.FullName)));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -76,6 +84,16 @@ namespace NWheels.Conventions.Core
         public TypeMetadataCache MetadataCache
         {
             get { return _metadataCache; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal protected void UpdateEntityRepositoryMap(Type repositoryContractType, IEnumerable<Type> entityContractTypes)
+        {
+            foreach ( var entityContract in entityContractTypes )
+            {
+                _repositoryContractByEntityContract[entityContract] = repositoryContractType;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -108,6 +126,7 @@ namespace NWheels.Conventions.Core
             private readonly HashSet<Type> _entityContractsInRepository;
             private readonly EntityObjectFactory _entityFactory;
             private readonly List<Action<ConstructorWriter>> _initializers;
+            private DataRepositoryFactoryBase _ownerFactory;
             private Field<EntityObjectFactory> _entityFactoryField;
             private Field<IDomainObjectFactory> _domainObjectFactoryField;
 
@@ -161,6 +180,7 @@ namespace NWheels.Conventions.Core
 
             protected override void OnInspectDeclaration(ObjectFactoryContext context)
             {
+                _ownerFactory = (DataRepositoryFactoryBase)context.Factory;
                 context.BaseType = this.RepositoryBaseType;
             }
 
@@ -233,14 +253,15 @@ namespace NWheels.Conventions.Core
 
             protected virtual void ImplementConstructor(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
-                writer.Constructor<IComponentContext, EntityObjectFactory, bool>((cw, components, entityFactory, autoCommit) => {
-                    cw.Base(components, autoCommit);
+                writer.Constructor<IResourceConsumerScopeHandle, IComponentContext, EntityObjectFactory, bool>(
+                    (cw, scope, components, entityFactory, autoCommit) => {
+                        cw.Base(scope, components, autoCommit);
                     
-                    _entityFactoryField.Assign(entityFactory);
-                    _domainObjectFactoryField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IDomainObjectFactory>(c), components));
+                        _entityFactoryField.Assign(entityFactory);
+                        _domainObjectFactoryField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IDomainObjectFactory>(c), components));
                     
-                    Initializers.ForEach(init => init(cw));
-                });
+                        Initializers.ForEach(init => init(cw));
+                    });
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -506,9 +527,10 @@ namespace NWheels.Conventions.Core
 
             protected override void ImplementConstructor(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
-                writer.Constructor<IComponentContext, EntityObjectFactory, ITypeMetadataCache, TConnection, bool>(
-                    (cw, components, entityFactory, metadata, connection, autoCommit) => {
+                writer.Constructor<IResourceConsumerScopeHandle, IComponentContext, EntityObjectFactory, ITypeMetadataCache, TConnection, bool>(
+                    (cw, scope, components, entityFactory, metadata, connection, autoCommit) => {
                         cw.Base(
+                            scope, 
                             components,
                             entityFactory,
                             Static.Func<TModel>(_methodGetOrBuildDbCompieldModel, metadata, connection),

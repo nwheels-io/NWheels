@@ -21,7 +21,7 @@ namespace NWheels.Stacks.EntityFramework
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<EfEntityObjectFactory>().SingleInstance();
-            builder.RegisterType<EfDataRepositoryFactory>().As<IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
+            builder.RegisterType<EfDataRepositoryFactory>().As<IDataRepositoryFactory, DataRepositoryFactoryBase, IAutoObjectFactory>().SingleInstance();
             builder.RegisterInstance(SqlClientFactory.Instance).As<DbProviderFactory>();
 
             builder.NWheelsFeatures().Logging().RegisterLogger<IDbCommandLogger>();

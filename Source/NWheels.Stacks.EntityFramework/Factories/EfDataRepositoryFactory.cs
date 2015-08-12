@@ -10,6 +10,7 @@ using Autofac;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
+using NWheels.Concurrency;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
@@ -50,13 +51,13 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IApplicationDataRepository NewUnitOfWork(Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
+        public override IApplicationDataRepository NewUnitOfWork(IResourceConsumerScopeHandle consumerScope, Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
         {
             var connection = _dbProvider.CreateConnection();
             connection.ConnectionString = _config.ConnectionString;
             connection.Open();
 
-            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(_components, _entityFactory, _metadataCache, connection, autoCommit);
+            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(consumerScope, _components, _entityFactory, _metadataCache, connection, autoCommit);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

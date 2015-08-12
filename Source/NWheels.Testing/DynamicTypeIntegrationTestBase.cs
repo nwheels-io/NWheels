@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using Hapil;
 using NUnit.Framework;
 
@@ -11,14 +12,14 @@ namespace NWheels.Testing
     [TestFixture]
     public class DynamicTypeIntegrationTestBase : IntegrationTestBase
     {
-        private Hapil.DynamicModule _dyamicModule;
+        private Hapil.DynamicModule _dynamicModule;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [TestFixtureSetUp]
         public void BaseFixtureSetUp()
         {
-            _dyamicModule = new DynamicModule(
+            _dynamicModule = new DynamicModule(
                 "EmittedBy" + this.GetType().Name,
                 allowSave: true,
                 saveDirectory: TestContext.CurrentContext.TestDirectory);
@@ -29,14 +30,25 @@ namespace NWheels.Testing
         [TestFixtureTearDown]
         public void BaseFixtureTearDown()
         {
-            _dyamicModule.SaveAssembly();
+            _dynamicModule.SaveAssembly();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public DynamicModule DyamicModule
         {
-            get { return _dyamicModule; }
+            get { return _dynamicModule; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of TestFixtureWithoutNodeHosts
+
+        protected override DynamicModule CreateDynamicModule()
+        {
+            return _dynamicModule;
+        }
+
+        #endregion
     }
 }

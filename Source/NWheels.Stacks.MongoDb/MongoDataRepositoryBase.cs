@@ -2,6 +2,7 @@
 using System.Linq;
 using Autofac;
 using MongoDB.Driver;
+using NWheels.Concurrency;
 using NWheels.Conventions.Core;
 using NWheels.Entities.Core;
 using NWheels.Stacks.MongoDb.Factories;
@@ -15,12 +16,13 @@ namespace NWheels.Stacks.MongoDb
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected MongoDataRepositoryBase(
+            IResourceConsumerScopeHandle consumerScope,
             IComponentContext components,
             IEntityObjectFactory objectFactory, 
             object emptyModel, 
             MongoDatabase database, 
             bool autoCommit)
-            : base(components, autoCommit)
+            : base(consumerScope, components, autoCommit)
         {
             _database = database;
         }

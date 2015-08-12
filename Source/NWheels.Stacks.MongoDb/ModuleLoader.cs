@@ -11,6 +11,7 @@ using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using MongoDB.Bson;
+using NWheels.Conventions.Core;
 using NWheels.Entities.Core;
 using NWheels.Stacks.MongoDb.Factories;
 
@@ -21,7 +22,7 @@ namespace NWheels.Stacks.MongoDb
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<MongoEntityObjectFactory>().SingleInstance();
-            builder.RegisterType<MongoDataRepositoryFactory>().As<IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
+            builder.RegisterType<MongoDataRepositoryFactory>().As<DataRepositoryFactoryBase, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<MongoDatabaseInitializer>().As<IStorageInitializer>().SingleInstance();
             builder.NWheelsFeatures().Entities().UseDefaultIdsOfType<ObjectId>();
             //TODO: add logging component

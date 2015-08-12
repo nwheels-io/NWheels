@@ -2,6 +2,7 @@
 using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Infrastructure;
 using Autofac;
+using NWheels.Concurrency;
 using NWheels.Conventions.Core;
 using NWheels.Entities.Core;
 
@@ -17,12 +18,13 @@ namespace NWheels.Stacks.EntityFramework
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected EfDataRepositoryBase(
+            IResourceConsumerScopeHandle consumerScope,
             IComponentContext components, 
             IEntityObjectFactory entityFactory, 
             DbCompiledModel compiledModel, 
             DbConnection connection, 
             bool autoCommit)
-            : base(components, autoCommit)
+            : base(consumerScope, components, autoCommit)
         {
             _entityFactory = entityFactory;
             _compiledModel = compiledModel;
@@ -35,7 +37,13 @@ namespace NWheels.Stacks.EntityFramework
 
         public override void Dispose()
         {
-            _objectContext.Dispose();
+            bool shouldDisposeResourcesNow;
+            base.DisposeConsumerScope(out shouldDisposeResourcesNow);
+
+            if ( shouldDisposeResourcesNow )
+            {
+                _objectContext.Dispose();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

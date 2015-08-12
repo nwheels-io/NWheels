@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Hapil;
+using NWheels.Authorization;
 using NWheels.Concurrency;
 using NWheels.Concurrency.Core;
 using NWheels.Entities;
@@ -16,6 +18,7 @@ using NWheels.Configuration;
 using NWheels.Configuration.Core;
 using NWheels.Conventions;
 using NWheels.Conventions.Core;
+using NWheels.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
@@ -34,7 +37,7 @@ namespace NWheels.Testing
         private readonly TestThreadLogAppender _logAppender;
         private readonly LoggerObjectFactory _loggerFactory;
         private readonly ConfigurationObjectFactory _configurationFactory;
-        private readonly TestDataRepositoryFactory _dataRepositoryFactory;
+        private readonly UnitOfWorkFactory _unitOfWorkFactory;
         //private readonly TypeMetadataCache _metadataCache;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -66,7 +69,7 @@ namespace NWheels.Testing
 
             _components = BuildComponentContainer();
             _configurationFactory = _components.Resolve<ConfigurationObjectFactory>();
-            _dataRepositoryFactory = _components.Resolve<TestDataRepositoryFactory>();
+            _unitOfWorkFactory = new UnitOfWorkFactory(_components);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -81,14 +84,14 @@ namespace NWheels.Testing
         public TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, IsolationLevel? isolationLevel = null) 
             where TRepository : class, IApplicationDataRepository
         {
-            return _dataRepositoryFactory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel);
+            return _unitOfWorkFactory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IApplicationDataRepository NewUnitOfWork(Type repositoryContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null)
         {
-            return _dataRepositoryFactory.NewUnitOfWork(repositoryContractType, autoCommit, isolationLevel);
+            return _unitOfWorkFactory.NewUnitOfWork(repositoryContractType, autoCommit, isolationLevel);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -165,6 +168,18 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IIdentityInfo CurrentIdentity 
+        {
+            get
+            {
+                return (
+                    PresetIdentity ?? 
+                    (Thread.CurrentPrincipal != null ? Thread.CurrentPrincipal.Identity as IIdentityInfo : null));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Guid CurrentCorrelationId
         {
             get
@@ -219,14 +234,7 @@ namespace NWheels.Testing
 
         public TSection ConfigSection<TSection>() where TSection : class, IConfigurationSection
         {
-            return _configurationFactory.CreateService<TSection>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public Auto<TSection> ConfigSectionAuto<TSection>() where TSection : class, IConfigurationSection
-        {
-            return new Auto<TSection>(_configurationFactory.CreateService<TSection>());
+            return _components.Resolve<TSection>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -285,6 +293,7 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IIdentityInfo PresetIdentity { get; set; }
         public Queue<Guid> PresetGuids { get; private set; }
         public Queue<int> PresetRandomInt32 { get; private set; }
         public Queue<long> PresetRandomInt64 { get; private set; }

@@ -51,7 +51,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
 
             //-- act
 
-            var repository = repoFactory.NewUnitOfWork<IR1.IOnlineStoreRepository>(autoCommit: true);
+            var repository = Framework.NewUnitOfWork<IR1.IOnlineStoreRepository>(autoCommit: true);
 
             //-- assert
 

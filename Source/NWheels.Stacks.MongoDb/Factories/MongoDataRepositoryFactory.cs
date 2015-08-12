@@ -6,6 +6,7 @@ using Hapil.Operands;
 using Hapil.Writers;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
+using NWheels.Concurrency;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
@@ -41,7 +42,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IApplicationDataRepository NewUnitOfWork(Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
+        public override IApplicationDataRepository NewUnitOfWork(IResourceConsumerScopeHandle consumerScope, Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
         {
             var connectionString = new MongoConnectionStringBuilder(_config.ConnectionString);
             var client = new MongoClient(_config.ConnectionString);
@@ -49,6 +50,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             var database = server.GetDatabase(connectionString.DatabaseName);
 
             return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(
+                consumerScope,
                 _components, 
                 _entityFactory, 
                 _metadataCache, 

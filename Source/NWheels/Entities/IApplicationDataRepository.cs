@@ -9,9 +9,10 @@ namespace NWheels.Entities
 {
     public interface IApplicationDataRepository : IUnitOfWork
     {
-        void InvokeGenericOperation(Type contractType, IDataRepositoryCallback callback);
+        void InvokeGenericOperation(Type entityContractType, IDataRepositoryCallback callback);
         Type[] GetEntityTypesInRepository();
         Type[] GetEntityContractsInRepository();
         IEntityRepository[] GetEntityRepositories();
+        IEntityRepository GetEntityRepository(Type entityContractType);
     }
 }

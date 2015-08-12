@@ -15,6 +15,7 @@ using NWheels.DataObjects.Core.Factories;
 using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.TypeModel.Core;
+using NWheels.TypeModel.Core.Factories;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Entities.Factories
@@ -72,6 +73,8 @@ namespace NWheels.Entities.Factories
                 new DomainObjectConstructorInjectionConvention(domainFactoryContext), 
                 new DomainObjectPropertyImplementationConvention(domainFactoryContext), 
                 new ContainedPersistableObjectConvention(domainFactoryContext),
+                new ImplementIObjectConvention(),
+                new ActiveRecordConvention(domainFactoryContext),
                 new DomainObjectMethodsConvention(domainFactoryContext)
             };
         }

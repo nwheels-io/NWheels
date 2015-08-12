@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using NWheels.Core;
 using NWheels.DataObjects.Core;
 using NWheels.Entities.Core;
+using NWheels.Extensions;
 using NWheels.TypeModel.Core;
 
 namespace NWheels.Entities.Factories
@@ -65,6 +67,32 @@ namespace NWheels.Entities.Factories
                         domainObjectFactory.CreateDomainObjectInstance(nested);
                     }
                 }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void SaveActiveRecordObject(IDomainObject domainObject, IFramework framework)
+        {
+            var coreFramework = (ICoreFramework)framework;
+
+            using ( var dataRepository = coreFramework.NewUnitOfWorkForEntity(domainObject.ContractType) )
+            {
+                var entityRepository = dataRepository.GetEntityRepository(domainObject.ContractType);
+                entityRepository.Update(domainObject);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void DeleteActiveRecordObject(IDomainObject domainObject, IFramework framework)
+        {
+            var coreFramework = (ICoreFramework)framework;
+
+            using ( var dataRepository = coreFramework.NewUnitOfWorkForEntity(domainObject.ContractType) )
+            {
+                var entityRepository = dataRepository.GetEntityRepository(domainObject.ContractType);
+                entityRepository.Delete(domainObject);
             }
         }
     }

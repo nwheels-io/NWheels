@@ -81,6 +81,7 @@ namespace NWheels.Entities.Factories
         public Type PersistableObjectType { get; private set; }
         public Field<TT2.TPersistable> PersistableObjectField { get; set; }
         public Field<IDomainObjectFactory> DomainObjectFactoryField { get; set; }
+        public Field<IFramework> FrameworkField { get; set; }
         public TypeMemberCache DomainObjectMembers { get; private set; }
         public TypeMemberCache PersistableObjectMembers { get; private set; }
         public PropertyImplementationStrategyMap PropertyMap { get; private set; }

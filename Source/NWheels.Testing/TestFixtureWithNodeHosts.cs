@@ -20,6 +20,7 @@ using NWheels.Hosting;
 using NWheels.Hosting.Core;
 using NWheels.Logging;
 using NWheels.Logging.Core;
+using NWheels.Testing.Controllers;
 using NWheels.Testing.Entities.Impl;
 
 namespace NWheels.Testing
@@ -27,7 +28,120 @@ namespace NWheels.Testing
     [TestFixture]
     public abstract class TestFixtureWithNodeHosts
     {
+        private ApplicationController _controller;
+        private Stopwatch _clock;
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [SetUp]
+        public void BaseSetUp()
+        {
+            Thread.CurrentPrincipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+            StartApplication();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [TearDown]
+        public void BaseTearDown()
+        {
+            StopApplication();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TestAgentComponent AgentComponent { get; internal set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void OnBuildingBootConfig(BootConfiguration configuration)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void OnRegisteringHostComponents(Autofac.ContainerBuilder builder)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal protected virtual void OnRegisteringModuleComponents(Autofac.ContainerBuilder builder)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void StartApplication()
+        {
+            var bootConfig = CreateBootConfiguration();
+
+            _clock = Stopwatch.StartNew();
+            _controller = new ApplicationController(new ConsolePlainLog(" ctr ", LogLevel.Debug, _clock), bootConfig);
+            
+            _controller.InjectingComponents += (sender, args) => {
+                args.ContainerBuilder.RegisterInstance<TestFixtureWithNodeHosts>(this);
+                args.ContainerBuilder.RegisterInstance(new ConsolePlainLog(" APP ", LogLevel.Debug, _clock)).As<IPlainLog>();
+                
+                OnRegisteringHostComponents(args.ContainerBuilder);
+            };
+
+            _controller.LoadAndActivate();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void StopApplication()
+        {
+            _controller.DeactivateAndUnload();
+            _controller = null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual string ApplicationName
+        {
+            get { return "TESTAPP"; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual string NodeName
+        {
+            get { return "TESTNODE"; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual string NodeInstanceId
+        {
+            get { return "1"; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected BootConfiguration CreateBootConfiguration()
+        {
+            NWheels.Stacks.Nlog.NLogBasedPlainLog.Instance.ConfigureConsoleOutput();
+
+            var bootConfig = new BootConfiguration {
+                ApplicationName = this.ApplicationName,
+                EnvironmentName = "TEST",
+                EnvironmentType = "TEST",
+                NodeName = this.NodeName,
+                InstanceId = this.NodeInstanceId,
+                FrameworkModules = new List<BootConfiguration.ModuleConfig>(),
+                ApplicationModules = new List<BootConfiguration.ModuleConfig>(),
+                ConfigFiles = new List<BootConfiguration.ConfigFile>(),
+                LoadedFromDirectory = TestContext.CurrentContext.TestDirectory
+            };
+
+            TestAgentComponent.RegisterInBootConfig(bootConfig);
+            OnBuildingBootConfig(bootConfig);
+
+            bootConfig.Validate();
+            return bootConfig;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

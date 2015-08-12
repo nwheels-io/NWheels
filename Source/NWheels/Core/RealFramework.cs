@@ -4,13 +4,16 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using NWheels.Authorization;
 using NWheels.Concurrency.Core;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Entities;
 using NWheels.Concurrency;
 using NWheels.Logging.Core;
+using System.Collections.Concurrent;
 
 namespace NWheels.Core
 {
@@ -19,6 +22,7 @@ namespace NWheels.Core
         private readonly IComponentContext _components;
         private readonly INodeConfiguration _nodeConfig;
         private readonly IThreadLogAnchor _threadLogAnchor;
+        private readonly UnitOfWorkFactory _unitOfWorkFactory;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -27,29 +31,35 @@ namespace NWheels.Core
             _components = components;
             _nodeConfig = nodeConfig;
             _threadLogAnchor = threadLogAnchor;
+            _unitOfWorkFactory = new UnitOfWorkFactory(components);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public T New<T>() where T : class
         {
-            throw new NotImplementedException();
+            using ( var unitOfWork = NewUnitOfWorkForEntity(typeof(T)) )
+            {
+                var entityRepository = unitOfWork.GetEntityRepository(typeof(T));
+                return (T)entityRepository.New(typeof(T));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TRepository NewUnitOfWork<TRepository>(bool autoCommit, IsolationLevel? isolationLevel = null) where TRepository : class, IApplicationDataRepository
         {
-            var factory = _components.Resolve<IDataRepositoryFactory>();
-            return factory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel);
+            return _unitOfWorkFactory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IApplicationDataRepository NewUnitOfWork(Type repositoryContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null)
+        public IApplicationDataRepository NewUnitOfWorkForEntity(Type entityContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null)
         {
-            var factory = _components.Resolve<IDataRepositoryFactory>();
-            return factory.NewUnitOfWork(repositoryContractType, autoCommit, isolationLevel);
+            var dataRepositoryFactory = _components.Resolve<IDataRepositoryFactory>();
+            var dataRepositoryContract = dataRepositoryFactory.GetDataRepositoryContract(entityContractType);
+            
+            return _unitOfWorkFactory.NewUnitOfWork(dataRepositoryContract, autoCommit, isolationLevel);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -117,6 +127,23 @@ namespace NWheels.Core
             get
             {
                 return _nodeConfig;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IIdentityInfo CurrentIdentity
+        {
+            get
+            {
+                var principal = Thread.CurrentPrincipal;
+
+                if ( principal != null )
+                {
+                    return (principal.Identity as IIdentityInfo);
+                }
+
+                return null;
             }
         }
 

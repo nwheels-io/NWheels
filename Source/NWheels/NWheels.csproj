@@ -95,12 +95,17 @@
     <Compile Include="Authorization\IEntityAccessControlBuilder.cs" />
     <Compile Include="Authorization\IEntityAccessRule.cs" />
     <Compile Include="Authorization\IIdentityInfo.cs" />
+    <Compile Include="Concurrency\ContextAnchor.cs" />
     <Compile Include="Concurrency\ITimerHandle.cs" />
+    <Compile Include="Concurrency\IResourceConsumerScopeHandle.cs" />
+    <Compile Include="Concurrency\PerContextResourceConsumerScope.cs" />
     <Compile Include="Core\ICoreFramework.cs" />
+    <Compile Include="Core\UnitOfWorkFactory.cs" />
     <Compile Include="Entities\Core\IDomainObject.cs" />
     <Compile Include="Entities\Core\IPersistableObject.cs" />
     <Compile Include="Entities\Core\IStorageSchemaNamingConvention.cs" />
     <Compile Include="Entities\EntityStateInfo.cs" />
+    <Compile Include="Entities\Factories\ActiveRecordConvention.cs" />
     <Compile Include="Entities\Factories\ContainedPersistableObjectConvention.cs" />
     <Compile Include="Entities\Factories\DomainObjectBaseTypeConvention.cs" />
     <Compile Include="Entities\Factories\DomainObjectConstructorInjectionConvention.cs" />
@@ -194,6 +199,7 @@
     <Compile Include="UI\Toolbox\Crud.cs" />
     <Compile Include="UI\Toolbox\CrudForm.cs" />
     <Compile Include="Utilities\AssemblyUtility.cs" />
+    <Compile Include="Utilities\ExpressionUtility.cs" />
     <Compile Include="Utilities\SecureStringUtility.cs" />
     <Compile Include="SecurityCheck.cs" />
     <Compile Include="Auto.cs" />
