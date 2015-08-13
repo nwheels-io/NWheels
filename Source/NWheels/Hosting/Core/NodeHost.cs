@@ -13,6 +13,7 @@ using Autofac.Extras.Multitenant;
 using Hapil;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using NWheels.Concurrency.Impl;
 using NWheels.Configuration;
 using NWheels.Configuration.Core;
 using NWheels.Conventions;
@@ -433,8 +434,8 @@ namespace NWheels.Hosting.Core
 
         private class BootTimeFramework : RealFramework
         {
-            public BootTimeFramework(IComponentContext components, INodeConfiguration nodeConfig, IThreadLogAnchor threadLogAnchor)
-                : base(components, nodeConfig, threadLogAnchor)
+            public BootTimeFramework(IComponentContext components, INodeConfiguration nodeConfig, IThreadLogAnchor threadLogAnchor, RealTimeoutManager timeoutManager)
+                : base(components, nodeConfig, threadLogAnchor, timeoutManager)
             {
             }
         }

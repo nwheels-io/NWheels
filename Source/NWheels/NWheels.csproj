@@ -96,7 +96,8 @@
     <Compile Include="Authorization\IEntityAccessRule.cs" />
     <Compile Include="Authorization\IIdentityInfo.cs" />
     <Compile Include="Concurrency\ContextAnchor.cs" />
-    <Compile Include="Concurrency\ITimerHandle.cs" />
+    <Compile Include="Concurrency\Impl\TimeoutManager.cs" />
+    <Compile Include="Concurrency\ITimeoutHandle.cs" />
     <Compile Include="Concurrency\IResourceConsumerScopeHandle.cs" />
     <Compile Include="Concurrency\PerContextResourceConsumerScope.cs" />
     <Compile Include="Core\ICoreFramework.cs" />
@@ -536,7 +537,6 @@
     <Compile Include="Utilities\Core\UtilityToolBase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Concurrency\Impl\" />
     <Folder Include="Processing\Rules\Impl\" />
     <Folder Include="UI\Old2\" />
     <Folder Include="UI\OldToolbox\" />

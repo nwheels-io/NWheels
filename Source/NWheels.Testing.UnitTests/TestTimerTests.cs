@@ -14,7 +14,7 @@ namespace NWheels.Testing.UnitTests
         public void CanSetupNewTimer()
         {
             Framework.NewTimer<int>(
-                "T1", "I1", TimeSpan.Zero, TimeSpan.FromSeconds(1), 
+                "T1", "I1", TimeSpan.Zero,
                 parameter => {
                     Console.WriteLine(parameter);    
                 }, 

@@ -35,20 +35,18 @@ namespace NWheels
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        ITimerHandle NewTimer(
+        ITimeoutHandle NewTimer(
             string timerName,
             string timerInstanceId,
             TimeSpan initialDueTime,
-            TimeSpan? recurringPeriod,
             Action callback);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        ITimerHandle NewTimer<TParam>(
+        ITimeoutHandle NewTimer<TParam>(
             string timerName, 
             string timerInstanceId, 
             TimeSpan initialDueTime, 
-            TimeSpan? recurringPeriod, 
             Action<TParam> callback, 
             TParam parameter);
     }

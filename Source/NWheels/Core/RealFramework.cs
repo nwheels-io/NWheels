@@ -12,6 +12,7 @@ using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Entities;
 using NWheels.Concurrency;
+using NWheels.Concurrency.Impl;
 using NWheels.Logging.Core;
 using System.Collections.Concurrent;
 
@@ -23,15 +24,17 @@ namespace NWheels.Core
         private readonly INodeConfiguration _nodeConfig;
         private readonly IThreadLogAnchor _threadLogAnchor;
         private readonly UnitOfWorkFactory _unitOfWorkFactory;
+        private readonly RealTimeoutManager _timeoutManager;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public RealFramework(IComponentContext components, INodeConfiguration nodeConfig, IThreadLogAnchor threadLogAnchor)
+        public RealFramework(IComponentContext components, INodeConfiguration nodeConfig, IThreadLogAnchor threadLogAnchor, RealTimeoutManager timeoutManager)
         {
             _components = components;
             _nodeConfig = nodeConfig;
             _threadLogAnchor = threadLogAnchor;
             _unitOfWorkFactory = new UnitOfWorkFactory(components);
+            _timeoutManager = timeoutManager;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -92,22 +95,25 @@ namespace NWheels.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ITimerHandle NewTimer(string timerName, string timerInstanceId, TimeSpan initialDueTime, TimeSpan? recurringPeriod, Action callback)
+        public ITimeoutHandle NewTimer(string timerName, string timerInstanceId, TimeSpan initialDueTime, Action callback)
         {
-            throw new NotImplementedException();
+            RealTimeoutHandle h = new RealTimeoutHandleNoParam(timerName, timerInstanceId, initialDueTime, callback, _timeoutManager);
+            _timeoutManager.AddTimeoutEvent(h);
+            return h;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ITimerHandle NewTimer<TParam>(
+        public ITimeoutHandle NewTimer<TParam>(
             string timerName, 
             string timerInstanceId, 
             TimeSpan initialDueTime, 
-            TimeSpan? recurringPeriod, 
             Action<TParam> callback, 
             TParam parameter)
         {
-            throw new NotImplementedException();
+            RealTimeoutHandle h = new RealTimeoutHandle<TParam>(timerName, timerInstanceId, initialDueTime, callback, parameter, _timeoutManager);
+            _timeoutManager.AddTimeoutEvent(h);
+            return h;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

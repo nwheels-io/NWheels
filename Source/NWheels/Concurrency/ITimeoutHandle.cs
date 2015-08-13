@@ -6,15 +6,14 @@ using System.Threading.Tasks;
 
 namespace NWheels.Concurrency
 {
-    public interface ITimerHandle : IDisposable
+    public interface ITimeoutHandle : IDisposable
     {
-        void Expand(TimeSpan delta);
-        void Expand(int deltaMilliseconds);
+        void ResetDueTime(TimeSpan newInitialDueTime);
         string TimerName { get; }
         string TimerInstanceId { get; }
         TimeSpan InitialDueTime { get; }
-        TimeSpan? RecurringPeriod { get; }
         DateTime DueTimeUtc { get; }
-        int TickCount { get; }
+
+        void CancelTimer();
     }
 }

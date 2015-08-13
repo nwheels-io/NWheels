@@ -103,19 +103,17 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ITimerHandle NewTimer(
+        public ITimeoutHandle NewTimer(
             string timerName,
             string timerInstanceId,
             TimeSpan initialDueTime,
-            TimeSpan? recurringPeriod,
             Action callback)
         {
-            return new TestTimer<object>(
+            return new TestTimeout<object>(
                 this, 
                 timerName, 
                 timerInstanceId, 
                 initialDueTime, 
-                recurringPeriod, 
                 callback: obj => {
                     callback();
                 }, 
@@ -124,15 +122,14 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ITimerHandle NewTimer<TParam>(
+        public ITimeoutHandle NewTimer<TParam>(
             string timerName, 
             string timerInstanceId, 
             TimeSpan initialDueTime, 
-            TimeSpan? recurringPeriod, 
             Action<TParam> callback, 
             TParam parameter)
         {
-            return new TestTimer<TParam>(this, timerName, timerInstanceId, initialDueTime, recurringPeriod, callback, parameter);
+            return new TestTimeout<TParam>(this, timerName, timerInstanceId, initialDueTime, callback, parameter);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

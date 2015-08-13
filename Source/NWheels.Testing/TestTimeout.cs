@@ -7,30 +7,30 @@ using NWheels.Concurrency;
 
 namespace NWheels.Testing
 {
-    public class TestTimer<TParam> : ITimerHandle
+    public class TestTimeout<TParam> : ITimeoutHandle
     {
         private readonly Action<TParam> _callback;
         private readonly TParam _parameter;
+        private TestFramework _framework;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TestTimer(
+        public TestTimeout(
             TestFramework framework,
             string timerName,
             string timerInstanceId,
             TimeSpan initialDueTime,
-            TimeSpan? recurringPeriod,
             Action<TParam> callback,
             TParam parameter)
         {
             _callback = callback;
             _parameter = parameter;
+            _framework = framework;
 
             this.TimerName = timerName;
             this.TimerInstanceId = timerInstanceId;
             this.DueTimeUtc = framework.UtcNow.Add(initialDueTime);
             this.InitialDueTime = initialDueTime;
-            this.RecurringPeriod = recurringPeriod;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -48,16 +48,9 @@ namespace NWheels.Testing
 
         #region Implementation of ITimerHandle
 
-        public void Expand(TimeSpan delta)
+        public void ResetDueTime(TimeSpan newInitialDueTime)
         {
-            DueTimeUtc = DueTimeUtc.Add(delta);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void Expand(int deltaMilliseconds)
-        {
-            DueTimeUtc = DueTimeUtc.AddMilliseconds(deltaMilliseconds);
+            DueTimeUtc = _framework.UtcNow.Add(newInitialDueTime);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,21 +58,24 @@ namespace NWheels.Testing
         public string TimerName { get; private set; }
         public string TimerInstanceId { get; private set; }
         public TimeSpan InitialDueTime { get; private set; }
-        public TimeSpan? RecurringPeriod { get; private set; }
         public DateTime DueTimeUtc { get; set; }
-        public int TickCount { get; set; }
+
+        public void CancelTimer()
+        {
+            IsCancelled = true;
+        }
 
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public bool IsDisposed { get; private set; }
+        public bool IsCancelled { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void PerformTick()
         {
-            TickCount++;
             _callback(_parameter);
         }
     }
