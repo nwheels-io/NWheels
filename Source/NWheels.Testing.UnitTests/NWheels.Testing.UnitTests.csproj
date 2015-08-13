@@ -63,6 +63,7 @@
     <Compile Include="LogexTests.cs" />
     <Compile Include="LogNodeList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestTimerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels.Testing\NWheels.Testing.csproj">

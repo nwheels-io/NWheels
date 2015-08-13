@@ -100,6 +100,40 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ITimerHandle NewTimer(
+            string timerName,
+            string timerInstanceId,
+            TimeSpan initialDueTime,
+            TimeSpan? recurringPeriod,
+            Action callback)
+        {
+            return new TestTimer<object>(
+                this, 
+                timerName, 
+                timerInstanceId, 
+                initialDueTime, 
+                recurringPeriod, 
+                callback: obj => {
+                    callback();
+                }, 
+                parameter: null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ITimerHandle NewTimer<TParam>(
+            string timerName, 
+            string timerInstanceId, 
+            TimeSpan initialDueTime, 
+            TimeSpan? recurringPeriod, 
+            Action<TParam> callback, 
+            TParam parameter)
+        {
+            return new TestTimer<TParam>(this, timerName, timerInstanceId, initialDueTime, recurringPeriod, callback, parameter);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Guid NewGuid()
         {
             return (PresetGuids.Count > 0 ? PresetGuids.Dequeue() : Guid.NewGuid());

@@ -82,6 +82,26 @@ namespace NWheels.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ITimerHandle NewTimer(string timerName, string timerInstanceId, TimeSpan initialDueTime, TimeSpan? recurringPeriod, Action callback)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ITimerHandle NewTimer<TParam>(
+            string timerName, 
+            string timerInstanceId, 
+            TimeSpan initialDueTime, 
+            TimeSpan? recurringPeriod, 
+            Action<TParam> callback, 
+            TParam parameter)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IComponentContext Components
         {
             get

@@ -95,6 +95,7 @@
     <Compile Include="Authorization\IEntityAccessControlBuilder.cs" />
     <Compile Include="Authorization\IEntityAccessRule.cs" />
     <Compile Include="Authorization\IIdentityInfo.cs" />
+    <Compile Include="Concurrency\ITimerHandle.cs" />
     <Compile Include="Core\ICoreFramework.cs" />
     <Compile Include="Entities\Core\IDomainObject.cs" />
     <Compile Include="Entities\Core\IPersistableObject.cs" />
@@ -529,6 +530,7 @@
     <Compile Include="Utilities\Core\UtilityToolBase.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Concurrency\Impl\" />
     <Folder Include="Processing\Rules\Impl\" />
     <Folder Include="UI\Old2\" />
     <Folder Include="UI\OldToolbox\" />

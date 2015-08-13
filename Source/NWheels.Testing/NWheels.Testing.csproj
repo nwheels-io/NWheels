@@ -105,6 +105,7 @@
     <Compile Include="TestThreadLogAppender.cs" />
     <Compile Include="TestFixtureWithoutNodeHosts.cs" />
     <Compile Include="IntegrationTestBase.cs" />
+    <Compile Include="TestTimer.cs" />
     <Compile Include="UnitTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
