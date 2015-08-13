@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Timers;
 using NWheels.Hosting;
+using Timer = System.Timers.Timer;
 
 namespace NWheels.Concurrency.Impl
 {
@@ -37,14 +39,10 @@ namespace NWheels.Concurrency.Impl
         public string TimerInstanceId { get; private set; }
         public TimeSpan InitialDueTime { get; private set; }
         public DateTime DueTimeUtc { get; internal set; }
+
         public void CancelTimer()
         {
-            RealTimeoutManager mgr = _relatedManager;
-            if (mgr != null)
-            {
-                mgr.CancelTimeOutEvent(this);
-                _relatedManager = null;
-            }
+            _relatedManager.CancelTimeOutEvent(this);
         }
 
         #endregion
@@ -228,19 +226,30 @@ namespace NWheels.Concurrency.Impl
                     }
                 }
 
-                foreach (RealTimeoutHandle h in allTimeOutEventsToInvoke)
+                foreach (RealTimeoutHandle handle in allTimeOutEventsToInvoke)
                 {
-                    try
-                    {
-                        h.Invoke();
-                    }
-                    catch ( Exception )
-                    {
-                    }
+                    ThreadPool.QueueUserWorkItem(Invoke, handle);
                 }
             }
             catch (Exception)
             {
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void Invoke(object realTimeoutHandleObject)
+        {
+            var timeoutHandle = (RealTimeoutHandle)realTimeoutHandleObject;
+
+            try
+            {
+                timeoutHandle.Invoke();
+            }
+            catch ( Exception )
+            {
+                
+                throw;
             }
         }
 
