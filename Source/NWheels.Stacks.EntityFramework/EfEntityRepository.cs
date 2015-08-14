@@ -110,6 +110,13 @@ namespace NWheels.Stacks.EntityFramework
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        void IEntityRepository.Save(object entity)
+        {
+            this.Save((TEntityContract)entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         void IEntityRepository.Insert(object entity)
         {
             this.Insert((TEntityContract)entity);
@@ -197,6 +204,16 @@ namespace NWheels.Stacks.EntityFramework
         {
             _ownerRepo.ValidateOperationalState();
             return QueryWithIncludedProperties(_objectSet.OfType<TEntityImpl>(), properties);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Save(TEntityContract entity)
+        {
+            _ownerRepo.ValidateOperationalState();
+            var persistableObject = entity.As<IPersistableObject>();
+
+            _objectSet.AddObject((TEntityImpl)persistableObject);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

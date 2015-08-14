@@ -79,7 +79,7 @@ namespace NWheels.Entities.Factories
             using ( var dataRepository = coreFramework.NewUnitOfWorkForEntity(domainObject.ContractType) )
             {
                 var entityRepository = dataRepository.GetEntityRepository(domainObject.ContractType);
-                entityRepository.Update(domainObject);
+                entityRepository.Save(domainObject);
             }
         }
 

@@ -5,8 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using NWheels.Entities;
+using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.Hosting;
+using NWheels.Logging.Core;
 
 namespace NWheels.Testing
 {
@@ -15,16 +17,31 @@ namespace NWheels.Testing
         private readonly TestFixtureWithNodeHosts _testFixtureInstance;
         private readonly IComponentContext _components;
         private readonly IFramework _framework;
+        private readonly IFrameworkDatabaseConfig _dbConfig;
+        private readonly IStorageInitializer _storageInitializer;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TestAgentComponent(IComponentContext components, IFramework framework, TestFixtureWithNodeHosts testFixtureInstance)
+        public TestAgentComponent(
+            IComponentContext components, 
+            IFramework framework, 
+            IStorageInitializer storageInitializer,
+            IFrameworkLoggingConfiguration loggingConfig,
+            IFrameworkDatabaseConfig dbConfig,
+            TestFixtureWithNodeHosts testFixtureInstance)
         {
             _testFixtureInstance = testFixtureInstance;
             _components = components;
             _framework = framework;
+            _dbConfig = dbConfig;
+            _storageInitializer = storageInitializer;
             
-            _testFixtureInstance.AgentComponent = null;
+            _testFixtureInstance.AgentComponent = this;
+            _testFixtureInstance.OnInitializingAgentComponent();
+
+            loggingConfig.SuppressDynamicArtifacts = false;
+
+            _storageInitializer.DropStorageSchema(_dbConfig.ConnectionString);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

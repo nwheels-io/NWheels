@@ -15,7 +15,7 @@ namespace NWheels.Domains.Security
         IEntityRepository<IUserRoleEntity> UserRoles { get; }
         IEntityRepository<IOperationPermissionEntity> OperationPermissions { get; }
         IEntityRepository<IEntityAccessRuleEntity> EntityAccessRules { get; }
-        IPasswordEntity NewPassword();
+        IPasswordEntity NewPassword(string clearText);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

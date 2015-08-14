@@ -190,6 +190,7 @@ namespace NWheels.Conventions.Core
             {
                 ValidateRepositoryContract(writer);
                 FindEntitiesInRepository(writer);
+                _ownerFactory.UpdateEntityRepositoryMap(writer.OwnerClass.Key.PrimaryInterface, this.EntitiesInRepository.Select(e => e.ContractType));
 
                 _entityFactoryField = writer.Field<EntityObjectFactory>("EntityFactory", isPublic: true);
                 _domainObjectFactoryField = writer.Field<IDomainObjectFactory>("$domainFactory");

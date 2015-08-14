@@ -48,6 +48,13 @@ namespace NWheels.Testing.Entities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        void IEntityRepository.Save(object entity)
+        {
+            ((IEntityRepository<TEntity>)this).Save((TEntity)entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         void IEntityRepository.Insert(object entity)
         {
             ((IEntityRepository<TEntity>)this).Insert((TEntity)entity);
@@ -125,6 +132,13 @@ namespace NWheels.Testing.Entities
         IQueryable<TEntity> IEntityRepository<TEntity>.Include(params System.Linq.Expressions.Expression<Func<TEntity, object>>[] properties)
         {
             return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IEntityRepository<TEntity>.Save(TEntity entity)
+        {
+            _storedEntities.Add(entity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

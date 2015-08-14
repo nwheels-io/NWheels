@@ -9,7 +9,7 @@ using NWheels.Entities;
 
 namespace NWheels.Core
 {
-    internal interface ICoreFramework
+    public interface ICoreFramework
     {
         IApplicationDataRepository NewUnitOfWorkForEntity(Type entityContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null);
         IComponentContext Components { get; }

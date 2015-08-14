@@ -35,7 +35,7 @@ namespace NWheels.Entities.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void NodeConfigured()
+        public override void NodeLoading()
         {
             if ( _initializer.StorageSchemaExists(_configuration.ConnectionString) )
             {

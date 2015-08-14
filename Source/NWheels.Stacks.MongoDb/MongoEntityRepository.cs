@@ -125,6 +125,13 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        void IEntityRepository.Save(object entity)
+        {
+            this.Save((TEntityContract)entity.As<IPersistableObject>());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         void IEntityRepository.Insert(object entity)
         {
             this.Insert((TEntityContract)entity.As<IPersistableObject>());
@@ -286,6 +293,15 @@ namespace NWheels.Stacks.MongoDb
         {
             _ownerRepo.ValidateOperationalState();
             return this;//QueryWithIncludedProperties(_objectSet.AsQueryable(), properties);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Save(TEntityContract entity)
+        {
+            _ownerRepo.ValidateOperationalState();
+            _ownerRepo.NotifyEntityState((IEntityObject)entity.As<IPersistableObject>(), EntityState.NewModified);
+            //_mongoCollection.Insert((TEntityImpl)entity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

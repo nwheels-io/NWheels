@@ -34,7 +34,7 @@ namespace NWheels.Testing
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [SetUp]
-        public void BaseSetUp()
+        public virtual void BaseSetUp()
         {
             Thread.CurrentPrincipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
             StartApplication();
@@ -43,7 +43,7 @@ namespace NWheels.Testing
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [TearDown]
-        public void BaseTearDown()
+        public virtual void BaseTearDown()
         {
             StopApplication();
         }
@@ -72,16 +72,24 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal protected virtual void OnInitializingAgentComponent()
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected virtual void StartApplication()
         {
             var bootConfig = CreateBootConfiguration();
 
             _clock = Stopwatch.StartNew();
-            _controller = new ApplicationController(new ConsolePlainLog(" ctr ", LogLevel.Debug, _clock), bootConfig);
+            _controller = new ApplicationController(new ConsolePlainLog(" controller ", LogLevel.Debug, _clock), bootConfig);
             
             _controller.InjectingComponents += (sender, args) => {
                 args.ContainerBuilder.RegisterInstance<TestFixtureWithNodeHosts>(this);
-                args.ContainerBuilder.RegisterInstance(new ConsolePlainLog(" APP ", LogLevel.Debug, _clock)).As<IPlainLog>();
+                args.ContainerBuilder
+                    .RegisterInstance(new ConsolePlainLog(string.Format(" {0}[{1}] ", NodeName, NodeInstanceId), LogLevel.Debug, _clock))
+                    .As<IPlainLog>();
                 
                 OnRegisteringHostComponents(args.ContainerBuilder);
             };
@@ -189,10 +197,10 @@ namespace NWheels.Testing
                         Warning(node.SingleLineText + AddExceptionIf(node.Exception));
                         break;
                     case NWheels.Logging.LogLevel.Error:
-                        Error(node.SingleLineText + " + EXCEPTION [" + node.Exception.Message + "]");
+                        Error(node.SingleLineText + AddExceptionIf(node.Exception));
                         break;
                     case NWheels.Logging.LogLevel.Critical:
-                        Critical(node.SingleLineText + " + EXCEPTION [" + node.Exception.Message + "]");
+                        Critical(node.SingleLineText + AddExceptionIf(node.Exception));
                         break;
                 }
             }
@@ -284,7 +292,7 @@ namespace NWheels.Testing
             {
                 if ( exception != null )
                 {
-                    return " + EXCEPTION [" + exception.Message + "]";
+                    return " + EXCEPTION[" + exception.GetType().Name + "]: " + exception.Message;
                 }
                 else
                 {

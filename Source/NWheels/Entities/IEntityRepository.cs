@@ -12,6 +12,7 @@ namespace NWheels.Entities
     {
         object New();
         object New(Type concreteContract);
+        void Save(object entity);
         void Insert(object entity);
         void Update(object entity);
         void Delete(object entity);
@@ -28,6 +29,7 @@ namespace NWheels.Entities
         TEntity New(Type concreteContract);
         TConcreteEntity New<TConcreteEntity>() where TConcreteEntity : class, TEntity;
         IQueryable<TEntity> Include(params Expression<Func<TEntity, object>>[] properties);
+        void Save(TEntity entity);
         void Insert(TEntity entity);
         void Update(TEntity entity);
         void Delete(TEntity entity);

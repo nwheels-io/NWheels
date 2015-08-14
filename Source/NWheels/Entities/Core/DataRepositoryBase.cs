@@ -17,6 +17,7 @@ namespace NWheels.Entities.Core
         private readonly IResourceConsumerScopeHandle _consumerScope;
         private UnitOfWorkState _currentState;
         private ILifetimeScope _componentLifetimeScope;
+        private bool _disposed;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -29,6 +30,7 @@ namespace NWheels.Entities.Core
             _currentState = UnitOfWorkState.Untouched;
             _componentLifetimeScope = null;
             _consumerScope = consumerScope;
+            _disposed = false;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -152,9 +154,11 @@ namespace NWheels.Entities.Core
 
         protected void DisposeConsumerScope(out bool shouldDisposeResourcesNow)
         {
+            shouldDisposeResourcesNow = false;
+
             try
             {
-                if ( _consumerScope == null || _consumerScope.IsOutermost )
+                if ( !_disposed && (_consumerScope == null || _consumerScope.Innermost.IsOutermost) )
                 {
                     if ( _currentState == UnitOfWorkState.Dirty )
                     {
@@ -170,17 +174,15 @@ namespace NWheels.Entities.Core
 
                     shouldDisposeResourcesNow = true;
                 }
-                else
-                {
-                    shouldDisposeResourcesNow = false;
-                }
             }
             finally
             {
-                if ( _consumerScope != null )
+                if ( _consumerScope != null && !_disposed )
                 {
-                    _consumerScope.Outermost.Dispose();
+                    _consumerScope.Innermost.Dispose();
                 }
+                
+                _disposed |= shouldDisposeResourcesNow;
             }
         }
 

@@ -68,6 +68,10 @@ namespace NWheels.Stacks.MongoDb.Factories
                 p => new RelationTypecastStrategy(context, MetadataCache, metaType, p));
 
             builder.AddRule(
+                p => p.Kind == PropertyKind.Scalar && p.RelationalMapping != null && p.RelationalMapping.StorageType != null,
+                p => new StorageDataTypeStrategy(context, MetadataCache, metaType, p));
+
+            builder.AddRule(
                 p => p.Kind == PropertyKind.Scalar && !(p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite),
                 p => new PublicAccessorWrapperStrategy(context, MetadataCache, metaType, p));
 

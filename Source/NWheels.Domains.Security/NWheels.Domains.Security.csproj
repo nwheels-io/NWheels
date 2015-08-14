@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\UserAccountEntity.cs" />
     <Compile Include="Core\UserAccountPrincipal.cs" />
     <Compile Include="Entities.cs" />
     <Compile Include="Enums.cs" />

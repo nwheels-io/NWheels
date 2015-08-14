@@ -38,7 +38,6 @@ namespace NWheels.Entities.Core
             if ( shouldDisposeResourcesNow )
             {
                 base.EndLifetimeScope();
-                base.Dispose();
             }
         }
 
