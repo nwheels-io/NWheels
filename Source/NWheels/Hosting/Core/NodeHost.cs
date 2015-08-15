@@ -276,6 +276,8 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory, DomainObjectFactory>().SingleInstance();
             builder.RegisterPipeline<IDataRepositoryPopulator>();
 
+            builder.RegisterType<RealTimeoutManager>().SingleInstance();
+            
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkLoggingConfiguration>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkEndpointsConfig>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkDatabaseConfig>();
@@ -434,8 +436,8 @@ namespace NWheels.Hosting.Core
 
         private class BootTimeFramework : RealFramework
         {
-            public BootTimeFramework(IComponentContext components, INodeConfiguration nodeConfig, IThreadLogAnchor threadLogAnchor, RealTimeoutManager timeoutManager)
-                : base(components, nodeConfig, threadLogAnchor, timeoutManager)
+            public BootTimeFramework(IComponentContext components, INodeConfiguration nodeConfig, IThreadLogAnchor threadLogAnchor)
+                : base(components, nodeConfig, threadLogAnchor, timeoutManager: null)
             {
             }
         }
