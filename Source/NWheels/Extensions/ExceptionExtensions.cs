@@ -19,6 +19,17 @@ namespace NWheels.Extensions
                 text.Append(inner.Message);
             }
 
+            var aggregate = exception as AggregateException;
+
+            if ( aggregate != null )
+            {
+                foreach ( var inner in aggregate.InnerExceptions )
+                {
+                    text.Append(" -> ");
+                    text.Append(GetMessageDeep(inner));
+                }
+            }
+
             return text.ToString();
         }
     }

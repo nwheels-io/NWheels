@@ -41,7 +41,10 @@ namespace NWheels.Testing
 
             loggingConfig.SuppressDynamicArtifacts = false;
 
-            _storageInitializer.DropStorageSchema(_dbConfig.ConnectionString);
+            if ( testFixtureInstance.ShouldRebuildDatabase )
+            {
+                _storageInitializer.DropStorageSchema(_dbConfig.ConnectionString);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

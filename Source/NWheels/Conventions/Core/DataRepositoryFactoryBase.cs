@@ -455,7 +455,8 @@ namespace NWheels.Conventions.Core
                     Type entityContractType;
                     ValidateContractProperty(property, out entityContractType);
                         
-                    _metadataCache.GetTypeMetadata(entityContractType); // force entity metadata to be created now, if not yet
+                    var metaType = _metadataCache.GetTypeMetadata(entityContractType); // force entity metadata to be created now, if not yet
+                    metaType = null;
                 });
 
                 _metadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(_metadataCache));

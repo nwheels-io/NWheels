@@ -128,6 +128,13 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal protected virtual bool ShouldRebuildDatabase
+        {
+            get { return true; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected BootConfiguration CreateBootConfiguration()
         {
             NWheels.Stacks.Nlog.NLogBasedPlainLog.Instance.ConfigureConsoleOutput();
@@ -292,7 +299,7 @@ namespace NWheels.Testing
             {
                 if ( exception != null )
                 {
-                    return " + EXCEPTION[" + exception.GetType().Name + "]: " + exception.Message;
+                    return " + EXCEPTION[" + exception.GetType().Name + "]: " + exception.GetMessageDeep();
                 }
                 else
                 {
