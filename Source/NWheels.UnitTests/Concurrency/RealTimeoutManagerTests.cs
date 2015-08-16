@@ -39,13 +39,27 @@ namespace NWheels.UnitTests.Concurrency
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void TestTimeoutFeatures()
+        public void TestTimeoutFeaturesSequential()
         {
 
             _executedCounters = new Counters();
             Counters requestedCounters = new Counters();
 
-            CreateEvents(requestedCounters);
+            CreateEventsSequential(requestedCounters);
+            Thread.Sleep(10000);
+            AssertEvents(requestedCounters);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void TestTimeoutFeaturesInParallel()
+        {
+
+            _executedCounters = new Counters();
+            Counters requestedCounters = new Counters();
+
+            CreateEventsInParallel(requestedCounters);
             Thread.Sleep(10000);
             AssertEvents(requestedCounters);
         }
@@ -71,61 +85,101 @@ namespace NWheels.UnitTests.Concurrency
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void CreateEvents(Counters requestedCounters)
+        private void CreateEventsInParallel(Counters requestedCounters)
         {
             Random rnd = new Random();
 
+            Parallel.For(
+                0,
+                200000,
+                counter => {
+                    int action;
+                    lock(rnd) { action = rnd.Next(4);}
+                    int timeoutInMsec = rnd.Next(150, 4000);
+                    CreateNewTimedEvent(requestedCounters, counter, action, timeoutInMsec);
+                });
+            //for ( int i = 0 ; i < 200000 ; i++ )
+            //{
+            //    CreateNewTimedEvent(requestedCounters, action, i, timeoutInMsec);
+            //}
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void CreateEventsSequential(Counters requestedCounters)
+        {
+            Random rnd = new Random();
             for ( int i = 0 ; i < 200000 ; i++ )
             {
                 int action = rnd.Next(4);
                 int timeoutInMsec = rnd.Next(150, 4000);
+                CreateNewTimedEvent(requestedCounters, action, i, timeoutInMsec);
+            }
+        }
 
-                switch ( action )
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void CreateNewTimedEvent(Counters requestedCounters, int counter, int action, int timeoutInMsec)
+        {
+            switch ( action )
+            {
+                case 0:
                 {
-                    case 0:
+                    // Valid action without parameter
+                    AgentComponent.Framework.NewTimer("Valid No Param", counter.ToString(), TimeSpan.FromMilliseconds(timeoutInMsec), ValidNoParamCallBack);
+                    lock ( requestedCounters )
                     {
-                        // Valid action without parameter
-                        AgentComponent.Framework.NewTimer("Valid No Param", i.ToString(), TimeSpan.FromMilliseconds(timeoutInMsec), ValidNoParamCallBack);
                         requestedCounters.ValidNoParamsCbs++;
-                        break;
                     }
-                    case 1:
+                    break;
+                }
+                case 1:
+                {
+                    // Valid action with parameter
+                    AgentComponent.Framework.NewTimer(
+                        "Valid With Param",
+                        counter.ToString(),
+                        TimeSpan.FromMilliseconds(timeoutInMsec),
+                        ValidWithParamCallBack,
+                        _executedCounters);
+                    lock ( requestedCounters )
                     {
-                        // Valid action with parameter
-                        AgentComponent.Framework.NewTimer(
-                            "Valid With Param",
-                            i.ToString(),
-                            TimeSpan.FromMilliseconds(timeoutInMsec),
-                            ValidWithParamCallBack,
-                            _executedCounters);
                         requestedCounters.ValidWithParamCbs++;
-                        break;
                     }
-                    case 2:
+                    break;
+                }
+                case 2:
+                {
+                    // Invalid action without parameter
+                    int factor = timeoutInMsec > 500 ? 2 : 4;
+                    ITimeoutHandle toHandle = AgentComponent.Framework.NewTimer(
+                        "Invalid No Param",
+                        counter.ToString(),
+                        TimeSpan.FromMilliseconds(timeoutInMsec * factor),
+                        InvalidNoParamCallBack);
+                    AgentComponent.Framework.NewTimer("Cancel timer", counter.ToString(), TimeSpan.FromMilliseconds(timeoutInMsec), CancelTimeoutEvent, toHandle);
+                    lock ( requestedCounters )
                     {
-                        // Invalid action without parameter
-                        ITimeoutHandle toHandle = AgentComponent.Framework.NewTimer(
-                            "Invalid No Param",
-                            i.ToString(),
-                            TimeSpan.FromMilliseconds(timeoutInMsec * 2),
-                            InvalidNoParamCallBack);
-                        AgentComponent.Framework.NewTimer("Cancel timer", i.ToString(), TimeSpan.FromMilliseconds(timeoutInMsec), CancelTimeoutEvent, toHandle);
                         requestedCounters.InvalidNoParamsCbs++;
-                        break;
                     }
-                    case 3:
+                    break;
+                }
+                case 3:
+                {
+                    // Invalid action with parameter
+                    int factor = timeoutInMsec > 500 ? 2 : 4;
+                    ITimeoutHandle toHandle = AgentComponent.Framework.NewTimer(
+                        "Invalid With Param",
+                        counter.ToString(),
+                        TimeSpan.FromMilliseconds(timeoutInMsec * factor),
+                        InvalidWithParamCallBack,
+                        _executedCounters);
+                    AgentComponent.Framework.NewTimer("Cancel timer", counter.ToString(), TimeSpan.FromMilliseconds(timeoutInMsec), CancelTimeoutEvent, toHandle);
+                    lock ( requestedCounters )
                     {
-                        // Invalid action with parameter
-                        ITimeoutHandle toHandle = AgentComponent.Framework.NewTimer(
-                            "Invalid With Param",
-                            i.ToString(),
-                            TimeSpan.FromMilliseconds(timeoutInMsec * 2),
-                            InvalidWithParamCallBack,
-                            _executedCounters);
-                        AgentComponent.Framework.NewTimer("Cancel timer", i.ToString(), TimeSpan.FromMilliseconds(timeoutInMsec), CancelTimeoutEvent, toHandle);
                         requestedCounters.InvalidWithParamCbs++;
-                        break;
                     }
+                    break;
                 }
             }
         }
