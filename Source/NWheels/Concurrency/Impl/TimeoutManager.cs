@@ -47,7 +47,7 @@ namespace NWheels.Concurrency.Impl
 
         #endregion
 
-        internal uint Id { get; set; }
+        internal int Id { get; set; }
         private RealTimeoutManager _relatedManager;
 
         internal abstract void Invoke();
@@ -94,27 +94,21 @@ namespace NWheels.Concurrency.Impl
 
     internal class RealTimeoutManager : LifecycleEventListenerBase
     {
-        private readonly Random _rndObj;
+        private int _handlersId;
         private Timer _timer;
-        private readonly Dictionary<DateTime, Dictionary<uint, RealTimeoutHandle>> _timeOutEvents;
+        private readonly Dictionary<DateTime, Dictionary<int, RealTimeoutHandle>> _timeOutEvents;
         private DateTime _nextTimeToCheck;
         private const int NumOfMsBetweenTicks = 20; // NOTE: The value should be a divisor of 1000. Otherwise the rounding calculation should be changed
-
-        /// Debug
-        private DateTime _nextTimeToCheckStarted;
-        private DateTime _timerStarted;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public RealTimeoutManager()
         {
-            _rndObj = new Random();
-            _timeOutEvents = new Dictionary<DateTime, Dictionary<uint, RealTimeoutHandle>>();
+            _timeOutEvents = new Dictionary<DateTime, Dictionary<int, RealTimeoutHandle>>();
             _timer = new Timer();
             _timer.Elapsed += TimerFunction;
 
             _nextTimeToCheck = GetDateInTimeOutResolution(DateTime.UtcNow);
-            _nextTimeToCheckStarted = _nextTimeToCheck;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -123,7 +117,7 @@ namespace NWheels.Concurrency.Impl
         {
             lock (_timeOutEvents)
             {
-                Dictionary<uint, RealTimeoutHandle> relevantTimeDictionary;
+                Dictionary<int, RealTimeoutHandle> relevantTimeDictionary;
                 if (_timeOutEvents.TryGetValue(handle.DueTimeUtc, out relevantTimeDictionary))
                 {
                     relevantTimeDictionary.Remove(handle.Id);
@@ -180,19 +174,14 @@ namespace NWheels.Concurrency.Impl
         {
             timeoutHandle.DueTimeUtc = finalTimeOut;
 
-            Dictionary<uint, RealTimeoutHandle> relevantTimeDictionary;
+            Dictionary<int, RealTimeoutHandle> relevantTimeDictionary;
             if (_timeOutEvents.TryGetValue(finalTimeOut, out relevantTimeDictionary) == false)
             {
-                relevantTimeDictionary = new Dictionary<uint, RealTimeoutHandle>(1);
+                relevantTimeDictionary = new Dictionary<int, RealTimeoutHandle>(1);
                 _timeOutEvents.Add(finalTimeOut, relevantTimeDictionary);
             }
 
-            bool found;
-            do
-            {
-                timeoutHandle.Id = (uint)_rndObj.Next();
-                found = !relevantTimeDictionary.ContainsKey(timeoutHandle.Id);
-            } while (!found);
+            timeoutHandle.Id = Interlocked.Increment(ref _handlersId);
             relevantTimeDictionary.Add(timeoutHandle.Id, timeoutHandle);
         }
 
@@ -210,7 +199,7 @@ namespace NWheels.Concurrency.Impl
                 {
                     while (_nextTimeToCheck <= now)
                     {
-                        Dictionary<uint, RealTimeoutHandle> relevantTimeDictionary;
+                        Dictionary<int, RealTimeoutHandle> relevantTimeDictionary;
                         if ( _timeOutEvents.TryGetValue(_nextTimeToCheck, out relevantTimeDictionary) )
                         {
                             _timeOutEvents.Remove(_nextTimeToCheck);
@@ -255,7 +244,6 @@ namespace NWheels.Concurrency.Impl
             base.NodeActivated();
 
             _timer.Interval = NumOfMsBetweenTicks;
-            _timerStarted = DateTime.UtcNow;
             _timer.Start();
         }
 
