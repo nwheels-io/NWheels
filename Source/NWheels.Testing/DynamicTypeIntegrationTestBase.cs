@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace NWheels.Testing
 {
     [TestFixture]
-    public class DynamicTypeIntegrationTestBase : IntegrationTestBase
+    public class DynamicTypeIntegrationTestBase : IntegrationTestWithoutNodeHosts
     {
         private Hapil.DynamicModule _dynamicModule;
 

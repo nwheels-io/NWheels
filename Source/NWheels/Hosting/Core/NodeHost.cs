@@ -276,7 +276,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory, DomainObjectFactory>().SingleInstance();
             builder.RegisterPipeline<IDataRepositoryPopulator>();
 
-            builder.RegisterType<RealTimeoutManager>().SingleInstance();
+            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();
             
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkLoggingConfiguration>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkEndpointsConfig>();

@@ -96,6 +96,7 @@
     <Compile Include="Logging\Impl\LogexImpl.cs" />
     <Compile Include="LogIs.cs" />
     <Compile Include="SingleNodeSystemTestBase.cs" />
+    <Compile Include="IntegrationTestWithNodeHosts.cs" />
     <Compile Include="TestAgentComponent.cs" />
     <Compile Include="TestFixtureWithNodeHosts.cs" />
     <Compile Include="SystemTestBase.cs" />
@@ -105,7 +106,7 @@
     <Compile Include="TestNodeHost.cs" />
     <Compile Include="TestThreadLogAppender.cs" />
     <Compile Include="TestFixtureWithoutNodeHosts.cs" />
-    <Compile Include="IntegrationTestBase.cs" />
+    <Compile Include="IntegrationTestWithoutNodeHosts.cs" />
     <Compile Include="TestTimeout.cs" />
     <Compile Include="TestUserIdentity.cs" />
     <Compile Include="UnitTestBase.cs" />

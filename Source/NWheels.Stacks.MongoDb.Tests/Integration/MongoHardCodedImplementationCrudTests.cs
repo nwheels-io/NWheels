@@ -16,7 +16,7 @@ using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;
 namespace NWheels.Stacks.MongoDb.Tests.Integration
 {
     [TestFixture]
-    public class MongoHardCodedImplementationCrudTests : IntegrationTestBase
+    public class MongoHardCodedImplementationCrudTests : IntegrationTestWithoutNodeHosts
     {
         public const string TestDatabaseName = "NWheelsHardCodedTest";
 

@@ -97,9 +97,12 @@ namespace NWheels.Concurrency.Impl
         private readonly Random _rndObj;
         private Timer _timer;
         private readonly Dictionary<DateTime, Dictionary<uint, RealTimeoutHandle>> _timeOutEvents;
-        private DateTime _lastTimeChecked;
-        private const int NumOfMsBetweenTicks = 15;
+        private DateTime _nextTimeToCheck;
+        private const int NumOfMsBetweenTicks = 20; // NOTE: The value should be a divisor of 1000. Otherwise the rounding calculation should be changed
 
+        /// Debug
+        private DateTime _nextTimeToCheckStarted;
+        private DateTime _timerStarted;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -110,7 +113,8 @@ namespace NWheels.Concurrency.Impl
             _timer = new Timer();
             _timer.Elapsed += TimerFunction;
 
-            _lastTimeChecked = GetDateInTimeOutResolution(DateTime.UtcNow);
+            _nextTimeToCheck = GetDateInTimeOutResolution(DateTime.UtcNow);
+            _nextTimeToCheckStarted = _nextTimeToCheck;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -141,12 +145,11 @@ namespace NWheels.Concurrency.Impl
                 fullTimeOutTime = fullTimeOutTime.AddMilliseconds(timeOutInMilliSeconds);
                 int milliSecToRound = NumOfMsBetweenTicks - 1;
                 fullTimeOutTime = fullTimeOutTime.AddMilliseconds(milliSecToRound);       // round the calculation up
-                DateTime now = DateTime.UtcNow;
-                if (fullTimeOutTime < now)
-                {
-                    fullTimeOutTime = now.AddMilliseconds(milliSecToRound);
-                }
                 DateTime finalTimeOut = GetDateInTimeOutResolution(fullTimeOutTime);
+                if (finalTimeOut < _nextTimeToCheck)
+                {
+                    finalTimeOut = _nextTimeToCheck;
+                }
                 AddFinalTimeOutEvent(finalTimeOut, timeoutHandle);
             }
         }
@@ -199,30 +202,22 @@ namespace NWheels.Concurrency.Impl
         {
             try
             {
-                DateTime nowRoundedByResolution = GetDateInTimeOutResolution(DateTime.UtcNow);
+                //DateTime nowRoundedByResolution = GetDateInTimeOutResolution(DateTime.UtcNow);
+                DateTime now = DateTime.UtcNow;
                 List<RealTimeoutHandle> allTimeOutEventsToInvoke = new List<RealTimeoutHandle>();
-                int timerInterval = NumOfMsBetweenTicks;
 
                 lock (_timeOutEvents)
                 {
-                    bool moreToSearch = true;
-                    while (moreToSearch)
+                    while (_nextTimeToCheck <= now)
                     {
                         Dictionary<uint, RealTimeoutHandle> relevantTimeDictionary;
-                        if (_timeOutEvents.TryGetValue(_lastTimeChecked, out relevantTimeDictionary))
+                        if ( _timeOutEvents.TryGetValue(_nextTimeToCheck, out relevantTimeDictionary) )
                         {
-                            _timeOutEvents.Remove(_lastTimeChecked);
+                            _timeOutEvents.Remove(_nextTimeToCheck);
                             allTimeOutEventsToInvoke.AddRange(relevantTimeDictionary.Values);
                         }
 
-                        if (_lastTimeChecked < nowRoundedByResolution)
-                        {
-                            _lastTimeChecked = _lastTimeChecked.AddMilliseconds(timerInterval);
-                        }
-                        else
-                        {
-                            moreToSearch = false;
-                        }
+                        _nextTimeToCheck = _nextTimeToCheck.AddMilliseconds(NumOfMsBetweenTicks);
                     }
                 }
 
@@ -248,8 +243,6 @@ namespace NWheels.Concurrency.Impl
             }
             catch ( Exception )
             {
-                
-                throw;
             }
         }
 
@@ -262,6 +255,7 @@ namespace NWheels.Concurrency.Impl
             base.NodeActivated();
 
             _timer.Interval = NumOfMsBetweenTicks;
+            _timerStarted = DateTime.UtcNow;
             _timer.Start();
         }
 

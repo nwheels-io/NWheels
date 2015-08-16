@@ -90,7 +90,12 @@ namespace NWheels.Testing
                 args.ContainerBuilder
                     .RegisterInstance(new ConsolePlainLog(string.Format(" {0}[{1}] ", NodeName, NodeInstanceId), LogLevel.Debug, _clock))
                     .As<IPlainLog>();
-                
+
+                if ( !HasDatabase )
+                {
+                    args.ContainerBuilder.RegisterType<VoidStorageInitializer>().As<IStorageInitializer>();
+                }
+
                 OnRegisteringHostComponents(args.ContainerBuilder);
             };
 
@@ -128,9 +133,16 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal protected virtual bool ShouldRebuildDatabase
+        internal protected virtual bool HasDatabase
         {
             get { return true; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal protected virtual bool ShouldRebuildDatabase
+        {
+            get { return HasDatabase; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -306,6 +318,35 @@ namespace NWheels.Testing
                     return "";
                 }
             }
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class VoidStorageInitializer : IStorageInitializer
+        {
+            #region Implementation of IStorageInitializer
+
+            public bool StorageSchemaExists(string connectionString)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void MigrateStorageSchema(string connectionString)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void CreateStorageSchema(string connectionString)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void DropStorageSchema(string connectionString)
+            {
+                throw new NotSupportedException();
+            }
+
+            #endregion
         }
     }
 }

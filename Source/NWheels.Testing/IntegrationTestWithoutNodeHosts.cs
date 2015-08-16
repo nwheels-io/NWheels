@@ -7,7 +7,7 @@ using NWheels.Entities;
 namespace NWheels.Testing
 {
     [TestFixture, Category(TestCategory.Integration)]
-    public abstract class IntegrationTestBase : TestFixtureWithoutNodeHosts
+    public abstract class IntegrationTestWithoutNodeHosts : TestFixtureWithoutNodeHosts
     {
     }
 }
