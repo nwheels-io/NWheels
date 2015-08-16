@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace NWheels.Processing.Messages
 {
-    public class ServiceRequestMessage<TService, TRequest> : IMessageObject
+    public class ServiceRequestMessage<TService, TRequest> : MessageObjectBase
     {
         private readonly MessageActionHeader _actionHeader;
         private readonly MessageIdHeader _idHeader;
@@ -21,7 +21,7 @@ namespace NWheels.Processing.Messages
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IReadOnlyCollection<IMessageHeader> IMessageObject.Headers
+        public override IReadOnlyCollection<IMessageHeader> Headers
         {
             get
             {
@@ -34,7 +34,7 @@ namespace NWheels.Processing.Messages
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        object IMessageObject.Body
+        public override object Body
         {
             get
             {

@@ -8,7 +8,7 @@ using System.Xml.Serialization;
 
 namespace NWheels.Processing.Messages
 {
-    internal class ExampleOfConcreteMessage : IMessageObject
+    internal class ExampleOfConcreteMessage : MessageObjectBase
     {
         private readonly MessageActionHeader _action;
 
@@ -28,7 +28,7 @@ namespace NWheels.Processing.Messages
         public object Serializer { get; private set; }
 
 
-        IReadOnlyCollection<IMessageHeader> IMessageObject.Headers
+        public override IReadOnlyCollection<IMessageHeader> Headers
         {
             get
             {
@@ -36,7 +36,7 @@ namespace NWheels.Processing.Messages
             }
         }
 
-        object IMessageObject.Body
+        public override object Body
         {
             get
             {
