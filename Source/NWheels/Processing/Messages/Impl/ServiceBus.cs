@@ -101,19 +101,23 @@ namespace NWheels.Processing.Messages.Impl
                 {
                     IMessageObject message;
 
-                    if ( _messageQueue.TryTake(out message, Timeout.Infinite, _stopRequest.Token) )
+                    try
                     {
-                        if ( !_stopRequest.IsCancellationRequested )
+                        if ( _messageQueue.TryTake(out message, Timeout.Infinite, _stopRequest.Token) )
                         {
-                            DispatchMessage(message);
+                            if ( !_stopRequest.IsCancellationRequested )
+                            {
+                                DispatchMessage(message);
+                            }
                         }
+                    }
+                    catch ( OperationCanceledException )
+                    {
+                        _logger.ListenerCanceled();
                     }
                 }
 
                 _logger.WorkerThreadStopped();
-            }
-            catch ( OperationCanceledException )
-            {
             }
             catch ( Exception e )
             {
