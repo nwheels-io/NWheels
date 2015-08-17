@@ -167,7 +167,7 @@ namespace NWheels.Concurrency.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        // Should be called under lock(_timeOutEvents)
+        // NOTE: Called under lock(_timeOutEvents)
         private void AddFinalTimeOutEvent(
             DateTime finalTimeOut,
             RealTimeoutHandle timeoutHandle)
@@ -181,7 +181,7 @@ namespace NWheels.Concurrency.Impl
                 _timeOutEvents.Add(finalTimeOut, relevantTimeDictionary);
             }
 
-            timeoutHandle.Id = Interlocked.Increment(ref _handlersId);
+            timeoutHandle.Id = _handlersId++;
             relevantTimeDictionary.Add(timeoutHandle.Id, timeoutHandle);
         }
 

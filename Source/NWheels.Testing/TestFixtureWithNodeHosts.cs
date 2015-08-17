@@ -26,10 +26,11 @@ using NWheels.Testing.Entities.Impl;
 namespace NWheels.Testing
 {
     [TestFixture]
-    public abstract class TestFixtureWithNodeHosts
+    public abstract class TestFixtureWithNodeHosts : TestFixtureBase
     {
         private ApplicationController _controller;
         private Stopwatch _clock;
+        private ITestFixtureBaseLogger _logger;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -38,6 +39,7 @@ namespace NWheels.Testing
         {
             Thread.CurrentPrincipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
             StartApplication();
+            _logger = AgentComponent.Components.Resolve<ITestFixtureBaseLogger>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -68,6 +70,7 @@ namespace NWheels.Testing
 
         internal protected virtual void OnRegisteringModuleComponents(Autofac.ContainerBuilder builder)
         {
+            builder.NWheelsFeatures().Logging().RegisterLogger<ITestFixtureBaseLogger>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -100,6 +103,13 @@ namespace NWheels.Testing
             };
 
             _controller.LoadAndActivate();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override TestFixtureBase.ITestFixtureBaseLogger Logger
+        {
+            get { return _logger; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

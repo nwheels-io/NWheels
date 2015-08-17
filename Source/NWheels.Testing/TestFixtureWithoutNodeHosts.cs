@@ -1,14 +1,11 @@
-﻿using System;
-using Autofac;
+﻿using Autofac;
 using Hapil;
 using NUnit.Framework;
-using NWheels.DataObjects;
-using NWheels.Entities;
 
 namespace NWheels.Testing
 {
     [TestFixture]
-    public abstract class TestFixtureWithoutNodeHosts
+    public abstract class TestFixtureWithoutNodeHosts : TestFixtureBase
     {
         private TestFramework _framework;
 
@@ -56,6 +53,16 @@ namespace NWheels.Testing
             get
             {
                 return _framework;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override TestFixtureBase.ITestFixtureBaseLogger Logger
+        {
+            get
+            {
+                return _framework.Logger<ITestFixtureBaseLogger>();
             }
         }
     }
