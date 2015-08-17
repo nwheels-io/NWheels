@@ -3,6 +3,7 @@ using Hapil.Members;
 using Hapil.Writers;
 using MongoDB.Bson.Serialization.Attributes;
 using NWheels.DataObjects;
+using System;
 
 namespace NWheels.Stacks.MongoDb.Factories
 {
@@ -35,20 +36,12 @@ namespace NWheels.Stacks.MongoDb.Factories
         {
             if ( _metaType.BaseType == null )
             {
-                classWriter.Attribute<BsonDiscriminatorAttribute>(v => v.Arg<string>(_metaType.Name).Named(a => a.RootClass, true));
+                classWriter.Attribute<BsonDiscriminatorAttribute>(v => v.Arg<string>(_metaType.Name).Named<bool>(a => a.Required, true));
             }
             else
             {
-                classWriter.Attribute<BsonDiscriminatorAttribute>(v => v.Arg<string>(_metaType.Name));
+                classWriter.Attribute<BsonDiscriminatorAttribute>(v => v.Arg<string>(_metaType.Name).Named<bool>(a => a.Required, true));
             }
-
-            //foreach ( var derivedType in _metaType.DerivedTypes )
-            //{
-            //    var derivedEntityTypeKey = new TypeKey(primaryInterface: derivedType.ContractType);
-            //    var derivedEntityType = _context.Factory.FindDynamicType(derivedEntityTypeKey);
-
-            //    classWriter.Attribute<BsonKnownTypesAttribute>(v => v.Arg<Type>(derivedEntityType));
-            //}
         }
     }
 }

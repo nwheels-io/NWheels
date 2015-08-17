@@ -18,7 +18,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
     [TestFixture]
     public class MongoHardCodedImplementationCrudTests : IntegrationTestWithoutNodeHosts
     {
-        public const string TestDatabaseName = "NWheelsHardCodedTest";
+        public const string TestDatabaseName = "NWheelsHardCodedCrudTest";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
         [TearDown]
         public void TearDown()
         {
-            HardCodedImplementations.CurrentDataRepoFactory = null;
+            //HardCodedImplementations.CurrentDataRepoFactory = null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             //-- Arrange
 
             var repoFactory = CreateDataRepositoryFactory();
-            HardCodedImplementations.CurrentDataRepoFactory = repoFactory;
+            //HardCodedImplementations.CurrentDataRepoFactory = repoFactory;
 
             //-- Act & Assert
 
@@ -82,7 +82,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             //-- Arrange
 
             var repoFactory = CreateDataRepositoryFactory();
-            HardCodedImplementations.CurrentDataRepoFactory = repoFactory;
+            //HardCodedImplementations.CurrentDataRepoFactory = repoFactory;
 
             //-- Act & Assert
 

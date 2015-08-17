@@ -4,6 +4,7 @@ using Hapil;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using NUnit.Framework;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
@@ -101,7 +102,12 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
 
             var entityFactory = new MongoEntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
             var repoFactory = new MongoDataRepositoryFactory(Framework.Components, _dyamicModule, entityFactory, metadataCache, configAuto.Instance);
-            
+
+            Framework.UpdateComponents(
+                builder => {
+                    builder.RegisterInstance(repoFactory).As<IDataRepositoryFactory, DataRepositoryFactoryBase, MongoDataRepositoryFactory>();
+                });
+
             return repoFactory;
         }
     }

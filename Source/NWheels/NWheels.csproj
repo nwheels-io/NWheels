@@ -117,6 +117,7 @@
     <Compile Include="Entities\Factories\DomainPersistableCollectionCastStrategy.cs" />
     <Compile Include="Entities\Factories\DomainPersistableDelegationStrategy.cs" />
     <Compile Include="Entities\Factories\DomainPersistableObjectCastStrategy.cs" />
+    <Compile Include="Entities\Factories\EnsureDomainObjectConvention.cs" />
     <Compile Include="Entities\Factories\EntityContractMethodsNotSupportedConvention.cs" />
     <Compile Include="Entities\Factories\RuntimeEntityModelHelpers.cs" />
     <Compile Include="Entities\IDomainObjectFactory.cs" />

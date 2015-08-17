@@ -80,6 +80,7 @@
     <Compile Include="MongoQueryExpressionSpecializer.cs" />
     <Compile Include="Factories\ObjectIdGeneratorConvention.cs" />
     <Compile Include="ModuleLoader.cs" />
+    <Compile Include="PolymorphicDiscriminatorConvention.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

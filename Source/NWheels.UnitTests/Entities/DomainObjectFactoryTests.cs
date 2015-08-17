@@ -479,6 +479,14 @@ namespace NWheels.UnitTests.Entities
                 _domainObject = container;
             }
 
+            public void EnsureDomainObject()
+            {
+                if ( _domainObject == null )
+                {
+                    RuntimeEntityModelHelpers.EnsureContainerDomainObject<IContractEntity>(this, _components);
+                }
+            }
+
             #endregion
         }
 

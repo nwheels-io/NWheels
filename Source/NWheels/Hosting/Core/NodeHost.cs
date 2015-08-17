@@ -618,7 +618,7 @@ namespace NWheels.Hosting.Core
                     }
 
                     var frameworkUpdater = new ContainerBuilder();
-                    frameworkUpdater.RegisterType<RealFramework>().As<IFramework>().WithParameter(new TypedParameter(typeof(BootConfiguration), this.NodeConfig)).SingleInstance();
+                    frameworkUpdater.RegisterType<RealFramework>().As<IFramework, ICoreFramework>().WithParameter(new TypedParameter(typeof(BootConfiguration), this.NodeConfig)).SingleInstance();
                     frameworkUpdater.RegisterGeneric(typeof(Auto<>)).SingleInstance();
                     frameworkUpdater.RegisterAdapter<IConfigSectionRegistration, IConfigurationSection>(
                         (ctx, reg) => {

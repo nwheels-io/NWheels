@@ -595,6 +595,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 _domainObject = container;
             }
 
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
+            }
+
             #endregion
         }
 
@@ -678,6 +683,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public void SetContainerObject(IDomainObject container)
             {
                 _domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
             }
 
             #endregion
@@ -782,6 +792,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public void SetContainerObject(IDomainObject container)
             {
                 _domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
             }
 
             #endregion
@@ -893,6 +908,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 _domainObject = container;
             }
 
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
+            }
+
             #endregion
         }
 
@@ -985,6 +1005,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
             void IPersistableObject.SetContainerObject(IDomainObject container)
             {
                 this._domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
             }
 
             IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
@@ -1389,6 +1414,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 _domainObject = container;
             }
 
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
+            }
+
             #endregion
         }
 
@@ -1498,6 +1528,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public void SetContainerObject(IDomainObject container)
             {
                 _domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
             }
 
             #endregion
@@ -1714,6 +1749,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 _domainObject = container;
             }
 
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
+            }
+
             #endregion
         }
 
@@ -1865,6 +1905,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 _domainObject = container;
             }
 
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
+            }
+
             #endregion
 
             #region Implementation of IActiveRecord
@@ -1983,6 +2028,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public void SetContainerObject(IDomainObject container)
             {
                 _domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
             }
 
             #endregion

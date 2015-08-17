@@ -10,5 +10,6 @@ namespace NWheels.Entities.Core
     public interface IPersistableObject : IContainedIn<IDomainObject>
     {
         void SetContainerObject(IDomainObject container);
+        void EnsureDomainObject();
     }
 }

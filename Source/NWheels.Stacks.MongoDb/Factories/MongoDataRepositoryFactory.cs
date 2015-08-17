@@ -107,9 +107,13 @@ namespace NWheels.Stacks.MongoDb.Factories
             {
                 foreach ( var entity in base.EntitiesInRepository )
                 {
-                    if ( entity.Metadata.BaseType != null )
+                    if ( entity.Metadata.BaseType != null || entity.Metadata.DerivedTypes.Count > 0 )
                     {
-                        Static.Func(BsonClassMap.LookupClassMap, writer.Const(entity.ImplementationType));
+                        using ( TT.CreateScope<TT.TImpl>(entity.ImplementationType) )
+                        {
+                            Static.GenericFunc<BsonClassMap<TT.TImpl>>(() => BsonClassMap.RegisterClassMap<TT.TImpl>());
+                        }
+                        //Static.Func(BsonClassMap.LookupClassMap, writer.Const(entity.ImplementationType));
                     }
                 }
             }

@@ -1,4 +1,6 @@
-﻿using Hapil;
+﻿using System;
+using Autofac;
+using Hapil;
 using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core.Factories;

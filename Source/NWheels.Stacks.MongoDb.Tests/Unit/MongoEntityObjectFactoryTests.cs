@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Autofac;
 using MongoDB.Bson;
 using NUnit.Framework;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
@@ -65,6 +66,12 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
             metadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(metadataCache));
 
             var factory = new MongoEntityObjectFactory(base.Framework.Components, base.DyamicModule, metadataCache);
+
+            Framework.UpdateComponents(
+                builder => {
+                    builder.RegisterInstance(factory).As<IEntityObjectFactory, EntityObjectFactory, MongoEntityObjectFactory>();
+                });
+
             return factory;
         }
     }

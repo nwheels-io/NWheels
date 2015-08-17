@@ -378,10 +378,11 @@ namespace NWheels.Stacks.MongoDb
             ObjectUtility.InjectDependenciesToObject(entity, _ownerRepo.Components);
             _ownerRepo.TrackEntity(ref entity, EntityState.RetrievedPristine);
 
-            if ( entity.AsOrNull<IDomainObject>() == null )
-            {
-                _domainObjectFactory.CreateDomainObjectInstance<TConcreteContract>((TConcreteContract)(object)entity);
-            }
+            ((IPersistableObject)entity).EnsureDomainObject();
+            //if ( entity.AsOrNull<IDomainObject>() == null )
+            //{
+            //    _domainObjectFactory.CreateDomainObjectInstance<TConcreteContract>((TConcreteContract)(object)entity);
+            //}
 
             return (TConcreteContract)(object)entity;
         }

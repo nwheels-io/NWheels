@@ -1,4 +1,5 @@
-﻿using Hapil;
+﻿using Autofac;
+using Hapil;
 using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.Entities.Core;

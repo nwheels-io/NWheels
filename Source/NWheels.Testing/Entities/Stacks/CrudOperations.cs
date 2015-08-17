@@ -2,6 +2,8 @@
 using System.Linq;
 using NUnit.Framework;
 using NWheels.Entities;
+using NWheels.Extensions;
+using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;
 
 namespace NWheels.Testing.Entities.Stacks
 {
@@ -21,6 +23,9 @@ namespace NWheels.Testing.Entities.Stacks
                 InsertOrder3(repoFactory());
                 UpdateStatusOfOrders(repoFactory());
                 RetrieveOrdersWithOrderLinesAndProducts(repoFactory());
+
+                //-- retrieving polymorphic entities in one query doesn't seem to be typically supported by ORM/ODMs
+                RetrieveCustomerContactDetails(repoFactory()); 
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -208,6 +213,36 @@ namespace NWheels.Testing.Entities.Stacks
                     Assert.That(product2.Attributes, Is.Not.Null);
                     Assert.That(product2.Attributes.Count(), Is.EqualTo(1));
                     Assert.That(product2.Attributes.Count(a => a.Name == "Color"), Is.EqualTo(1));
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static void RetrieveCustomerContactDetails(IR1.IOnlineStoreRepository repo)
+            {
+                using ( repo )
+                {
+                    #region Customer #1
+
+                    var customer1 = repo.Customers.Include(c => c.ContactDetails).Where(c => c.FullName == "John Smith").FirstOrDefault();
+
+                    Assert.That(customer1, Is.Not.Null);
+                    Assert.That(customer1.ContactDetails.Count, Is.EqualTo(3));
+
+                    var contactDetails = customer1.ContactDetails.ToArray();
+
+                    Assert.That(customer1.ContactDetails.Count, Is.EqualTo(3));
+                    
+                    Assert.That(contactDetails[0], Is.InstanceOf<IR1.IEmailContactDetail>());
+                    Assert.That(contactDetails[0].As<IR1.IEmailContactDetail>().Email, Is.EqualTo("john.smith@email.com"));
+
+                    Assert.That(contactDetails[1], Is.InstanceOf<IR1.IEmailContactDetail>());
+                    Assert.That(contactDetails[1].As<IR1.IEmailContactDetail>().Email, Is.EqualTo("jsmith@nomail.com"));
+
+                    Assert.That(contactDetails[2], Is.InstanceOf<IR1.IPhoneContactDetail>());
+                    Assert.That(contactDetails[2].As<IR1.IPhoneContactDetail>().Phone, Is.EqualTo("555-555-555-555"));
+
+                    #endregion
                 }
             }
 

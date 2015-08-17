@@ -72,6 +72,23 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static IDomainObject EnsureContainerDomainObject<TEntityContract>(IPersistableObject persistableObject, IComponentContext components)
+        {
+            var existingDomainObject = persistableObject.GetContainerObject();
+
+            if ( existingDomainObject != null )
+            {
+                return existingDomainObject;
+            }
+
+            var factory = components.Resolve<IDomainObjectFactory>();
+            var newDomainObject = factory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)persistableObject);
+
+            return (IDomainObject)newDomainObject;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static void SaveActiveRecordObject(IDomainObject domainObject, IFramework framework)
         {
             var coreFramework = (ICoreFramework)framework;

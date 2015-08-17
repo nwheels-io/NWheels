@@ -29,11 +29,87 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 {
     public static class HardCodedImplementations
     {
-        internal static Func<IR1.IOnlineStoreRepository> CurrentDataRepoFactory { get; set; }
+        #region Entity Factory
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        public class HardCodedEntityFactory : IEntityObjectFactory
+        {
+            private readonly IComponentContext _components;
 
-        #region Data Repository IOnlineStoreRepository
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public HardCodedEntityFactory(IComponentContext components)
+            {
+                _components = components;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TEntityContract NewEntity<TEntityContract>() where TEntityContract : class
+            {
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IOrder))
+                {
+                    return (TEntityContract)(object)new MongoEntityObject_Order(_components);
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IOrderLine))
+                {
+                    return (TEntityContract)(object)new MongoEntityObject_OrderLine(_components);
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IProduct))
+                {
+                    return (TEntityContract)(object)new MongoEntityObject_Product(_components);
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.ICategory))
+                {
+                    return (TEntityContract)(object)new MongoEntityObject_Category(_components);
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IAttribute))
+                {
+                    return (TEntityContract)(object)new MongoEntityObject_Attribute(_components);
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IAttributeValue))
+                {
+                    return (TEntityContract)(object)new MongoEntityObject_AttributeValue(_components);
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IAttributeValueChoice))
+                {
+                    return (TEntityContract)(object)new MongoEntityObject_AttributeValueChoice(_components);
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IPostalAddress))
+                {
+                    return (TEntityContract)(object)new MongoEntityObject_PostalAddress(_components);
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.ICustomer))
+                {
+                    return (TEntityContract)(object)new MongoEntityObject_Customer(_components);
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IEmailContactDetail))
+                {
+                    return (TEntityContract)(object)new MongoEntityObject_EmailContactDetail(_components);
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IPhoneContactDetail))
+                {
+                    return (TEntityContract)(object)new MongoEntityObject_PhoneContactDetail(_components);
+                }
+                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IPostContactDetail))
+                {
+                    return (TEntityContract)(object)new MongoEntityObject_PostContactDetail(_components);
+                }
+
+                throw new NotSupportedException(
+                    string.Format("Entity contract '{0}' is not supported by HardCodedEntityFactory.", typeof(TEntityContract).Name));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public object NewEntity(Type entityContractType)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        #endregion
+
+        #region Generated Code
 
         public class MongoDataRepository_OnlineStoreRepository : MongoDataRepositoryBase, Interfaces.Repository1.IOnlineStoreRepository
         {
@@ -51,12 +127,12 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             private IEntityRepository<Interfaces.Repository1.IOrderLine> m_OrdersLines;
             private IEntityRepository<Interfaces.Repository1.IProduct> m_Products;
 
-            public MongoDataRepository_OnlineStoreRepository(IResourceConsumerScopeHandle consumerScope, IComponentContext arg0, IEntityObjectFactory arg1, ITypeMetadataCache arg2, MongoDatabase arg3, bool arg4)
-                : base(consumerScope, arg0, arg1, GetOrBuildDbCompiledModel(arg2, arg3), arg3, arg4)
+            public MongoDataRepository_OnlineStoreRepository(IResourceConsumerScopeHandle arg0, IComponentContext arg1, IEntityObjectFactory arg2, ITypeMetadataCache arg3, MongoDatabase arg4, bool arg5)
+                : base(arg0, arg1, arg2, GetOrBuildDbCompiledModel(arg3, arg4), arg4, arg5)
             {
-                this.EntityFactory = arg1;
-                this._domainFactory = arg0.Resolve<IDomainObjectFactory>();
-                this._metadataCache = arg2;
+                this.EntityFactory = arg2;
+                this._domainFactory = arg1.Resolve<IDomainObjectFactory>();
+                this._metadataCache = arg3;
                 this.m_Categories = new MongoEntityRepository<Interfaces.Repository1.ICategory, MongoEntityObject_Category>(this, this._metadataCache, this.EntityFactory);
                 base.RegisterEntityRepository<Interfaces.Repository1.ICategory, MongoEntityObject_Category>(this.m_Categories);
                 this.m_Products = new MongoEntityRepository<Interfaces.Repository1.IProduct, MongoEntityObject_Product>(this, this._metadataCache, this.EntityFactory);
@@ -75,9 +151,9 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 base.RegisterEntityRepository<Interfaces.Repository1.IEmailContactDetail, MongoEntityObject_EmailContactDetail>(this.m_ContactEmails);
             }
 
-            public static object FactoryMethod1(IResourceConsumerScopeHandle consumerScope, IComponentContext context1, EntityObjectFactory factory1, ITypeMetadataCache cache1, MongoDatabase database1, bool flag1)
+            public static object FactoryMethod1(IResourceConsumerScopeHandle handle1, IComponentContext context1, EntityObjectFactory factory1, ITypeMetadataCache cache1, MongoDatabase database1, bool flag1)
             {
-                return new MongoDataRepository_OnlineStoreRepository(consumerScope, context1, factory1, cache1, database1, flag1);
+                return new MongoDataRepository_OnlineStoreRepository(handle1, context1, factory1, cache1, database1, flag1);
             }
 
             public sealed override Type[] GetEntityContractsInRepository()
@@ -121,9 +197,16 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     {
                         if (_s_compiledModel == null)
                         {
-                            BsonClassMap.LookupClassMap(typeof(MongoEntityObject_EmailContactDetail));
-                            BsonClassMap.LookupClassMap(typeof(MongoEntityObject_PhoneContactDetail));
-                            BsonClassMap.LookupClassMap(typeof(MongoEntityObject_PostContactDetail));
+                            BsonClassMap.RegisterClassMap<MongoEntityObject_ContactDetail>();
+                            BsonClassMap.RegisterClassMap<MongoEntityObject_EmailContactDetail>();
+                            BsonClassMap.RegisterClassMap<MongoEntityObject_PhoneContactDetail>();
+                            BsonClassMap.RegisterClassMap<MongoEntityObject_PostContactDetail>();
+
+                            BsonSerializer.RegisterDiscriminatorConvention(typeof(MongoEntityObject_ContactDetail), new PolymorphicDiscriminatorConvention("_polyt"));
+                            BsonSerializer.RegisterDiscriminatorConvention(typeof(MongoEntityObject_EmailContactDetail), new PolymorphicDiscriminatorConvention("_polyt"));
+                            BsonSerializer.RegisterDiscriminatorConvention(typeof(MongoEntityObject_PhoneContactDetail), new PolymorphicDiscriminatorConvention("_polyt"));
+                            BsonSerializer.RegisterDiscriminatorConvention(typeof(MongoEntityObject_PostContactDetail), new PolymorphicDiscriminatorConvention("_polyt"));
+
                             _s_compiledModel = new object();
                         }
                     }
@@ -258,95 +341,814 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
         }
 
-        #endregion
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        #region Entity Factory
-
-        public class HardCodedEntityFactory : IEntityObjectFactory
+        [BsonIgnoreExtraElements]
+        public class MongoEntityObject_Attribute : Interfaces.Repository1.IAttribute, IEntityPartUniqueDisplayName, IEntityPartId<ObjectId>, IObject, IEntityObject, IHaveNestedObjects
         {
-            private readonly IComponentContext _components;
+            private IDomainObject _domainObject;
+            private ObjectId m_Id_storage;
+            private string m_Name;
+            private string m_TitleForUser;
+            private ConcreteToAbstractListAdapter<MongoEntityObject_AttributeValue, Interfaces.Repository1.IAttributeValue> m_Values_adapter;
+            private List<MongoEntityObject_AttributeValue> m_Values_storage;
 
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public HardCodedEntityFactory(IComponentContext components)
+            public MongoEntityObject_Attribute()
             {
-                _components = components;
             }
 
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public TEntityContract NewEntity<TEntityContract>() where TEntityContract : class
+            public MongoEntityObject_Attribute(IComponentContext arg0)
             {
-                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IOrder))
-                {
-                    return (TEntityContract)(object)new MongoEntityObject_Order(_components);
-                }
-                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IOrderLine))
-                {
-                    return (TEntityContract)(object)new MongoEntityObject_OrderLine(_components);
-                }
-                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IProduct))
-                {
-                    return (TEntityContract)(object)new MongoEntityObject_Product(_components);
-                }
-                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.ICategory))
-                {
-                    return (TEntityContract)(object)new MongoEntityObject_Category(_components);
-                }
-                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IAttribute))
-                {
-                    return (TEntityContract)(object)new MongoEntityObject_Attribute(_components);
-                }
-                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IAttributeValue))
-                {
-                    return (TEntityContract)(object)new MongoEntityObject_AttributeValue(_components);
-                }
-                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IAttributeValueChoice))
-                {
-                    return (TEntityContract)(object)new MongoEntityObject_AttributeValueChoice(_components);
-                }
-                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IPostalAddress))
-                {
-                    return (TEntityContract)(object)new MongoEntityObject_PostalAddress(_components);
-                }
-                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.ICustomer))
-                {
-                    return (TEntityContract)(object)new MongoEntityObject_Customer(_components);
-                }
-                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IEmailContactDetail))
-                {
-                    return (TEntityContract)(object)new MongoEntityObject_EmailContactDetail(_components);
-                }
-                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IPhoneContactDetail))
-                {
-                    return (TEntityContract)(object)new MongoEntityObject_PhoneContactDetail(_components);
-                }
-                if (typeof(TEntityContract) == typeof(Interfaces.Repository1.IPostContactDetail))
-                {
-                    return (TEntityContract)(object)new MongoEntityObject_PostContactDetail(_components);
-                }
-
-                throw new NotSupportedException(
-                    string.Format("Entity contract '{0}' is not supported by HardCodedEntityFactory.", typeof(TEntityContract).Name));
+                this.m_Values_storage = new List<MongoEntityObject_AttributeValue>();
+                this.m_Values_adapter = (ConcreteToAbstractListAdapter<MongoEntityObject_AttributeValue, Interfaces.Repository1.IAttributeValue>)RuntimeTypeModelHelpers.CreateCollectionAdapter<MongoEntityObject_AttributeValue, Interfaces.Repository1.IAttributeValue>(this.m_Values_storage, true);
+                this.m_Id_storage = ObjectId.GenerateNewId();
             }
 
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            public static object FactoryMethod1()
+            {
+                return new MongoEntityObject_Attribute();
+            }
 
-            public object NewEntity(Type entityContractType)
+            public static object FactoryMethod2(IComponentContext context1)
+            {
+                return new MongoEntityObject_Attribute(context1);
+            }
+
+            public void DeepListNestedObjects(HashSet<object> nestedObjects)
+            {
+                RuntimeTypeModelHelpers.DeepListNestedObjectCollection(this.m_Values_adapter, nestedObjects);
+            }
+
+            IEntityId IEntityObject.GetId()
+            {
+                return new EntityId<Interfaces.Repository1.IAttribute, ObjectId>(this.m_Id_storage);
+            }
+
+            void IEntityObject.SetId(object value)
+            {
+                this.m_Id_storage = (ObjectId)value;
+            }
+
+            void IPersistableObject.SetContainerObject(IDomainObject container)
+            {
+                this._domainObject = container;
+            }
+
+            public void EnsureDomainObject()
             {
                 throw new NotImplementedException();
             }
+
+            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
+            {
+                return this._domainObject;
+            }
+
+            public virtual void WritePropertyValue_Id(ObjectId arg1)
+            {
+                this.m_Id_storage = arg1;
+            }
+
+            IList<Interfaces.Repository1.IAttributeValue> Interfaces.Repository1.IAttribute.Values
+            {
+                get
+                {
+                    return this.m_Values_adapter;
+                }
+            }
+
+            public virtual ObjectId Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+                set
+                {
+                    this.m_Id_storage = value;
+                }
+            }
+
+            ObjectId IEntityPartId<ObjectId>.Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.IAttribute);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(MongoEntityObjectFactory);
+                }
+            }
+
+            public virtual string Name
+            {
+                get
+                {
+                    return this.m_Name;
+                }
+                set
+                {
+                    this.m_Name = value;
+                }
+            }
+
+            public virtual string TitleForUser
+            {
+                get
+                {
+                    return this.m_TitleForUser;
+                }
+                set
+                {
+                    this.m_TitleForUser = value;
+                }
+            }
+
+            public virtual List<MongoEntityObject_AttributeValue> Values
+            {
+                get
+                {
+                    return this.m_Values_storage;
+                }
+                set
+                {
+                    this.m_Values_adapter = (ConcreteToAbstractListAdapter<MongoEntityObject_AttributeValue, Interfaces.Repository1.IAttributeValue>)RuntimeTypeModelHelpers.CreateCollectionAdapter<MongoEntityObject_AttributeValue, Interfaces.Repository1.IAttributeValue>(value, true);
+                    this.m_Values_storage = value;
+                }
+            }
         }
 
+        [BsonIgnoreExtraElements]
+        public class MongoEntityObject_AttributeValue : Interfaces.Repository1.IAttributeValue, IObject, IEntityPartObject
+        {
+            private IDomainObject _domainObject;
+            private int m_DisplayOrder;
+            private string m_Value;
 
-        #endregion
+            public MongoEntityObject_AttributeValue()
+            {
+            }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            public MongoEntityObject_AttributeValue(IComponentContext arg0)
+            {
+            }
 
-        #region Entity Order
+            public static object FactoryMethod1()
+            {
+                return new MongoEntityObject_AttributeValue();
+            }
 
+            public static object FactoryMethod2(IComponentContext context1)
+            {
+                return new MongoEntityObject_AttributeValue(context1);
+            }
+
+            void IPersistableObject.SetContainerObject(IDomainObject container)
+            {
+                this._domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
+            {
+                return this._domainObject;
+            }
+
+            public virtual int DisplayOrder
+            {
+                get
+                {
+                    return this.m_DisplayOrder;
+                }
+                set
+                {
+                    this.m_DisplayOrder = value;
+                }
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.IAttributeValue);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(MongoEntityObjectFactory);
+                }
+            }
+
+            public virtual string Value
+            {
+                get
+                {
+                    return this.m_Value;
+                }
+                set
+                {
+                    this.m_Value = value;
+                }
+            }
+        }
+
+        [BsonIgnoreExtraElements]
+        public class MongoEntityObject_AttributeValueChoice : Interfaces.Repository1.IAttributeValueChoice, IObject, IEntityPartObject, IHaveDependencies, IHaveNestedObjects
+        {
+            private IComponentContext _components;
+            private IDomainObject _domainObject;
+            private Interfaces.Repository1.IAttribute m_Attribute_contract;
+            private DualValueStates m_Attribute_state;
+            private ObjectId m_Attribute_storage;
+            private string m_Value;
+
+            public MongoEntityObject_AttributeValueChoice()
+            {
+            }
+
+            public MongoEntityObject_AttributeValueChoice(IComponentContext arg0)
+            {
+                this._components = arg0;
+                ((IHaveDependencies)this).InjectDependencies(this._components);
+            }
+
+            public static object FactoryMethod1()
+            {
+                return new MongoEntityObject_AttributeValueChoice();
+            }
+
+            public static object FactoryMethod2(IComponentContext context1)
+            {
+                return new MongoEntityObject_AttributeValueChoice(context1);
+            }
+
+            public void DeepListNestedObjects(HashSet<object> nestedObjects)
+            {
+                if ((((int)this.m_Attribute_state) & 1) != 0)
+                {
+                    RuntimeTypeModelHelpers.DeepListNestedObject(this.m_Attribute_contract, nestedObjects);
+                }
+            }
+
+            public virtual void InjectDependencies(IComponentContext components)
+            {
+                this._components = components;
+            }
+
+            void IPersistableObject.SetContainerObject(IDomainObject container)
+            {
+                this._domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
+            {
+                return this._domainObject;
+            }
+
+            public virtual ObjectId Attribute
+            {
+                get
+                {
+                    if (this.m_Attribute_state == DualValueStates.Contract)
+                    {
+                        this.m_Attribute_storage = ((IEntityObject)this.m_Attribute_contract).GetId().ValueAs<ObjectId>();
+                        this.m_Attribute_state |= DualValueStates.Storage;
+                    }
+                    return this.m_Attribute_storage;
+                }
+                set
+                {
+                    this.m_Attribute_storage = value;
+                    this.m_Attribute_state = DualValueStates.Storage;
+                }
+            }
+
+            Interfaces.Repository1.IAttribute Interfaces.Repository1.IAttributeValueChoice.Attribute
+            {
+                get
+                {
+                    if (this.m_Attribute_state == DualValueStates.Storage)
+                    {
+                        this.m_Attribute_contract = MongoDataRepositoryBase.ResolveFrom(this._components).LazyLoadById<Interfaces.Repository1.IAttribute, ObjectId>(this.m_Attribute_storage);
+                        this.m_Attribute_state |= DualValueStates.Contract;
+                    }
+                    return this.m_Attribute_contract;
+                }
+                set
+                {
+                    this.m_Attribute_contract = value;
+                    this.m_Attribute_state = DualValueStates.Contract;
+                }
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.IAttributeValueChoice);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(MongoEntityObjectFactory);
+                }
+            }
+
+            public virtual string Value
+            {
+                get
+                {
+                    return this.m_Value;
+                }
+                set
+                {
+                    this.m_Value = value;
+                }
+            }
+        }
+
+        [BsonIgnoreExtraElements]
+        public class MongoEntityObject_Category : Interfaces.Repository1.ICategory, IEntityPartUniqueDisplayName, IEntityPartId<ObjectId>, IObject, IEntityObject
+        {
+            private IDomainObject _domainObject;
+            private ObjectId m_Id_storage;
+            private string m_Name;
+
+            public MongoEntityObject_Category()
+            {
+            }
+
+            public MongoEntityObject_Category(IComponentContext arg0)
+            {
+                this.m_Id_storage = ObjectId.GenerateNewId();
+            }
+
+            public static object FactoryMethod1()
+            {
+                return new MongoEntityObject_Category();
+            }
+
+            public static object FactoryMethod2(IComponentContext context1)
+            {
+                return new MongoEntityObject_Category(context1);
+            }
+
+            IEntityId IEntityObject.GetId()
+            {
+                return new EntityId<Interfaces.Repository1.ICategory, ObjectId>(this.m_Id_storage);
+            }
+
+            void IEntityObject.SetId(object value)
+            {
+                this.m_Id_storage = (ObjectId)value;
+            }
+
+            void IPersistableObject.SetContainerObject(IDomainObject container)
+            {
+                this._domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
+            {
+                return this._domainObject;
+            }
+
+            public virtual void WritePropertyValue_Id(ObjectId arg1)
+            {
+                this.m_Id_storage = arg1;
+            }
+
+            public virtual ObjectId Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+                set
+                {
+                    this.m_Id_storage = value;
+                }
+            }
+
+            ObjectId IEntityPartId<ObjectId>.Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.ICategory);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(MongoEntityObjectFactory);
+                }
+            }
+
+            public virtual string Name
+            {
+                get
+                {
+                    return this.m_Name;
+                }
+                set
+                {
+                    this.m_Name = value;
+                }
+            }
+        }
+
+        [BsonIgnoreExtraElements, BsonDiscriminator("ContactDetail", Required = true)]
+        public class MongoEntityObject_ContactDetail : Interfaces.Repository1.IContactDetail, IEntityPartId<ObjectId>, IObject, IEntityObject
+        {
+            private IDomainObject _domainObject;
+            private ObjectId m_Id_storage;
+            private bool m_IsPrimary;
+
+            public MongoEntityObject_ContactDetail()
+            {
+            }
+
+            public MongoEntityObject_ContactDetail(IComponentContext arg0)
+            {
+                this.m_Id_storage = ObjectId.GenerateNewId();
+            }
+
+            public static object FactoryMethod1()
+            {
+                return new MongoEntityObject_ContactDetail();
+            }
+
+            public static object FactoryMethod2(IComponentContext context1)
+            {
+                return new MongoEntityObject_ContactDetail(context1);
+            }
+
+            IEntityId IEntityObject.GetId()
+            {
+                return new EntityId<Interfaces.Repository1.IContactDetail, ObjectId>(this.m_Id_storage);
+            }
+
+            void IEntityObject.SetId(object value)
+            {
+                this.m_Id_storage = (ObjectId)value;
+            }
+
+            void IPersistableObject.SetContainerObject(IDomainObject container)
+            {
+                this._domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
+            {
+                return this._domainObject;
+            }
+
+            public virtual void WritePropertyValue_Id(ObjectId arg1)
+            {
+                this.m_Id_storage = arg1;
+            }
+
+            public virtual ObjectId Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+                set
+                {
+                    this.m_Id_storage = value;
+                }
+            }
+
+            ObjectId IEntityPartId<ObjectId>.Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.IContactDetail);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(MongoEntityObjectFactory);
+                }
+            }
+
+            public virtual bool IsPrimary
+            {
+                get
+                {
+                    return this.m_IsPrimary;
+                }
+                set
+                {
+                    this.m_IsPrimary = value;
+                }
+            }
+        }
+
+        [BsonIgnoreExtraElements]
+        public class MongoEntityObject_Customer : Interfaces.Repository1.ICustomer, IEntityPartId<ObjectId>, IObject, IEntityObject, IHaveDependencies, IHaveNestedObjects
+        {
+            private IComponentContext _components;
+            private IDomainObject _domainObject;
+            private ICollection<Interfaces.Repository1.IContactDetail> m_ContactDetails_contract;
+            private DualValueStates m_ContactDetails_state;
+            private ObjectId[] m_ContactDetails_storage;
+            private string m_FullName;
+            private ObjectId m_Id_storage;
+
+            public MongoEntityObject_Customer()
+            {
+            }
+
+            public MongoEntityObject_Customer(IComponentContext arg0)
+            {
+                this._components = arg0;
+                this.m_ContactDetails_contract = new HashSet<Interfaces.Repository1.IContactDetail>();
+                this.m_ContactDetails_state = DualValueStates.Contract;
+                ((IHaveDependencies)this).InjectDependencies(this._components);
+                this.m_Id_storage = ObjectId.GenerateNewId();
+            }
+
+            public static object FactoryMethod1()
+            {
+                return new MongoEntityObject_Customer();
+            }
+
+            public static object FactoryMethod2(IComponentContext context1)
+            {
+                return new MongoEntityObject_Customer(context1);
+            }
+
+            public void DeepListNestedObjects(HashSet<object> nestedObjects)
+            {
+                if ((((int)this.m_ContactDetails_state) & 1) != 0)
+                {
+                    RuntimeTypeModelHelpers.DeepListNestedObjectCollection(this.m_ContactDetails_contract, nestedObjects);
+                }
+            }
+
+            public void Delete()
+            {
+                throw new NotSupportedException("Methods of entity contracts are only supported by domain objects.");
+            }
+
+            public virtual void InjectDependencies(IComponentContext components)
+            {
+                this._components = components;
+            }
+
+            public bool IsInteredtedIn(Interfaces.Repository1.IProduct product)
+            {
+                throw new NotSupportedException();
+            }
+
+            IEntityId IEntityObject.GetId()
+            {
+                return new EntityId<Interfaces.Repository1.ICustomer, ObjectId>(this.m_Id_storage);
+            }
+
+            void IEntityObject.SetId(object value)
+            {
+                this.m_Id_storage = (ObjectId)value;
+            }
+
+            void IPersistableObject.SetContainerObject(IDomainObject container)
+            {
+                this._domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
+            {
+                return this._domainObject;
+            }
+
+            public bool QualifiesAsValuableCustomer()
+            {
+                throw new NotSupportedException();
+            }
+
+            public void Save()
+            {
+                throw new NotSupportedException("Methods of entity contracts are only supported by domain objects.");
+            }
+
+            public virtual void WritePropertyValue_Id(ObjectId arg1)
+            {
+                this.m_Id_storage = arg1;
+            }
+
+            public virtual ObjectId[] ContactDetails
+            {
+                get
+                {
+                    if (this.m_ContactDetails_state == DualValueStates.Contract)
+                    {
+                        int count = this.m_ContactDetails_contract.Count;
+                        int num2 = 0;
+                        ObjectId[] idArray = new ObjectId[count];
+                        this.m_ContactDetails_contract.Cast<IEntityObject>();
+                        IEnumerator<IEntityObject> enumerator = this.m_ContactDetails_contract.Cast<IEntityObject>().GetEnumerator();
+                        using (enumerator)
+                        {
+                            while (enumerator.MoveNext())
+                            {
+                                IEntityObject current = enumerator.Current;
+                                idArray[num2] = current.GetId().ValueAs<ObjectId>();
+                                num2++;
+                            }
+                        }
+                        this.m_ContactDetails_storage = idArray;
+                        this.m_ContactDetails_state |= DualValueStates.Storage;
+                    }
+                    return this.m_ContactDetails_storage;
+                }
+                set
+                {
+                    this.m_ContactDetails_storage = value;
+                    this.m_ContactDetails_state = DualValueStates.Storage;
+                }
+            }
+
+            public virtual string FullName
+            {
+                get
+                {
+                    return this.m_FullName;
+                }
+                set
+                {
+                    this.m_FullName = value;
+                }
+            }
+
+            ICollection<Interfaces.Repository1.IContactDetail> Interfaces.Repository1.ICustomer.ContactDetails
+            {
+                get
+                {
+                    if (this.m_ContactDetails_state == DualValueStates.Storage)
+                    {
+                        IEnumerable<Interfaces.Repository1.IContactDetail> collection = MongoDataRepositoryBase.ResolveFrom(this._components).LazyLoadByIdList<Interfaces.Repository1.IContactDetail, ObjectId>(this.m_ContactDetails_storage);
+                        this.m_ContactDetails_contract = new HashSet<Interfaces.Repository1.IContactDetail>(collection);
+                        this.m_ContactDetails_state |= DualValueStates.Contract;
+                    }
+                    return this.m_ContactDetails_contract;
+                }
+            }
+
+            public virtual ObjectId Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+                set
+                {
+                    this.m_Id_storage = value;
+                }
+            }
+
+            ObjectId IEntityPartId<ObjectId>.Id
+            {
+                get
+                {
+                    return this.m_Id_storage;
+                }
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.ICustomer);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(MongoEntityObjectFactory);
+                }
+            }
+        }
+
+        [BsonDiscriminator("EmailContactDetail", Required = true), BsonIgnoreExtraElements]
+        public class MongoEntityObject_EmailContactDetail : MongoEntityObject_ContactDetail, Interfaces.Repository1.IEmailContactDetail, IObject
+        {
+            private string m_Email;
+
+            public MongoEntityObject_EmailContactDetail()
+            {
+            }
+
+            public MongoEntityObject_EmailContactDetail(IComponentContext arg0)
+                : base(arg0)
+            {
+            }
+
+            public static new object FactoryMethod1()
+            {
+                return new MongoEntityObject_EmailContactDetail();
+            }
+
+            public static new object FactoryMethod2(IComponentContext context1)
+            {
+                return new MongoEntityObject_EmailContactDetail(context1);
+            }
+
+            public virtual string Email
+            {
+                get
+                {
+                    return this.m_Email;
+                }
+                set
+                {
+                    this.m_Email = value;
+                }
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.IEmailContactDetail);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(MongoEntityObjectFactory);
+                }
+            }
+        }
+
+        [BsonIgnoreExtraElements]
         public class MongoEntityObject_Order : Interfaces.Repository1.IOrder, IEntityPartId<ObjectId>, IObject, IEntityObject, IHaveDependencies, IHaveNestedObjects
         {
             private IComponentContext _components;
@@ -370,13 +1172,13 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             public MongoEntityObject_Order(IComponentContext arg0)
             {
-                ((IHaveDependencies)this).InjectDependencies(this._components);
                 this._components = arg0;
                 this.m_OrderLines_contract = new HashSet<Interfaces.Repository1.IOrderLine>();
                 this.m_OrderLines_state = DualValueStates.Contract;
                 this.m_DeliveryAddress_storage = new MongoEntityObject_PostalAddress(arg0);
                 this.m_BillingAddress_storage = new MongoEntityObject_PostalAddress(arg0);
                 this.m_Status = Interfaces.Repository1.OrderStatus.New;
+                ((IHaveDependencies)this).InjectDependencies(this._components);
                 this.m_Id_storage = ObjectId.GenerateNewId();
             }
 
@@ -404,7 +1206,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 }
             }
 
-            public void InjectDependencies(IComponentContext components)
+            public virtual void InjectDependencies(IComponentContext components)
             {
                 this._components = components;
             }
@@ -422,6 +1224,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             void IPersistableObject.SetContainerObject(IDomainObject container)
             {
                 this._domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
             }
 
             IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
@@ -639,12 +1446,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
         }
 
-        #endregion
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        #region Entity OrderLine
-
+        [BsonIgnoreExtraElements]
         public class MongoEntityObject_OrderLine : Interfaces.Repository1.IOrderLine, IEntityPartId<ObjectId>, IObject, IEntityObject, IHaveDependencies, IHaveNestedObjects
         {
             private IComponentContext _components;
@@ -666,10 +1468,10 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             public MongoEntityObject_OrderLine(IComponentContext arg0)
             {
-                ((IHaveDependencies)this).InjectDependencies(this._components);
                 this._components = arg0;
                 this.m_Attributes_storage = new HashSet<MongoEntityObject_AttributeValueChoice>();
                 this.m_Attributes_adapter = (ConcreteToAbstractCollectionAdapter<MongoEntityObject_AttributeValueChoice, Interfaces.Repository1.IAttributeValueChoice>)RuntimeTypeModelHelpers.CreateCollectionAdapter<MongoEntityObject_AttributeValueChoice, Interfaces.Repository1.IAttributeValueChoice>(this.m_Attributes_storage, false);
+                ((IHaveDependencies)this).InjectDependencies(this._components);
                 this.m_Id_storage = ObjectId.GenerateNewId();
             }
 
@@ -696,7 +1498,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 RuntimeTypeModelHelpers.DeepListNestedObjectCollection(this.m_Attributes_adapter, nestedObjects);
             }
 
-            public void InjectDependencies(IComponentContext components)
+            public virtual void InjectDependencies(IComponentContext components)
             {
                 this._components = components;
             }
@@ -714,6 +1516,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             void IPersistableObject.SetContainerObject(IDomainObject container)
             {
                 this._domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
             }
 
             IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
@@ -868,12 +1675,240 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
         }
 
-        #endregion
+        [BsonDiscriminator("PhoneContactDetail", Required = true), BsonIgnoreExtraElements]
+        public class MongoEntityObject_PhoneContactDetail : MongoEntityObject_ContactDetail, Interfaces.Repository1.IPhoneContactDetail, IObject
+        {
+            private string m_Phone;
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            public MongoEntityObject_PhoneContactDetail()
+            {
+            }
 
-        #region Entity Product
+            public MongoEntityObject_PhoneContactDetail(IComponentContext arg0)
+                : base(arg0)
+            {
+            }
 
+            public new static object FactoryMethod1()
+            {
+                return new MongoEntityObject_PhoneContactDetail();
+            }
+
+            public new static object FactoryMethod2(IComponentContext context1)
+            {
+                return new MongoEntityObject_PhoneContactDetail(context1);
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.IPhoneContactDetail);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(MongoEntityObjectFactory);
+                }
+            }
+
+            public virtual string Phone
+            {
+                get
+                {
+                    return this.m_Phone;
+                }
+                set
+                {
+                    this.m_Phone = value;
+                }
+            }
+        }
+
+
+        [BsonIgnoreExtraElements]
+        public class MongoEntityObject_PostalAddress : Interfaces.Repository1.IPostalAddress, IObject, IEntityPartObject
+        {
+            private IDomainObject _domainObject;
+            private string m_City;
+            private string m_Country;
+            private string m_StreetAddress;
+            private string m_ZipCode;
+
+            public MongoEntityObject_PostalAddress()
+            {
+            }
+
+            public MongoEntityObject_PostalAddress(IComponentContext arg0)
+            {
+            }
+
+            public static object FactoryMethod1()
+            {
+                return new MongoEntityObject_PostalAddress();
+            }
+
+            public static object FactoryMethod2(IComponentContext context1)
+            {
+                return new MongoEntityObject_PostalAddress(context1);
+            }
+
+            void IPersistableObject.SetContainerObject(IDomainObject container)
+            {
+                this._domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
+            }
+
+            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
+            {
+                return this._domainObject;
+            }
+
+            public virtual string City
+            {
+                get
+                {
+                    return this.m_City;
+                }
+                set
+                {
+                    this.m_City = value;
+                }
+            }
+
+            public virtual string Country
+            {
+                get
+                {
+                    return this.m_Country;
+                }
+                set
+                {
+                    this.m_Country = value;
+                }
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.IPostalAddress);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(MongoEntityObjectFactory);
+                }
+            }
+
+            public virtual string StreetAddress
+            {
+                get
+                {
+                    return this.m_StreetAddress;
+                }
+                set
+                {
+                    this.m_StreetAddress = value;
+                }
+            }
+
+            public virtual string ZipCode
+            {
+                get
+                {
+                    return this.m_ZipCode;
+                }
+                set
+                {
+                    this.m_ZipCode = value;
+                }
+            }
+        }
+
+        [BsonDiscriminator("PostContactDetail", Required = true), BsonIgnoreExtraElements]
+        public class MongoEntityObject_PostContactDetail : MongoEntityObject_ContactDetail, Interfaces.Repository1.IPostContactDetail, IObject, IHaveNestedObjects
+        {
+            private MongoEntityObject_PostalAddress m_PostalAddress_storage;
+
+            public MongoEntityObject_PostContactDetail()
+            {
+            }
+
+            public MongoEntityObject_PostContactDetail(IComponentContext arg0)
+                : base(arg0)
+            {
+                this.m_PostalAddress_storage = new MongoEntityObject_PostalAddress(arg0);
+            }
+
+            public new static object FactoryMethod1()
+            {
+                return new MongoEntityObject_PostContactDetail();
+            }
+
+            public new static object FactoryMethod2(IComponentContext context1)
+            {
+                return new MongoEntityObject_PostContactDetail(context1);
+            }
+
+            public void DeepListNestedObjects(HashSet<object> nestedObjects)
+            {
+                RuntimeTypeModelHelpers.DeepListNestedObject(this.m_PostalAddress_storage, nestedObjects);
+            }
+
+            public virtual void WritePropertyValue_PostalAddress(Interfaces.Repository1.IPostalAddress arg1)
+            {
+                this.m_PostalAddress_storage = (MongoEntityObject_PostalAddress)arg1;
+            }
+
+            Type IObject.ContractType
+            {
+                get
+                {
+                    return typeof(Interfaces.Repository1.IPostContactDetail);
+                }
+            }
+
+            Type IObject.FactoryType
+            {
+                get
+                {
+                    return typeof(MongoEntityObjectFactory);
+                }
+            }
+
+            Interfaces.Repository1.IPostalAddress Interfaces.Repository1.IPostContactDetail.PostalAddress
+            {
+                get
+                {
+                    return this.m_PostalAddress_storage;
+                }
+            }
+
+            public virtual MongoEntityObject_PostalAddress PostalAddress
+            {
+                get
+                {
+                    return this.m_PostalAddress_storage;
+                }
+                set
+                {
+                    this.m_PostalAddress_storage = value;
+                }
+            }
+        }
+
+        [BsonIgnoreExtraElements]
         public class MongoEntityObject_Product : Interfaces.Repository1.IProduct, IEntityPartId<ObjectId>, IObject, IEntityObject, IHaveDependencies, IHaveNestedObjects
         {
             private IComponentContext _components;
@@ -895,12 +1930,12 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             public MongoEntityObject_Product(IComponentContext arg0)
             {
-                ((IHaveDependencies)this).InjectDependencies(this._components);
                 this._components = arg0;
                 this.m_Categories_contract = new HashSet<Interfaces.Repository1.ICategory>();
                 this.m_Categories_state = DualValueStates.Contract;
                 this.m_Attributes_contract = new HashSet<Interfaces.Repository1.IAttribute>();
                 this.m_Attributes_state = DualValueStates.Contract;
+                ((IHaveDependencies)this).InjectDependencies(this._components);
                 this.m_Id_storage = ObjectId.GenerateNewId();
             }
 
@@ -926,7 +1961,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 }
             }
 
-            public void InjectDependencies(IComponentContext components)
+            public virtual void InjectDependencies(IComponentContext components)
             {
                 this._components = components;
             }
@@ -944,6 +1979,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             void IPersistableObject.SetContainerObject(IDomainObject container)
             {
                 this._domainObject = container;
+            }
+
+            public void EnsureDomainObject()
+            {
+                throw new NotImplementedException();
             }
 
             IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
@@ -1121,1066 +2161,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             }
         }
 
-        #endregion
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        #region Entity Category
-
-        public class MongoEntityObject_Category : Interfaces.Repository1.ICategory, IEntityPartUniqueDisplayName, IEntityPartId<ObjectId>, IObject, IEntityObject
-        {
-            private IDomainObject _domainObject;
-            private ObjectId m_Id_storage;
-            private string m_Name;
-
-            public MongoEntityObject_Category()
-            {
-            }
-
-            public MongoEntityObject_Category(IComponentContext arg0)
-            {
-                this.m_Id_storage = ObjectId.GenerateNewId();
-            }
-
-            public static object FactoryMethod1()
-            {
-                return new MongoEntityObject_Category();
-            }
-
-            public static object FactoryMethod2(IComponentContext context1)
-            {
-                return new MongoEntityObject_Category(context1);
-            }
-
-            IEntityId IEntityObject.GetId()
-            {
-                return new EntityId<Interfaces.Repository1.ICategory, ObjectId>(this.m_Id_storage);
-            }
-
-            void IEntityObject.SetId(object value)
-            {
-                this.m_Id_storage = (ObjectId)value;
-            }
-
-            void IPersistableObject.SetContainerObject(IDomainObject container)
-            {
-                this._domainObject = container;
-            }
-
-            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
-            {
-                return this._domainObject;
-            }
-
-            public virtual void WritePropertyValue_Id(ObjectId arg1)
-            {
-                this.m_Id_storage = arg1;
-            }
-
-            public virtual ObjectId Id
-            {
-                get
-                {
-                    return this.m_Id_storage;
-                }
-                set
-                {
-                    this.m_Id_storage = value;
-                }
-            }
-
-            ObjectId IEntityPartId<ObjectId>.Id
-            {
-                get
-                {
-                    return this.m_Id_storage;
-                }
-            }
-
-            Type IObject.ContractType
-            {
-                get
-                {
-                    return typeof(Interfaces.Repository1.ICategory);
-                }
-            }
-
-            Type IObject.FactoryType
-            {
-                get
-                {
-                    return typeof(MongoEntityObjectFactory);
-                }
-            }
-
-            public virtual string Name
-            {
-                get
-                {
-                    return this.m_Name;
-                }
-                set
-                {
-                    this.m_Name = value;
-                }
-            }
-        }
-
-        #endregion
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        #region Entity Attribute
-
-        public class MongoEntityObject_Attribute : Interfaces.Repository1.IAttribute, IEntityPartUniqueDisplayName, IEntityPartId<ObjectId>, IObject, IEntityObject, IHaveNestedObjects
-        {
-            private IDomainObject _domainObject;
-            private ObjectId m_Id_storage;
-            private string m_Name;
-            private string m_TitleForUser;
-            private ConcreteToAbstractListAdapter<MongoEntityObject_AttributeValue, Interfaces.Repository1.IAttributeValue> m_Values_adapter;
-            private List<MongoEntityObject_AttributeValue> m_Values_storage;
-
-            public MongoEntityObject_Attribute()
-            {
-            }
-
-            public MongoEntityObject_Attribute(IComponentContext arg0)
-            {
-                this.m_Values_storage = new List<MongoEntityObject_AttributeValue>();
-                this.m_Values_adapter = (ConcreteToAbstractListAdapter<MongoEntityObject_AttributeValue, Interfaces.Repository1.IAttributeValue>)RuntimeTypeModelHelpers.CreateCollectionAdapter<MongoEntityObject_AttributeValue, Interfaces.Repository1.IAttributeValue>(this.m_Values_storage, true);
-                this.m_Id_storage = ObjectId.GenerateNewId();
-            }
-
-            public static object FactoryMethod1()
-            {
-                return new MongoEntityObject_Attribute();
-            }
-
-            public static object FactoryMethod2(IComponentContext context1)
-            {
-                return new MongoEntityObject_Attribute(context1);
-            }
-
-            public void DeepListNestedObjects(HashSet<object> nestedObjects)
-            {
-                RuntimeTypeModelHelpers.DeepListNestedObjectCollection(this.m_Values_adapter, nestedObjects);
-            }
-
-            IEntityId IEntityObject.GetId()
-            {
-                return new EntityId<Interfaces.Repository1.IAttribute, ObjectId>(this.m_Id_storage);
-            }
-
-            void IEntityObject.SetId(object value)
-            {
-                this.m_Id_storage = (ObjectId)value;
-            }
-
-            void IPersistableObject.SetContainerObject(IDomainObject container)
-            {
-                this._domainObject = container;
-            }
-
-            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
-            {
-                return this._domainObject;
-            }
-
-            public virtual void WritePropertyValue_Id(ObjectId arg1)
-            {
-                this.m_Id_storage = arg1;
-            }
-
-            IList<Interfaces.Repository1.IAttributeValue> Interfaces.Repository1.IAttribute.Values
-            {
-                get
-                {
-                    return this.m_Values_adapter;
-                }
-            }
-
-            public virtual ObjectId Id
-            {
-                get
-                {
-                    return this.m_Id_storage;
-                }
-                set
-                {
-                    this.m_Id_storage = value;
-                }
-            }
-
-            ObjectId IEntityPartId<ObjectId>.Id
-            {
-                get
-                {
-                    return this.m_Id_storage;
-                }
-            }
-
-            Type IObject.ContractType
-            {
-                get
-                {
-                    return typeof(Interfaces.Repository1.IAttribute);
-                }
-            }
-
-            Type IObject.FactoryType
-            {
-                get
-                {
-                    return typeof(MongoEntityObjectFactory);
-                }
-            }
-
-            public virtual string Name
-            {
-                get
-                {
-                    return this.m_Name;
-                }
-                set
-                {
-                    this.m_Name = value;
-                }
-            }
-
-            public virtual string TitleForUser
-            {
-                get
-                {
-                    return this.m_TitleForUser;
-                }
-                set
-                {
-                    this.m_TitleForUser = value;
-                }
-            }
-
-            public virtual List<MongoEntityObject_AttributeValue> Values
-            {
-                get
-                {
-                    return this.m_Values_storage;
-                }
-                set
-                {
-                    this.m_Values_adapter = (ConcreteToAbstractListAdapter<MongoEntityObject_AttributeValue, Interfaces.Repository1.IAttributeValue>)RuntimeTypeModelHelpers.CreateCollectionAdapter<MongoEntityObject_AttributeValue, Interfaces.Repository1.IAttributeValue>(value, true);
-                    this.m_Values_storage = value;
-                }
-            }
-        }
-
-        #endregion
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        #region Entity Part AttributeValue
-
-        public class MongoEntityObject_AttributeValue : Interfaces.Repository1.IAttributeValue, IObject, IEntityPartObject
-        {
-            private IDomainObject _domainObject;
-            private int m_DisplayOrder;
-            private string m_Value;
-
-            public MongoEntityObject_AttributeValue()
-            {
-            }
-
-            public MongoEntityObject_AttributeValue(IComponentContext arg0)
-            {
-            }
-
-            public static object FactoryMethod1()
-            {
-                return new MongoEntityObject_AttributeValue();
-            }
-
-            public static object FactoryMethod2(IComponentContext context1)
-            {
-                return new MongoEntityObject_AttributeValue(context1);
-            }
-
-            void IPersistableObject.SetContainerObject(IDomainObject container)
-            {
-                this._domainObject = container;
-            }
-
-            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
-            {
-                return this._domainObject;
-            }
-
-            public virtual int DisplayOrder
-            {
-                get
-                {
-                    return this.m_DisplayOrder;
-                }
-                set
-                {
-                    this.m_DisplayOrder = value;
-                }
-            }
-
-            Type IObject.ContractType
-            {
-                get
-                {
-                    return typeof(Interfaces.Repository1.IAttributeValue);
-                }
-            }
-
-            Type IObject.FactoryType
-            {
-                get
-                {
-                    return typeof(MongoEntityObjectFactory);
-                }
-            }
-
-            public virtual string Value
-            {
-                get
-                {
-                    return this.m_Value;
-                }
-                set
-                {
-                    this.m_Value = value;
-                }
-            }
-        }
-
-        #endregion
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        #region Entity Part AttributeValueChoice
-
-        public class MongoEntityObject_AttributeValueChoice : Interfaces.Repository1.IAttributeValueChoice, IObject, IEntityPartObject, IHaveDependencies, IHaveNestedObjects
-        {
-            private IComponentContext _components;
-            private IDomainObject _domainObject;
-            private Interfaces.Repository1.IAttribute m_Attribute_contract;
-            private DualValueStates m_Attribute_state;
-            private ObjectId m_Attribute_storage;
-            private string m_Value;
-
-            public MongoEntityObject_AttributeValueChoice()
-            {
-            }
-
-            public MongoEntityObject_AttributeValueChoice(IComponentContext arg0)
-            {
-                ((IHaveDependencies)this).InjectDependencies(this._components);
-                this._components = arg0;
-            }
-
-            public static object FactoryMethod1()
-            {
-                return new MongoEntityObject_AttributeValueChoice();
-            }
-
-            public static object FactoryMethod2(IComponentContext context1)
-            {
-                return new MongoEntityObject_AttributeValueChoice(context1);
-            }
-
-            public void DeepListNestedObjects(HashSet<object> nestedObjects)
-            {
-                if ((((int)this.m_Attribute_state) & 1) != 0)
-                {
-                    RuntimeTypeModelHelpers.DeepListNestedObject(this.m_Attribute_contract, nestedObjects);
-                }
-            }
-
-            public void InjectDependencies(IComponentContext components)
-            {
-                this._components = components;
-            }
-
-            void IPersistableObject.SetContainerObject(IDomainObject container)
-            {
-                this._domainObject = container;
-            }
-
-            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
-            {
-                return this._domainObject;
-            }
-
-            public virtual ObjectId Attribute
-            {
-                get
-                {
-                    if (this.m_Attribute_state == DualValueStates.Contract)
-                    {
-                        this.m_Attribute_storage = ((IEntityObject)this.m_Attribute_contract).GetId().ValueAs<ObjectId>();
-                        this.m_Attribute_state |= DualValueStates.Storage;
-                    }
-                    return this.m_Attribute_storage;
-                }
-                set
-                {
-                    this.m_Attribute_storage = value;
-                    this.m_Attribute_state = DualValueStates.Storage;
-                }
-            }
-
-            Interfaces.Repository1.IAttribute Interfaces.Repository1.IAttributeValueChoice.Attribute
-            {
-                get
-                {
-                    if (this.m_Attribute_state == DualValueStates.Storage)
-                    {
-                        this.m_Attribute_contract = MongoDataRepositoryBase.ResolveFrom(this._components).LazyLoadById<Interfaces.Repository1.IAttribute, ObjectId>(this.m_Attribute_storage);
-                        this.m_Attribute_state |= DualValueStates.Contract;
-                    }
-                    return this.m_Attribute_contract;
-                }
-                set
-                {
-                    this.m_Attribute_contract = value;
-                    this.m_Attribute_state = DualValueStates.Contract;
-                }
-            }
-
-            Type IObject.ContractType
-            {
-                get
-                {
-                    return typeof(Interfaces.Repository1.IAttributeValueChoice);
-                }
-            }
-
-            Type IObject.FactoryType
-            {
-                get
-                {
-                    return typeof(MongoEntityObjectFactory);
-                }
-            }
-
-            public virtual string Value
-            {
-                get
-                {
-                    return this.m_Value;
-                }
-                set
-                {
-                    this.m_Value = value;
-                }
-            }
-        }
-
-        #endregion
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        #region Entity Part PostalAddress
-
-        public class MongoEntityObject_PostalAddress : Interfaces.Repository1.IPostalAddress, IObject, IEntityPartObject
-        {
-            private IDomainObject _domainObject;
-            private string m_City;
-            private string m_Country;
-            private string m_StreetAddress;
-            private string m_ZipCode;
-
-            public MongoEntityObject_PostalAddress()
-            {
-            }
-
-            public MongoEntityObject_PostalAddress(IComponentContext arg0)
-            {
-            }
-
-            public static object FactoryMethod1()
-            {
-                return new MongoEntityObject_PostalAddress();
-            }
-
-            public static object FactoryMethod2(IComponentContext context1)
-            {
-                return new MongoEntityObject_PostalAddress(context1);
-            }
-
-            void IPersistableObject.SetContainerObject(IDomainObject container)
-            {
-                this._domainObject = container;
-            }
-
-            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
-            {
-                return this._domainObject;
-            }
-
-            public virtual string City
-            {
-                get
-                {
-                    return this.m_City;
-                }
-                set
-                {
-                    this.m_City = value;
-                }
-            }
-
-            public virtual string Country
-            {
-                get
-                {
-                    return this.m_Country;
-                }
-                set
-                {
-                    this.m_Country = value;
-                }
-            }
-
-            Type IObject.ContractType
-            {
-                get
-                {
-                    return typeof(Interfaces.Repository1.IPostalAddress);
-                }
-            }
-
-            Type IObject.FactoryType
-            {
-                get
-                {
-                    return typeof(MongoEntityObjectFactory);
-                }
-            }
-
-            public virtual string StreetAddress
-            {
-                get
-                {
-                    return this.m_StreetAddress;
-                }
-                set
-                {
-                    this.m_StreetAddress = value;
-                }
-            }
-
-            public virtual string ZipCode
-            {
-                get
-                {
-                    return this.m_ZipCode;
-                }
-                set
-                {
-                    this.m_ZipCode = value;
-                }
-            }
-        }
-
-        #endregion
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        #region Entity Customer
-
-        public class MongoEntityObject_Customer : Interfaces.Repository1.ICustomer, IEntityPartId<ObjectId>, IObject, IEntityObject, IHaveDependencies, IHaveNestedObjects
-        {
-            private IComponentContext _components;
-            private IDomainObject _domainObject;
-            private ICollection<Interfaces.Repository1.IContactDetail> m_ContactDetails_contract;
-            private DualValueStates m_ContactDetails_state;
-            private ObjectId[] m_ContactDetails_storage;
-            private string m_FullName;
-            private ObjectId m_Id_storage;
-
-            public MongoEntityObject_Customer()
-            {
-            }
-
-            public MongoEntityObject_Customer(IComponentContext arg0)
-            {
-                ((IHaveDependencies)this).InjectDependencies(this._components);
-                this._components = arg0;
-                this.m_ContactDetails_contract = new HashSet<Interfaces.Repository1.IContactDetail>();
-                this.m_ContactDetails_state = DualValueStates.Contract;
-                this.m_Id_storage = ObjectId.GenerateNewId();
-            }
-
-            public static object FactoryMethod1()
-            {
-                return new MongoEntityObject_Customer();
-            }
-
-            public static object FactoryMethod2(IComponentContext context1)
-            {
-                return new MongoEntityObject_Customer(context1);
-            }
-
-            public void DeepListNestedObjects(HashSet<object> nestedObjects)
-            {
-                if ((((int)this.m_ContactDetails_state) & 1) != 0)
-                {
-                    RuntimeTypeModelHelpers.DeepListNestedObjectCollection(this.m_ContactDetails_contract, nestedObjects);
-                }
-            }
-
-            public void InjectDependencies(IComponentContext components)
-            {
-                this._components = components;
-            }
-
-            public bool IsInteredtedIn(Interfaces.Repository1.IProduct product)
-            {
-                throw new NotSupportedException();
-            }
-
-            IEntityId IEntityObject.GetId()
-            {
-                return new EntityId<Interfaces.Repository1.ICustomer, ObjectId>(this.m_Id_storage);
-            }
-
-            void IEntityObject.SetId(object value)
-            {
-                this.m_Id_storage = (ObjectId)value;
-            }
-
-            void IPersistableObject.SetContainerObject(IDomainObject container)
-            {
-                this._domainObject = container;
-            }
-
-            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
-            {
-                return this._domainObject;
-            }
-
-            public bool QualifiesAsValuableCustomer()
-            {
-                throw new NotSupportedException();
-            }
-
-            public virtual void WritePropertyValue_Id(ObjectId arg1)
-            {
-                this.m_Id_storage = arg1;
-            }
-
-            public virtual ObjectId[] ContactDetails
-            {
-                get
-                {
-                    if (this.m_ContactDetails_state == DualValueStates.Contract)
-                    {
-                        int count = this.m_ContactDetails_contract.Count;
-                        int num2 = 0;
-                        ObjectId[] idArray = new ObjectId[count];
-                        this.m_ContactDetails_contract.Cast<IEntityObject>();
-                        IEnumerator<IEntityObject> enumerator = this.m_ContactDetails_contract.Cast<IEntityObject>().GetEnumerator();
-                        using (enumerator)
-                        {
-                            while (enumerator.MoveNext())
-                            {
-                                IEntityObject current = enumerator.Current;
-                                idArray[num2] = current.GetId().ValueAs<ObjectId>();
-                                num2++;
-                            }
-                        }
-                        this.m_ContactDetails_storage = idArray;
-                        this.m_ContactDetails_state |= DualValueStates.Storage;
-                    }
-                    return this.m_ContactDetails_storage;
-                }
-                set
-                {
-                    this.m_ContactDetails_storage = value;
-                    this.m_ContactDetails_state = DualValueStates.Storage;
-                }
-            }
-
-            public virtual string FullName
-            {
-                get
-                {
-                    return this.m_FullName;
-                }
-                set
-                {
-                    this.m_FullName = value;
-                }
-            }
-
-            ICollection<Interfaces.Repository1.IContactDetail> Interfaces.Repository1.ICustomer.ContactDetails
-            {
-                get
-                {
-                    if (this.m_ContactDetails_state == DualValueStates.Storage)
-                    {
-                        IEnumerable<Interfaces.Repository1.IContactDetail> collection = MongoDataRepositoryBase.ResolveFrom(this._components).LazyLoadByIdList<Interfaces.Repository1.IContactDetail, ObjectId>(this.m_ContactDetails_storage);
-                        this.m_ContactDetails_contract = new HashSet<Interfaces.Repository1.IContactDetail>(collection);
-                        this.m_ContactDetails_state |= DualValueStates.Contract;
-                    }
-                    return this.m_ContactDetails_contract;
-                }
-            }
-
-            public virtual ObjectId Id
-            {
-                get
-                {
-                    return this.m_Id_storage;
-                }
-                set
-                {
-                    this.m_Id_storage = value;
-                }
-            }
-
-            ObjectId IEntityPartId<ObjectId>.Id
-            {
-                get
-                {
-                    return this.m_Id_storage;
-                }
-            }
-
-            Type IObject.ContractType
-            {
-                get
-                {
-                    return typeof(Interfaces.Repository1.ICustomer);
-                }
-            }
-
-            Type IObject.FactoryType
-            {
-                get
-                {
-                    return typeof(MongoEntityObjectFactory);
-                }
-            }
-
-            #region Implementation of IActiveRecord
-
-            public void Save()
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Delete()
-            {
-                throw new NotImplementedException();
-            }
-
-            #endregion
-        }
-
-
-        #endregion
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        #region Entity ContactDetail
-
-        [BsonDiscriminator("ContactDetail", RootClass = true)]
-        public class MongoEntityObject_ContactDetail : Interfaces.Repository1.IContactDetail, IEntityPartId<ObjectId>, IObject, IEntityObject
-        {
-            private IDomainObject _domainObject;
-            private ObjectId m_Id_storage;
-            private bool m_IsPrimary;
-
-            public MongoEntityObject_ContactDetail()
-            {
-            }
-
-            public MongoEntityObject_ContactDetail(IComponentContext arg0)
-            {
-                this.m_Id_storage = ObjectId.GenerateNewId();
-            }
-
-            public static object FactoryMethod1()
-            {
-                return new MongoEntityObject_ContactDetail();
-            }
-
-            public static object FactoryMethod2(IComponentContext context1)
-            {
-                return new MongoEntityObject_ContactDetail(context1);
-            }
-
-            IEntityId IEntityObject.GetId()
-            {
-                return new EntityId<Interfaces.Repository1.IContactDetail, ObjectId>(this.m_Id_storage);
-            }
-
-            void IEntityObject.SetId(object value)
-            {
-                this.m_Id_storage = (ObjectId)value;
-            }
-
-            void IPersistableObject.SetContainerObject(IDomainObject container)
-            {
-                this._domainObject = container;
-            }
-
-            IDomainObject IContainedIn<IDomainObject>.GetContainerObject()
-            {
-                return this._domainObject;
-            }
-
-            public virtual void WritePropertyValue_Id(ObjectId arg1)
-            {
-                this.m_Id_storage = arg1;
-            }
-
-            public virtual ObjectId Id
-            {
-                get
-                {
-                    return this.m_Id_storage;
-                }
-                set
-                {
-                    this.m_Id_storage = value;
-                }
-            }
-
-            ObjectId IEntityPartId<ObjectId>.Id
-            {
-                get
-                {
-                    return this.m_Id_storage;
-                }
-            }
-
-            Type IObject.ContractType
-            {
-                get
-                {
-                    return typeof(Interfaces.Repository1.IContactDetail);
-                }
-            }
-
-            Type IObject.FactoryType
-            {
-                get
-                {
-                    return typeof(MongoEntityObjectFactory);
-                }
-            }
-
-            public virtual bool IsPrimary
-            {
-                get
-                {
-                    return this.m_IsPrimary;
-                }
-                set
-                {
-                    this.m_IsPrimary = value;
-                }
-            }
-        }
-
-        #endregion
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        #region Entity EmailContactDetail
-
-        [BsonDiscriminator("EmailContactDetail")]
-        public class MongoEntityObject_EmailContactDetail : MongoEntityObject_ContactDetail, Interfaces.Repository1.IEmailContactDetail, IObject
-        {
-            private string m_Email;
-
-            public MongoEntityObject_EmailContactDetail()
-            {
-            }
-
-            public MongoEntityObject_EmailContactDetail(IComponentContext arg0)
-                : base(arg0)
-            {
-            }
-
-            public new static object FactoryMethod1()
-            {
-                return new MongoEntityObject_EmailContactDetail();
-            }
-
-            public new static object FactoryMethod2(IComponentContext context1)
-            {
-                return new MongoEntityObject_EmailContactDetail(context1);
-            }
-
-            public virtual string Email
-            {
-                get
-                {
-                    return this.m_Email;
-                }
-                set
-                {
-                    this.m_Email = value;
-                }
-            }
-
-            Type IObject.ContractType
-            {
-                get
-                {
-                    return typeof(Interfaces.Repository1.IEmailContactDetail);
-                }
-            }
-
-            Type IObject.FactoryType
-            {
-                get
-                {
-                    return typeof(MongoEntityObjectFactory);
-                }
-            }
-        }
- 
-        #endregion
-        
-        #region Entity PhoneContactDetail
-
-        [BsonDiscriminator("PhoneContactDetail")]
-        public class MongoEntityObject_PhoneContactDetail : MongoEntityObject_ContactDetail, Interfaces.Repository1.IPhoneContactDetail, IObject
-        {
-            private string m_Phone;
-
-            public MongoEntityObject_PhoneContactDetail()
-            {
-            }
-
-            public MongoEntityObject_PhoneContactDetail(IComponentContext arg0)
-                : base(arg0)
-            {
-            }
-
-            public new static object FactoryMethod1()
-            {
-                return new MongoEntityObject_PhoneContactDetail();
-            }
-
-            public new static object FactoryMethod2(IComponentContext context1)
-            {
-                return new MongoEntityObject_PhoneContactDetail(context1);
-            }
-
-            Type IObject.ContractType
-            {
-                get
-                {
-                    return typeof(Interfaces.Repository1.IPhoneContactDetail);
-                }
-            }
-
-            Type IObject.FactoryType
-            {
-                get
-                {
-                    return typeof(MongoEntityObjectFactory);
-                }
-            }
-
-            public virtual string Phone
-            {
-                get
-                {
-                    return this.m_Phone;
-                }
-                set
-                {
-                    this.m_Phone = value;
-                }
-            }
-        }
-
-        
-        #endregion
-
-        #region Entity PostContactDetail
-
-        [BsonDiscriminator("PostContactDetail")]
-        public class MongoEntityObject_PostContactDetail : MongoEntityObject_ContactDetail, Interfaces.Repository1.IPostContactDetail, IObject, IHaveNestedObjects
-        {
-            private MongoEntityObject_PostalAddress m_PostalAddress_storage;
-
-            public MongoEntityObject_PostContactDetail()
-            {
-            }
-
-            public MongoEntityObject_PostContactDetail(IComponentContext arg0)
-                : base(arg0)
-            {
-                this.m_PostalAddress_storage = new MongoEntityObject_PostalAddress(arg0);
-            }
-
-            public new static object FactoryMethod1()
-            {
-                return new MongoEntityObject_PostContactDetail();
-            }
-
-            public new static object FactoryMethod2(IComponentContext context1)
-            {
-                return new MongoEntityObject_PostContactDetail(context1);
-            }
-
-            public void DeepListNestedObjects(HashSet<object> nestedObjects)
-            {
-                RuntimeTypeModelHelpers.DeepListNestedObject(this.m_PostalAddress_storage, nestedObjects);
-            }
-
-            public virtual void WritePropertyValue_PostalAddress(Interfaces.Repository1.IPostalAddress arg1)
-            {
-                this.m_PostalAddress_storage = (MongoEntityObject_PostalAddress)arg1;
-            }
-
-            Type IObject.ContractType
-            {
-                get
-                {
-                    return typeof(Interfaces.Repository1.IPostContactDetail);
-                }
-            }
-
-            Type IObject.FactoryType
-            {
-                get
-                {
-                    return typeof(MongoEntityObjectFactory);
-                }
-            }
-
-            Interfaces.Repository1.IPostalAddress Interfaces.Repository1.IPostContactDetail.PostalAddress
-            {
-                get
-                {
-                    return this.m_PostalAddress_storage;
-                }
-            }
-
-            public virtual MongoEntityObject_PostalAddress PostalAddress
-            {
-                get
-                {
-                    return this.m_PostalAddress_storage;
-                }
-                set
-                {
-                    this.m_PostalAddress_storage = value;
-                }
-            }
-        }
-        
         #endregion
     }
 }

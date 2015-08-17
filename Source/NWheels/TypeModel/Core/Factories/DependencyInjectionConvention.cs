@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
@@ -12,21 +14,25 @@ using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Factories;
+using NWheels.Utilities;
+using TT = Hapil.TypeTemplate;
 
 namespace NWheels.TypeModel.Core.Factories
 {
     public class DependencyInjectionConvention : CompositeConvention
     {
         private readonly PropertyImplementationStrategyMap _propertyStrategyMap;
+        private readonly bool _forceApply;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DependencyInjectionConvention(PropertyImplementationStrategyMap propertyStrategyMap)
+        public DependencyInjectionConvention(ITypeMetadata metaType, PropertyImplementationStrategyMap propertyStrategyMap, bool forceApply = false)
             : base(
-                new ImplementIHaveDependencies(propertyStrategyMap), 
+                new ImplementIHaveDependencies(metaType, propertyStrategyMap), 
                 new CallInjectDependenciesFromInitializationConstructor())
         {
             _propertyStrategyMap = propertyStrategyMap;
+            _forceApply = forceApply;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,37 +41,87 @@ namespace NWheels.TypeModel.Core.Factories
 
         public override bool ShouldApply(ObjectFactoryContext context)
         {
-            return _propertyStrategyMap.Strategies.Any(strategy => strategy.HasDependencies);
+            return (_forceApply || _propertyStrategyMap.Strategies.Any(strategy => strategy.HasDependencies));
         }
 
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static MethodInfo _s_injectDependenciesMethod =
+            ExpressionUtility.GetMethodInfo<Expression<Action<IHaveDependencies, IComponentContext>>>((x, c) => x.InjectDependencies(c));
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static bool IsInjectDependenciesMethod(MethodInfo method)
+        {
+            var parameters = method.GetParameters();
+
+            return (
+                method.DeclaringType != null &&
+                method.DeclaringType.IsClass &&
+                !method.IsAbstract &&
+                !method.IsGenericMethod &&
+                parameters.Length == 1 &&
+                parameters[0].ParameterType == typeof(IComponentContext) &&
+                method.Name == _s_injectDependenciesMethod.Name);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class ImplementIHaveDependencies : ImplementationConvention
         {
             private readonly PropertyImplementationStrategyMap _propertyStrategyMap;
+            private readonly ITypeMetadata _metaType;
+            private Type _factoryType;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ImplementIHaveDependencies(PropertyImplementationStrategyMap propertyStrategyMap)
-                : base(Will.ImplementBaseClass)
+            public ImplementIHaveDependencies(ITypeMetadata metaType, PropertyImplementationStrategyMap propertyStrategyMap)
+                : base(Will.InspectDeclaration | Will.ImplementBaseClass)
             {
                 _propertyStrategyMap = propertyStrategyMap;
+                _metaType = metaType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override void OnInspectDeclaration(ObjectFactoryContext context)
+            {
+                _factoryType = context.Factory.GetType();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
             {
-                writer.ImplementInterface<IHaveDependencies>()
-                    .Method<IComponentContext>(x => x.InjectDependencies).Implement((m, components) => {
-                        writer.DependencyField<IComponentContext>("$components").Assign(components);
-                        
-                        _propertyStrategyMap.InvokeStrategies(
-                            predicate: strategy => strategy.HasDependencies,
-                            action: strategy => strategy.WriteResolveDependencies(writer, m, components));
-                    });
+                writer.ImplementInterfaceVirtual<IHaveDependencies>().Method<IComponentContext>(x => x.InjectDependencies).Implement((m, components) => {
+                    writer.DependencyField<IComponentContext>("$components").Assign(components);
+
+                    _propertyStrategyMap.InvokeStrategies(
+                        predicate: strategy => strategy.HasDependencies,
+                        action: strategy => strategy.WriteResolveDependencies(writer, m, components));
+
+                    CallBaseInjectDependenciesMethod(m, components);
+                });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void CallBaseInjectDependenciesMethod(VoidMethodWriter m, Argument<IComponentContext> components)
+            {
+                if ( _metaType.BaseType != null && typeof(IHaveDependencies).IsAssignableFrom(m.OwnerClass.BaseType) )
+                {
+                    var baseInjectDependenciesMethod = TypeMemberCache.Of(m.OwnerClass.BaseType).Methods.FirstOrDefault(IsInjectDependenciesMethod);
+
+                    if ( baseInjectDependenciesMethod != null )
+                    {
+                        using ( TT.CreateScope<TT.TBase>(m.OwnerClass.BaseType) )
+                        {
+                            m.This<TT.TBase>().Void<IComponentContext>(baseInjectDependenciesMethod, components);
+                        }
+                    }
+                }
             }
         }
 
@@ -95,7 +151,7 @@ namespace NWheels.TypeModel.Core.Factories
             {
                 if ( IsInitializationConstructor(member) )
                 {
-                    decorate().OnBefore(
+                    decorate().OnSuccess(
                         m => {
                             m.This<IHaveDependencies>().Void<IComponentContext>(x => x.InjectDependencies, _componentsField);
                         });
