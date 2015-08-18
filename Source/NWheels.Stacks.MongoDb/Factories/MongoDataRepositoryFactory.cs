@@ -105,15 +105,18 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             private void WritePolymorphicEntityRegistrations(FunctionMethodWriter<object> writer)
             {
+                var w = writer;
+
                 foreach ( var entity in base.EntitiesInRepository )
                 {
                     if ( entity.Metadata.BaseType != null || entity.Metadata.DerivedTypes.Count > 0 )
                     {
                         using ( TT.CreateScope<TT.TImpl>(entity.ImplementationType) )
                         {
-                            Static.GenericFunc<BsonClassMap<TT.TImpl>>(() => BsonClassMap.RegisterClassMap<TT.TImpl>());
+                            w.If(!Static.Func(BsonClassMap.IsClassMapRegistered, w.Const(entity.ImplementationType))).Then(() => {
+                                Static.GenericFunc<BsonClassMap<TT.TImpl>>(() => BsonClassMap.RegisterClassMap<TT.TImpl>());
+                            });
                         }
-                        //Static.Func(BsonClassMap.LookupClassMap, writer.Const(entity.ImplementationType));
                     }
                 }
             }

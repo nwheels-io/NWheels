@@ -82,6 +82,7 @@
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="PolymorphicDiscriminatorConvention.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RuntimeHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels\NWheels.csproj">

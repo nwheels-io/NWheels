@@ -56,17 +56,39 @@ namespace NWheels.Entities.Factories
         {
             if ( _context.MetaType.DomainObjectType == null )
             {
-                using ( TT.CreateScope<TT.TInterface, TT2.TDomain, TT2.TPersistable>(
-                    writer.OwnerClass.BaseType, writer.OwnerClass.BaseType, _context.PersistableObjectType) )
+                //using ( TT.CreateScope<TT.TInterface, TT2.TDomain, TT2.TPersistable>(
+                //    writer.OwnerClass.BaseType, writer.OwnerClass.BaseType, _context.PersistableObjectType) )
+                //{
+                //    PropertyImplementationStrategyMap.InvokeStrategies(
+                //        _context.PropertyMap.Strategies,
+                //        strategy => {
+                //            using ( _context.CreatePropertyTypeTemplateScope(strategy.MetaProperty) )
+                //            {
+                //                strategy.WritePropertyImplementation(writer);
+                //            }
+                //        });
+                //}
+
+                var propertyGroupsByInterface = 
+                    _context.PropertyMap.Strategies.GroupBy(strategy => strategy.MetaProperty.ContractPropertyInfo.DeclaringType);
+
+                foreach ( var group in propertyGroupsByInterface )
                 {
-                    PropertyImplementationStrategyMap.InvokeStrategies(
-                        _context.PropertyMap.Strategies,
-                        strategy => {
-                            using ( _context.CreatePropertyTypeTemplateScope(strategy.MetaProperty) )
-                            {
-                                strategy.WritePropertyImplementation(writer);
-                            }
-                        });
+                    var interfaceType = group.Key;
+
+                    using ( TT.CreateScope<TT.TInterface>(interfaceType) )
+                    {
+                        var explicitImplementation = writer.ImplementInterfaceExplicitly<TT.TInterface>();
+
+                        PropertyImplementationStrategyMap.InvokeStrategies(
+                            group, 
+                            strategy => {
+                                using ( _context.CreatePropertyTypeTemplateScope(strategy.MetaProperty) )
+                                {
+                                    strategy.WritePropertyImplementation(explicitImplementation);
+                                }
+                            });
+                    }
                 }
             }
         }
