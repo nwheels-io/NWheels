@@ -56,19 +56,21 @@ namespace NWheels.DataObjects.Core
 
         public void ApplyRelationalMappingConventions(TypeMetadataBuilder type)
         {
+            var orderedConventions = _relationalMappingConventions.Reverse().ToArray();
+
             type.SafeGetRelationalMapping();
 
-            foreach ( var convention in _relationalMappingConventions )
+            foreach ( var convention in orderedConventions )
             {
                 convention.Preview(type);
             }
 
-            foreach ( var convention in _relationalMappingConventions )
+            foreach ( var convention in orderedConventions )
             {
                 convention.Apply(type);
             }
 
-            foreach ( var convention in _relationalMappingConventions )
+            foreach ( var convention in orderedConventions )
             {
                 convention.Finalize(type);
             }

@@ -69,7 +69,7 @@ namespace NWheels.Stacks.EntityFramework
 
                     if ( !string.IsNullOrEmpty(entity.NamespaceQualifier) )
                     {
-                        var namingConvention = metadataCache.Conventions.RelationalMappingConventions.OfType<IStorageSchemaNamingConvention>().First();
+                        var namingConvention = metadataCache.Conventions.RelationalMappingConventions.OfType<IStorageSchemaNamingConvention>().Last();
                         tableName = namingConvention.QualifyTableNameWithNamespace(entity, entity.RelationalMapping.PrimaryTableName, entity.NamespaceQualifier);
                     }
                     else
