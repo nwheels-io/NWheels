@@ -10,7 +10,6 @@ namespace NWheels.Stacks.Network
         protected Int32 Id;
         protected MessagesDispatcher m_MessagesDispatcher;
         protected Dictionary<Int32, AbstractNetConnector> _connectors = new Dictionary<Int32, AbstractNetConnector>();
-        protected DispatchedTimeOutUtils m_TimeOutManager;
         protected Int32 MaxConnectorId = Int32.MaxValue;
 
         protected readonly INetworkEndpointLogger Logger;
@@ -77,8 +76,6 @@ namespace NWheels.Stacks.Network
 
         public virtual void StartListening(int port, bool isBlockingAcceptLoop)
         {
-            m_TimeOutManager = new DispatchedTimeOutUtils(m_MessagesDispatcher);
-            m_TimeOutManager.Run();
         }
 
         public virtual void StopListening()
@@ -90,12 +87,6 @@ namespace NWheels.Stacks.Network
             }
 
             _connectors.Clear();
-
-            if (m_TimeOutManager != null)
-            {
-                m_TimeOutManager.Dispose();
-                m_TimeOutManager = null;
-            }
         }
 
         //-----------------
@@ -109,8 +100,8 @@ namespace NWheels.Stacks.Network
         {
             lock (_connectors)
             {
-                _connectors.Add(cc.ID, cc);
-                LastConnectorsIds.Remove(cc.ID);
+                _connectors.Add(cc.Id, cc);
+                LastConnectorsIds.Remove(cc.Id);
                 TimeSpan timeSpan = new TimeSpan(0, 0, 10);
                 List<int> connectionsToRemove = new List<int>();
                 foreach (KeyValuePair<int, DateTime> keyVal in LastConnectorsIds)
@@ -126,7 +117,6 @@ namespace NWheels.Stacks.Network
                 }
             }
             cc.RegisterMessageDispatcher(m_MessagesDispatcher);
-            cc.SetTimeOutManager(m_TimeOutManager);
             cc.StartKeepAliveService();
         }
 
@@ -155,7 +145,7 @@ namespace NWheels.Stacks.Network
         {
             lock (_connectors)
             {
-                _connectors.Remove(cc.ID);
+                _connectors.Remove(cc.Id);
             }
         }
 

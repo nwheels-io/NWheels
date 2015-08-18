@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using NWheels.Endpoints;
+using NWheels.Concurrency;
 
 //AbstractConnector
 namespace NWheels.Stacks.Network
@@ -13,39 +14,41 @@ namespace NWheels.Stacks.Network
     }
 
 
-    public class SocketConnector : AbstractNetConnector, IDisposable
+    public class TcpConnector : AbstractNetConnector
     {
         protected Socket Socket;
         private readonly int _receiveBufferSize;
+        private readonly IFramework _framework;
+
         //
         // Keep alive handling
         //
         private bool _isKeepAliveRunning;
-        private TimeOutHandle _sendKeepAliveTimeOutHandle;
-        private TimeOutHandle _receiveKeepAliveTimeOutHandle;
+        private ITimeoutHandle _sendKeepAliveTimeOutHandle;
+        private ITimeoutHandle _receiveKeepAliveTimeOutHandle;
         private UInt16 _receiveKeepAliveTimeOutCounter;
-        private const uint SendKeepAliveTimeOutValue = 20;
-        private const uint ReceiveKeepAliveTimeOutValue = 40;
+        private const uint SendKeepAliveTimeOutValue = 20000;
+        private const uint ReceiveKeepAliveTimeOutValue = 40000;
         private static readonly byte[] _s_keepAliveMessage = { 0x00, 0x00, 0x4E, 0x57, 0x4B, 0x41, 0x00, 0x00 };     // "\0 \0 N W K A \0 \0" NWheels Keep Alive
 
         //
         // Round trip delay check handling
         //
         private bool _isRoundTripDelayCheckRunning;
-        private TimeOutHandle _sendPingTimeOutHandle;
-        private const uint SendPingTimeOutValue = 20;
+        private ITimeoutHandle _sendPingTimeOutHandle;
+        private const uint SendPingTimeOutValue = 20000;
         private DateTime _lastPingSentTime;
         private static readonly byte[] _s_roundTripPingMessage = { 0x00, 0x00, 0x4E, 0x57, 0x50, 0x49, 0x00, 0x00 }; // "\0 \0 N W P I \0 \0" NWheels Ping for roundtrip delay check
         private static readonly byte[] _s_roundTripPongMessage = { 0x00, 0x00, 0x4E, 0x57, 0x50, 0x4F, 0x00, 0x00 }; // "\0 \0 N W P O \0 \0" NWheels Pong for roundtrip delay check
         private RoundTripDelayInfo _roundTripDelayInfoDelgate;
         private uint _roundTripDelayWaitTimeoutInSec;
-        private TimeOutHandle _waitPongTimeOutHandle;
+        private ITimeoutHandle _waitPongTimeOutHandle;
 
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
 
-        private void OnSendKeepAliveTimeOutDelegate(object param)
+        private void OnSendKeepAliveTimeOutDelegate()
         {
             if (IsDisposed)
             {
@@ -63,8 +66,7 @@ namespace NWheels.Stacks.Network
         /// this means a disconnection has occured.
         /// Throws ConnectoerDisconnectedException in case no delegate had been registered.
         /// </summary>
-        /// <param name="param"></param>
-        private void OnReceiveKeepAliveTimeOutDelegate(object param)
+        private void OnReceiveKeepAliveTimeOutDelegate()
         {
             if (IsDisposed)
             {
@@ -79,7 +81,7 @@ namespace NWheels.Stacks.Network
             {
                 // In case of debugging (breakpoints), then we might reach here even if we don't need to.
                 // so, in order to avoid any future redundant timeouts - cancel the current TO.
-                TimeOutManager.CancelTimeOutEvent(_receiveKeepAliveTimeOutHandle);
+                _receiveKeepAliveTimeOutHandle.CancelTimer();
                 _receiveKeepAliveTimeOutHandle = null;
             }
 
@@ -92,7 +94,7 @@ namespace NWheels.Stacks.Network
                 {
                     DoOnExcp(new ConnectorDisconnectedException());
                 }
-                this.Dispose();
+                Dispose();
             }
             if (doResetTimer)
             {
@@ -102,7 +104,7 @@ namespace NWheels.Stacks.Network
 
         private void ResetSendKeepAliveTimeOut()
         {
-            if (_isKeepAliveRunning == false || TimeOutManager == null)
+            if ( _isKeepAliveRunning == false )
             {
                 return;
             }
@@ -113,21 +115,24 @@ namespace NWheels.Stacks.Network
                 {
                     return;
                 }
-                if (_sendKeepAliveTimeOutHandle != null)
+                if ( _sendKeepAliveTimeOutHandle != null )
                 {
-                    TimeOutManager.CancelTimeOutEvent(_sendKeepAliveTimeOutHandle);
+                    _sendKeepAliveTimeOutHandle.ResetDueTime(TimeSpan.FromMilliseconds(SendKeepAliveTimeOutValue));
                 }
-
-                _sendKeepAliveTimeOutHandle = TimeOutManager.AddTimeOutEvent(
-                        SendKeepAliveTimeOutValue,
-                        OnSendKeepAliveTimeOutDelegate,
-                        null);
+                else
+                {
+                    _sendKeepAliveTimeOutHandle = _framework.NewTimer(
+                        "SendKeepAliveTimeOut",
+                        Id.ToString(),
+                        TimeSpan.FromMilliseconds(SendKeepAliveTimeOutValue),
+                        OnSendKeepAliveTimeOutDelegate);
+                }
             }
         }
 
         private void ResetReceiveKeepAliveTimeOut()
         {
-            if (_isKeepAliveRunning == false || TimeOutManager == null)
+            if (_isKeepAliveRunning == false )
             {
                 return;
             }
@@ -138,15 +143,18 @@ namespace NWheels.Stacks.Network
                     return;
                 }
 
-                if (_receiveKeepAliveTimeOutHandle != null)
+                if ( _receiveKeepAliveTimeOutHandle != null )
                 {
-                    TimeOutManager.CancelTimeOutEvent(_receiveKeepAliveTimeOutHandle);
+                    _receiveKeepAliveTimeOutHandle.ResetDueTime(TimeSpan.FromMilliseconds(ReceiveKeepAliveTimeOutValue));
                 }
-
-                _receiveKeepAliveTimeOutHandle = TimeOutManager.AddTimeOutEvent(
-                        ReceiveKeepAliveTimeOutValue,
-                        OnReceiveKeepAliveTimeOutDelegate,
-                        null);
+                else
+                {
+                    _receiveKeepAliveTimeOutHandle = _framework.NewTimer(
+                        "ReceiveKeepAliveTimeOut",
+                        Id.ToString(),
+                        TimeSpan.FromMilliseconds(ReceiveKeepAliveTimeOutValue),
+                        OnReceiveKeepAliveTimeOutDelegate);
+                }
             }
         }
 
@@ -154,13 +162,13 @@ namespace NWheels.Stacks.Network
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
 
-        private void OnSendPingTimeOutDelegate(object param)
+        private void OnSendPingTimeOutDelegate()
         {
             SendRoundTripPing();
         }
 
         // Pong reply didn't arrive
-        private void OnWaitPongTimeOutDelegate(object param)
+        private void OnWaitPongTimeOutDelegate()
         {
             DateTime now = DateTime.UtcNow;
             TimeSpan roundTripTime = now - _lastPingSentTime;
@@ -169,7 +177,7 @@ namespace NWheels.Stacks.Network
             {
                 if (_waitPongTimeOutHandle != null)
                 {
-                    TimeOutManager.CancelTimeOutEvent(_waitPongTimeOutHandle);
+                    _waitPongTimeOutHandle.CancelTimer();
                     _waitPongTimeOutHandle = null;
                 }
             }
@@ -182,7 +190,7 @@ namespace NWheels.Stacks.Network
 
         private void ResetRoundTripDelayCheck()
         {
-            if (_isRoundTripDelayCheckRunning == false || TimeOutManager == null)
+            if (_isRoundTripDelayCheckRunning == false )
             {
                 return;
             }
@@ -195,18 +203,19 @@ namespace NWheels.Stacks.Network
                 }
                 if (_sendPingTimeOutHandle != null)
                 {
-                    TimeOutManager.CancelTimeOutEvent(_sendPingTimeOutHandle);
+                    _sendPingTimeOutHandle.CancelTimer();
                 }
                 if (_waitPongTimeOutHandle != null)
                 {
-                    TimeOutManager.CancelTimeOutEvent(_waitPongTimeOutHandle);
+                    _waitPongTimeOutHandle.CancelTimer();
                     _waitPongTimeOutHandle = null;
                 }
 
-                _sendPingTimeOutHandle = TimeOutManager.AddTimeOutEvent(
-                        SendPingTimeOutValue,
-                        OnSendPingTimeOutDelegate,
-                        null);
+                _sendPingTimeOutHandle = _framework.NewTimer(
+                    "SendPingTimeOut",
+                    Id.ToString(),
+                    TimeSpan.FromMilliseconds(SendPingTimeOutValue),
+                    OnSendPingTimeOutDelegate);
             }
         }
 
@@ -222,10 +231,11 @@ namespace NWheels.Stacks.Network
             TcpSocketsUtils.Send(Socket, _s_roundTripPingMessage, _OnSend, OnExcp);
             if (_roundTripDelayWaitTimeoutInSec > 0)
             {
-                _waitPongTimeOutHandle = TimeOutManager.AddTimeOutEvent(
-                        _roundTripDelayWaitTimeoutInSec,
-                        OnWaitPongTimeOutDelegate,
-                        null);
+                _waitPongTimeOutHandle = _framework.NewTimer(
+                    "WaitPongTimeOut",
+                    Id.ToString(),
+                    TimeSpan.FromSeconds(_roundTripDelayWaitTimeoutInSec),
+                    OnWaitPongTimeOutDelegate);
             }
         }
 
@@ -248,43 +258,16 @@ namespace NWheels.Stacks.Network
             return false;
         }
 
-        ///////////////////////////////////////////////////////////////////////
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public SocketConnector(Int32 id,
-            IConnectorClient connectorClient,
-            NetworkApiEndpointRegistration registration,
-            INetworkEndpointLogger logger)
-            : this(null, null, id, connectorClient, registration, logger)
-        {
-        }
-
-        public SocketConnector(Int32 id,
-            int receiveBufferSize,
-            IConnectorClient connectorClient,
-            NetworkApiEndpointRegistration registration,
-            INetworkEndpointLogger logger)
-            : this(null, null, id, receiveBufferSize, connectorClient, registration, logger)
-        {
-        }
-
-        protected SocketConnector(
-            SocketConnectorsManager cc,
-            Socket s,
-            Int32 id,
-            IConnectorClient connectorClient,
-            NetworkApiEndpointRegistration registration,
-            INetworkEndpointLogger logger)
-            : this(cc, s, id, TcpSocketsUtils.DefualtReceiveBufferSize, connectorClient, registration, logger)
-        {
-        }
-
-        protected SocketConnector(
-            SocketConnectorsManager cc,
+        internal TcpConnector(
+            TcpConnectorsManager cc,
             Socket s,
             Int32 id,
             int receiveBufferSize,
             IConnectorClient connectorClient,
             NetworkApiEndpointRegistration registration,
+            IFramework framework,
             INetworkEndpointLogger logger)
             : base(id, connectorClient, registration, logger)
         {
@@ -295,6 +278,7 @@ namespace NWheels.Stacks.Network
                 ConnectorsManager.RegisterConnector(this);
             }
 
+            _framework = framework;
             _receiveBufferSize = receiveBufferSize;
         }
 
@@ -324,10 +308,6 @@ namespace NWheels.Stacks.Network
 
         public override void StartKeepAliveService()
         {
-            if (TimeOutManager == null)
-            {
-                throw new Exception("No timeout manager had been set for keep-alive service");
-            }
             _isKeepAliveRunning = true;
             ResetSendKeepAliveTimeOut();
             ResetReceiveKeepAliveTimeOut();
@@ -335,10 +315,6 @@ namespace NWheels.Stacks.Network
 
         public override void StartRoundTripDelayCheck(RoundTripDelayInfo roundTripDelayInfoDelgate, int waitTimeoutInSec)
         {
-            if (TimeOutManager == null)
-            {
-                throw new Exception("No timeout manager had been set for Round Trip Delay Check");
-            }
             _roundTripDelayWaitTimeoutInSec = (uint)waitTimeoutInSec;
             _roundTripDelayInfoDelgate = roundTripDelayInfoDelgate;
             _isRoundTripDelayCheckRunning = true;
@@ -480,18 +456,19 @@ namespace NWheels.Stacks.Network
 
         }
 
-        //-------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected void _OnSend()
         {
         }
 
-        //-------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
         //for message dispatcher purpose
         private void _DoOnGracefulClose(object obj)
         {
             DoOnGracefulClose();
         }
-        //-------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
@@ -499,32 +476,31 @@ namespace NWheels.Stacks.Network
 
         // Methods used for initiate connection
 
-        private AutoResetEvent m_WaitHandle;
+        //private AutoResetEvent _waitHandle;
 
         public void Connect(string addr, int port)
         {
-            m_WaitHandle = new AutoResetEvent(false);
+            //_waitHandle = new AutoResetEvent(false);
             Socket = TcpSocketsUtils.Connect(addr, port);
             //send unique id
-            TcpSocketsUtils.Send(Socket, Id.ToString(), AccOnSendId, OnExcp);
-            m_WaitHandle.WaitOne();
-            m_WaitHandle.Close();
-            m_WaitHandle = null;
+            //TcpSocketsUtils.Send(Socket, Id.ToString(), AccOnSendId, OnExcp);
+            //_waitHandle.WaitOne();
+            //_waitHandle.Close();
+            //_waitHandle = null;
         }
 
-        private void AccOnSendId()
-        {
-            //need to read the server ID
-            TcpSocketsUtils.Recv(Socket, this.AccOnRecvId, OnExcp, _receiveBufferSize, false);
-            //TcpSocketsUtils.Recv(m_Socket, this.AccOnRecvId, OnExcp, m_ReceiveBufferSize, false);
-        }
+        //private void AccOnSendId()
+        //{
+        //    //need to read the server ID
+        //    TcpSocketsUtils.Recv(Socket, AccOnRecvId, OnExcp, _receiveBufferSize, false);
+        //}
 
-        private bool AccOnRecvId(byte[] buf)
-        {
-            //recv the server ID (and ignore it)
-            m_WaitHandle.Set();
-            return true;
-        }
+        //private bool AccOnRecvId(byte[] buf)
+        //{
+        //    //recv the server ID (and ignore it)
+        //    _waitHandle.Set();
+        //    return true;
+        //}
 
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
@@ -551,22 +527,22 @@ namespace NWheels.Stacks.Network
             {
                 if (_receiveKeepAliveTimeOutHandle != null)
                 {
-                    TimeOutManager.CancelTimeOutEvent(_receiveKeepAliveTimeOutHandle);
+                    _receiveKeepAliveTimeOutHandle.CancelTimer();
                     _receiveKeepAliveTimeOutHandle = null;
                 }
                 if (_sendKeepAliveTimeOutHandle != null)
                 {
-                    TimeOutManager.CancelTimeOutEvent(_sendKeepAliveTimeOutHandle);
+                    _sendKeepAliveTimeOutHandle.CancelTimer();
                     _sendKeepAliveTimeOutHandle = null;
                 }
                 if (_sendPingTimeOutHandle != null)
                 {
-                    TimeOutManager.CancelTimeOutEvent(_sendPingTimeOutHandle);
+                    _sendPingTimeOutHandle.CancelTimer();
                     _sendPingTimeOutHandle = null;
                 }
                 if (_waitPongTimeOutHandle != null)
                 {
-                    TimeOutManager.CancelTimeOutEvent(_waitPongTimeOutHandle);
+                    _waitPongTimeOutHandle.CancelTimer();
                     _waitPongTimeOutHandle = null;
                 }
 

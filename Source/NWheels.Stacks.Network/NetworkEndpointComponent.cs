@@ -9,15 +9,18 @@ namespace NWheels.Stacks.Network
         private readonly NetworkApiEndpointRegistration _registration;
         private readonly IComponentContext _components;
         private readonly INetworkEndpointLogger _logger;
+        private readonly IFramework _framework;
 
         private AbstractNetConnectorsManager ConnectorsManager;
 
-        public NetworkEndpointComponent(IComponentContext components, NetworkApiEndpointRegistration registration, INetworkEndpointLogger logger)
+        public NetworkEndpointComponent(IComponentContext components, NetworkApiEndpointRegistration registration, INetworkEndpointLogger logger, IFramework framework)
         {
             _logger = logger;
+            _framework = framework;
             _components = components;
             _registration = registration;
-            ConnectorsManager = new SocketConnectorsManager(0, registration, _logger); // -=-= Eli: Todo: Decide upon Id 
+            // -=-= Eli: Todo: Decide upon Id and other parameters
+            ConnectorsManager = new TcpConnectorsManager(0, TcpConnectorsManager.AddressListenMode.External, TcpSocketsUtils.DefualtReceiveBufferSize, registration, components, _logger, _framework);
         }
 
         public override void Activate()

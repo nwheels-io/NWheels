@@ -48,12 +48,10 @@
   <ItemGroup>
     <Compile Include="AbstractConnectors\AbstractNetConnector.cs" />
     <Compile Include="AbstractConnectors\AbstractNetConnectorsManager.cs" />
-    <Compile Include="AbstractConnectors\ITimeOutUtils.cs" />
-    <Compile Include="AbstractConnectors\SocketConnector.cs" />
-    <Compile Include="AbstractConnectors\SocketConnectorsManager.cs" />
+    <Compile Include="AbstractConnectors\TcpConnector.cs" />
+    <Compile Include="AbstractConnectors\TcpConnectorsManager.cs" />
     <Compile Include="AbstractConnectors\MessagesDispatcher.cs" />
     <Compile Include="AbstractConnectors\TcpSocketsUtils.cs" />
-    <Compile Include="AbstractConnectors\TimeOutUtils.cs" />
     <Compile Include="INetworkEndpointLogger.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="NetworkEndpointComponent.cs" />

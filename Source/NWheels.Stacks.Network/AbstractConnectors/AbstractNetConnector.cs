@@ -19,10 +19,8 @@ namespace NWheels.Stacks.Network
 
         //===============================================================
 
-        protected Int32 Id;
         protected AbstractNetConnectorsManager ConnectorsManager;
         protected MessagesDispatcher m_MessagesDispatcher;
-        protected ITimeOutUtils TimeOutManager;
 
         private IConnectorClient _connectorClient;
         protected readonly NetworkApiEndpointRegistration Registration;
@@ -71,18 +69,13 @@ namespace NWheels.Stacks.Network
 
         //===============================================================
         //===============================================================
-        public void RegisterMessageDispatcher(MessagesDispatcher MsgDisp)
+        public void RegisterMessageDispatcher(MessagesDispatcher msgDisp)
         {
-            m_MessagesDispatcher = MsgDisp;
-        }
-
-        public void SetTimeOutManager(ITimeOutUtils timeOutManager)
-        {
-            TimeOutManager = timeOutManager;
+            m_MessagesDispatcher = msgDisp;
         }
 
         //-----------------
-        public Int32 ID { get { return Id; } }
+        public Int32 Id { get; private set; }
 
         #region IDisposable Members
 

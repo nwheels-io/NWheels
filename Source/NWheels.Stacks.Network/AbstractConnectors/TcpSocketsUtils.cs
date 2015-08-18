@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
@@ -17,34 +16,34 @@ namespace NWheels.Stacks.Network
             public Socket Socket;
             public OnSendDlgt OnSend;
             public OnExcpDlgt OnException;
-            public byte[] m_buf;
-            public int m_BytesSentSoFar;
+            public byte[] Buffer;
+            public int BytesSentSoFar;
         }
 
         // Send a buffer on the given socket.
         // The onSocket delegate will be executed once the send action has ended
         public static void Send(Socket socket, string s, OnSendDlgt onSend, OnExcpDlgt onExcp)
         {
-            byte[] BufferToSend = Encoding.UTF8.GetBytes(s);
-            Send(socket, BufferToSend, onSend, onExcp);
+            byte[] bufferToSend = Encoding.UTF8.GetBytes(s);
+            Send(socket, bufferToSend, onSend, onExcp);
         }
 
         private static void ConvertIntToArray(int Val, out byte[] OutArray)
         {
-            byte[] MaxNum = new byte[MaxNumOfBytesInLengthField];
-            int ArrayLen = 0;
+            byte[] maxNum = new byte[MaxNumOfBytesInLengthField];
+            int arrayLen = 0;
 
             do
             {
-                MaxNum[ArrayLen++] = (byte)(Val & 0x7F);
+                maxNum[arrayLen++] = (byte)(Val & 0x7F);
                 Val >>= 7;
             } while (Val != 0);
 
-            OutArray = new byte[ArrayLen];
+            OutArray = new byte[arrayLen];
             int i;
-            for (i = 0; i < ArrayLen; i++)
+            for (i = 0; i < arrayLen; i++)
             {
-                OutArray[i] = (byte)(MaxNum[ArrayLen - i - 1] | (byte)((i == (ArrayLen - 1)) ? 0x0 : 0x80));
+                OutArray[i] = (byte)(maxNum[arrayLen - i - 1] | (byte)((i == (arrayLen - 1)) ? 0x0 : 0x80));
             }
         }
 
@@ -62,16 +61,16 @@ namespace NWheels.Stacks.Network
                 state.Socket = socket;
                 state.OnSend = onSend;
                 state.OnException = onExcp;
-                state.m_buf = new byte[lenBuf.Length + bufferToSend.Length];
-                state.m_BytesSentSoFar = 0;
-                Buffer.BlockCopy(lenBuf, 0, state.m_buf, 0, lenBuf.Length);
-                Buffer.BlockCopy(bufferToSend, 0, state.m_buf, lenBuf.Length, bufferToSend.Length);
+                state.Buffer = new byte[lenBuf.Length + bufferToSend.Length];
+                state.BytesSentSoFar = 0;
+                Buffer.BlockCopy(lenBuf, 0, state.Buffer, 0, lenBuf.Length);
+                Buffer.BlockCopy(bufferToSend, 0, state.Buffer, lenBuf.Length, bufferToSend.Length);
 
                 //Begin sending the data to the remote device.
                 state.Socket.BeginSend(
-                    state.m_buf,
+                    state.Buffer,
                     0,
-                    state.m_buf.Length,
+                    state.Buffer.Length,
                     0,
                     SendCallback,
                     state);
@@ -99,14 +98,14 @@ namespace NWheels.Stacks.Network
 
                 // Complete sending the data to the remote device.
                 int bytesSent = state.Socket.EndSend(ar);
-                state.m_BytesSentSoFar += bytesSent;
-                if (state.m_BytesSentSoFar < state.m_buf.Length)
+                state.BytesSentSoFar += bytesSent;
+                if (state.BytesSentSoFar < state.Buffer.Length)
                 {
                     //keep sending
                     state.Socket.BeginSend(
-                        state.m_buf,
-                        state.m_BytesSentSoFar,
-                        state.m_buf.Length - state.m_BytesSentSoFar,
+                        state.Buffer,
+                        state.BytesSentSoFar,
+                        state.Buffer.Length - state.BytesSentSoFar,
                         0,
                         SendCallback,
                         state);
@@ -145,9 +144,9 @@ namespace NWheels.Stacks.Network
 
         private class RecvState
         {
-            public Socket m_Socket;
-            public OnRecvDlgt m_OnRecv;
-            public OnExcpDlgt m_OnExcp;
+            public Socket Socket;
+            public OnRecvDlgt OnRecv;
+            public OnExcpDlgt OnExcp;
             public byte[] DateBuffer;
             public byte[] PrevLeftoverBuf;
             public bool RecvLoop;
@@ -159,9 +158,9 @@ namespace NWheels.Stacks.Network
             {
                 // Create the state object.
                 RecvState state = new RecvState();
-                state.m_Socket = socket;
-                state.m_OnRecv = onRecv;
-                state.m_OnExcp = onExcp;
+                state.Socket = socket;
+                state.OnRecv = onRecv;
+                state.OnExcp = onExcp;
                 state.RecvLoop = recvLoop;
                 state.DateBuffer = (recvLoop ? new byte[reciveBufferSize] : new byte[1]);
                 StartRecvPacket(state);
@@ -188,9 +187,9 @@ namespace NWheels.Stacks.Network
         private static void StartRecvPacket(RecvState state)
         {
             // Begin receiving the data from the remote device, read buf len
-            if (state.m_Socket.Connected)
+            if (state.Socket.Connected)
             {
-                state.m_Socket.BeginReceive(
+                state.Socket.BeginReceive(
                     state.DateBuffer,
                     0, //offset
                     state.DateBuffer.Length, //len of len (start with 1 byte, if needed we'll read more later)
@@ -209,12 +208,12 @@ namespace NWheels.Stacks.Network
                 // from the asynchronous state object.
 
                 // can get the disconnected socket status
-                if (state.m_Socket.Connected == false)
+                if (state.Socket.Connected == false)
                 {
                     return;
                 }
                 // Read data from the remote device.
-                int bytesRead = state.m_Socket.EndReceive(ar);
+                int bytesRead = state.Socket.EndReceive(ar);
                 ParseBuffer(state, bytesRead);
             }
             catch (ObjectDisposedException)
@@ -224,7 +223,7 @@ namespace NWheels.Stacks.Network
             }
             catch (Exception e)
             {
-                state.m_OnExcp(e);
+                state.OnExcp(e);
             }
         }
 
@@ -295,7 +294,7 @@ namespace NWheels.Stacks.Network
 
                 byte[] data = new byte[packetBytesRecived];
                 Array.Copy(workingBuf, i, data, 0, packetBytesRecived);
-                state.m_OnRecv(data);
+                state.OnRecv(data);
                 i += packetBytesRecived;
             }
             if (state.RecvLoop)

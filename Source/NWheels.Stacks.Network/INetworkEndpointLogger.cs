@@ -28,17 +28,17 @@ namespace NWheels.Stacks.Network
 
         //--------------------------------------------------------------------------------------
 
-        [LogDebug]
-        void NewConnectorOnSend(string listenUrl, string contract);
+        //[LogDebug]
+        //void NewConnectorOnSend(string listenUrl, string contract);
 
-        [LogDebug]
-        void NewConnectorOnReceive(string listenUrl, string contract, string receivedData);
+        //[LogDebug]
+        //void NewConnectorOnReceive(string listenUrl, string contract, string receivedData);
 
-        [LogDebug]
-        void NewConnectorOnReceiveParseFailed(string listenUrl, string contract, string receivedData);
+        //[LogDebug]
+        //void NewConnectorOnReceiveParseFailed(string listenUrl, string contract, string receivedData);
 
-        [LogError]
-        void NewConnectorExceptionOccurred(string listenUrl, string contract, Exception e);
+        //[LogError]
+        //void NewConnectorExceptionOccurred(string listenUrl, string contract, Exception e);
         
         //--------------------------------------------------------------------------------------
 
