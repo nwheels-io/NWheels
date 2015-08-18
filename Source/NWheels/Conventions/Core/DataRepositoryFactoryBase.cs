@@ -656,6 +656,17 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            #region Overrides of Object
+
+            public override string ToString()
+            {
+                return Metadata.Name;
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public PropertyInfo RepositoryProperty { get; private set; }
             public ITypeMetadata Metadata { get; private set; }
 
