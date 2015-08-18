@@ -15,6 +15,7 @@ namespace NWheels.Domains.Security
         IEntityRepository<IUserRoleEntity> UserRoles { get; }
         IEntityRepository<IOperationPermissionEntity> OperationPermissions { get; }
         IEntityRepository<IEntityAccessRuleEntity> EntityAccessRules { get; }
+        IEntityRepository<IPasswordEntity> Passwords { get; }
         IPasswordEntity NewPassword(string clearText);
     }
 
@@ -45,16 +46,16 @@ namespace NWheels.Domains.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        DateTime? LastLoginAtUtc { get; set; }
+        DateTime? LastLoginAtUtc { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [PropertyContract.Validation.MinValue(0)]
-        int FailedLoginCount { get; set; }
+        int FailedLoginCount { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        bool IsLockedOut { get; set; }
+        bool IsLockedOut { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.Domains.Security.Core;
 using NWheels.Exceptions;
+using NWheels.Extensions;
 
 namespace NWheels.Domains.Security.Impl
 {
@@ -42,21 +43,7 @@ namespace NWheels.Domains.Security.Impl
                     throw new DomainFaultException<LoginFault>(LoginFault.LoginIncorrect);
                 }
 
-                if ( user.IsLockedOut )
-                {
-                    _logger.FailedLoginAttempt(LoginFault.AccountLockedOut, loginName);
-                    throw new DomainFaultException<LoginFault>(LoginFault.AccountLockedOut);
-                }
-
-                if ( !user.Passwords.Any(p => !p.IsExpired(_framework.UtcNow) && _cryptoProvider.MatchHash(p.Hash, password)) )
-                {
-                    _logger.FailedLoginAttempt(LoginFault.LoginIncorrect, loginName);
-                    throw new DomainFaultException<LoginFault>(LoginFault.LoginIncorrect);
-                }
-
-                var principal = CreatePrincipal(user);
-
-                _logger.UserAuthenticated(loginName);
+                var principal = user.As<UserAccountEntity>().Authenticate(password);
                 return principal;
             }
         }

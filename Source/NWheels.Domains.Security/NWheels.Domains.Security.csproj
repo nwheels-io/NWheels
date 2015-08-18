@@ -55,6 +55,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\UserAccountEntity.cs" />
+    <Compile Include="Core\UserAccountPolicy.cs" />
+    <Compile Include="Core\UserAccountPolicySet.cs" />
     <Compile Include="Core\UserAccountPrincipal.cs" />
     <Compile Include="Entities.cs" />
     <Compile Include="Enums.cs" />

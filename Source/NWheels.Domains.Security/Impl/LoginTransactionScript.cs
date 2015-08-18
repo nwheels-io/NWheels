@@ -30,7 +30,7 @@ namespace NWheels.Domains.Security.Impl
             using ( var data = _framework.NewUnitOfWork<IUserAccountDataRepository>() )
             {
                 var userAccount = principal.Identity.GetUserAccount();
-                userAccount.LastLoginAtUtc = _framework.UtcNow;
+                //userAccount.LastLoginAtUtc = _framework.UtcNow;
                 data.AllUsers.Update(userAccount);
                 data.CommitChanges();
             }

@@ -24,6 +24,10 @@ namespace NWheels.Domains.Security
 
             builder.RegisterType<LoginTransactionScript>().SingleInstance();
             builder.RegisterType<SecurityDomainApi>().As<ISecurityDomainApi>().SingleInstance();
+
+            builder.RegisterType<UserAccountPolicySet>();
+
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IUserAccountEntity>().With<UserAccountEntity>();
         }
     }
 }

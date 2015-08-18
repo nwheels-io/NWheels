@@ -11,6 +11,9 @@ namespace NWheels.Domains.Security.Core
         void FailedLoginAttempt(LoginFault fault, string loginName);
 
         [LogWarning]
+        void UserAccountLockedOut(string loginName);
+
+        [LogWarning]
         void UserNotFound(string loginName);
     }
 }
