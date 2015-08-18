@@ -5,6 +5,6 @@ namespace NWheels.Processing.Messages.Impl
     public interface IMessageHandlerAdapter
     {
         void InvokeHandleMessage(IMessageObject message);
-        Type MessageType { get; }
+        Type MessageBodyType { get; }
     }
 }

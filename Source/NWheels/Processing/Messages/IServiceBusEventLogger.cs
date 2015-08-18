@@ -10,32 +10,32 @@ namespace NWheels.Processing.Messages
     public interface IServiceBusEventLogger : IApplicationEventLogger
     {
         [LogActivity]
-        ILogActivity DispatchingMessage(string messageType);
+        ILogActivity DispatchingMessageObject(string messageObjectType);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [LogActivity]
-        ILogActivity InvokingActor(string actorType, string messageType);
+        ILogActivity InvokingActor(string actorType, string messageBodyType);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [LogError]
-        Exception ActorFailed(string actorType, string messageType, Exception error);
+        Exception ActorFailed(string actorType, string messageBodyType, Exception error);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [LogError]
-        AggregateException ErrorsWhileHandlingMessage(string messageType, AggregateException errors);
+        AggregateException ErrorsWhileHandlingMessage(string messageBodyType, AggregateException errors);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [LogError]
-        void NoSubscribersFound(string messageType);
+        void NoSubscribersFound(string messageBodyType);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [LogError]
-        Exception FailedToObtainActorInstance(string messageType, Exception error);
+        Exception FailedToObtainActorInstance(string messageBodyType, Exception error);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

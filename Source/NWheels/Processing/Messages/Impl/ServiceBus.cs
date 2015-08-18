@@ -9,7 +9,7 @@ namespace NWheels.Processing.Messages.Impl
 {
     public class ServiceBus : LifecycleEventListenerBase, IServiceBus
     {
-        private readonly IReadOnlyDictionary<Type, IMessageHandlerAdapter> _handlersByMessageType;
+        private readonly IReadOnlyDictionary<Type, IMessageHandlerAdapter> _handlersByBodyType;
         private readonly IServiceBusEventLogger _logger;
         private readonly BlockingCollection<IMessageObject> _messageQueue;
         private CancellationTokenSource _stopRequest;
@@ -20,7 +20,7 @@ namespace NWheels.Processing.Messages.Impl
         public ServiceBus(IEnumerable<IMessageHandlerAdapter> registeredHandlers, IServiceBusEventLogger logger)
         {
             _logger = logger;
-            _handlersByMessageType = registeredHandlers.ToDictionary(handler => handler.MessageType);
+            _handlersByBodyType = registeredHandlers.ToDictionary(handler => handler.MessageBodyType);
             _messageQueue = new BlockingCollection<IMessageObject>();
             _stopRequest = new CancellationTokenSource();
         }
@@ -47,13 +47,13 @@ namespace NWheels.Processing.Messages.Impl
         {
             IMessageHandlerAdapter adapter;
 
-            if ( _handlersByMessageType.TryGetValue(message.GetType(), out adapter) )
+            if ( _handlersByBodyType.TryGetValue(message.Body.GetType(), out adapter) )
             {
                 adapter.InvokeHandleMessage(message);
             }
             else
             {
-                _logger.NoSubscribersFound(message.GetType().FullName);
+                _logger.NoSubscribersFound(message.Body.GetType().FullName);
             }
         }
 
@@ -136,7 +136,7 @@ namespace NWheels.Processing.Messages.Impl
 
         private void DispatchMessage(IMessageObject message)
         {
-            using ( var activity = _logger.DispatchingMessage(message.GetType().FullName) )
+            using ( var activity = _logger.DispatchingMessageObject(message.GetType().FullName) )
             {
                 try
                 {

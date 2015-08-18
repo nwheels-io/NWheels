@@ -12,9 +12,9 @@ namespace NWheels.Processing.Messages
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IMessageHandler<TMessage> : IMessageHandler
-        where TMessage : class, IMessageObject
+    public interface IMessageHandler<TBody> : IMessageHandler
+        where TBody : class
     {
-        void HandleMessage(TMessage message);
+        void HandleMessage(TBody message);
     }
 }
