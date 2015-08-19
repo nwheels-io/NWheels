@@ -10,8 +10,23 @@ namespace NWheels.Processing.Messages
     {
         #region Implementation of IMessageObject
 
-        public virtual IReadOnlyCollection<IMessageHeader> Headers { get { return null; } }
-        public virtual object Body { get { return this; } }
+        public virtual IReadOnlyCollection<IMessageHeader> Headers
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual object Body
+        {
+            get
+            {
+                return this;
+            }
+        }
 
         #endregion
     }
