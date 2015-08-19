@@ -1000,6 +1000,12 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 this.m_Id_storage = arg1;
             }
 
+            public IR1.CustomerPriority? Priority
+            {
+                get { throw new NotImplementedException(); }
+                set { throw new NotImplementedException(); }
+            }
+
             public virtual ObjectId[] ContactDetails
             {
                 get
@@ -1042,6 +1048,12 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 {
                     this.m_FullName = value;
                 }
+            }
+
+            public int? Age
+            {
+                get { throw new NotImplementedException(); }
+                set { throw new NotImplementedException(); }
             }
 
             ICollection<Interfaces.Repository1.IContactDetail> Interfaces.Repository1.ICustomer.ContactDetails

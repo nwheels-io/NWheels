@@ -161,8 +161,18 @@ namespace NWheels.Testing.Entities.Stacks
                 [PropertyContract.Required]
                 string FullName { get; set; }
 
+                int? Age { get; set; }
+
+                CustomerPriority? Priority { get; set; }
+
                 [PropertyContract.Relation.Composition]
                 ICollection<IContactDetail> ContactDetails { get; }
+            }
+
+            public enum CustomerPriority
+            {
+                Regular,
+                Valued
             }
 
             [EntityContract(IsAbstract = true, UseCodeNamespace = true)]
@@ -211,6 +221,8 @@ namespace NWheels.Testing.Entities.Stacks
                 #region Implementation of ICustomer
 
                 public abstract string FullName { get; set; }
+                public abstract int? Age { get; set; }
+                public abstract CustomerPriority? Priority { get; set; }
                 public abstract ICollection<IContactDetail> ContactDetails { get; }
 
                 #endregion

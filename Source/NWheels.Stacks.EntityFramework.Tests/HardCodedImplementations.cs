@@ -1815,6 +1815,10 @@ namespace NWheels.Stacks.EntityFramework.Tests
             }
 
             // Properties
+            public int? Age { get; set; }
+
+            public NWheels.Testing.Entities.Stacks.Interfaces.Repository1.CustomerPriority? Priority { get; set; }
+
             public virtual HashSet<EfEntityObject_ContactDetail> ContactDetails
             {
                 get
