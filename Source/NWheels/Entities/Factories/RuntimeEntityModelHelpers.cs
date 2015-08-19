@@ -97,6 +97,7 @@ namespace NWheels.Entities.Factories
             {
                 var entityRepository = dataRepository.GetEntityRepository(domainObject.ContractType);
                 entityRepository.Save(domainObject);
+                dataRepository.CommitChanges();
             }
         }
 

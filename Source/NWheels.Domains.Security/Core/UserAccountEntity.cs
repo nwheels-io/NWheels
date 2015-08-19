@@ -18,22 +18,17 @@ namespace NWheels.Domains.Security.Core
         {
             var policy = PolicySet.GetPolicy(this);
 
-            using ( var context = Framework.NewUnitOfWork<IUserAccountDataRepository>() )
-            {
-                DeactivateCurrentPassword();
+            DeactivateCurrentPassword();
 
-                var password = context.Passwords.New();
+            var password = Framework.New<IPasswordEntity>();
                 
-                password.User = this;
-                password.Hash = CryptoProvider.CalculateHash(passwordString);
-                password.ExpiresAtUtc = Framework.UtcNow.AddDays(policy.PasswordExpiryDays);
-                password.As<IActiveRecord>().Save();
+            password.User = this;
+            password.Hash = CryptoProvider.CalculateHash(passwordString);
+            password.ExpiresAtUtc = Framework.UtcNow.AddDays(policy.PasswordExpiryDays);
+            password.As<IActiveRecord>().Save();
 
-                this.Passwords.Add(password);
-                this.Save();
-
-                context.CommitChanges();
-            }
+            this.Passwords.Add(password);
+            this.Save();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

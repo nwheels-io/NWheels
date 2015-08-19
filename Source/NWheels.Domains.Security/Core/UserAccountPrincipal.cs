@@ -4,14 +4,18 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Authorization;
 
 namespace NWheels.Domains.Security.Core
 {
-    public class UserAccountPrincipal : ClaimsPrincipal
+    public class UserAccountPrincipal : ClaimsPrincipal, IIdentityInfo
     {
+        private readonly IIdentityInfo _identityInfo;
+
         public UserAccountPrincipal(UserAccountIdentity identity)
             : base(identity)
         {
+            _identityInfo = identity;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -22,6 +26,69 @@ namespace NWheels.Domains.Security.Core
             {
                 return (UserAccountIdentity)base.Identity;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string Name
+        {
+            get { return _identityInfo.Name; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string AuthenticationType
+        {
+            get { return _identityInfo.AuthenticationType; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsAuthenticated
+        {
+            get { return _identityInfo.IsAuthenticated; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public bool IsOfType(Type accountEntityType)
+        {
+            return _identityInfo.IsOfType(accountEntityType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public string[] GetUserRoles()
+        {
+            return _identityInfo.GetUserRoles();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public string LoginName
+        {
+            get { return _identityInfo.LoginName; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public string QualifiedLoginName
+        {
+            get { return _identityInfo.QualifiedLoginName; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public string PersonFullName
+        {
+            get { return _identityInfo.PersonFullName; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string EmailAddress
+        {
+            get { return _identityInfo.EmailAddress; }
         }
     }
 }
