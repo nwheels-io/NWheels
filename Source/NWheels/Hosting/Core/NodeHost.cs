@@ -13,6 +13,8 @@ using Autofac.Extras.Multitenant;
 using Hapil;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using NWheels.Authorization;
+using NWheels.Authorization.Impl;
 using NWheels.Concurrency.Impl;
 using NWheels.Configuration;
 using NWheels.Configuration.Core;
@@ -39,6 +41,7 @@ using NWheels.Processing.Workflows.Core;
 using NWheels.Utilities;
 using Formatting = Newtonsoft.Json.Formatting;
 using NWheels.Entities.Factories;
+using NWheels.Authorization.Core;
 
 namespace NWheels.Hosting.Core
 {
@@ -277,6 +280,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterPipeline<IDataRepositoryPopulator>();
 
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();
+            builder.RegisterType<LocalTransientSessionManager>().As<ISessionManager, ICoreSessionManager>();
             
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkLoggingConfiguration>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkEndpointsConfig>();
