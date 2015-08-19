@@ -100,6 +100,8 @@ namespace NWheels.Testing
             protected override void Load(ContainerBuilder builder)
             {
                 builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<TestAgentComponent>();
+                builder.NWheelsFeatures().Logging().RegisterLogger<TestFixtureBase.ITestFixtureBaseLogger>();
+                
                 _testFixtureInstance.OnRegisteringModuleComponents(builder);
             }
         }

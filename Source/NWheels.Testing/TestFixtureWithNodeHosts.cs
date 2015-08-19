@@ -70,7 +70,6 @@ namespace NWheels.Testing
 
         internal protected virtual void OnRegisteringModuleComponents(Autofac.ContainerBuilder builder)
         {
-            builder.NWheelsFeatures().Logging().RegisterLogger<ITestFixtureBaseLogger>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
