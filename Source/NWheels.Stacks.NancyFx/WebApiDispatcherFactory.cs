@@ -11,13 +11,14 @@ using Hapil.Writers;
 using Nancy;
 using Nancy.ModelBinding;
 using NWheels.Conventions.Core;
+using NWheels.UI.ServerSide;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Stacks.NancyFx
 {
     public class WebApiDispatcherFactory : ConventionObjectFactory
     {
-        public WebApiDispatcherFactory(DynamicModule module, EntityObjectFactory objectFactory)
+        public WebApiDispatcherFactory(DynamicModule module, ViewModelObjectFactory objectFactory)
             : base(module, new WebApiDispatcherConvention(objectFactory))
         {
         }
@@ -33,11 +34,11 @@ namespace NWheels.Stacks.NancyFx
 
         public class WebApiDispatcherConvention : ImplementationConvention
         {
-            private readonly EntityObjectFactory _objectFactory;
+            private readonly ViewModelObjectFactory _objectFactory;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public WebApiDispatcherConvention(EntityObjectFactory objectFactory)
+            public WebApiDispatcherConvention(ViewModelObjectFactory objectFactory)
                 : base(Will.InspectDeclaration | Will.ImplementBaseClass)
             {
                 _objectFactory = objectFactory;

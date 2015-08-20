@@ -62,9 +62,13 @@ namespace NWheels.Stacks.ODataBreeze
 
         public override void Activate()
         {
+            string url = null;
+
             try
             {
-                var url = _endpointRegistration.AddressWithTrailingSlash.ToString();
+                url = _endpointRegistration.AddressWithTrailingSlash.ToString();
+                
+                _logger.RestEndpointStarting(_endpointRegistration.Contract.Name, url);
 
                 _host = WebApp.Start(url, ConfigureWebService);
 
@@ -72,7 +76,7 @@ namespace NWheels.Stacks.ODataBreeze
             }
             catch ( Exception e )
             {
-                _logger.RestEndpointFailedToStart(_endpointRegistration.Contract.Name, e);
+                _logger.RestEndpointFailedToStart(_endpointRegistration.Contract.Name, url, e);
                 throw;
             }
         }
@@ -139,10 +143,12 @@ namespace NWheels.Stacks.ODataBreeze
 
         public interface ILogger : IApplicationEventLogger
         {
+            [LogDebug]
+            void RestEndpointStarting(string repositoryName, string url);
             [LogInfo]
             void RestEndpointStarted(string repositoryName, string url);
             [LogError]
-            void RestEndpointFailedToStart(string repositoryName, Exception e);
+            void RestEndpointFailedToStart(string repositoryName, string url, Exception e);
             [LogInfo]
             void RestEndpointStopped(string repositoryName);
             [LogError]

@@ -214,6 +214,7 @@
     <Compile Include="UI\AuthorizationContract.cs" />
     <Compile Include="UI\ServerSide\EntityChangeSetMessage.cs" />
     <Compile Include="UI\ServerSide\EntityCommandMessage.cs" />
+    <Compile Include="UI\ServerSide\ViewModelObjectFactory.cs" />
     <Compile Include="UI\ServerSide\TransactionScriptCommandMessage.cs" />
     <Compile Include="UI\ServerSide\CommandActor.cs" />
     <Compile Include="UI\ServerSide\CommandMessageBase.cs" />
