@@ -37,6 +37,14 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
             if ( selectedNodeItem != null )
             {
                 viewModel.SelectedNode = selectedNodeItem.Data;
+
+                lvwLogs.ScrollIntoView(lvwLogs.SelectedItem);
+                ListViewItem item = lvwLogs.ItemContainerGenerator.ContainerFromItem(lvwLogs.SelectedItem) as ListViewItem;
+
+                if ( item != null )
+                {
+                    item.Focus();
+                }
             }
             else
             {

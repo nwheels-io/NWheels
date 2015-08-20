@@ -20,8 +20,10 @@ namespace NWheels.Tools.TestBoard
         {
             if ( e.Args.Length > 0 )
             {
-                //base.Application.
+                //base.Application.MainWindow.Title = "COMMAND LINE ARGS";
             }
+
+            base.OnStartup(sender, e);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

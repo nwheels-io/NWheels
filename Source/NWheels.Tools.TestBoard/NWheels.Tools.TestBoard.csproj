@@ -202,6 +202,7 @@
     <Compile Include="Modules\LogViewer\NodeInstanceLogConnection.cs" />
     <Compile Include="Modules\LogViewer\ThreadLogViewModel.cs" />
     <Compile Include="Modules\LogViewer\TreeNodeItem.cs" />
+    <Compile Include="Modules\LogViewer\TreeNodeItemExtensions.cs" />
     <Compile Include="Services\IApplicationComponentInjector.cs" />
     <Compile Include="Services\IApplicationControllerService.cs" />
     <Compile Include="Services\IMessageBoxService.cs" />

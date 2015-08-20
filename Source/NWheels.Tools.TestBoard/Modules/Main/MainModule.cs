@@ -78,6 +78,20 @@ namespace NWheels.Tools.TestBoard.Modules.Main
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override void PostInitialize()
+        {
+            base.PostInitialize();
+
+            var commandLineArgs = Environment.GetCommandLineArgs();
+
+            foreach ( var arg in commandLineArgs.Skip(1) )
+            {
+                _controllerService.Open(arg, autoRun: true);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         void IHandle<AppOpenedMessage>.Handle(AppOpenedMessage message)
         {
             UpdateWindowTitle();

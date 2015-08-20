@@ -18,6 +18,7 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
         private ConcurrentQueue<ThreadLogSnapshot> _pendingThreadLogs;
         private CancellationTokenSource _cancellation;
         private List<Task> _loaderTasks;
+        private TreeNodeItem<ThreadLogViewModel.NodeItem> _selectedItem;
         private ThreadLogViewModel.NodeItem _selectedNode;
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -108,17 +109,48 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
             int count = 0;
             ThreadLogSnapshot threadLog;
 
+            TreeNodeItem<ThreadLogViewModel.NodeItem> rootCauseErrorNode = null;
+
             while ( _pendingThreadLogs.TryDequeue(out threadLog) && count++ < 100 )
             {
                 var tuple = new ThreadLogModelTuple(this, threadLog);
                 _threadLogModelTuples.Add(tuple);
                 Items.Add(tuple.RootNodeItem);
+
+                if ( rootCauseErrorNode == null )
+                {
+                    rootCauseErrorNode = tuple.RootNodeItem.ExpandToRootCauseError();
+
+                    if ( rootCauseErrorNode != null )
+                    {
+                        this.SelectedItem = rootCauseErrorNode;
+                    }
+                }
             }
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ObservableCollection<TreeNodeItem<ThreadLogViewModel.NodeItem>> Items { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TreeNodeItem<ThreadLogViewModel.NodeItem> SelectedItem
+        {
+            get
+            {
+                return _selectedItem;
+            }
+            set
+            {
+                _selectedItem = value;
+
+                if ( PropertyChanged != null )
+                {
+                    PropertyChanged(this, new PropertyChangedEventArgs("SelectedItem"));
+                }
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

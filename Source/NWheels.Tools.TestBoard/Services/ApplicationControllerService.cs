@@ -59,34 +59,9 @@ namespace NWheels.Tools.TestBoard.Services
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
         }
 
-        System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            var assemblyName = new AssemblyName(args.Name);
-            var assemblyProbePaths = new List<string>();
-
-            assemblyProbePaths.Add(PathUtility.HostBinPath("..\\Core\\" + assemblyName.Name + ".dll"));
-            assemblyProbePaths.Add(PathUtility.HostBinPath("..\\Core\\" + assemblyName.Name + ".exe"));
-
-            foreach ( var bootConfigLoadPath in _applicationByFilePath.Keys )
-            {
-                assemblyProbePaths.Add(Path.Combine(Path.GetDirectoryName(bootConfigLoadPath), assemblyName.Name + ".dll"));
-                assemblyProbePaths.Add(Path.Combine(Path.GetDirectoryName(bootConfigLoadPath), assemblyName.Name + ".exe"));
-            }
-
-            foreach ( var probePath in assemblyProbePaths )
-            {
-                if ( File.Exists(probePath) )
-                {
-                    return Assembly.LoadFrom(probePath);
-                }
-            }
-
-            return null;
-        }
-
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Open(string bootConfigFilePath)
+        public void Open(string bootConfigFilePath, bool autoRun = false)
         {
             _output.AppendLine(string.Format("Loading application from file: {0}.", bootConfigFilePath));
 
@@ -97,14 +72,14 @@ namespace NWheels.Tools.TestBoard.Services
             {
                 if ( !_applicationByFilePath.ContainsKey(bootConfigFilePath) )
                 {
-                    var newController = new ApplicationController(_plainLog, bootConfig);
-                    newController.InjectingComponents += OnInjectingHostComponents;
+                    var application = new ApplicationController(_plainLog, bootConfig);
+                    application.InjectingComponents += OnInjectingHostComponents;
 
-                    _applications.Add(newController);
-                    _applicationByFilePath.Add(bootConfigFilePath, newController);
+                    _applications.Add(application);
+                    _applicationByFilePath.Add(bootConfigFilePath, application);
 
-                    newController.CurrentStateChanged += OnApplicationControllerStateChanged;
-                    _eventAggregator.Publish(new AppOpenedMessage(newController), action => Task.Run(action));
+                    application.CurrentStateChanged += OnApplicationControllerStateChanged;
+                    _eventAggregator.Publish(new AppOpenedMessage(application, autoRun), action => Task.Run(action));
                 }
             }
         }
@@ -146,6 +121,33 @@ namespace NWheels.Tools.TestBoard.Services
         public IReadOnlyList<ApplicationController> Applications
         {
             get { return _applications; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            var assemblyName = new AssemblyName(args.Name);
+            var assemblyProbePaths = new List<string>();
+
+            assemblyProbePaths.Add(PathUtility.HostBinPath("..\\Core\\" + assemblyName.Name + ".dll"));
+            assemblyProbePaths.Add(PathUtility.HostBinPath("..\\Core\\" + assemblyName.Name + ".exe"));
+
+            foreach (var bootConfigLoadPath in _applicationByFilePath.Keys)
+            {
+                assemblyProbePaths.Add(Path.Combine(Path.GetDirectoryName(bootConfigLoadPath), assemblyName.Name + ".dll"));
+                assemblyProbePaths.Add(Path.Combine(Path.GetDirectoryName(bootConfigLoadPath), assemblyName.Name + ".exe"));
+            }
+
+            foreach (var probePath in assemblyProbePaths)
+            {
+                if (File.Exists(probePath))
+                {
+                    return Assembly.LoadFrom(probePath);
+                }
+            }
+
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

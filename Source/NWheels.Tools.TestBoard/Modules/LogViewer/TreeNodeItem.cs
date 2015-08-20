@@ -133,6 +133,13 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+        /// <summary>
+        /// Should be bound to ListView item container
+        /// </summary>
+        public bool IsSelected { get; set; }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
         public int Depth
         {
             get
@@ -178,6 +185,13 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
                 SetValue(HoverImagePathProperty, value);
             }
         }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TreeNodeItem<T> ParentNode { get; private set; }
+        public TreeNodeItem<T> FirstChildNode { get; private set; }
+        public TreeNodeItem<T> PrevSiblingNode { get; private set; }
+        public TreeNodeItem<T> NextSiblingNode { get; private set; }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -232,13 +246,6 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
                 }
             }
         }
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private TreeNodeItem<T> ParentNode { get; set; }
-        private TreeNodeItem<T> FirstChildNode { get; set; }
-        private TreeNodeItem<T> PrevSiblingNode { get; set; }
-        private TreeNodeItem<T> NextSiblingNode { get; set; }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

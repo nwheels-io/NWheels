@@ -72,7 +72,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         void IHandle<AppOpenedMessage>.Handle(AppOpenedMessage message)
         {
-            Execute.OnUIThreadAsync(() => AddApplicationItem(message.App));
+            Execute.OnUIThreadAsync(() => AddApplicationItem(message.App, message.AutoRun));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -95,9 +95,15 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void AddApplicationItem(ApplicationController app)
+        private void AddApplicationItem(ApplicationController app, bool autoRun)
         {
-            ExplorerItems.Add(new ApplicationItem(this, app));
+            var item = new ApplicationItem(this, app);
+            ExplorerItems.Add(item);
+
+            if ( autoRun )
+            {
+                item.Start();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -425,8 +431,8 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
 
             public override void Start()
             {
-                Task.Run(() => Controller.LoadAndActivate());
                 base.ViewLogs();
+                Task.Run(() => Controller.LoadAndActivate());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

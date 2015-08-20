@@ -40,6 +40,9 @@
                 </Style>
             </TreeView.Style>
             <TreeView.Resources>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="IsExpanded" Value="True" />
+                </Style>
                 <HierarchicalDataTemplate DataType="{x:Type local:ApplicationExplorerViewModel+ExplorerItem}" ItemsSource="{Binding SubItems}">
                     <Border Padding="2 2 5 2">
                         <StackPanel Orientation="Horizontal"  VerticalAlignment="Center" ToolTip="{Binding Text}">
