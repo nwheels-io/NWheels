@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Autofac;
+using MongoDB;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
@@ -14,6 +16,7 @@ using NWheels.DataObjects.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
+using NWheels.Logging;
 using NWheels.Stacks.MongoDb.Factories;
 using NWheels.TypeModel.Core;
 using NWheels.Utilities;
@@ -29,6 +32,7 @@ namespace NWheels.Stacks.MongoDb
         private readonly IDomainObjectFactory _domainObjectFactory;
         private readonly ITypeMetadata _metadata;
         private readonly IEntityObjectFactory _objectFactory;
+        private readonly IMongoDbLogger _logger;
         private readonly MongoCollection<TEntityImpl> _mongoCollection;
         private readonly Expression<Func<TEntityImpl, object>> _keyPropertyExpression;
         private InterceptingQueryProvider _queryProvider;
@@ -43,6 +47,7 @@ namespace NWheels.Stacks.MongoDb
             _metadata = metadataCache.GetTypeMetadata(typeof(TEntityContract));
             _keyPropertyExpression = GetKeyPropertyExpression(_metadata);
             _objectFactory = objectFactory;
+            _logger = ownerRepo.Components.Resolve<IMongoDbLogger>();
             _mongoCollection = ownerRepo.GetCollection<TEntityImpl>(GetMongoCollectionName(_metadata));
             _queryProvider = null;
         }
@@ -52,13 +57,17 @@ namespace NWheels.Stacks.MongoDb
         public IEnumerator<TEntityContract> GetEnumerator()
         {
             _ownerRepo.ValidateOperationalState();
-            
+
+            var queryLog = _logger.ExecutingQuery(((IQueryable)this).Expression, _mongoCollection.AsQueryable().ToMongoQueryText());
+            _logger.QueryPlanExplained(_mongoCollection.AsQueryable().ExplainTyped<TEntityContract>().ToString());
+
             var actualEnumerator = _mongoCollection.AsQueryable().GetEnumerator();
             var transformingEnumerator = new DelegatingTransformingEnumerator<TEntityImpl, TEntityContract>(
                 actualEnumerator,
                 InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>);
+            var loggingEnumerator = new ResultLoggingEnumerator<TEntityContract>(transformingEnumerator, _logger, queryLog);
 
-            return transformingEnumerator;
+            return loggingEnumerator;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -450,7 +459,7 @@ namespace NWheels.Stacks.MongoDb
             {
                 var specializedExpression = _expressionSpecializer.Specialize(expression);
                 var query = _actualQueryProvider.CreateQuery<TElement>(specializedExpression);
-                return new InterceptingQuery<TElement>(_ownerRepo, query);
+                return new InterceptingQuery<TElement>(_ownerRepo, query, _ownerRepo._logger);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -467,7 +476,12 @@ namespace NWheels.Stacks.MongoDb
             public TResult Execute<TResult>(Expression expression)
             {
                 var specializedExpression = _expressionSpecializer.Specialize(expression);
-                var result = _actualQueryProvider.Execute<TResult>(specializedExpression);
+                TResult result;
+
+                using ( _ownerRepo._logger.ExecutingQuery(specializedExpression, null) )
+                {
+                    result = _actualQueryProvider.Execute<TResult>(specializedExpression);
+                }
 
                 var entity = result as IEntityObject;
 
@@ -515,15 +529,94 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private class ResultLoggingEnumerator<T> : IEnumerator<T>
+        {
+            private readonly IEnumerator<T> _innerEnumerator;
+            private readonly IMongoDbLogger _logger;
+            private readonly ILogActivity _enumerationActivity;
+            private int _rowCount;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ResultLoggingEnumerator(IEnumerator<T> innerEnumerator, IMongoDbLogger logger, ILogActivity enumerationActivity)
+            {
+                _enumerationActivity = enumerationActivity;
+                _innerEnumerator = innerEnumerator;
+                _logger = logger;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IDisposable
+
+            public void Dispose()
+            {
+                _logger.DisposingQueryResultEnumerator();
+                _enumerationActivity.Dispose();
+                _innerEnumerator.Dispose();
+            }
+
+            #endregion
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IEnumerator
+
+            public bool MoveNext()
+            {
+                if ( _innerEnumerator.MoveNext() )
+                {
+                    _logger.ObjectReadFromQueryResult(_rowCount);
+                    _rowCount++;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Reset()
+            {
+                _rowCount = 0;
+                _innerEnumerator.Reset();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public T Current
+            {
+                get
+                {
+                    return _innerEnumerator.Current;
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            object IEnumerator.Current
+            {
+                get { return this.Current; }
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class InterceptingQuery<T> : IOrderedQueryable<T>
         {
             private readonly MongoEntityRepository<TEntityContract, TEntityImpl> _ownerRepo;
             private readonly IQueryable<T> _underlyingQuery;
+            private readonly IMongoDbLogger _logger;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public InterceptingQuery(MongoEntityRepository<TEntityContract, TEntityImpl> ownerRepo, IQueryable<T> underlyingQuery)
+            public InterceptingQuery(MongoEntityRepository<TEntityContract, TEntityImpl> ownerRepo, IQueryable<T> underlyingQuery, IMongoDbLogger logger)
             {
+                _logger = logger;
                 _ownerRepo = ownerRepo;
                 _underlyingQuery = underlyingQuery;
             }
@@ -532,8 +625,13 @@ namespace NWheels.Stacks.MongoDb
 
             public IEnumerator<T> GetEnumerator()
             {
+                var queryActivity = _logger.ExecutingQuery(this.Expression, _underlyingQuery.ToMongoQueryText());
+                _logger.QueryPlanExplained(_underlyingQuery.ExplainTyped<T>().ToString());
+
+                var actualResults = _underlyingQuery.GetEnumerator();
+
                 return new DelegatingTransformingEnumerator<T, T>(
-                    _underlyingQuery.GetEnumerator(),
+                    new ResultLoggingEnumerator<T>(actualResults, _logger, queryActivity),
                     item => {
                         return _ownerRepo.InjectDependenciesAndTrackAndWrapInDomainObject<T>((TEntityImpl)(object)item);
                     });

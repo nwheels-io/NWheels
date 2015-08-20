@@ -52,6 +52,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\mongocsharpdriver.1.10.0\lib\net35\MongoDB.Driver.dll</HintPath>
     </Reference>
+    <Reference Include="MongoDB.QueryHelper">
+      <HintPath>..\..\..\git\Source\packages\MongoDB.QueryHelper.1.0.0\lib\MongoDB.QueryHelper.dll</HintPath>
+    </Reference>
     <Reference Include="Remotion.Linq">
       <HintPath>..\packages\Remotion.Linq.1.15.15.0\lib\portable-net45+wp80+wpa81+win\Remotion.Linq.dll</HintPath>
     </Reference>
@@ -70,6 +73,7 @@
     <Compile Include="Factories\BsonIgnoreExtraElementsConvention.cs" />
     <Compile Include="Factories\DocumentIdStrategy.cs" />
     <Compile Include="Factories\LazyLoadDomainObjectConvention.cs" />
+    <Compile Include="IMongoDbLogger.cs" />
     <Compile Include="IMongoEntityRepository.cs" />
     <Compile Include="Factories\MongoDatabaseInitializer.cs" />
     <Compile Include="Factories\MongoDataRepositoryFactory.cs" />
