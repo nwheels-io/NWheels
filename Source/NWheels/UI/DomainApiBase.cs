@@ -4,16 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Conventions.Core;
+using NWheels.UI.ServerSide;
 
 namespace NWheels.UI
 {
     public abstract class DomainApiBase
     {
-        private readonly IEntityObjectFactory _objectFactory;
+        private readonly ViewModelObjectFactory _objectFactory;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected DomainApiBase(IEntityObjectFactory objectFactory)
+        protected DomainApiBase(ViewModelObjectFactory objectFactory)
         {
             _objectFactory = objectFactory;
         }

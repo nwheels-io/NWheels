@@ -2,6 +2,7 @@
 using NWheels.Conventions.Core;
 using NWheels.Domains.Security.UI;
 using NWheels.UI;
+using NWheels.UI.ServerSide;
 using NWheels.Utilities;
 
 namespace NWheels.Domains.Security.Impl
@@ -13,7 +14,7 @@ namespace NWheels.Domains.Security.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public SecurityDomainApi(IFramework framework, IEntityObjectFactory objectFactory, UserLoginTransactionScript loginTransaction)
+        public SecurityDomainApi(IFramework framework, ViewModelObjectFactory objectFactory, UserLoginTransactionScript loginTransaction)
             : base(objectFactory)
         {
             _framework = framework;
