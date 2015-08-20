@@ -38,15 +38,21 @@
                                 <Setter Property="Background" Value="LightBlue"/>
                             </Trigger>
                             <DataTrigger Binding="{Binding Path=Data.IsRootActivity}" Value="true">
-                                <Setter TargetName="brdItem" Property="BorderBrush" Value="#FFB7B7B7" />
+                                <Setter TargetName="brdItem" Property="BorderBrush" Value="#FFD7D7D7" />
                                 <Setter TargetName="brdItem" Property="BorderThickness" Value="0 1 0 0" />
                                 <Setter TargetName="brdItem" Property="Height" Value="32" />
                                 <Setter TargetName="gvrPresenter" Property="Height" Value="32" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Path=Data.IsRootActivity}" Value="false">
+                            <DataTrigger Binding="{Binding Path=Data.IsNonRootActivity}" Value="true">
+                                <Setter TargetName="brdItem" Property="BorderBrush" Value="#FFE8E8E8" />
+                                <Setter TargetName="brdItem" Property="BorderThickness" Value="0 0 0 1" />
+                                <Setter TargetName="brdItem" Property="Height" Value="26" />
+                                <Setter TargetName="gvrPresenter" Property="Height" Value="26" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=Data.IsActivity}" Value="false">
                                 <Setter TargetName="brdItem" Property="BorderThickness" Value="0" />
-                                <Setter TargetName="brdItem" Property="Height" Value="24" />
-                                <Setter TargetName="gvrPresenter" Property="Height" Value="24" />
+                                <Setter TargetName="brdItem" Property="Height" Value="22" />
+                                <Setter TargetName="gvrPresenter" Property="Height" Value="22" />
                             </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -60,30 +66,30 @@
             <EventSetter Event="PreviewKeyDown" Handler="ListViewItem_PreviewKeyDown" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ThreadSuccess">
-                    <Setter Property="Background" Value="#FFDEDEDE" />
+                    <Setter Property="Background" Value="#FFE8E8E8" />
                     <Setter Property="Foreground" Value="#FF4D4D4D" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ThreadWarning">
-                    <Setter Property="Background" Value="#FFDEDEDE" />
+                    <Setter Property="Background" Value="#FFE8E8E8" />
                     <Setter Property="Foreground" Value="DarkOrange" />
                     <Setter Property="FontWeight" Value="DemiBold" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ThreadFailure">
-                    <Setter Property="Background" Value="#FFDEDEDE" />
+                    <Setter Property="Background" Value="#FFE8E8E8" />
                     <Setter Property="Foreground" Value="#FFCD1717" />
                     <Setter Property="FontWeight" Value="DemiBold" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ActivitySuccess">
-                    <Setter Property="Background" Value="#FFEEEEEE" />
+                    <Setter Property="Background" Value="#FFF8F8F8" />
                     <Setter Property="Foreground" Value="#FF8B8B8B" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ActivityWarning">
-                    <Setter Property="Background" Value="#FFEEEEEE" />
+                    <Setter Property="Background" Value="#FFF8F8F8" />
                     <Setter Property="Foreground" Value="#FFDC7A02" />
                     <Setter Property="FontWeight" Value="DemiBold" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ActivityFailure">
-                    <Setter Property="Background" Value="#FFEEEEEE" />
+                    <Setter Property="Background" Value="#FFF8F8F8" />
                     <Setter Property="Foreground" Value="#FFCD1717" />
                     <Setter Property="FontWeight" Value="DemiBold" />
                 </DataTrigger>
@@ -118,7 +124,6 @@
                     <Setter Property="Background" Value="#FFD9EFF7" />
                 </MultiTrigger>
             </Style.Triggers>
-            
         </Style>
     </UserControl.Resources>
     
@@ -246,7 +251,7 @@
             <!--this GridSplitter represents the glyph-->
             <TextBox 
                 Grid.Row="2" 
-                Background="LightGray" 
+                Background="#FFE8E8E8" 
                 FontFamily="Consolas" 
                 FontSize="13" 
                 IsReadOnly="True"

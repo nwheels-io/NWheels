@@ -132,6 +132,26 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public bool IsNonRootActivity
+            {
+                get
+                {
+                    return NodeKind.IsIn(LogNodeKind.ActivityFailure, LogNodeKind.ActivitySuccess, LogNodeKind.ActivityWarning);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool IsActivity
+            {
+                get
+                {
+                    return (IsRootActivity || IsNonRootActivity);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public string SingleLineText
             {
                 get
