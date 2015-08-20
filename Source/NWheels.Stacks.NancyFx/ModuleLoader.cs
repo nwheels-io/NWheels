@@ -26,6 +26,8 @@ namespace NWheels.Stacks.NancyFx
                     return component;
                 });
 
+            builder.RegisterType<WebModuleLoggingHook>().SingleInstance();
+
             builder.RegisterType<ViewModelObjectFactory>().SingleInstance();
             builder.RegisterType<WebApiDispatcherFactory>().SingleInstance();
 

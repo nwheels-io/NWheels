@@ -3,12 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Nancy;
 using NWheels.Logging;
 
 namespace NWheels.Stacks.NancyFx
 {
     public interface IWebApplicationLogger : IApplicationEventLogger
     {
+        [LogThread(ThreadTaskType.IncomingRequest)]
+        ILogActivity Request(string verb, string path, [Detail] string query);
+
+        [LogVerbose]
+        void RequestCompleted(HttpStatusCode statusCode);
+
+        [LogError]
+        void RequestFailed(Exception error);
+
         [LogVerbose]
         void WebApplicationActivating(string appName, Uri url, string localPath);
 
@@ -17,8 +27,5 @@ namespace NWheels.Stacks.NancyFx
  
         [LogInfo]
         void WebApplicationDeactivated(string appName, Uri url);
-
-        [LogDebug]
-        void ServingRequest(string appName, string verb, string pathAndQuery);
     }
 }

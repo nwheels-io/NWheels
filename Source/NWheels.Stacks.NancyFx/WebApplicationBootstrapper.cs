@@ -5,20 +5,24 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using Nancy;
+using Nancy.Bootstrapper;
 using Nancy.Bootstrappers.Autofac;
 using Nancy.Conventions;
+using Nancy.Session;
 
 namespace NWheels.Stacks.NancyFx
 {
     public class WebApplicationBootstrapper : AutofacNancyBootstrapper, IRootPathProvider
     {
         private readonly WebApplicationModule _module;
+        private readonly WebModuleLoggingHook _loggingHook;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public WebApplicationBootstrapper(WebApplicationModule module)
+        public WebApplicationBootstrapper(WebApplicationModule module, WebModuleLoggingHook loggingHook)
         {
             _module = module;
+            _loggingHook = loggingHook;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -41,6 +45,14 @@ namespace NWheels.Stacks.NancyFx
         {
             nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/assets", "assets"));
             base.ConfigureConventions(nancyConventions);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void ApplicationStartup(ILifetimeScope container, IPipelines pipelines)
+        {
+            CookieBasedSessions.Enable(pipelines);
+            _loggingHook.Attach(pipelines);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

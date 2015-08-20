@@ -23,6 +23,7 @@ namespace NWheels.Stacks.NancyFx
         private readonly ITypeMetadataCache _metadataCache;
         private readonly ILocalizationProvider _localizationProvider;
         private readonly WebApiDispatcherFactory _dispatcherFactory;
+        private readonly WebModuleLoggingHook _loggingHook;
         private readonly IWebApplicationLogger _logger;
         private readonly UidlApplication _application;
         private readonly Dictionary<string, object> _apiServicesByContractName;
@@ -39,6 +40,7 @@ namespace NWheels.Stacks.NancyFx
             ITypeMetadataCache metadataCache,
             ILocalizationProvider localizationProvider,
             WebApiDispatcherFactory dispatcherFactory,
+            WebModuleLoggingHook loggingHook,
             IWebApplicationLogger logger)
         {
             _components = components;
@@ -46,6 +48,7 @@ namespace NWheels.Stacks.NancyFx
             _metadataCache = metadataCache;
             _localizationProvider = localizationProvider;
             _dispatcherFactory = dispatcherFactory;
+            _loggingHook = loggingHook;
             _logger = logger;
 
             _application = (UidlApplication)components.Resolve(endpointRegistration.Contract);
@@ -109,7 +112,7 @@ namespace NWheels.Stacks.NancyFx
             BuildApiDispatchers(_components, _dispatcherFactory);
 
             _module = new WebApplicationModule(this);
-            var bootstrapper = new WebApplicationBootstrapper(_module);
+            var bootstrapper = new WebApplicationBootstrapper(_module, _loggingHook);
 
             _host = new NancyHost(bootstrapper, new[] { TrailingSlashSafeUri(_endpointRegistration.Address) });
         }
