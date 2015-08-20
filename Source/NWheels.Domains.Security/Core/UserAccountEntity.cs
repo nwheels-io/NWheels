@@ -33,6 +33,29 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void SetTemporaryPassword()
+        {
+            var policy = PolicySet.GetPolicy(this);
+
+            DeactivateCurrentPassword();
+
+            var password = Framework.New<IPasswordEntity>();
+            var passwordLength = new Random().Next(policy.PasswordMinLength, policy.PasswordMaxLength);
+            var clearText = Convert.ToBase64String(Framework.NewGuid().ToByteArray()).Substring(0, passwordLength);
+
+            password.User = this;
+            password.Hash = CryptoProvider.CalculateHash(SecureStringUtility.ClearToSecure(clearText));
+            password.ExpiresAtUtc = Framework.UtcNow.AddDays(policy.TemporaryPasswordExpiryDays);
+            password.MustChange = true;
+
+            password.As<IActiveRecord>().Save();
+
+            this.Passwords.Add(password);
+            this.Save();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public UserAccountPrincipal Authenticate(SecureString password)
         {
             var policy = PolicySet.GetPolicy(this);
@@ -44,6 +67,18 @@ namespace NWheels.Domains.Security.Core
 
             Logger.UserAuthenticated(LoginName);
             
+            return principal;
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UserAccountPrincipal CreatePrincipal()
+        {
+            var claims = ClaimFactory.CreateClaimsFromContainerEntity(this);
+            var identity = new UserAccountIdentity(this, claims);
+            var principal = new UserAccountPrincipal(identity);
+
             return principal;
         }
 
@@ -160,17 +195,6 @@ namespace NWheels.Domains.Security.Core
         {
             Logger.UserAccountLockedOut(LoginName);
             IsLockedOut = true;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private UserAccountPrincipal CreatePrincipal()
-        {
-            var claims = ClaimFactory.CreateClaimsFromContainerEntity(this);
-            var identity = new UserAccountIdentity(this, claims);
-            var principal = new UserAccountPrincipal(identity);
-
-            return principal;
         }
     }
 }

@@ -13,6 +13,7 @@ namespace NWheels.Domains.Security.Core
             return new UserAccountPolicy(
                 failedLoginAttemptsBeforeLockOut: 3,
                 passwordExpiryDays: 90,
+                temporaryPasswordExpiryDays: 7,
                 passwordMinLength: 4,
                 passwordMaxLength: 20,
                 passwordMinAlphaChars: 1,

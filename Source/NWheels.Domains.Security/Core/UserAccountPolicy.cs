@@ -11,6 +11,7 @@ namespace NWheels.Domains.Security.Core
         public UserAccountPolicy(
             int failedLoginAttemptsBeforeLockOut, 
             int passwordExpiryDays, 
+            int temporaryPasswordExpiryDays,
             int passwordMinLength, 
             int passwordMaxLength, 
             int passwordMinAlphaChars, 
@@ -21,6 +22,7 @@ namespace NWheels.Domains.Security.Core
         {
             FailedLoginAttemptsBeforeLockOut = failedLoginAttemptsBeforeLockOut;
             PasswordExpiryDays = passwordExpiryDays;
+            TemporaryPasswordExpiryDays = temporaryPasswordExpiryDays;
             PasswordMinLength = passwordMinLength;
             PasswordMaxLength = passwordMaxLength;
             PasswordMinAlphaChars = passwordMinAlphaChars;
@@ -34,6 +36,7 @@ namespace NWheels.Domains.Security.Core
 
         public int FailedLoginAttemptsBeforeLockOut { get; private set; }
         public int PasswordExpiryDays { get; private set; }
+        public int TemporaryPasswordExpiryDays { get; private set; }
         public int PasswordMinLength { get; private set; }
         public int PasswordMaxLength { get; private set; }
         public int PasswordMinAlphaChars { get; private set; }

@@ -16,6 +16,10 @@ namespace NWheels.Configuration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool IsAbstract { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static ConfigurationElementAttribute From(Type interfaceType)
         {
             return interfaceType.GetCustomAttribute<ConfigurationElementAttribute>(inherit: true);
