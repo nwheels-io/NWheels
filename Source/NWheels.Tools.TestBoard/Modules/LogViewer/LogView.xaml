@@ -38,14 +38,14 @@
                                 <Setter Property="Background" Value="LightBlue"/>
                             </Trigger>
                             <DataTrigger Binding="{Binding Path=Data.IsRootActivity}" Value="true">
-                                <Setter TargetName="brdItem" Property="BorderBrush" Value="#FFD7D7D7" />
+                                <Setter TargetName="brdItem" Property="BorderBrush" Value="#FFF8F8F8" />
                                 <Setter TargetName="brdItem" Property="BorderThickness" Value="0 1 0 0" />
                                 <Setter TargetName="brdItem" Property="Height" Value="32" />
                                 <Setter TargetName="gvrPresenter" Property="Height" Value="32" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Path=Data.IsNonRootActivity}" Value="true">
                                 <Setter TargetName="brdItem" Property="BorderBrush" Value="#FFE8E8E8" />
-                                <Setter TargetName="brdItem" Property="BorderThickness" Value="0 0 0 1" />
+                                <Setter TargetName="brdItem" Property="BorderThickness" Value="0 1 0 0" />
                                 <Setter TargetName="brdItem" Property="Height" Value="26" />
                                 <Setter TargetName="gvrPresenter" Property="Height" Value="26" />
                             </DataTrigger>
@@ -114,7 +114,8 @@
                     <Setter Property="FontWeight" Value="Bold" />
                 </DataTrigger>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="SkyBlue" />
+                    <Setter Property="Background" Value="{x:Static SystemColors.HighlightBrush}" />
+                    <Setter Property="Foreground" Value="{x:Static SystemColors.HighlightTextBrush}" />
                 </Trigger>
                 <MultiTrigger>
                     <MultiTrigger.Conditions>

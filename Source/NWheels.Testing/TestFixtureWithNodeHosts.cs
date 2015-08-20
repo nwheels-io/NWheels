@@ -253,7 +253,7 @@ namespace NWheels.Testing
             {
                 if ( _logLevel == LogLevel.Debug )
                 {
-                    Console.WriteLine(GetLogPrefix() + ">debug> " + format, args);
+                    Console.WriteLine(GetLogPrefix() + ">debug> " + format.FormatIf(args));
                 }
             }
 
@@ -263,7 +263,7 @@ namespace NWheels.Testing
             {
                 if ( _logLevel <= LogLevel.Verbose )
                 {
-                    Console.WriteLine(GetLogPrefix() + ">trace> " + format, args);
+                    Console.WriteLine(GetLogPrefix() + ">trace> " + format.FormatIf(args));
                 }
             }
 
@@ -273,7 +273,7 @@ namespace NWheels.Testing
             {
                 if ( _logLevel <= LogLevel.Info )
                 {
-                    Console.WriteLine(GetLogPrefix() + ">INFO > " + format, args);
+                    Console.WriteLine(GetLogPrefix() + ">INFO > " + format.FormatIf(args));
                 }
             }
 
@@ -283,7 +283,7 @@ namespace NWheels.Testing
             {
                 if ( _logLevel <= LogLevel.Warning )
                 {
-                    Console.WriteLine(GetLogPrefix() + ">WARNI> " + format, args);
+                    Console.WriteLine(GetLogPrefix() + ">WARNI> " + format.FormatIf(args));
                 }
             }
 
@@ -293,7 +293,7 @@ namespace NWheels.Testing
             {
                 if ( _logLevel <= LogLevel.Error )
                 {
-                    Console.WriteLine(GetLogPrefix() + ">ERROR> " + format, args);
+                    Console.WriteLine(GetLogPrefix() + ">ERROR> " + format.FormatIf(args));
                 }
             }
 
@@ -303,7 +303,7 @@ namespace NWheels.Testing
             {
                 if ( _logLevel <= LogLevel.Critical )
                 {
-                    Console.WriteLine(GetLogPrefix() + ">CRITI> " + format, args);
+                    Console.WriteLine(GetLogPrefix() + ">CRITI> " + format.FormatIf(args));
                 }
             }
 

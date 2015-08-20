@@ -58,8 +58,8 @@ namespace NWheels.Stacks.MongoDb
         {
             _ownerRepo.ValidateOperationalState();
 
-            var queryLog = _logger.ExecutingQuery(((IQueryable)this).Expression, _mongoCollection.AsQueryable().ToMongoQueryText());
-            _logger.QueryPlanExplained(_mongoCollection.AsQueryable().ExplainTyped<TEntityContract>().ToString());
+            var queryLog = _logger.ExecutingQuery(((IQueryable)this).Expression, null/*_mongoCollection.AsQueryable().ToMongoQueryText()*/);
+            //_logger.QueryPlanExplained(_mongoCollection.AsQueryable().ExplainTyped<TEntityContract>().ToString());
 
             var actualEnumerator = _mongoCollection.AsQueryable().GetEnumerator();
             var transformingEnumerator = new DelegatingTransformingEnumerator<TEntityImpl, TEntityContract>(
@@ -218,49 +218,128 @@ namespace NWheels.Stacks.MongoDb
 
         void IMongoEntityRepository.CommitInsert(IEntityObject entity)
         {
-            _mongoCollection.Insert<TEntityImpl>((TEntityImpl)entity);
+            using ( var activity = _logger.ExecutingInsert(_metadata.Name, 1) )
+            {
+                try
+                {
+                    var result = _mongoCollection.Insert<TEntityImpl>((TEntityImpl)entity);
+                    //_logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
+                }
+                catch ( Exception e )
+                {
+                    LogMongoDbErrors(e, activity);
+                    throw;
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         void IMongoEntityRepository.CommitUpdate(IEntityObject entity)
         {
-            _mongoCollection.Save<TEntityImpl>((TEntityImpl)entity);
+            using ( var activity = _logger.ExecutingUpdate(_metadata.Name, 1) )
+            {
+                try
+                {
+                    var result = _mongoCollection.Save<TEntityImpl>((TEntityImpl)entity);
+                    //_logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
+                }
+                catch ( Exception e )
+                {
+                    LogMongoDbErrors(e, activity);
+                    throw;
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
+
         void IMongoEntityRepository.CommitDelete(IEntityObject entity)
         {
-            var query = Query<TEntityImpl>.EQ(_keyPropertyExpression, entity.GetId().Value);
-            _mongoCollection.Remove(query);
+            using ( var activity = _logger.ExecutingDelete(_metadata.Name, 1) )
+            {
+                try
+                {
+                    var query = Query<TEntityImpl>.EQ(_keyPropertyExpression, entity.GetId().Value);
+                    var result = _mongoCollection.Remove(query);
+
+                    //_logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
+                }
+                catch ( Exception e )
+                {
+                    LogMongoDbErrors(e, activity);
+                    throw;
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
+
         void IMongoEntityRepository.CommitInsert(IEnumerable<IEntityObject> entities)
         {
-            _mongoCollection.InsertBatch<TEntityImpl>(entities.Cast<TEntityImpl>());
+            using ( var activity = _logger.ExecutingInsert(_metadata.Name, entities.Count()) )
+            {
+                try
+                {
+                    var results = _mongoCollection.InsertBatch<TEntityImpl>(entities.Cast<TEntityImpl>());
+
+                    foreach ( var result in results )
+                    {
+                        //_logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
+                    }
+                }
+                catch ( Exception e )
+                {
+                    LogMongoDbErrors(e, activity);
+                    throw;
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         void IMongoEntityRepository.CommitUpdate(IEnumerable<IEntityObject> entities)
         {
-            foreach ( var entity in entities )
+            using ( var activity = _logger.ExecutingUpdate(_metadata.Name, entities.Count()) )
             {
-                _mongoCollection.Save<TEntityImpl>((TEntityImpl)entity);
+                try
+                {
+                    foreach ( var entity in entities )
+                    {
+                        var result = _mongoCollection.Save<TEntityImpl>((TEntityImpl)entity);
+                        //_logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
+                    }
+                }
+                catch ( Exception e )
+                {
+                    LogMongoDbErrors(e, activity);
+                    throw;
+                }
             }
-        }
+
+       }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void IMongoEntityRepository.CommitDelete(IEnumerable<IEntityObject> entities)
         {
-            foreach ( var entity in entities )
+            using ( var activity = _logger.ExecutingDelete(_metadata.Name, entities.Count()) )
             {
-                var query = Query<TEntityImpl>.EQ(_keyPropertyExpression, entity.GetId().Value);
-                _mongoCollection.Remove(query);
+                try
+                {
+                    foreach ( var entity in entities )
+                    {
+                        var query = Query<TEntityImpl>.EQ(_keyPropertyExpression, entity.GetId().Value);
+                        var result =_mongoCollection.Remove(query);
+                        
+                        //_logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
+                    }
+                }
+                catch ( Exception e )
+                {
+                    LogMongoDbErrors(e, activity);
+                    throw;
+                }
             }
         }
 
@@ -357,6 +436,24 @@ namespace NWheels.Stacks.MongoDb
             {
                 return _mongoCollection;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void LogMongoDbErrors(Exception exception, ILogActivity activity)
+        {
+            var bulkException = (exception as MongoBulkWriteException);
+
+            if ( bulkException != null && bulkException.WriteErrors != null )
+            {
+                foreach ( var error in bulkException.WriteErrors )
+                {
+                    _logger.MongoDbWriteError(error.Message);
+                }
+            }
+
+            _logger.MongoDbWriteError(exception.Message);
+            activity.Fail(exception);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -566,7 +663,7 @@ namespace NWheels.Stacks.MongoDb
             {
                 if ( _innerEnumerator.MoveNext() )
                 {
-                    _logger.ObjectReadFromQueryResult(_rowCount);
+                    _logger.QueryResult(_innerEnumerator.Current.ToString(), _rowCount);
                     _rowCount++;
                     return true;
                 }
@@ -625,8 +722,8 @@ namespace NWheels.Stacks.MongoDb
 
             public IEnumerator<T> GetEnumerator()
             {
-                var queryActivity = _logger.ExecutingQuery(this.Expression, _underlyingQuery.ToMongoQueryText());
-                _logger.QueryPlanExplained(_underlyingQuery.ExplainTyped<T>().ToString());
+                var queryActivity = _logger.ExecutingQuery(this.Expression, null /*_underlyingQuery.ToMongoQueryText()*/);
+                //_logger.QueryPlanExplained(_underlyingQuery.ExplainTyped<T>().ToString());
 
                 var actualResults = _underlyingQuery.GetEnumerator();
 

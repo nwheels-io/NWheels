@@ -91,6 +91,29 @@ namespace NWheels.Stacks.MongoDb
             }
         }
 
+        //TODO: make the version below work instead:
+        //protected override void OnCommitChanges()
+        //{
+        //    var insertBatchPerEntityType = base.InsertBatch.GroupBy(e => e.ContractType);
+        //    var updateBatchPerEntityType = base.UpdateBatch.GroupBy(e => e.ContractType);
+        //    var deleteBatchPerEntityType = base.DeleteBatch.GroupBy(e => e.ContractType);
+
+        //    foreach (var entityGroupToInsert in insertBatchPerEntityType)
+        //    {
+        //        ((IMongoEntityRepository)base.GetEntityRepository(entityGroupToInsert.Key)).CommitInsert(entityGroupToInsert);
+        //    }
+
+        //    foreach (var entityGroupToUpdate in updateBatchPerEntityType)
+        //    {
+        //        ((IMongoEntityRepository)base.GetEntityRepository(entityGroupToUpdate.Key)).CommitInsert(entityGroupToUpdate);
+        //    }
+
+        //    foreach (var entityGroupToDelete in deleteBatchPerEntityType)
+        //    {
+        //        ((IMongoEntityRepository)base.GetEntityRepository(entityGroupToDelete.Key)).CommitDelete(entityGroupToDelete);
+        //    }
+        //}
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void OnRollbackChanges()
