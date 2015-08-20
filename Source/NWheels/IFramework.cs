@@ -30,6 +30,7 @@ namespace NWheels
         long NewRandomInt64();
         INodeConfiguration CurrentNode { get; }
         IIdentityInfo CurrentIdentity { get; }
+        string CurrentSessionId { get; }
         Guid CurrentCorrelationId { get; }
         DateTime UtcNow { get; }
 

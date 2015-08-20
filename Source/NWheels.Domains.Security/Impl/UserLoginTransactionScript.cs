@@ -1,42 +1,34 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Security;
 using System.Security.Principal;
 using System.Threading;
 using NWheels.Authorization;
+using NWheels.Authorization.Core;
 using NWheels.Domains.Security.Core;
 using NWheels.Exceptions;
 
 namespace NWheels.Domains.Security.Impl
 {
-    public class LoginTransactionScript
+    public class UserLoginTransactionScript
     {
-        private readonly IFramework _framework;
         private readonly IAuthenticationProvider _authenticationProvider;
+        private readonly ICoreSessionManager _sessionManager;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public LoginTransactionScript(IFramework framework, IAuthenticationProvider authenticationProvider)
+        public UserLoginTransactionScript(IAuthenticationProvider authenticationProvider, ICoreSessionManager sessionManager)
         {
-            _framework = framework;
             _authenticationProvider = authenticationProvider;
+            _sessionManager = sessionManager;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IIdentityInfo Execute(string loginName, SecureString password)
+        public ISession Execute(string loginName, SecureString password)
         {
             var principal = _authenticationProvider.Authenticate(loginName, password);
-
-            using ( var data = _framework.NewUnitOfWork<IUserAccountDataRepository>() )
-            {
-                var userAccount = principal.Identity.GetUserAccount();
-                //userAccount.LastLoginAtUtc = _framework.UtcNow;
-                data.AllUsers.Update(userAccount);
-                data.CommitChanges();
-            }
-
-            Thread.CurrentPrincipal = principal;
-            return principal.Identity;
+            return _sessionManager.OpenSession(principal, originatorEndpoint: null);
         }
     }
 }

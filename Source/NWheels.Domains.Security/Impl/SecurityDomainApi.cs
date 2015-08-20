@@ -9,11 +9,11 @@ namespace NWheels.Domains.Security.Impl
     public class SecurityDomainApi : DomainApiBase, ISecurityDomainApi
     {
         private readonly IFramework _framework;
-        private readonly LoginTransactionScript _loginTransaction;
+        private readonly UserLoginTransactionScript _loginTransaction;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public SecurityDomainApi(IFramework framework, IEntityObjectFactory objectFactory, LoginTransactionScript loginTransaction)
+        public SecurityDomainApi(IFramework framework, IEntityObjectFactory objectFactory, UserLoginTransactionScript loginTransaction)
             : base(objectFactory)
         {
             _framework = framework;
@@ -24,12 +24,12 @@ namespace NWheels.Domains.Security.Impl
 
         public ILogUserInReply LogUserIn(ILogUserInRequest request)
         {
-            var identityInfo = _loginTransaction.Execute(request.LoginName, SecureStringUtility.ClearToSecure(request.Password));
+            var session = _loginTransaction.Execute(request.LoginName, SecureStringUtility.ClearToSecure(request.Password));
             var reply = NewModel<ILogUserInReply>();
 
             reply.AuthorizedUidlNodes = new string[0];
-            reply.FullName = identityInfo.PersonFullName;
-            reply.Roles = identityInfo.GetUserRoles();
+            reply.FullName = session.UserIdentity.PersonFullName;
+            reply.Roles = session.UserIdentity.GetUserRoles();
 
             return reply;
         }

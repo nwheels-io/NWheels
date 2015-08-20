@@ -30,7 +30,7 @@ using NWheels.Testing.Entities.Impl;
 
 namespace NWheels.Testing
 {
-    public class TestFramework : IFramework
+    public class TestFramework : IFramework, ICoreFramework
     {
         private readonly IContainer _components;
         private readonly DynamicModule _dynamicModule;
@@ -76,7 +76,11 @@ namespace NWheels.Testing
 
         public T New<T>() where T : class
         {
-            throw new NotImplementedException();
+            using ( var unitOfWork = NewUnitOfWorkForEntity(typeof(T)))
+            {
+                var entityRepository = unitOfWork.GetEntityRepository(typeof(T));
+                return (T)entityRepository.New(typeof(T));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -177,6 +181,16 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string CurrentSessionId
+        {
+            get
+            {
+                return PresetSessionId;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Guid CurrentCorrelationId
         {
             get
@@ -201,6 +215,16 @@ namespace NWheels.Testing
             {
                 PresetUtcNow = value;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IApplicationDataRepository NewUnitOfWorkForEntity(Type entityContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null)
+        {
+            var dataRepositoryFactory = _components.Resolve<IDataRepositoryFactory>();
+            var dataRepositoryContract = dataRepositoryFactory.GetDataRepositoryContract(entityContractType);
+
+            return _unitOfWorkFactory.NewUnitOfWork(dataRepositoryContract, autoCommit, isolationLevel);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -291,6 +315,7 @@ namespace NWheels.Testing
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IIdentityInfo PresetIdentity { get; set; }
+        public string PresetSessionId { get; set; }
         public Queue<Guid> PresetGuids { get; private set; }
         public Queue<int> PresetRandomInt32 { get; private set; }
         public Queue<long> PresetRandomInt64 { get; private set; }

@@ -15,17 +15,13 @@ namespace NWheels.Domains.Security.Impl
     public class PrivateAuthenticationProvider : IAuthenticationProvider
     {
         private readonly IFramework _framework;
-        private readonly ICryptoProvider _cryptoProvider;
-        private readonly ClaimFactory _claimFactory;
         private readonly ISecurityDomainLogger _logger;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public PrivateAuthenticationProvider(IFramework framework, ICryptoProvider cryptoProvider, ClaimFactory claimFactory,  ISecurityDomainLogger logger)
+        public PrivateAuthenticationProvider(IFramework framework, ISecurityDomainLogger logger)
         {
             _framework = framework;
-            _cryptoProvider = cryptoProvider;
-            _claimFactory = claimFactory;
             _logger = logger;
         }
 
@@ -44,19 +40,12 @@ namespace NWheels.Domains.Security.Impl
                 }
 
                 var principal = user.As<UserAccountEntity>().Authenticate(password);
+                
+                data.AllUsers.Update(user);
+                data.CommitChanges();
+                
                 return principal;
             }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private UserAccountPrincipal CreatePrincipal(IUserAccountEntity userAccount)
-        {
-            var claims = _claimFactory.CreateClaimsFromContainerEntity(userAccount);
-            var identity = new UserAccountIdentity(userAccount, claims);
-            var principal = new UserAccountPrincipal(identity);
-
-            return principal;
         }
     }
 }

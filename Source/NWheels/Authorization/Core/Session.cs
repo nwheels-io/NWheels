@@ -84,5 +84,15 @@ namespace NWheels.Authorization.Core
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ISession Current
+        {
+            get
+            {
+                return CallContextResourceConsumerScope<Session>.CurrentResource;
+            }
+        }
     }
 }

@@ -26,7 +26,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IDisposable OpenSession(IPrincipal userPrincipal, IEndpoint originatorEndpoint)
+        public ISession OpenSession(IPrincipal userPrincipal, IEndpoint originatorEndpoint)
         {
             var newSession = new Session(_framework, userPrincipal, originatorEndpoint, slidingExpiration: null, absoluteExpiration: null);
             
@@ -37,7 +37,7 @@ namespace NWheels.Authorization.Impl
                     throw new SecurityException("Duplicate session id");
                 });
 
-            return newSession.Join();
+            return newSession;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,6 +65,13 @@ namespace NWheels.Authorization.Impl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Implementation of ICoreSessionManager
+
+        public ISession GetCurrentSession()
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ISession[] GetOpenSessions()
         {

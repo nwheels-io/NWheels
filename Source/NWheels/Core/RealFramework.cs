@@ -15,6 +15,7 @@ using NWheels.Concurrency;
 using NWheels.Concurrency.Impl;
 using NWheels.Logging.Core;
 using System.Collections.Concurrent;
+using NWheels.Authorization.Core;
 
 namespace NWheels.Core
 {
@@ -150,6 +151,25 @@ namespace NWheels.Core
                 }
 
                 return null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string CurrentSessionId
+        {
+            get
+            {
+                var currentSession = Session.Current;
+
+                if ( currentSession != null )
+                {
+                    return currentSession.Id;
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 

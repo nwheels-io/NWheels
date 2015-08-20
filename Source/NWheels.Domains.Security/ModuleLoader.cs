@@ -22,7 +22,7 @@ namespace NWheels.Domains.Security
             builder.RegisterType<PrivateAuthenticationProvider>().As<IAuthenticationProvider>().SingleInstance();
             builder.RegisterType<ClaimFactory>().SingleInstance();
 
-            builder.RegisterType<LoginTransactionScript>().SingleInstance();
+            builder.RegisterType<UserLoginTransactionScript>().SingleInstance();
             builder.RegisterType<SecurityDomainApi>().As<ISecurityDomainApi>().SingleInstance();
 
             builder.RegisterType<UserAccountPolicySet>();

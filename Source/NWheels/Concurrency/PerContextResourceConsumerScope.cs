@@ -157,6 +157,25 @@ namespace NWheels.Concurrency
             : base(new LogicalCallContextAnchor<PerContextResourceConsumerScope<T>>(), resourceFactory, externallyOwned)
         {
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static T CurrentResource
+        {
+            get
+            {
+                var currentScope = new LogicalCallContextAnchor<PerContextResourceConsumerScope<T>>().Current;
+
+                if ( currentScope != null )
+                {
+                    return currentScope.Resource;
+                }
+                else
+                {
+                    return default(T);
+                }
+            }
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -166,6 +185,25 @@ namespace NWheels.Concurrency
         public ThreadStaticResourceConsumerScope(Func<IResourceConsumerScopeHandle, T> resourceFactory, bool externallyOwned = false)
             : base(new ThreadStaticAnchor<PerContextResourceConsumerScope<T>>(), resourceFactory, externallyOwned)
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static T CurrentResource
+        {
+            get
+            {
+                var currentScope = new ThreadStaticAnchor<PerContextResourceConsumerScope<T>>().Current;
+
+                if ( currentScope != null )
+                {
+                    return currentScope.Resource;
+                }
+                else
+                {
+                    return default(T);
+                }
+            }
         }
     }
 }
