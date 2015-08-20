@@ -49,9 +49,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
 
         private MongoEntityObjectFactory CreateEntityObjectFactory()
         {
-            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new IMetadataConvention[] {
-                new DefaultIdMetadataConvention(typeof(ObjectId))
-            });
+            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(
+                Framework.Components,
+                new IMetadataConvention[] {
+                    new DefaultIdMetadataConvention(typeof(ObjectId))
+                });
             
             var updater = new ContainerBuilder();
             updater.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();

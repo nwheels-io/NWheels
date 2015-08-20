@@ -2,39 +2,33 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Autofac;
 
 namespace NWheels.DataObjects.Core
 {
     public class TypeMetadataCache : ITypeMetadataCache
     {
+        private readonly IComponentContext _components;
         private readonly MetadataConventionSet _conventions;
-        private readonly Dictionary<Type, MixinRegistration[]> _mixinsByPrimaryContract;
-        private readonly Dictionary<Type, ConcretizationRegistration> _concretizationsByPrimaryContract;
         private readonly ConcurrentDictionary<Type, TypeMetadataBuilder> _metadataByContractType = new ConcurrentDictionary<Type, TypeMetadataBuilder>();
         private readonly ConcurrentDictionary<Type, ISemanticDataType> _semanticDataTypes;
         private readonly ConcurrentDictionary<Type, IStorageDataType> _storageDataTypes;
+        private Dictionary<Type, MixinRegistration[]> _mixinsByPrimaryContract = null;
+        private Dictionary<Type, ConcretizationRegistration> _concretizationsByPrimaryContract = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeMetadataCache(
-            MetadataConventionSet conventions,
-            IEnumerable<MixinRegistration> mixinRegistrations,
-            IEnumerable<ConcretizationRegistration> concretizationRegistrations)
+        public TypeMetadataCache(IComponentContext components, MetadataConventionSet conventions)
         {
+            _components = components;
+
             _conventions = conventions;
             _conventions.InjectCache(this);
 
             _semanticDataTypes = new ConcurrentDictionary<Type, ISemanticDataType>();
             _storageDataTypes = new ConcurrentDictionary<Type, IStorageDataType>();
-            _mixinsByPrimaryContract = mixinRegistrations.GroupBy(r => r.TargetContract).ToDictionary(g => g.Key, g => g.ToArray());
-            _concretizationsByPrimaryContract = concretizationRegistrations.ToDictionary(r => r.GeneralContract);
-        }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public TypeMetadataCache(MetadataConventionSet conventions)
-            : this(conventions, new MixinRegistration[0], new ConcretizationRegistration[0])
-        {
+            EnsureExtensibilityRegistrations();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -124,6 +118,14 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void InvalidateExtensibilityRegistrations()
+        {
+            _mixinsByPrimaryContract = null;
+            _concretizationsByPrimaryContract = null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public MetadataConventionSet Conventions
         {
             get { return _conventions; }
@@ -153,8 +155,24 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private void EnsureExtensibilityRegistrations()
+        {
+            if ( _mixinsByPrimaryContract == null || _concretizationsByPrimaryContract == null )
+            {
+                var mixinRegistrations = _components.Resolve<IEnumerable<MixinRegistration>>();
+                var concretizationRegistrations = _components.Resolve<IEnumerable<ConcretizationRegistration>>();
+
+                _mixinsByPrimaryContract = mixinRegistrations.GroupBy(r => r.TargetContract).ToDictionary(g => g.Key, g => g.ToArray());
+                _concretizationsByPrimaryContract = concretizationRegistrations.ToDictionary(r => r.GeneralContract);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private TypeMetadataBuilder BuildTypeMetadata(Type primaryContract)
         {
+            EnsureExtensibilityRegistrations();
+
             var mixinContracts = GetRegisteredMixinContracts(primaryContract);
             return BuildTypeMetadata(primaryContract, mixinContracts);
         }

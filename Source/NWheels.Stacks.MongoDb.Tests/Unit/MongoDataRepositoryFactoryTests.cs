@@ -10,6 +10,7 @@ using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
 using NWheels.Entities;
 using NWheels.Entities.Core;
+using NWheels.Extensions;
 using NWheels.Stacks.MongoDb.Factories;
 using NWheels.Testing;
 using NWheels.Testing.Entities.Stacks;
@@ -39,6 +40,14 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
         public void FixtureTearDown()
         {
             _dyamicModule.SaveAssembly();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [SetUp]
+        public void SetUp()
+        {
+            Framework.UpdateComponents(builder => builder.NWheelsFeatures().Logging().RegisterLogger<IMongoDbLogger>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -92,9 +101,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
             var configAuto = ResolveAuto<IFrameworkDatabaseConfig>();
             configAuto.Instance.ConnectionString = string.Format("server=localhost;database=TEST");
 
-            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new IMetadataConvention[] {
-                new DefaultIdMetadataConvention(typeof(ObjectId))
-            });
+            var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(
+                Framework.Components,
+                new IMetadataConvention[] {
+                    new DefaultIdMetadataConvention(typeof(ObjectId))
+                });
 
             var updater = new ContainerBuilder();
             updater.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();

@@ -1,4 +1,5 @@
 ﻿using System;
+using Autofac;
 using NUnit.Framework;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
@@ -99,11 +100,22 @@ namespace NWheels.UnitTests.DataObjects
 
         private TypeMetadataBuilderConstructor CreateMetadataConstructor(out TypeMetadataCache metadataCache, params MixinRegistration[] mixinRegistrations)
         {
+            Framework.UpdateComponents(
+                builder => {
+                    if ( mixinRegistrations != null )
+                    {
+                        foreach ( var mixin in mixinRegistrations )
+                        {
+                            builder.RegisterInstance(mixin).As<MixinRegistration>();
+                        }
+                    }
+                });
+
             var conventions = new MetadataConventionSet(
                 new IMetadataConvention[] { new ContractMetadataConvention(), new AttributeMetadataConvention(), new RelationMetadataConvention() },
                 new IRelationalMappingConvention[] { new PascalCaseRelationalMappingConvention(usePluralTableNames: true) });
 
-            metadataCache = new TypeMetadataCache(conventions, mixinRegistrations, new ConcretizationRegistration[0]);
+            metadataCache = new TypeMetadataCache(Framework.Components, conventions);
             var metadataConstructor = new TypeMetadataBuilderConstructor(conventions);
             
             return metadataConstructor;

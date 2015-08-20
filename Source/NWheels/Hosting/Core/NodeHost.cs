@@ -671,6 +671,7 @@ namespace NWheels.Hosting.Core
                 }
 
                 moduleUpdater.Update(_lifetimeContainer.ComponentRegistry);
+                _lifetimeContainer.Resolve<TypeMetadataCache>().InvalidateExtensibilityRegistrations();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -194,6 +194,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
             //Framework.RebuildMetadataCache();
 
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(
+                Framework.Components,
                 new IMetadataConvention[] {
                     new DefaultIdMetadataConvention(typeof(int)),
                     new IntIdGeneratorMetadataConvention(), 

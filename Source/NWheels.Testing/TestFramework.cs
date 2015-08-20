@@ -67,7 +67,8 @@ namespace NWheels.Testing
             _logAppender = new TestThreadLogAppender(this);
             _loggerFactory = new LoggerObjectFactory(_dynamicModule, _logAppender);
 
-            _components = BuildComponentContainer();
+            BuildComponentContainer(out _components);
+
             _configurationFactory = _components.Resolve<ConfigurationObjectFactory>();
             _unitOfWorkFactory = new UnitOfWorkFactory(_components);
         }
@@ -304,10 +305,9 @@ namespace NWheels.Testing
             IRelationalMappingConvention[] relationalMappingConventions = null)
         {
             var metadataCache = CreateMetadataCacheWithDefaultConventions(
+                _components,
                 _components.Resolve<IEnumerable<IMetadataConvention>>().ConcatIf(customMetadataConventions).ToArray(),
-                _components.Resolve<IEnumerable<MixinRegistration>>().ConcatIf(mixinRegistrations).ToArray(),
-                _components.Resolve<IEnumerable<ConcretizationRegistration>>().ConcatIf(concretizationRegistrations).ToArray(),
-                _components.Resolve<IEnumerable<IRelationalMappingConvention>>().ConcatIf(relationalMappingConventions).ToArray());
+                _components.Resolve<IEnumerable<MixinRegistration>>().ConcatIf(mixinRegistrations).ToArray());
             
             UpdateComponents(builder => builder.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>());
         }
@@ -338,7 +338,7 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        private IContainer BuildComponentContainer()
+        private void BuildComponentContainer(out IContainer container)
         {
             var builder = new ContainerBuilder();
 
@@ -347,9 +347,6 @@ namespace NWheels.Testing
             builder.RegisterType<ThreadRegistry>().SingleInstance();
             builder.RegisterGeneric(typeof(Auto<>)).SingleInstance();
 
-            var metadataCache = CreateMetadataCacheWithDefaultConventions();
-            builder.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();
-            
             builder.RegisterInstance(_loggerFactory).As<LoggerObjectFactory, IAutoObjectFactory>();
             builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory, IConfigurationObjectFactory, ConfigurationObjectFactory>().SingleInstance();
             builder.RegisterType<TestEntityObjectFactory>().As<IEntityObjectFactory, EntityObjectFactory, TestEntityObjectFactory>().SingleInstance();
@@ -363,7 +360,10 @@ namespace NWheels.Testing
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkEndpointsConfig>();
             //builder.NWheelsFeatures().Entities().UseDefaultIdsOfType<int>();
 
-            return builder.Build();
+            container = builder.Build();
+
+            var metadataCache = CreateMetadataCacheWithDefaultConventions(_components);
+            UpdateComponents(builder2 => builder2.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -374,9 +374,10 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static TypeMetadataCache CreateMetadataCacheWithDefaultConventions(params MixinRegistration[] mixinRegistrations)
+        public static TypeMetadataCache CreateMetadataCacheWithDefaultConventions(IComponentContext components, params MixinRegistration[] mixinRegistrations)
         {
             return CreateMetadataCacheWithDefaultConventions(
+                components,
                 new IMetadataConvention[] {
                     new DefaultIdMetadataConvention(typeof(int)), 
                     new IntIdGeneratorMetadataConvention()
@@ -387,6 +388,7 @@ namespace NWheels.Testing
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static TypeMetadataCache CreateMetadataCacheWithDefaultConventions(
+            IComponentContext components,
             IMetadataConvention[] customMetadataConventions, 
             MixinRegistration[] mixinRegistrations = null,
             ConcretizationRegistration[] concretizationRegistrations = null,
@@ -406,6 +408,7 @@ namespace NWheels.Testing
             };
 
             return CreateMetadataCache(
+                components,
                 metadataConventions,
                 effectiveRelationalMappingConventions, 
                 mixinRegistrations ?? new MixinRegistration[0],
@@ -415,17 +418,34 @@ namespace NWheels.Testing
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static TypeMetadataCache CreateMetadataCache(
+            IComponentContext components,
             IMetadataConvention[] metadataConventions,
             IRelationalMappingConvention[] relationalMappingConventions,
             MixinRegistration[] mixinRegistrations,
             ConcretizationRegistration[] concretizationRegistrations)
         {
+            var updater = new ContainerBuilder();
+
+            if ( mixinRegistrations != null )
+            {
+                foreach ( var mixin in mixinRegistrations )
+                {
+                    updater.RegisterInstance(mixin).As<MixinRegistration>();
+                }
+            }
+
+            if ( mixinRegistrations != null )
+            {
+                foreach ( var concretization in concretizationRegistrations )
+                {
+                    updater.RegisterInstance(concretization).As<ConcretizationRegistration>();
+                }
+            }
+
+            updater.Update(components.ComponentRegistry);
+
             var conventionSet = new MetadataConventionSet(metadataConventions, relationalMappingConventions);
-            
-            return new TypeMetadataCache(
-                conventionSet, 
-                mixinRegistrations,
-                concretizationRegistrations);
+            return new TypeMetadataCache(components, conventionSet);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

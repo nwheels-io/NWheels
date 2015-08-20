@@ -90,10 +90,12 @@ namespace NWheels.Testing.Entities.Stacks
 
             private static void SetupFrameworkForDataRepositoryFactory(TestFramework framework)
             {
-                var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(new IMetadataConvention[] {
-                    new DefaultIdMetadataConvention(typeof(int)),
-                    new IntIdGeneratorMetadataConvention(), 
-                });
+                var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(
+                    framework.Components,
+                    new IMetadataConvention[] {
+                        new DefaultIdMetadataConvention(typeof(int)),
+                        new IntIdGeneratorMetadataConvention(), 
+                    });
 
                 var updater = new ContainerBuilder();
                 updater.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();

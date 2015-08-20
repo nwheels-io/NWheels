@@ -250,6 +250,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
         private void InitializeMetadata(Func<ConcretizationRegistration[]> concretizationsFactory = null)
         {
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(
+                Framework.Components,
                 new IMetadataConvention[] {
                     new DefaultIdMetadataConvention(typeof(int)),
                     new IntIdGeneratorMetadataConvention(), 
