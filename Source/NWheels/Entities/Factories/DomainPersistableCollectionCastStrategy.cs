@@ -90,6 +90,18 @@ namespace NWheels.Entities.Factories
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnWritingReturnTrueIfModified(FunctionMethodWriter<bool> functionWriter)
+        {
+            using ( TT.CreateScope<TT.TItem>(MetaProperty.Relation.RelatedPartyType.ContractType) )
+            {
+                functionWriter.If(_adapterBackingField.CastTo<IChangeTrackingCollection<TT.TItem>>().Prop(x => x.IsChanged)).Then(() => {
+                    functionWriter.Return(true);                        
+                });
+            }
+        }
+
         #endregion
     }
 }

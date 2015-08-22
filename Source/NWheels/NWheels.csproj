@@ -114,8 +114,11 @@
     <Compile Include="Entities\Core\IEntityObjectBase.cs" />
     <Compile Include="Entities\Core\IPersistableObject.cs" />
     <Compile Include="Entities\Core\IStorageSchemaNamingConvention.cs" />
+    <Compile Include="Entities\EntityImplementation.cs" />
     <Compile Include="Entities\EntityStateInfo.cs" />
     <Compile Include="Entities\Factories\ActiveRecordConvention.cs" />
+    <Compile Include="Entities\Factories\BitVectorField.cs" />
+    <Compile Include="Entities\Factories\DomainObjectModifiedVectorConvention.cs" />
     <Compile Include="Entities\Factories\EntityObjectStateConvention.cs" />
     <Compile Include="Entities\Factories\ImplementIDomainObjectConvention.cs" />
     <Compile Include="Entities\Factories\DomainObjectBaseTypeConvention.cs" />
@@ -177,6 +180,7 @@
     <Compile Include="TypeModel\Core\Factories\RuntimeTypeModelHelpers.cs" />
     <Compile Include="TypeModel\Core\Factories\StorageDataTypeStrategy.cs" />
     <Compile Include="TypeModel\Core\Factories\RelationTypecastStrategy.cs" />
+    <Compile Include="TypeModel\Core\IChangeTrackingCollection.cs" />
     <Compile Include="TypeModel\Core\IContainedIn.cs" />
     <Compile Include="TypeModel\Core\IHaveDependencies.cs" />
     <Compile Include="TypeModel\Core\IContain.cs" />

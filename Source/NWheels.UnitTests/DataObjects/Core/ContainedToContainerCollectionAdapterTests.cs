@@ -46,7 +46,7 @@ namespace NWheels.UnitTests.DataObjects.Core
 
             //-- assert
 
-            outerCollection.IsModified.ShouldBe(false);
+            outerCollection.IsChanged.ShouldBe(false);
             _outerFactoryInvocationCount.ShouldBe(3);
             
             outerItems.Length.ShouldBe(3);
@@ -81,7 +81,7 @@ namespace NWheels.UnitTests.DataObjects.Core
             _outerFactoryInvocationCount.ShouldBe(3);
             outerItems2.ShouldBe(outerItems1);
 
-            outerCollection.IsModified.ShouldBe(false);
+            outerCollection.IsChanged.ShouldBe(false);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -110,7 +110,7 @@ namespace NWheels.UnitTests.DataObjects.Core
 
             //-- assert
 
-            outerCollection.IsModified.ShouldBe(true);
+            outerCollection.IsChanged.ShouldBe(true);
 
             added.ShouldBe(null);
             removed.ShouldBe(null);
@@ -149,7 +149,7 @@ namespace NWheels.UnitTests.DataObjects.Core
 
             //-- assert
 
-            outerCollection.IsModified.ShouldBe(true);
+            outerCollection.IsChanged.ShouldBe(true);
 
             removed.ShouldBe(null);
             added.ShouldBe(new IConcreteOuterContract[] { newOuterItems[0], newOuterItems[1] });
@@ -186,7 +186,7 @@ namespace NWheels.UnitTests.DataObjects.Core
 
             //-- assert
 
-            outerCollection.IsModified.ShouldBe(true);
+            outerCollection.IsChanged.ShouldBe(true);
 
             changed.ShouldBe(null);
             added.ShouldBe(null);
@@ -221,7 +221,7 @@ namespace NWheels.UnitTests.DataObjects.Core
 
             //-- assert
 
-            outerCollection.IsModified.ShouldBe(true);
+            outerCollection.IsChanged.ShouldBe(true);
 
             changed.ShouldBe(null);
             added.ShouldBe(null);
@@ -267,7 +267,7 @@ namespace NWheels.UnitTests.DataObjects.Core
 
             //-- assert
 
-            outerCollection.IsModified.ShouldBe(true);
+            outerCollection.IsChanged.ShouldBe(true);
 
             changed.ShouldBe(null);
             added.ShouldBe(null);
@@ -306,7 +306,7 @@ namespace NWheels.UnitTests.DataObjects.Core
 
             //-- assert
 
-            outerCollection.IsModified.ShouldBe(true);
+            outerCollection.IsChanged.ShouldBe(true);
 
             added.ShouldBe(null);
             changed.ShouldBe(null);

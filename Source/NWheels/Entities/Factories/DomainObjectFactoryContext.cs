@@ -83,6 +83,7 @@ namespace NWheels.Entities.Factories
         public Field<IDomainObjectFactory> DomainObjectFactoryField { get; set; }
         public Field<IFramework> FrameworkField { get; set; }
         public Field<EntityState> EntityStateField { get; set; }
+        public BitVectorField ModifiedVector { get; set; }
         public TypeMemberCache DomainObjectMembers { get; private set; }
         public TypeMemberCache PersistableObjectMembers { get; private set; }
         public PropertyImplementationStrategyMap PropertyMap { get; private set; }

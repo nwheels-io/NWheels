@@ -9,6 +9,7 @@ using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Factories;
 using NWheels.Entities.Core;
 using NWheels.TypeModel.Core;
@@ -93,6 +94,20 @@ namespace NWheels.Entities.Factories
 
         protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnWritingReturnTrueIfModified(FunctionMethodWriter<bool> functionWriter)
+        {
+            using ( TT.CreateScope<TT.TContract>(MetaType.ContractType) )
+            {
+                functionWriter.Return(
+                    functionWriter.This<TT.TContract>()
+                    .Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo)
+                    .CastTo<IObject>()
+                    .Prop(x => x.IsModified));
+            }
         }
 
         #endregion

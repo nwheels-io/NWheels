@@ -97,9 +97,11 @@ namespace NWheels.DataObjects.Core
 
         private void CreateProperties()
         {
+            var propertyIndex = 0;
+
             foreach ( var propertyInfo in _allProperties )
             {
-                _thisType.Properties.Add(new PropertyMetadataBuilder(_thisType, propertyInfo));
+                _thisType.Properties.Add(new PropertyMetadataBuilder(_thisType, propertyInfo, propertyIndex++));
             }
         }
 

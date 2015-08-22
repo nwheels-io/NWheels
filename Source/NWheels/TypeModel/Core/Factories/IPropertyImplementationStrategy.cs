@@ -15,6 +15,7 @@ namespace NWheels.DataObjects.Core.Factories
         void WriteDeepListNestedObjects(MethodWriterBase writer, Operand<HashSet<object>> nestedObjects);
         void WriteSerializingCallback(MethodWriterBase callbackMethodWriter);
         void WriteDeserializedCallback(MethodWriterBase callbackMethodWriter);
+        void WriteReturnTrueIfModified(FunctionMethodWriter<bool> functionWriter);
         ObjectFactoryContext FactoryContext { get; }
         ITypeMetadataCache MetadataCache { get; }
         ITypeMetadata MetaType { get; }

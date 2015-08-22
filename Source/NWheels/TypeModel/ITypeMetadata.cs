@@ -10,6 +10,8 @@ namespace NWheels.DataObjects
     {
         IPropertyMetadata GetPropertyByName(string name);
         IPropertyMetadata GetPropertyByDeclaration(PropertyInfo declarationInContract);
+        bool TryGetPropertyByName(string name, out IPropertyMetadata property);
+        bool TryGetPropertyByDeclaration(PropertyInfo declarationInContract, out IPropertyMetadata property);
         string Name { get; }
         string NamespaceQualifier { get; }
         Type ContractType { get; }

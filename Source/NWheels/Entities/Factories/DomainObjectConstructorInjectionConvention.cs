@@ -35,6 +35,7 @@ namespace NWheels.Entities.Factories
                 _context.DomainObjectFactoryField = writer.Field<IDomainObjectFactory>("$domainFactory");
                 _context.FrameworkField = writer.Field<IFramework>("$framework");
                 _context.EntityStateField = writer.Field<EntityState>("$entityState");
+                _context.ModifiedVector = new BitVectorField(writer, "$modifiedVector", _context.MetaType.Properties.Count);
 
                 var dependencyProperties = FindDependencyProperties(writer);
 

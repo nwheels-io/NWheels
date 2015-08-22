@@ -19,6 +19,7 @@ namespace NWheels.DataObjects
         ITypeMetadata DeclaringContract { get; }
         string Name { get; }
         string ContractQualifiedName { get; }
+        int PropertyIndex { get; }
         PropertyKind Kind { get; }
         PropertyRole Role { get; }
         Type ClrType { get; }

@@ -76,6 +76,13 @@ namespace NWheels.TypeModel.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public virtual void WriteReturnTrueIfModified(FunctionMethodWriter<bool> functionWriter)
+        {
+            _target.WriteReturnTrueIfModified(functionWriter);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public virtual ObjectFactoryContext FactoryContext
         {
             get { return _target.FactoryContext; }

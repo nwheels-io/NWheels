@@ -29,13 +29,14 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public PropertyMetadataBuilder(TypeMetadataBuilder declaringContract, PropertyInfo declaration) 
+        public PropertyMetadataBuilder(TypeMetadataBuilder declaringContract, PropertyInfo declaration, int propertyIndex) 
             : this()
         {
             this.Name = declaration.Name;
             this.ClrType = declaration.PropertyType;
             this.DeclaringContract = declaringContract;
             this.ContractPropertyInfo = declaration;
+            this.PropertyIndex = propertyIndex;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,6 +84,7 @@ namespace NWheels.DataObjects.Core
 
         public TypeMetadataBuilder DeclaringContract { get; set; }
         public string Name { get; set; }
+        public int PropertyIndex { get; private set; }
         public PropertyKind Kind { get; set; }
         public PropertyRole Role { get; set; }
         public Type ClrType { get; set; }
@@ -172,6 +174,7 @@ namespace NWheels.DataObjects.Core
         public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {
             Name = visitor.VisitAttribute("Name", Name);
+            PropertyIndex = visitor.VisitAttribute("PropertyIndex", PropertyIndex);
             DeclaringContract = visitor.VisitAttribute("DeclaringContract", DeclaringContract);
             Kind = visitor.VisitAttribute("Kind", Kind);
             Role = visitor.VisitAttribute("Role", Role);

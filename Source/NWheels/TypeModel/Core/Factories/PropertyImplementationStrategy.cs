@@ -103,6 +103,13 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void WriteReturnTrueIfModified(FunctionMethodWriter<bool> functionWriter)
+        {
+            OnWritingReturnTrueIfModified(functionWriter);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
         public ObjectFactoryContext FactoryContext
         {
             get
@@ -254,6 +261,12 @@ namespace NWheels.DataObjects.Core.Factories
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected virtual void OnWritingDeserializedCallback(MethodWriterBase writer)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void OnWritingReturnTrueIfModified(FunctionMethodWriter<bool> functionWriter)
         {
         }
 

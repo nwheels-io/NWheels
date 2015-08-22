@@ -24,14 +24,31 @@ namespace NWheels.Entities.Factories
 
         protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
         {
+
             writer.ImplementInterfaceExplicitly<IObject>()
                 .Property(intf => intf.IsModified).Implement(p =>
-                    p.Get(gw => gw.Return(Static.Func(EntityStateExtensions.IsModified, _context.EntityStateField)))
+                    p.Get(gw => {
+                        gw.If(_context.ModifiedVector.WriteNonZeroTest(gw)).Then(() => {
+                            gw.Return(gw.Const(true));        
+                        });
+
+                        _context.PropertyMap.InvokeStrategies(
+                            strategy => {
+                                strategy.WriteReturnTrueIfModified(gw);
+                            });
+
+                        gw.Return(false);
+                    })
                 );
 
             writer.ImplementInterfaceExplicitly<IDomainObject>()
                 .Property(intf => intf.State).Implement(p => 
-                    p.Get(gw => gw.Return(_context.EntityStateField))
+                    p.Get(gw => {
+                        gw.Return(gw.Iif(
+                            gw.This<IObject>().Prop<bool>(x => x.IsModified),
+                            Static.Func(EntityStateExtensions.SetModified, _context.EntityStateField),
+                            _context.EntityStateField));
+                    })
                 );
 
             writer.ImplementInterfaceExplicitly<IContain<IPersistableObject>>()

@@ -213,6 +213,26 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool TryGetPropertyByName(string name, out IPropertyMetadata property)
+        {
+            PropertyMetadataBuilder metaProperty;
+            var result = TryGetPropertyByName(name, out metaProperty);
+            property = metaProperty;
+            return result;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool TryGetPropertyByDeclaration(PropertyInfo declarationInContract, out IPropertyMetadata property)
+        {
+            PropertyMetadataBuilder metaProperty;
+            var result = TryGetPropertyByDeclaration(declarationInContract, out metaProperty);
+            property = metaProperty;
+            return result;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public bool TryGetPropertyByName(string name, out PropertyMetadataBuilder property)
         {
             if ( _propertyByName != null )

@@ -75,6 +75,7 @@ namespace NWheels.Entities.Factories
                 new ImplementIDomainObjectConvention(domainFactoryContext),
                 new ImplementIObjectConvention(),
                 new ActiveRecordConvention(domainFactoryContext),
+                new DomainObjectModifiedVectorConvention(domainFactoryContext), 
                 new DomainObjectMethodsConvention(domainFactoryContext)
             };
         }

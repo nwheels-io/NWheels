@@ -10,7 +10,8 @@ namespace NWheels.TypeModel.Core
 {
     public class ContainedToContainerCollectionAdapter<TContained, TContainer, TContainedContract, TContainerContract> :
         ICollection<TContainerContract>,
-        IReadOnlyCollection<TContainerContract>
+        IReadOnlyCollection<TContainerContract>,
+        IChangeTrackingCollection<TContainerContract>
         where TContained : class, IContainedIn<TContainer>
         where TContainer : class, IContain<TContained>
         where TContainedContract : class
@@ -172,7 +173,7 @@ namespace NWheels.TypeModel.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool IsModified
+        public bool IsChanged
         {
             get
             {
