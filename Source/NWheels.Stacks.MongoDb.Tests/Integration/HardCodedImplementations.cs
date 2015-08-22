@@ -451,6 +451,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             public virtual string Name
             {
                 get
@@ -487,6 +492,15 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     this.m_Values_storage = value;
                 }
             }
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
         }
 
         [BsonIgnoreExtraElements]
@@ -557,6 +571,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             public virtual string Value
             {
                 get
@@ -568,6 +587,15 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     this.m_Value = value;
                 }
             }
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
         }
 
         [BsonIgnoreExtraElements]
@@ -680,6 +708,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             public virtual string Value
             {
                 get
@@ -691,6 +724,15 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     this.m_Value = value;
                 }
             }
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
         }
 
         [BsonIgnoreExtraElements]
@@ -785,6 +827,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             public virtual string Name
             {
                 get
@@ -796,6 +843,15 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     this.m_Name = value;
                 }
             }
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
         }
 
         [BsonIgnoreExtraElements, BsonDiscriminator("ContactDetail", Required = true)]
@@ -890,6 +946,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             public virtual bool IsPrimary
             {
                 get
@@ -901,6 +962,15 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     this.m_IsPrimary = value;
                 }
             }
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
         }
 
         [BsonIgnoreExtraElements]
@@ -1105,6 +1175,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     return typeof(MongoEntityObjectFactory);
                 }
             }
+
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
         }
 
         [BsonDiscriminator("EmailContactDetail", Required = true), BsonIgnoreExtraElements]
@@ -1341,6 +1425,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             Interfaces.Repository1.IPostalAddress Interfaces.Repository1.IOrder.BillingAddress
             {
                 get
@@ -1456,6 +1545,15 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     this.m_Status = value;
                 }
             }
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
         }
 
         [BsonIgnoreExtraElements]
@@ -1594,6 +1692,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             ICollection<Interfaces.Repository1.IAttributeValueChoice> Interfaces.Repository1.IOrderLine.Attributes
             {
                 get
@@ -1685,6 +1788,15 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     this.m_Quantity = value;
                 }
             }
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
         }
 
         [BsonDiscriminator("PhoneContactDetail", Required = true), BsonIgnoreExtraElements]
@@ -1823,6 +1935,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             public virtual string StreetAddress
             {
                 get
@@ -1846,6 +1963,15 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     this.m_ZipCode = value;
                 }
             }
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
         }
 
         [BsonDiscriminator("PostContactDetail", Required = true), BsonIgnoreExtraElements]
@@ -2120,6 +2246,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             ICollection<Interfaces.Repository1.IAttribute> Interfaces.Repository1.IProduct.Attributes
             {
                 get
@@ -2171,6 +2302,15 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     this.m_Price = value;
                 }
             }
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
         }
 
 

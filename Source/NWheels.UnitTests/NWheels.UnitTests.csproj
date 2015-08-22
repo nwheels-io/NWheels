@@ -58,6 +58,9 @@
       <HintPath>..\packages\protobuf-net.2.0.0.668\lib\net40\protobuf-net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Shouldly">
+      <HintPath>..\packages\Shouldly.2.5.0\lib\net40\Shouldly.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -75,6 +78,7 @@
     <Compile Include="Concurrency\RealTimeoutManagerTests.cs" />
     <Compile Include="Configuration\ConfigurationSectionConventionTests.cs" />
     <Compile Include="Configuration\XmlConfigurationLoaderTest.cs" />
+    <Compile Include="DataObjects\Core\ContainedToContainerCollectionAdapterTests.cs" />
     <Compile Include="DataObjects\TestDataObjects.cs" />
     <Compile Include="DataObjects\TypeMetadataBuilderConstructorTests.cs" />
     <Compile Include="DataObjects\TypeMetadataCacheTests.cs" />

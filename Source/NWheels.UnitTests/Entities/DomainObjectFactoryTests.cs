@@ -458,11 +458,19 @@ namespace NWheels.UnitTests.Entities
             {
                 get { return typeof(IContractEntity); }
             }
+
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             Type IObject.FactoryType
             {
                 get { return typeof(HardCodedEntityObjectFactory); }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool IsModified
+            {
+                get { throw new NotImplementedException(); }
             }
 
             #region Implementation of IContainedIn<out IDomainObject>
@@ -485,6 +493,15 @@ namespace NWheels.UnitTests.Entities
                 {
                     RuntimeEntityModelHelpers.EnsureContainerDomainObject<IContractEntity>(this, _components);
                 }
+            }
+
+            #endregion
+
+            #region Implementation of IEntityObjectBase
+
+            public EntityState State
+            {
+                get { return EntityState.NewPristine; }
             }
 
             #endregion

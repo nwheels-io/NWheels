@@ -72,7 +72,7 @@ namespace NWheels.Entities.Factories
                 new DomainObjectBaseTypeConvention(domainFactoryContext),
                 new DomainObjectConstructorInjectionConvention(domainFactoryContext), 
                 new DomainObjectPropertyImplementationConvention(domainFactoryContext), 
-                new ContainedPersistableObjectConvention(domainFactoryContext),
+                new ImplementIDomainObjectConvention(domainFactoryContext),
                 new ImplementIObjectConvention(),
                 new ActiveRecordConvention(domainFactoryContext),
                 new DomainObjectMethodsConvention(domainFactoryContext)

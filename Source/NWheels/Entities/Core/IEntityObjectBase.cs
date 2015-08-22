@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Autofac;
 using NWheels.DataObjects.Core;
 
 namespace NWheels.Entities.Core
 {
-    public interface IEntityObject : IEntityObjectBase, IPersistableObject
+    public interface IEntityObjectBase : IObject
     {
-        IEntityId GetId();
-        void SetId(object value);
+        EntityState State { get; }
     }
 }

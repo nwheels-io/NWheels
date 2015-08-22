@@ -70,6 +70,7 @@ namespace NWheels.Testing.Entities.Impl
         {
             return member.Signature.ArgumentCount > 0;
         }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static bool IsIntPropertyWithNoGenerator(IPropertyMetadata metaProperty)

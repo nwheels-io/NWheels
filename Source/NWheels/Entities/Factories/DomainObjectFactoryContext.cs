@@ -82,8 +82,29 @@ namespace NWheels.Entities.Factories
         public Field<TT2.TPersistable> PersistableObjectField { get; set; }
         public Field<IDomainObjectFactory> DomainObjectFactoryField { get; set; }
         public Field<IFramework> FrameworkField { get; set; }
+        public Field<EntityState> EntityStateField { get; set; }
         public TypeMemberCache DomainObjectMembers { get; private set; }
         public TypeMemberCache PersistableObjectMembers { get; private set; }
         public PropertyImplementationStrategyMap PropertyMap { get; private set; }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsEntity
+        {
+            get
+            {
+                return MetaType.ContractType.IsEntityContract();
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsEntityPart
+        {
+            get
+            {
+                return MetaType.ContractType.IsEntityPartContract();
+            }
+        }
     }
 }

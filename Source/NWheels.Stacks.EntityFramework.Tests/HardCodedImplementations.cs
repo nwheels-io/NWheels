@@ -31,6 +31,7 @@ using NWheels.Concurrency;
 using NWheels.Entities.Factories;
 using NWheels.TypeModel.Core;
 using NWheels.TypeModel.Core.Factories;
+using EntityState = NWheels.Entities.EntityState;
 
 namespace NWheels.Stacks.EntityFramework.Tests
 {
@@ -537,6 +538,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 get { return typeof(EfEntityObjectFactory); }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             public virtual string Name
             {
                 get
@@ -601,6 +607,15 @@ namespace NWheels.Stacks.EntityFramework.Tests
             }
 
             #endregion
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
         }
 
         public class EfEntityObject_AttributeValue : Interfaces.Repository1.IAttributeValue, IObject, IEntityPartObject
@@ -659,6 +674,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 get { return typeof(EfEntityObjectFactory); }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             public virtual string Value
             {
                 get
@@ -688,6 +708,15 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public void EnsureDomainObject()
             {
                 throw new NotImplementedException();
+            }
+
+            #endregion
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
             }
 
             #endregion
@@ -768,6 +797,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 get { return typeof(EfEntityObjectFactory); }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             public virtual string Value
             {
                 get
@@ -797,6 +831,15 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public void EnsureDomainObject()
             {
                 throw new NotImplementedException();
+            }
+
+            #endregion
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
             }
 
             #endregion
@@ -880,6 +923,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 get { return typeof(EfEntityObjectFactory); }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             public virtual string Name
             {
                 get
@@ -911,6 +959,15 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public void EnsureDomainObject()
             {
                 throw new NotImplementedException();
+            }
+
+            #endregion
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
             }
 
             #endregion
@@ -1104,6 +1161,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             Interfaces.Repository1.IPostalAddress Interfaces.Repository1.IOrder.BillingAddress
             {
                 get
@@ -1194,6 +1256,15 @@ namespace NWheels.Stacks.EntityFramework.Tests
                     this.m_Status = value;
                 }
             }
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
         }
 
         public class EfEntityObject_OrderLine : Interfaces.Repository1.IOrderLine, IEntityPartId<int>, IObject, IEntityObject, IHaveNestedObjects
@@ -1326,6 +1397,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 get { return typeof(EfEntityObjectFactory); }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             ICollection<Interfaces.Repository1.IAttributeValueChoice> Interfaces.Repository1.IOrderLine.Attributes
             {
                 get
@@ -1420,6 +1496,15 @@ namespace NWheels.Stacks.EntityFramework.Tests
             }
 
             #endregion
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            #endregion
         }
 
         public class EfEntityObject_PostalAddress : Interfaces.Repository1.IPostalAddress, IObject, IEntityPartObject
@@ -1492,6 +1577,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 get { return typeof(EfEntityObjectFactory); }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             public virtual string StreetAddress
             {
                 get
@@ -1533,6 +1623,15 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public void EnsureDomainObject()
             {
                 throw new NotImplementedException();
+            }
+
+            #endregion
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
             }
 
             #endregion
@@ -1695,6 +1794,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 get { return typeof(EfEntityObjectFactory); }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             ICollection<Interfaces.Repository1.IAttribute> Interfaces.Repository1.IProduct.Attributes
             {
                 get
@@ -1752,6 +1856,15 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public void EnsureDomainObject()
             {
                 throw new NotImplementedException();
+            }
+
+            #endregion
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
             }
 
             #endregion
@@ -1885,6 +1998,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 get { return typeof(EfEntityObjectFactory); }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             bool Interfaces.Repository1.ICustomer.QualifiesAsValuableCustomer()
             {
                 throw new NotSupportedException();
@@ -1926,6 +2044,15 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public void Delete()
             {
                 throw new NotSupportedException();
+            }
+
+            #endregion
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
             }
 
             #endregion
@@ -2020,6 +2147,11 @@ namespace NWheels.Stacks.EntityFramework.Tests
                 get { return typeof(EfEntityObjectFactory); }
             }
 
+            bool IObject.IsModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             #region Implementation of IContainedIn<out IDomainObject>
 
             private IDomainObject _domainObject;
@@ -2037,6 +2169,15 @@ namespace NWheels.Stacks.EntityFramework.Tests
             public void EnsureDomainObject()
             {
                 throw new NotImplementedException();
+            }
+
+            #endregion
+
+            #region Implementation of IEntityObjectBase
+
+            EntityState IEntityObjectBase.State
+            {
+                get { throw new NotImplementedException(); }
             }
 
             #endregion

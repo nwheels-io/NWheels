@@ -111,11 +111,13 @@
     <Compile Include="Core\UnitOfWorkFactory.cs" />
     <Compile Include="Endpoints\Core\IEndpoint.cs" />
     <Compile Include="Entities\Core\IDomainObject.cs" />
+    <Compile Include="Entities\Core\IEntityObjectBase.cs" />
     <Compile Include="Entities\Core\IPersistableObject.cs" />
     <Compile Include="Entities\Core\IStorageSchemaNamingConvention.cs" />
     <Compile Include="Entities\EntityStateInfo.cs" />
     <Compile Include="Entities\Factories\ActiveRecordConvention.cs" />
-    <Compile Include="Entities\Factories\ContainedPersistableObjectConvention.cs" />
+    <Compile Include="Entities\Factories\EntityObjectStateConvention.cs" />
+    <Compile Include="Entities\Factories\ImplementIDomainObjectConvention.cs" />
     <Compile Include="Entities\Factories\DomainObjectBaseTypeConvention.cs" />
     <Compile Include="Entities\Factories\DomainObjectConstructorInjectionConvention.cs" />
     <Compile Include="Entities\Factories\DomainObjectFactory.cs" />

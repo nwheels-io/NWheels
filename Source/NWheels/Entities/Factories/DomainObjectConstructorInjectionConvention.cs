@@ -34,6 +34,7 @@ namespace NWheels.Entities.Factories
                 _context.PersistableObjectField = writer.Field<TT2.TPersistable>("$persistable");
                 _context.DomainObjectFactoryField = writer.Field<IDomainObjectFactory>("$domainFactory");
                 _context.FrameworkField = writer.Field<IFramework>("$framework");
+                _context.EntityStateField = writer.Field<EntityState>("$entityState");
 
                 var dependencyProperties = FindDependencyProperties(writer);
 
@@ -50,6 +51,7 @@ namespace NWheels.Entities.Factories
                     _context.PersistableObjectField.Assign(persistable.CastTo<TT2.TPersistable>());
                     _context.DomainObjectFactoryField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IDomainObjectFactory>(c), components));
                     _context.FrameworkField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IFramework>(c), components));
+                    _context.EntityStateField.Assign(persistable.CastTo<IEntityObjectBase>().Prop(x => x.State));
 
                     foreach ( var property in dependencyProperties )
                     {
@@ -81,14 +83,20 @@ namespace NWheels.Entities.Factories
 
         private PropertyInfo[] FindDependencyProperties(ImplementationClassWriter<TypeTemplate.TBase> writer)
         {
-            var dependencyProperties = TypeMemberCache.Of(writer.OwnerClass.BaseType).SelectAllProperties(p => 
-                p.DeclaringType != null && 
-                    p.DeclaringType.IsClass &&
-                    p.GetMethod != null && !p.GetMethod.IsPublic && !p.GetMethod.IsAbstract && !p.GetMethod.IsVirtual &&
-                    p.SetMethod != null && !p.SetMethod.IsPublic && !p.SetMethod.IsAbstract && !p.SetMethod.IsVirtual &&
-                    p.DeclaringType != typeof(object)).ToArray();
-
+            var dependencyProperties = TypeMemberCache.Of(writer.OwnerClass.BaseType).SelectAllProperties(IsDependencyProperty).ToArray();
             return dependencyProperties;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static bool IsDependencyProperty(PropertyInfo p)
+        {
+            return 
+                p.DeclaringType != null && 
+                p.DeclaringType.IsClass &&
+                p.DeclaringType != typeof(object) &&
+                p.GetMethod != null && !p.GetMethod.IsPublic && !p.GetMethod.IsAbstract && !p.GetMethod.IsVirtual &&
+                p.SetMethod != null && !p.SetMethod.IsPublic && !p.SetMethod.IsAbstract && !p.SetMethod.IsVirtual;
         }
     }
 }

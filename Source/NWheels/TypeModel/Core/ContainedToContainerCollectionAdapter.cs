@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.DataObjects.Core;
+using NWheels.Extensions;
 
 namespace NWheels.TypeModel.Core
 {
@@ -16,6 +18,8 @@ namespace NWheels.TypeModel.Core
     {
         private readonly ICollection<TContainedContract> _innerCollection;
         private readonly Func<TContained, TContainer> _containerFactory;
+        private List<TContainerContract> _added = null;
+        private List<TContainerContract> _removed = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -37,12 +41,31 @@ namespace NWheels.TypeModel.Core
         public void Add(TContainerContract item)
         {
             _innerCollection.Add((TContainedContract)(object)((IContain<TContained>)item).GetContainedObject());
+
+            if ( _added == null )
+            {
+                _added = new List<TContainerContract>(capacity: 4);
+            }
+
+            _added.Add(item);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Clear()
         {
+            if ( _removed == null )
+            {
+                _removed = new List<TContainerContract>();
+            }
+
+            _removed.AddRange(_innerCollection
+                .Cast<TContained>()
+                .Select(c => c.GetContainerObject() ?? GetContainerFromContained(c))
+                .Cast<TContainerContract>()
+                .Where(c => _added == null || !_added.Contains(c)));
+            _added = null;
+            
             _innerCollection.Clear();
         }
 
@@ -70,7 +93,24 @@ namespace NWheels.TypeModel.Core
 
         public bool Remove(TContainerContract item)
         {
-            return _innerCollection.Remove((TContainedContract)(object)((IContain<TContained>)item).GetContainedObject());
+            var itemWasRemoved = _innerCollection.Remove((TContainedContract)(object)((IContain<TContained>)item).GetContainedObject());
+
+            if ( itemWasRemoved )
+            {
+                var itemWasAdded = (_added != null && _added.Remove(item));
+
+                if ( !itemWasAdded )
+                { 
+                    if ( _removed == null )
+                    {
+                        _removed = new List<TContainerContract>(capacity: 4);
+                    }
+
+                    _removed.Add(item);
+                }
+            }
+
+            return itemWasRemoved;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -87,6 +127,17 @@ namespace NWheels.TypeModel.Core
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void GetChanges(out TContainerContract[] added, out TContainerContract[] changed, out TContainerContract[] removed)
+        {
+            var modifiedList = FindModifiedItems();
+
+            changed = (modifiedList != null ? modifiedList.ToArray() : null);
+            added = (_added != null ? _added.ToArray() : null);
+            removed = (_removed != null ? _removed.ToArray() : null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -121,6 +172,19 @@ namespace NWheels.TypeModel.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool IsModified
+        {
+            get
+            {
+                return (
+                    _added != null || 
+                    _removed != null || 
+                    _innerCollection.Cast<TContained>().Any(IsItemModified));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected TContainerContract ContainedContractToContainerContract(TContainedContract contained)
         {
             return (TContainerContract)(object)GetContainerFromContained((TContained)(object)contained);
@@ -139,10 +203,43 @@ namespace NWheels.TypeModel.Core
 
             if ( _containerFactory != null )
             {
-                return _containerFactory(contained);
+                var newContainer = _containerFactory(contained);
+                return newContainer;
             }
 
             return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private List<TContainerContract> FindModifiedItems()
+        {
+            List<TContainerContract> changedList = null;
+
+            foreach ( var containedItem in _innerCollection.Cast<TContained>() )
+            {
+                if ( IsItemModified(containedItem) )
+                {
+                    if ( changedList == null )
+                    {
+                        changedList = new List<TContainerContract>(capacity: 4);
+                    }
+
+                    changedList.Add((TContainerContract)(object)containedItem.GetContainerObject());
+                }
+            }
+
+            return changedList;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool IsItemModified(TContained containedItem)
+        {
+            var containerItem = containedItem.GetContainerObject();
+            var containerObject = containerItem as IObject;
+
+            return (containerObject != null && containerObject.IsModified);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

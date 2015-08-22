@@ -36,6 +36,7 @@ namespace NWheels.Testing.Entities.Impl
                 new MaterializationConstructorConvention(metaType, propertyMap),
                 new InitializationConstructorConvention(metaType, propertyMap),
                 new ImplementIObjectConvention(), 
+                new EntityObjectStateConvention(), 
                 new ImplementIEntityObjectConvention(metaType, propertyMap), 
                 new ImplementIEntityPartObjectConvention(metaType), 
                 new EnsureDomainObjectConvention(metaType), 

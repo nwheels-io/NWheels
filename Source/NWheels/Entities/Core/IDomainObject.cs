@@ -10,5 +10,6 @@ namespace NWheels.Entities.Core
 {
     public interface IDomainObject : IObject, IContain<IPersistableObject>
     {
+        EntityState State { get; }
     }
 }
