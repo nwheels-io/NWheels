@@ -1,6 +1,7 @@
 ﻿using System;
 using Autofac;
 using Hapil;
+using Hapil.Writers;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
@@ -32,6 +33,7 @@ namespace NWheels.UI.ServerSide
                 new MaterializationConstructorConvention(metaType, propertyMap),
                 new InitializationConstructorConvention(metaType, propertyMap),
                 new ImplementIObjectConvention(), 
+                new NeverModifiedConvention()
                 //new ImplementIEntityObjectConvention(metaType, propertyMap), 
                 //new ImplementIEntityPartObjectConvention(metaType), 
                 //new EnsureDomainObjectConvention(metaType), 
@@ -64,6 +66,31 @@ namespace NWheels.UI.ServerSide
                 p => new AutomaticPropertyStrategy(context, MetadataCache, metaType, p));
 
             return builder.Build(MetadataCache, metaType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class NeverModifiedConvention : ImplementationConvention
+        {
+            public NeverModifiedConvention()
+                : base(Will.ImplementBaseClass)
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of ImplementationConvention
+
+            protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            {
+                writer.ImplementInterfaceExplicitly<IObject>()
+                    .Property(x => x.IsModified).Implement(p =>
+                        p.Get(gw => gw.Return(false)
+                    )
+                );
+            }
+
+            #endregion
         }
     }
 }

@@ -13,6 +13,7 @@ using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Factories;
 using NWheels.Entities.Core;
 using NWheels.TypeModel.Core;
+using NWheels.TypeModel.Core.Factories;
 using TT = Hapil.TypeTemplate;
 using TT2 = NWheels.Entities.Factories.DomainObjectFactory.TemplateTypes;
 
@@ -94,6 +95,24 @@ namespace NWheels.Entities.Factories
 
         protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override bool OnHasNestedObjects()
+        {
+            return true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnWritingDeepListNestedObjects(MethodWriterBase writer, IOperand<HashSet<object>> nestedObjects)
+        {
+            var w = writer;
+
+            Static.Void(RuntimeTypeModelHelpers.DeepListNestedObject,
+                w.This<TT.TBase>().Prop<TT.TProperty>(this.ImplementedContractProperty),
+                nestedObjects);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

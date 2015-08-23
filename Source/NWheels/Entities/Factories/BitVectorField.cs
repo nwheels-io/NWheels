@@ -61,6 +61,14 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Operand<bool> WriteNonZeroBitTest(MethodWriterBase methodWriter, int index)
+        {
+            long mask = (long)1 << index;
+            return ((_field & mask) != methodWriter.Const<long>(0));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Operand<bool> WriteNonZeroTest(MethodWriterBase methodWriter)
         {
             return (_field != methodWriter.Const<long>(0));

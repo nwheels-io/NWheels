@@ -11,8 +11,8 @@ namespace NWheels.Entities.Factories
 {
     public class ImplementIDomainObjectConvention : ImplementationConvention
     {
-        public const string MethodNameOnEntityCommitting = "OnEntityCommitting";
-        public const string MethodNameOnEntityCommitted = "OnEntityCommitted";
+        public const string MethodNameOnEntityCommitting = "EntityTriggerBeforeSave";
+        public const string MethodNameOnEntityCommitted = "EntityTriggerAfterSave";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -37,6 +37,7 @@ namespace NWheels.Entities.Factories
             var domainObjectImplementation = writer.ImplementInterfaceExplicitly<IDomainObject>();
             ImplementState(domainObjectImplementation);
             ImplementCommittingCommitted(domainObjectImplementation);
+            ImplementValidate(domainObjectImplementation);
             
             ImplementGetContainedObject(writer);
         }
@@ -88,18 +89,30 @@ namespace NWheels.Entities.Factories
             TryFindCommitCallbackMethods(out committingCallback, out committedCallback);
 
             writer
-                .Method(x => x.NotifyCommitting).Implement(w => {
+                .Method(x => x.BeforeSave).Implement(w => {
                     if ( committingCallback != null )
                     {
                         w.This<TT.TBase>().Void(committingCallback);
                     }
                 })
-                .Method(x => x.NotifyCommitted).Implement(w => {
+                .Method(x => x.AfterSave).Implement(w => {
                     if ( committedCallback != null )
                     {
                         w.This<TT.TBase>().Void(committedCallback);
                     }
                 });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementValidate(ImplementationClassWriter<IDomainObject> writer)
+        {
+            writer.Method(x => x.Validate).Implement(w => {
+                _context.PropertyMap.InvokeStrategies(
+                    strategy => {
+                        strategy.WriteValidation(w);
+                    });
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

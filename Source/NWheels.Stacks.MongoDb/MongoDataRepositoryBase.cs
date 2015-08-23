@@ -4,7 +4,9 @@ using Autofac;
 using MongoDB.Driver;
 using NWheels.Concurrency;
 using NWheels.Conventions.Core;
+using NWheels.DataObjects;
 using NWheels.Entities.Core;
+using NWheels.Extensions;
 using NWheels.Stacks.MongoDb.Factories;
 
 namespace NWheels.Stacks.MongoDb
@@ -139,6 +141,18 @@ namespace NWheels.Stacks.MongoDb
         public static MongoDataRepositoryBase ResolveFrom(IComponentContext components)
         {
             return (MongoDataRepositoryBase)components.Resolve<DataRepositoryBase>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal static string GetMongoCollectionName(ITypeMetadata metadata)
+        {
+            if ( metadata.BaseType != null )
+            {
+                return GetMongoCollectionName(metadata.BaseType);
+            }
+
+            return metadata.Name.TrimLead("Abstract");
         }
     }
 }

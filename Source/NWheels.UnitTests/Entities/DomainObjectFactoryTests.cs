@@ -33,6 +33,7 @@ namespace NWheels.UnitTests.Entities
             Framework.UpdateComponents(
                 builder => {
                     builder.RegisterType<HardCodedDomainObjectFactory>().As<IDomainObjectFactory>().SingleInstance();
+                    builder.NWheelsFeatures().Logging().RegisterLogger<IContractEntityLogger>();
                 });
 
             HardCodedEntityObject_ContractEntity persistableEntityObject = new HardCodedEntityObject_ContractEntity(Framework.Components);
@@ -63,6 +64,7 @@ namespace NWheels.UnitTests.Entities
             Framework.UpdateComponents(
                 builder => {
                     builder.NWheelsFeatures().ObjectContracts().Concretize<IContractEntity>().With<ContractEntity>();
+                    builder.NWheelsFeatures().Logging().RegisterLogger<IContractEntityLogger>();
                 });
             Framework.RebuildMetadataCache();
 
@@ -85,6 +87,7 @@ namespace NWheels.UnitTests.Entities
             Framework.UpdateComponents(
                 builder => {
                     builder.NWheelsFeatures().ObjectContracts().Concretize<IContractEntity>().With<ContractEntity>();
+                    builder.NWheelsFeatures().Logging().RegisterLogger<IContractEntityLogger>();
                 });
             Framework.RebuildMetadataCache();
             Framework.MetadataCache.GetTypeMetadata(typeof(IContractEntity)).As<TypeMetadataBuilder>().UpdateImplementation(
@@ -115,6 +118,7 @@ namespace NWheels.UnitTests.Entities
             Framework.UpdateComponents(
                 builder => {
                     builder.NWheelsFeatures().ObjectContracts().Concretize<IContractEntity>().With<ContractEntity>();
+                    builder.NWheelsFeatures().Logging().RegisterLogger<IContractEntityLogger>();
                 }
             );
             Framework.RebuildMetadataCache();
@@ -170,16 +174,16 @@ namespace NWheels.UnitTests.Entities
             contract.Term = ContractTermType.Yearly;;
             contract.As<ContractEntity>().Approve();
             
-            contract.As<IDomainObject>().NotifyCommitting();
+            contract.As<IDomainObject>().BeforeSave();
             var log1 = Framework.TakeLog();
 
-            contract.As<IDomainObject>().NotifyCommitted();
+            contract.As<IDomainObject>().AfterSave();
             var log2 = Framework.TakeLog();
 
             //- assert
 
-            LogAssert.That(log1).HasOne<IContractEntityLogger>(x => x.Committing(EntityState.NewModified, true, true, true));
-            LogAssert.That(log2).HasOne<IContractEntityLogger>(x => x.Committed(EntityState.NewModified, true, true, true));
+            LogAssert.That(log1).HasOne<IContractEntityLogger>(x => x.BeforeSave(EntityState.NewModified, true, true, true));
+            LogAssert.That(log2).HasOne<IContractEntityLogger>(x => x.AfterSave(EntityState.NewModified, true, true, true));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -187,10 +191,10 @@ namespace NWheels.UnitTests.Entities
         public interface IContractEntityLogger : IApplicationEventLogger
         {
             [LogInfo]
-            void Committing(EntityState entityState, bool termWasModified, bool expirationWasModified, bool isApprovedWasModified);
+            void BeforeSave(EntityState entityState, bool termWasModified, bool expirationWasModified, bool isApprovedWasModified);
             
             [LogInfo]
-            void Committed(EntityState entityState, bool termWasModified, bool expirationWasModified, bool isApprovedWasModified);
+            void AfterSave(EntityState entityState, bool termWasModified, bool expirationWasModified, bool isApprovedWasModified);
         }
 
 
@@ -360,9 +364,9 @@ namespace NWheels.UnitTests.Entities
             /// <summary>
             /// By convention, this method will be called just prior to committing create or update of the entity
             /// </summary>
-            protected virtual void OnEntityCommitting()
+            protected virtual void EntityTriggerBeforeSave()
             {
-                Logger.Committing(EntityState, TermWasModified, ExpirationWasModified, IsApprovedWasModified);
+                Logger.BeforeSave(EntityState, TermWasModified, ExpirationWasModified, IsApprovedWasModified);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -370,9 +374,9 @@ namespace NWheels.UnitTests.Entities
             /// <summary>
             /// By convention, this method will be called just prior to committing create or update of the entity
             /// </summary>
-            protected virtual void OnEntityCommitted()
+            protected virtual void EntityTriggerAfterSave()
             {
-                Logger.Committed(EntityState, TermWasModified, ExpirationWasModified, IsApprovedWasModified);
+                Logger.AfterSave(EntityState, TermWasModified, ExpirationWasModified, IsApprovedWasModified);
             }
 
             #endregion

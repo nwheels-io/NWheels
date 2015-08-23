@@ -48,7 +48,7 @@ namespace NWheels.Stacks.MongoDb
             _keyPropertyExpression = GetKeyPropertyExpression(_metadata);
             _objectFactory = objectFactory;
             _logger = ownerRepo.Components.Resolve<IMongoDbLogger>();
-            _mongoCollection = ownerRepo.GetCollection<TEntityImpl>(GetMongoCollectionName(_metadata));
+            _mongoCollection = ownerRepo.GetCollection<TEntityImpl>(MongoDataRepositoryBase.GetMongoCollectionName(_metadata));
             _queryProvider = null;
         }
 
@@ -493,17 +493,6 @@ namespace NWheels.Stacks.MongoDb
             return (TConcreteContract)(object)entity;
         }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static string GetMongoCollectionName(ITypeMetadata metadata)
-        {
-            if ( metadata.BaseType != null )
-            {
-                return GetMongoCollectionName(metadata.BaseType);
-            }
-
-            return metadata.Name;
-        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

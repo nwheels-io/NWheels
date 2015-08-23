@@ -30,9 +30,9 @@ namespace NWheels.Entities.Factories
         {
             IPropertyMetadata metaProperty;
 
-            if ( _context.MetaType.TryGetPropertyByDeclaration(member.PropertyDeclaration, out metaProperty) )
+            if ( _context.MetaType.TryGetPropertyByName(member.Name, out metaProperty) )
             {
-                if ( metaProperty.Kind == PropertyKind.Scalar && metaProperty.ContractPropertyInfo.CanWrite )
+                if ( metaProperty.Kind == PropertyKind.Scalar && member.HasSetter )
                 {
                     decorate().Setter().OnBefore(w => _context.ModifiedVector.WriteSetBit(w, metaProperty.PropertyIndex));
                 }

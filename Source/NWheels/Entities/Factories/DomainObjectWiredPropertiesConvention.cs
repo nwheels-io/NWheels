@@ -69,9 +69,13 @@ namespace NWheels.Entities.Factories
                     var associatedEntityProperty = _context.MetaType.GetPropertyByName(p.OwnerProperty.Name.TrimTail(WasModifiedWiredPropertySuffix));
                     var entityPropertyStrategy = _context.PropertyMap[associatedEntityProperty];
 
-                    using (TT.CreateScope<TT.TProperty>(associatedEntityProperty.ClrType))
+                    using ( TT.CreateScope<TT.TProperty>(associatedEntityProperty.ClrType) )
                     {
                         entityPropertyStrategy.WriteReturnTrueIfModified(gw);
+
+                        gw.If(_context.ModifiedVector.WriteNonZeroBitTest(gw, associatedEntityProperty.PropertyIndex)).Then(() => {
+                            gw.Return(gw.Const(true));
+                        });
                     }
 
                     gw.Return(false);

@@ -74,6 +74,7 @@ namespace NWheels.Entities.Factories
                 new DomainObjectPropertyImplementationConvention(domainFactoryContext), 
                 new ImplementIDomainObjectConvention(domainFactoryContext),
                 new ImplementIObjectConvention(),
+                new NestedObjectsConvention(domainFactoryContext.PropertyMap),
                 new ActiveRecordConvention(domainFactoryContext),
                 new DomainObjectModifiedVectorConvention(domainFactoryContext), 
                 new DomainObjectOperationMethodsConvention(domainFactoryContext),
@@ -121,133 +122,6 @@ namespace NWheels.Entities.Factories
                 p => new DomainPersistableDelegationStrategy(context, p));
 
             builder.Build(context.MetadataCache, context.MetaType);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class ContractPropertyDelegationConvention : ImplementationConvention
-        {
-            private readonly DomainObjectFactoryContext _conventionState;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public ContractPropertyDelegationConvention(DomainObjectFactoryContext conventionState)
-                : base(Will.ImplementPrimaryInterface)
-            {
-                _conventionState = conventionState;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            #region Overrides of ImplementationConvention
-
-            protected override void OnImplementPrimaryInterface(ImplementationClassWriter<TypeTemplate.TInterface> writer)
-            {
-                writer.AllProperties().ImplementPropagate(_conventionState.PersistableObjectField.CastTo<TT.TInterface>());
-                writer.AllMethods().Implement(m => m.Throw<NotSupportedException>("No domain object was registered for this entity."));
-            }
-
-            #endregion
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class DomainObjectPropertyDelegationConvention : ImplementationConvention
-        {
-            private readonly DomainObjectFactoryContext _conventionState;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public DomainObjectPropertyDelegationConvention(DomainObjectFactoryContext conventionState)
-                : base(Will.ImplementBaseClass)
-            {
-                _conventionState = conventionState;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            #region Overrides of ImplementationConvention
-
-            protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
-            {
-                var allProperties = writer.AllProperties().ToArray();
-
-                using ( TT.CreateScope<TT.TContract, TT.TImpl>(_conventionState.MetaType.ContractType, _conventionState.PersistableObjectType) )
-                {
-                    foreach ( var property in allProperties )
-                    {
-                        using ( TT.CreateScope<TT.TProperty>(property.PropertyType) )
-                        {
-                            ImplementProperty(writer, property);
-                        }
-                    }
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void ImplementProperty(ImplementationClassWriter<TypeTemplate.TBase> writer, PropertyInfo property)
-            {
-                var metaProperty = _conventionState.MetaType.GetPropertyByName(property.Name);
-                var contractCanRead = metaProperty.ContractPropertyInfo.CanRead;
-                var contractCanWrite = metaProperty.ContractPropertyInfo.CanWrite;
-                var domainCanRead = property.GetMethod != null;
-                var domainCanWrite = property.SetMethod != null;
-
-                writer.Property(property).Implement(
-                    getter: p =>
-                        domainCanRead
-                        ? p.Get(w => ImplementPropertyGetter(w, metaProperty, contractCanRead))
-                        : null,
-                    setter: p =>
-                        domainCanWrite
-                        ? p.Set((w, value) => ImplementPropertySetter(w, value, metaProperty, contractCanWrite))
-                        : null
-                );
-            }
-
-            #endregion
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void ImplementPropertyGetter(
-                FunctionMethodWriter<TypeTemplate.TProperty> w, 
-                IPropertyMetadata metaProperty,
-                bool contractCanRead)
-            {
-                if ( contractCanRead )
-                {
-                    w.Return(_conventionState.PersistableObjectField.Prop<TT.TProperty>(metaProperty.ContractPropertyInfo));
-                }
-                else
-                {
-                    var propertyReadMethodName = PropertyImplementationStrategy.GetReadAccessorMethodName(metaProperty);
-                    var propertyReadMethod = TypeMemberCache.Of(_conventionState.PersistableObjectType).Methods.Single(m => m.Name == propertyReadMethodName);
-
-                    w.Return(_conventionState.PersistableObjectField.Func<TT.TProperty>(propertyReadMethod));
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void ImplementPropertySetter(
-                VoidMethodWriter w,
-                Argument<TypeTemplate.TProperty> value,
-                IPropertyMetadata metaProperty,
-                bool contractCanWrite)
-            {
-                if ( contractCanWrite )
-                {
-                    _conventionState.PersistableObjectField.Prop<TT.TProperty>(metaProperty.ContractPropertyInfo).Assign(value);
-                }
-                else
-                {
-                    var propertyWriteMethodName = PropertyImplementationStrategy.GetWriteAccessorMethodName(metaProperty);
-                    var propertyWriteMethod = TypeMemberCache.Of(_conventionState.PersistableObjectType).Methods.Single(m => m.Name == propertyWriteMethodName);
-
-                    _conventionState.PersistableObjectField.Void<TT.TProperty>(propertyWriteMethod, value);
-                }
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

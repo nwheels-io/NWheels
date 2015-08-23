@@ -83,6 +83,13 @@ namespace NWheels.TypeModel.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public virtual void WriteValidation(MethodWriterBase writer)
+        {
+            _target.WriteValidation(writer);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public virtual ObjectFactoryContext FactoryContext
         {
             get { return _target.FactoryContext; }

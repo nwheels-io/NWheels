@@ -8,6 +8,7 @@ using Hapil.Members;
 using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core.Factories;
+using NWheels.Exceptions;
 using NWheels.TypeModel.Core;
 using TT = Hapil.TypeTemplate;
 
@@ -40,6 +41,8 @@ namespace NWheels.Entities.Factories
                 writer.Property(baseProperty).Implement(
                     p => baseProperty.GetMethod != null ? 
                         p.Get(gw => {
+                            this.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+
                             if ( MetaProperty.ContractPropertyInfo.CanRead )
                             {
                                 gw.Return(_context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo));
@@ -53,7 +56,9 @@ namespace NWheels.Entities.Factories
                         null,
                     p => baseProperty.SetMethod != null ? 
                         p.Set((sw, value) => {
-                            if ( MetaProperty.ContractPropertyInfo.CanWrite )
+                            this.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+
+                            if (MetaProperty.ContractPropertyInfo.CanWrite)
                             {
                                 _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(value);
                             }
@@ -72,6 +77,51 @@ namespace NWheels.Entities.Factories
 
         protected override void OnImplementStorageProperty(ImplementationClassWriter<TypeTemplate.TInterface> writer)
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnWritingValidation(MethodWriterBase writer)
+        {
+            var w = writer;
+
+            if ( MetaProperty.ClrType == typeof(string) )
+            {
+                if ( MetaProperty.Validation.IsRequired && MetaProperty.Validation.IsEmptyAllowed )
+                {
+                    w.If(w.This<TT.TBase>().Prop<string>(this.ImplementedContractProperty).IsNull()).Then(() => {
+                        w.Throw<EntityValidationException>(MetaType.Name + "." + MetaProperty.Name + " is mandatory.");        
+                    });
+                }
+                else if ( MetaProperty.Validation.IsRequired && !MetaProperty.Validation.IsEmptyAllowed )
+                {
+                    w.If(Static.Func(string.IsNullOrEmpty, w.This<TT.TBase>().Prop<string>(this.ImplementedContractProperty))).Then(() => {
+                        w.Throw<EntityValidationException>(MetaType.Name + "." + MetaProperty.Name + " is mandatory and cannot be empty.");
+                    });
+                }
+
+                if ( MetaProperty.Validation.MinLength.HasValue )
+                {
+                    w.If(
+                        (!w.This<TT.TBase>().Prop<string>(this.ImplementedContractProperty).IsNull()) && 
+                        w.This<TT.TBase>().Prop<string>(this.ImplementedContractProperty).Prop<int>(s => s.Length) < w.Const(MetaProperty.Validation.MinLength.Value)
+                    )
+                    .Then(() => {
+                        w.Throw<EntityValidationException>(MetaType.Name + "." + MetaProperty.Name + " must be at least " + MetaProperty.Validation.MinLength.Value + " characters length.");
+                    });
+                }
+
+                if ( MetaProperty.Validation.MaxLength.HasValue )
+                {
+                    w.If(
+                        (!w.This<TT.TBase>().Prop<string>(this.ImplementedContractProperty).IsNull()) &&
+                        w.This<TT.TBase>().Prop<string>(this.ImplementedContractProperty).Prop<int>(s => s.Length) > w.Const(MetaProperty.Validation.MaxLength.Value)
+                    )
+                    .Then(() => {
+                        w.Throw<EntityValidationException>(MetaType.Name + "." + MetaProperty.Name + " length must not exceed " + MetaProperty.Validation.MaxLength.Value + " characters.");
+                    });
+                }
+            }
         }
 
         #endregion

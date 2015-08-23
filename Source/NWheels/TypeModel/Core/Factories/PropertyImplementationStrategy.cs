@@ -110,6 +110,13 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void WriteValidation(MethodWriterBase writer)
+        {
+            OnWritingValidation(writer);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
         public ObjectFactoryContext FactoryContext
         {
             get
@@ -267,6 +274,12 @@ namespace NWheels.DataObjects.Core.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected virtual void OnWritingReturnTrueIfModified(FunctionMethodWriter<bool> functionWriter)
+        {
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void OnWritingValidation(MethodWriterBase writer)
         {
         }
 

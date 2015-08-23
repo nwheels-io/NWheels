@@ -50,6 +50,7 @@ namespace NWheels.Testing.Entities.Stacks
                 //[PropertyContract.Storage.RelationalMapping(Column = "Id")]
                 //int Id { get; set; }
 
+                [PropertyContract.Unique]
                 string CatalogNo { get; set; }
 
                 string Name { get; set; }

@@ -12,6 +12,7 @@ using NWheels.DataObjects;
 using NWheels.DataObjects.Core.Factories;
 using NWheels.Entities.Core;
 using NWheels.TypeModel.Core;
+using NWheels.TypeModel.Core.Factories;
 using TT = Hapil.TypeTemplate;
 using TT2 = NWheels.Entities.Factories.DomainObjectFactory.TemplateTypes;
 
@@ -49,6 +50,7 @@ namespace NWheels.Entities.Factories
             
             writer.Property(baseProperty).Implement(p => 
                 p.Get(gw => {
+                    this.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
                     gw.Return(_adapterBackingField);
                 })
             );
@@ -88,6 +90,24 @@ namespace NWheels.Entities.Factories
                     )
                     .CastTo<TT.TProperty>());
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override bool OnHasNestedObjects()
+        {
+            return true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnWritingDeepListNestedObjects(MethodWriterBase writer, IOperand<HashSet<object>> nestedObjects)
+        {
+            var w = writer;
+            
+            Static.Void(RuntimeTypeModelHelpers.DeepListNestedObjectCollection, 
+                w.This<TT.TBase>().Prop<TT.TProperty>(this.ImplementedContractProperty).CastTo<System.Collections.IEnumerable>(), 
+                nestedObjects);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

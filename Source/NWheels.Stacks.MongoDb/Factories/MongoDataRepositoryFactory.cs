@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Data;
+using System.Linq;
 using Autofac;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using NWheels.Concurrency;
@@ -85,6 +87,8 @@ namespace NWheels.Stacks.MongoDb.Factories
                 Operand<MongoDatabase> connection)
             {
                 WritePolymorphicEntityRegistrations(writer);
+                WriteCollectionIndexes(writer, connection);
+
                 base.CompiledModelField.Assign(writer.New<object>());
             }
 
@@ -116,6 +120,27 @@ namespace NWheels.Stacks.MongoDb.Factories
                             w.If(!Static.Func(BsonClassMap.IsClassMapRegistered, w.Const(entity.ImplementationType))).Then(() => {
                                 Static.GenericFunc<BsonClassMap<TT.TImpl>>(() => BsonClassMap.RegisterClassMap<TT.TImpl>());
                             });
+                        }
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void WriteCollectionIndexes(FunctionMethodWriter<object> writer, Operand<MongoDatabase> database)
+            {
+                var w = writer;
+
+                foreach ( var entity in base.EntitiesInRepository )
+                {
+                    foreach ( var uniqueProperty in entity.Metadata.Properties.Where(p => p.Validation.IsUnique) )
+                    {
+                        if ( uniqueProperty.DeclaringContract == entity.Metadata )
+                        {
+                            Static.Void(RuntimeHelpers.CreateUniqueIndex,
+                                database,
+                                w.Const(MongoDataRepositoryBase.GetMongoCollectionName(entity.Metadata)),
+                                w.Const(uniqueProperty.Name));
                         }
                     }
                 }

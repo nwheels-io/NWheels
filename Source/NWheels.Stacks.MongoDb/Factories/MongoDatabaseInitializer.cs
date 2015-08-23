@@ -1,4 +1,5 @@
 ﻿using System;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using NWheels.Entities;
 using NWheels.Entities.Core;
@@ -26,7 +27,12 @@ namespace NWheels.Stacks.MongoDb.Factories
             var server = client.GetServer();
             var connectionParams = new MongoConnectionStringBuilder(connectionString);
 
-            return server.DatabaseExists(connectionParams.DatabaseName);
+            if ( !server.DatabaseExists(connectionParams.DatabaseName) )
+            {
+                return false;
+            }
+
+            return server.GetDatabase(connectionParams.DatabaseName).CollectionExists("SystemMigrationLog");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -44,7 +50,9 @@ namespace NWheels.Stacks.MongoDb.Factories
             var server = client.GetServer();
             var connectionParams = new MongoConnectionStringBuilder(connectionString);
             
-            server.GetDatabase(connectionParams.DatabaseName);
+            var database = server.GetDatabase(connectionParams.DatabaseName);
+
+            database.GetCollection<MigrationLogEntry>("SystemMigrationLog").Insert(new MigrationLogEntry() { CurrentVersion = 1 });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -62,5 +70,12 @@ namespace NWheels.Stacks.MongoDb.Factories
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class MigrationLogEntry
+        {
+            public int CurrentVersion { get; set; }
+        }
     }
 }

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
+using MongoDB.Driver.Builders;
 
 namespace NWheels.Stacks.MongoDb
 {
@@ -18,6 +20,15 @@ namespace NWheels.Stacks.MongoDb
             }
 
             return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void CreateUniqueIndex(MongoDatabase database, string collectionName, string propertyName)
+        {
+            database.GetCollection(collectionName).CreateIndex(
+                new IndexKeysBuilder().Ascending(propertyName), 
+                new IndexOptionsBuilder().SetUnique(true));
         }
     }
 }
