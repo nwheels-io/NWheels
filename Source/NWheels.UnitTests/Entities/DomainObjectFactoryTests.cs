@@ -15,6 +15,7 @@ using NWheels.Entities.Core;
 using NWheels.Entities.Factories;
 using NWheels.Exceptions;
 using NWheels.Extensions;
+using NWheels.Logging;
 using NWheels.Processing.Messages;
 using NWheels.Testing;
 using NWheels.TypeModel.Core;
@@ -143,6 +144,58 @@ namespace NWheels.UnitTests.Entities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void CanInvokeWiredMethodsOnCommitOfNewEntity()
+        {
+            //- arrange
+
+            Framework.UpdateComponents(
+                builder => {
+                    builder.NWheelsFeatures().ObjectContracts().Concretize<IContractEntity>().With<ContractEntity>();
+                    builder.NWheelsFeatures().Logging().RegisterLogger<IContractEntityLogger>();
+                }
+            );
+            Framework.RebuildMetadataCache();
+            Framework.MetadataCache.GetTypeMetadata(typeof(IContractEntity)).As<TypeMetadataBuilder>().UpdateImplementation(
+                typeof(HardCodedEntityObjectFactory),
+                typeof(HardCodedEntityObject_ContractEntity));
+
+            var factoryUnderTest = new DomainObjectFactory(Framework.Components, base.DyamicModule, Framework.MetadataCache);
+            var persistableObject = new HardCodedEntityObject_ContractEntity(Framework.Components);
+
+            IContractEntity contract = factoryUnderTest.CreateDomainObjectInstance<IContractEntity>(persistableObject);
+
+            //- act
+
+            contract.Term = ContractTermType.Yearly;;
+            contract.As<ContractEntity>().Approve();
+            
+            contract.As<IDomainObject>().NotifyCommitting();
+            var log1 = Framework.TakeLog();
+
+            contract.As<IDomainObject>().NotifyCommitted();
+            var log2 = Framework.TakeLog();
+
+            //- assert
+
+            LogAssert.That(log1).HasOne<IContractEntityLogger>(x => x.Committing(EntityState.NewModified, true, true, true));
+            LogAssert.That(log2).HasOne<IContractEntityLogger>(x => x.Committed(EntityState.NewModified, true, true, true));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IContractEntityLogger : IApplicationEventLogger
+        {
+            [LogInfo]
+            void Committing(EntityState entityState, bool termWasModified, bool expirationWasModified, bool isApprovedWasModified);
+            
+            [LogInfo]
+            void Committed(EntityState entityState, bool termWasModified, bool expirationWasModified, bool isApprovedWasModified);
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Application Code - coded by application developer
 
         /// <summary>
@@ -219,14 +272,6 @@ namespace NWheels.UnitTests.Entities
         /// </remarks>
         public abstract class ContractEntity : IContractEntity
         {
-            #region Dependency Properties
-
-            protected IFramework Framework { get; set; }
-
-            #endregion
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
             #region Implementation of IContractEntity - concrete class will be generated on the fly.
 
             // All we need here is write abstract property declarations. 
@@ -267,6 +312,67 @@ namespace NWheels.UnitTests.Entities
                 IsApproved = true;
                 Expiration = Framework.UtcNow;
                 Renew();
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            #region Dependency Properties
+
+            protected IFramework Framework { get; set; }
+            protected IContractEntityLogger Logger { get; set; }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Auto-Wired Members (by naming convention)
+
+            /// <summary>
+            /// By convention, this property will return current state of the entity
+            /// </summary>
+            protected abstract EntityState EntityState { get; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            /// <summary>
+            /// By convention, this property will return whether the value of Term property was modified
+            /// </summary>
+            protected abstract bool TermWasModified { get; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            /// <summary>
+            /// By convention, this property will return whether the value of Expiration property was modified
+            /// </summary>
+            protected abstract bool ExpirationWasModified { get; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            /// <summary>
+            /// By convention, this property will return whether the value of IsApproved property was modified
+            /// </summary>
+            protected abstract bool IsApprovedWasModified { get; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            /// <summary>
+            /// By convention, this method will be called just prior to committing create or update of the entity
+            /// </summary>
+            protected virtual void OnEntityCommitting()
+            {
+                Logger.Committing(EntityState, TermWasModified, ExpirationWasModified, IsApprovedWasModified);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            /// <summary>
+            /// By convention, this method will be called just prior to committing create or update of the entity
+            /// </summary>
+            protected virtual void OnEntityCommitted()
+            {
+                Logger.Committed(EntityState, TermWasModified, ExpirationWasModified, IsApprovedWasModified);
             }
 
             #endregion
@@ -334,6 +440,25 @@ namespace NWheels.UnitTests.Entities
                 }
             }
 
+            protected override EntityState EntityState
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            protected override bool TermWasModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            protected override bool ExpirationWasModified
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            protected override bool IsApprovedWasModified
+            {
+                get { throw new NotImplementedException(); }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -354,6 +479,7 @@ namespace NWheels.UnitTests.Entities
 
             public HardCodedEntityObject_ContractEntity()
             {
+                this.State = EntityState.NewPristine;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -499,10 +625,7 @@ namespace NWheels.UnitTests.Entities
 
             #region Implementation of IEntityObjectBase
 
-            public EntityState State
-            {
-                get { return EntityState.NewPristine; }
-            }
+            public EntityState State { get; set; }
 
             #endregion
         }

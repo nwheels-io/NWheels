@@ -1,16 +1,24 @@
+using System.Linq;
+using System.Reflection;
 using Hapil;
 using Hapil.Writers;
 using NWheels.DataObjects.Core;
 using NWheels.Entities.Core;
 using NWheels.TypeModel.Core;
+using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Entities.Factories
 {
     public class ImplementIDomainObjectConvention : ImplementationConvention
     {
+        public const string MethodNameOnEntityCommitting = "OnEntityCommitting";
+        public const string MethodNameOnEntityCommitted = "OnEntityCommitted";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private readonly DomainObjectFactoryContext _context;
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ImplementIDomainObjectConvention(DomainObjectFactoryContext context)
             : base(Will.ImplementBaseClass)
@@ -18,13 +26,27 @@ namespace NWheels.Entities.Factories
             _context = context;
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Overrides of ImplementationConvention
 
-        protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
+        protected override void OnImplementBaseClass(ImplementationClassWriter<TT.TBase> writer)
         {
+            ImplementIsModified(writer);
 
+            var domainObjectImplementation = writer.ImplementInterfaceExplicitly<IDomainObject>();
+            ImplementState(domainObjectImplementation);
+            ImplementCommittingCommitted(domainObjectImplementation);
+            
+            ImplementGetContainedObject(writer);
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementIsModified(ImplementationClassWriter<TT.TBase> writer)
+        {
             writer.ImplementInterfaceExplicitly<IObject>()
                 .Property(intf => intf.IsModified).Implement(p =>
                     p.Get(gw => {
@@ -40,8 +62,13 @@ namespace NWheels.Entities.Factories
                         gw.Return(false);
                     })
                 );
+        }
 
-            writer.ImplementInterfaceExplicitly<IDomainObject>()
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementState(ImplementationClassWriter<IDomainObject> writer)
+        {
+            writer
                 .Property(intf => intf.State).Implement(p => 
                     p.Get(gw => {
                         gw.Return(gw.Iif(
@@ -50,13 +77,60 @@ namespace NWheels.Entities.Factories
                             _context.EntityStateField));
                     })
                 );
+        }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementCommittingCommitted(ImplementationClassWriter<IDomainObject> writer)
+        {
+            MethodInfo committingCallback;
+            MethodInfo committedCallback;
+            TryFindCommitCallbackMethods(out committingCallback, out committedCallback);
+
+            writer
+                .Method(x => x.NotifyCommitting).Implement(w => {
+                    if ( committingCallback != null )
+                    {
+                        w.This<TT.TBase>().Void(committingCallback);
+                    }
+                })
+                .Method(x => x.NotifyCommitted).Implement(w => {
+                    if ( committedCallback != null )
+                    {
+                        w.This<TT.TBase>().Void(committedCallback);
+                    }
+                });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementGetContainedObject(ImplementationClassWriter<TT.TBase> writer)
+        {
             writer.ImplementInterfaceExplicitly<IContain<IPersistableObject>>()
                 .Method<IPersistableObject>(intf => intf.GetContainedObject).Implement(w =>
                     w.Return(_context.PersistableObjectField.CastTo<IPersistableObject>())
                 );
         }
 
-        #endregion
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void TryFindCommitCallbackMethods(out MethodInfo committingCallback, out MethodInfo committedCallback)
+        {
+            committingCallback = null;
+            committedCallback = null;
+
+            if ( _context.MetaType.DomainObjectType != null )
+            {
+                committingCallback =
+                    _context.DomainObjectMembers.SelectVoids(m => m.Name == MethodNameOnEntityCommitting && !m.IsPublic && m.GetParameters().Length == 0)
+                    .ToArray()
+                    .FirstOrDefault();
+
+                committedCallback =
+                    _context.DomainObjectMembers.SelectVoids(m => m.Name == MethodNameOnEntityCommitted && !m.IsPublic && m.GetParameters().Length == 0)
+                    .ToArray()
+                    .FirstOrDefault();
+            }
+        }
     }
 }

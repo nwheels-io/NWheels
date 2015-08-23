@@ -8,13 +8,13 @@ using Hapil.Writers;
 
 namespace NWheels.Entities.Factories
 {
-    public class DomainObjectMethodsConvention : ImplementationConvention
+    public class DomainObjectOperationMethodsConvention : ImplementationConvention
     {
         private readonly DomainObjectFactoryContext _context;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DomainObjectMethodsConvention(DomainObjectFactoryContext context)
+        public DomainObjectOperationMethodsConvention(DomainObjectFactoryContext context)
             : base(Will.ImplementPrimaryInterface)
         {
             _context = context;

@@ -10,6 +10,8 @@ namespace NWheels.Entities.Core
 {
     public interface IDomainObject : IObject, IContain<IPersistableObject>
     {
+        void NotifyCommitting();
+        void NotifyCommitted();
         EntityState State { get; }
     }
 }

@@ -84,7 +84,6 @@
     <Compile Include="DataObjects\TypeMetadataCacheTests.cs" />
     <Compile Include="Endpoints\Core\CompactBinarySerializersTests.cs" />
     <Compile Include="Entities\DomainObjectFactoryTests.cs" />
-    <Compile Include="Entities\__DomainObjectFactoryTests.cs" />
     <Compile Include="Extensions\AutofacExtensionTests.cs" />
     <Compile Include="Extensions\TypeExtensionTests.cs" />
     <Compile Include="Hosting\AutofacRegistrationTests.cs" />

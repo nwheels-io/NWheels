@@ -119,13 +119,14 @@
     <Compile Include="Entities\Factories\ActiveRecordConvention.cs" />
     <Compile Include="Entities\Factories\BitVectorField.cs" />
     <Compile Include="Entities\Factories\DomainObjectModifiedVectorConvention.cs" />
+    <Compile Include="Entities\Factories\DomainObjectWiredPropertiesConvention.cs" />
     <Compile Include="Entities\Factories\EntityObjectStateConvention.cs" />
     <Compile Include="Entities\Factories\ImplementIDomainObjectConvention.cs" />
     <Compile Include="Entities\Factories\DomainObjectBaseTypeConvention.cs" />
     <Compile Include="Entities\Factories\DomainObjectConstructorInjectionConvention.cs" />
     <Compile Include="Entities\Factories\DomainObjectFactory.cs" />
     <Compile Include="Entities\Factories\DomainObjectFactoryContext.cs" />
-    <Compile Include="Entities\Factories\DomainObjectMethodsConvention.cs" />
+    <Compile Include="Entities\Factories\DomainObjectOperationMethodsConvention.cs" />
     <Compile Include="Entities\Factories\DomainObjectPropertyImplementationConvention.cs" />
     <Compile Include="Entities\Factories\DomainPersistableCollectionCastStrategy.cs" />
     <Compile Include="Entities\Factories\DomainPersistableDelegationStrategy.cs" />
