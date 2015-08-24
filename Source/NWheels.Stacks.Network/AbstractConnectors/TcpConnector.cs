@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading;
 using NWheels.Endpoints;
 using NWheels.Concurrency;
+using NWheels.Processing.Messages;
 
 //AbstractConnector
 namespace NWheels.Stacks.Network
@@ -14,7 +15,7 @@ namespace NWheels.Stacks.Network
     }
 
 
-    public class TcpConnector : AbstractNetConnector
+    public class TcpConnector : AbstractNetBinaryConnector
     {
         protected Socket Socket;
         private readonly int _receiveBufferSize;
@@ -27,8 +28,8 @@ namespace NWheels.Stacks.Network
         private ITimeoutHandle _sendKeepAliveTimeOutHandle;
         private ITimeoutHandle _receiveKeepAliveTimeOutHandle;
         private UInt16 _receiveKeepAliveTimeOutCounter;
-        private const uint SendKeepAliveTimeOutValue = 20000;
-        private const uint ReceiveKeepAliveTimeOutValue = 40000;
+        private const uint SendKeepAliveTimeOutValue = 10000;
+        private const uint ReceiveKeepAliveTimeOutValue = 30000;
         private static readonly byte[] _s_keepAliveMessage = { 0x00, 0x00, 0x4E, 0x57, 0x4B, 0x41, 0x00, 0x00 };     // "\0 \0 N W K A \0 \0" NWheels Keep Alive
 
         //
@@ -261,23 +262,17 @@ namespace NWheels.Stacks.Network
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         internal TcpConnector(
-            TcpConnectorsManager cc,
+            TcpBinaryTransport cc,
             Socket s,
-            Int32 id,
             int receiveBufferSize,
             IConnectorClient connectorClient,
             NetworkApiEndpointRegistration registration,
             IFramework framework,
-            INetworkEndpointLogger logger)
-            : base(id, connectorClient, registration, logger)
+            INetworkEndpointLogger logger,
+            IServiceBus serviceBus)
+            : base(cc, connectorClient, registration, logger, serviceBus)
         {
             Socket = s;
-            ConnectorsManager = cc;
-            if (ConnectorsManager != null)
-            {
-                ConnectorsManager.RegisterConnector(this);
-            }
-
             _framework = framework;
             _receiveBufferSize = receiveBufferSize;
         }
@@ -416,14 +411,7 @@ namespace NWheels.Stacks.Network
                     //stop recv loop
                     return false;
                 }
-                if (m_MessagesDispatcher != null)
-                {
-                    m_MessagesDispatcher.EnqueueTask(DoOnRecv, buf);
-                }
-                else
-                {
-                    DoOnRecv(buf);
-                }
+                DoOnRecv(buf);
             }
             catch (Exception ex)
             {
@@ -480,27 +468,8 @@ namespace NWheels.Stacks.Network
 
         public void Connect(string addr, int port)
         {
-            //_waitHandle = new AutoResetEvent(false);
             Socket = TcpSocketsUtils.Connect(addr, port);
-            //send unique id
-            //TcpSocketsUtils.Send(Socket, Id.ToString(), AccOnSendId, OnExcp);
-            //_waitHandle.WaitOne();
-            //_waitHandle.Close();
-            //_waitHandle = null;
         }
-
-        //private void AccOnSendId()
-        //{
-        //    //need to read the server ID
-        //    TcpSocketsUtils.Recv(Socket, AccOnRecvId, OnExcp, _receiveBufferSize, false);
-        //}
-
-        //private bool AccOnRecvId(byte[] buf)
-        //{
-        //    //recv the server ID (and ignore it)
-        //    _waitHandle.Set();
-        //    return true;
-        //}
 
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////

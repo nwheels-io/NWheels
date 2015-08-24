@@ -7,8 +7,6 @@ namespace NWheels.Stacks.Network
 {
     public class TcpSocketsUtils
     {
-        public const int DefualtReceiveBufferSize = 1000;
-
         //----------- Send Section ---------------
         public delegate void OnSendDlgt();
         private class SendState
@@ -47,7 +45,7 @@ namespace NWheels.Stacks.Network
             }
         }
 
-        // Send a string on the given socket.
+        // Send a byte array on the given socket.
         // The onSocket delegate will be executed once the send action has ended
         public static void Send(Socket socket, byte[] bufferToSend, OnSendDlgt onSend, OnExcpDlgt onExcp)
         {
@@ -304,10 +302,10 @@ namespace NWheels.Stacks.Network
         }
 
         //----------- Connect Section ---------------
-        public static Socket Connect(string addr, int port)
+        public static Socket Connect(string remoteAddr, int port)
         {
             // Establish the remote endpoint for the socket.
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(addr);
+            IPHostEntry ipHostInfo = Dns.GetHostEntry(remoteAddr);
             IPAddress ipAddress = ipHostInfo.AddressList[0];
             IPEndPoint ep = new IPEndPoint(ipAddress, port);
 

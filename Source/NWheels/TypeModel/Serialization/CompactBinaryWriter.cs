@@ -4,7 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace NWheels.Endpoints.Core
+namespace NWheels.TypeModel.Serialization
 {
     public class CompactBinaryWriter : BinaryWriter
     {

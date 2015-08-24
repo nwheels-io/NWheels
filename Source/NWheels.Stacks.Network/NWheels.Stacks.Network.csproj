@@ -47,9 +47,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractConnectors\AbstractNetConnector.cs" />
-    <Compile Include="AbstractConnectors\AbstractNetConnectorsManager.cs" />
+    <Compile Include="AbstractConnectors\BinaryContentMessage.cs" />
+    <Compile Include="AbstractConnectors\NetConnectorsBinaryTransport.cs" />
+    <Compile Include="AbstractConnectors\TcpBinaryTransportConfiguration.cs" />
     <Compile Include="AbstractConnectors\TcpConnector.cs" />
-    <Compile Include="AbstractConnectors\TcpConnectorsManager.cs" />
+    <Compile Include="AbstractConnectors\TcpBinaryTransport.cs" />
     <Compile Include="AbstractConnectors\MessagesDispatcher.cs" />
     <Compile Include="AbstractConnectors\TcpSocketsUtils.cs" />
     <Compile Include="INetworkEndpointLogger.cs" />

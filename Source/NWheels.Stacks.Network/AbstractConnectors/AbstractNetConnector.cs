@@ -1,5 +1,7 @@
 ﻿using System;
 using NWheels.Endpoints;
+using NWheels.Processing.Messages;
+using NWheels.Stacks.Network.AbstractConnectors;
 
 namespace NWheels.Stacks.Network
 {
@@ -11,7 +13,7 @@ namespace NWheels.Stacks.Network
         void OnConnectionGracefulClose();
     }
 
-    public abstract class AbstractNetConnector : IDisposable
+    public abstract class AbstractNetBinaryConnector : IDisposable
     {
         //===============================================================
 
@@ -19,14 +21,15 @@ namespace NWheels.Stacks.Network
 
         //===============================================================
 
-        protected AbstractNetConnectorsManager ConnectorsManager;
+        protected NetConnectorsBinaryTransport ConnectorsManager;
         protected MessagesDispatcher m_MessagesDispatcher;
 
         private IConnectorClient _connectorClient;
+        protected IServiceBus _serviceBus;
         protected readonly NetworkApiEndpointRegistration Registration;
         protected readonly INetworkEndpointLogger Logger;
 
-        public static byte[] GracefulCloseMessage = { 0x00, 0x00, 0x4E, 0x57, 0x47, 0x43, 0x00, 0x00 }; // "\0 \0 N W G C \0 \0" NWheels Graceful Close
+        protected static byte[] GracefulCloseMessage = { 0x00, 0x00, 0x4E, 0x57, 0x47, 0x43, 0x00, 0x00 }; // "\0 \0 N W G C \0 \0" NWheels Graceful Close
 
 
         public bool IsDisposed { get; private set; }
@@ -36,15 +39,22 @@ namespace NWheels.Stacks.Network
 
         //===============================================================
 
-        protected AbstractNetConnector(int id, IConnectorClient connectorClient, NetworkApiEndpointRegistration registration, INetworkEndpointLogger logger)
+        protected AbstractNetBinaryConnector(NetConnectorsBinaryTransport connectorsManager,
+            IConnectorClient connectorClient,
+            NetworkApiEndpointRegistration registration,
+            INetworkEndpointLogger logger,
+            IServiceBus serviceBus)
         {
-            Id = id;
+            ConnectorsManager = connectorsManager;
             _connectorClient = connectorClient;
             Registration = registration;
             Logger = logger;
+            _serviceBus = serviceBus;
+
+            ConnectorsManager.RegisterConnector(this);
         }
 
-        ~AbstractNetConnector()
+        ~AbstractNetBinaryConnector()
         {
             Dispose(false);
         }
@@ -63,7 +73,11 @@ namespace NWheels.Stacks.Network
         public abstract byte[] GetRemoteIpAddress();
         public abstract string GetRemoteIpAddressAsString();
         //-----------------
-        protected internal void DoOnRecv(object o) { byte[] buf = o as byte[]; _connectorClient.OnPacketReceived(buf); }
+        protected internal void DoOnRecv(byte[] buf)
+        {
+            BinaryContentMessage message  = new BinaryContentMessage(buf, null); // _serializer);
+            _connectorClient.OnPacketReceived(buf);
+        }
         protected internal void DoOnExcp(object o) { Exception e = o as Exception; _connectorClient.OnConnectionException(e); }
         protected internal void DoOnGracefulClose() { _connectorClient.OnConnectionGracefulClose(); }
 
@@ -75,7 +89,7 @@ namespace NWheels.Stacks.Network
         }
 
         //-----------------
-        public Int32 Id { get; private set; }
+        public Int32 Id { get; internal set; }
 
         #region IDisposable Members
 
@@ -94,11 +108,7 @@ namespace NWheels.Stacks.Network
             if (disposing)
             {
                 // Release managed resources.
-                if (ConnectorsManager != null)
-                {
-                    ConnectorsManager.UnregisterConnector(this);
-                    ConnectorsManager = null;
-                }
+                ConnectorsManager.UnregisterConnector(this);
             }
         }
 

@@ -107,10 +107,16 @@
     <Compile Include="Concurrency\ITimeoutHandle.cs" />
     <Compile Include="Concurrency\IResourceConsumerScopeHandle.cs" />
     <Compile Include="Concurrency\PerContextResourceConsumerScope.cs" />
+    <Compile Include="Configuration\ConfiguredComponentAttribute.cs" />
     <Compile Include="Core\ICoreFramework.cs" />
     <Compile Include="Core\UnitOfWorkFactory.cs" />
     <Compile Include="Endpoints\Core\IEndpoint.cs" />
     <Compile Include="Entities\Core\IDomainContextLogger.cs" />
+    <Compile Include="Endpoints\INetworkEndpointTransport.cs" />
+    <Compile Include="Endpoints\IAbstractNetwrokTransportConfig.cs" />
+    <Compile Include="Endpoints\INetworkProtocolConfigContainer.cs" />
+    <Compile Include="TypeModel\Serialization\BinarySerializer.cs" />
+    <Compile Include="TypeModel\Serialization\IObjectSerializer.cs" />
     <Compile Include="Entities\Core\IDomainObject.cs" />
     <Compile Include="Entities\Core\IEntityObjectBase.cs" />
     <Compile Include="Entities\Core\IPersistableObject.cs" />
@@ -206,8 +212,8 @@
     <Compile Include="TypeModel\Core\DelegatingTransformingEnumerable.cs" />
     <Compile Include="TypeModel\Core\TransformingEnumerator.cs" />
     <Compile Include="TypeModel\Core\TypeMetadataVisitorBase.cs" />
-    <Compile Include="Endpoints\Core\CompactBinaryReader.cs" />
-    <Compile Include="Endpoints\Core\CompactBinaryWriter.cs" />
+    <Compile Include="TypeModel\Serialization\CompactBinaryReader.cs" />
+    <Compile Include="TypeModel\Serialization\CompactBinaryWriter.cs" />
     <Compile Include="Endpoints\HttpOperationAttribute.cs" />
     <Compile Include="Endpoints\HttpOperationVerbs.cs" />
     <Compile Include="Entities\Core\IDataRepositoryCallback.cs" />
@@ -233,6 +239,7 @@
     <Compile Include="Processing\Messages\IServiceBus.cs" />
     <Compile Include="Processing\Messages\MessageActionHeader.cs" />
     <Compile Include="Processing\Messages\MessageIdHeader.cs" />
+    <Compile Include="TypeModel\Serialization\IObjectSerializerConfigContainer.cs" />
     <Compile Include="UI\AuthorizationContract.cs" />
     <Compile Include="UI\ServerSide\EntityChangeSetMessage.cs" />
     <Compile Include="UI\ServerSide\EntityCommandMessage.cs" />

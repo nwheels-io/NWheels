@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using NWheels.Endpoints;
 using NWheels.Hosting;
+using NWheels.Processing.Messages;
 
 namespace NWheels.Stacks.Network
 {
@@ -10,17 +11,23 @@ namespace NWheels.Stacks.Network
         private readonly IComponentContext _components;
         private readonly INetworkEndpointLogger _logger;
         private readonly IFramework _framework;
+        private readonly IServiceBus _serviceBus;
 
-        private AbstractNetConnectorsManager ConnectorsManager;
+        private NetConnectorsBinaryTransport ConnectorsManager;
 
-        public NetworkEndpointComponent(IComponentContext components, NetworkApiEndpointRegistration registration, INetworkEndpointLogger logger, IFramework framework)
+        public NetworkEndpointComponent(IAbstractNetwrokTransportConfig transportConfiguration,
+            IComponentContext components,
+            NetworkApiEndpointRegistration registration,
+            INetworkEndpointLogger logger,
+            IFramework framework,
+            IServiceBus serviceBus)
         {
             _logger = logger;
             _framework = framework;
             _components = components;
             _registration = registration;
-            // -=-= Eli: Todo: Decide upon Id and other parameters
-            ConnectorsManager = new TcpConnectorsManager(0, TcpConnectorsManager.AddressListenMode.External, TcpSocketsUtils.DefualtReceiveBufferSize, registration, components, _logger, _framework);
+            _serviceBus = serviceBus;
+            ConnectorsManager = new TcpBinaryTransport(transportConfiguration, registration, components, _logger, _framework, _serviceBus);
         }
 
         public override void Activate()
@@ -29,7 +36,7 @@ namespace NWheels.Stacks.Network
 
             _logger.NetworkEndpointListening(_registration.Address.ToString(), _registration.Contract.FullName);
             // open socket for listening
-            ConnectorsManager.StartListening(_registration.Address.Port, true);
+            ConnectorsManager.StartListening(); // _registration.Address.Port ???
         }
 
         public override void Deactivate()

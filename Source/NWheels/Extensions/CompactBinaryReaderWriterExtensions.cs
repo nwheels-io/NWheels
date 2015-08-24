@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using NWheels.Endpoints.Core;
+using NWheels.TypeModel.Serialization;
 
 namespace NWheels.Extensions
 {

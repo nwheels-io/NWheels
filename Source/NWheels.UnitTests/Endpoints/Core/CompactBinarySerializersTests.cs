@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using NWheels.Endpoints.Core;
+using NWheels.TypeModel.Serialization;
 using NWheels.Extensions;
 
 namespace NWheels.UnitTests.Endpoints.Core
