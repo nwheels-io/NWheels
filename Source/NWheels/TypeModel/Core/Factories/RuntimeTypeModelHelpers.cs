@@ -24,7 +24,10 @@ namespace NWheels.TypeModel.Core.Factories
         {
             if ( obj != null )
             {
-                nestedObjects.Add(obj);
+                if ( !nestedObjects.Add(obj) )
+                {
+                    return;
+                }
 
                 var hasNestedObjects = obj as IHaveNestedObjects;
 
@@ -43,7 +46,10 @@ namespace NWheels.TypeModel.Core.Factories
             {
                 foreach ( var item in collection )
                 {
-                    nestedObjects.Add(item);
+                    if ( !nestedObjects.Add(item) )
+                    {
+                        continue;
+                    }
 
                     var hasNestedObjects = item as IHaveNestedObjects;
 

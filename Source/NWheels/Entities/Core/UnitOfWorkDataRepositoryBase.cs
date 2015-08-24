@@ -98,6 +98,13 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected override IEnumerable<IEntityObject> GetCurrentChangeSet()
+        {
+            return _insertBatch.Concat(_updateBatch).Concat(_deleteBatch);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected HashSet<IEntityObject> InsertBatch
         {
             get { return _insertBatch; }

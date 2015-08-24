@@ -113,5 +113,34 @@ namespace NWheels.Entities.Factories
                 entityRepository.Delete(domainObject);
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool IsDomainObjectModified(object obj)
+        {
+            var domainObject = obj.AsOrNull<IDomainObject>();
+            return (domainObject == null || domainObject.IsModified);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static TContract GetNestedDomainObject<TContract>(object nestedPersistableObject, IDomainObjectFactory domainObjectFactory)
+            where TContract : class
+        {
+            if ( nestedPersistableObject == null )
+            {
+                return null;
+            }
+
+            var containedObject = (TContract)nestedPersistableObject;
+            var containerObject = (TContract)((IPersistableObject)nestedPersistableObject).GetContainerObject();
+            
+            if ( containerObject != null )
+            {
+                return containerObject;
+            }
+
+            return domainObjectFactory.CreateDomainObjectInstance<TContract>(containedObject);
+        }
     }
 }

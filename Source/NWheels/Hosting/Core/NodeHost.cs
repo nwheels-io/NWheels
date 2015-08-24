@@ -288,6 +288,7 @@ namespace NWheels.Hosting.Core
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<INodeHostLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<TransientStateMachine<NodeState, NodeTrigger>.ILogger>();
+            builder.NWheelsFeatures().Logging().RegisterLogger<IDomainContextLogger>();
 
             builder.RegisterPipeline<IMetadataConvention>().SingleInstance();
             builder.RegisterPipeline<IRelationalMappingConvention>().SingleInstance();

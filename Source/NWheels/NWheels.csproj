@@ -110,6 +110,7 @@
     <Compile Include="Core\ICoreFramework.cs" />
     <Compile Include="Core\UnitOfWorkFactory.cs" />
     <Compile Include="Endpoints\Core\IEndpoint.cs" />
+    <Compile Include="Entities\Core\IDomainContextLogger.cs" />
     <Compile Include="Entities\Core\IDomainObject.cs" />
     <Compile Include="Entities\Core\IEntityObjectBase.cs" />
     <Compile Include="Entities\Core\IPersistableObject.cs" />
@@ -232,6 +233,7 @@
     <Compile Include="UI\Toolbox\CrudForm.cs" />
     <Compile Include="UI\Toolbox\HorizontalStack.cs" />
     <Compile Include="Utilities\AssemblyUtility.cs" />
+    <Compile Include="Utilities\EnumerableUtility.cs" />
     <Compile Include="Utilities\ExpressionUtility.cs" />
     <Compile Include="Utilities\SecureStringUtility.cs" />
     <Compile Include="SecurityCheck.cs" />

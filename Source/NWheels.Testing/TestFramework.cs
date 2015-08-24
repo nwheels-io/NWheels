@@ -355,6 +355,7 @@ namespace NWheels.Testing
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
             
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
+            builder.NWheelsFeatures().Logging().RegisterLogger<IDomainContextLogger>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkDatabaseConfig>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkLoggingConfiguration>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkEndpointsConfig>();

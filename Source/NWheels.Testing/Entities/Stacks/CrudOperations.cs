@@ -2,6 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 using NWheels.Entities;
+using NWheels.Entities.Core;
 using NWheels.Extensions;
 using IR1 = NWheels.Testing.Entities.Stacks.Interfaces.Repository1;
 
@@ -358,6 +359,8 @@ namespace NWheels.Testing.Entities.Stacks
                     var order2 = repo.Orders.Single(o => o.OrderNo == "ORD002");
                     order2.Status = Interfaces.Repository1.OrderStatus.PaymentReceived;
                     repo.Orders.Update(order2);
+
+                    var state = order1.As<IDomainObject>().State;
 
                     repo.CommitChanges();
                 }

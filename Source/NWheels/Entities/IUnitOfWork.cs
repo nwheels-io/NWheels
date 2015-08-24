@@ -9,7 +9,7 @@ namespace NWheels.Entities
     public interface IUnitOfWork : IDisposable
     {
         void CommitChanges();
-        void RollbackChanges();
+        //void RollbackChanges();
         bool IsAutoCommitMode { get; }
         UnitOfWorkState UnitOfWorkState { get; }
     }

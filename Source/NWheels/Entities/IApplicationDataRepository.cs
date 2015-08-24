@@ -14,5 +14,6 @@ namespace NWheels.Entities
         Type[] GetEntityContractsInRepository();
         IEntityRepository[] GetEntityRepositories();
         IEntityRepository GetEntityRepository(Type entityContractType);
+        bool TryGetEntityRepository(Type entityContractType, out IEntityRepository entityRepository);
     }
 }

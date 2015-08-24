@@ -10,11 +10,11 @@ namespace NWheels.UI
 {
     public abstract class DomainApiBase
     {
-        private readonly ViewModelObjectFactory _objectFactory;
+        private readonly IViewModelObjectFactory _objectFactory;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected DomainApiBase(ViewModelObjectFactory objectFactory)
+        protected DomainApiBase(IViewModelObjectFactory objectFactory)
         {
             _objectFactory = objectFactory;
         }

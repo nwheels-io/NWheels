@@ -4,7 +4,9 @@ using System.Data.Common;
 using System.Linq;
 using Autofac;
 using NWheels.Concurrency;
+using NWheels.DataObjects.Core;
 using NWheels.Extensions;
+using NWheels.Logging;
 
 namespace NWheels.Entities.Core
 {
@@ -13,6 +15,7 @@ namespace NWheels.Entities.Core
         private readonly Dictionary<Type, IEntityRepository> _entityRepositoryByContractType;
         private readonly Dictionary<Type, Action<IDataRepositoryCallback>> _genericCallbacksByContractType;
         private readonly IComponentContext _components;
+        private readonly IDomainContextLogger _logger;
         private readonly bool _autoCommit;
         private readonly IResourceConsumerScopeHandle _consumerScope;
         private UnitOfWorkState _currentState;
@@ -27,6 +30,7 @@ namespace NWheels.Entities.Core
             _genericCallbacksByContractType = new Dictionary<Type, Action<IDataRepositoryCallback>>();
             _autoCommit = autoCommit;
             _components = components;
+            _logger = components.Resolve<IDomainContextLogger>();
             _currentState = UnitOfWorkState.Untouched;
             _componentLifetimeScope = null;
             _consumerScope = consumerScope;
@@ -61,7 +65,14 @@ namespace NWheels.Entities.Core
             if ( _consumerScope == null || _consumerScope.IsInnermost )
             {
                 ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
-                OnCommitChanges();
+
+                var changeSet = GetCurrentChangeSet().ToArray();
+
+                ExecuteValidationPhase(changeSet);
+                ExecuteBeforeSavePhase(changeSet);
+                ExecuteCommitToPersistenceLayer();
+                ExecuteAfterSavePhase(changeSet);
+
                 _currentState = UnitOfWorkState.Committed;
             }
         }
@@ -95,24 +106,36 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEntityRepository GetEntityRepository(Type contractType)
+        public IEntityRepository GetEntityRepository(Type entityContractType)
         {
             IEntityRepository repository;
 
-            if ( _entityRepositoryByContractType.TryGetValue(contractType, out repository) )
+            if ( TryGetEntityRepository(entityContractType, out repository) )
             {
                 return repository;
             }
 
-            foreach ( var baseContractType in contractType.GetInterfaces().Where(intf => intf.IsEntityContract()) )
+            throw new KeyNotFoundException("Entity repository for contract '" + entityContractType.FullName + "' could not be found in the data repository.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool TryGetEntityRepository(Type entityContractType, out IEntityRepository entityRepository)
+        {
+            if ( _entityRepositoryByContractType.TryGetValue(entityContractType, out entityRepository) )
             {
-                if ( _entityRepositoryByContractType.TryGetValue(baseContractType, out repository) )
+                return true;
+            }
+
+            foreach ( var baseContractType in entityContractType.GetInterfaces().Where(intf => intf.IsEntityContract()) )
+            {
+                if ( _entityRepositoryByContractType.TryGetValue(baseContractType, out entityRepository) )
                 {
-                    return repository;
+                    return true;
                 }
             }
 
-            throw new KeyNotFoundException("Entity repository for contract '" + contractType.FullName + "' could not be found in the data repository.");
+            return false;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -147,6 +170,7 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected abstract IEnumerable<IEntityObject> GetCurrentChangeSet();
         protected abstract void OnCommitChanges();
         protected abstract void OnRollbackChanges();
 
@@ -160,6 +184,8 @@ namespace NWheels.Entities.Core
             {
                 if ( !_disposed && (_consumerScope == null || _consumerScope.Innermost.IsOutermost) )
                 {
+                    _logger.EndOfRootUnitOfWork(this.ToString());
+
                     if ( _currentState == UnitOfWorkState.Dirty )
                     {
                         if ( _autoCommit )
@@ -173,6 +199,10 @@ namespace NWheels.Entities.Core
                     }
 
                     shouldDisposeResourcesNow = true;
+                }
+                else
+                {
+                    _logger.EndOfNestedUnitOfWork(this.ToString());
                 }
             }
             finally
@@ -220,6 +250,175 @@ namespace NWheels.Entities.Core
 
             _componentLifetimeScope.Dispose();
             _componentLifetimeScope = null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void ExecuteValidationPhase(IEnumerable<object> changedEntities)
+        {
+            using ( var activity = _logger.ExecutingValidationPhase() )
+            {
+                try
+                {
+                    VisitDomainObjects(
+                        changedEntities, 
+                        predicate: ShouldValidateDomainObject, 
+                        action: ValidateDomainObject, 
+                        logFactory: obj => _logger.ValidateObject(obj.ToString()));
+                }
+                catch ( Exception e )
+                {
+                    activity.Fail(e);
+                    throw;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void ExecuteBeforeSavePhase(IEnumerable<object> changedEntities)
+        {
+            using ( var activity = _logger.ExecutingBeforeSavePhase() )
+            {
+                try
+                {
+                    VisitDomainObjects(
+                        changedEntities, 
+                        predicate: null, 
+                        action: BeforeSaveDomainObject, 
+                        logFactory: obj => _logger.BeforeSaveObject(obj.ToString()));
+                }
+                catch ( Exception e )
+                {
+                    activity.Fail(e);
+                    throw;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ExecuteCommitToPersistenceLayer()
+        {
+            using ( var activity = _logger.CommittingChangesToPersistenceLayer() )
+            {
+                try
+                {
+                    OnCommitChanges();
+                }
+                catch ( Exception e )
+                {
+                    activity.Fail(e);
+                    throw;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void ExecuteAfterSavePhase(IEnumerable<object> changedEntities)
+        {
+            using ( var activity = _logger.ExecutingAfterSavePhase() )
+            {
+                try
+                {
+                    VisitDomainObjects(
+                        changedEntities, 
+                        predicate: null,
+                        action: AfterSaveDomainObject, 
+                        logFactory: obj => _logger.AfterSaveObject(obj.ToString()));
+                }
+                catch ( Exception e )
+                {
+                    activity.Fail(e);
+                    throw;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected void VisitDomainObjects(
+            IEnumerable<object> persistableOrDomainObjects,
+            Func<IDomainObject, bool> predicate,
+            Action<IDomainObject> action, 
+            Func<object, ILogActivity> logFactory)
+        {
+            foreach ( var domainObject in persistableOrDomainObjects.Select(e => e.As<IDomainObject>()) )
+            {
+                if ( predicate == null || predicate(domainObject) )
+                {
+                    VisitSingleDomainObject(domainObject, action, logFactory);
+
+                    var haveNestedObjects = domainObject as IHaveNestedObjects;
+
+                    if ( haveNestedObjects != null )
+                    {
+                        try
+                        {
+                            var nestedObjects = new HashSet<object>();
+                            haveNestedObjects.DeepListNestedObjects(nestedObjects);
+
+                            foreach ( var nestedDomainObject in 
+                                nestedObjects.Select(e => e.As<IDomainObject>()).Where(obj => predicate == null || predicate(obj)) )
+                            {
+                                VisitSingleDomainObject(nestedDomainObject, action, logFactory);
+                            }
+                        }
+                        catch ( Exception e )
+                        {
+                            _logger.FailedToVisitNestedObjects(e);
+                        }
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void VisitSingleDomainObject(IDomainObject obj, Action<IDomainObject> action, Func<object, ILogActivity> logFactory)
+        {
+            using ( var activity = logFactory(obj) )
+            {
+                try
+                {
+                    action(obj);
+                }
+                catch ( Exception e )
+                {
+                    activity.Fail(e);
+                    throw;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool ShouldValidateDomainObject(IDomainObject obj)
+        {
+            var state = obj.State;
+            return (state != EntityState.RetrievedPristine && !state.IsDeleted());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ValidateDomainObject(IDomainObject obj)
+        {
+            obj.Validate();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void BeforeSaveDomainObject(IDomainObject obj)
+        {
+            obj.BeforeSave();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void AfterSaveDomainObject(IDomainObject obj)
+        {
+            obj.AfterSave();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

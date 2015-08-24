@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -24,6 +25,7 @@ namespace NWheels.Entities.Factories
     {
         private readonly IComponentContext _components;
         private readonly ITypeMetadataCache _metadataCache;
+        private readonly ConcurrentDictionary<Type, PolymorphicActivator> _polymorphicActivatorByConcreteContract;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -32,6 +34,7 @@ namespace NWheels.Entities.Factories
         {
             _components = components;
             _metadataCache = metadataCache;
+            _polymorphicActivatorByConcreteContract = new ConcurrentDictionary<Type, PolymorphicActivator>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,11 +49,24 @@ namespace NWheels.Entities.Factories
 
         public TEntityContract CreateDomainObjectInstance<TEntityContract>(TEntityContract underlyingPersistableObject)
         {
-            var typeEntry = GetOrBuildDomainObjectTypeEntry(
-                contractType: typeof(TEntityContract), 
-                persistableFactoryType: underlyingPersistableObject.As<IObject>().FactoryType);
-            
-            return typeEntry.CreateInstance<TEntityContract, TEntityContract, IComponentContext>(0, underlyingPersistableObject, _components);
+            var persistableContractType = ((IObject)underlyingPersistableObject).ContractType;
+            var persistableFactoryType = ((IObject)underlyingPersistableObject).FactoryType;
+
+            var typeEntry = GetOrBuildDomainObjectTypeEntry(persistableContractType, persistableFactoryType);
+            TEntityContract domainObjectInstance;
+
+            if ( typeof(TEntityContract) == persistableContractType )
+            {
+                domainObjectInstance = typeEntry
+                    .CreateInstance<TEntityContract, TEntityContract, IComponentContext>(0, underlyingPersistableObject, _components);
+            }
+            else
+            {
+                domainObjectInstance = GetOrAddPolymorphicActivator(persistableContractType)
+                    .CreateConcreteInstance<TEntityContract>(typeEntry, 0, underlyingPersistableObject, _components);
+            }
+
+            return domainObjectInstance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -126,6 +142,13 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private PolymorphicActivator GetOrAddPolymorphicActivator(Type concreteContract)
+        {
+            return _polymorphicActivatorByConcreteContract.GetOrAdd(concreteContract, key => PolymorphicActivator.Create(concreteContract));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class TemplateTypes
         {
             public interface TDomain : TypeTemplate.ITemplateType<TDomain>, IContain<TPersistable>
@@ -139,6 +162,39 @@ namespace NWheels.Entities.Factories
             }
             public interface TPersistableItem : TypeTemplate.ITemplateType<TPersistableItem>, IContainedIn<TDomainItem>
             {
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private abstract class PolymorphicActivator
+        {
+            public abstract TBaseContract CreateConcreteInstance<TBaseContract>(
+                TypeEntry typeEntry,
+                int constructorIndex,
+                TBaseContract persistableObject,
+                IComponentContext components);
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static PolymorphicActivator Create(Type concreteContract)
+            {
+                var closedType = typeof(PolymorphicActivator<>).MakeGenericType(concreteContract);
+                var instance = Activator.CreateInstance(closedType);
+                return (PolymorphicActivator)instance;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class PolymorphicActivator<TConcreteContract> : PolymorphicActivator
+        {
+            public override TBaseContract CreateConcreteInstance<TBaseContract>(TypeEntry typeEntry, int constructorIndex, TBaseContract persistableObject, IComponentContext components)
+            {
+                return (TBaseContract)(object)typeEntry.CreateInstance<TConcreteContract, TConcreteContract, IComponentContext>(
+                    0, 
+                    (TConcreteContract)(object)persistableObject, 
+                    components);
             }
         }
     }

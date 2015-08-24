@@ -32,7 +32,7 @@ namespace NWheels.Domains.Security
         [PropertyContract.Required, PropertyContract.Validation.Length(min: 2, max: 100)]
         string FullName { get; set; }
 
-        [PropertyContract.Required, PropertyContract.Semantic.EmailAddress]
+        [/*PropertyContract.Required, */PropertyContract.Semantic.EmailAddress]
         string EmailAddress { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ namespace NWheels.Domains.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Required, PropertyContract.WriteOnly, PropertyContract.Security.Sensitive]
+        [/*PropertyContract.Required, */PropertyContract.WriteOnly, PropertyContract.Security.Sensitive]
         string ClearText { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -105,8 +105,8 @@ namespace NWheels.Domains.Security
     [EntityPartContract]
     public interface IEntityPartClaim
     {
-        [PropertyContract.Required(AllowEmpty = false)]
-        string ClaimValueType { get; set; }
+        //[PropertyContract.Required(AllowEmpty = false)]
+        //string ClaimValueType { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

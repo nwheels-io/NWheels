@@ -140,16 +140,16 @@ namespace NWheels.Testing.Entities.Stacks
             [EntityPartContract]
             public interface IPostalAddress
             {
-                [PropertyContract.Required]
+                //[PropertyContract.Required]
                 string StreetAddress { get; set; }
                 
-                [PropertyContract.Required]
+                //[PropertyContract.Required]
                 string City { get; set; }
                 
-                [PropertyContract.Required]
+                //[PropertyContract.Required]
                 string ZipCode { get; set; }
                 
-                [PropertyContract.Required]
+                //[PropertyContract.Required]
                 string Country { get; set; }
             }
 

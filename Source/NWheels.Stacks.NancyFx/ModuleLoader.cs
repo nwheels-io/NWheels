@@ -28,7 +28,7 @@ namespace NWheels.Stacks.NancyFx
 
             builder.RegisterType<WebModuleLoggingHook>().SingleInstance();
 
-            builder.RegisterType<ViewModelObjectFactory>().SingleInstance();
+            builder.RegisterType<ViewModelObjectFactory>().As<ViewModelObjectFactory, IViewModelObjectFactory>().SingleInstance();
             builder.RegisterType<WebApiDispatcherFactory>().SingleInstance();
 
             StaticConfiguration.Caching.EnableRuntimeViewDiscovery = true;

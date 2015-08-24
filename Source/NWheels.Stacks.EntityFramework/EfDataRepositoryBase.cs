@@ -1,6 +1,8 @@
-﻿using System.Data.Common;
+﻿using System.Collections.Generic;
+using System.Data.Common;
 using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Infrastructure;
+using System.Linq;
 using Autofac;
 using NWheels.Concurrency;
 using NWheels.Conventions.Core;
@@ -78,6 +80,23 @@ namespace NWheels.Stacks.EntityFramework
             {
                 return _objectContext;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override IEnumerable<IEntityObject> GetCurrentChangeSet()
+        {
+            var changeEntityStates = 
+                System.Data.Entity.EntityState.Added | 
+                System.Data.Entity.EntityState.Modified | 
+                System.Data.Entity.EntityState.Deleted;
+
+            var changeSet = _objectContext.ObjectStateManager.GetObjectStateEntries(changeEntityStates)
+                .Where(entry => entry.Entity != null)
+                .Select(entry => entry.Entity)
+                .Cast<IEntityObject>();
+
+            return changeSet;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

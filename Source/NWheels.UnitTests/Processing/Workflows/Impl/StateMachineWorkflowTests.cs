@@ -32,6 +32,7 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
 
             LogAssert.That(Framework.GetLog()).HasNoErrorsOrWarnings();
             LogAssert.That(Framework.GetLog()).Matches(Logex.Begin()
+                .ZeroOrMore().AnyMessage()
                 .One().Message<IWorkflowEngineLogger>(x => x.ProcessorRunning())
                 .One().Message<IWorkflowEngineLogger>(x => x.ExecutingActor(TestWorkflows.OrderItemState.PaymentConfirmationPending.ToString()))
                 .One().Message<TestWorkflows.IOrderItemLogger>(x => x.PaymentConfirmationPending())

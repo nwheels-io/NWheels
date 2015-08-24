@@ -7,6 +7,7 @@ using Autofac;
 using NWheels.Concurrency;
 using NWheels.Entities;
 using NWheels.Entities.Core;
+using NWheels.Extensions;
 
 namespace NWheels.Testing.Entities.Impl
 {
@@ -22,6 +23,26 @@ namespace NWheels.Testing.Entities.Impl
         public void ResetState()
         {
             base.ResetCurrentState(UnitOfWorkState.Untouched);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override IEnumerable<IEntityObject> GetCurrentChangeSet()
+        {
+            IEnumerable<IEntityObject> changeSet = new IEntityObject[0];
+
+            foreach ( var entityRepo in GetEntityRepositories().Where(repo => repo != null) )
+            {
+                var storedEntityObjects = ((System.Collections.IEnumerable)entityRepo).Cast<object>()
+                    .Select(obj => obj.As<IPersistableObject>())
+                    .Cast<IEntityObject>()
+                    .ToArray();
+                
+                var changedEntityObjects = storedEntityObjects.Where(e => e.As<IDomainObject>().State != EntityState.RetrievedPristine);
+                changeSet = changeSet.Concat(changedEntityObjects);
+            }
+
+            return changeSet;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

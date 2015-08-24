@@ -45,31 +45,48 @@ namespace NWheels.Entities.Factories
                 p => baseProperty.CanRead
                     ? p.Get(gw => {
                         base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
-                        
-                        var domainObjectLocal = gw.Local<TT.TProperty>();
-                        domainObjectLocal.Assign(
-                            _context.PersistableObjectField
-                            .Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo)
-                            .CastTo<IPersistableObject>()
-                            .Func<IDomainObject>(x => x.GetContainerObject)
-                            .CastTo<TT.TProperty>());
 
-                        gw.If(domainObjectLocal.IsNotNull()).Then(() => {
-                            gw.Return(domainObjectLocal);
-                        }).Else(() => {
-                            gw.Return(
-                                _context.DomainObjectFactoryField.Func<TT.TProperty, TT.TProperty>(
-                                    x => x.CreateDomainObjectInstance,
-                                    _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo))
-                            );
-                        });
-
-                        gw.Return(
+                        var persistableObjectLocal = gw.Local<object>();
+                        persistableObjectLocal.Assign(
                             _context.PersistableObjectField
-                            .Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo)
-                            .CastTo<IContainedIn<IDomainObject>>()
-                            .Func<IDomainObject>(x => x.GetContainerObject)
-                            .CastTo<TT.TProperty>());
+                            .Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo));
+
+                        gw.Return(Static.GenericFunc((o, f) => RuntimeEntityModelHelpers.GetNestedDomainObject<TT.TProperty>(o, f), 
+                            persistableObjectLocal, 
+                            _context.DomainObjectFactoryField));
+
+
+                        //    .CastTo<IPersistableObject>());
+
+                        //gw.If(persistableObjectLocal.IsNull()).Then(() => {
+                        //    gw.Return(gw.Const<TT.TProperty>(null));        
+                        //});
+
+                        //var domainObjectLocal = gw.Local<TT.TProperty>();
+                        //domainObjectLocal.Assign(
+                        //    //_context.PersistableObjectField
+                        //    //.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo)
+                        //    //.CastTo<IPersistableObject>()
+                        //    persistableObjectLocal
+                        //    .Func<IDomainObject>(x => x.GetContainerObject)
+                        //    .CastTo<TT.TProperty>());
+
+                        //gw.If(domainObjectLocal.IsNotNull()).Then(() => {
+                        //    gw.Return(domainObjectLocal);
+                        //}).Else(() => {
+                        //    gw.Return(
+                        //        _context.DomainObjectFactoryField.Func<TT.TProperty, TT.TProperty>(
+                        //            x => x.CreateDomainObjectInstance,
+                        //            _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo))
+                        //    );
+                        //});
+
+                        //gw.Return(
+                        //    _context.PersistableObjectField
+                        //    .Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo)
+                        //    .CastTo<IContainedIn<IDomainObject>>()
+                        //    .Func<IDomainObject>(x => x.GetContainerObject)
+                        //    .CastTo<TT.TProperty>());
                     })
                     : null,
                 p => baseProperty.CanWrite
@@ -119,13 +136,15 @@ namespace NWheels.Entities.Factories
 
         protected override void OnWritingReturnTrueIfModified(FunctionMethodWriter<bool> functionWriter)
         {
-            using ( TT.CreateScope<TT.TContract>(MetaType.ContractType) )
+            if ( MetaProperty.Relation.ThisPartyKind != RelationPartyKind.Dependent )
             {
-                functionWriter.Return(
-                    functionWriter.This<TT.TContract>()
-                    .Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo)
-                    .CastTo<IObject>()
-                    .Prop(x => x.IsModified));
+                using ( TT.CreateScope<TT.TContract>(MetaType.ContractType) )
+                {
+                    functionWriter.Return(
+                        Static.Func(
+                            RuntimeEntityModelHelpers.IsDomainObjectModified,
+                            functionWriter.This<TT.TContract>().Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo)));
+                }
             }
         }
 

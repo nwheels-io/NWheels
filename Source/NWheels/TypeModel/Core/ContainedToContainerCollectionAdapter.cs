@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects.Core;
 using NWheels.Extensions;
+using NWheels.Utilities;
 
 namespace NWheels.TypeModel.Core
 {
@@ -118,6 +119,11 @@ namespace NWheels.TypeModel.Core
 
         public IEnumerator<TContainerContract> GetEnumerator()
         {
+            if ( _innerCollection == null )
+            {
+                return EnumerableUtility.GetEmptyEnumerator<TContainerContract>();
+            }
+
             return new DelegatingTransformingEnumerator<TContainedContract, TContainerContract>(
                 _innerCollection.GetEnumerator(), 
                 ContainedContractToContainerContract);
@@ -180,7 +186,7 @@ namespace NWheels.TypeModel.Core
                 return (
                     _added != null || 
                     _removed != null || 
-                    _innerCollection.Cast<TContained>().Any(IsItemModified));
+                    (_innerCollection != null && _innerCollection.Cast<TContained>().Any(IsItemModified)));
             }
         }
 

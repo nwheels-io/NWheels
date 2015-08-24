@@ -12,7 +12,11 @@ using NWheels.TypeModel.Core.Factories;
 
 namespace NWheels.UI.ServerSide
 {
-    public class ViewModelObjectFactory : EntityObjectFactory
+    public interface IViewModelObjectFactory : IEntityObjectFactory
+    {
+    }
+
+    public class ViewModelObjectFactory : EntityObjectFactory, IViewModelObjectFactory
     {
         public ViewModelObjectFactory(IComponentContext components, DynamicModule module, TypeMetadataCache metadataCache)
             : base(components, module, metadataCache)
