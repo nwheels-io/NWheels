@@ -149,11 +149,21 @@ namespace NWheels.UI.Toolbox
             public ItemAction(DescribeActionCallback onDescribe)
             {
                 this.OnDescribe = onDescribe;
+                this.Authorization = new UidlAuthorization();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public ItemAction UserRoles(params string[] roles)
+            {
+                Authorization.RequiredClaims.UnionWith(roles ?? new string[0]);
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+             
             public DescribeActionCallback OnDescribe { get; private set; }
+            public UidlAuthorization Authorization { get; private set; }
         }
     }
 
@@ -162,6 +172,10 @@ namespace NWheels.UI.Toolbox
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
     public class MenuItem : WidgetBase<MenuItem, Empty.Data, Empty.State>
     {
+        private Menu.ItemAction _action;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public MenuItem(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
@@ -199,7 +213,22 @@ namespace NWheels.UI.Toolbox
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        internal Menu.ItemAction Action { get; set; }
+
+        internal Menu.ItemAction Action
+        {
+            get
+            {
+                return _action;
+            }
+            set
+            {
+                _action = value;
+
+                if ( value != null )
+                {
+                    this.Authorization.RequiredClaims.UnionWith(value.Authorization.RequiredClaims);
+                }
+            }
+        }
     }
 }

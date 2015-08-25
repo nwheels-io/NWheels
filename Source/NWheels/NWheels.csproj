@@ -223,6 +223,7 @@
     <Compile Include="UI\AuthorizationContract.cs" />
     <Compile Include="UI\ServerSide\EntityChangeSetMessage.cs" />
     <Compile Include="UI\ServerSide\EntityCommandMessage.cs" />
+    <Compile Include="UI\Toolbox\CrudScreenPart.cs" />
     <Compile Include="UI\Toolbox\Report.cs" />
     <Compile Include="UI\ServerSide\ViewModelObjectFactory.cs" />
     <Compile Include="UI\ServerSide\TransactionScriptCommandMessage.cs" />
@@ -232,6 +233,7 @@
     <Compile Include="UI\Toolbox\Crud.cs" />
     <Compile Include="UI\Toolbox\CrudForm.cs" />
     <Compile Include="UI\Toolbox\HorizontalStack.cs" />
+    <Compile Include="UI\Uidl\UidlAuthorization.cs" />
     <Compile Include="Utilities\AssemblyUtility.cs" />
     <Compile Include="Utilities\EnumerableUtility.cs" />
     <Compile Include="Utilities\ExpressionUtility.cs" />

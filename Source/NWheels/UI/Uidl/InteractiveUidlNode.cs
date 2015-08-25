@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace NWheels.UI.Uidl
             this.Notifications = new List<UidlNotification>();
             this.Text = base.IdName;
             this.Enabled = true;
-            this.Authorized = true;
+            this.Authorization = new UidlAuthorization(GetAuthorizationAttributes());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,11 +40,18 @@ namespace NWheels.UI.Uidl
         [DataMember]
         public bool Enabled { get; set; }
         [DataMember]
-        public bool Authorized { get; set; }
+        public UidlAuthorization Authorization { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
         public List<UidlNotification> Notifications { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IEnumerable<AuthorizationContract.AuthorizationAttribute> GetAuthorizationAttributes()
+        {
+            return this.GetType().GetCustomAttributes<AuthorizationContract.AuthorizationAttribute>(inherit: true);
+        }
     }
 }

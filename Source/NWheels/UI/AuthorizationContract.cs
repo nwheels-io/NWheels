@@ -13,7 +13,7 @@ namespace NWheels.UI
         {
             public string[] UserRoles { get; protected set; }
             public string[] Permissions { get; protected set; }
-            public string[] DataRules { get; protected set; }
+            public string[] EntityAccessRules { get; protected set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -38,11 +38,11 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class DataRulesAttribute : AuthorizationAttribute
+        public class EntityAccessRulesAttribute : AuthorizationAttribute
         {
-            public DataRulesAttribute(params string[] dataRules)
+            public EntityAccessRulesAttribute(params string[] rules)
             {
-                base.DataRules = dataRules;
+                base.EntityAccessRules = rules;
             }
         }
     }
