@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Text;
 using Autofac;
 using Hapil;
 using Hapil.Writers;
@@ -6,6 +8,7 @@ using NWheels.DataObjects;
 using NWheels.DataObjects.Core.Factories;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
+using NWheels.Utilities;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Entities.Factories
@@ -64,8 +67,31 @@ namespace NWheels.Entities.Factories
                 .Method<IDomainObject>(x => x.GetContainerObject).Implement(m => {
                     m.Return(domainObjectField);
                 });
+
+            ImplementToString(writer);
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementToString(ImplementationClassWriter<TypeTemplate.TBase> writer)
+        {
+            var keyProperty = (_metaType.PrimaryKey != null ? _metaType.PrimaryKey.Properties.FirstOrDefault() : null);
+            var displayProperty = _metaType.DefaultDisplayProperties.FirstOrDefault();
+
+            if ( keyProperty == null )
+            {
+                return;
+            }
+
+            writer.Method<string>(x => x.ToString).Implement(w => {
+                w.Return(
+                    w.Const(_metaType.Name + "[") + 
+                    TypeFactoryUtility.GetPropertyStringValueOperand(w, keyProperty) + 
+                    (displayProperty != null ? "|" : "") +
+                    TypeFactoryUtility.GetPropertyStringValueOperand(w, displayProperty) + "]");
+            });
+        }
     }
 }

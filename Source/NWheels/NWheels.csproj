@@ -235,6 +235,7 @@
     <Compile Include="Utilities\AssemblyUtility.cs" />
     <Compile Include="Utilities\EnumerableUtility.cs" />
     <Compile Include="Utilities\ExpressionUtility.cs" />
+    <Compile Include="Utilities\TypeFactoryUtility.cs" />
     <Compile Include="Utilities\SecureStringUtility.cs" />
     <Compile Include="SecurityCheck.cs" />
     <Compile Include="Auto.cs" />

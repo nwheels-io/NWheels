@@ -174,10 +174,10 @@ namespace NWheels.UnitTests.Entities
             contract.Term = ContractTermType.Yearly;;
             contract.As<ContractEntity>().Approve();
             
-            contract.As<IDomainObject>().BeforeSave();
+            contract.As<IDomainObject>().BeforeCommit();
             var log1 = Framework.TakeLog();
 
-            contract.As<IDomainObject>().AfterSave();
+            contract.As<IDomainObject>().AfterCommit();
             var log2 = Framework.TakeLog();
 
             //- assert

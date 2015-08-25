@@ -203,6 +203,7 @@ namespace NWheels.Conventions.Core
                 ImplementGetEntityContractsInRepository(writer);
                 ImplementGetEntityRepositories(writer);
                 ImplementNewEntityMethods(writer);
+                ImplementToStringMethod(writer);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -262,6 +263,16 @@ namespace NWheels.Conventions.Core
                         _domainObjectFactoryField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IDomainObjectFactory>(c), components));
                     
                         Initializers.ForEach(init => init(cw));
+                    });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementToStringMethod(ImplementationClassWriter<TypeTemplate.TInterface> writer)
+            {
+                writer.ImplementBase<object>()
+                    .Method<string>(x => x.ToString).Implement(w => {
+                        w.Return(w.Const("DomainContext[" + writer.OwnerClass.Key.PrimaryInterface.Name.TrimLead("I") + "]"));        
                     });
             }
 

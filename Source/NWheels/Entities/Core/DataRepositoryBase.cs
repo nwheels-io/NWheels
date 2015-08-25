@@ -411,14 +411,14 @@ namespace NWheels.Entities.Core
 
         private void BeforeSaveDomainObject(IDomainObject obj)
         {
-            obj.BeforeSave();
+            obj.BeforeCommit();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private void AfterSaveDomainObject(IDomainObject obj)
         {
-            obj.AfterSave();
+            obj.AfterCommit();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
