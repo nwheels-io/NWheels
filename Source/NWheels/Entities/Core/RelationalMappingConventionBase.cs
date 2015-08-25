@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
+using NWheels.Extensions;
 
 namespace NWheels.Entities.Core
 {
@@ -18,21 +19,30 @@ namespace NWheels.Entities.Core
 
         void IRelationalMappingConvention.Preview(ITypeMetadata type)
         {
-            PreviewType((TypeMetadataBuilder)type);
+            if ( type.PrimaryKey != null || !type.ContractType.IsEntityContract() )
+            {
+                PreviewType((TypeMetadataBuilder)type);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void IRelationalMappingConvention.Apply(ITypeMetadata type)
         {
-            ApplyToType((TypeMetadataBuilder)type);
+            if ( type.PrimaryKey != null || !type.ContractType.IsEntityContract() )
+            {
+                ApplyToType((TypeMetadataBuilder)type);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void IRelationalMappingConvention.Finalize(ITypeMetadata type)
         {
-            FinalizeType((TypeMetadataBuilder)type);
+            if ( type.PrimaryKey != null || !type.ContractType.IsEntityContract() )
+            {
+                FinalizeType((TypeMetadataBuilder)type);
+            }
         }
 
         #endregion

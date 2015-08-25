@@ -290,13 +290,13 @@ namespace NWheels.Hosting.Core
             builder.NWheelsFeatures().Logging().RegisterLogger<TransientStateMachine<NodeState, NodeTrigger>.ILogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IDomainContextLogger>();
 
-            builder.RegisterPipeline<IMetadataConvention>().SingleInstance();
-            builder.RegisterPipeline<IRelationalMappingConvention>().SingleInstance();
+            builder.RegisterPipeline<IMetadataConvention>().InstancePerDependency(); // avoid caching to allow modules extend convention set
+            builder.RegisterPipeline<IRelationalMappingConvention>().InstancePerDependency(); // avoid caching to allow modules extend convention set
             builder.RegisterType<ContractMetadataConvention>().As<IMetadataConvention>().SingleInstance().FirstInPipeline();
             builder.RegisterType<AttributeMetadataConvention>().As<IMetadataConvention>().SingleInstance().LastInPipeline();
             builder.RegisterType<RelationMetadataConvention>().As<IMetadataConvention>().SingleInstance().LastInPipeline();
             builder.RegisterInstance(new PascalCaseRelationalMappingConvention(usePluralTableNames: true)).As<IRelationalMappingConvention>();
-            builder.RegisterType<MetadataConventionSet>().SingleInstance();
+            builder.RegisterType<MetadataConventionSet>().InstancePerDependency(); // avoid caching because modules can add new registrations
             builder.RegisterType<TypeMetadataCache>().As<ITypeMetadataCache, TypeMetadataCache>().SingleInstance();
 
             builder.RegisterType<VoidLocalizationProvider>().As<ILocalizationProvider>().SingleInstance();

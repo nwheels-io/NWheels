@@ -9,10 +9,10 @@ namespace NWheels.DataObjects.Core
     public class TypeMetadataCache : ITypeMetadataCache
     {
         private readonly IComponentContext _components;
-        private readonly MetadataConventionSet _conventions;
         private readonly ConcurrentDictionary<Type, TypeMetadataBuilder> _metadataByContractType = new ConcurrentDictionary<Type, TypeMetadataBuilder>();
         private readonly ConcurrentDictionary<Type, ISemanticDataType> _semanticDataTypes;
         private readonly ConcurrentDictionary<Type, IStorageDataType> _storageDataTypes;
+        private MetadataConventionSet _conventions;
         private Dictionary<Type, MixinRegistration[]> _mixinsByPrimaryContract = null;
         private Dictionary<Type, ConcretizationRegistration> _concretizationsByPrimaryContract = null;
 
@@ -122,6 +122,7 @@ namespace NWheels.DataObjects.Core
         {
             _mixinsByPrimaryContract = null;
             _concretizationsByPrimaryContract = null;
+            _conventions = _components.Resolve<MetadataConventionSet>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
