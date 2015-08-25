@@ -11,8 +11,8 @@ namespace NWheels.Entities.Core
     public interface IDomainObject : IObject, IContain<IPersistableObject>
     {
         void Validate();
-        void BeforeSave();
-        void AfterSave();
+        void BeforeCommit();
+        void AfterCommit();
         EntityState State { get; }
     }
 }

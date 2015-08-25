@@ -11,8 +11,12 @@ namespace NWheels.Entities.Factories
 {
     public class ImplementIDomainObjectConvention : ImplementationConvention
     {
-        public const string MethodNameOnEntityCommitting = "EntityTriggerBeforeSave";
-        public const string MethodNameOnEntityCommitted = "EntityTriggerAfterSave";
+        public const string TriggerMethodNameBeforeSave = "EntityTriggerBeforeSave";
+        public const string TriggerMethodNameAfterSave = "EntityTriggerAfterSave";
+        public const string TriggerMethodNameBeforeDelete = "EntityTriggerBeforeDelete";
+        public const string TriggerMethodNameAfterDelete = "EntityTriggerAfterDelete";
+        public const string TriggerMethodNameInsteadOfSave = "EntityTriggerInsteadOfSave";
+        public const string TriggerMethodNameInsteadOfDelete = "EntityTriggerInsteadOfDelete";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -36,10 +40,11 @@ namespace NWheels.Entities.Factories
 
             var domainObjectImplementation = writer.ImplementInterfaceExplicitly<IDomainObject>();
             ImplementState(domainObjectImplementation);
-            ImplementCommittingCommitted(domainObjectImplementation);
+            ImplementBeforeAfterCommit(domainObjectImplementation);
             ImplementValidate(domainObjectImplementation);
             
             ImplementGetContainedObject(writer);
+            ImplementToString(writer);
         }
 
         #endregion
@@ -82,23 +87,41 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ImplementCommittingCommitted(ImplementationClassWriter<IDomainObject> writer)
+        private void ImplementBeforeAfterCommit(ImplementationClassWriter<IDomainObject> writer)
         {
-            MethodInfo committingCallback;
-            MethodInfo committedCallback;
-            TryFindCommitCallbackMethods(out committingCallback, out committedCallback);
+            MethodInfo beforeSave;
+            MethodInfo afterSave;
+            MethodInfo beforeDelete;
+            MethodInfo afterDelete;
+            TryFindEntityTriggerMethods(out beforeSave, out afterSave, out beforeDelete, out afterDelete);
 
             writer
-                .Method(x => x.BeforeSave).Implement(w => {
-                    if ( committingCallback != null )
+                .Method(x => x.BeforeCommit).Implement(w => {
+                    if ( beforeSave != null )
                     {
-                        w.This<TT.TBase>().Void(committingCallback);
+                        w.If(w.This<IDomainObject>().Prop(x => x.State) != EntityState.RetrievedDeleted).Then(() => {
+                            w.This<TT.TBase>().Void(beforeSave);
+                        });
+                    }
+                    if ( beforeDelete != null )
+                    {
+                        w.If(w.This<IDomainObject>().Prop(x => x.State) == EntityState.RetrievedDeleted).Then(() => {
+                            w.This<TT.TBase>().Void(beforeDelete);
+                        });
                     }
                 })
-                .Method(x => x.AfterSave).Implement(w => {
-                    if ( committedCallback != null )
+                .Method(x => x.AfterCommit).Implement(w => {
+                    if ( afterSave != null )
                     {
-                        w.This<TT.TBase>().Void(committedCallback);
+                        w.If(w.This<IDomainObject>().Prop(x => x.State) != EntityState.RetrievedDeleted).Then(() => {
+                            w.This<TT.TBase>().Void(afterSave);
+                        });
+                    }
+                    if ( afterDelete != null )
+                    {
+                        w.If(w.This<IDomainObject>().Prop(x => x.State) == EntityState.RetrievedDeleted).Then(() => {
+                            w.This<TT.TBase>().Void(afterDelete);
+                        });
                     }
                 });
         }
@@ -127,22 +150,47 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void TryFindCommitCallbackMethods(out MethodInfo committingCallback, out MethodInfo committedCallback)
+        private void TryFindEntityTriggerMethods(
+            out MethodInfo beforeSave, 
+            out MethodInfo afterSave, 
+            out MethodInfo beforeDelete, 
+            out MethodInfo afterDelete)
         {
-            committingCallback = null;
-            committedCallback = null;
-
             if ( _context.MetaType.DomainObjectType != null )
             {
-                committingCallback =
-                    _context.DomainObjectMembers.SelectVoids(m => m.Name == MethodNameOnEntityCommitting && !m.IsPublic && m.GetParameters().Length == 0)
-                    .ToArray()
-                    .FirstOrDefault();
+                beforeSave = TryFindEntityTriggerMethod(TriggerMethodNameBeforeSave);
+                afterSave = TryFindEntityTriggerMethod(TriggerMethodNameAfterSave);
+                beforeDelete = TryFindEntityTriggerMethod(TriggerMethodNameBeforeDelete);
+                afterDelete = TryFindEntityTriggerMethod(TriggerMethodNameAfterDelete);
+            }
+            else
+            {
+                beforeSave = null;
+                afterSave = null;
+                beforeDelete = null;
+                afterDelete = null;
+            }
+        }
 
-                committedCallback =
-                    _context.DomainObjectMembers.SelectVoids(m => m.Name == MethodNameOnEntityCommitted && !m.IsPublic && m.GetParameters().Length == 0)
-                    .ToArray()
-                    .FirstOrDefault();
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private MethodInfo TryFindEntityTriggerMethod(string methodName)
+        {
+            return _context.DomainObjectMembers
+                .SelectVoids(m => m.Name == methodName && !m.IsPublic && m.GetParameters().Length == 0)
+                .ToArray()
+                .FirstOrDefault();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementToString(ImplementationClassWriter<TT.TBase> writer)
+        {
+            if ( _context.MetaType.BaseType == null )
+            {
+                writer.Method<string>(x => x.ToString).Implement(w => {
+                    w.Return(_context.PersistableObjectField.FuncToString());
+                });
             }
         }
     }

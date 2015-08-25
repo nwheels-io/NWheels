@@ -53,6 +53,7 @@ namespace NWheels.Testing.Entities.Stacks
                 [PropertyContract.Unique]
                 string CatalogNo { get; set; }
 
+                [PropertyContract.Semantic.DisplayName]
                 string Name { get; set; }
                 
                 decimal Price { get; set; }
@@ -232,6 +233,30 @@ namespace NWheels.Testing.Entities.Stacks
 
                 public abstract void Save();
                 public abstract void Delete();
+
+                #endregion
+
+                #region Entity Triggers
+
+                protected void EntityTriggerBeforeSave()
+                {
+                    Console.WriteLine("EntityTriggerBeforeSave: " + this.ToString());
+                }
+
+                protected void EntityTriggerAfterSave()
+                {
+                    Console.WriteLine("EntityTriggerAfterSave: " + this.ToString());
+                }
+
+                protected void EntityTriggerBeforeDelete()
+                {
+                    Console.WriteLine("EntityTriggerBeforeDelete: " + this.ToString());
+                }
+
+                protected void EntityTriggerAfterDelete()
+                {
+                    Console.WriteLine("EntityTriggerAfterDelete: " + this.ToString());
+                }
 
                 #endregion
             }
