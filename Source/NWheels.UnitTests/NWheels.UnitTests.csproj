@@ -51,6 +51,10 @@
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.2.1507.0118\lib\net40\Moq.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\git\Source\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
@@ -84,6 +88,7 @@
     <Compile Include="DataObjects\TypeMetadataCacheTests.cs" />
     <Compile Include="Endpoints\Core\CompactBinarySerializersTests.cs" />
     <Compile Include="Entities\DomainObjectFactoryTests.cs" />
+    <Compile Include="Entities\PresentationObjectFactoryTests.cs" />
     <Compile Include="Extensions\AutofacExtensionTests.cs" />
     <Compile Include="Extensions\TypeExtensionTests.cs" />
     <Compile Include="Hosting\AutofacRegistrationTests.cs" />

@@ -352,6 +352,7 @@ namespace NWheels.Testing
             builder.RegisterType<TestEntityObjectFactory>().As<IEntityObjectFactory, EntityObjectFactory, TestEntityObjectFactory>().SingleInstance();
             builder.RegisterType<TestDataRepositoryFactory>().As<TestDataRepositoryFactory, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory>().SingleInstance();
+            builder.RegisterType<PresentationObjectFactory>().As<IPresentationObjectFactory>().SingleInstance();
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
             
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();

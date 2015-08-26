@@ -48,6 +48,23 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static InnerToOuterCollectionAdapter<TEntityContract> CreatePresentationCollectionAdapter<TEntityContract>(
+            ICollection<TEntityContract> domainObjectCollection,
+            IPresentationObjectFactory presentationFactory)
+            where TEntityContract : class
+        {
+            return new InnerToOuterCollectionAdapter<TEntityContract>(
+                domainObjectCollection,
+                innerToOuter: domainObject => {
+                    return presentationFactory.CreatePresentationObjectInstance<TEntityContract>(domainObject);
+                },
+                outerToInner: presentationObject => {
+                    return (TEntityContract)((IPresentationObject)presentationObject).GetDomainObject();
+                });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static void InjectContainerDomainObject(IComponentContext components, IDomainObject domainObject, IPersistableObject persistableObject)
         {
             persistableObject.SetContainerObject(domainObject);
