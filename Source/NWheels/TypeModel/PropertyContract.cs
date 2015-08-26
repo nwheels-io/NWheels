@@ -1,6 +1,7 @@
 using System;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.StorageTypes;
+using NWheels.TypeModel;
 
 namespace NWheels.DataObjects
 {
@@ -98,7 +99,19 @@ namespace NWheels.DataObjects
 
             public class DateAttribute : DataTypeAttribute { public DateAttribute() : base(typeof(SemanticType.DefaultOf<DateTime>)) { } }
             public class TimeAttribute : DataTypeAttribute { public TimeAttribute() : base(typeof(SemanticType.DefaultOf<TimeSpan>)) { } }
-            public class DurationAttribute : DataTypeAttribute { public DurationAttribute() : base(typeof(SemanticType.DefaultOf<TimeSpan>)) { } }
+            
+            public class DurationAttribute : DataTypeAttribute {
+                public DurationAttribute(TimeUnits units = TimeUnits.HourMinuteSecond)
+                    : base(typeof(SemanticType.DefaultOf<TimeSpan>))
+                {
+                }
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+                {
+                    //TODO: implement apply
+                }
+            }
+            
+
             public class PhoneNumberAttribute : DataTypeAttribute { public PhoneNumberAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class CurrencyAttribute : DataTypeAttribute { public CurrencyAttribute() : base(typeof(SemanticType.DefaultOf<decimal>)) { } }
             public class MultilineTextAttribute : DataTypeAttribute { public MultilineTextAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }

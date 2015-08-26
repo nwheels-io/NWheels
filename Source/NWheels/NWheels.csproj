@@ -240,6 +240,7 @@
     <Compile Include="Processing\Messages\MessageActionHeader.cs" />
     <Compile Include="Processing\Messages\MessageIdHeader.cs" />
     <Compile Include="TypeModel\Serialization\IObjectSerializerConfigContainer.cs" />
+    <Compile Include="TypeModel\TimeUnit.cs" />
     <Compile Include="UI\AuthorizationContract.cs" />
     <Compile Include="UI\ServerSide\EntityChangeSetMessage.cs" />
     <Compile Include="UI\ServerSide\EntityCommandMessage.cs" />
