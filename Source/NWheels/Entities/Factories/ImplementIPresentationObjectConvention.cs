@@ -32,7 +32,7 @@ namespace NWheels.Entities.Factories
                     w.Return(_context.DomainObjectField.CastTo<IDomainObject>())
                 );
 
-            writer.ImplementInterface<IObject>()
+            writer.ImplementInterfaceExplicitly<IObject>()
                 .Property(intf => intf.IsModified).ImplementPropagate(_context.DomainObjectField.CastTo<IObject>());
 
             ImplementToString(writer);

@@ -12,7 +12,10 @@ namespace NWheels.Extensions
     {
         public static PropertyInfo GetPropertyInfo(this LambdaExpression lambda)
         {
-            return (PropertyInfo)((MemberExpression)lambda.Body).Member;
+            var unaryExpression = lambda.Body as UnaryExpression;
+            var memberExpression = (MemberExpression)(unaryExpression != null ? unaryExpression.Operand : lambda.Body);
+
+            return (PropertyInfo)memberExpression.Member;
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

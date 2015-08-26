@@ -277,6 +277,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<VoidDataRepositoryFactory>().As<IDataRepositoryFactory>();
             builder.RegisterType<EntityObjectFactory>().As<EntityObjectFactory, IEntityObjectFactory>().SingleInstance();
             builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory, DomainObjectFactory>().SingleInstance();
+            builder.RegisterType<PresentationObjectFactory>().As<IPresentationObjectFactory>().SingleInstance();
             builder.RegisterPipeline<IDataRepositoryPopulator>();
 
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();
