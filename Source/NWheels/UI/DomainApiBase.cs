@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Conventions.Core;
-using NWheels.UI.ServerSide;
+using NWheels.UI.Factories;
 
 namespace NWheels.UI
 {

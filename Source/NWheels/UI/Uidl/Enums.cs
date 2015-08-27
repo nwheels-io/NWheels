@@ -69,6 +69,17 @@ namespace NWheels.UI.Uidl
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    public enum ApiCallTargetType
+    {
+        TransactionScript,
+        ServiceMethod,
+        EntityMethod,
+        EntityChangeSet,
+        DomainApi
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
     public enum BroadcastDirection
     {
         BubbleUp,

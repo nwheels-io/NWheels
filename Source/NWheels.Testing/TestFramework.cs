@@ -26,6 +26,7 @@ using NWheels.Endpoints;
 using NWheels.Entities.Core;
 using NWheels.Entities.Factories;
 using NWheels.Logging.Core;
+using NWheels.Processing.Commands.Factories;
 using NWheels.Testing.Entities.Impl;
 
 namespace NWheels.Testing
@@ -353,6 +354,7 @@ namespace NWheels.Testing
             builder.RegisterType<TestDataRepositoryFactory>().As<TestDataRepositoryFactory, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory>().SingleInstance();
             builder.RegisterType<PresentationObjectFactory>().As<IPresentationObjectFactory>().SingleInstance();
+            builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
             
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();

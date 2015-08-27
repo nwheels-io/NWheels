@@ -2,7 +2,7 @@
 using NWheels.Conventions.Core;
 using NWheels.Domains.Security.UI;
 using NWheels.UI;
-using NWheels.UI.ServerSide;
+using NWheels.UI.Factories;
 using NWheels.Utilities;
 
 namespace NWheels.Domains.Security.Impl

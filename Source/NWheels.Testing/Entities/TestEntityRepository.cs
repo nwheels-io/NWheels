@@ -48,6 +48,20 @@ namespace NWheels.Testing.Entities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        object IEntityRepository.TryGetById(IEntityId id)
+        {
+            return TryGetById(id);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TEntity TryGetById(IEntityId id)
+        {
+            return _storedEntities.FirstOrDefault(e => e.As<IEntityObject>().GetId().Equals(id));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         void IEntityRepository.Save(object entity)
         {
             ((IEntityRepository<TEntity>)this).Save((TEntity)entity);

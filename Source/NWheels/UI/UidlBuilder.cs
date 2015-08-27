@@ -246,7 +246,7 @@ namespace NWheels.UI
                 return existingInstance;
             }
 
-            var newInstance = (UidlScreenPart)Activator.CreateInstance(screenPartType, screenPartType.Name, _applicationBeingAdded);
+            var newInstance = (UidlScreenPart)Activator.CreateInstance(screenPartType, screenPartType.FriendlyName(), _applicationBeingAdded);
             _applicationBeingAdded.ScreenParts.Add(newInstance);
             
             InstantiateDeclaredMemberNodes(newInstance);

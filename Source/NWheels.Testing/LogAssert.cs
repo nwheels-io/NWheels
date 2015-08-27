@@ -29,6 +29,74 @@ namespace NWheels.Testing
             return log.Where(matcher.Match);
         }
 
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void ShouldMatch(this IEnumerable<LogNode> log, Logex logex)
+        {
+            new Assertions(log).Matches(logex);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void ShouldHaveOne<TLogger>(this IEnumerable<LogNode> log, Expression<Action<TLogger>> messageSpecifier)
+            where TLogger : class, IApplicationEventLogger
+        {
+            new Assertions(log).Matches(Logex.Begin().One().Message<TLogger>(messageSpecifier).End());
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void ShouldHaveOneOrMore<TLogger>(this IEnumerable<LogNode> log, Expression<Action<TLogger>> messageSpecifier)
+            where TLogger : class, IApplicationEventLogger
+        {
+            new Assertions(log).Matches(Logex.Begin().OneOrMore().Message<TLogger>(messageSpecifier).End());
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void ShouldHaveNone<TLogger>(this IEnumerable<LogNode> log, Expression<Action<TLogger>> messageSpecifier)
+            where TLogger : class, IApplicationEventLogger
+        {
+            new Assertions(log).Matches(Logex.Begin().NoneToEnd().Message<TLogger>(messageSpecifier).End());
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void ShouldHaveMessagesFrom<TLogger>(this IEnumerable<LogNode> log)
+            where TLogger : class, IApplicationEventLogger
+        {
+            new Assertions(log).Matches(Logex.Begin().OneOrMore().From<TLogger>().End());
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void ShouldHaveNoMessagesFrom<TLogger>(this IEnumerable<LogNode> log)
+            where TLogger : class, IApplicationEventLogger
+        {
+            new Assertions(log).Matches(Logex.Begin().NoneToEnd().From<TLogger>().End());
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void ShouldHaveNoErrors(this IEnumerable<LogNode> log)
+        {
+            new Assertions(log).Matches(Logex.Begin().NoneToEnd().OfLevelOrHigher(LogLevel.Error).End());
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void ShouldHaveNoWarnings(this IEnumerable<LogNode> log)
+        {
+            new Assertions(log).Matches(Logex.Begin().NoneToEnd().OfLevel(LogLevel.Warning).End());
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void ShouldHaveNoErrorsOrWarnings(this IEnumerable<LogNode> log)
+        {
+            new Assertions(log).Matches(Logex.Begin().NoneToEnd().WarningOrError().End());
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class Assertions

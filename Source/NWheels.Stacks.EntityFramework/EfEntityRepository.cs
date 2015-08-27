@@ -10,6 +10,7 @@ using NWheels.DataObjects.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
+using NWheels.TypeModel.Core.Factories;
 using NWheels.Utilities;
 
 namespace NWheels.Stacks.EntityFramework
@@ -22,6 +23,7 @@ namespace NWheels.Stacks.EntityFramework
         private readonly EfDataRepositoryBase _ownerRepo;
         private readonly IDomainObjectFactory _domainObjectFactory;
         private readonly ObjectSet<TBaseImpl> _objectSet;
+        private readonly System.Data.Entity.Core.Metadata.Edm.EdmMember _entityKeyMember;
         private InterceptingQueryProvider _queryProvider;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -31,6 +33,7 @@ namespace NWheels.Stacks.EntityFramework
             _ownerRepo = ownerRepo;
             _domainObjectFactory = ownerRepo.Components.Resolve<IDomainObjectFactory>();
             _objectSet = ownerRepo.CreateObjectSet<TBaseImpl>();
+            _entityKeyMember = _objectSet.EntitySet.ElementType.KeyMembers.First();
             _queryProvider = null;
         }
 
@@ -106,6 +109,31 @@ namespace NWheels.Stacks.EntityFramework
         object IEntityRepository.New(Type concreteContract)
         {
             return this.New(concreteContract);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        object IEntityRepository.TryGetById(IEntityId id)
+        {
+            return TryGetById(id);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TEntityContract TryGetById(IEntityId id)
+        {
+            var entityKey = new System.Data.Entity.Core.EntityKey(_objectSet.EntitySet.Name, _entityKeyMember.Name, id.Value);
+            object persistableObject;
+
+            if ( _ownerRepo.ObjectContext.TryGetObjectByKey(entityKey, out persistableObject) )
+            {
+                var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)persistableObject);
+                return domainObject;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using NWheels.Extensions;
+using NWheels.Processing.Commands.Impl;
 using NWheels.Processing.Messages;
 
 namespace NWheels.Processing
@@ -17,6 +18,9 @@ namespace NWheels.Processing
         {
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<NWheels.Processing.Messages.Impl.ServiceBus>().SingleInstance();
             builder.NWheelsFeatures().Logging().RegisterLogger<IServiceBusEventLogger>();
+
+            builder.NWheelsFeatures().Processing().RegisterActor<CommandActor>().SingleInstance();
+            builder.NWheelsFeatures().Logging().RegisterLogger<ICommandActorLogger>();
         }
 
         #endregion

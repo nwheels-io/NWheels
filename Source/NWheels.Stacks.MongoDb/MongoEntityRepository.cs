@@ -134,6 +134,31 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        object IEntityRepository.TryGetById(IEntityId id)
+        {
+            return TryGetById(id);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TEntityContract TryGetById(IEntityId id)
+        {
+            var bsonIdValue = BsonValue.Create(id.Value);
+            var persistableObject = _mongoCollection.FindOneById(bsonIdValue);
+
+            if ( persistableObject != null ) //TODO: if not found, does FindOneById() return null or throw an exception?
+            {
+                var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)persistableObject);
+                return domainObject;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         void IEntityRepository.Save(object entity)
         {
             this.Save((TEntityContract)entity.As<IPersistableObject>());

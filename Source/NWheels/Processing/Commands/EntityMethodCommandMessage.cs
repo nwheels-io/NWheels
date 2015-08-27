@@ -1,63 +1,86 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using NWheels.Entities;
 using NWheels.Extensions;
+using NWheels.Processing.Commands.Impl;
+using NWheels.Processing.Messages;
 
-namespace NWheels.Processing.Messages
+namespace NWheels.Processing.Commands
 {
-    public class MessageActionHeader : IMessageHeader
+    public class EntityMethodCommandMessage : AbstractCommandMessage
     {
-        public MessageActionHeader(Type contract, MethodInfo method)
+        private readonly IEntityId _entityId;
+        private readonly IMethodCallObject _call;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public EntityMethodCommandMessage(IEntityId entityId, IMethodCallObject call)
         {
-            Contract = contract;
-            Method = method;
+            _entityId = entityId;
+            _call = call;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Type Contract { get; private set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public MethodInfo Method { get; private set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        string IMessageHeader.Name
+        public override IReadOnlyCollection<IMessageHeader> Headers
         {
             get
             {
-                return "Action";
+                return null;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        string IMessageHeader.Values
+        public override object Body
         {
             get
             {
-                return string.Format("{0}.{1}", Contract.Name, Method.Name);
+                return _call;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static MessageActionHeader FromMethod<TContract, TRequest>(Expression<Func<TContract, Action<TRequest>>> methodSelector)
+        public Type EntityContract
         {
-            var methodInfo = methodSelector.GetMethodInfo();
-            return new MessageActionHeader(typeof(TContract), methodInfo);
+            get
+            {
+                return _entityId.ContractType;
+            }
+            
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static MessageActionHeader FromMethod(MethodInfo method)
+        public IEntityId EntityId
         {
-            return new MessageActionHeader(method.DeclaringType, method);
+            get
+            {
+                return _entityId;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MethodInfo EntityMethod
+        {
+            get
+            {
+                return _call.MethodInfo;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IMethodCallObject Call
+        {
+            get
+            {
+                return _call;
+            }
         }
     }
 }

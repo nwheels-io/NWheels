@@ -8,7 +8,7 @@ using Nancy;
 using NWheels.Endpoints;
 using NWheels.Extensions;
 using NWheels.Hosting;
-using NWheels.UI.ServerSide;
+using NWheels.UI.Factories;
 
 namespace NWheels.Stacks.NancyFx
 {
@@ -30,6 +30,7 @@ namespace NWheels.Stacks.NancyFx
 
             builder.RegisterType<ViewModelObjectFactory>().As<ViewModelObjectFactory, IViewModelObjectFactory>().SingleInstance();
             builder.RegisterType<WebApiDispatcherFactory>().SingleInstance();
+            builder.RegisterType<WebApplicationModule>().InstancePerDependency();
 
             StaticConfiguration.Caching.EnableRuntimeViewDiscovery = true;
             StaticConfiguration.Caching.EnableRuntimeViewUpdates = true;

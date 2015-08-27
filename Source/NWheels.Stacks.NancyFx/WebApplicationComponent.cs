@@ -111,9 +111,9 @@ namespace NWheels.Stacks.NancyFx
             _uidl = UidlBuilder.GetApplicationDocument(_application, _metadataCache, _localizationProvider);
             BuildApiDispatchers(_components, _dispatcherFactory);
 
-            _module = new WebApplicationModule(this);
+            _module = _components.Resolve<WebApplicationModule>(TypedParameter.From<IWebModuleContext>(this));
+            
             var bootstrapper = new WebApplicationBootstrapper(_module, _loggingHook);
-
             _host = new NancyHost(bootstrapper, new[] { TrailingSlashSafeUri(_endpointRegistration.Address) });
         }
 

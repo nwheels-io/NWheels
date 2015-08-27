@@ -42,6 +42,7 @@ using NWheels.Utilities;
 using Formatting = Newtonsoft.Json.Formatting;
 using NWheels.Entities.Factories;
 using NWheels.Authorization.Core;
+using NWheels.Processing.Commands.Factories;
 
 namespace NWheels.Hosting.Core
 {
@@ -278,6 +279,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<EntityObjectFactory>().As<EntityObjectFactory, IEntityObjectFactory>().SingleInstance();
             builder.RegisterType<DomainObjectFactory>().As<IDomainObjectFactory, DomainObjectFactory>().SingleInstance();
             builder.RegisterType<PresentationObjectFactory>().As<IPresentationObjectFactory>().SingleInstance();
+            builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
             builder.RegisterPipeline<IDataRepositoryPopulator>();
 
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();

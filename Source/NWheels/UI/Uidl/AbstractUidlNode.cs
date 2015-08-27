@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Hapil;
 
 namespace NWheels.UI.Uidl
 {
@@ -38,7 +39,7 @@ namespace NWheels.UI.Uidl
 
         protected virtual string GetIdNameFromType()
         {
-            return this.GetType().Name;
+            return this.GetType().FriendlyName();
         }
     }
 }

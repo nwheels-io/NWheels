@@ -76,9 +76,13 @@ namespace NWheels.UI.Uidl
         [DataMember]
         public ApiCallType CallType { get; set; }
         [DataMember]
+        public ApiCallTargetType CallTargetType { get; set; }
+        [DataMember]
         public string ContractName { get; set; }
         [DataMember]
         public string OperationName { get; set; }
+        [DataMember]
+        public string EntityId { get; set; }
         [DataMember]
         public string[] ParameterNames { get; set; }
         [DataMember]

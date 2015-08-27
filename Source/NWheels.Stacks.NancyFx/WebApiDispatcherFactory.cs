@@ -11,7 +11,7 @@ using Hapil.Writers;
 using Nancy;
 using Nancy.ModelBinding;
 using NWheels.Conventions.Core;
-using NWheels.UI.ServerSide;
+using NWheels.UI.Factories;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Stacks.NancyFx

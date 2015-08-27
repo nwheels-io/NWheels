@@ -10,7 +10,7 @@ using NWheels.Entities.Factories;
 using NWheels.Extensions;
 using NWheels.TypeModel.Core.Factories;
 
-namespace NWheels.UI.ServerSide
+namespace NWheels.UI.Factories
 {
     public interface IViewModelObjectFactory : IEntityObjectFactory
     {

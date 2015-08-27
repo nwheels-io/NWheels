@@ -1,63 +1,72 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using NWheels.Extensions;
+using NWheels.Processing.Commands.Impl;
+using NWheels.Processing.Messages;
 
-namespace NWheels.Processing.Messages
+namespace NWheels.Processing.Commands
 {
-    public class MessageActionHeader : IMessageHeader
+    public class ServiceMethodCommandMessage : AbstractCommandMessage
     {
-        public MessageActionHeader(Type contract, MethodInfo method)
+        private readonly IMethodCallObject _call;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ServiceMethodCommandMessage(IMethodCallObject call)
         {
-            Contract = contract;
-            Method = method;
+            _call = call;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Type Contract { get; private set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public MethodInfo Method { get; private set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        string IMessageHeader.Name
+        public override IReadOnlyCollection<IMessageHeader> Headers
         {
             get
             {
-                return "Action";
+                return null;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        string IMessageHeader.Values
+        public override object Body
         {
             get
             {
-                return string.Format("{0}.{1}", Contract.Name, Method.Name);
+                return _call;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static MessageActionHeader FromMethod<TContract, TRequest>(Expression<Func<TContract, Action<TRequest>>> methodSelector)
+        public IMethodCallObject Call
         {
-            var methodInfo = methodSelector.GetMethodInfo();
-            return new MessageActionHeader(typeof(TContract), methodInfo);
+            get
+            {
+                return _call;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static MessageActionHeader FromMethod(MethodInfo method)
+        public Type ServiceContract
         {
-            return new MessageActionHeader(method.DeclaringType, method);
+            get
+            {
+                return _call.MethodInfo.DeclaringType;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MethodInfo ServiceMethod
+        {
+            get
+            {
+                return _call.MethodInfo;
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Core;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
@@ -184,6 +185,40 @@ namespace NWheels.UnitTests.Entities
 
             LogAssert.That(log1).HasOne<IContractEntityLogger>(x => x.BeforeSave(EntityState.NewModified, true, true, true));
             LogAssert.That(log2).HasOne<IContractEntityLogger>(x => x.AfterSave(EntityState.NewModified, true, true, true));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanSerializeDomainObjectToJson()
+        {
+            //- arrange
+
+            Framework.UpdateComponents(builder => {
+                builder.NWheelsFeatures().ObjectContracts().Concretize<IContractEntity>().With<ContractEntity>();
+                builder.NWheelsFeatures().Logging().RegisterLogger<IContractEntityLogger>();
+            });
+            Framework.RebuildMetadataCache();
+            Framework.MetadataCache.GetTypeMetadata(typeof(IContractEntity)).As<TypeMetadataBuilder>().UpdateImplementation(
+                typeof(HardCodedEntityObjectFactory),
+                typeof(HardCodedEntityObject_ContractEntity));
+
+            var factoryUnderTest = new DomainObjectFactory(Framework.Components, base.DyamicModule, Framework.MetadataCache);
+            var entityObject = new HardCodedEntityObject_ContractEntity(Framework.Components);
+
+            entityObject.WritePropertyValue_Expiration(new DateTime(2015, 5, 30));
+            entityObject.WritePropertyValue_IsApproved(true);
+            entityObject.Term = ContractTermType.Monthly;
+
+            IContractEntity contract = factoryUnderTest.CreateDomainObjectInstance<IContractEntity>(entityObject);
+
+            //- act
+
+            var json = JsonConvert.SerializeObject(contract);
+
+            //- assert
+
+            Console.WriteLine(json);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
