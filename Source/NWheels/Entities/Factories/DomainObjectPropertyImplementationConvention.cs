@@ -78,7 +78,7 @@ namespace NWheels.Entities.Factories
 
                     using ( TT.CreateScope<TT.TInterface>(interfaceType) )
                     {
-                        var explicitImplementation = writer.ImplementInterfaceExplicitly<TT.TInterface>();
+                        var explicitImplementation = writer.ImplementInterface<TT.TInterface>();
 
                         PropertyImplementationStrategyMap.InvokeStrategies(
                             group, 
