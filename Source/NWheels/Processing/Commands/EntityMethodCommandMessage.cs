@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Security.Principal;
+using NWheels.Authorization;
 using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Processing.Commands.Impl;
@@ -16,7 +18,8 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EntityMethodCommandMessage(IEntityId entityId, IMethodCallObject call)
+        public EntityMethodCommandMessage(IFramework framework, ISession session, IEntityId entityId, IMethodCallObject call)
+            : base(framework, session)
         {
             _entityId = entityId;
             _call = call;
@@ -24,22 +27,9 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IReadOnlyCollection<IMessageHeader> Headers
+        protected override IReadOnlyCollection<IMessageHeader> OnGetHeaders()
         {
-            get
-            {
-                return null;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public override object Body
-        {
-            get
-            {
-                return _call;
-            }
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

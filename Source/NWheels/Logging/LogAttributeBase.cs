@@ -20,6 +20,7 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public bool MustFormatEarly { get; set; }
+        public bool Audit { get; set; }
         public LogLevel Level { get; private set; }
         public bool IsActivity { get; private set; }
         public bool IsThread { get; private set; }

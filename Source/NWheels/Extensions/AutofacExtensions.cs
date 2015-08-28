@@ -534,14 +534,55 @@ namespace NWheels.Extensions
 
             public IRegistrationBuilder<TActor, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterActor<TActor>()
             {
-                foreach ( var messageHandlerInterface in typeof(TActor).GetInterfaces().Where(IsMessageHandlerInterface) )
+                var messageHandlerInterfaces = typeof(TActor).GetInterfaces().Where(IsMessageHandlerInterface).ToArray();
+
+                foreach ( var handlerInterface in messageHandlerInterfaces )
                 {
-                    var messageType = messageHandlerInterface.GetGenericArguments()[0];
+                    var messageType = handlerInterface.GetGenericArguments()[0];
                     var adapterClosedType = typeof(MessageHandlerAdapter<>).MakeGenericType(messageType);
+
                     _builder.RegisterType(adapterClosedType).As<IMessageHandlerAdapter>();
                 }
 
-                return _builder.RegisterType<TActor>();
+                return _builder.RegisterType<TActor>().As(messageHandlerInterfaces);
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ProcessingFeature RegisterMessage<TBody>()
+            {
+                _builder.RegisterInstance(new MessageTypeRegistration(typeof(TBody)));
+                return this;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ProcessingFeature RegisterMessage<TBody1, TBody2>()
+            {
+                _builder.RegisterInstance(new MessageTypeRegistration(typeof(TBody1)));
+                _builder.RegisterInstance(new MessageTypeRegistration(typeof(TBody2)));
+                return this;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ProcessingFeature RegisterMessage<TBody1, TBody2, TBody3>()
+            {
+                _builder.RegisterInstance(new MessageTypeRegistration(typeof(TBody1)));
+                _builder.RegisterInstance(new MessageTypeRegistration(typeof(TBody2)));
+                _builder.RegisterInstance(new MessageTypeRegistration(typeof(TBody3)));
+                return this;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ProcessingFeature RegisterMessage<TBody1, TBody2, TBody3, TBody4>()
+            {
+                _builder.RegisterInstance(new MessageTypeRegistration(typeof(TBody1)));
+                _builder.RegisterInstance(new MessageTypeRegistration(typeof(TBody2)));
+                _builder.RegisterInstance(new MessageTypeRegistration(typeof(TBody3)));
+                _builder.RegisterInstance(new MessageTypeRegistration(typeof(TBody4)));
+                return this;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------

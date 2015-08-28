@@ -16,13 +16,15 @@ namespace NWheels.Stacks.NancyFx
     {
         private readonly WebApplicationModule _module;
         private readonly WebModuleLoggingHook _loggingHook;
+        private readonly WebModuleSessionHook _sessionHook;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public WebApplicationBootstrapper(WebApplicationModule module, WebModuleLoggingHook loggingHook)
+        public WebApplicationBootstrapper(WebApplicationModule module, WebModuleLoggingHook loggingHook, WebModuleSessionHook sessionHook)
         {
             _module = module;
             _loggingHook = loggingHook;
+            _sessionHook = sessionHook;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -51,8 +53,9 @@ namespace NWheels.Stacks.NancyFx
 
         protected override void ApplicationStartup(ILifetimeScope container, IPipelines pipelines)
         {
-            CookieBasedSessions.Enable(pipelines);
+            //CookieBasedSessions.Enable(pipelines);
             _loggingHook.Attach(pipelines);
+            _sessionHook.Attach(pipelines);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

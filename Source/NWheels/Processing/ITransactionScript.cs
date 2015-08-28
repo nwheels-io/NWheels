@@ -8,13 +8,5 @@ namespace NWheels.Processing
 {
     public interface ITransactionScript
     {
-        Type InputType { get; }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-    
-    public interface ITransactionScript<in TInput> : ITransactionScript
-    {
-        void Execute(TInput input);
     }
 }

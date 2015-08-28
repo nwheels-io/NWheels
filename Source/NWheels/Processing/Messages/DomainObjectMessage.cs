@@ -27,9 +27,9 @@ namespace NWheels.Processing.Messages
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override object Body
+        protected override object OnGetBody()
         {
-            get { return DomainObject; }
+            return DomainObject;
         }
     }
 
@@ -48,19 +48,19 @@ namespace NWheels.Processing.Messages
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override object Body
-        {
-            get { return DomainObject; }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         IDomainObject IDomainObjectMessage.DomainObject
         {
             get 
             { 
                 return (IDomainObject)DomainObject; 
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override object OnGetBody()
+        {
+            return DomainObject;
         }
     }
 }

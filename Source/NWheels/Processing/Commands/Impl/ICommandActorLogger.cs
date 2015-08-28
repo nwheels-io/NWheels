@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Authorization;
+using NWheels.Endpoints.Core;
 using NWheels.Entities;
 using NWheels.Exceptions;
 using NWheels.Logging;
@@ -19,21 +22,9 @@ namespace NWheels.Processing.Commands.Impl
         EntityNotFoundException EntityNotFound(IEntityId id);
 
         [LogActivity]
-        ILogActivity ExecutingEntityMethod(object entity, MethodInfo method);
-
-        [LogActivity]
-        ILogActivity ExecutingTransactionScript(Type transactionScriptType);
-
-        [LogActivity]
-        ILogActivity ExecutingServiceMethod(Type serviceContract, MethodInfo method);
+        ILogActivity ExecutingCommand(AbstractCommandMessage command, IEndpoint endpoint, ISession session, IPrincipal principal);
 
         [LogError]
-        void EntityMethodFailed(object entity, MethodInfo method, Exception error);
-
-        [LogError]
-        void TransactionScriptFailed(Type transactionScriptType, Exception error);
-
-        [LogError]
-        void ServiceMethodFailed(Type serviceContract, MethodInfo method, Exception error);
+        void CommandFailed(AbstractCommandMessage command, IEndpoint endpoint, ISession session, IPrincipal principal, Exception error);
     }
 }

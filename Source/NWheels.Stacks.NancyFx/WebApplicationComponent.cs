@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Nancy.Bootstrappers.Autofac;
 using Nancy.Hosting.Self;
+using NWheels.Authorization;
 using NWheels.DataObjects;
 using NWheels.Endpoints;
 using NWheels.Globalization;
@@ -24,6 +25,7 @@ namespace NWheels.Stacks.NancyFx
         private readonly ILocalizationProvider _localizationProvider;
         private readonly WebApiDispatcherFactory _dispatcherFactory;
         private readonly WebModuleLoggingHook _loggingHook;
+        private readonly ISessionManager _sessionManager;
         private readonly IWebApplicationLogger _logger;
         private readonly UidlApplication _application;
         private readonly Dictionary<string, object> _apiServicesByContractName;
@@ -41,6 +43,7 @@ namespace NWheels.Stacks.NancyFx
             ILocalizationProvider localizationProvider,
             WebApiDispatcherFactory dispatcherFactory,
             WebModuleLoggingHook loggingHook,
+            ISessionManager sessionManager,
             IWebApplicationLogger logger)
         {
             _components = components;
@@ -48,6 +51,7 @@ namespace NWheels.Stacks.NancyFx
             _metadataCache = metadataCache;
             _localizationProvider = localizationProvider;
             _dispatcherFactory = dispatcherFactory;
+            _sessionManager = sessionManager;
             _loggingHook = loggingHook;
             _logger = logger;
 
@@ -112,8 +116,9 @@ namespace NWheels.Stacks.NancyFx
             BuildApiDispatchers(_components, _dispatcherFactory);
 
             _module = _components.Resolve<WebApplicationModule>(TypedParameter.From<IWebModuleContext>(this));
-            
-            var bootstrapper = new WebApplicationBootstrapper(_module, _loggingHook);
+            var sessionHook = new WebModuleSessionHook(_module, _sessionManager, _logger);
+
+            var bootstrapper = new WebApplicationBootstrapper(_module, _loggingHook, sessionHook);
             _host = new NancyHost(bootstrapper, new[] { TrailingSlashSafeUri(_endpointRegistration.Address) });
         }
 

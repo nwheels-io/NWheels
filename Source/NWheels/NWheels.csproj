@@ -90,6 +90,7 @@
     <Compile Include="Authorization\Claims\EntityAccessRuleClaim.cs" />
     <Compile Include="Authorization\Claims\UserIdentityClaim.cs" />
     <Compile Include="Authorization\Core\ICoreSessionManager.cs" />
+    <Compile Include="Authorization\Core\ISessionEventLogger.cs" />
     <Compile Include="Authorization\EntityPermission.cs" />
     <Compile Include="Authorization\Claims\OperationPermissionClaim.cs" />
     <Compile Include="Authorization\Claims\UserRoleClaim.cs" />
@@ -115,7 +116,10 @@
     <Compile Include="Endpoints\INetworkEndpointTransport.cs" />
     <Compile Include="Endpoints\IAbstractNetwrokTransportConfig.cs" />
     <Compile Include="Endpoints\INetworkProtocolConfigContainer.cs" />
+    <Compile Include="Exceptions\IFaultException.cs" />
+    <Compile Include="Exceptions\SessionNotFoundException.cs" />
     <Compile Include="Exceptions\EntityNotFoundException.cs" />
+    <Compile Include="Processing\Commands\CommandResultMessage.cs" />
     <Compile Include="Processing\Commands\Factories\IMethodCallObjectFactory.cs" />
     <Compile Include="Processing\Commands\Factories\MethodCallObjectFactory.cs" />
     <Compile Include="Processing\Commands\Impl\CommandActor.cs" />
@@ -126,6 +130,9 @@
     <Compile Include="Processing\Commands\EntityChangeSetCommandMessage.cs" />
     <Compile Include="Processing\Commands\EntityMethodCommandMessage.cs" />
     <Compile Include="Processing\Commands\TransactionScriptCommandMessage.cs" />
+    <Compile Include="Processing\Messages\AbstractSessionPushMessage.cs" />
+    <Compile Include="Processing\Messages\Impl\SessionPushActor.cs" />
+    <Compile Include="Processing\Messages\MessageTypeRegistration.cs" />
     <Compile Include="TypeModel\Serialization\BinarySerializer.cs" />
     <Compile Include="TypeModel\Serialization\IObjectSerializer.cs" />
     <Compile Include="Entities\Core\IDomainObject.cs" />

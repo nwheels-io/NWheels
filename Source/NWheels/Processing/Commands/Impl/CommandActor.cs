@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using NWheels.Authorization;
 using NWheels.Core;
+using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Processing.Messages;
 
@@ -19,14 +21,23 @@ namespace NWheels.Processing.Commands.Impl
         private readonly IComponentContext _components;
         private readonly IFramework _framework;
         private readonly ICommandActorLogger _logger;
+        private readonly IServiceBus _serviceBus;
+        private readonly ISessionManager _sessionManager;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CommandActor(IComponentContext components, IFramework framework, ICommandActorLogger logger)
+        public CommandActor(
+            IComponentContext components, 
+            IFramework framework, 
+            ICommandActorLogger logger, 
+            IServiceBus serviceBus, 
+            ISessionManager sessionManager)
         {
             _components = components;
             _framework = framework;
             _logger = logger;
+            _serviceBus = serviceBus;
+            _sessionManager = sessionManager;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,35 +57,7 @@ namespace NWheels.Processing.Commands.Impl
 
         public void HandleMessage(EntityMethodCommandMessage message)
         {
-            var entityContract = message.EntityId.ContractType;
-
-            using ( var context = _framework.As<ICoreFramework>().NewUnitOfWorkForEntity(entityContract) )
-            {
-                _logger.LookingUpEntity(id: message.EntityId);
-                
-                var entityInstance = context.GetEntityRepository(entityContract).TryGetById(message.EntityId);
-
-                if ( entityInstance != null )
-                {
-                    using ( var activity = _logger.ExecutingEntityMethod(entity: entityInstance, method: message.EntityMethod) )
-                    {
-                        try
-                        {
-                            message.Call.ExecuteOn(entityInstance);
-                        }
-                        catch ( Exception e )
-                        {
-                            activity.Fail(e);
-                            _logger.EntityMethodFailed(entity: entityInstance, method: message.EntityMethod, error: e);
-                            throw;
-                        }
-                    }
-                }
-                else
-                {
-                    throw _logger.EntityNotFound(id: message.EntityId);
-                }
-            }
+            ExecuteCommand(message, ExecuteEntityMethodCommand);
         }
 
         #endregion
@@ -85,21 +68,7 @@ namespace NWheels.Processing.Commands.Impl
 
         public void HandleMessage(TransactionScriptCommandMessage message)
         {
-            var scriptInstance = _components.Resolve(message.TransactionScriptType);
-
-            using ( var activity = _logger.ExecutingTransactionScript(transactionScriptType: message.TransactionScriptType) )
-            {
-                try
-                {
-                    message.Call.ExecuteOn(scriptInstance);
-                }
-                catch ( Exception e )
-                {
-                    activity.Fail(e);
-                    _logger.TransactionScriptFailed(transactionScriptType: message.TransactionScriptType, error: e);
-                    throw;
-                }
-            }
+            ExecuteCommand(message, ExecuteTransactionScriptCommand);
         }
 
         #endregion
@@ -110,23 +79,108 @@ namespace NWheels.Processing.Commands.Impl
 
         public void HandleMessage(ServiceMethodCommandMessage message)
         {
-            var serviceInstance = _components.Resolve(message.ServiceContract);
-            
-            using ( var activity = _logger.ExecutingServiceMethod(serviceContract: message.ServiceContract, method: message.ServiceMethod) )
+            ExecuteCommand(message, ExecuteServiceMethodCommand);
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ExecuteCommand<TConcreteCommand>(TConcreteCommand command, Action<TConcreteCommand> concreteExecutor)
+            where TConcreteCommand : AbstractCommandMessage
+        {
+            using ( var activity = _logger.ExecutingCommand(command, command.Session.Endpoint, command.Session, command.Session.UserPrincipal) )
             {
                 try
                 {
-                    message.Call.ExecuteOn(serviceInstance);
+                    using ( _sessionManager.JoinSession(command.Session.Id) )
+                    {
+                        concreteExecutor(command);
+                    }
+                    
+                    EnqueueSuccessfulCommandResult(command);
                 }
                 catch ( Exception e )
                 {
                     activity.Fail(e);
-                    _logger.ServiceMethodFailed(serviceContract: message.ServiceContract, method: message.ServiceMethod, error: e);
+                    _logger.CommandFailed(command, command.Session.Endpoint, command.Session, command.Session.UserPrincipal, error: e);
+
+                    EnqueueFailedCommandResult(command, e);
+
                     throw;
                 }
             }
         }
 
-        #endregion
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ExecuteEntityMethodCommand(EntityMethodCommandMessage command)
+        {
+            var entityContract = command.EntityId.ContractType;
+
+            using ( var context = _framework.As<ICoreFramework>().NewUnitOfWorkForEntity(entityContract) )
+            {
+                _logger.LookingUpEntity(id: command.EntityId);
+
+                var entityInstance = context.GetEntityRepository(entityContract).TryGetById(command.EntityId);
+
+                if ( entityInstance != null )
+                {
+                    command.Call.ExecuteOn(entityInstance);
+                    EnqueueSuccessfulCommandResult(command);
+                }
+                else
+                {
+                    throw _logger.EntityNotFound(id: command.EntityId);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ExecuteTransactionScriptCommand(TransactionScriptCommandMessage command)
+        {
+            var scriptInstance = _components.Resolve(command.TransactionScriptType);
+            command.Call.ExecuteOn(scriptInstance);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ExecuteServiceMethodCommand(ServiceMethodCommandMessage command)
+        {
+            var serviceInstance = _components.Resolve(command.ServiceContract);
+            command.Call.ExecuteOn(serviceInstance);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void EnqueueSuccessfulCommandResult(AbstractCommandMessage command)
+        {
+            var result = new CommandResultMessage(
+                _framework,
+                command.Session,
+                command.MessageId,
+                success: true);
+
+            _serviceBus.EnqueueMessage(result);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void EnqueueFailedCommandResult(AbstractCommandMessage command, Exception error)
+        {
+            var fault = error as IFaultException;
+
+            var result = new CommandResultMessage(
+                _framework, 
+                command.Session,
+                command.MessageId, 
+                success: false, 
+                faultCode: fault != null ? fault.FaultCode : "InternalError",
+                faultSubCode: fault != null ? fault.FaultSubCode : string.Empty,
+                faultReason: fault != null ? fault.FaultReason : "Request failed due to an internal error.");
+            
+            _serviceBus.EnqueueMessage(result);
+        }
     }
 }

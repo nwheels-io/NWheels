@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Security.Principal;
+using NWheels.Authorization;
 using NWheels.Extensions;
 using NWheels.Processing.Commands.Impl;
 using NWheels.Processing.Messages;
@@ -14,29 +16,10 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ServiceMethodCommandMessage(IMethodCallObject call)
+        public ServiceMethodCommandMessage(IFramework framework, ISession session, IMethodCallObject call)
+            : base(framework, session)
         {
             _call = call;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public override IReadOnlyCollection<IMessageHeader> Headers
-        {
-            get
-            {
-                return null;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public override object Body
-        {
-            get
-            {
-                return _call;
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

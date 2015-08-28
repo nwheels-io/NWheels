@@ -6,7 +6,9 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Hapil;
 using NWheels.Extensions;
+using NWheels.Processing;
 using NWheels.UI.Toolbox;
 using ApiCallType = NWheels.UI.Uidl.ApiCallType;
 using BroadcastDirection = NWheels.UI.Uidl.BroadcastDirection;
@@ -133,6 +135,17 @@ namespace NWheels.UI
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<TInput> InvokeTransactionScript<TScript>(Expression<Action<TScript, TData, TState, TInput>> call)
+                where TScript : ITransactionScript
+            {
+                var behavior = new UidlCallApiBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                SetAndSubscribeBehavior(behavior);
+                TransactionScriptBehaviorBuilder.ParseMethodCall(behavior, call);
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
             
             public NavigateBehaviorBuilder<TInput> Navigate()
             {
@@ -228,6 +241,7 @@ namespace NWheels.UI
             {
                 _ownerNode = ownerNode;
                 _behavior = behavior;
+                _behavior.CallTargetType = ApiCallTargetType.DomainApi;
                 _uidl = uidl;
             }
 
@@ -269,6 +283,47 @@ namespace NWheels.UI
                 _behavior.OperationName = method.Name;
                 _behavior.ParameterNames = method.GetParameters().Select(p => p.Name).ToArray();
                 _behavior.ParameterExpressions = callArguments.Select(x => x.ToString()).ToArray();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class TransactionScriptBehaviorBuilder //<TInput, TScript>
+        {
+            //private readonly ControlledUidlNode _ownerNode;
+            //private readonly UidlCallApiBehavior _behavior;
+            //private readonly UidlBuilder _uidl;
+
+            ////-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            //public TransactionScriptBehaviorBuilder(ControlledUidlNode ownerNode, UidlCallApiBehavior behavior, UidlBuilder uidl)
+            //{
+            //    _ownerNode = ownerNode;
+            //    _behavior = behavior;
+            //    _behavior.CallTargetType = ApiCallTargetType.TransactionScript;
+            //    _uidl = uidl;
+            //}
+
+            ////-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            //public PromiseBuilder<TInput> Execute(Expression<Func<TData, TState, TInput>> call)
+            //{
+            //    ParseMethodCall(call);
+            //    _behavior.CallType = ApiCallType.OneWay;
+            //    return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+            //}
+
+            ////-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static void ParseMethodCall(UidlCallApiBehavior behavior, LambdaExpression methodCall)
+            {
+                Expression[] callArguments;
+                var method = methodCall.GetMethodInfo(out callArguments);
+
+                behavior.ContractName = method.DeclaringType.SimpleQualifiedName();
+                behavior.OperationName = method.Name;
+                behavior.ParameterNames = method.GetParameters().Select(p => p.Name).ToArray();
+                behavior.ParameterExpressions = callArguments.Select(x => x.ToString().ToCamelCaseExpression()).ToArray();
             }
         }
 

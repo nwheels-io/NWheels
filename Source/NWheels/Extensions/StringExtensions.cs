@@ -64,6 +64,28 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static string ToCamelCaseExpression(this string str)
+        {
+            if ( string.IsNullOrEmpty(str) )
+            {
+                return str;
+            }
+
+            char[] resultChars = new char[str.Length];
+            var atFirstLetter = true;
+
+            for ( int i = 0 ; i < resultChars.Length ; i++ )
+            {
+                var c = str[i];
+                resultChars[i] = (atFirstLetter ? char.ToLower(c) : c);
+                atFirstLetter = (!char.IsLetterOrDigit(c) && c != '_');
+            }
+
+            return new string(resultChars);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static bool EqualsIgnoreCase(this string s, string other)
         {
             return s.Equals(other, StringComparison.InvariantCultureIgnoreCase);

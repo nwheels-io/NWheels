@@ -1,4 +1,5 @@
-﻿using System.Security.Permissions;
+﻿using System;
+using System.Security.Permissions;
 using NWheels.Conventions.Core;
 using NWheels.Domains.Security.UI;
 using NWheels.UI;
@@ -25,14 +26,16 @@ namespace NWheels.Domains.Security.Impl
 
         public ILogUserInReply LogUserIn(ILogUserInRequest request)
         {
-            var session = _loginTransaction.Execute(request.LoginName, SecureStringUtility.ClearToSecure(request.Password));
-            var reply = NewModel<ILogUserInReply>();
+            throw new NotSupportedException();
 
-            reply.AuthorizedUidlNodes = new string[0];
-            reply.FullName = session.UserIdentity.PersonFullName;
-            reply.Roles = session.UserIdentity.GetUserRoles();
+            //var session = _loginTransaction.Execute(request.LoginName, request.Password);
+            //var reply = NewModel<ILogUserInReply>();
 
-            return reply;
+            //reply.AuthorizedUidlNodes = new string[0];
+            //reply.FullName = session.UserIdentity.PersonFullName;
+            //reply.Roles = session.UserIdentity.GetUserRoles();
+
+            //return reply;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

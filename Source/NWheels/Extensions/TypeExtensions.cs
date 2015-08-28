@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Hapil;
 using NWheels.Configuration;
 using NWheels.Entities;
 
@@ -127,6 +128,38 @@ namespace NWheels.Extensions
         public static bool IsEntityPartContract(this Type contract)
         {
             return (contract.IsInterface && EntityPartContractAttribute.IsEntityPartContract(contract));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string SimpleQualifiedName(this Type type)
+        {
+            if ( type.Namespace != null )
+            {
+                var significantNamespaceParts = type.Namespace.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Where(IsSignificantNamespacePart)
+                    .ToArray();
+
+                if ( significantNamespaceParts.Length > 0 )
+                {
+                    return significantNamespaceParts[significantNamespaceParts.Length - 1] + "." + type.FriendlyName();
+                }
+            }
+
+            return type.FriendlyName();
+        }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static bool IsSignificantNamespacePart(string part)
+        {
+            var comparer = StringComparer.InvariantCultureIgnoreCase;
+
+            return (
+                comparer.Compare(part, "Domain") != 0 && 
+                comparer.Compare(part, "Core") != 0 && 
+                comparer.Compare(part, "Impl") != 0 && 
+                comparer.Compare(part, "UI") != 0 && 
+                comparer.Compare(part, "Entities") != 0);
         }
     }
 }

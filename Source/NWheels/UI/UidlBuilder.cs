@@ -73,7 +73,7 @@ namespace NWheels.UI
         {
             var typeKey = type.AssemblyQualifiedNameNonVersioned();
 
-            if (!_document.MetaTypes.ContainsKey(typeKey))
+            if ( !_document.MetaTypes.ContainsKey(typeKey) )
             {
                 _document.MetaTypes.Add(typeKey, CreateMetaType(type));
             }

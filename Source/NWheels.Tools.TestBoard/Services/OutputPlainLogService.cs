@@ -63,10 +63,10 @@ namespace NWheels.Tools.TestBoard.Services
                     Warning(node.SingleLineText + AddExceptionIf(node.Exception));
                     break;
                 case NWheels.Logging.LogLevel.Error:
-                    Error(node.SingleLineText + " + EXCEPTION [" + node.Exception.Message + "]");
+                    Error(node.SingleLineText + AddExceptionIf(node.Exception));
                     break;
                 case NWheels.Logging.LogLevel.Critical:
-                    Critical(node.SingleLineText + " + EXCEPTION [" + node.Exception.Message + "]");
+                    Critical(node.SingleLineText + AddExceptionIf(node.Exception));
                     break;
             }
         }

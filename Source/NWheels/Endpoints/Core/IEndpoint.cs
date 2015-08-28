@@ -10,7 +10,7 @@ namespace NWheels.Endpoints.Core
 {
     public interface IEndpoint
     {
-        void PushMessage(IIdentityInfo userIdentity, IMessageObject message);
+        void PushMessage(ISession session, IMessageObject message);
         string Name { get; }
         bool IsPushSupprted { get; }
     }

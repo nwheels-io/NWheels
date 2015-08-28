@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Nancy;
@@ -27,5 +28,8 @@ namespace NWheels.Stacks.NancyFx
  
         [LogInfo]
         void WebApplicationDeactivated(string appName, Uri url);
+
+        [LogWarning]
+        void FailedToDecryptSessionCookie(CryptographicException error);
     }
 }

@@ -9,7 +9,7 @@ namespace NWheels.Authorization
         string Id { get; }
         IPrincipal UserPrincipal { get; }
         IIdentityInfo UserIdentity { get; }
-        IEndpoint OriginatorEndpoint { get; }
+        IEndpoint Endpoint { get; }
         DateTime OpenedAtUtc { get; }
         DateTime? ExpiresAtUtc { get; }
     }

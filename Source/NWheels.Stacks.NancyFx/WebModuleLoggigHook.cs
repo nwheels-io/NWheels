@@ -22,22 +22,22 @@ namespace NWheels.Stacks.NancyFx
 
         public void Attach(IPipelines pipelines)
         {
-            pipelines.BeforeRequest += (ctx) => {
+            pipelines.BeforeRequest.AddItemToStartOfPipeline(ctx => {
                 string verb = ctx.Request.Method;
                 string path = ctx.Request.Path;
 
-                ctx.Items[this.GetType().FullName] = _logger.Request(verb, path, ctx.Request.Url.ToString());
+                ctx.Items[this.GetType().FullName] = _logger.Request(verb, path, ctx.Request.Url.ToString()); // will be disposed by Nancy upon end of request
                 return null;
-            };
+            });
 
-            pipelines.AfterRequest += (ctx) => {
+            pipelines.AfterRequest.AddItemToEndOfPipeline(ctx => {
                 _logger.RequestCompleted(ctx.Response.StatusCode);
-            };
+            });
 
-            pipelines.OnError += (ctx, error) => {
+            pipelines.OnError.AddItemToStartOfPipeline((ctx, error) => {
                 _logger.RequestFailed(error);
                 return null;
-            };
+            });
         }
     }
 }

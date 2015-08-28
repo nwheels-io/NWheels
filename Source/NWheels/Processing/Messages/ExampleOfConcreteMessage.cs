@@ -28,25 +28,19 @@ namespace NWheels.Processing.Messages
         public object Serializer { get; private set; }
 
 
-        public override IReadOnlyCollection<IMessageHeader> Headers
+        protected override IReadOnlyCollection<IMessageHeader> OnGetHeaders()
         {
-            get
-            {
-                return new IMessageHeader[] { _action };
-            }
+            return new IMessageHeader[] { _action };
         }
 
-        public override object Body
+        protected override object OnGetBody()
         {
-            get
+            if ( _deserializedBody == null )
             {
-                if ( _deserializedBody == null )
-                {
-                    //_deserializedBody = Serializer.Deserialize(SerializedBody);
-                }
-
-                return _deserializedBody;
+                //_deserializedBody = Serializer.Deserialize(SerializedBody);
             }
+
+            return _deserializedBody;
         }
     }
 }

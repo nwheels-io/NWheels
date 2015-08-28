@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Principal;
+using NWheels.Authorization;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 
@@ -7,7 +9,8 @@ namespace NWheels.Processing.Commands
 {
     public class EntityChangeSetCommandMessage : AbstractCommandMessage
     {
-        public EntityChangeSetCommandMessage(IReadOnlyList<ChangeItem> changes)
+        public EntityChangeSetCommandMessage(IFramework framework, ISession session, IReadOnlyList<ChangeItem> changes)
+            : base(framework, session)
         {
             this.Changes = changes;
         }

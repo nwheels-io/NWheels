@@ -72,12 +72,12 @@
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ThreadWarning">
                     <Setter Property="Background" Value="#FFE8E8E8" />
                     <Setter Property="Foreground" Value="DarkOrange" />
-                    <Setter Property="FontWeight" Value="DemiBold" />
+                    <Setter Property="FontWeight" Value="Normal" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ThreadFailure">
                     <Setter Property="Background" Value="#FFE8E8E8" />
                     <Setter Property="Foreground" Value="#FFCD1717" />
-                    <Setter Property="FontWeight" Value="DemiBold" />
+                    <Setter Property="FontWeight" Value="Normal" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ActivitySuccess">
                     <Setter Property="Background" Value="#FFF8F8F8" />
@@ -86,12 +86,12 @@
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ActivityWarning">
                     <Setter Property="Background" Value="#FFF8F8F8" />
                     <Setter Property="Foreground" Value="#FFDC7A02" />
-                    <Setter Property="FontWeight" Value="DemiBold" />
+                    <Setter Property="FontWeight" Value="Normal" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="ActivityFailure">
                     <Setter Property="Background" Value="#FFF8F8F8" />
                     <Setter Property="Foreground" Value="#FFCD1717" />
-                    <Setter Property="FontWeight" Value="DemiBold" />
+                    <Setter Property="FontWeight" Value="Normal" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="LogDebug">
                     <Setter Property="Foreground" Value="#FFAEAEAE" />
@@ -101,9 +101,11 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="LogInfo">
                     <Setter Property="Foreground" Value="Navy" />
+                    <Setter Property="FontWeight" Value="DemiBold" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="LogWarning">
                     <Setter Property="Foreground" Value="#FFDC7A02" />
+                    <Setter Property="FontWeight" Value="DemiBold" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=Data.NodeKind}" Value="LogError">
                     <Setter Property="Foreground" Value="#FFCD1717" />

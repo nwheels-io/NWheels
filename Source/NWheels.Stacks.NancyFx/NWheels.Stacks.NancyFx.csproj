@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="IWebApplicationLogger.cs" />
     <Compile Include="IWebModuleContext.cs" />
+    <Compile Include="WebModuleSessionHook.cs" />
     <Compile Include="WebModuleLoggigHook.cs" />
     <Compile Include="MetadataJsonSerializer.cs" />
     <Compile Include="ModuleLoader.cs" />

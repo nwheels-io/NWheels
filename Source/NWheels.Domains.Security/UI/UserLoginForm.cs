@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
+using NWheels.Domains.Security.Impl;
 using NWheels.Globalization;
 using NWheels.UI;
 using NWheels.UI.Uidl;
@@ -32,7 +33,7 @@ namespace NWheels.Domains.Security.UI
         protected override void DescribePresenter(PresenterBuilder<UserLoginForm, ILogUserInRequest, IState> presenter)
         {
             presenter.On(LogIn)
-                .CallApi<ISecurityDomainApi>().RequestReply((api, data, state, input) => api.LogUserIn(data))
+                .InvokeTransactionScript<UserLoginTransactionScript>((x, data, state, input) => x.Execute(data.LoginName, data.Password))
                 .Then(
                     onSuccess: b => b.Broadcast(UserLoggedIn).BubbleUp(),
                     onFailure: b => b.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.LoginHasFailed(failure.ReasonText)));

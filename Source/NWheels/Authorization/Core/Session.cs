@@ -32,7 +32,7 @@ namespace NWheels.Authorization.Core
 
             UserPrincipal = userPrincipal;
             UserIdentity = (userPrincipal as IIdentityInfo);
-            OriginatorEndpoint = originatorEndpoint;
+            Endpoint = originatorEndpoint;
             OpenedAtUtc = _framework.UtcNow;
 
             Touch();
@@ -70,7 +70,7 @@ namespace NWheels.Authorization.Core
         public string Id { get; private set; }
         public IPrincipal UserPrincipal { get; private set; }
         public IIdentityInfo UserIdentity { get; private set; }
-        public IEndpoint OriginatorEndpoint { get; private set; }
+        public IEndpoint Endpoint { get; private set; }
         public DateTime OpenedAtUtc { get; private set; }
         public DateTime? ExpiresAtUtc { get; private set; }
 
@@ -84,6 +84,14 @@ namespace NWheels.Authorization.Core
         }
 
         #endregion
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal void Authorize(IPrincipal userPrincipal)
+        {
+            this.UserPrincipal = userPrincipal;
+            this.UserIdentity = (IIdentityInfo)userPrincipal.Identity;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -93,6 +93,31 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void CanCallNonVoidMethod()
+        {
+            //-- arrange
+
+            var factoryUnderTest = new MethodCallObjectFactory(base.DyamicModule);
+            var methodTwoInfo = typeof(TestTarget).GetMethod("MethodTwo");
+
+            var call = factoryUnderTest.NewMessageCallObject(methodTwoInfo);
+            dynamic callAsDynamic = call;
+
+            //-- act
+
+            callAsDynamic.Num = 123;
+
+            var target = new TestTarget(Framework.Logger<ITestTargetLogger>());
+            call.ExecuteOn(target);
+
+            //-- assert
+
+            Framework.TakeLog().ShouldHaveOne<ITestTargetLogger>(x => x.MethodTwo(123));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public interface ITestTargetLogger : IApplicationEventLogger
         {
             [LogInfo]
@@ -125,9 +150,10 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void MethodTwo(int num)
+            public string MethodTwo(int num)
             {
                 _logger.MethodTwo(num);
+                return num.ToString();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

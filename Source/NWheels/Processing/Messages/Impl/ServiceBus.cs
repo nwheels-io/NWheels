@@ -17,10 +17,17 @@ namespace NWheels.Processing.Messages.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ServiceBus(IEnumerable<IMessageHandlerAdapter> registeredHandlers, IServiceBusEventLogger logger)
+        public ServiceBus(
+            IEnumerable<IMessageHandlerAdapter> registeredHandlers,
+            IEnumerable<MessageTypeRegistration> registeredBodyTypes,
+            IServiceBusEventLogger logger)
         {
             _logger = logger;
-            _handlersByBodyType = registeredHandlers.ToDictionary(handler => handler.MessageBodyType);
+            
+            _handlersByBodyType = MapRegisteredBodyTypes(
+                registeredHandlers.ToDictionary(handler => handler.MessageBodyType),
+                registeredBodyTypes);
+
             _messageQueue = new BlockingCollection<IMessageObject>();
             _stopRequest = new CancellationTokenSource();
         }
@@ -147,6 +154,33 @@ namespace NWheels.Processing.Messages.Impl
                     activity.Fail(e);
                 }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Dictionary<Type, IMessageHandlerAdapter> MapRegisteredBodyTypes(
+            Dictionary<Type, IMessageHandlerAdapter> map,
+            IEnumerable<MessageTypeRegistration> bodyTypeRegistrations)
+        {
+            foreach ( var registration in bodyTypeRegistrations )
+            {
+                var hierarchy = registration.GetBodyTypeHierarchyTopDown();
+
+                for ( int i = 1 ; i < hierarchy.Count ; i++ )
+                {
+                    var baseType = hierarchy[i - 1];
+                    var derivedType = hierarchy[i];
+
+                    IMessageHandlerAdapter baseAdapter;
+
+                    if ( map.TryGetValue(baseType, out baseAdapter) && !map.ContainsKey(derivedType) )
+                    {
+                        map.Add(derivedType, baseAdapter);
+                    }
+                }
+            }
+
+            return map;
         }
     }
 }

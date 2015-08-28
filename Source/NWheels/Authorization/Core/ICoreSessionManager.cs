@@ -11,8 +11,11 @@ namespace NWheels.Authorization.Core
     public interface ICoreSessionManager
     {
         ISession OpenSession(IPrincipal userPrincipal, IEndpoint originatorEndpoint);
-        ISession GetCurrentSession();
+        ISession AuthorieSession(IPrincipal userPrincipal);
         ISession[] GetOpenSessions();
         void DropSession(string sessionId);
+        byte[] EncryptSessionId(string clearSessionId);
+        string DecryptSessionId(byte[] encryptedSessionId);
+        string SessionIdCookieName { get; }
     }
 }

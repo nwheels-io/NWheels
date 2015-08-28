@@ -8,6 +8,7 @@ using Hapil;
 using Hapil.Operands;
 using Hapil.Toolbox;
 using Hapil.Writers;
+using NWheels.Extensions;
 using NWheels.Processing.Commands.Impl;
 using TT = Hapil.TypeTemplate;
 
@@ -49,6 +50,7 @@ namespace NWheels.Processing.Commands.Factories
             var conventionsContext = new MethodCallConventionsContext(((MethodCallTypeKey)context.TypeKey).Method);
 
             return new IObjectFactoryConvention[] {
+                new ClassNameConvention(conventionsContext),
                 new DefaultConstructorConvention(),
                 new ParameterPropertiesConvention(conventionsContext),
                 new ImplementIMethodCallObjectConvention(conventionsContext)
@@ -125,6 +127,34 @@ namespace NWheels.Processing.Commands.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public class ClassNameConvention : ImplementationConvention
+        {
+            private readonly MethodCallConventionsContext _conventionContext;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ClassNameConvention(MethodCallConventionsContext conventionContext)
+                : base(Will.InspectDeclaration)
+            {
+                _conventionContext = conventionContext;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override void OnInspectDeclaration(ObjectFactoryContext context)
+            {
+                var currentNameParts = context.ClassFullName.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
+                context.ClassFullName = string.Format(
+                    "{0}MethodCall_{1}_{2}",
+                    (currentNameParts.Length > 0 ? string.Join(".", currentNameParts.Take(currentNameParts.Length - 1)) + "." : ""),
+                    _conventionContext.Method.DeclaringType.SimpleQualifiedName().Replace(".", "_"),
+                    _conventionContext.Method.Name);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class ParameterPropertiesConvention : ImplementationConvention
         {
             private readonly MethodCallConventionsContext _context;
@@ -184,7 +214,17 @@ namespace NWheels.Processing.Commands.Factories
                 {
                     writer.ImplementInterfaceExplicitly<IMethodCallObject>()
                         .Method<object>(intf => intf.ExecuteOn).Implement((w, target) => {
-                            target.CastTo<TT.TService>().Void(_context.Method, callArguments);
+                            if ( _context.Method.IsVoid() )
+                            {
+                                target.CastTo<TT.TService>().Void(_context.Method, callArguments);
+                            }
+                            else
+                            {
+                                using ( TT.CreateScope<TT.TReturn>(_context.Method.ReturnType) )
+                                {
+                                    target.CastTo<TT.TService>().Func<TT.TReturn>(_context.Method, callArguments);
+                                }
+                            }
                         })
                         .Property(intf => intf.MethodInfo).Implement(p =>
                             p.Get(gw => {
