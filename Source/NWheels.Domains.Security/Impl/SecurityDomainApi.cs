@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Security.Permissions;
+using NWheels.Authorization.Impl;
 using NWheels.Conventions.Core;
+using NWheels.Domains.Security.Core;
 using NWheels.Domains.Security.UI;
 using NWheels.UI;
 using NWheels.UI.Factories;

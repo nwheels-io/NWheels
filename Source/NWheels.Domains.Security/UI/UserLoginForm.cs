@@ -4,7 +4,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Authorization.Impl;
 using NWheels.DataObjects;
+using NWheels.Domains.Security.Core;
 using NWheels.Domains.Security.Impl;
 using NWheels.Globalization;
 using NWheels.UI;
@@ -33,11 +35,10 @@ namespace NWheels.Domains.Security.UI
         protected override void DescribePresenter(PresenterBuilder<UserLoginForm, ILogUserInRequest, IState> presenter)
         {
             presenter.On(LogIn)
-                .InvokeTransactionScript<UserLoginTransactionScript>((x, data, state, input) => x.Execute(data.LoginName, data.Password))
+                .InvokeTransactionScript<UserLoginTransactionScript>().WaitForReply((x, data, state, input) => x.Execute(data.LoginName, data.Password))
                 .Then(
                     onSuccess: b => b.Broadcast(UserLoggedIn).BubbleUp(),
                     onFailure: b => b.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.LoginHasFailed(failure.ReasonText)));
-
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

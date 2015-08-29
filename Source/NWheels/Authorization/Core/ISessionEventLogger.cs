@@ -39,5 +39,8 @@ namespace NWheels.Authorization.Core
 
         [LogVerbose(Audit = true)]
         void DroppingSession(string sessionId);
+
+        [LogVerbose(Audit = true)]
+        void ClosingSession(string sessionId);
     }
 }

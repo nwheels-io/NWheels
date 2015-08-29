@@ -6,6 +6,7 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using NWheels.Authorization.Core;
+using NWheels.Concurrency;
 using NWheels.Endpoints.Core;
 using NWheels.Extensions;
 
@@ -130,6 +131,29 @@ namespace NWheels.Authorization.Impl
         public ISession[] GetOpenSessions()
         {
             return _sessionById.Values.ToArray().Cast<ISession>().ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void CloseCurrentSession()
+        {
+            var session = this.CurrentSession;
+
+            if ( session == null )
+            {
+                throw new InvalidOperationException("No session is associatd with the current thread.");
+            }
+
+            _logger.ClosingSession(session.Id);
+
+            //TODO: session cleanup callbacks should be invoked
+
+            Session.Clear();
+            
+            Session removedSession;
+            _sessionById.TryRemove(session.Id, out removedSession);
+
+            JoinAnonymous();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -15,19 +17,22 @@ using Autofac.Integration.WebApi;
 using Hapil;
 using Owin;
 using Microsoft.Owin.Hosting;
+using NWheels.Authorization;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.Endpoints;
+using NWheels.Endpoints.Core;
 
 namespace NWheels.Stacks.ODataBreeze
 {
-    public class BreezeEndpointComponent : LifecycleEventListenerBase
+    public class BreezeEndpointComponent : LifecycleEventListenerBase, IEndpoint
     {
         private readonly IComponentContext _baseContainer;
         private readonly DynamicModule _dyanmicModule;
         private readonly ITypeMetadataCache _metadataCache;
+        private readonly ISessionManager _sessionManager;
         private readonly RestApiEndpointRegistration _endpointRegistration;
         private readonly ILogger _logger;
         private ILifetimeScope _containerLifetimeScope = null;
@@ -40,15 +45,48 @@ namespace NWheels.Stacks.ODataBreeze
             IComponentContext components,
             DynamicModule dyanmicModule,
             ITypeMetadataCache metadataCache, 
+            ISessionManager sessionManager,
             RestApiEndpointRegistration endpointRegistration,
             Auto<ILogger> logger)
         {
             _dyanmicModule = dyanmicModule;
             _metadataCache = metadataCache;
+            _sessionManager = sessionManager;
             _baseContainer = components;
             _endpointRegistration = endpointRegistration;
             _logger = logger.Instance;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region IEndpoint Implementation
+
+        void IEndpoint.PushMessage(ISession session, Processing.Messages.IMessageObject message)
+        {
+            throw new NotSupportedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        string IEndpoint.Name
+        {
+            get
+            {
+                return this.GetType().Name + "[" + _endpointRegistration.Contract.Name + "]";
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        bool IEndpoint.IsPushSupprted
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -133,6 +171,8 @@ namespace NWheels.Stacks.ODataBreeze
             config.Services.Replace(typeof(IHttpControllerTypeResolver), new SingleControllerTypeResolver(_apiControllerType));
             config.MapHttpAttributeRoutes(new DirectRouteProviderWithInheritance());
             config.DependencyResolver = new AutofacWebApiDependencyResolver(_containerLifetimeScope);
+            
+            config.MessageHandlers.Add(new LoggingAndSessionHandler(this, _sessionManager, _logger));
 
             app.UseAutofacMiddleware(_containerLifetimeScope);
             app.UseAutofacWebApi(config);
@@ -145,14 +185,24 @@ namespace NWheels.Stacks.ODataBreeze
         {
             [LogDebug]
             void RestEndpointStarting(string repositoryName, string url);
+            
             [LogInfo]
             void RestEndpointStarted(string repositoryName, string url);
+            
             [LogError]
             void RestEndpointFailedToStart(string repositoryName, string url, Exception e);
+            
             [LogInfo]
             void RestEndpointStopped(string repositoryName);
+            
             [LogError]
             void RestEndpointFailedToStop(string repositoryName, Exception e);
+            
+            [LogWarning(Audit = true)]
+            void FailedToDecryptSessionCookie(CryptographicException error);
+            
+            [LogThread(ThreadTaskType.IncomingRequest)]
+            ILogActivity Request(HttpMethod verb, string path, [Detail] string query);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

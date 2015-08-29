@@ -58,6 +58,8 @@
     <Compile Include="Core\UserAccountPolicy.cs" />
     <Compile Include="Core\UserAccountPolicySet.cs" />
     <Compile Include="Core\UserAccountPrincipal.cs" />
+    <Compile Include="LoggedInUserInfo.cs" />
+    <Compile Include="UserLoginTransactionScript.cs" />
     <Compile Include="Entities.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Impl\ClaimFactory.cs" />
@@ -66,7 +68,6 @@
     <Compile Include="Core\ICryptoProvider.cs" />
     <Compile Include="Core\ISecurityDomainLogger.cs" />
     <Compile Include="Impl\PrivateAuthenticationProvider.cs" />
-    <Compile Include="Impl\UserLoginTransactionScript.cs" />
     <Compile Include="Impl\SecurityDomainApi.cs" />
     <Compile Include="Core\UserAccountIdentity.cs" />
     <Compile Include="Impl\UserAccountRoleClaim.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="UI\CurrentLoggedInUser.cs" />
     <Compile Include="ISecurityDomainApi.cs" />
     <Compile Include="UI\UserLoginForm.cs" />
+    <Compile Include="UserLogoutTransactionScript.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels\NWheels.csproj">

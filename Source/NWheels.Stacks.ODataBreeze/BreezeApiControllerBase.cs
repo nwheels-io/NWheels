@@ -8,15 +8,21 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
+using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using Breeze.ContextProvider;
 using Breeze.WebApi2;
 using Newtonsoft.Json.Linq;
+using NWheels.Authorization;
+using NWheels.Authorization.Core;
 using NWheels.DataObjects;
 using NWheels.Entities;
+using NWheels.Extensions;
 
 namespace NWheels.Stacks.ODataBreeze
 {

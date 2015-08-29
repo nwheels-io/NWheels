@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using NWheels.Authorization.Impl;
 using NWheels.Domains.Security.Core;
 using NWheels.Domains.Security.Impl;
 using NWheels.Domains.Security.UI;
@@ -23,6 +24,7 @@ namespace NWheels.Domains.Security
             builder.RegisterType<ClaimFactory>().SingleInstance();
 
             builder.RegisterType<UserLoginTransactionScript>().SingleInstance();
+            builder.RegisterType<UserLogoutTransactionScript>().SingleInstance();
             builder.RegisterType<SecurityDomainApi>().As<ISecurityDomainApi>().SingleInstance();
 
             builder.RegisterType<UserAccountPolicySet>();

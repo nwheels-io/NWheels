@@ -86,19 +86,21 @@ namespace NWheels.Processing.Commands.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ExecuteCommand<TConcreteCommand>(TConcreteCommand command, Action<TConcreteCommand> concreteExecutor)
+        private void ExecuteCommand<TConcreteCommand>(TConcreteCommand command, Func<TConcreteCommand, object> concreteExecutor)
             where TConcreteCommand : AbstractCommandMessage
         {
             using ( var activity = _logger.ExecutingCommand(command, command.Session.Endpoint, command.Session, command.Session.UserPrincipal) )
             {
                 try
                 {
+                    object resultValue;
+
                     using ( _sessionManager.JoinSession(command.Session.Id) )
                     {
-                        concreteExecutor(command);
+                        resultValue = concreteExecutor(command);
                     }
                     
-                    EnqueueSuccessfulCommandResult(command);
+                    EnqueueSuccessfulCommandResult(command, resultValue);
                 }
                 catch ( Exception e )
                 {
@@ -114,7 +116,7 @@ namespace NWheels.Processing.Commands.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ExecuteEntityMethodCommand(EntityMethodCommandMessage command)
+        private object ExecuteEntityMethodCommand(EntityMethodCommandMessage command)
         {
             var entityContract = command.EntityId.ContractType;
 
@@ -127,7 +129,7 @@ namespace NWheels.Processing.Commands.Impl
                 if ( entityInstance != null )
                 {
                     command.Call.ExecuteOn(entityInstance);
-                    EnqueueSuccessfulCommandResult(command);
+                    return command.Call.Result;
                 }
                 else
                 {
@@ -138,31 +140,34 @@ namespace NWheels.Processing.Commands.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ExecuteTransactionScriptCommand(TransactionScriptCommandMessage command)
+        private object ExecuteTransactionScriptCommand(TransactionScriptCommandMessage command)
         {
             var scriptInstance = _components.Resolve(command.TransactionScriptType);
             command.Call.ExecuteOn(scriptInstance);
+            return command.Call.Result;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ExecuteServiceMethodCommand(ServiceMethodCommandMessage command)
+        private object ExecuteServiceMethodCommand(ServiceMethodCommandMessage command)
         {
             var serviceInstance = _components.Resolve(command.ServiceContract);
             command.Call.ExecuteOn(serviceInstance);
+            return command.Call.Result;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void EnqueueSuccessfulCommandResult(AbstractCommandMessage command)
+        private void EnqueueSuccessfulCommandResult(AbstractCommandMessage command, object resultValue)
         {
-            var result = new CommandResultMessage(
+            var resultMessage = new CommandResultMessage(
                 _framework,
                 command.Session,
                 command.MessageId,
+                resultValue,
                 success: true);
 
-            _serviceBus.EnqueueMessage(result);
+            _serviceBus.EnqueueMessage(resultMessage);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -171,16 +176,17 @@ namespace NWheels.Processing.Commands.Impl
         {
             var fault = error as IFaultException;
 
-            var result = new CommandResultMessage(
+            var resultMessage = new CommandResultMessage(
                 _framework, 
                 command.Session,
-                command.MessageId, 
+                command.MessageId,
+                result: null,
                 success: false, 
                 faultCode: fault != null ? fault.FaultCode : "InternalError",
                 faultSubCode: fault != null ? fault.FaultSubCode : string.Empty,
                 faultReason: fault != null ? fault.FaultReason : "Request failed due to an internal error.");
             
-            _serviceBus.EnqueueMessage(result);
+            _serviceBus.EnqueueMessage(resultMessage);
         }
     }
 }

@@ -160,6 +160,13 @@ namespace NWheels.Concurrency
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static void Clear()
+        {
+            new LogicalCallContextAnchor<PerContextResourceConsumerScope<T>>().Clear();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static T CurrentResource
         {
             get
@@ -185,6 +192,13 @@ namespace NWheels.Concurrency
         public ThreadStaticResourceConsumerScope(Func<IResourceConsumerScopeHandle, T> resourceFactory, bool externallyOwned = false)
             : base(new ThreadStaticAnchor<PerContextResourceConsumerScope<T>>(), resourceFactory, externallyOwned)
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void Clear()
+        {
+            new ThreadStaticAnchor<PerContextResourceConsumerScope<T>>().Clear();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

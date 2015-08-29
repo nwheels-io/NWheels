@@ -14,18 +14,20 @@ namespace NWheels.Processing.Commands
         public CommandResultMessage(
             IFramework framework,
             ISession toSession,
-            Guid commandMessageId, 
+            Guid commandMessageId,
+            object result,
             bool success, 
             string faultCode = null, 
             string faultSubCode = null, 
             string faultReason = null)
             : base(framework, toSession)
         {
-            CommandMessageId = commandMessageId;
-            Success = success;
-            FaultCode = faultCode;
-            FaultSubCode = faultSubCode;
-            FaultReason = faultReason;
+            this.CommandMessageId = commandMessageId;
+            this.Result = result;
+            this.Success = success;
+            this.FaultCode = faultCode;
+            this.FaultSubCode = faultSubCode;
+            this.FaultReason = faultReason;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -38,6 +40,7 @@ namespace NWheels.Processing.Commands
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Guid CommandMessageId { get; private set; }
+        public object Result { get; private set; }
         public bool Success { get; private set; }
         public string FaultCode { get; private set; }
         public string FaultSubCode { get; private set; }
@@ -51,6 +54,7 @@ namespace NWheels.Processing.Commands
             {
                 this.Type = source.GetType().SimpleQualifiedName();
                 this.CommandMessageId = source.CommandMessageId;
+                this.Result = source.Result;
                 this.Success = source.Success;
                 this.FaultCode = source.FaultCode;
                 this.FaultSubCode = source.FaultSubCode;
@@ -61,6 +65,7 @@ namespace NWheels.Processing.Commands
 
             public string Type { get; private set; }
             public Guid CommandMessageId { get; private set; }
+            public object Result { get; private set; }
             public bool Success { get; private set; }
             public string FaultCode { get; private set; }
             public string FaultSubCode { get; private set; }

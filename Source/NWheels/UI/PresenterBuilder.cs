@@ -136,13 +136,22 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<TInput> InvokeTransactionScript<TScript>(Expression<Action<TScript, TData, TState, TInput>> call)
+            public SendServerCommandBehaviorBuilder<TInput, TScript> InvokeTransactionScript<TScript>()
                 where TScript : ITransactionScript
             {
                 var behavior = new UidlCallApiBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
                 SetAndSubscribeBehavior(behavior);
-                TransactionScriptBehaviorBuilder.ParseMethodCall(behavior, call);
-                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+                return new SendServerCommandBehaviorBuilder<TInput, TScript>(_ownerNode, behavior, _uidl, ApiCallTargetType.TransactionScript);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public SendServerCommandBehaviorBuilder<TInput, TScript> InvokeServiceMethod<TScript>()
+                where TScript : ITransactionScript
+            {
+                var behavior = new UidlCallApiBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                SetAndSubscribeBehavior(behavior);
+                return new SendServerCommandBehaviorBuilder<TInput, TScript>(_ownerNode, behavior, _uidl, ApiCallTargetType.ServiceMethod);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -288,42 +297,60 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class TransactionScriptBehaviorBuilder //<TInput, TScript>
+        public class SendServerCommandBehaviorBuilder<TInput, TContract>
         {
-            //private readonly ControlledUidlNode _ownerNode;
-            //private readonly UidlCallApiBehavior _behavior;
-            //private readonly UidlBuilder _uidl;
+            private readonly ControlledUidlNode _ownerNode;
+            private readonly UidlCallApiBehavior _behavior;
+            private readonly UidlBuilder _uidl;
 
-            ////-------------------------------------------------------------------------------------------------------------------------------------------------
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            //public TransactionScriptBehaviorBuilder(ControlledUidlNode ownerNode, UidlCallApiBehavior behavior, UidlBuilder uidl)
-            //{
-            //    _ownerNode = ownerNode;
-            //    _behavior = behavior;
-            //    _behavior.CallTargetType = ApiCallTargetType.TransactionScript;
-            //    _uidl = uidl;
-            //}
+            public SendServerCommandBehaviorBuilder(ControlledUidlNode ownerNode, UidlCallApiBehavior behavior, UidlBuilder uidl, ApiCallTargetType targetType)
+            {
+                _ownerNode = ownerNode;
+                _behavior = behavior;
+                _behavior.CallTargetType = targetType;
+                _uidl = uidl;
+            }
 
-            ////-------------------------------------------------------------------------------------------------------------------------------------------------
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            //public PromiseBuilder<TInput> Execute(Expression<Func<TData, TState, TInput>> call)
-            //{
-            //    ParseMethodCall(call);
-            //    _behavior.CallType = ApiCallType.OneWay;
-            //    return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
-            //}
+            public PromiseBuilder<TInput> FireAndForget(Expression<Action<TContract, TData, TState, TInput>> call)
+            {
+                ParseMethodCall(call);
+                _behavior.CallType = ApiCallType.OneWay;
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+            }
 
-            ////-------------------------------------------------------------------------------------------------------------------------------------------------
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static void ParseMethodCall(UidlCallApiBehavior behavior, LambdaExpression methodCall)
+            public PromiseBuilder<TInput> WaitForCompletion(Expression<Action<TContract, TData, TState, TInput>> call)
+            {
+                ParseMethodCall(call);
+                _behavior.CallType = ApiCallType.RequestReply;
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<TReply> WaitForReply<TReply>(Expression<Func<TContract, TData, TState, TInput, TReply>> call)
+            {
+                ParseMethodCall(call);
+                _behavior.CallType = ApiCallType.RequestReply;
+                return new PromiseBuilder<TReply>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ParseMethodCall(LambdaExpression methodCall)
             {
                 Expression[] callArguments;
                 var method = methodCall.GetMethodInfo(out callArguments);
 
-                behavior.ContractName = method.DeclaringType.SimpleQualifiedName();
-                behavior.OperationName = method.Name;
-                behavior.ParameterNames = method.GetParameters().Select(p => p.Name).ToArray();
-                behavior.ParameterExpressions = callArguments.Select(x => x.ToString().ToCamelCaseExpression()).ToArray();
+                _behavior.ContractName = method.DeclaringType.SimpleQualifiedName();
+                _behavior.OperationName = method.Name;
+                _behavior.ParameterNames = method.GetParameters().Select(p => p.Name).ToArray();
+                _behavior.ParameterExpressions = callArguments.Select(x => x.ToString().ToCamelCaseExpression()).ToArray();
             }
         }
 

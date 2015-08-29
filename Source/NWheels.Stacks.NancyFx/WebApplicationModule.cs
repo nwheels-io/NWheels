@@ -248,28 +248,6 @@ namespace NWheels.Stacks.NancyFx
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class TestMethodCall : IMethodCallObject
-        {
-            #region Implementation of IMethodCallObject
-
-            public void ExecuteOn(object target)
-            {
-                throw new NotImplementedException();
-            }
-
-            public MethodInfo MethodInfo
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            #endregion
-
-            public string LoginName { get; set; }
-            public string Password { get; set; }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public string ContentRootPath
         {
             get { return _contentRootPath; }

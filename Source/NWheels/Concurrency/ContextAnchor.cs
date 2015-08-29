@@ -11,6 +11,7 @@ namespace NWheels.Concurrency
 {
     public abstract class ContextAnchor<T>
     {
+        public abstract void Clear();
         public abstract T Current { get; set; }
     }
 
@@ -24,6 +25,13 @@ namespace NWheels.Concurrency
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Overrides of ContextAnchor<T>
+
+        public override void Clear()
+        {
+            Current = default(T);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override T Current
         {
@@ -43,6 +51,13 @@ namespace NWheels.Concurrency
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Overrides of ContextAnchor<T>
+
+        public override void Clear()
+        {
+            Current = default(T);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override T Current
         {

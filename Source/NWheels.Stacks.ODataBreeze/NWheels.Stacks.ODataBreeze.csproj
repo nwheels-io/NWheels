@@ -161,6 +161,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BreezeContextProvider.cs" />
     <Compile Include="BreezeApiControllerBase.cs" />
+    <Compile Include="LoggingAndSessionHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels\NWheels.csproj">
