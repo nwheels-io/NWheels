@@ -46,7 +46,7 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void CanCallMethodWithNoParameters()
+        public void CanCallVoidMethodWithNoParameters()
         {
             //-- arrange
 
@@ -63,12 +63,13 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             //-- assert
 
             Framework.TakeLog().ShouldHaveOne<ITestTargetLogger>(x => x.MethodOne());
+            call.Result.ShouldBe(null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void CanCallMethodWithTwoParameters()
+        public void CanCallVoidMethodWithTwoParameters()
         {
             //-- arrange
 
@@ -89,6 +90,7 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             //-- assert
 
             Framework.TakeLog().ShouldHaveOne<ITestTargetLogger>(x => x.MethodThree(123, "ABC"));
+            call.Result.ShouldBe(null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -114,6 +116,7 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             //-- assert
 
             Framework.TakeLog().ShouldHaveOne<ITestTargetLogger>(x => x.MethodTwo(123));
+            call.Result.ShouldBe("246");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -153,7 +156,7 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             public string MethodTwo(int num)
             {
                 _logger.MethodTwo(num);
-                return num.ToString();
+                return (num * 2).ToString();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

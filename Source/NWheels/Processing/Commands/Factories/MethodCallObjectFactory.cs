@@ -77,6 +77,7 @@ namespace NWheels.Processing.Commands.Factories
             public Type TargetType { get; private set; }
             public ParameterInfo[] Parameters { get; private set; }
             public Field<TT.TProperty>[] ParameterFields { get; private set; }
+            public Field<TT.TReturn> ReturnValueField { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -222,13 +223,26 @@ namespace NWheels.Processing.Commands.Factories
                             {
                                 using ( TT.CreateScope<TT.TReturn>(_context.Method.ReturnType) )
                                 {
-                                    target.CastTo<TT.TService>().Func<TT.TReturn>(_context.Method, callArguments);
+                                    _context.ReturnValueField = writer.Field<TT.TReturn>("$returnValue");
+                                    _context.ReturnValueField.Assign(target.CastTo<TT.TService>().Func<TT.TReturn>(_context.Method, callArguments));
                                 }
                             }
                         })
                         .Property(intf => intf.MethodInfo).Implement(p =>
                             p.Get(gw => {
                                 gw.Return(gw.Const<MethodInfo>(_context.Method));                        
+                            })
+                        )
+                        .Property(intf => intf.Result).Implement(p => 
+                            p.Get(gw => {
+                                if ( _context.Method.IsVoid() )
+                                {
+                                    gw.Return(gw.Const<object>(null));
+                                }
+                                else
+                                {
+                                    gw.Return(_context.ReturnValueField);
+                                }
                             })
                         );
                 }

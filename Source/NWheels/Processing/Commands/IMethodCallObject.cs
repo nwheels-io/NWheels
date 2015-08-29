@@ -6,5 +6,6 @@ namespace NWheels.Processing.Commands
     {
         void ExecuteOn(object target);
         MethodInfo MethodInfo { get; }
+        object Result { get; }
     }
 }
