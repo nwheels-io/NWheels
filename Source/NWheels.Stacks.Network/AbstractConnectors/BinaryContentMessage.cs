@@ -13,28 +13,31 @@ namespace NWheels.Stacks.Network.AbstractConnectors
         private byte[] _messageBuffer;
         private IObjectSerializer _serializer;
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public BinaryContentMessage(byte[] messageBuffer, IObjectSerializer serializer)
         {
             _messageBuffer = messageBuffer;
             _serializer = serializer;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Implementation of IMessageObject
 
-        public override IReadOnlyCollection<IMessageHeader> Headers
+        protected override IReadOnlyCollection<IMessageHeader> OnGetHeaders()
         {
-            get
-            {
-                byte[] headers = new byte[2];
-                headers[0] = _messageBuffer[0];
-                headers[1] = _messageBuffer[1];
-                return null;
-            }
+            byte[] headers = new byte[2];
+            headers[0] = _messageBuffer[0];
+            headers[1] = _messageBuffer[1];
+            return null;
         }
 
-        public override object Body
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override object OnGetBody()
         {
-            get { return _serializer.Deserialize(this); }
+            return _serializer.Deserialize(this);
         }
 
         #endregion
