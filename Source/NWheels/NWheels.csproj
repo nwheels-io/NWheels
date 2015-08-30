@@ -262,6 +262,8 @@
     <Compile Include="TypeModel\TimeUnit.cs" />
     <Compile Include="UI\AuthorizationContract.cs" />
     <Compile Include="UI\Toolbox\CrudScreenPart.cs" />
+    <Compile Include="UI\Toolbox\Dashboard.cs" />
+    <Compile Include="UI\Toolbox\Chat.cs" />
     <Compile Include="UI\Toolbox\Report.cs" />
     <Compile Include="UI\Factories\ViewModelObjectFactory.cs" />
     <Compile Include="UI\Toolbox\Chart.cs" />

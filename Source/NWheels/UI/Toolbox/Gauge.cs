@@ -14,6 +14,7 @@ namespace NWheels.UI.Toolbox
         public Gauge(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
+            this.Values = new List<GaugeValue>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -21,5 +22,37 @@ namespace NWheels.UI.Toolbox
         protected override void DescribePresenter(PresenterBuilder<Gauge, Empty.Data, Empty.State> presenter)
         {
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public string Header { get; set; }
+        [DataMember]
+        public string Badge { get; set; }
+        [DataMember]
+        public List<GaugeValue> Values { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+        public class GaugeValue
+        {
+            [DataMember]
+            public decimal Value { get; set; }
+            [DataMember]
+            public string Label { get; set; }
+            [DataMember]
+            public GaugeValueType Type { get; set; }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum GaugeValueType
+    {
+        Absolute,
+        Percentage,
+        AbsoluteChange,
+        PercentageChange
     }
 }
