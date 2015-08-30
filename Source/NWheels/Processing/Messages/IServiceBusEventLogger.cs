@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Logging;
@@ -61,5 +62,25 @@ namespace NWheels.Processing.Messages
 
         [LogCritical]
         void WorkerThreadTerminatedWithUnhandledException(Exception error);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [LogDebug]
+        void SettingMessageResult(MessageResult result, Exception error);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [LogActivity]
+        ILogActivity InvokingContinuation(MethodInfo callback);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [LogDebug]
+        void MessageDoesNotSupportContinuation();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [LogError]
+        void ContinuationCallbackFailed(MethodInfo method, Exception error);
     }
 }

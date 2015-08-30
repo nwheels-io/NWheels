@@ -8,6 +8,6 @@ namespace NWheels.Processing.Messages
 {
     public interface ISetMessageResult
     {
-        void SetMessageResult(MessageResult result, Exception error);
+        void SetMessageResult(MessageResult result, Exception error, out Action continuation);
     }
 }

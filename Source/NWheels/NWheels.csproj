@@ -132,6 +132,7 @@
     <Compile Include="Processing\Commands\TransactionScriptCommandMessage.cs" />
     <Compile Include="Processing\Messages\AbstractSessionPushMessage.cs" />
     <Compile Include="Processing\Messages\Impl\SessionPushActor.cs" />
+    <Compile Include="Processing\Messages\MessageObjectWithContinuation.cs" />
     <Compile Include="Processing\Messages\MessageTypeRegistration.cs" />
     <Compile Include="TypeModel\Serialization\BinarySerializer.cs" />
     <Compile Include="TypeModel\Serialization\IObjectSerializer.cs" />

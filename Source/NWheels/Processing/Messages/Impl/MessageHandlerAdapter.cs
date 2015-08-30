@@ -7,15 +7,15 @@ namespace NWheels.Processing.Messages.Impl
     internal class MessageHandlerAdapter<TBody> : IMessageHandlerAdapter
         where TBody : class
     {
-        private IComponentContext _components;
+        private readonly IComponentContext _components;
         private readonly IServiceBusEventLogger _logger;
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public MessageHandlerAdapter(IComponentContext components, IServiceBusEventLogger logger)
         {
-            _logger = logger;
             _components = components;
+            _logger = logger;
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,9 +42,12 @@ namespace NWheels.Processing.Messages.Impl
                 InvokeActor(singleActor, message, exceptions);
             }
 
-            if ( exceptions.Count > 0 )
+            AggregateException aggregatedError = (exceptions.Count > 0 ? new AggregateException(exceptions).Flatten() : null);
+            SetMessageResult(message as ISetMessageResult, aggregatedError);
+
+            if ( aggregatedError != null )
             {
-                throw _logger.ErrorsWhileHandlingMessage(typeof(TBody).FullName, new AggregateException(exceptions));
+                throw _logger.ErrorsWhileHandlingMessage(typeof(TBody).FullName, aggregatedError);
             }
         }
 
@@ -71,6 +74,46 @@ namespace NWheels.Processing.Messages.Impl
                 {
                     activity.Fail(e);
                     exceptions.Add(_logger.ActorFailed(actorInstance.GetType().FullName, typeof(TBody).FullName, e));
+                }
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void SetMessageResult(ISetMessageResult messageWithResult, Exception error)
+        {
+            if ( messageWithResult == null )
+            {
+                _logger.MessageDoesNotSupportContinuation();
+                return;
+            }
+
+            var result = (error != null ? MessageResult.ProcessingFailed : MessageResult.Processed);
+            _logger.SettingMessageResult(result, error);
+
+            Action continuation;
+            messageWithResult.SetMessageResult(result, error, out continuation);
+
+            if ( continuation != null )
+            {
+                InvokeContinuationCallback(continuation);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void InvokeContinuationCallback(Action continuation)
+        {
+            using ( var activity = _logger.InvokingContinuation(continuation.Method) )
+            {
+                try
+                {
+                    continuation();
+                }
+                catch ( Exception e )
+                {
+                    activity.Fail(e);
+                    _logger.ContinuationCallbackFailed(continuation.Method, e);
                 }
             }
         }
