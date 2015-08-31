@@ -279,6 +279,7 @@
     <Compile Include="UI\Toolbox\Crud.cs" />
     <Compile Include="UI\Toolbox\CrudForm.cs" />
     <Compile Include="UI\Toolbox\LayoutHorizontal.cs" />
+    <Compile Include="UI\Toolbox\Text.cs" />
     <Compile Include="UI\Uidl\UidlAuthorization.cs" />
     <Compile Include="Utilities\AssemblyUtility.cs" />
     <Compile Include="Utilities\EnumerableUtility.cs" />

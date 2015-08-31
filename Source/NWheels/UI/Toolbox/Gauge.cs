@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Hapil;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
@@ -19,40 +20,89 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override IEnumerable<string> GetTranslatables()
+        {
+            return base.GetTranslatables()
+                .ConcatIf(BadgeText)
+                .Concat(Values.SelectMany(v => v.GetTranslatables()));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public string BadgeText { get; set; }
+        [DataMember]
+        public List<GaugeValue> Values { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void DescribePresenter(PresenterBuilder<Gauge, Empty.Data, Empty.State> presenter)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [DataMember]
-        public string Header { get; set; }
-        [DataMember]
-        public string Badge { get; set; }
-        [DataMember]
-        public List<GaugeValue> Values { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         [DataContract(Namespace = UidlDocument.DataContractNamespace)]
         public class GaugeValue
         {
+            public IEnumerable<string> GetTranslatables()
+            {
+                if ( !string.IsNullOrEmpty(Label) )
+                {
+                    yield return Label;
+                }
+                
+                if ( !string.IsNullOrEmpty(ChangeLabel) )
+                {
+                    yield return ChangeLabel;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             [DataMember]
             public decimal Value { get; set; }
             [DataMember]
             public string Label { get; set; }
             [DataMember]
-            public GaugeValueType Type { get; set; }
+            public decimal OldValue { get; set; }
+            [DataMember]
+            public GaugeChangeType ChangeType { get; set; }
+            [DataMember]
+            public string ChangeLabel { get; set; }
         }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public enum GaugeValueType
+    public enum GaugeChangeType
     {
+        None,
         Absolute,
         Percentage,
-        AbsoluteChange,
-        PercentageChange
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class GaugeExtensions
+    {
+        public static Gauge Badge(this Gauge gauge, string value)
+        {
+            gauge.BadgeText = value;
+            return gauge;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Gauge Value(this Gauge gauge, string label, GaugeChangeType changeType = GaugeChangeType.None, string changeLabel = null)
+        {
+            gauge.Values.Add(new Gauge.GaugeValue {
+                Label = label,
+                ChangeType = changeType,
+                ChangeLabel = changeLabel
+            });
+            
+            return gauge;
+        }
     }
 }

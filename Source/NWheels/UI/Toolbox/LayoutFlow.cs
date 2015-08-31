@@ -7,9 +7,9 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
 {
-    public class HorizontalStack : Container
+    public class LayoutFlow : Container
     {
-        public HorizontalStack(string idName, ControlledUidlNode parent)
+        public LayoutFlow(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
         }

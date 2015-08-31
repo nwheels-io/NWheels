@@ -7,7 +7,7 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
 {
-    public class Chart : WidgetBase<Gauge, Empty.Data, Empty.State>
+    public class Chart : WidgetBase<Chart, Empty.Data, Empty.State>
     {
         public Chart(string idName, ControlledUidlNode parent)
             : base(idName, parent)
@@ -16,7 +16,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<Gauge, Empty.Data, Empty.State> presenter)
+        protected override void DescribePresenter(PresenterBuilder<Chart, Empty.Data, Empty.State> presenter)
         {
         }
     }
