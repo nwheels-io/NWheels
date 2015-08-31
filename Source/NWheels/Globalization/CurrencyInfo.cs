@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -300,7 +301,6 @@ namespace NWheels.Globalization
                 { "CHE",947 },
                 { "CHW",948 },
                 { "TRY",949 },
-                { "XAF",950 },
                 { "XAF",950 },
                 { "XCD",951 },
                 { "XOF",952 },

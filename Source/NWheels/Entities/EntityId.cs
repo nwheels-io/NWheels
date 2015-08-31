@@ -30,6 +30,11 @@ namespace NWheels.Entities
 
             if ( entityObject == null )
             {
+                entityObject = (IEntityObject)obj.AsOrNull<IPersistableObject>();
+            }
+
+            if ( entityObject == null )
+            {
                 throw new ArgumentException("Not an entity object", "entity");
             }
 

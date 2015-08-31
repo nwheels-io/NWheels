@@ -104,7 +104,7 @@ namespace NWheels
         public static Money operator +(Money x, Money y)
         {
             ValidateIdenticalCurrency(x, y);
-            return new Money(x.Amount + y.Amount, x.Currency);
+            return new Money(x.Amount + y.Amount, x.Currency.HasValue ? x.Currency : y.Currency);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ namespace NWheels
         public static Money operator -(Money x, Money y)
         {
             ValidateIdenticalCurrency(x, y);
-            return new Money(x.Amount - y.Amount, x.Currency);
+            return new Money(x.Amount - y.Amount, x.Currency.HasValue ? x.Currency : y.Currency);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -120,7 +120,7 @@ namespace NWheels
         public static Money operator *(Money x, Money y)
         {
             ValidateIdenticalCurrency(x, y);
-            return new Money(x.Amount * y.Amount, x.Currency);
+            return new Money(x.Amount * y.Amount, x.Currency.HasValue ? x.Currency : y.Currency);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ namespace NWheels
                 throw new DivideByZeroException();
             }
 
-            return new Money(x.Amount / y.Amount, x.Currency);
+            return new Money(x.Amount / y.Amount, x.Currency.HasValue ? x.Currency : y.Currency);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -174,7 +174,7 @@ namespace NWheels
 
         private static void ValidateIdenticalCurrency(Money x, Money y)
         {
-            if ( x.Currency != y.Currency )
+            if ( x.Currency.HasValue && y.Currency.HasValue && x.Currency != y.Currency )
             {
                 throw new ArgumentException("Two Money instances must be of the same currency.");
             }

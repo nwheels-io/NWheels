@@ -140,6 +140,7 @@
     <Compile Include="Processing\Messages\Impl\SessionPushActor.cs" />
     <Compile Include="Processing\Messages\MessageObjectWithContinuation.cs" />
     <Compile Include="Processing\Messages\MessageTypeRegistration.cs" />
+    <Compile Include="TypeModel\Core\StorageTypes\MoneyStorageType.cs" />
     <Compile Include="TypeModel\Serialization\BinarySerializer.cs" />
     <Compile Include="TypeModel\Serialization\IObjectSerializer.cs" />
     <Compile Include="Entities\Core\IDomainObject.cs" />
@@ -270,12 +271,14 @@
     <Compile Include="UI\Toolbox\CrudScreenPart.cs" />
     <Compile Include="UI\Toolbox\Dashboard.cs" />
     <Compile Include="UI\Toolbox\Chat.cs" />
+    <Compile Include="UI\Toolbox\LayoutFlow.cs" />
+    <Compile Include="UI\Toolbox\LayoutVertical.cs" />
     <Compile Include="UI\Toolbox\Report.cs" />
     <Compile Include="UI\Factories\ViewModelObjectFactory.cs" />
     <Compile Include="UI\Toolbox\Chart.cs" />
     <Compile Include="UI\Toolbox\Crud.cs" />
     <Compile Include="UI\Toolbox\CrudForm.cs" />
-    <Compile Include="UI\Toolbox\HorizontalStack.cs" />
+    <Compile Include="UI\Toolbox\LayoutHorizontal.cs" />
     <Compile Include="UI\Uidl\UidlAuthorization.cs" />
     <Compile Include="Utilities\AssemblyUtility.cs" />
     <Compile Include="Utilities\EnumerableUtility.cs" />

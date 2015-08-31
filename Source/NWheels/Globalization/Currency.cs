@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -88,6 +89,17 @@ namespace NWheels.Globalization
         public CurrencyInfo GetInfo()
         {
             return CurrencyInfo.GetCurrency(this.IsoNumericCode);
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool HasValue
+        {
+            get
+            {
+                return (IsoNumericCode > 0);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

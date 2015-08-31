@@ -157,6 +157,7 @@ namespace NWheels.DataObjects
             }
             public class JsonAttribute : StorageTypeAttribute { public JsonAttribute() : base(typeof(JsonStorageType<>)) { } }
             public class ClrTypeAttribute : StorageTypeAttribute { public ClrTypeAttribute() : base(typeof(ClrTypeStorageType)) { } }
+            public class MoneyAttribute : StorageTypeAttribute { public MoneyAttribute() : base(typeof(MoneyStorageType)) { } }
 
             public class RelationalMappingAttribute : PropertyContractAttribute
             {
