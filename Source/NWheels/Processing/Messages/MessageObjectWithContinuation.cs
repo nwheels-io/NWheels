@@ -9,7 +9,7 @@ namespace NWheels.Processing.Messages
     public abstract class MessageObjectWithContinuation<TMessage> : MessageObjectBase, ISetMessageResult
         where TMessage : MessageObjectWithContinuation<TMessage>
     {
-        private Action<TMessage> _onSuccess;
+        private Action<TMessage> _onCompletion;
         private Action<TMessage, Exception> _onFailure;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,9 +33,9 @@ namespace NWheels.Processing.Messages
         {
             this.MessageResult = result;
 
-            if ( result == Messages.MessageResult.Processed && _onSuccess != null )
+            if ( result == Messages.MessageResult.Processed && _onCompletion != null )
             {
-                continuation = () => _onSuccess((TMessage)this);
+                continuation = () => _onCompletion((TMessage)this);
             }
             else if ( result != Messages.MessageResult.Processed && _onFailure != null )
             {
@@ -51,9 +51,9 @@ namespace NWheels.Processing.Messages
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TMessage OnSuccess(Action<TMessage> callback)
+        public TMessage OnCompletion(Action<TMessage> callback)
         {
-            _onSuccess += callback;
+            _onCompletion += callback;
             return (TMessage)this;
         }
 
