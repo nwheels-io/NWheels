@@ -19,6 +19,13 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void AddWidgets(params WidgetUidlNode[] widgets)
+        {
+            this.Widgets.AddRange(widgets);
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void DescribePresenter(PresenterBuilder<Dashboard, Empty.Data, Empty.State> presenter)
         {
         }
