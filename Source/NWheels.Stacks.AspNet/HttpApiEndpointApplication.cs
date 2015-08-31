@@ -50,11 +50,10 @@ namespace NWheels.Stacks.AspNet
 
         private void WebApiApplication_BeginRequest(object sender, EventArgs e)
         {
-            if (RequestLogger != null)
+            if ( RequestLogger != null )
             {
                 var context = HttpContext.Current;
-                context.Items[RequestLogger] = RequestLogger.IncomingRequest(context.Request.HttpMethod,
-                    context.Request.Path);
+                context.Items[RequestLogger] = RequestLogger.IncomingRequest(context.Request.HttpMethod, context.Request.Path);
             }
         }
 
@@ -65,26 +64,26 @@ namespace NWheels.Stacks.AspNet
             if ( RequestLogger != null )
             {
                 var context = HttpContext.Current;
-                var activity = (ActivityLogNode) context.Items[RequestLogger];
+                var activity = (ActivityLogNode)context.Items[RequestLogger];
 
-                if (context.Response.StatusCode < 400)
+                if ( context.Response.StatusCode < 400 )
                 {
                     RequestLogger.RequestCompleted(
                         context.Request.HttpMethod,
                         context.Request.Path,
                         context.Response.StatusCode,
-                        (int) activity.MillisecondsDuration);
+                        (int)activity.MillisecondsDuration);
                 }
                 else
                 {
                     RequestLogger.RequestFailed(
                         context.Request.HttpMethod,
                         context.Request.Path,
-                        (int) activity.MillisecondsDuration,
+                        (int)activity.MillisecondsDuration,
                         context.Response.StatusCode);
                 }
 
-                ((IDisposable) activity).Dispose();
+                ((IDisposable)activity).Dispose();
             }
         }
 
@@ -92,8 +91,7 @@ namespace NWheels.Stacks.AspNet
 
         protected void Application_Start()
         {
-            _s_sLog.Info("Application_Start: privateBinPath=[{0}]",
-                AppDomain.CurrentDomain.SetupInformation.PrivateBinPath);
+            _s_sLog.Info("Application_Start: privateBinPath=[{0}]", AppDomain.CurrentDomain.SetupInformation.PrivateBinPath);
 
             try
             {
@@ -113,19 +111,20 @@ namespace NWheels.Stacks.AspNet
 
                 _nodeHost.LoadAndActivate();
 
-                GlobalConfiguration.Configure(config => {
-                    config.Services.Replace(typeof(IHttpControllerTypeResolver), _nodeHost.Components.Resolve<DynamicControllerTypeResolver>());
-                    //config.Services.Replace(typeof(IHttpControllerSelector), _nodeHost.Components.Resolve<DynamicControllerSelector>());
-                    //config.Routes.MapHttpRoute(
-                    //    name: "DefaultApi",
-                    //    routeTemplate: "{controller}/{action}");
-                    config.DependencyResolver = new AutofacWebApiDependencyResolver(_nodeHost.Components);
-                    config.MapHttpAttributeRoutes();
-                });
+                GlobalConfiguration.Configure(
+                    config => {
+                        config.Services.Replace(typeof(IHttpControllerTypeResolver), _nodeHost.Components.Resolve<DynamicControllerTypeResolver>());
+                        //config.Services.Replace(typeof(IHttpControllerSelector), _nodeHost.Components.Resolve<DynamicControllerSelector>());
+                        //config.Routes.MapHttpRoute(
+                        //    name: "DefaultApi",
+                        //    routeTemplate: "{controller}/{action}");
+                        config.DependencyResolver = new AutofacWebApiDependencyResolver(_nodeHost.Components);
+                        config.MapHttpAttributeRoutes();
+                    });
 
                 _s_sLog.Info("Application_Start: SUCCESS");
             }
-            catch (Exception e)
+            catch ( Exception e )
             {
                 _s_sLog.Critical("Application_Start: FAILURE! {0}", e.ToString());
                 throw;
@@ -140,24 +139,12 @@ namespace NWheels.Stacks.AspNet
 
         private static BootConfiguration BuildBootConfiguration()
         {
-            var bootConfigFilePath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.PrivateBinPath,
-                BootConfiguration.DefaultBootConfigFileName);
+            var bootConfigFilePath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.PrivateBinPath, BootConfiguration.DefaultBootConfigFileName);
             var bootConfig = BootConfiguration.LoadFromFile(bootConfigFilePath);
 
             bootConfig.Validate();
 
-            _s_sLog.Debug("> Application Name   - {0}", bootConfig.ApplicationName);
-            _s_sLog.Debug("> Node Name          - {0}", bootConfig.NodeName);
-
-            foreach (var module in bootConfig.FrameworkModules)
-            {
-                _s_sLog.Debug("> Framework Module   - {0}", module.Name);
-            }
-
-            foreach (var module in bootConfig.ApplicationModules)
-            {
-                _s_sLog.Debug("> Application Module - {0}", module.Name);
-            }
+            _s_sLog.Debug(bootConfig.ToLogString());
 
             return bootConfig;
         }
@@ -211,8 +198,7 @@ namespace NWheels.Stacks.AspNet
 
             public override void NodeLoading()
             {
-                GlobalConfiguration.Configuration.DependencyResolver =
-                    new AutofacWebApiDependencyResolver((ILifetimeScope) _components);
+                GlobalConfiguration.Configuration.DependencyResolver = new AutofacWebApiDependencyResolver((ILifetimeScope)_components);
             }
         }
 
@@ -222,8 +208,7 @@ namespace NWheels.Stacks.AspNet
         {
             public RequestLoggerComponent(Auto<ILogger> logger)
             {
-                GlobalConfiguration.Configuration.Services.Replace(typeof (IExceptionLogger),
-                    new RequestExceptionLogger());
+                GlobalConfiguration.Configuration.Services.Replace(typeof(IExceptionLogger), new RequestExceptionLogger());
                 HttpApiEndpointApplication.RequestLogger = logger.Instance;
             }
         }
@@ -236,7 +221,7 @@ namespace NWheels.Stacks.AspNet
             {
                 base.Log(context);
 
-                if (RequestLogger != null)
+                if ( RequestLogger != null )
                 {
                     RequestLogger.RequestError(
                         context.Request.Method.ToString(),

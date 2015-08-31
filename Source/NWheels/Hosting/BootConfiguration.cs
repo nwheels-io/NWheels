@@ -19,10 +19,15 @@ namespace NWheels.Hosting
         public const string DefaultBootConfigFileName = "boot.config";
         public const string DefaultModuleConfigFileName = "module.config";
 
+        private string _environmentInitLog = "";
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Validate()
         {
+            //init environments from environments.config
+
+            LoadEnvironmentConfig();
+
             if ( string.IsNullOrEmpty(ApplicationName) )
             {
                 throw new NodeHostConfigException("ApplicatioName is not specified");
@@ -61,15 +66,49 @@ namespace NWheels.Hosting
             }
         }
 
+        private void LoadEnvironmentConfig()
+        {
+            var envConfig = EnvironmentConfiguration.LoadFromFile(Path.Combine(LoadedFromDirectory, EnvironmentConfiguration.DefaultEnvironmentConfigFileName));
+
+            if ( envConfig != null )
+            {
+                foreach ( var env in envConfig.ConfigEnvironments )
+                {
+                    if ( env.MachineName.ToLower() == Environment.MachineName.ToLower() )
+                    {
+                        this.EnvironmentName = env.Environment;
+                        this.EnvironmentType = env.EnvironmentType;
+                        _environmentInitLog = "from MachineName section";
+                        return;
+                    }
+                    if ( env.MachineName.ToLower() == "default" )
+                    {
+                        this.EnvironmentName = env.Environment;
+                        this.EnvironmentType = env.EnvironmentType;
+                        _environmentInitLog = "from default section";
+                    }
+                }
+            }
+            else
+            {
+                _environmentInitLog = "environment file not exist";
+            }
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public string ToLogString()
         {
             var text = new StringBuilder();
 
+            text.AppendLine();
+            text.AppendFormat("MachineName   - {0}", Environment.MachineName);
+            text.AppendLine();
             text.AppendFormat("Application Name   - {0}", this.ApplicationName);
             text.AppendLine();
             text.AppendFormat("Node Name          - {0}", this.NodeName);
+            text.AppendLine();
+            text.AppendFormat("Init Environment   - {0}", _environmentInitLog);
             text.AppendLine();
             text.AppendFormat("Environment Name   - {0}", this.EnvironmentName);
             text.AppendLine();

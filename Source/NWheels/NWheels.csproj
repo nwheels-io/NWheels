@@ -123,6 +123,7 @@
     <Compile Include="Exceptions\IFaultException.cs" />
     <Compile Include="Exceptions\SessionNotFoundException.cs" />
     <Compile Include="Exceptions\EntityNotFoundException.cs" />
+    <Compile Include="Hosting\EnvironmentConfiguration.cs" />
     <Compile Include="Processing\Commands\CommandResultMessage.cs" />
     <Compile Include="Processing\Commands\Factories\IMethodCallObjectFactory.cs" />
     <Compile Include="Processing\Commands\Factories\MethodCallObjectFactory.cs" />
