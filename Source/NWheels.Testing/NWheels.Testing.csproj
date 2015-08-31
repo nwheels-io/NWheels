@@ -73,6 +73,7 @@
     <Compile Include="Controllers\NodeInstanceController.cs" />
     <Compile Include="CoreUnitTestBase.cs" />
     <Compile Include="DataObjects\Jsonlike.cs" />
+    <Compile Include="Doubles\LocalFileOutgoingEmailActor.cs" />
     <Compile Include="DynamicTypeIntegrationTestBase.cs" />
     <Compile Include="DynamicTypeUnitTestBase.cs" />
     <Compile Include="Entities\Impl\TestDataRepositoryBase.cs" />
