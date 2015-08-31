@@ -57,7 +57,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\protobuf-net.2.0.0.668\lib\net40\protobuf-net.dll</HintPath>
     </Reference>
-    <Reference Include="SmartFormat">
+    <Reference Include="SmartFormat, Version=1.6.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\git\source\Adstrix.Platform\packages\SmartFormat.NET.1.6.1.0\lib\net40\SmartFormat.dll</HintPath>
     </Reference>
     <Reference Include="System" />
