@@ -73,6 +73,13 @@ namespace NWheels.Processing.Workflows
             return actor;
         }
 
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IStateMachineBuilder<TState, TTrigger>.RestoreState(TState value)
+        {
+            throw new NotSupportedException("Directly restoring state is not supported by workflow-based state machine.");
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public virtual void OnInitialize(TDataEntity initialData, IWorkflowInitializer initializer)

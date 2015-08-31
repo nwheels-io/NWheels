@@ -5,6 +5,7 @@ namespace NWheels.Processing.Workflows
     public interface IStateMachineBuilder<TState, TTrigger>
     {
         IStateMachineStateBuilder<TState, TTrigger> State(TState value);
+        void RestoreState(TState value);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

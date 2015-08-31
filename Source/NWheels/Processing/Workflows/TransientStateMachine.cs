@@ -69,6 +69,13 @@ namespace NWheels.Processing.Workflows
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        void IStateMachineBuilder<TState, TTrigger>.RestoreState(TState value)
+        {
+            _currentState = _states[value];
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void ReceiveTrigger(TTrigger trigger)
         {
             ReceiveTrigger(trigger, context: null);
