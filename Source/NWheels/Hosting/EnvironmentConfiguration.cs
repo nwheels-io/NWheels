@@ -30,19 +30,19 @@ namespace NWheels.Hosting
         }
 
         [DataMember(Order = 1, IsRequired = true)]
-        public List<ConfigEnvironment> ConfigEnvironments { get; set; }
+        public List<Environment> Environments { get; set; }
 
-        [DataContract(Namespace = "NWheels.Hosting", Name = "ConfigEnvironment")]
-        public class ConfigEnvironment
+        [DataContract(Namespace = "NWheels.Hosting", Name = "Environment")]
+        public class Environment
         {
             [DataMember(Order = 1, IsRequired = true)]
             public string MachineName { get; set; }
 
             [DataMember(Order = 2, IsRequired = true)]
-            public string Environment { get; set; }
+            public string Name { get; set; }
 
             [DataMember(Order = 3, IsRequired = true)]
-            public string EnvironmentType { get; set; }
+            public string Type { get; set; }
         }
     }
 }

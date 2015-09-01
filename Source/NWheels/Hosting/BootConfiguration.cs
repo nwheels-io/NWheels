@@ -72,19 +72,19 @@ namespace NWheels.Hosting
 
             if ( envConfig != null )
             {
-                foreach ( var env in envConfig.ConfigEnvironments )
+                foreach ( var env in envConfig.Environments )
                 {
                     if ( env.MachineName.ToLower() == Environment.MachineName.ToLower() )
                     {
-                        this.EnvironmentName = env.Environment;
-                        this.EnvironmentType = env.EnvironmentType;
+                        this.EnvironmentName = env.Name;
+                        this.EnvironmentType = env.Type;
                         _environmentInitLog = "from MachineName section";
                         return;
                     }
                     if ( env.MachineName.ToLower() == "default" )
                     {
-                        this.EnvironmentName = env.Environment;
-                        this.EnvironmentType = env.EnvironmentType;
+                        this.EnvironmentName = env.Name;
+                        this.EnvironmentType = env.Type;
                         _environmentInitLog = "from default section";
                     }
                 }
