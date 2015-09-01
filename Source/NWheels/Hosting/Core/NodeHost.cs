@@ -973,7 +973,9 @@ namespace NWheels.Hosting.Core
             {
                 using ( _logger.ComponentNodeConfigured(component.GetType().FullName) )
                 {
-                    component.NodeConfigured();
+                    var additionalComponents = new List<ILifecycleEventListener>();
+                    component.NodeConfigured(additionalComponents);
+                    //TODO: handle additional components
                 }
             }
 

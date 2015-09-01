@@ -90,6 +90,13 @@ namespace NWheels.Testing.Entities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        EntityChangeMessage IEntityRepository.CreateChangeMessage(IEnumerable<IDomainObject> entities, EntityState state)
+        {
+            return EntityChangeMessage.Create<TEntity>(_components.Resolve<IFramework>(), entities, state);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         Type IEntityRepository.ContractType
         {
             get

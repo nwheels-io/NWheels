@@ -20,6 +20,7 @@ namespace NWheels.Stacks.EntityFramework
         where TBaseImpl : class
         where TEntityImpl : class, TEntityContract, TBaseImpl
     {
+        private readonly IFramework _framework;
         private readonly EfDataRepositoryBase _ownerRepo;
         private readonly IDomainObjectFactory _domainObjectFactory;
         private readonly ObjectSet<TBaseImpl> _objectSet;
@@ -31,6 +32,7 @@ namespace NWheels.Stacks.EntityFramework
         public EfEntityRepository(EfDataRepositoryBase ownerRepo)
         {
             _ownerRepo = ownerRepo;
+            _framework = ownerRepo.Components.Resolve<IFramework>();
             _domainObjectFactory = ownerRepo.Components.Resolve<IDomainObjectFactory>();
             _objectSet = ownerRepo.CreateObjectSet<TBaseImpl>();
             _entityKeyMember = _objectSet.EntitySet.ElementType.KeyMembers.First();
@@ -162,6 +164,13 @@ namespace NWheels.Stacks.EntityFramework
         void IEntityRepository.Delete(object entity)
         {
             this.Delete((TEntityContract)entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        EntityChangeMessage IEntityRepository.CreateChangeMessage(IEnumerable<IDomainObject> entities, NWheels.Entities.EntityState state)
+        {
+            return EntityChangeMessage.Create<TEntityContract>(_framework, entities, state);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

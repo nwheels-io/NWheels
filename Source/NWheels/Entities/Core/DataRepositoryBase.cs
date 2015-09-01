@@ -7,6 +7,7 @@ using NWheels.Concurrency;
 using NWheels.DataObjects.Core;
 using NWheels.Extensions;
 using NWheels.Logging;
+using NWheels.Processing.Messages;
 
 namespace NWheels.Entities.Core
 {
@@ -15,6 +16,7 @@ namespace NWheels.Entities.Core
         private readonly Dictionary<Type, IEntityRepository> _entityRepositoryByContractType;
         private readonly Dictionary<Type, Action<IDataRepositoryCallback>> _genericCallbacksByContractType;
         private readonly IComponentContext _components;
+        private readonly IServiceBus _serviceBus;
         private readonly IDomainContextLogger _logger;
         private readonly bool _autoCommit;
         private readonly IResourceConsumerScopeHandle _consumerScope;
@@ -30,6 +32,7 @@ namespace NWheels.Entities.Core
             _genericCallbacksByContractType = new Dictionary<Type, Action<IDataRepositoryCallback>>();
             _autoCommit = autoCommit;
             _components = components;
+            _serviceBus = components.Resolve<IServiceBus>();
             _logger = components.Resolve<IDomainContextLogger>();
             _currentState = UnitOfWorkState.Untouched;
             _componentLifetimeScope = null;
@@ -72,6 +75,7 @@ namespace NWheels.Entities.Core
                 ExecuteBeforeSavePhase(changeSet);
                 ExecuteCommitToPersistenceLayer();
                 ExecuteAfterSavePhase(changeSet);
+                ExecuteNotificationPhase(changeSet);
 
                 _currentState = UnitOfWorkState.Committed;
             }
@@ -332,6 +336,24 @@ namespace NWheels.Entities.Core
                 {
                     activity.Fail(e);
                     throw;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void ExecuteNotificationPhase(IEnumerable<object> changedEntities)
+        {
+            var entityGroups = changedEntities.Select(e => e.As<IDomainObject>()).GroupBy(e => new { e.ContractType, e.State });
+
+            foreach ( var group in entityGroups )
+            {
+                var repository = GetEntityRepository(group.Key.ContractType);
+                var message = repository.CreateChangeMessage(group, group.Key.State);
+
+                if ( message != null )
+                {
+                    _serviceBus.EnqueueMessage(message);
                 }
             }
         }

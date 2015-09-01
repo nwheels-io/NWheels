@@ -120,6 +120,7 @@
     <Compile Include="Endpoints\INetworkEndpointTransport.cs" />
     <Compile Include="Endpoints\IAbstractNetwrokTransportConfig.cs" />
     <Compile Include="Endpoints\INetworkProtocolConfigContainer.cs" />
+    <Compile Include="Entities\EntityChangeMessage.cs" />
     <Compile Include="Exceptions\IFaultException.cs" />
     <Compile Include="Exceptions\SessionNotFoundException.cs" />
     <Compile Include="Exceptions\EntityNotFoundException.cs" />

@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
+using NWheels.Entities.Core;
 
 namespace NWheels.Entities
 {
@@ -17,6 +18,7 @@ namespace NWheels.Entities
         void Insert(object entity);
         void Update(object entity);
         void Delete(object entity);
+        EntityChangeMessage CreateChangeMessage(IEnumerable<IDomainObject> entities, EntityState state);
         Type ContractType { get; }
         Type ImplementationType { get; }
         ITypeMetadata Metadata { get; }

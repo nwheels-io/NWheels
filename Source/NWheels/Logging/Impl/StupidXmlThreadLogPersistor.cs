@@ -40,7 +40,7 @@ namespace NWheels.Logging.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void NodeConfigured()
+        public override void NodeConfigured(List<ILifecycleEventListener> additionalComponentsToHost)
         {
             var configuration = _components.Resolve<IFrameworkLoggingConfiguration>();
             SetThreadLogFolder(configuration);

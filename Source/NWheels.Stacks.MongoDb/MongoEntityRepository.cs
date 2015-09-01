@@ -28,6 +28,7 @@ namespace NWheels.Stacks.MongoDb
         where TEntityImpl : class, TEntityContract
     {
         private readonly MongoDataRepositoryBase _ownerRepo;
+        private readonly IFramework _framework;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly IDomainObjectFactory _domainObjectFactory;
         private readonly ITypeMetadata _metadata;
@@ -42,6 +43,7 @@ namespace NWheels.Stacks.MongoDb
         public MongoEntityRepository(MongoDataRepositoryBase ownerRepo, ITypeMetadataCache metadataCache, IEntityObjectFactory objectFactory)
         {
             _ownerRepo = ownerRepo;
+            _framework = ownerRepo.Components.Resolve<IFramework>();
             _metadataCache = metadataCache;
             _domainObjectFactory = ownerRepo.Components.Resolve<IDomainObjectFactory>();
             _metadata = metadataCache.GetTypeMetadata(typeof(TEntityContract));
@@ -185,6 +187,13 @@ namespace NWheels.Stacks.MongoDb
             this.Delete((TEntityContract)entity.As<IPersistableObject>());
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        EntityChangeMessage IEntityRepository.CreateChangeMessage(IEnumerable<IDomainObject> entities, EntityState state)
+        {
+            return EntityChangeMessage.Create<TEntityContract>(_framework, entities, state);
+        }
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         Type IEntityRepository.ContractType
