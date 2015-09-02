@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using NWheels.Processing.Messages;
 using NWheels.Utilities;
 
-namespace NWheels.Testing.Doubles
+namespace NWheels.Testing.Processing.Messages
 {
     public class LocalFileOutgoingEmailActor : IMessageHandler<OutgoingEmailMessage>
     {

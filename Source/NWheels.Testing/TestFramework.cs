@@ -27,7 +27,9 @@ using NWheels.Entities.Core;
 using NWheels.Entities.Factories;
 using NWheels.Logging.Core;
 using NWheels.Processing.Commands.Factories;
+using NWheels.Processing.Messages;
 using NWheels.Testing.Entities.Impl;
+using NWheels.Testing.Processing.Messages;
 
 namespace NWheels.Testing
 {
@@ -338,6 +340,16 @@ namespace NWheels.Testing
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TestServiceBus ServiceBus
+        {
+            get
+            {
+                return (TestServiceBus)_components.Resolve<IServiceBus>();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         private void BuildComponentContainer(out IContainer container)
         {
@@ -356,6 +368,7 @@ namespace NWheels.Testing
             builder.RegisterType<PresentationObjectFactory>().As<IPresentationObjectFactory>().SingleInstance();
             builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
+            builder.RegisterType<TestServiceBus>().As<IServiceBus>().SingleInstance();
             
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IDomainContextLogger>();
