@@ -35,7 +35,7 @@ namespace NWheels.Entities.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void NodeLoading()
+        public override void NodeConfigured(List<ILifecycleEventListener> additionalComponentsToHost)
         {
             if ( _initializer.StorageSchemaExists(_configuration.ConnectionString) )
             {

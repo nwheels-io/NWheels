@@ -40,7 +40,7 @@ namespace NWheels.Entities.Factories
                 var dependencyProperties = FindDependencyProperties(writer);
 
                 writer.Constructor<TT.TContract, IComponentContext>((cw, persistable, components) => {
-                    if ( _context.MetaType.BaseType != null )
+                    if ( _context.MetaType.BaseType != null  && _context.MetaType.DomainObjectType == null )
                     {
                         cw.Base(persistable, components);
                     }

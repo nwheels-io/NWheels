@@ -468,7 +468,7 @@ namespace NWheels.Extensions
             public void UseStorageInitializerOnStartup()
             {
                 _builder.NWheelsFeatures().Logging().RegisterLogger<DatabaseInitializer.ILogger>();
-                _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>();
+                _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>().FirstInPipeline();
             }
         }
 

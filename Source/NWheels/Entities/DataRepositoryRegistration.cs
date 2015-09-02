@@ -40,7 +40,7 @@ namespace NWheels.Entities
         public DataRepositoryRegistration<TRepo> WithInitializeStorageOnStartup()
         {
             _builder.NWheelsFeatures().Logging().RegisterLogger<DatabaseInitializer.ILogger>();
-            _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>();
+            _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>().FirstInPipeline();
             return this;
         }
 
