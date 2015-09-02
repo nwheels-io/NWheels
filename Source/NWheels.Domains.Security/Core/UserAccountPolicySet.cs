@@ -11,6 +11,8 @@ namespace NWheels.Domains.Security.Core
         public UserAccountPolicy GetPolicy(UserAccountEntity userAccount)
         {
             return new UserAccountPolicy(
+                loginMinLength: 5,
+                loginMaxLength: 20,
                 failedLoginAttemptsBeforeLockOut: 3,
                 passwordExpiryDays: 90,
                 temporaryPasswordExpiryDays: 7,

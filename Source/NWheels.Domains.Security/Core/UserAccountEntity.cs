@@ -56,6 +56,46 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string AutoGenerateLoginName(string baseText)
+        {
+            var policy = PolicySet.GetPolicy(this);
+            var builder = new StringBuilder();
+
+            for ( int i = 0 ; i < baseText.Length && i < Math.Max(policy.LoginMaxLength - 3, 3) ; i++ )
+            {
+                if ( char.IsLetterOrDigit(baseText[i]) )
+                {
+                    builder.Append(baseText[i]);
+                }
+            }
+
+            var random = new Random();
+
+            while ( builder.Length < policy.LoginMinLength + (policy.LoginMaxLength - policy.LoginMinLength) / 2 )
+            {
+                builder.Append(random.Next(1, 100));
+            }
+
+            var loginName = builder.ToString();
+
+            if ( IsLoginNameAvailable(Framework, loginName) )
+            {
+                return loginName;
+            }
+                
+            for ( int suffix = 1 ; suffix < 1000 ; suffix++ )
+            {
+                if ( IsLoginNameAvailable(Framework, loginName + suffix) )
+                {
+                    return loginName + suffix;
+                }
+            }
+
+            throw new SecurityException("Unable to generate unique login name.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public UserAccountPrincipal Authenticate(SecureString password)
         {
             var policy = PolicySet.GetPolicy(this);
@@ -195,6 +235,16 @@ namespace NWheels.Domains.Security.Core
         {
             Logger.UserAccountLockedOut(LoginName);
             IsLockedOut = true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool IsLoginNameAvailable(IFramework framework, string loginName)
+        {
+            using ( var context = framework.NewUnitOfWork<IUserAccountDataRepository>() )
+            {
+                return !context.AllUsers.Any(u => u.LoginName == loginName);
+            }
         }
     }
 }
