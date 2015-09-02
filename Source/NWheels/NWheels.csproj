@@ -137,6 +137,8 @@
     <Compile Include="Processing\Commands\EntityMethodCommandMessage.cs" />
     <Compile Include="Processing\Commands\TransactionScriptCommandMessage.cs" />
     <Compile Include="Processing\Messages\AbstractSessionPushMessage.cs" />
+    <Compile Include="Processing\Messages\IContentTemplateProvider.cs" />
+    <Compile Include="Processing\Messages\Impl\LocalFileContentTemplateProvider.cs" />
     <Compile Include="Processing\Messages\OutgoingEmailMessage.cs" />
     <Compile Include="Processing\Messages\Impl\SessionPushActor.cs" />
     <Compile Include="Processing\Messages\MessageObjectWithContinuation.cs" />

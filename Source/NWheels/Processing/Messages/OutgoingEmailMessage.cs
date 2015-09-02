@@ -10,18 +10,38 @@ namespace NWheels.Processing.Messages
 {
     public class OutgoingEmailMessage : MessageObjectBase
     {
+        private readonly IContentTemplateProvider _templateProvider;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public OutgoingEmailMessage()
         {
-            this.To = new List<Recipient>();
-            this.Cc = new List<Recipient>();
-            this.Bcc = new List<Recipient>();
-            this.Attachments = new List<Attachment>();
+            Initialize();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public OutgoingEmailMessage(IFramework framework)
+            : base(framework)
+        {
+            Initialize();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public OutgoingEmailMessage(IFramework framework, IContentTemplateProvider templateProvider)
+            : base(framework)
+        {
+            _templateProvider = templateProvider;
+            Initialize();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void FormatTemplates(out string formattedSubject, out string formattedHtmlBody)
         {
+            ValidateTemplateProvider();
+
             string subjectTemplate;
             string bodyTemplate;
 
@@ -39,8 +59,30 @@ namespace NWheels.Processing.Messages
                 bodyTemplate = BodyHtmlTemplate;
             }
 
-            formattedSubject = Smart.Format(subjectTemplate, this.TemplateData);
-            formattedHtmlBody = Smart.Format(bodyTemplate, this.TemplateData);
+            formattedSubject = _templateProvider.Format(subjectTemplate, this.TemplateData);
+            formattedHtmlBody = _templateProvider.Format(bodyTemplate, this.TemplateData);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void LoadTemplate(object contentType, bool subjectAtFirstLine)
+        {
+            ValidateTemplateProvider();
+
+            var template = _templateProvider.GetTemplate(contentType);
+
+            if ( subjectAtFirstLine )
+            {
+                using ( var reader = new StringReader(template) )
+                {
+                    this.Subject = reader.ReadLine();
+                    this.BodyHtmlTemplate = reader.ReadToEnd();
+                }
+            }
+            else
+            {
+                this.BodyHtmlTemplate = template;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -88,6 +130,26 @@ namespace NWheels.Processing.Messages
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private void Initialize()
+        {
+            this.To = new List<Recipient>();
+            this.Cc = new List<Recipient>();
+            this.Bcc = new List<Recipient>();
+            this.Attachments = new List<Attachment>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ValidateTemplateProvider()
+        {
+            if ( _templateProvider == null )
+            {
+                throw new InvalidOperationException("Current instance was not initialized with content provider.");
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class Recipient
         {
             public Recipient(string personName, string emailAddress)
@@ -132,6 +194,17 @@ namespace NWheels.Processing.Messages
             public string FileName { get; private set; }
             public string FileExtension { get; private set; }
             public byte[] FileContents { get; private set; }
+        }
+
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class OutgoingEmailMessageExtensions
+    {
+        public static void AddRecipient(this List<OutgoingEmailMessage.Recipient> recipients, string personName, string emailAddress)
+        {
+            recipients.Add(new OutgoingEmailMessage.Recipient(personName, emailAddress));
         }
     }
 }
