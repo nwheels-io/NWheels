@@ -168,7 +168,7 @@ namespace NWheels.Stacks.EntityFramework
             where TManyEntity : class
         {
             var navigation = oneEntity.HasMany(PropertyExpression<TOneEntity, ICollection<TManyEntity>>(oneProperty.GetImplementationBy<EfEntityObjectFactory>()))
-                .WithRequired()
+                .WithOptional()
                 .Map(cfg => cfg.MapKey(oneProperty.RelationalMapping.RelatedColumnName));
 
             return navigation;
@@ -234,7 +234,7 @@ namespace NWheels.Stacks.EntityFramework
                 thisProperty.DeclaringContract.Name,
                 thisProperty.Name);
 
-            var namingConvention = metadataCache.Conventions.RelationalMappingConventions.OfType<IStorageSchemaNamingConvention>().First();
+            var namingConvention = metadataCache.Conventions.RelationalMappingConventions.OfType<IStorageSchemaNamingConvention>().Last();
             relationTableName = namingConvention.QualifyTableNameWithNamespace(
                 thisProperty.DeclaringContract, 
                 relationTableName, 

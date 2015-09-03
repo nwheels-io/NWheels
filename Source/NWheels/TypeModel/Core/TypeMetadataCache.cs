@@ -180,7 +180,28 @@ namespace NWheels.DataObjects.Core
                 var concretizationRegistrations = _components.Resolve<IEnumerable<ConcretizationRegistration>>();
 
                 _mixinsByPrimaryContract = mixinRegistrations.GroupBy(r => r.TargetContract).ToDictionary(g => g.Key, g => g.ToArray());
-                _concretizationsByPrimaryContract = concretizationRegistrations.ToDictionary(r => r.GeneralContract);
+
+                BuildMergedConcretizations(concretizationRegistrations);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void BuildMergedConcretizations(IEnumerable<ConcretizationRegistration> concretizationRegistrations)
+        {
+            _concretizationsByPrimaryContract = new Dictionary<Type, ConcretizationRegistration>();
+            var concretizationGroupsByGeneralContract = concretizationRegistrations.GroupBy(r => r.GeneralContract).ToList();
+
+            foreach ( var concretizationGroup in concretizationGroupsByGeneralContract )
+            {
+                ConcretizationRegistration mergedConcretization = null;
+
+                foreach ( var concretization in concretizationGroup )
+                {
+                    mergedConcretization = (mergedConcretization == null ? concretization : mergedConcretization.Merge(concretization));
+                }
+
+                _concretizationsByPrimaryContract.Add(concretizationGroup.Key, mergedConcretization);
             }
         }
 
