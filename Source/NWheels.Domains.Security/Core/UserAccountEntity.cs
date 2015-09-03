@@ -56,7 +56,14 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string AutoGenerateLoginName(string baseText)
+        public void AutoGenerateLoginName(string baseText)
+        {
+            this.LoginName = CreateLoginName(baseText);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string CreateLoginName(string baseText)
         {
             var policy = PolicySet.GetPolicy(this);
             var builder = new StringBuilder();
