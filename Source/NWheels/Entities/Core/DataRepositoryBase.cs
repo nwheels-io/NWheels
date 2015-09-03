@@ -344,18 +344,18 @@ namespace NWheels.Entities.Core
 
         protected virtual void ExecuteNotificationPhase(IEnumerable<object> changedEntities)
         {
-            var entityGroups = changedEntities.Select(e => e.As<IDomainObject>()).GroupBy(e => new { e.ContractType, e.State });
+            //var entityGroups = changedEntities.Select(e => e.As<IDomainObject>()).GroupBy(e => new { e.ContractType, e.State });
 
-            foreach ( var group in entityGroups )
-            {
-                var repository = GetEntityRepository(group.Key.ContractType);
-                var message = repository.CreateChangeMessage(group, group.Key.State);
+            //foreach ( var group in entityGroups )
+            //{
+            //    var repository = GetEntityRepository(group.Key.ContractType);
+            //    var message = repository.CreateChangeMessage(group, group.Key.State);
 
-                if ( message != null )
-                {
-                    _serviceBus.EnqueueMessage(message);
-                }
-            }
+            //    if ( message != null )
+            //    {
+            //        _serviceBus.EnqueueMessage(message);
+            //    }
+            //}
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
