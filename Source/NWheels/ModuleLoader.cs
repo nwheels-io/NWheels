@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using NWheels.Extensions;
 using NWheels.Processing.Messages;
 using NWheels.Processing.Messages.Impl;
 
@@ -20,6 +21,8 @@ namespace NWheels
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<LocalFileContentTemplateProvider>().As<IContentTemplateProvider>().SingleInstance();
+            builder.NWheelsFeatures().Logging().RegisterLogger<LocalFileContentTemplateProvider.ILogger>();
+            builder.NWheelsFeatures().Configuration().RegisterSection<LocalFileContentTemplateProvider.IConfig>();
         }
 
         #endregion
