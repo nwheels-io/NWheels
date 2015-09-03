@@ -49,7 +49,9 @@ namespace NWheels.DataObjects.Core.StorageTypes
             MutableOperand<TypeTemplate.TContract> contractValue,
             IOperand<TypeTemplate.TValue> storageValue)
         {
-            contractValue.Assign(storageValue.CastTo<SerializableMoney>().Func<Money>(x => x.ToMoney).CastTo<TypeTemplate.TContract>());
+            method.If(storageValue.CastTo<SerializableMoney>().IsNotNull()).Then(() => {
+                contractValue.Assign(storageValue.CastTo<SerializableMoney>().Func<Money>(x => x.ToMoney).CastTo<TypeTemplate.TContract>());
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
