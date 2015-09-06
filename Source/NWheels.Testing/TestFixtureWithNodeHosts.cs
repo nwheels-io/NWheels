@@ -369,7 +369,7 @@ namespace NWheels.Testing
                 throw new NotSupportedException();
             }
 
-            public void MigrateStorageSchema(string connectionString)
+            public void MigrateStorageSchema(string connectionString, DataRepositoryBase context, SchemaMigrationCollection migrations)
             {
                 throw new NotSupportedException();
             }

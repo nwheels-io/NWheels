@@ -41,7 +41,7 @@ namespace NWheels.Stacks.EntityFramework
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void MigrateStorageSchema(string connectionString)
+        public void MigrateStorageSchema(string connectionString, DataRepositoryBase context, SchemaMigrationCollection migrations)
         {
             throw new NotImplementedException();
         }

@@ -37,7 +37,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void MigrateStorageSchema(string connectionString)
+        public void MigrateStorageSchema(string connectionString, DataRepositoryBase context, SchemaMigrationCollection migrations)
         {
             throw new NotImplementedException();
         }
