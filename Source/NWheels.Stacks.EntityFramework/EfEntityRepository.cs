@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Core.Objects;
@@ -296,11 +297,80 @@ namespace NWheels.Stacks.EntityFramework
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static IQueryable<TEntityContract> QueryWithIncludedProperties(
+        private IQueryable<TEntityContract> QueryWithIncludedProperties(
             IQueryable<TEntityContract> query,
             IEnumerable<Expression<Func<TEntityContract, object>>> propertiesToInclude)
         {
-            return propertiesToInclude.Aggregate(query, (current, property) => current.Include(property));
+            var queryWithIncludes = propertiesToInclude.Aggregate(query, (current, property) => current.Include(property));
+            return new InterceptingQueryable<TEntityContract>(this, queryWithIncludes);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class InterceptingQueryable<T> : IQueryable<T>
+        {
+            private readonly EfEntityRepository<TEntityContract, TBaseImpl, TEntityImpl> _ownerRepo;
+            private readonly IQueryable<T> _underlyingQueryable;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public InterceptingQueryable(EfEntityRepository<TEntityContract, TBaseImpl, TEntityImpl> ownerRepo, IQueryable<T> underlyingQueryable)
+            {
+                _ownerRepo = ownerRepo;
+                _underlyingQueryable = underlyingQueryable;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IEnumerable
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                return new InterceptingResultEnumerator<T>(_ownerRepo._ownerRepo, _underlyingQueryable.GetEnumerator());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IQueryable
+
+            public Expression Expression
+            {
+                get
+                {
+                    return _underlyingQueryable.Expression;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type ElementType
+            {
+                get
+                {
+                    return ((IQueryable<TEntityContract>)_ownerRepo).ElementType;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public IQueryProvider Provider
+            {
+                get
+                {
+                    return ((IQueryable<TEntityContract>)_ownerRepo).Provider;
+                }
+            }
+
+            #endregion
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

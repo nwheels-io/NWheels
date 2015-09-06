@@ -189,6 +189,9 @@ namespace NWheels.Testing.Entities.Stacks
                     var product1 = repo.Products.Include(p => p.Categories, p => p.Attributes).Single(p => p.Name == "ABC");
                     var product2 = repo.Products.Include(p => p.Categories, p => p.Attributes).Single(p => p.Name == "DEF");
 
+                    Assert.That(product1, Is.InstanceOf<IDomainObject>());
+                    Assert.That(product2, Is.InstanceOf<IDomainObject>());
+
                     Assert.That(product1.CatalogNo, Is.EqualTo("CN111"));
                     Assert.That(product1.Name, Is.EqualTo("ABC"));
                     Assert.That(product1.Price, Is.EqualTo(123.45m));
@@ -228,6 +231,7 @@ namespace NWheels.Testing.Entities.Stacks
                     var customer1 = repo.Customers.Include(c => c.ContactDetails).Where(c => c.FullName == "John Smith").FirstOrDefault();
 
                     Assert.That(customer1, Is.Not.Null);
+                    Assert.That(customer1, Is.InstanceOf<IDomainObject>());
                     Assert.That(customer1.ContactDetails.Count, Is.EqualTo(3));
 
                     var contactDetails = customer1.ContactDetails.ToArray();
@@ -384,6 +388,8 @@ namespace NWheels.Testing.Entities.Stacks
 
                     #region Assert order1
 
+                    Assert.That(order1, Is.InstanceOf<IDomainObject>());
+
                     Assert.That(order1.OrderNo, Is.EqualTo("ORD001"));
                     Assert.That(order1.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 1, 12, 0, 0, DateTimeKind.Utc)));
                     Assert.That(order1.Status, Is.EqualTo(Interfaces.Repository1.OrderStatus.ProductsShipped));
@@ -425,6 +431,8 @@ namespace NWheels.Testing.Entities.Stacks
 
                     #region Assert order2
 
+                    Assert.That(order2, Is.InstanceOf<IDomainObject>());
+
                     Assert.That(order2.OrderNo, Is.EqualTo("ORD002"));
                     Assert.That(order2.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 2, 12, 0, 0, DateTimeKind.Utc)));
                     Assert.That(order2.Status, Is.EqualTo(Interfaces.Repository1.OrderStatus.PaymentReceived));
@@ -443,6 +451,8 @@ namespace NWheels.Testing.Entities.Stacks
                     #endregion
 
                     #region Assert order3
+
+                    Assert.That(order3, Is.InstanceOf<IDomainObject>());
 
                     Assert.That(order3.OrderNo, Is.EqualTo("ORD003"));
                     Assert.That(order3.PlacedAt, Is.EqualTo(new DateTime(2015, 1, 2, 13, 0, 0, DateTimeKind.Utc)));
