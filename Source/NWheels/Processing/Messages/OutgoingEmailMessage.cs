@@ -69,6 +69,7 @@ namespace NWheels.Processing.Messages
         {
             ValidateTemplateProvider();
 
+            this.TemplateContentType = contentType;
             var template = _templateProvider.GetTemplate(contentType);
 
             if ( subjectAtFirstLine )
@@ -127,6 +128,26 @@ namespace NWheels.Processing.Messages
         /// Attachments to the email
         /// </summary>
         public List<Attachment> Attachments { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Content type value that was used when loading template.
+        /// </summary>
+        public object TemplateContentType { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Template provider which the current instance was initialized with (optional).
+        /// </summary>
+        public IContentTemplateProvider TemplateProvider 
+        {
+            get
+            {
+                return _templateProvider;
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
