@@ -216,19 +216,19 @@ namespace NWheels.Testing
                 {
                     case NWheels.Logging.LogLevel.Debug:
                     case NWheels.Logging.LogLevel.Verbose:
-                        Debug(node.SingleLineText);
+                        Debug(GetMessageIdQualifier(node.MessageId) + node.SingleLineText);
                         break;
                     case NWheels.Logging.LogLevel.Info:
-                        Info(node.SingleLineText);
+                        Info(GetMessageIdQualifier(node.MessageId) + node.SingleLineText);
                         break;
                     case NWheels.Logging.LogLevel.Warning:
-                        Warning(node.SingleLineText + AddExceptionIf(node.Exception));
+                        Warning(GetMessageIdQualifier(node.MessageId) + node.SingleLineText + AddExceptionIf(node.Exception));
                         break;
                     case NWheels.Logging.LogLevel.Error:
-                        Error(node.SingleLineText + AddExceptionIf(node.Exception));
+                        Error(GetMessageIdQualifier(node.MessageId) + node.SingleLineText + AddExceptionIf(node.Exception));
                         break;
                     case NWheels.Logging.LogLevel.Critical:
-                        Critical(node.SingleLineText + AddExceptionIf(node.Exception));
+                        Critical(GetMessageIdQualifier(node.MessageId) + node.SingleLineText + AddExceptionIf(node.Exception));
                         break;
                 }
             }
@@ -239,11 +239,11 @@ namespace NWheels.Testing
             {
                 if ( activity.Parent != null )
                 {
-                    Trace(activity.SingleLineText);
+                    Trace(GetMessageIdQualifier(activity.MessageId) + activity.SingleLineText);
                 }
                 else
                 {
-                    Trace("[THREAD:{0}] {1}", activity.TaskType, activity.SingleLineText);
+                    Trace("[THREAD:{0}] {1}", activity.TaskType, GetMessageIdQualifier(activity.MessageId) + activity.SingleLineText);
                 }
             }
 
@@ -312,6 +312,22 @@ namespace NWheels.Testing
             private string GetLogPrefix()
             {
                 return string.Format("+{0} >{1}", _clock.Elapsed, _loggerName);
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private string GetMessageIdQualifier(string messageId)
+            {
+                var qualifiedLength = messageId.LastIndexOf('.');
+
+                if ( qualifiedLength >= 0 )
+                {
+                    return messageId.Substring(0, qualifiedLength) + "::";
+                }
+                else
+                {
+                    return string.Empty;
+                }
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
