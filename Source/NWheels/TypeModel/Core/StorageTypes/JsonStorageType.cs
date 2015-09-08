@@ -48,7 +48,11 @@ namespace NWheels.DataObjects.Core.StorageTypes
             MutableOperand<TypeTemplate.TContract> contractValue, 
             IOperand<TypeTemplate.TValue> storageValue)
         {
-            contractValue.Assign(Static.Func(JsonConvert.DeserializeObject<TypeTemplate.TContract>, storageValue.CastTo<string>()).CastTo<TypeTemplate.TContract>());
+            method.If(storageValue.CastTo<string>().IsNotNull()).Then(() => {
+                contractValue.Assign(Static.Func(JsonConvert.DeserializeObject<TypeTemplate.TContract>, storageValue.CastTo<string>()).CastTo<TypeTemplate.TContract>());
+            }).Else(() => {
+                contractValue.Assign(method.Const<TypeTemplate.TContract>(null));
+            });
         }
     }
 }
