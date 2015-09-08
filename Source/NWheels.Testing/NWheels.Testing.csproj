@@ -61,6 +61,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BehaviorDriven\ExecutableSpecification.cs" />
+    <Compile Include="BehaviorDriven\ISpecificationLogger.cs" />
+    <Compile Include="BehaviorDriven\Scenario.cs" />
+    <Compile Include="BehaviorDriven\Story.cs" />
+    <Compile Include="BehaviorDriven\UseCase.cs" />
     <Compile Include="Controllers\ApplicationController.cs" />
     <Compile Include="BootConfigurationExtensions.cs" />
     <Compile Include="Controllers\ComponentInjectionEventArgs.cs" />
@@ -96,6 +101,7 @@
     <Compile Include="Logging\Core\ILogexValueMatcher.cs" />
     <Compile Include="Logging\Impl\LogexImpl.cs" />
     <Compile Include="LogIs.cs" />
+    <Compile Include="Processing\Messages\OutgoingEmailTestSink.cs" />
     <Compile Include="Processing\Messages\TestServiceBus.cs" />
     <Compile Include="SingleNodeSystemTestBase.cs" />
     <Compile Include="IntegrationTestWithNodeHosts.cs" />

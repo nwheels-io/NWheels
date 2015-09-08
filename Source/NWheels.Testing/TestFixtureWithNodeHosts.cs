@@ -37,9 +37,12 @@ namespace NWheels.Testing
         [SetUp]
         public virtual void BaseSetUp()
         {
-            Thread.CurrentPrincipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-            StartApplication();
-            _logger = AgentComponent.Components.Resolve<ITestFixtureBaseLogger>();
+            if ( ShouldAutoStartApplication )
+            {
+                Thread.CurrentPrincipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+                StartApplication();
+                _logger = AgentComponent.Components.Resolve<ITestFixtureBaseLogger>();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,7 +50,10 @@ namespace NWheels.Testing
         [TearDown]
         public virtual void BaseTearDown()
         {
-            StopApplication();
+            if ( ShouldAutoStartApplication )
+            {
+                StopApplication();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -80,7 +86,7 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void StartApplication()
+        public virtual void StartApplication()
         {
             var bootConfig = CreateBootConfiguration();
 
@@ -88,7 +94,7 @@ namespace NWheels.Testing
             _controller = new ApplicationController(new ConsolePlainLog(" controller ", LogLevel.Debug, _clock), bootConfig);
             
             _controller.InjectingComponents += (sender, args) => {
-                args.ContainerBuilder.RegisterInstance<TestFixtureWithNodeHosts>(this);
+                args.ContainerBuilder.RegisterInstance<TestFixtureWithNodeHosts>(this).AsSelf().As<TestFixtureWithNodeHosts>();
                 args.ContainerBuilder
                     .RegisterInstance(new ConsolePlainLog(string.Format(" {0}[{1}] ", NodeName, NodeInstanceId), LogLevel.Debug, _clock))
                     .As<IPlainLog>();
@@ -106,17 +112,17 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override TestFixtureBase.ITestFixtureBaseLogger Logger
+        public virtual void StopApplication()
         {
-            get { return _logger; }
+            _controller.DeactivateAndUnload();
+            _controller = null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void StopApplication()
+        protected override TestFixtureBase.ITestFixtureBaseLogger Logger
         {
-            _controller.DeactivateAndUnload();
-            _controller = null;
+            get { return _logger; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -152,6 +158,13 @@ namespace NWheels.Testing
         internal protected virtual bool ShouldRebuildDatabase
         {
             get { return HasDatabase; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal protected virtual bool ShouldAutoStartApplication
+        {
+            get { return true; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

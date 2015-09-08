@@ -45,10 +45,22 @@ namespace NWheels.Testing.Processing.Messages
 
             Thread.Sleep(10);
 
-            var fileName = string.Format("{0:yyyy-MM-dd-HHmm-ssfff}.txt", DateTime.UtcNow);
+            var fileName = string.Format("{0:yyyy-MM-dd-HHmm-ssfff}.{1}.txt", DateTime.UtcNow, GetSubjectFileNamePart(subject));
             File.WriteAllText(Path.Combine(_outputFolderPath, fileName), output.ToString());
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string GetSubjectFileNamePart(string subject)
+        {
+            var chars = subject
+                .Where(c => c == ' ' || char.IsLetterOrDigit(c))
+                .Select(c => c == ' ' ? '_' : c)
+                .ToArray();
+
+            return new string(chars);
+        }
     }
 }
