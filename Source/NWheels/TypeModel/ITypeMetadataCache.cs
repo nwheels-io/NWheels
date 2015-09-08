@@ -14,6 +14,7 @@ namespace NWheels.DataObjects
         bool TryGetTypeMetadata(Type contract, out ITypeMetadata metadata);
         IEnumerable<IPropertyMetadata> GetIncomingRelations(ITypeMetadata targetType, Func<IPropertyMetadata, bool> sourcePredicate = null);
         void EnsureRelationalMapping(ITypeMetadata type);
+        Type Concretize(Type contract);
         MetadataConventionSet Conventions { get; }
     }
 }

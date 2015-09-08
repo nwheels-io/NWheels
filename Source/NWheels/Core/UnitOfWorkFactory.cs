@@ -7,6 +7,7 @@ using System.Text;
 using NWheels.Concurrency;
 using NWheels.Entities;
 using Autofac;
+using NWheels.DataObjects;
 
 namespace NWheels.Core
 {
@@ -14,6 +15,7 @@ namespace NWheels.Core
     {
         private readonly ConcurrentDictionary<Type, FactoryByContract> _unitOfWorkFactoryPerRepositoryContract;
         private readonly IComponentContext _components;
+        private readonly ITypeMetadataCache _metadataCache;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -21,12 +23,24 @@ namespace NWheels.Core
         {
             _components = components;
             _unitOfWorkFactoryPerRepositoryContract = new ConcurrentDictionary<Type, FactoryByContract>();
+            _metadataCache = components.Resolve<ITypeMetadataCache>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TRepository NewUnitOfWork<TRepository>(bool autoCommit, IsolationLevel? isolationLevel = null) where TRepository : class, IApplicationDataRepository
         {
+            var concretized = _metadataCache.Concretize(typeof(TRepository));
+
+            if ( concretized != typeof(TRepository) )
+            {
+                var factoryByContract = _unitOfWorkFactoryPerRepositoryContract.GetOrAdd(
+                    concretized,
+                    key => FactoryByContract.Create(key, this));
+
+                return (TRepository)factoryByContract.NewUnitOfWork(autoCommit, isolationLevel);
+            }
+
             var consumerScope = new ThreadStaticResourceConsumerScope<TRepository>(
                 resourceFactory: scope => {
                     var factory = _components.Resolve<IDataRepositoryFactory>();

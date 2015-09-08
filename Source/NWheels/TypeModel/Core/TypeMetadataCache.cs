@@ -75,6 +75,22 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Type Concretize(Type contract)
+        {
+            ConcretizationRegistration concretization;
+
+            if ( _concretizationsByPrimaryContract.TryGetValue(contract, out concretization) )
+            {
+                return concretization.ConcreteContract;
+            }
+            else
+            {
+                return contract;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public ISemanticDataType GetSemanticTypeInstance(Type semanticDataType, Type propertyClrType)
         {
             Type closedSemanticDataType = (
