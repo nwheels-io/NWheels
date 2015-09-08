@@ -80,7 +80,7 @@ namespace NWheels.Stacks.ODataBreeze
             }
             else
             {
-                _sessionManager.JoinAnonymous();
+                _sessionManager.JoinGlobalAnonymous();
             }
         }
     }

@@ -42,6 +42,7 @@ namespace NWheels.Authorization.Core
 
         public IDisposable Join()
         {
+            Thread.CurrentPrincipal = this.UserPrincipal;
             return new CallContextResourceConsumerScope<Session>(handle => this, externallyOwned: true);
         }
 

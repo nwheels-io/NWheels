@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Domains.Security;
 using NWheels.Domains.Security.Core;
 using NWheels.Utilities;
 
@@ -43,7 +44,8 @@ namespace NWheels.Samples.SimpleChatApp
 
             try
             {
-                UserAccountPrincipal accountPrincipal = _authenticationProvider.Authenticate(loginParams.Username, loginParams.Password.ClearToSecure());
+                IUserAccountEntity userAccount;
+                UserAccountPrincipal accountPrincipal = _authenticationProvider.Authenticate(loginParams.Username, loginParams.Password.ClearToSecure(), out userAccount);
                 response.Result = LoginErrorCode.Success;
             }
             catch (Exception ex)

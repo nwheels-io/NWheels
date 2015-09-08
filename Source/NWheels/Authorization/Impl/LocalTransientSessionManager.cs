@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Principal;
+using System.Threading;
 using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Endpoints.Core;
@@ -58,9 +59,15 @@ namespace NWheels.Authorization.Impl
         {
             var currentSession = Session.Current;
 
+            if ( currentSession == _anonymousSession || currentSession == _systemSession )
+            {
+                throw new InvalidOperationException("Cannot mutate a global session.");
+            }
+
             if ( currentSession != null )
             {
                 currentSession.As<Session>().Authorize(principal);
+                Thread.CurrentPrincipal = currentSession.UserPrincipal;
                 return currentSession;
             }
 
@@ -89,6 +96,14 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IDisposable OpenAnonymous(IEndpoint endpoint)
+        {
+            var newSession = OpenSession(_anonymousSession.UserPrincipal, endpoint);
+            return newSession.As<Session>().Join();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IDisposable JoinSessionOrOpenAnonymous(string sessionId, IEndpoint endpoint)
         {
             if ( !string.IsNullOrEmpty(sessionId) )
@@ -104,13 +119,12 @@ namespace NWheels.Authorization.Impl
                 _logger.SessionNotFound(sessionId);
             }
 
-            var newSession = OpenSession(_anonymousSession.UserPrincipal, endpoint);
-            return newSession.As<Session>().Join(); 
+            return OpenAnonymous(endpoint); 
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IDisposable JoinAnonymous()
+        public IDisposable JoinGlobalAnonymous()
         {
             _logger.ThreadJoiningAnonymousSession();
             return _anonymousSession.Join();
@@ -118,7 +132,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IDisposable JoinSystem()
+        public IDisposable JoinGlobalSystem()
         {
             _logger.ThreadJoiningSystemSession();
             return _systemSession.Join();
@@ -153,7 +167,7 @@ namespace NWheels.Authorization.Impl
             Session removedSession;
             _sessionById.TryRemove(session.Id, out removedSession);
 
-            JoinAnonymous();
+            JoinGlobalAnonymous();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
