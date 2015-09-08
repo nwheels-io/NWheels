@@ -31,7 +31,9 @@ namespace NWheels.Domains.Security
             [PropertyContract.Semantic.Password] 
             string password)
         {
-            var principal = _authenticationProvider.Authenticate(loginName, SecureStringUtility.ClearToSecure(password));
+            IUserAccountEntity userAccount;
+            
+            var principal = _authenticationProvider.Authenticate(loginName, SecureStringUtility.ClearToSecure(password), out userAccount);
             _sessionManager.AuthorieSession(principal);
 
             var result = new Result(principal);

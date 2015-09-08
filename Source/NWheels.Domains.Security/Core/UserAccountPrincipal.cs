@@ -20,6 +20,17 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of ClaimsPrincipal
+
+        public override bool IsInRole(string role)
+        {
+            return _identityInfo.GetUserRoles().Contains(role);
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public new UserAccountIdentity Identity
         {
             get

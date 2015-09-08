@@ -28,12 +28,12 @@ namespace NWheels.Domains.Security.Core
             password.As<IActiveRecord>().Save();
 
             this.Passwords.Add(password);
-            this.Save();
+            //this.Save();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void SetTemporaryPassword()
+        public string SetTemporaryPassword()
         {
             var policy = PolicySet.GetPolicy(this);
 
@@ -41,17 +41,17 @@ namespace NWheels.Domains.Security.Core
 
             var password = Framework.New<IPasswordEntity>();
             var passwordLength = new Random().Next(policy.PasswordMinLength, policy.PasswordMaxLength);
-            var clearText = Convert.ToBase64String(Framework.NewGuid().ToByteArray()).Substring(0, passwordLength);
+            var clearText = GenerateTemporaryPassword(passwordLength);
 
             password.User = this;
             password.Hash = CryptoProvider.CalculateHash(SecureStringUtility.ClearToSecure(clearText));
             password.ExpiresAtUtc = Framework.UtcNow.AddDays(policy.TemporaryPasswordExpiryDays);
             password.MustChange = true;
 
-            password.As<IActiveRecord>().Save();
+            //password.As<IActiveRecord>().Save();
 
             this.Passwords.Add(password);
-            this.Save();
+            return clearText;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -110,13 +110,14 @@ namespace NWheels.Domains.Security.Core
             ValidateNotLockedOut();
             var activePassword = ValidatePasswordExpiry();
             ValidatePasswordMatch(password, activePassword, policy);
+            ValidatePasswordMustChange(activePassword);
+
             var principal = CreatePrincipal();
 
             Logger.UserAuthenticated(LoginName);
             
             return principal;
         }
-
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -238,10 +239,28 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private void ValidatePasswordMustChange(IPasswordEntity activePassword)
+        {
+            if ( activePassword.MustChange )
+            {
+                throw new DomainFaultException<LoginFault>(LoginFault.PasswordExpired);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void LockOut()
         {
             Logger.UserAccountLockedOut(LoginName);
             IsLockedOut = true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string GenerateTemporaryPassword(int passwordLength)
+        {
+            var passwordBytes = Framework.NewGuid().ToByteArray();
+            return Convert.ToBase64String(passwordBytes).Substring(0, passwordLength).Replace('/', 'A').Replace('+', 'B');
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

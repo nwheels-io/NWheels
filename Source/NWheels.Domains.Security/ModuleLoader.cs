@@ -25,6 +25,7 @@ namespace NWheels.Domains.Security
 
             builder.RegisterType<UserLoginTransactionScript>().SingleInstance();
             builder.RegisterType<UserLogoutTransactionScript>().SingleInstance();
+            builder.RegisterType<ChangePasswordTransactionScript>().SingleInstance();
             builder.RegisterType<SecurityDomainApi>().As<ISecurityDomainApi>().SingleInstance();
 
             builder.RegisterType<UserAccountPolicySet>();
