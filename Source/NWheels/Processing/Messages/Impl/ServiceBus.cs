@@ -25,7 +25,7 @@ namespace NWheels.Processing.Messages.Impl
             _logger = logger;
             
             _handlersByBodyType = MapRegisteredBodyTypes(
-                registeredHandlers.ToDictionary(handler => handler.MessageBodyType),
+                registeredHandlers.Distinct().ToDictionary(handler => handler.MessageBodyType),
                 registeredBodyTypes);
 
             _messageQueue = new BlockingCollection<IMessageObject>();

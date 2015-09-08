@@ -4,7 +4,7 @@ using Autofac;
 
 namespace NWheels.Processing.Messages.Impl
 {
-    internal class MessageHandlerAdapter<TBody> : IMessageHandlerAdapter
+    internal class MessageHandlerAdapter<TBody> : IMessageHandlerAdapter, IEquatable<IMessageHandlerAdapter>
         where TBody : class
     {
         private readonly IComponentContext _components;
@@ -59,7 +59,45 @@ namespace NWheels.Processing.Messages.Impl
         }
 
         #endregion
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Implementation of IEquatable<IMessageHandlerAdapter>
+
+        public bool Equals(IMessageHandlerAdapter other)
+        {
+            return (other != null && other.MessageBodyType == this.MessageBodyType);
+        }
+
+        #endregion
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
         
+        #region Overrides of Object
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as IMessageHandlerAdapter;
+
+            if ( other != null )
+            {
+                return this.Equals(other);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override int GetHashCode()
+        {
+            return this.MessageBodyType.GetHashCode();
+        }
+
+        #endregion
+
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         private void InvokeActor(IMessageHandler<TBody> actorInstance, IMessageObject message, List<Exception> exceptions)
