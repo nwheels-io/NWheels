@@ -62,7 +62,7 @@ namespace NWheels.TypeModel.Core.Factories
 
                         m.If(_stateField == DualValueStates.Storage).Then(() => {
                             OnWritingStorageToContractConversion(m, _contractField, _storageField);
-                            _stateField.Assign(_stateField | DualValueStates.Contract);
+                            _stateField.Assign(/*_stateField | */ DualValueStates.Contract);
                         });
 
                         m.Return(_contractField);

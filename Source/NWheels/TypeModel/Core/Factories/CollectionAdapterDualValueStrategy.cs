@@ -82,7 +82,7 @@ namespace NWheels.TypeModel.Core.Factories
                         m.If(_stateField == DualValueStates.Storage).Then(() => {
                             OnWritingStorageToConcreteCollectionConversion(m, _concreteCollectionField, _storageField);
                             _collectionAdapterField.Assign(m.New<TT.TAbstractCollection<TT.TAbstract>>(_concreteCollectionField));
-                            _stateField.Assign(_stateField | DualValueStates.Contract);
+                            _stateField.Assign(/*_stateField | */ DualValueStates.Contract);
                         });
                         
                         m.Return(_collectionAdapterField.CastTo<TT.TProperty>());
