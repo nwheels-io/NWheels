@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Autofac;
+using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Logging.Core;
 using NWheels.Utilities;
@@ -18,6 +19,7 @@ namespace NWheels.Logging.Impl
         private readonly IComponentContext _components;
         private readonly IPlainLog _plainLog;
         private string _threadLogFolder;
+        private LogLevel _logLevel;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -26,6 +28,7 @@ namespace NWheels.Logging.Impl
             _components = components;
             _plainLog = plainLog;
             _threadLogFolder = PathUtility.HostBinPath("..\\BootLog");
+            _logLevel = LogLevel.Debug;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -43,6 +46,8 @@ namespace NWheels.Logging.Impl
         public override void NodeConfigured(List<ILifecycleEventListener> additionalComponentsToHost)
         {
             var configuration = _components.Resolve<IFrameworkLoggingConfiguration>();
+            
+            _logLevel = configuration.Level;
             SetThreadLogFolder(configuration);
         }
 
@@ -62,6 +67,11 @@ namespace NWheels.Logging.Impl
 
         private void PersistLogInXmlFormat(IReadOnlyThreadLog threadLog)
         {
+            if ( threadLog.RootActivity.Level < _logLevel && threadLog.TaskType != ThreadTaskType.StartUp && threadLog.TaskType != ThreadTaskType.ShutDown )
+            {
+                return;
+            }
+
             var serializer = new DataContractSerializer(typeof(ThreadLogSnapshot));
             var fileName = threadLog.LogId.ToString("N") + ".threadlog";
 
