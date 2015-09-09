@@ -975,7 +975,7 @@ namespace NWheels.Hosting.Core
                 {
                     var additionalComponents = new List<ILifecycleEventListener>();
                     component.NodeConfigured(additionalComponents);
-                    //TODO: handle additional components
+                    _ownerLifetime.LifecycleComponents.AddRange(additionalComponents);
                 }
             }
 
