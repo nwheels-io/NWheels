@@ -13,6 +13,7 @@ using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.TypeModel.Core.Factories;
 using NWheels.Utilities;
+using EntityState = System.Data.Entity.EntityState;
 
 namespace NWheels.Stacks.EntityFramework
 {
@@ -248,10 +249,17 @@ namespace NWheels.Stacks.EntityFramework
 
         public void Save(TEntityContract entity)
         {
-            _ownerRepo.ValidateOperationalState();
-            var persistableObject = entity.As<IPersistableObject>();
+            var domainObject = entity.As<IDomainObject>();
+            var domainObjectState = domainObject.State;
 
-            _objectSet.AddObject((TEntityImpl)persistableObject);
+            if ( domainObjectState != NWheels.Entities.EntityState.RetrievedPristine )
+            {
+                _ownerRepo.ValidateOperationalState();
+                var persistableObject = entity.As<IPersistableObject>();
+
+                _objectSet.AddObject((TEntityImpl)persistableObject);
+                _ownerRepo.ObjectContext.ObjectStateManager.ChangeObjectState(persistableObject, GetEfEntityState(domainObjectState));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -303,6 +311,28 @@ namespace NWheels.Stacks.EntityFramework
         {
             var queryWithIncludes = propertiesToInclude.Aggregate(query, (current, property) => current.Include(property));
             return new InterceptingQueryable<TEntityContract>(this, queryWithIncludes);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private System.Data.Entity.EntityState GetEfEntityState(Entities.EntityState domainObjectState)
+        {
+            if ( domainObjectState.IsDeleted() )
+            {
+                return EntityState.Deleted;
+            }
+
+            if ( domainObjectState.IsNew() )
+            {
+                return EntityState.Added;
+            }
+
+            if ( domainObjectState.IsModified() )
+            {
+                return EntityState.Modified;
+            }
+
+            return EntityState.Unchanged;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

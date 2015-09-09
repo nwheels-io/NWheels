@@ -421,9 +421,13 @@ namespace NWheels.Stacks.MongoDb
 
         public void Save(TEntityContract entity)
         {
-            _ownerRepo.ValidateOperationalState();
-            _ownerRepo.NotifyEntityState((IEntityObject)entity.As<IPersistableObject>(), EntityState.NewModified);
-            //_mongoCollection.Insert((TEntityImpl)entity);
+            var entityState = entity.As<IDomainObject>().State;
+
+            if ( entityState != EntityState.RetrievedPristine )
+            {
+                _ownerRepo.ValidateOperationalState();
+                _ownerRepo.NotifyEntityState((IEntityObject)entity.As<IPersistableObject>(), entityState);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
