@@ -28,7 +28,6 @@ namespace NWheels.Domains.Security.Core
             password.As<IActiveRecord>().Save();
 
             this.Passwords.Add(password);
-            //this.Save();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -48,7 +47,7 @@ namespace NWheels.Domains.Security.Core
             password.ExpiresAtUtc = Framework.UtcNow.AddDays(policy.TemporaryPasswordExpiryDays);
             password.MustChange = true;
 
-            //password.As<IActiveRecord>().Save();
+            password.As<IActiveRecord>().Save();
 
             this.Passwords.Add(password);
             return clearText;
@@ -188,7 +187,8 @@ namespace NWheels.Domains.Security.Core
                 {
                     if ( !oldPassword.IsExpired(now) )
                     {
-                        oldPassword.ExpiresAtUtc = now;
+                        oldPassword.ExpiresAtUtc = now.Date;
+                        oldPassword.As<IActiveRecord>().Save();
                     }
                 }
             }
