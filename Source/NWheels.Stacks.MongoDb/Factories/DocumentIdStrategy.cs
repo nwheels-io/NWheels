@@ -4,6 +4,7 @@ using Autofac;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
+using MongoDB.Bson;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.StorageTypes;
@@ -84,7 +85,11 @@ namespace NWheels.Stacks.MongoDb.Factories
             IOperand<TT.TProperty> contractValue, 
             MutableOperand<TT.TValue> storageValue)
         {
-            storageValue.Assign(contractValue.CastTo<IEntityObject>().Func<IEntityId>(x => x.GetId).Func<TT.TValue>(x => x.ValueAs<TT.TValue>));
+            method.If(contractValue.CastTo<IEntityObject>().IsNotNull()).Then(() => {
+                storageValue.Assign(contractValue.CastTo<IEntityObject>().Func<IEntityId>(x => x.GetId).Func<TT.TValue>(x => x.ValueAs<TT.TValue>));
+            }).Else(() => {
+                storageValue.Assign(Static.Prop(() => ObjectId.Empty).CastTo<TT.TValue>());
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
