@@ -35,6 +35,12 @@ namespace NWheels.Stacks.NancyFx
 
             StaticConfiguration.Caching.EnableRuntimeViewDiscovery = true;
             StaticConfiguration.Caching.EnableRuntimeViewUpdates = true;
+
+            builder.NWheelsFeatures().Logging().RegisterLogger<IHttpApiEndpointLogger>();
+            builder.RegisterType<HttpApiEndpointComponent>().InstancePerDependency();
+            builder.RegisterAdapter<HttpApiEndpointRegistration, ILifecycleEventListener>((ctx, endpoint) =>
+                ctx.Resolve<HttpApiEndpointComponent>(TypedParameter.From(endpoint))
+            );
         }
     }
 }

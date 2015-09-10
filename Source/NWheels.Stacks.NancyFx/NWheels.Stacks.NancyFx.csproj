@@ -55,6 +55,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -63,8 +64,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IHttpApiEndpointLogger.cs" />
     <Compile Include="IWebApplicationLogger.cs" />
     <Compile Include="IWebModuleContext.cs" />
+    <Compile Include="HttpApiEndpointComponent.cs" />
     <Compile Include="WebModuleSessionHook.cs" />
     <Compile Include="WebModuleLoggigHook.cs" />
     <Compile Include="MetadataJsonSerializer.cs" />
