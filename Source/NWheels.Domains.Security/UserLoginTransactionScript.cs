@@ -4,6 +4,7 @@ using NWheels.Authorization.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Domains.Security.Core;
+using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.Processing;
 using NWheels.Utilities;
@@ -50,6 +51,7 @@ namespace NWheels.Domains.Security
 
                 FullName = principal.PersonFullName;
                 AccountType = account.As<IObject>().ContractType.SimpleQualifiedName();
+                AccountId = account.As<IPersistableObject>().As<IEntityObject>().GetId().Value.ToString();
                 UserRoles = principal.GetUserRoles();
                 AllClaims = principal.Identity.Claims.Select(c => c.Value).ToArray();
                 LastLoginAtUtc = account.LastLoginAtUtc;
@@ -58,6 +60,7 @@ namespace NWheels.Domains.Security
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public string FullName { get; private set; }
+            public string AccountId { get; private set; }
             public string AccountType { get; private set; }
             public string[] UserRoles { get; private set; }
             public string[] AllClaims { get; private set; }

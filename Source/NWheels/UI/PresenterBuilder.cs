@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -194,11 +195,19 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public AlterModelBehaviorBuilder<TInput> AlterModel()
+            public PromiseBuilder<TInput> AlterModel(params Action<AlterModelBehaviorBuilder<TInput>>[] alterations)
             {
                 var behavior = new UidlAlterModelBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
                 SetAndSubscribeBehavior(behavior);
-                return new AlterModelBehaviorBuilder<TInput>(_ownerNode, behavior, _uidl);
+
+                var alterationBuilder = new AlterModelBehaviorBuilder<TInput>(_ownerNode, behavior, _uidl);
+
+                foreach ( var alteration in alterations )
+                {
+                    alteration(alterationBuilder);
+                }
+
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -558,7 +567,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public BroadcastBehaviorBuilder4<TInput> WithPayload(Expression<Func<TData, TState, TInput, TPayload>> payloadSelector)
+            public BroadcastBehaviorBuilder4<TInput> WithPayload(Expression<Func<ViewModel<TData, TState, TInput>, TPayload>> payloadSelector)
             {
                 _behavior.PayloadExpression = payloadSelector.ToString();
                 return new BroadcastBehaviorBuilder4<TInput>(_ownerNode, _behavior, _uidl);
@@ -694,19 +703,30 @@ namespace NWheels.UI
             }
         }
 
-        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //public interface IShowAlertBehaviorBuilder3<TInput, TData, TState>
-        //    where TData : class
-        //    where TState : class
-        //{
-        //    IPromiseBuilder<UserAlertResult, TData, TState> Inline();
-        //    IPromiseBuilder<UserAlertResult, TData, TState> Popup();
-        //}
+        public interface IAlterModelSourceSelector<TInput>
+        {
+            IAlterModelDestinationSelector<TInput, TValue> Copy<TValue>(TValue value);
+            IAlterModelDestinationSelector<TInput, TValue> Copy<TValue>(Expression<Func<ViewModel<TData, TState, TInput>, TValue>> source);
+            IAlterModelDestinationSelector<TInput, ICollection<TValue>> InsertOne<TValue>(TValue value);
+            IAlterModelDestinationSelector<TInput, ICollection<TValue>> InsertOne<TValue>(Expression<Func<ViewModel<TData, TState, TInput>, TValue>> source);
+            IAlterModelDestinationSelector<TInput, ICollection<TValue>> RemoveOne<TValue>(TValue value);
+            IAlterModelDestinationSelector<TInput, ICollection<TValue>> RemoveOne<TValue>(Expression<Func<ViewModel<TData, TState, TInput>, TValue>> source);
+            IAlterModelDestinationSelector<TInput, ICollection<TValue>> InsertMany<TValue>(Expression<Func<ViewModel<TData, TState, TInput>, ICollection<TValue>>> source);
+            IAlterModelDestinationSelector<TInput, ICollection<TValue>> RemoveMany<TValue>(Expression<Func<ViewModel<TData, TState, TInput>, ICollection<TValue>>> source);
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class AlterModelBehaviorBuilder<TInput>
+        public interface IAlterModelDestinationSelector<TInput, TDestination>
+        {
+            void To(Expression<Func<ViewModel<TData, TState, TInput>, TDestination>> destination);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class AlterModelBehaviorBuilder<TInput> : IAlterModelSourceSelector<TInput>
         {
             private readonly ControlledUidlNode _ownerNode;
             private readonly UidlAlterModelBehavior _behavior;
@@ -723,49 +743,154 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<TInput> SetData<TValue>(
-                Expression<Func<TData, TValue>> propertySelector,
-                Expression<Func<TData, TState, TInput, TValue>> newValue)
-            {
-                _behavior.WriteExpression = "model.data." + propertySelector.ToString();
-                _behavior.ReadExpression = newValue.ToString();
+            #region Implementation of IAlterModelSourceSelector<TInput>
 
-                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+            public IAlterModelDestinationSelector<TInput, TValue> Copy<TValue>(TValue value)
+            {
+                CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
+                    Type = UidlAlterModelBehavior.AlterationType.Copy,
+                    SourceExpression = value.ToString()
+                };
+
+                return new DestinationSelector<TValue>(this);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<TInput> SetData<TValue>(Expression<Func<TData, TValue>> propertySelector, Expression<Func<TValue>> newValue)
+            public IAlterModelDestinationSelector<TInput, TValue> Copy<TValue>(Expression<Func<ViewModel<TData, TState, TInput>, TValue>> source)
             {
-                _behavior.WriteExpression = "model.data." + propertySelector.ToString();
-                _behavior.ReadExpression = newValue.ToString();
+                CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
+                    Type = UidlAlterModelBehavior.AlterationType.Copy,
+                    SourceExpression = source.ToNormalizedNavigationString()
+                };
 
-                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+                return new DestinationSelector<TValue>(this);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<TInput> SetState<TValue>(
-                Expression<Func<TState, TValue>> propertySelector,
-                Expression<Func<TData, TState, TInput, TValue>> newValue)
+            public IAlterModelDestinationSelector<TInput, ICollection<TValue>> InsertOne<TValue>(TValue value)
             {
-                _behavior.WriteExpression = "model.state." + propertySelector.ToString();
-                _behavior.ReadExpression = newValue.ToString();
+                CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
+                    Type = UidlAlterModelBehavior.AlterationType.InsertOne,
+                    SourceExpression = value.ToString()
+                };
 
-                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+                return new DestinationSelector<ICollection<TValue>>(this);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<TInput> SetState<TValue>(
-                Expression<Func<TState, TValue>> propertySelector,
-                Expression<Func<TValue>> newValue)
+            public IAlterModelDestinationSelector<TInput, ICollection<TValue>> InsertOne<TValue>(
+                Expression<Func<ViewModel<TData, TState, TInput>, TValue>> source)
             {
-                _behavior.WriteExpression = "model.state." + propertySelector.ToString();
-                _behavior.ReadExpression = newValue.ToString();
+                CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
+                    Type = UidlAlterModelBehavior.AlterationType.InsertOne,
+                    SourceExpression = source.ToNormalizedNavigationString()
+                };
 
-                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+                return new DestinationSelector<ICollection<TValue>>(this);
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IAlterModelDestinationSelector<TInput, ICollection<TValue>> RemoveOne<TValue>(TValue value)
+            {
+                CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
+                    Type = UidlAlterModelBehavior.AlterationType.RemoveOne,
+                    SourceExpression = value.ToString()
+                };
+
+                return new DestinationSelector<ICollection<TValue>>(this);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IAlterModelDestinationSelector<TInput, ICollection<TValue>> RemoveOne<TValue>(
+                Expression<Func<ViewModel<TData, TState, TInput>, TValue>> source)
+            {
+                CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
+                    Type = UidlAlterModelBehavior.AlterationType.RemoveOne,
+                    SourceExpression = source.ToNormalizedNavigationString()
+                };
+
+                return new DestinationSelector<ICollection<TValue>>(this);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IAlterModelDestinationSelector<TInput, ICollection<TValue>> InsertMany<TValue>(
+                Expression<Func<ViewModel<TData, TState, TInput>, ICollection<TValue>>> source)
+            {
+                CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
+                    Type = UidlAlterModelBehavior.AlterationType.InsertMany,
+                    SourceExpression = source.ToNormalizedNavigationString()
+                };
+
+                return new DestinationSelector<ICollection<TValue>>(this);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IAlterModelDestinationSelector<TInput, ICollection<TValue>> RemoveMany<TValue>(
+                Expression<Func<ViewModel<TData, TState, TInput>, ICollection<TValue>>> source)
+            {
+                CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
+                    Type = UidlAlterModelBehavior.AlterationType.RemoveMany,
+                    SourceExpression = source.ToNormalizedNavigationString()
+                };
+
+                return new DestinationSelector<ICollection<TValue>>(this);
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void FinalizeAlteration(LambdaExpression destinationExpression)
+            {
+                if ( CurrentAlteration != null )
+                {
+
+                    CurrentAlteration.DestinationExpression = destinationExpression.ToNormalizedNavigationString();
+                    _behavior.Alterations.Add(CurrentAlteration);
+                    CurrentAlteration = null;
+                }
+                else
+                {
+                    throw new InvalidOperationException("No current alteration(?)");
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private UidlAlterModelBehavior.Alteration CurrentAlteration { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private class DestinationSelector<TDestination> : IAlterModelDestinationSelector<TInput, TDestination>
+            {
+                private readonly AlterModelBehaviorBuilder<TInput> _ownerBuilder;
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                public DestinationSelector(AlterModelBehaviorBuilder<TInput> ownerBuilder)
+                {
+                    _ownerBuilder = ownerBuilder;
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                #region Implementation of IAlterModelDestinationSelector<TInput,TDestination>
+
+                public void To(Expression<Func<ViewModel<TData, TState, TInput>, TDestination>> destination)
+                {
+                    _ownerBuilder.FinalizeAlteration(destination);
+                }
+
+                #endregion
+            }
+
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

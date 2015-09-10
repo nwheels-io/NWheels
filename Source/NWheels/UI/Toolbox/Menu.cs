@@ -131,7 +131,7 @@ namespace NWheels.UI.Toolbox
                 TPayload payload, 
                 BroadcastDirection direction = BroadcastDirection.BubbleUp)
             {
-                return Describe(b => b.Broadcast(notification).WithPayload((data, state, input) => payload).Direction(direction));
+                return Describe(b => b.Broadcast(notification).WithPayload(m => payload).Direction(direction));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

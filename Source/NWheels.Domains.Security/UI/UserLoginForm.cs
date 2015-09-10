@@ -35,9 +35,11 @@ namespace NWheels.Domains.Security.UI
         protected override void DescribePresenter(PresenterBuilder<UserLoginForm, ILogUserInRequest, IState> presenter)
         {
             presenter.On(LogIn)
-                .InvokeTransactionScript<UserLoginTransactionScript>().WaitForReply((x, data, state, input) => x.Execute(data.LoginName, data.Password))
+                .InvokeTransactionScript<UserLoginTransactionScript>()
+                .WaitForReply((x, data, state, input) => x.Execute(data.LoginName, data.Password))
                 .Then(
-                    onSuccess: b => b.Broadcast(UserLoggedIn).BubbleUp(),
+                    onSuccess: b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.User))
+                        .Then(bb => bb.Broadcast(UserLoggedIn).WithPayload(m => m.Input).BubbleUp()),
                     onFailure: b => b.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.LoginHasFailed(failure.ReasonText)));
         }
 
@@ -46,7 +48,7 @@ namespace NWheels.Domains.Security.UI
         public UidlCommand LogIn { get; set; }
         public UidlCommand SignUp { get; set; }
         public UidlCommand ForgotPassword { get; set; }
-        public UidlNotification UserLoggedIn { get; set; }
+        public UidlNotification<UserLoginTransactionScript.Result> UserLoggedIn { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -64,6 +66,8 @@ namespace NWheels.Domains.Security.UI
         [ViewModelContract]
         public interface IState
         {
+            UserLoginTransactionScript.Result User { get; set; }
+
             [ViewModelPropertyContract.PersistedOnUserMachine]
             bool RememberMe { get; set; }
         }

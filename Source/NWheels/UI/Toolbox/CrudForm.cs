@@ -13,7 +13,7 @@ namespace NWheels.UI.Toolbox
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
     public class CrudForm : WidgetBase<CrudForm, Empty.Data, Empty.State>
     {
-        public CrudForm(string idName, Crud parent)
+        public CrudForm(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
             DisplayFields = new List<string>();
@@ -32,6 +32,10 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string EntityMetaType { get; set; }
         [DataMember]
+        public object EntityId { get; set; }
+        [DataMember]
+        public CrudFormMode Mode { get; set; }
+        [DataMember]
         public List<string> DisplayFields { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -40,6 +44,16 @@ namespace NWheels.UI.Toolbox
         {
             return base.GetTranslatables().Concat(DisplayFields);
         }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum CrudFormMode
+    {
+        CrudWidget,
+        StandaloneView,
+        StandaloneCreate,
+        StandaloneUpdate
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -53,7 +67,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CrudForm(string idName, Crud<TEntity> parent)
+        public CrudForm(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
             this.WidgetType = "CrudForm";

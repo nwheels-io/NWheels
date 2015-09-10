@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Extensions;
 
 namespace NWheels.UI.Uidl
 {
@@ -183,13 +184,36 @@ namespace NWheels.UI.Uidl
         public UidlAlterModelBehavior(string idName, ControlledUidlNode parent)
             : base(idName, BehaviorType.AlterModel, parent)
         {
+            this.Alterations = new List<Alteration>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
-        public string ReadExpression { get; set; }
-        [DataMember]
-        public string WriteExpression { get; set; }
+        public List<Alteration> Alterations { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+        public class Alteration
+        {
+            [DataMember]
+            public AlterationType Type { get; set; }
+            [DataMember]
+            public string SourceExpression { get; set; }
+            [DataMember]
+            public string DestinationExpression { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public enum AlterationType
+        {
+            Copy,
+            InsertOne,
+            InsertMany,
+            RemoveOne,
+            RemoveMany
+        }
     }
 }
