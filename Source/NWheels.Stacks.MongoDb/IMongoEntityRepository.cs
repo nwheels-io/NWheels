@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MongoDB.Driver;
 using NWheels.Entities.Core;
 
 namespace NWheels.Stacks.MongoDb
@@ -13,5 +14,6 @@ namespace NWheels.Stacks.MongoDb
         void CommitInsert(IEnumerable<IEntityObject> entities);
         void CommitUpdate(IEnumerable<IEntityObject> entities);
         void CommitDelete(IEnumerable<IEntityObject> entities);
+        MongoCollection GetMongoCollection();
     }
 }

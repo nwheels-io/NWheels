@@ -78,6 +78,7 @@
     <Compile Include="Factories\MongoEntityObjectFactory.cs" />
     <Compile Include="Factories\MongoEntityObjectFactory.Old.cs" />
     <Compile Include="MongoEntityRepository.cs" />
+    <Compile Include="MongoEntityRepositoryExtensions.cs" />
     <Compile Include="MongoQueryExpressionSpecializer.cs" />
     <Compile Include="Factories\ObjectIdGeneratorConvention.cs" />
     <Compile Include="ModuleLoader.cs" />
