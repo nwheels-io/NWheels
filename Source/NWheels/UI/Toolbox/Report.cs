@@ -22,6 +22,10 @@ namespace NWheels.UI.Toolbox
 
         protected override void DescribePresenter(PresenterBuilder<Report, Empty.Data, Empty.State> presenter)
         {
+            if ( RowTemplate == null )
+            {
+                RowTemplate = DefaultRowTemplate;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,12 +36,31 @@ namespace NWheels.UI.Toolbox
         public string EntityMetaType { get; set; }
         [DataMember]
         public List<string> DisplayColumns { get; set; }
+        [DataMember, ManuallyAssigned]
+        public WidgetUidlNode RowTemplate { get; set; }
+        public ReportDefaultRow DefaultRowTemplate { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override IEnumerable<string> GetTranslatables()
         {
             return base.GetTranslatables().Concat(DisplayColumns ?? new List<string>());
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class ReportDefaultRow : WidgetBase<ReportDefaultRow, Empty.Data, Empty.State>
+    {
+        public ReportDefaultRow(string idName, ControlledUidlNode parent)
+            : base(idName, parent)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void DescribePresenter(PresenterBuilder<ReportDefaultRow, Empty.Data, Empty.State> presenter)
+        {
         }
     }
 
