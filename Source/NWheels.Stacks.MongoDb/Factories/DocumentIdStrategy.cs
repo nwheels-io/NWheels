@@ -88,7 +88,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             method.If(contractValue.CastTo<IEntityObject>().IsNotNull()).Then(() => {
                 storageValue.Assign(contractValue.CastTo<IEntityObject>().Func<IEntityId>(x => x.GetId).Func<TT.TValue>(x => x.ValueAs<TT.TValue>));
             }).Else(() => {
-                storageValue.Assign(Static.Prop(() => ObjectId.Empty).CastTo<TT.TValue>());
+                storageValue.Assign(method.Default<TT.TValue>());
             });
         }
 
