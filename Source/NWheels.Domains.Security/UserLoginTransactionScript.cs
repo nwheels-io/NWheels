@@ -50,8 +50,8 @@ namespace NWheels.Domains.Security
                 var account = principal.Identity.GetUserAccount();
 
                 FullName = principal.PersonFullName;
-                AccountType = account.As<IObject>().ContractType.SimpleQualifiedName();
-                AccountId = account.As<IPersistableObject>().As<IEntityObject>().GetId().Value.ToString();
+                UserType = account.As<IObject>().ContractType.SimpleQualifiedName();
+                UserId = account.As<IPersistableObject>().As<IEntityObject>().GetId().Value.ToString();
                 UserRoles = principal.GetUserRoles();
                 AllClaims = principal.Identity.Claims.Select(c => c.Value).ToArray();
                 LastLoginAtUtc = account.LastLoginAtUtc;
@@ -60,8 +60,8 @@ namespace NWheels.Domains.Security
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public string FullName { get; private set; }
-            public string AccountId { get; private set; }
-            public string AccountType { get; private set; }
+            public string UserId { get; private set; }
+            public string UserType { get; private set; }
             public string[] UserRoles { get; private set; }
             public string[] AllClaims { get; private set; }
             public DateTime? LastLoginAtUtc { get; private set; }

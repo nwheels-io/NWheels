@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 using Hapil;
 using Hapil.Members;
+using NWheels.DataObjects.Core.Conventions;
+using NWheels.Exceptions;
 
 namespace NWheels.DataObjects.Core
 {
@@ -78,9 +80,22 @@ namespace NWheels.DataObjects.Core
 
         private void RegisterTypeInheritance()
         {
-            if ( _thisType.BaseType != null )
+            var baseContracts = _thisType.GetBaseContracts();
+
+            if ( baseContracts.Count > 1 )
             {
+                throw new ContractConventionException(typeof(ContractMetadataConvention), _thisType.ContractType, "Multiple inheritance is not allowed");
+            }
+
+            if ( baseContracts.Count == 1 )
+            {
+                _thisType.BaseType = _cache.FindTypeMetadataAllowIncomplete(baseContracts.Single());
                 _thisType.BaseType.RegisterDerivedType(_thisType);
+
+                //for ( var baseType = _thisType.BaseType ; baseType != null ; baseType = baseType.BaseType )
+                //{
+                //    _allProperties.ExceptWith(baseType.Properties.Select(p => p.ContractPropertyInfo));
+                //}
             }
         }
 

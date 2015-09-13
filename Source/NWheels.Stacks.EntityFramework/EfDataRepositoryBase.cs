@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Data.Entity.Core.Objects;
 using System.Data.Entity.Infrastructure;
@@ -45,6 +47,24 @@ namespace NWheels.Stacks.EntityFramework
             if ( shouldDisposeResourcesNow )
             {
                 _objectContext.Dispose();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override void InitializeCurrentSchema()
+        {
+            var script = _objectContext.CreateDatabaseScript();
+
+            using ( var command = _connection.CreateCommand() )
+            {
+                command.CommandType = CommandType.Text;
+                command.CommandText = script;
+
+                Console.WriteLine(script);
+
+                command.CommandTimeout = 120000;
+                command.ExecuteNonQuery();
             }
         }
 

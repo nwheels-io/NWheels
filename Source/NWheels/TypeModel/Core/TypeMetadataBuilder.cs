@@ -153,6 +153,7 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+
         public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {
             Name = visitor.VisitAttribute("Name", Name);
@@ -321,6 +322,21 @@ namespace NWheels.DataObjects.Core
         {
             _propertyByName = this.Properties.ToDictionary(p => p.Name);
             _propertyByDeclaration = this.Properties.ToDictionary(p => p.ContractPropertyInfo);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal HashSet<Type> GetBaseContracts()
+        {
+            var allContracts = this.ContractType.GetInterfaces().Where(DataObjectContractAttribute.IsDataObjectContract).ToArray();
+            var baseContractSet = new HashSet<Type>(allContracts);
+
+            foreach ( var contract in allContracts )
+            {
+                baseContractSet.ExceptWith(contract.GetInterfaces());
+            }
+
+            return baseContractSet;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

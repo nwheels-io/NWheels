@@ -22,7 +22,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
         public void Preview(TypeMetadataBuilder type)
         {
-            ApplyInheritance(type);
+            //ApplyInheritance(type);
 
             foreach ( var property in type.Properties )
             {
@@ -44,36 +44,24 @@ namespace NWheels.DataObjects.Core.Conventions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ApplyInheritance(TypeMetadataBuilder type)
-        {
-            var baseContracts = GetBaseContracts(type);
+        //private void ApplyInheritance(TypeMetadataBuilder type)
+        //{
+        //    if ( type.BaseType == null )
+        //    {
+        //        var baseContracts = type.GetBaseContracts();
 
-            if ( baseContracts.Count > 1 )
-            {
-                throw new ContractConventionException(typeof(ContractMetadataConvention), type.ContractType, "Multiple inheritance is not allowed");
-            }
+        //        if ( baseContracts.Count > 1 )
+        //        {
+        //            throw new ContractConventionException(typeof(ContractMetadataConvention), type.ContractType, "Multiple inheritance is not allowed");
+        //        }
 
-            if ( baseContracts.Count == 1 )
-            {
-                type.BaseType = _metadataCache.FindTypeMetadataAllowIncomplete(baseContracts.Single());
-                type.BaseType.RegisterDerivedType(type);
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private HashSet<Type> GetBaseContracts(TypeMetadataBuilder type)
-        {
-            var allContracts = type.ContractType.GetInterfaces().Where(DataObjectContractAttribute.IsDataObjectContract).ToArray();
-            var baseContractSet = new HashSet<Type>(allContracts);
-
-            foreach ( var contract in allContracts )
-            {
-                baseContractSet.ExceptWith(contract.GetInterfaces());
-            }
-
-            return baseContractSet;
-        }
+        //        if ( baseContracts.Count == 1 )
+        //        {
+        //            type.BaseType = _metadataCache.FindTypeMetadataAllowIncomplete(baseContracts.Single());
+        //            type.BaseType.RegisterDerivedType(type);
+        //        }
+        //    }
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

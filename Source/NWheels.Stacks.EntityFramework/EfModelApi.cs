@@ -57,6 +57,10 @@ namespace NWheels.Stacks.EntityFramework
             ITypeMetadataCache metadataCache)
             where TEntity : class
         {
+            //TODO: resolve a weird bug when entityConfiguration.GetType().GetGenericArguments()[0] != typeof(TEntity), typeof(TEntity) == null
+            //var list = new List<TEntity>();
+            //list.Add(null);
+
             var entityConfiguration = builder.Entity<TEntity>();
 
             entityConfiguration.HasEntitySetName(entity.Name);
@@ -78,6 +82,15 @@ namespace NWheels.Stacks.EntityFramework
                     }
 
                     entityConfiguration.ToTable(tableName);
+                    //entityConfiguration.Map(m => {
+                    //    m.ToTable(tableName);
+
+                    //    if (entity.DerivedTypes.Count > 0 && !entity.IsAbstract)
+                    //    {
+                    //        m.Requires(EfConfigurationConvention.DiscriminatorColumnName)
+                    //            .HasValue(EfConfigurationConvention.GetDiscriminatorValue(entity, entity));
+                    //    }
+                    //});
                 }
             }
 

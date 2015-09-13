@@ -35,7 +35,11 @@ namespace NWheels.Entities.Factories
         protected override void OnImplementContractProperty(ImplementationClassWriter<TypeTemplate.TInterface> writer)
         {
             var baseProperty = _context.GetBasePropertyToImplement(MetaProperty);
-            
+            ClassWriterBase effectiveClassWriter = (
+                baseProperty.DeclaringType != null && baseProperty.DeclaringType.IsInterface 
+                ? (ClassWriterBase)writer.ImplementInterfaceVirtual(baseProperty.DeclaringType) 
+                : (ClassWriterBase)writer);
+
             using ( TT.CreateScope<TT.TInterface>(MetaType.ContractType) )
             {
                 writer.Property(baseProperty).Implement(

@@ -31,7 +31,7 @@ namespace NWheels.Domains.Security.Impl
         {
             using ( var data = _framework.NewUnitOfWork<IUserAccountDataRepository>() )
             {
-                userAccount = data.AllUsers.FirstOrDefault(u => u.LoginName == loginName);
+                userAccount = data.AllUsers.Include(u => u.Passwords).FirstOrDefault(u => u.LoginName == loginName);
 
                 if ( userAccount == null )
                 {

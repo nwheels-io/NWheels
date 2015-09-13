@@ -29,15 +29,20 @@ namespace NWheels.Entities.Core
 
         public void Preview(TypeMetadataBuilder type)
         {
-            if ( EntityContractAttribute.IsEntityContract(type.ContractType) ) // filter out entity part contracts
-            { 
-                if ( type.PrimaryKey == null &&
-                    !type.Properties.Any(p => p.Role == PropertyRole.Key) &&
-                    !type.MixinContractTypes.Any(IsEntityPartIdMixinType) )
+            if ( !EntityContractAttribute.IsEntityContract(type.ContractType) )
+            {
+                return;
+            }
+
+            for ( var currentType = type ; currentType != null ; currentType = currentType.BaseType )
+            {
+                if ( TypeHasPrimaryKey(currentType) )
                 {
-                    type.MixinContractTypes.Add(_entityPartIdMixinType);
+                    return;
                 }
             }
+
+            type.MixinContractTypes.Add(_entityPartIdMixinType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -59,6 +64,16 @@ namespace NWheels.Entities.Core
             return (
                 type.IsConstructedGenericType && 
                 type.GetGenericTypeDefinition() == typeof(IEntityPartId<>));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool TypeHasPrimaryKey(TypeMetadataBuilder type)
+        {
+            return (
+                type.PrimaryKey != null ||
+                type.Properties.Any(p => p.Role == PropertyRole.Key) ||
+                type.MixinContractTypes.Any(IsEntityPartIdMixinType));
         }
     }
 }

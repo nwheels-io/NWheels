@@ -91,7 +91,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
         private bool IsInheritanceConfigurationRequired()
         {
-            return (_metaType.BaseType != null || _metaType.DerivedTypes.Count > 0) && !_metaType.IsAbstract;
+            return (_metaType.BaseType != null && !_metaType.IsAbstract);
         }
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
         {
             ITypeMetadata rootBaseType;
             var rootBaseTypeImplementation = GetRootBaseTypeImplementation(w.OwnerClass, out rootBaseType);
-            var discriminatorValue = (_metaType.BaseType != null ? _metaType.Name.TrimTail(rootBaseType.Name) : _metaType.Name);
+            var discriminatorValue = GetDiscriminatorValue(rootBaseType, _metaType);
 
             using ( TT.CreateScope<TT.TContract>(rootBaseTypeImplementation) )
             {
@@ -147,6 +147,13 @@ namespace NWheels.Stacks.EntityFramework.Factories
         private void ConfigureComplexType(VoidMethodWriter w, Argument<ITypeMetadataCache> metadataCache, Argument<DbModelBuilder> builder)
         {
             Static.Void(EfModelApi.ComplexType<TT.TImpl>, builder);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetDiscriminatorValue(ITypeMetadata rootBaseType, ITypeMetadata derivedType)
+        {
+            return (derivedType.BaseType != null ? derivedType.Name.TrimTail(rootBaseType.Name) : derivedType.Name);
         }
     }
 }

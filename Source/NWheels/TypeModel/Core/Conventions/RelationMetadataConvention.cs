@@ -23,6 +23,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
         public void Apply(TypeMetadataBuilder type)
         {
+            CopyKeysFromBase(type);
             FindOrAddPrimaryKey(type);
         }
 
@@ -56,6 +57,26 @@ namespace NWheels.DataObjects.Core.Conventions
             }
 
             return type.PrimaryKey;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void CopyKeysFromBase(TypeMetadataBuilder thisType)
+        {
+            for ( var baseType = thisType.BaseType ; baseType != null ; baseType = baseType.BaseType )
+            {
+                var basePrimaryKey = FindOrAddPrimaryKey(baseType);
+
+                foreach ( var key in baseType.AllKeys )
+                {
+                    thisType.AllKeys.Add(key);
+                }
+
+                if ( thisType.PrimaryKey == null )
+                {
+                    thisType.PrimaryKey = basePrimaryKey;
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

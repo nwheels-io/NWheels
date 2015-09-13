@@ -138,7 +138,9 @@ namespace NWheels.DataObjects.Core
         {
             _mixinsByPrimaryContract = null;
             _concretizationsByPrimaryContract = null;
+            
             _conventions = _components.Resolve<MetadataConventionSet>();
+            _conventions.InjectCache(this);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
