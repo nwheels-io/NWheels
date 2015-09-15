@@ -101,7 +101,11 @@
     <Compile Include="Logging\ThreadLogTests.cs" />
     <Compile Include="Logging\ThreadLogUnitTestBase.cs" />
     <Compile Include="Processing\Commands\Factories\MethodCallObjectFactoryTests.cs" />
-    <Compile Include="Processing\Rules\DomainObjectVarianceTests.cs" />
+    <Compile Include="IntervalTests.cs" />
+    <Compile Include="Processing\Rules\CompiledRuleSystemTests.cs" />
+    <Compile Include="Processing\Rules\RuleObjectVarianceTests.cs" />
+    <Compile Include="Processing\Rules\TestCodeBehind.cs" />
+    <Compile Include="Processing\Rules\TestDataContext.cs" />
     <Compile Include="Processing\Rules\Tshirts\CustomerContextBase.cs" />
     <Compile Include="Processing\Rules\Tshirts\Entities.cs" />
     <Compile Include="Processing\Rules\Tshirts\PricingContext.cs" />
@@ -140,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DataObjects\Conventions\" />
+    <Folder Include="Processing\Rules\Core\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

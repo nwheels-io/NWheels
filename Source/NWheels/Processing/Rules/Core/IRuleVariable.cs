@@ -6,7 +6,7 @@ namespace NWheels.Processing.Rules.Core
     /// Represents a variable in the rule engine. 
     /// A variable is basically a function that gets TContext and returns TValue.
     /// </summary>
-	public interface IRuleVariable<in TDataContext,out TValue>: IRuleDomainObject
+	public interface IRuleVariable<in TDataContext, out TValue> : IRuleDomainObject
     {
         /// <summary>
         /// Returns value of this variable from specified data context object.
@@ -20,6 +20,9 @@ namespace NWheels.Processing.Rules.Core
         /// It is declared as covariant, which allows casting this variable to be used with an ancestor result value type.
         /// </returns>
         TValue GetValue(TDataContext context);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
 		/// <summary>
 		/// Returns list of inventory values
 		/// </summary>

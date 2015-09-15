@@ -5,6 +5,7 @@
     /// </summary>
     public interface IRuleFunction : IRuleDomainObject
     {
+        object GetValue(object[] arguments);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

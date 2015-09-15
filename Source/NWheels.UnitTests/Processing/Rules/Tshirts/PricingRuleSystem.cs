@@ -90,7 +90,7 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class AddPriceLineAction : RuleActionBase<PricingContext, Money, string>
+        public class AddPriceLineAction : RuleActionBase, IRuleAction<PricingContext, Money, string>
         {
             public AddPriceLineAction()
                 : base("AddPriceLine", description: "Add price line")
@@ -101,7 +101,7 @@ namespace NWheels.UnitTests.Processing.Rules.Tshirts
 
             #region Overrides of RuleActionBase<PricingContext,Money,string>
 
-            public override void Apply(IRuleActionContext<PricingContext> context, Money price, string description)
+            public void Apply(IRuleActionContext<PricingContext> context, Money price, string description)
             {
                 context.Data.PriceLines.Add(new PricingContext.PriceLine() {
                     Price = price,

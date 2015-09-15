@@ -9,7 +9,7 @@ using NWheels.Processing.Rules.Core;
 namespace NWheels.UnitTests.Processing.Rules
 {
     [TestFixture]
-    public class DomainObjectVarianceTests
+    public class RuleObjectVarianceTests
     {
         [Test]
         public void CanUseInlineBaseContextVariableWithDerivedContext()

@@ -144,6 +144,12 @@
     <Compile Include="Processing\Messages\Impl\SessionPushActor.cs" />
     <Compile Include="Processing\Messages\MessageObjectWithContinuation.cs" />
     <Compile Include="Processing\Messages\MessageTypeRegistration.cs" />
+    <Compile Include="Processing\RuleEngineFeatureLoader.cs" />
+    <Compile Include="Interval.cs" />
+    <Compile Include="Processing\Rules\Core\IRuleEngineLogger.cs" />
+    <Compile Include="Processing\Rules\Impl\EvaluationContext.cs" />
+    <Compile Include="Processing\Rules\Impl\EvaluationHelpers.cs" />
+    <Compile Include="Processing\Rules\Impl\RealRuleEngine.cs" />
     <Compile Include="TypeModel\Core\StorageTypes\MoneyStorageType.cs" />
     <Compile Include="TypeModel\Serialization\BinarySerializer.cs" />
     <Compile Include="TypeModel\Serialization\IObjectSerializer.cs" />
@@ -626,7 +632,6 @@
     <Compile Include="Utilities\Core\UtilityToolBase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Processing\Rules\Impl\" />
     <Folder Include="UI\Old2\" />
     <Folder Include="UI\OldToolbox\" />
     <Folder Include="UI\Old\" />

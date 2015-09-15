@@ -1,48 +1,69 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using Hapil;
 
 namespace NWheels.Processing.Rules.Core
 {
     public abstract class RuleSystemBuilder
     {
-        public abstract RuleSystemDescription GetDescription(bool includeDomain = true, bool includeRules = true);
+        public abstract RuleSystemDescription GetDescription();
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public class RuleSystemBuilder<TContext> : RuleSystemBuilder
     {
-        private readonly RuleSystemDescription _desciption = new RuleSystemDescription();
-		private readonly CompiledRuleSystem<TContext> _compiledRuleSystem =new CompiledRuleSystem<TContext>();
-
-        private readonly Dictionary<string, IRuleDomainObject> _domainObjectsByIdName = new Dictionary<string, IRuleDomainObject>();
+        private readonly RuleSystemDescription _description;
+        private readonly IRuleEngineLogger _logger;
+        private readonly Dictionary<string, IRuleDomainObject> _runtimeObjectByIdName;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public RuleSystemBuilder(Type codeBehindType, IRuleEngineLogger logger)
+        {
+            _logger = logger;
+            _description = new RuleSystemDescription();
+            _runtimeObjectByIdName = new Dictionary<string, IRuleDomainObject>();
 
+            if ( codeBehindType != null )
+            {
+                _description.IdName = codeBehindType.FriendlyName();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void SetIdName(string idName)
+        {
+            _description.IdName = idName;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AddAllContextPropertiesAsVariables()
         {
+            throw new NotImplementedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AddScalarPropertiesAsVariables<TObject>(Expression<Func<TContext, TObject>> objectInContext)
         {
+            throw new NotImplementedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AddContextVariables(params Expression<Func<TContext, object>>[] contextProperties)
         {
+            throw new NotImplementedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void AddVariable<TValue>(Func<TContext, TValue> variable, string idName, string description)
+        public void AddVariable<TValue>(Func<TContext, TValue> variable, string idName, string description = null)
         {
             var runtimeVariable = new RuleVariable<TContext, TValue>(onGetValue: variable, onGetInventoryValues: null, idName: idName, description: description);
             AddVariable<TValue>(runtimeVariable);
@@ -50,11 +71,11 @@ namespace NWheels.Processing.Rules.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void AddVariable<TValue>(Func<TContext, TValue> variable, Func<IList<object>> inventoryVariables, string idName, string description)
+        public void AddVariable<TValue>(Func<TContext, TValue> variable, Func<IList<object>> inventoryValues, string idName, string description = null)
         {
             var runtimeVariable = new RuleVariable<TContext, TValue>(
                 onGetValue: variable, 
-                onGetInventoryValues: inventoryVariables, 
+                onGetInventoryValues: inventoryValues, 
                 idName: idName, 
                 description: description);
 	        
@@ -70,8 +91,9 @@ namespace NWheels.Processing.Rules.Core
 				Description = variable.Description,
 				ValueType = RuleSystemDescription.TypeDescription.Of<TValue>()
 			};
-			_desciption.Domain.Variables.Add(metaVariable);
-			_compiledRuleSystem.Variables.Add(variable);
+
+			_description.Domain.Variables.Add(metaVariable);
+            _runtimeObjectByIdName[variable.IdName] = variable;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -82,9 +104,11 @@ namespace NWheels.Processing.Rules.Core
 		        Description = function.Description,
 		        IdName = function.Description,
 		        ValueType = RuleSystemDescription.TypeDescription.Of(function.GetType()),
-				Parameters = null
+				Parameters = new List<RuleSystemDescription.ParameterDescription>()
 	        };
 			
+            _description.Domain.Functions.Add(metaFunction);
+            _runtimeObjectByIdName[function.IdName] = function;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -95,28 +119,28 @@ namespace NWheels.Processing.Rules.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void AddFunction<T1, TReturn>(Func<T1, TReturn> function, string idName, string description, string[] parameterNames, string[] parameterDescriptions)
+        public void AddFunction<T1, TReturn>(Func<T1, TReturn> function, string idName, string description, string[] parameterNames, string[] parameterDescriptions = null)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AddFunction<T1, T2, TReturn>(
-            Func<T1, T2, TReturn> function, string idName, string description, string[] parameterNames, string[] parameterDescriptions)
+            Func<T1, T2, TReturn> function, string idName, string description, string[] parameterNames, string[] parameterDescriptions = null)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AddFunction<T1, T2, T3, TReturn>(
-            Func<T1, T2, T3, TReturn> function, string idName, string description, string[] parameterNames, string[] parameterDescriptions)
+            Func<T1, T2, T3, TReturn> function, string idName, string description, string[] parameterNames, string[] parameterDescriptions = null)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AddFunction<T1, T2, T3, T4, TReturn>(
-            Func<T1, T2, T3, T4, TReturn> function, string idName, string description, string[] parameterNames, string[] parameterDescriptions)
+            Func<T1, T2, T3, T4, TReturn> function, string idName, string description, string[] parameterNames, string[] parameterDescriptions = null)
         {
         }
 
@@ -124,51 +148,71 @@ namespace NWheels.Processing.Rules.Core
 
         public void AddAction(IRuleAction action)
         {
+            var metaAction = new RuleSystemDescription.DomainAction() {
+                IdName = action.IdName,
+                Description = action.Description,
+                Parameters = new List<RuleSystemDescription.ParameterDescription>() //TODO: support actions with parameters
+            };
+
+            _description.Domain.Actions.Add(metaAction);
+            _runtimeObjectByIdName[action.IdName] = action;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void AddAction(Action<TContext> action, string idName, string description)
+        public void AddAction(Action<TContext> action, string idName, string description = null)
         {
+            AddAction(new RuleAction<TContext>(idName, description, ctx => action(ctx.Data)));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AddAction<T1>(
-            Action<TContext, T1> action, string idName, string description, string[] parameterNames, string[] parameterDescriptions)
+            Action<TContext, T1> action, string idName, string description, string[] parameterNames, string[] parameterDescriptions = null)
         {
+            AddAction(new RuleAction<TContext, T1>(idName, description, (ctx, p1) => action(ctx.Data, p1)));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AddAction<T1, T2>(
-            Action<TContext, T1, T2> action, string idName, string description, string[] parameterNames, string[] parameterDescriptions)
+            Action<TContext, T1, T2> action, string idName, string description, string[] parameterNames, string[] parameterDescriptions = null)
         {
+            AddAction(new RuleAction<TContext, T1, T2>(idName, description, (ctx, p1, p2) => action(ctx.Data, p1, p2)));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AddAction<T1, T2, T3>(
-            Action<TContext, T1, T2, T3> action, string idName, string description, string[] parameterNames, string[] parameterDescriptions)
+            Action<TContext, T1, T2, T3> action, string idName, string description, string[] parameterNames, string[] parameterDescriptions = null)
         {
+            AddAction(new RuleAction<TContext, T1, T2, T3>(idName, description, (ctx, p1, p2, p3) => action(ctx.Data, p1, p2, p3)));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AddAction<T1, T2, T3, T4>(
-            Action<TContext, T1, T2, T3, T4> action, string idName, string description, string[] parameterNames, string[] parameterDescriptions)
+            Action<TContext, T1, T2, T3, T4> action, string idName, string description, string[] parameterNames, string[] parameterDescriptions = null)
         {
+            AddAction(new RuleAction<TContext, T1, T2, T3, T4>(idName, description, (ctx, p1, p2, p3, p4) => action(ctx.Data, p1, p2, p3, p4)));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AddRuleSet(
             string idName,
-            string description,
+            string description = null,
             RuleSystemDescription.RuleSetMode mode = RuleSystemDescription.RuleSetMode.ApplyFirstMatch,
             bool failIfNotMatched = false,
             RuleSystemDescription.Operand precondition = null)
         {
+            _description.RuleSets.Add(new RuleSystemDescription.RuleSetDescription {
+                IdName = idName,
+                Description = description,
+                Mode = mode,
+                FailIfNotMatched = failIfNotMatched,
+                Precondition = precondition
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -214,16 +258,16 @@ namespace NWheels.Processing.Rules.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override RuleSystemDescription GetDescription(bool includeDomain = true, bool includeRules = true)
+        public override RuleSystemDescription GetDescription()
         {
-            return _desciption;
+            return _description;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public CompiledRuleSystem<TContext> CompileRuleSystem(RuleSystemData rules)
         {
-            return _compiledRuleSystem;
+            return new CompiledRuleSystem<TContext>(_logger, _description, rules, _runtimeObjectByIdName);
         }
     }
 }
