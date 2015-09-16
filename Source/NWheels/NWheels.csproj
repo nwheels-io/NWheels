@@ -150,6 +150,7 @@
     <Compile Include="Processing\Rules\Impl\EvaluationContext.cs" />
     <Compile Include="Processing\Rules\Impl\EvaluationHelpers.cs" />
     <Compile Include="Processing\Rules\Impl\RealRuleEngine.cs" />
+    <Compile Include="TypeModel\Core\Factories\NotSupportedPropertyStrategy.cs" />
     <Compile Include="TypeModel\Core\StorageTypes\MoneyStorageType.cs" />
     <Compile Include="TypeModel\Serialization\BinarySerializer.cs" />
     <Compile Include="TypeModel\Serialization\IObjectSerializer.cs" />

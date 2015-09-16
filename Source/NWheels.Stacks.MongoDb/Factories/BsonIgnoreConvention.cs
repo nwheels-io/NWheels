@@ -3,6 +3,7 @@ using Hapil;
 using Hapil.Decorators;
 using Hapil.Members;
 using NWheels.DataObjects;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace NWheels.Stacks.MongoDb.Factories
 {
@@ -24,20 +25,22 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         protected override void OnProperty(PropertyMember property, Func<PropertyDecorationBuilder> decorate)
         {
-            //if ( property.PropertyDeclaration != null && property.PropertyDeclaration.DeclaringType == typeof(IEntityObject) ) // TODO: generalize this condition
-            //{
-            //    return;
-            //}
+            IPropertyMetadata metaProperty = null;
 
-            //var metaProperty = (
-            //    property.PropertyDeclaration != null ? 
-            //        _metaType.GetPropertyByDeclaration(property.PropertyDeclaration) :
-            //        _metaType.GetPropertyByName(property.Name));
+            if ( property.PropertyDeclaration != null )
+            {
+                _metaType.TryGetPropertyByDeclaration(property.PropertyDeclaration, out metaProperty);
+            }
 
-            //if ( metaProperty.Kind == PropertyKind.Relation && metaProperty.Relation.ThisPartyKind == RelationPartyKind.Dependent )
-            //{
-            //    decorate().Attribute<BsonIgnoreAttribute>();
-            //}
+            if ( metaProperty == null )
+            {
+                _metaType.TryGetPropertyByName(property.Name, out metaProperty);
+            }
+
+            if ( metaProperty != null && metaProperty.IsCalculated )
+            {
+                decorate().Attribute<BsonIgnoreAttribute>();
+            }
         }
     }
 }

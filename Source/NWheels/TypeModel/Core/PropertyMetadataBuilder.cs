@@ -91,6 +91,7 @@ namespace NWheels.DataObjects.Core
         public ISemanticDataType SemanticType { get; set; }
         public PropertyAccess Access { get; set; }
         public bool IsSensitive { get; set; }
+        public bool IsCalculated { get; set; }
         public List<PropertyContractAttribute> ContractAttributes { get; set; }
         public System.Reflection.PropertyInfo ContractPropertyInfo { get; set; }
         public object DefaultValue { get; set; }

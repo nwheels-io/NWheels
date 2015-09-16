@@ -54,6 +54,10 @@ namespace NWheels.Stacks.MongoDb.Factories
             Type collectionItemType;
 
             builder.AddRule(
+                p => p.IsCalculated,
+                p => new NotSupportedPropertyStrategy(context, MetadataCache, metaType, p));
+
+            builder.AddRule(
                 p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityContract(), 
                 p => new ArrayOfDocumentIdsStrategy(context, MetadataCache, metaType, p));
 

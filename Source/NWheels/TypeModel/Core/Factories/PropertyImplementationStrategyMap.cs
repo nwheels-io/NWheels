@@ -125,7 +125,11 @@ namespace NWheels.DataObjects.Core.Factories
                 }
 
                 var strategyInstance = effectiveRule.StrategyFactory(metaProperty);
-                _map.Add(metaProperty, strategyInstance);
+
+                if ( strategyInstance != null )
+                {
+                    _map.Add(metaProperty, strategyInstance);
+                }
             }
         }
 

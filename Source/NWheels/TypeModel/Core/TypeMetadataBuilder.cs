@@ -277,7 +277,7 @@ namespace NWheels.DataObjects.Core
 
             var implementationProperties = implementationType.GetProperties(BindingFlags.Instance | BindingFlags.Public).ToDictionary(prop => prop.Name);
 
-            foreach ( var property in this.Properties )
+            foreach ( var property in this.Properties.Where(p => implementationProperties.ContainsKey(p.Name)) )
             {
                 property.UpdateImplementation(factoryType, implementationProperties[property.Name]);
             }
@@ -291,6 +291,7 @@ namespace NWheels.DataObjects.Core
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
 
         public TypeRelationalMappingBuilder SafeGetRelationalMapping()
         {

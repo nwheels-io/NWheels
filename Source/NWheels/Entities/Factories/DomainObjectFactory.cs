@@ -126,6 +126,10 @@ namespace NWheels.Entities.Factories
             Type collectionItemType;
 
             builder.AddRule(
+                p => p.IsCalculated,
+                p => null); // do not implement calculated properties
+
+            builder.AddRule(
                 p => p.ClrType.IsEntityContract() || p.ClrType.IsEntityPartContract(),
                 p => new DomainPersistableObjectCastStrategy(context, p));
 

@@ -21,6 +21,7 @@ namespace NWheels.UI.Uidl
             this.SemanticType = (metadata.SemanticType != null ? metadata.SemanticType.Name : null);
             this.AccessFlags = metadata.Access.ToString();
             this.IsSensitive = metadata.IsSensitive;
+            this.IsCalculated = metadata.IsCalculated;
             this.Relation = metadata.Relation != null ? new MetaRelation(metadata.Relation) : null;
             this.Validation = metadata.Validation != null ? new MetaValidation(metadata.Validation) : null;
             this.DefaultValue = metadata.DefaultValue;
@@ -45,6 +46,8 @@ namespace NWheels.UI.Uidl
         public string AccessFlags { get; set; }
         [DataMember]
         public bool IsSensitive { get; set; }
+        [DataMember]
+        public bool IsCalculated { get; set; }
         [DataMember]
         public MetaRelation Relation { get; set; }
         [DataMember]

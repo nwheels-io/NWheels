@@ -27,6 +27,7 @@ namespace NWheels.DataObjects
         PropertyAccess Access { get; }
         bool IsSensitive { get; }
         bool IsCollection { get; }
+        bool IsCalculated { get; }
         IReadOnlyList<PropertyContractAttribute> ContractAttributes { get; }
         PropertyInfo ContractPropertyInfo { get; }
         IRelationMetadata Relation { get; }

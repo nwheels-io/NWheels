@@ -26,7 +26,14 @@ namespace NWheels.DataObjects
         [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
         public class CalculatedAttribute : PropertyContractAttribute
         {
-            public bool AllowEmpty { get; set; }
+            #region Overrides of PropertyContractAttribute
+
+            public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+            {
+                property.IsCalculated = true;
+            }
+
+            #endregion
         }
 
         public class ReadOnlyAttribute : PropertyContractAttribute { }
