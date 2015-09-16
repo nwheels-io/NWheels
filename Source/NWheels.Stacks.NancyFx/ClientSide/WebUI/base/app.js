@@ -421,7 +421,24 @@ function ($q, $http, $rootScope, commandService) {
     m_behaviorImplementations['AlterModel'] = {
         returnsPromise: false,
         execute: function (scope, behavior, input) {
-            //TBD
+            scope.model.input = input;
+            var context = {
+                model: scope.model
+            };
+            for (var i = 0; i < behavior.alterations.length; i++) {
+                var alteration = behavior.alterations[i];
+                switch (alteration.type) {
+                    case 'Copy':
+                        var value = Enumerable.Return(context).Select('ctx=>ctx.' + alteration.sourceExpression).Single();
+                        var target = context;
+                        for (var j = 0; j < alteration.destinationNavigations.length - 1; j++) {
+                            target = target[alteration.destinationNavigations[j]];
+                        }
+                        var lastNavigation = alteration.destinationNavigations[alteration.destinationNavigations.length-1];
+                        target[lastNavigation] = value;
+                        break;
+                }
+            }
         },
     };
 
@@ -798,7 +815,7 @@ function ($http, $scope, $rootScope, uidlService, entityService, commandService)
         $rootScope.currentLocale = uidlService.getCurrentLocale();
         $scope.pageTitle = $scope.translate($scope.app.text) + ' - ' + $scope.translate($scope.currentScreen.text);
 
-        //commandService.startPollingMessages();
+        commandService.startPollingMessages();
     });
 
     /*
