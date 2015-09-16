@@ -761,7 +761,7 @@ namespace NWheels.UI
             {
                 CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
                     Type = UidlAlterModelBehavior.AlterationType.Copy,
-                    SourceExpression = source.ToNormalizedNavigationString()
+                    SourceExpression = source.ToNormalizedNavigationString("model")
                 };
 
                 return new DestinationSelector<TValue>(this);
@@ -786,7 +786,7 @@ namespace NWheels.UI
             {
                 CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
                     Type = UidlAlterModelBehavior.AlterationType.InsertOne,
-                    SourceExpression = source.ToNormalizedNavigationString()
+                    SourceExpression = source.ToNormalizedNavigationString("model")
                 };
 
                 return new DestinationSelector<ICollection<TValue>>(this);
@@ -811,7 +811,7 @@ namespace NWheels.UI
             {
                 CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
                     Type = UidlAlterModelBehavior.AlterationType.RemoveOne,
-                    SourceExpression = source.ToNormalizedNavigationString()
+                    SourceExpression = source.ToNormalizedNavigationString("model")
                 };
 
                 return new DestinationSelector<ICollection<TValue>>(this);
@@ -824,7 +824,7 @@ namespace NWheels.UI
             {
                 CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
                     Type = UidlAlterModelBehavior.AlterationType.InsertMany,
-                    SourceExpression = source.ToNormalizedNavigationString()
+                    SourceExpression = source.ToNormalizedNavigationString("model")
                 };
 
                 return new DestinationSelector<ICollection<TValue>>(this);
@@ -837,7 +837,7 @@ namespace NWheels.UI
             {
                 CurrentAlteration = new UidlAlterModelBehavior.Alteration() {
                     Type = UidlAlterModelBehavior.AlterationType.RemoveMany,
-                    SourceExpression = source.ToNormalizedNavigationString()
+                    SourceExpression = source.ToNormalizedNavigationString("model")
                 };
 
                 return new DestinationSelector<ICollection<TValue>>(this);
@@ -851,8 +851,8 @@ namespace NWheels.UI
             {
                 if ( CurrentAlteration != null )
                 {
-
-                    CurrentAlteration.DestinationExpression = destinationExpression.ToNormalizedNavigationString();
+                    CurrentAlteration.DestinationExpression = destinationExpression.ToNormalizedNavigationString("model");
+                    CurrentAlteration.DestinationNavigations = CurrentAlteration.DestinationExpression.Split('.');
                     _behavior.Alterations.Add(CurrentAlteration);
                     CurrentAlteration = null;
                 }

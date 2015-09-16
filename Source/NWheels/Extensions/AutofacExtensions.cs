@@ -549,6 +549,14 @@ namespace NWheels.Extensions
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public IRegistrationBuilder<TScript, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterTransactionScript<TScript>()
+                where TScript : ITransactionScript
+            {
+                return _builder.RegisterType<TScript>().As<TScript, ITransactionScript>();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
             public ProcessingFeature RegisterMessage<TBody>()
             {
                 _builder.RegisterInstance(new MessageTypeRegistration(typeof(TBody)));

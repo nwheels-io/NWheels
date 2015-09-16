@@ -80,7 +80,9 @@ namespace NWheels.Extensions
             var leftSideLength = expressionString.IndexOf(arrowToken) + arrowToken.Length;
 
             var rightSideString = expressionString.Substring(leftSideLength).TrimStart();
-            return NormalizeKnownTokens(rightSideString);
+            var camelCaseRightSideString = string.Join(".", rightSideString.Split('.').Select(s => s.ConvertToCamelCase()));
+
+            return NormalizeKnownTokens(camelCaseRightSideString);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

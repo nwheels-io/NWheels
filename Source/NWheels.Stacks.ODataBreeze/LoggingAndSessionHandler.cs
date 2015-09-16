@@ -59,7 +59,7 @@ namespace NWheels.Stacks.ODataBreeze
         private void AuthenticateRequest(string sessionCookie, out string sessionId)
         {
             sessionId = null;
-            var encryptedSessionCookie = WebUtility.UrlDecode(sessionCookie);
+            var encryptedSessionCookie = sessionCookie;//WebUtility.UrlDecode(sessionCookie);
 
             if ( encryptedSessionCookie != null )
             {

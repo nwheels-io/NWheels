@@ -203,6 +203,8 @@ namespace NWheels.UI.Uidl
             public string SourceExpression { get; set; }
             [DataMember]
             public string DestinationExpression { get; set; }
+            [DataMember]
+            public string[] DestinationNavigations { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
