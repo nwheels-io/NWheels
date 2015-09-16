@@ -9,22 +9,31 @@ using Nancy.Bootstrapper;
 using Nancy.Bootstrappers.Autofac;
 using Nancy.Conventions;
 using Nancy.Session;
+using NWheels.Utilities;
 
 namespace NWheels.Stacks.NancyFx
 {
     public class WebApplicationBootstrapper : AutofacNancyBootstrapper, IRootPathProvider
     {
+        private readonly IWebModuleContext _context;
         private readonly WebApplicationModule _module;
         private readonly WebModuleLoggingHook _loggingHook;
         private readonly WebModuleSessionHook _sessionHook;
+        private readonly string _contentRootPath;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public WebApplicationBootstrapper(WebApplicationModule module, WebModuleLoggingHook loggingHook, WebModuleSessionHook sessionHook)
+        public WebApplicationBootstrapper(
+            IWebModuleContext context, 
+            WebApplicationModule module, 
+            WebModuleLoggingHook loggingHook, 
+            WebModuleSessionHook sessionHook)
         {
+            _context = context;
             _module = module;
             _loggingHook = loggingHook;
             _sessionHook = sessionHook;
+            _contentRootPath = PathUtility.HostBinPath("ClientSide", "WebUI");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -45,7 +54,9 @@ namespace NWheels.Stacks.NancyFx
 
         protected override void ConfigureConventions(NancyConventions nancyConventions)
         {
-            nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/assets", "assets"));
+            nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/base", "Base"));
+            nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/skin", "Skin." + _context.Application.DefaultSkin));
+            
             base.ConfigureConventions(nancyConventions);
         }
 
@@ -53,7 +64,6 @@ namespace NWheels.Stacks.NancyFx
 
         protected override void ApplicationStartup(ILifetimeScope container, IPipelines pipelines)
         {
-            //CookieBasedSessions.Enable(pipelines);
             _loggingHook.Attach(pipelines);
             _sessionHook.Attach(pipelines);
         }
@@ -69,7 +79,7 @@ namespace NWheels.Stacks.NancyFx
 
         public string GetRootPath()
         {
-            return _module.ContentRootPath;
+            return _contentRootPath;
         }
     }
 }

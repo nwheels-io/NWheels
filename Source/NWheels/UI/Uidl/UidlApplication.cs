@@ -21,6 +21,7 @@ namespace NWheels.UI.Uidl
             base.Notifications.Add(this.RequestNotAuthorized);
 
             this.RequiredDomainApis = new List<Type>();
+            this.DefaultSkin = "Debug";
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -45,6 +46,8 @@ namespace NWheels.UI.Uidl
         public Dictionary<string, UidlUserAlert> UserAlerts { get; set; }
         [DataMember]
         public string DefaultInitialScreenQualifiedName { get; set; }
+        [DataMember]
+        public string DefaultSkin { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

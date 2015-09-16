@@ -31,6 +31,7 @@ namespace NWheels.Stacks.NancyFx
         private readonly Dictionary<string, object> _apiServicesByContractName;
         private readonly Dictionary<string, WebApiDispatcherBase> _apiDispatchersByContractName;
         private UidlDocument _uidl;
+        private WebApplicationBootstrapper _hostBootstrapper;
         private NancyHost _host;
         private WebApplicationModule _module;
 
@@ -118,15 +119,15 @@ namespace NWheels.Stacks.NancyFx
             _module = _components.Resolve<WebApplicationModule>(TypedParameter.From<IWebModuleContext>(this));
             var sessionHook = new WebModuleSessionHook(_module, _sessionManager, _logger);
 
-            var bootstrapper = new WebApplicationBootstrapper(_module, _loggingHook, sessionHook);
-            _host = new NancyHost(bootstrapper, new[] { TrailingSlashSafeUri(_endpointRegistration.Address) });
+            _hostBootstrapper = new WebApplicationBootstrapper(this, _module, _loggingHook, sessionHook);
+            _host = new NancyHost(_hostBootstrapper, new[] { TrailingSlashSafeUri(_endpointRegistration.Address) });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void Activate()
         {
-            _logger.WebApplicationActivating(_application.IdName, _endpointRegistration.Address, _module.ContentRootPath);
+            _logger.WebApplicationActivating(_application.IdName, _endpointRegistration.Address, _hostBootstrapper.GetRootPath());
             _host.Start();
             _logger.WebApplicationActive(_application.IdName, _endpointRegistration.Address);
         }

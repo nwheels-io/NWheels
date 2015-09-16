@@ -34,7 +34,6 @@ namespace NWheels.Stacks.NancyFx
         private readonly ISessionManager _sessionManager;
         private readonly Dictionary<string, TransactionScriptEntry> _transactionScriptByName;
         private readonly ConcurrentDictionary<string, ConcurrentQueue<IMessageObject>> _pendingPushMessagesBySessionId;
-        private readonly string _contentRootPath;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -55,8 +54,6 @@ namespace NWheels.Stacks.NancyFx
 
             _transactionScriptByName = new Dictionary<string, TransactionScriptEntry>(StringComparer.InvariantCultureIgnoreCase);
             _pendingPushMessagesBySessionId = new ConcurrentDictionary<string, ConcurrentQueue<IMessageObject>>();
-
-            _contentRootPath = PathUtility.ModuleBinPath(_context.Application.GetType().Assembly, _context.Application.IdName) + "\\Skin.Default";
 
             RegisterRoutes();
             RegisterTransactionScripts(components);
@@ -99,7 +96,7 @@ namespace NWheels.Stacks.NancyFx
         private void RegisterRoutes()
         {
             base.Get["/"] = route => {
-                return View["index.html"];
+                return Response.AsFile("Skin." + _context.Application.DefaultSkin + "\\index.html", "text/html");
             };
 
             base.Get["/uidl.json"] = route => {
@@ -244,13 +241,6 @@ namespace NWheels.Stacks.NancyFx
             }
 
             #endregion
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string ContentRootPath
-        {
-            get { return _contentRootPath; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
