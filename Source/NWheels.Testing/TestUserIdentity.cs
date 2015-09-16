@@ -14,11 +14,12 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TestUserIdentity(string loginName, Type userAccountType, params string[] userRoles)
+        public TestUserIdentity(string userId, string loginName, Type userAccountType, params string[] userRoles)
         {
             _userRoles = userRoles;
             _userAccountType = userAccountType;
 
+            this.UserId = userId;
             this.LoginName = loginName;
             this.Name = loginName;
             this.QualifiedLoginName = loginName;
@@ -53,6 +54,7 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string UserId { get; private set; }
         public string LoginName { get; private set; }
         public string QualifiedLoginName { get; private set; }
         public string PersonFullName { get; private set; }

@@ -19,6 +19,7 @@ namespace NWheels.Authorization.Claims
         public abstract bool IsOfType(Type accountEntityType);
         public abstract bool IsInRole(string userRole);
         public abstract string[] GetUserRoles();
+        public abstract string UserId { get; }
         public abstract string LoginName { get; }
         public abstract string QualifiedLoginName{ get; }
         public abstract string PersonFullName { get; }

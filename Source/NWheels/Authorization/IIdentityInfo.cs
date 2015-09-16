@@ -12,6 +12,7 @@ namespace NWheels.Authorization
         bool IsOfType(Type accountEntityType);
         bool IsInRole(string userRole);
         string[] GetUserRoles();
+        string UserId { get; }
         string LoginName { get; }
         string QualifiedLoginName { get; }
         string PersonFullName { get; }
