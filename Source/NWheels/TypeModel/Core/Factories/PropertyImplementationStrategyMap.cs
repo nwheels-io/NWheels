@@ -16,6 +16,7 @@ namespace NWheels.DataObjects.Core.Factories
         private readonly List<StrategyRule> _strategyRules;
         private readonly Dictionary<IPropertyMetadata, IPropertyImplementationStrategy> _map;
         private HashSet<PropertyInfo> _baseProperties;
+        private HashSet<string> _basePropertyNames;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -48,7 +49,7 @@ namespace NWheels.DataObjects.Core.Factories
                 throw new InvalidOperationException("IsImplementedByBaseEntity can only be called after the map is built.");
             }
 
-            return _baseProperties.Contains(property);
+             return (_baseProperties.Contains(property) || _basePropertyNames.Contains(property.Name));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -109,7 +110,9 @@ namespace NWheels.DataObjects.Core.Factories
         private void BuildMap(ITypeMetadataCache metadataCache, ITypeMetadata metaType)
         {
             _baseProperties = GetBaseContractProperties(metaType);
-            Func<IPropertyMetadata, bool> notImplementedByBaseEntity = p => !_baseProperties.Contains(p.ContractPropertyInfo);
+            _basePropertyNames = new HashSet<string>(_baseProperties.Select(p => p.Name));
+
+            Func<IPropertyMetadata, bool> notImplementedByBaseEntity = p => !IsImplementedByBaseEntity(p.ContractPropertyInfo);
 
             foreach ( var metaProperty in metaType.Properties.Where(notImplementedByBaseEntity) )
             {

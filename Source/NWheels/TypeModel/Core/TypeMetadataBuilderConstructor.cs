@@ -136,7 +136,7 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static HashSet<PropertyInfo> UnionPropertiesInAllContracts(Type primaryContract, Type[] mixinContracts)
+        private HashSet<PropertyInfo> UnionPropertiesInAllContracts(Type primaryContract, Type[] mixinContracts)
         {
             var result = new HashSet<PropertyInfo>();
 

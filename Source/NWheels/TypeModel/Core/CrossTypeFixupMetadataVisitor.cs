@@ -33,6 +33,7 @@ namespace NWheels.DataObjects.Core
             if ( metadata.BaseType != null )
             {
                 metadata.BaseType = (TypeMetadataBuilder)_metadataCache.GetTypeMetadata(metadata.BaseType.ContractType);
+                metadata.EnsureBasePropertiesInherited();
             }
 
             if ( metadata.DerivedTypes != null )

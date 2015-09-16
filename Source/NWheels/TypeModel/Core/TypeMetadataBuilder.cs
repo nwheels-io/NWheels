@@ -342,6 +342,30 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal void EnsureBasePropertiesInherited()
+        {
+            if ( this.BaseType != null )
+            {
+                this.BaseType.EnsureBasePropertiesInherited();
+
+                foreach ( var baseProperty in this.BaseType.Properties )
+                {
+                    if ( !_propertyByName.ContainsKey(baseProperty.Name) )
+                    {
+                        this.Properties.Add(baseProperty);
+                        _propertyByName.Add(baseProperty.Name, baseProperty);
+
+                        if ( baseProperty.ContractPropertyInfo != null )
+                        {
+                            _propertyByDeclaration.Add(baseProperty.ContractPropertyInfo, baseProperty);
+                        }
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal bool MetadataConventionsPreviewed { get; set; }
         internal bool MetadataConventionsApplied { get; set; }
         internal bool MetadataConventionsFinalized { get; set; }

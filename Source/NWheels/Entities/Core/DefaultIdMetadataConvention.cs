@@ -34,7 +34,7 @@ namespace NWheels.Entities.Core
                 return;
             }
 
-            for ( var currentType = type ; currentType != null ; currentType = currentType.BaseType )
+            for ( var currentType = type; currentType != null; currentType = currentType.BaseType )
             {
                 if ( TypeHasPrimaryKey(currentType) )
                 {
