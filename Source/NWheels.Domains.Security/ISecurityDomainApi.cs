@@ -29,6 +29,9 @@ namespace NWheels.Domains.Security.UI
         
         [PropertyContract.Required, PropertyContract.Semantic.Password]
         string Password { get; set; }
+
+        [PropertyContract.Semantic.Password]
+        string NewPassword { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

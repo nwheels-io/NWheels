@@ -55,6 +55,13 @@ namespace NWheels.Testing.Entities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IEntityId MakeEntityId(object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TEntity TryGetById(IEntityId id)
         {
             return _storedEntities.FirstOrDefault(e => e.As<IEntityObject>().GetId().Equals(id));

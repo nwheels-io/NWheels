@@ -143,6 +143,24 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IEntityId MakeEntityId(object value)
+        {
+            if ( value is ObjectId )
+            {
+                return new EntityId<TEntityContract, ObjectId>((ObjectId)value);
+            }
+            else if ( value is string )
+            {
+                return new EntityId<TEntityContract, ObjectId>(ObjectId.Parse((string)value));
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TEntityContract TryGetById(IEntityId id)
         {
             var bsonIdValue = BsonValue.Create(id.Value);
@@ -150,6 +168,13 @@ namespace NWheels.Stacks.MongoDb
 
             if ( persistableObject != null ) //TODO: if not found, does FindOneById() return null or throw an exception?
             {
+                var hasDependencies = persistableObject as IHaveDependencies;
+
+                if ( hasDependencies != null )
+                {
+                    hasDependencies.InjectDependencies(_ownerRepo.Components);
+                }
+
                 var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)persistableObject);
                 return domainObject;
             }

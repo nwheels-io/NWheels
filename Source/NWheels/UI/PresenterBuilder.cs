@@ -34,9 +34,9 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public BindingSourceBuilder<TValue> Bind<TValue>(Expression<Func<TContents, TValue>> destination)
+        public BindingSourceBuilder<TValue> Bind<TValue>(Expression<Func<TContents, TValue>> property)
         {
-            return null;
+            return new BindingSourceBuilder<TValue>(_ownerNode, property);
         }
 
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -80,15 +80,38 @@ namespace NWheels.UI
 
         public class BindingSourceBuilder<TValue>
         {
-            //internal BindingSourceBuilder(ControlledUidlNode targetNode, )
+            private readonly ControlledUidlNode _targetNode;
+            private readonly Expression<Func<TContents, TValue>> _destinationProperty;
 
-            public void ToData(Expression<Func<TData, TValue>> dataProperty) { }
-            public void ToState(Expression<Func<TState, TValue>> stateProperty) { }
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public BindingSourceBuilder(ControlledUidlNode targetNode, Expression<Func<TContents, TValue>> destinationProperty)
+            {
+                _targetNode = targetNode;
+                _destinationProperty = destinationProperty;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ToModel(Expression<Func<ViewModel<TData, TState, Empty.Input>, TValue>> source)
+            {
+                _targetNode.DataBindings.Add(
+                    new UidlModelBinding("MB1", BindingSourceType.Model, _targetNode) {
+                        SourcePropertyExpression = source.ToNormalizedNavigationString("model")
+                    });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public void ToApi<TApiContract>(Expression<Func<TApiContract, TValue>> apiCall) { }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public void ToApi<TApiContract, TReply>(
                 Expression<Func<TApiContract, TReply>> apiCall,
                 Expression<Func<TReply, TValue>> valueSelector) { }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public void ToEntity<TEntity>(
                 Action<IQueryable<TEntity>> query,

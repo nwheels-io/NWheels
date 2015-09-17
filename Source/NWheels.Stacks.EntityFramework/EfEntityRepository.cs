@@ -124,6 +124,13 @@ namespace NWheels.Stacks.EntityFramework
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IEntityId MakeEntityId(object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TEntityContract TryGetById(IEntityId id)
         {
             var entityKey = new System.Data.Entity.Core.EntityKey(_objectSet.EntitySet.Name, _entityKeyMember.Name, id.Value);

@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using NWheels.Authorization;
 using NWheels.Extensions;
 using NWheels.Processing.Messages;
+using NWheels.UI;
 
 namespace NWheels.Processing.Commands
 {
-    public class CommandResultMessage : AbstractSessionPushMessage
+    public class CommandResultMessage : AbstractSessionPushMessage, IPromiseFailureInfo
     {
         public CommandResultMessage(
             IFramework framework,

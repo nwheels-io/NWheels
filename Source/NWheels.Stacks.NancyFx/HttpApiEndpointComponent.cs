@@ -129,11 +129,19 @@ namespace NWheels.Stacks.NancyFx
                 foreach ( var method in actionMethods )
                 {
                     var attribute = ValidateActionMethod(method);
+                    var dispatcher = new ActionDispatcher(_codeBehind, method);
 
                     if ( attribute.Verbs.HasFlag(HttpOperationVerbs.Get) )
                     {
-                        var dispatcher = new ActionDispatcher(_codeBehind, method);
                         this.Get[attribute.Route] = (parameters) => {
+                            var response = DispatchAction(dispatcher, parameters);
+                            return response;
+                        };
+                    }
+
+                    if ( attribute.Verbs.HasFlag(HttpOperationVerbs.Post) )
+                    {
+                        this.Post[attribute.Route] = (parameters) => {
                             var response = DispatchAction(dispatcher, parameters);
                             return response;
                         };
@@ -175,10 +183,11 @@ namespace NWheels.Stacks.NancyFx
                     method: (isPostMethod ? HttpMethod.Post : HttpMethod.Get), 
                     requestUri: (string)this.Request.Url);
 
-                foreach ( var header in this.Request.Headers )
-                {
-                    message.Headers.Add(header.Key, header.Value);
-                }
+                //TODO: make headers work
+                //foreach ( var header in this.Request.Headers )
+                //{
+                //    message.Headers.Add(header.Key, header.Value);
+                //}
 
                 message.Content = new StreamContent(this.Request.Body);
                 return message;
@@ -188,17 +197,19 @@ namespace NWheels.Stacks.NancyFx
 
             private Response CreateNancyResponse(HttpResponseMessage responseMessage)
             {
-                var responseStreamFactory = new Func<Stream>(
-                    () => {
-                        var buffer = new MemoryStream();
+                var responseStreamFactory = new Func<Stream>(() => {
+                    var buffer = new MemoryStream();
+                    if ( responseMessage.Content != null )
+                    {
                         responseMessage.Content.CopyToAsync(buffer).Wait();
                         buffer.Position = 0;
-                        return buffer;
-                    });
+                    }
+                    return buffer;
+                });
 
                 var nancyResponse = new StreamResponse(
                     source: responseStreamFactory,
-                    contentType: responseMessage.Content.Headers.ContentType.ToString());
+                    contentType: responseMessage.Content != null ? responseMessage.Content.Headers.ContentType.ToString() : "text/html");
 
                 return nancyResponse;
             }

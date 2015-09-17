@@ -1,21 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
+using NWheels.Extensions;
+using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-    public class Gauge : WidgetBase<Gauge, Empty.Data, Empty.State>
+    public class Gauge : WidgetBase<Gauge, Empty.Data, Gauge.IGaugeState>
     {
         public Gauge(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
-            this.Values = new List<GaugeValue>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -24,7 +26,8 @@ namespace NWheels.UI.Toolbox
         {
             return base.GetTranslatables()
                 .ConcatIf(BadgeText)
-                .Concat(Values.SelectMany(v => v.GetTranslatables()));
+                .ConcatIf(Label)
+                .ConcatIf(ChangeLabel);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,44 +35,34 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string BadgeText { get; set; }
         [DataMember]
-        public List<GaugeValue> Values { get; set; }
+        public string Label { get; set; }
+        [DataMember]
+        public GaugeChangeType ChangeType { get; set; }
+        [DataMember]
+        public string ChangeLabel { get; set; }
+        [DataMember]
+        public string ValueDataProperty { get; set; }
+        [DataMember]
+        public string OldValueDataProperty { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<Gauge, Empty.Data, Empty.State> presenter)
+        [ManuallyAssigned]
+        public UidlNotification UpdateSource { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void DescribePresenter(PresenterBuilder<Gauge, Empty.Data, IGaugeState> presenter)
         {
+            presenter.On(UpdateSource).AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Data));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-        public class GaugeValue
+        [ViewModelContract]
+        public interface IGaugeState
         {
-            public IEnumerable<string> GetTranslatables()
-            {
-                if ( !string.IsNullOrEmpty(Label) )
-                {
-                    yield return Label;
-                }
-                
-                if ( !string.IsNullOrEmpty(ChangeLabel) )
-                {
-                    yield return ChangeLabel;
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            [DataMember]
-            public decimal Value { get; set; }
-            [DataMember]
-            public string Label { get; set; }
-            [DataMember]
-            public decimal OldValue { get; set; }
-            [DataMember]
-            public GaugeChangeType ChangeType { get; set; }
-            [DataMember]
-            public string ChangeLabel { get; set; }
+            Empty.Payload Data { get; set; }
         }
     }
 
@@ -94,13 +87,26 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static Gauge Value(this Gauge gauge, string label, GaugeChangeType changeType = GaugeChangeType.None, string changeLabel = null)
+        public static Gauge Appearance(this Gauge gauge, string label, GaugeChangeType changeType = GaugeChangeType.None, string changeLabel = null)
         {
-            gauge.Values.Add(new Gauge.GaugeValue {
-                Label = label,
-                ChangeType = changeType,
-                ChangeLabel = changeLabel
-            });
+            gauge.Label = label;
+            gauge.ChangeType = changeType;
+            gauge.ChangeLabel = changeLabel;
+
+            return gauge;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Gauge DataSource<TPayload>(
+            this Gauge gauge, 
+            UidlNotification<TPayload> updateSource, 
+            Expression<Func<TPayload, int>> valueProperty, 
+            Expression<Func<TPayload, int>> oldValueProperty = null)
+        {
+            gauge.UpdateSource = updateSource;
+            gauge.ValueDataProperty = valueProperty.ToNormalizedNavigationString("input").TrimLead("input.");
+            gauge.OldValueDataProperty = (oldValueProperty != null ? oldValueProperty.ToNormalizedNavigationString("input").TrimLead("input.") : null);
             
             return gauge;
         }

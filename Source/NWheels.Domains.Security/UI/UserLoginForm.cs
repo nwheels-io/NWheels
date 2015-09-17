@@ -40,7 +40,17 @@ namespace NWheels.Domains.Security.UI
                 .Then(
                     onSuccess: b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.User))
                         .Then(bb => bb.Broadcast(UserLoggedIn).WithPayload(m => m.Input).BubbleUp()),
-                    onFailure: b => b.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.LoginHasFailed(failure.ReasonText)));
+                    onFailure: b => b.AlterModel(alt => alt.Copy(m => m.Input.FaultCode).To(m => m.State.LoginFault))
+                        .Then(bb => bb.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.LoginHasFailed(failure.FaultReason))));
+
+            presenter.On(ChangePassword)
+                .InvokeTransactionScript<ChangePasswordTransactionScript>()
+                .WaitForCompletion((x, data, state, input) => x.Execute(data.LoginName, data.Password, data.NewPassword))
+                .Then(
+                    onSuccess: b => b.AlterModel(alt => alt.Copy(m => (string)null).To(m => m.State.LoginFault))
+                        .Then(bb => bb.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.PasswordSuccessfullyChanged())),
+                    onFailure: b => b.AlterModel(alt => alt.Copy(m => m.Input.FaultCode).To(m => m.State.LoginFault))
+                        .Then(bb => bb.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.FailedToChangePassword(failure.FaultReason))));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -48,6 +58,7 @@ namespace NWheels.Domains.Security.UI
         public UidlCommand LogIn { get; set; }
         public UidlCommand SignUp { get; set; }
         public UidlCommand ForgotPassword { get; set; }
+        public UidlCommand ChangePassword { get; set; }
         public UidlNotification<UserLoginTransactionScript.Result> UserLoggedIn { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -59,6 +70,12 @@ namespace NWheels.Domains.Security.UI
             
             [WarningAlert(UserAlertResult.OK)]
             UidlUserAlert UserWasNotLoggedOut(string reason);
+
+            [InfoAlert(UserAlertResult.OK)]
+            UidlUserAlert PasswordSuccessfullyChanged();
+
+            [ErrorAlert(UserAlertResult.OK)]
+            UidlUserAlert FailedToChangePassword(string reason);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -66,6 +83,8 @@ namespace NWheels.Domains.Security.UI
         [ViewModelContract]
         public interface IState
         {
+            string LoginFault { get; set; }
+            
             UserLoginTransactionScript.Result User { get; set; }
 
             [ViewModelPropertyContract.PersistedOnUserMachine]

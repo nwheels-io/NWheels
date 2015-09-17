@@ -11,7 +11,8 @@ namespace NWheels.UI
     /// </summary>
     public interface IPromiseFailureInfo
     {
-        string ReasonText { get; }
-        object ReasonCode { get; }
+        string FaultCode { get; }
+        string FaultSubCode { get; }
+        string FaultReason { get; }
     }
 }

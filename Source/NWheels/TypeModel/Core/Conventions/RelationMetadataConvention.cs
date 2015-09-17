@@ -69,7 +69,10 @@ namespace NWheels.DataObjects.Core.Conventions
 
                 foreach ( var key in baseType.AllKeys )
                 {
-                    thisType.AllKeys.Add(key);
+                    if ( !thisType.AllKeys.Any(k => k.Name == key.Name) )
+                    {
+                        thisType.AllKeys.Add(key);
+                    }
                 }
 
                 if ( thisType.PrimaryKey == null )
