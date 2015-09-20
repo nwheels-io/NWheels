@@ -46,7 +46,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         public override IApplicationDataRepository NewUnitOfWork(IResourceConsumerScopeHandle consumerScope, Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
         {
-            var connectionString = new MongoConnectionStringBuilder(_config.ConnectionString);
+            var connectionString = new MongoConnectionStringBuilder(_config.GetContextConnectionString(domainContextType: repositoryType));
             var client = new MongoClient(_config.ConnectionString);
             var server = client.GetServer();
             var database = server.GetDatabase(connectionString.DatabaseName);
@@ -137,6 +137,14 @@ namespace NWheels.Stacks.MongoDb.Factories
 
                 foreach ( var entity in base.EntitiesInRepository )
                 {
+                    foreach ( var key in entity.Metadata.AllKeys.Where(k => k.Kind == KeyKind.Index && k.Properties.Count == 1) )
+                    {
+                        Static.Void(RuntimeHelpers.CreateSearchIndex,
+                            database,
+                            w.Const(MongoDataRepositoryBase.GetMongoCollectionName(entity.Metadata, null)),
+                            w.Const(key.Properties.First().Name));
+                    }
+
                     foreach ( var uniqueProperty in entity.Metadata.Properties.Where(p => p.Validation.IsUnique) )
                     {
                         if ( uniqueProperty.DeclaringContract == entity.Metadata )
