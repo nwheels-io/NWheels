@@ -103,7 +103,8 @@ namespace NWheels.Conventions.Core
         {
             var type = property.PropertyType;
 
-            if ( !type.IsGenericType || type.IsGenericTypeDefinition || type.GetGenericTypeDefinition() != typeof(IEntityRepository<>) )
+            if ( !type.IsGenericType || type.IsGenericTypeDefinition || 
+                (type.GetGenericTypeDefinition() != typeof(IEntityRepository<>) && type.GetGenericTypeDefinition() != typeof(IPartitionedRepository<,>)) )
             {
                 throw new ContractConventionException(
                     typeof(DataRepositoryConvention), property.DeclaringType, property, "Property must be of type IEntityRepository<T>");

@@ -21,13 +21,13 @@ namespace NWheels.Entities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        ICollection<IFrameworkContextPersistenceConfig> Contexts { get; }
+        INamedObjectCollection<IFrameworkContextPersistenceConfig> Contexts { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [ConfigurationElement(XmlName = "Context")]
-    public interface IFrameworkContextPersistenceConfig : IConfigurationElement
+    public interface IFrameworkContextPersistenceConfig : INamedConfigurationElement
     {
         [PropertyContract.Semantic.InheritorOf(typeof(IApplicationDataRepository))]
         Type Contract { get; set; }
