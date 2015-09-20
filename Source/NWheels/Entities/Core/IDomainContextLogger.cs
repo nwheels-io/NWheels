@@ -56,5 +56,8 @@ namespace NWheels.Entities.Core
 
         [LogWarning]
         void FailedToVisitNestedObjects(Exception e);
+
+        [LogVerbose]
+        void CreatRepositoryPartition(Type entity, object partitionValue);
     }
 }

@@ -59,7 +59,9 @@ namespace NWheels.Testing.Entities.Impl
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected override IOperand<IEntityRepository<TypeTemplate.TContract>> GetNewEntityRepositoryExpression(MethodWriterBase writer)
+            protected override IOperand<IEntityRepository<TypeTemplate.TContract>> GetNewEntityRepositoryExpression(
+                MethodWriterBase writer,
+                IOperand<TypeTemplate.TIndex1> partitionValue)
             {
                 return writer.New<TestEntityRepository<TypeTemplate.TContract>>(
                     writer.This<DataRepositoryBase>().Prop(x => x.Components), 

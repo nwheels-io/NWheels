@@ -21,6 +21,7 @@ using System.Data;
 using System.Linq.Expressions;
 using NWheels.Concurrency;
 using NWheels.Entities.Core;
+using NWheels.Entities.Impl;
 using TT = Hapil.TypeTemplate;
 
 // ReSharper disable ConvertToLambdaExpression
@@ -220,6 +221,11 @@ namespace NWheels.Conventions.Core
                 {
                     ImplementEntityRepositoryProperty(writer, entity);
                 }
+
+                foreach ( var entity in EntitiesInRepository.Where(e => e.PartitionedRepositoryProperty != null) )
+                {
+                    ImplementPartitionedRepositoryProperty(writer, entity);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -235,8 +241,37 @@ namespace NWheels.Conventions.Core
                             .GetPropertyBackingField(entity.RepositoryProperty)
                             .AsOperand<IEntityRepository<TT.TContract>>();
 
-                        backingField.Assign(GetNewEntityRepositoryExpression(cw));
+                        backingField.Assign(GetNewEntityRepositoryExpression(cw, partitionValue: null));
                         cw.This<DataRepositoryBase>().Void(x => x.RegisterEntityRepository<TT.TContract, TT.TImpl>, backingField);
+                    }
+                });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected virtual void ImplementPartitionedRepositoryProperty(ImplementationClassWriter<TypeTemplate.TInterface> writer, EntityInRepository entity)
+            {
+                if ( entity.Metadata.PartitionProperty == null )
+                {
+                    throw new ContractConventionException(
+                        typeof(DataRepositoryConvention), entity.ContractType, entity.PartitionedRepositoryProperty,
+                        "Entity declared with IPartitionedRepository<,> must have a partition property - use [PropertyContract.Partition] attribute.");
+                }
+
+                writer.Property(entity.PartitionedRepositoryProperty).Implement(p => p.Get(w => w.Return(p.BackingField)));
+
+                Initializers.Add(cw => {
+                    using ( TT.CreateScope<TT.TContract, TT.TImpl, TT.TIndex1>(
+                        entity.ContractType, entity.ImplementationType, entity.Metadata.PartitionProperty.ClrType) )
+                    {
+                        var backingField = writer.OwnerClass
+                            .GetPropertyBackingField(entity.PartitionedRepositoryProperty)
+                            .AsOperand<IPartitionedRepository<TT.TContract, TT.TIndex1>>();
+
+                        backingField.Assign(cw.New<PartitionedRepository<TT.TContract, TT.TIndex1>>(
+                            cw.Lambda<TT.TIndex1, IEntityRepository<TT.TContract>>(partitionValue => this.GetNewEntityRepositoryExpression(cw, partitionValue)),
+                            Static.Func(c => ResolutionExtensions.Resolve<IDomainContextLogger>(c), cw.This<DataRepositoryBase>().Prop(x => x.Components))
+                        ));
                     }
                 });
             }
@@ -249,7 +284,9 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected abstract IOperand<IEntityRepository<TT.TContract>> GetNewEntityRepositoryExpression(MethodWriterBase writer);
+            protected abstract IOperand<IEntityRepository<TT.TContract>> GetNewEntityRepositoryExpression(
+                MethodWriterBase writer,
+                IOperand<TT.TIndex1> partitionValue);
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -617,7 +654,22 @@ namespace NWheels.Conventions.Core
                 _ownerConvention = ownerConvention;
                 ownerConvention.DecomposeContractProperty(property, out _contractType, out _implementationType);
 
-                this.RepositoryProperty = property;
+                if ( property.PropertyType.GetGenericTypeDefinition() == typeof(IEntityRepository<>) )
+                {
+                    this.RepositoryProperty = property;
+                }
+                else if ( property.PropertyType.GetGenericTypeDefinition() == typeof(IPartitionedRepository<,>) )
+                {
+                    this.PartitionedRepositoryProperty = property;
+                }
+                else
+                {
+                    throw new ContractConventionException(
+                        typeof(DataRepositoryConvention), 
+                        property.DeclaringType, property, 
+                        "Domain context properties must be of type IEntityRepository<> or IPartitionedRepository<,>.");
+                }
+
                 this.Metadata = ownerConvention.MetadataCache.GetTypeMetadata(_contractType);
             }
 
@@ -629,6 +681,7 @@ namespace NWheels.Conventions.Core
                 _ownerConvention = ownerConvention;
 
                 this.RepositoryProperty = null;
+                this.PartitionedRepositoryProperty = null;
                 this.Metadata = ownerConvention.MetadataCache.GetTypeMetadata(_contractType);
                 this.Metadata.TryGetImplementation(_ownerConvention.EntityFactory.GetType(), out _implementationType);
             }
@@ -679,6 +732,7 @@ namespace NWheels.Conventions.Core
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public PropertyInfo RepositoryProperty { get; private set; }
+            public PropertyInfo PartitionedRepositoryProperty { get; private set; }
             public ITypeMetadata Metadata { get; private set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

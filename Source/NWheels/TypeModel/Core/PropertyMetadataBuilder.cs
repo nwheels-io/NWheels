@@ -92,6 +92,7 @@ namespace NWheels.DataObjects.Core
         public PropertyAccess Access { get; set; }
         public bool IsSensitive { get; set; }
         public bool IsCalculated { get; set; }
+        public bool IsPartition { get; set; }
         public List<PropertyContractAttribute> ContractAttributes { get; set; }
         public System.Reflection.PropertyInfo ContractPropertyInfo { get; set; }
         public object DefaultValue { get; set; }
@@ -188,6 +189,9 @@ namespace NWheels.DataObjects.Core
             DefaultDisplayName = visitor.VisitAttribute("DefaultDisplayName", DefaultDisplayName);
             DefaultDisplayFormat = visitor.VisitAttribute("DefaultDisplayFormat", DefaultDisplayFormat);
             DefaultSortAscending = visitor.VisitAttribute("DefaultSortAscending", DefaultSortAscending);
+            IsSensitive = visitor.VisitAttribute("IsSensitive", IsSensitive);
+            IsCalculated = visitor.VisitAttribute("IsCalculated", IsCalculated);
+            IsPartition = visitor.VisitAttribute("IsPartition", IsPartition);
 
             Relation = visitor.VisitElement<IRelationMetadata, RelationMetadataBuilder>(Relation);
             Validation = visitor.VisitElement<IPropertyValidationMetadata, PropertyValidationMetadataBuilder>(Validation);

@@ -78,6 +78,18 @@ namespace NWheels.DataObjects
             public Type ValueGeneratorType { get; private set; }
         }
 
+        public class PartitionAttribute : PropertyContractAttribute
+        {
+            #region Overrides of PropertyContractAttribute
+
+            public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+            {
+                property.IsPartition = true;
+            }
+
+            #endregion
+        }
+
         public static class Semantic
         {
             public class DataTypeAttribute : PropertyContractAttribute

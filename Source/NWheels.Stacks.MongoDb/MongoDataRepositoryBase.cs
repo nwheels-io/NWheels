@@ -145,14 +145,17 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal static string GetMongoCollectionName(ITypeMetadata metadata)
+        internal static string GetMongoCollectionName(ITypeMetadata metadata, object partitionValue)
         {
             if ( metadata.BaseType != null )
             {
-                return GetMongoCollectionName(metadata.BaseType);
+                return GetMongoCollectionName(metadata.BaseType, partitionValue);
             }
 
-            return metadata.Name.TrimLead("Abstract");
+            var baseName = metadata.Name.TrimLead("Abstract");
+            var partitionSuffix = (partitionValue != null ? "_" + partitionValue.ToString() : "");
+
+            return baseName + partitionSuffix;
         }
     }
 }

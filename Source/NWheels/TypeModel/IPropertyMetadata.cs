@@ -28,6 +28,7 @@ namespace NWheels.DataObjects
         bool IsSensitive { get; }
         bool IsCollection { get; }
         bool IsCalculated { get; }
+        bool IsPartition { get; }
         IReadOnlyList<PropertyContractAttribute> ContractAttributes { get; }
         PropertyInfo ContractPropertyInfo { get; }
         IRelationMetadata Relation { get; }

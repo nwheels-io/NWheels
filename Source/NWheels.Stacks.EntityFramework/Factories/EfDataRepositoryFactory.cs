@@ -107,7 +107,9 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected override IOperand<IEntityRepository<TT.TContract>> GetNewEntityRepositoryExpression(MethodWriterBase writer)
+            protected override IOperand<IEntityRepository<TT.TContract>> GetNewEntityRepositoryExpression(
+                MethodWriterBase writer,
+                IOperand<TT.TIndex1> partitionValue)
             {
                 var thisMetaType = base.MetadataCache.GetTypeMetadata(TT.Resolve<TT.TContract>());
                 var rootBaseMetaType = thisMetaType.GetRootBaseType();

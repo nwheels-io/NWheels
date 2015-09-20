@@ -94,7 +94,9 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected override IOperand<IEntityRepository<TT.TContract>> GetNewEntityRepositoryExpression(MethodWriterBase writer)
+            protected override IOperand<IEntityRepository<TT.TContract>> GetNewEntityRepositoryExpression(
+                MethodWriterBase writer,
+                IOperand<TT.TIndex1> partitionValue)
             {
                 return writer.New<MongoEntityRepository<TT.TContract, TT.TImpl>>(
                     // ownerRepo
@@ -102,7 +104,9 @@ namespace NWheels.Stacks.MongoDb.Factories
                     // metadataCache
                     base.MetadataCacheField,
                     // objectFactory
-                    base.EntityFactoryField);                                           
+                    base.EntityFactoryField,
+                    // partitionValue
+                    object.ReferenceEquals(null, partitionValue) ? writer.Const<object>(null) : partitionValue.CastTo<object>());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -139,7 +143,7 @@ namespace NWheels.Stacks.MongoDb.Factories
                         {
                             Static.Void(RuntimeHelpers.CreateUniqueIndex,
                                 database,
-                                w.Const(MongoDataRepositoryBase.GetMongoCollectionName(entity.Metadata)),
+                                w.Const(MongoDataRepositoryBase.GetMongoCollectionName(entity.Metadata, null)),
                                 w.Const(uniqueProperty.Name));
                         }
                     }

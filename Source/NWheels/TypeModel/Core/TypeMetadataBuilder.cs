@@ -147,6 +147,7 @@ namespace NWheels.DataObjects.Core
         public List<PropertyMetadataBuilder> Properties { get; private set; }
         public KeyMetadataBuilder PrimaryKey { get; set; }
         public List<KeyMetadataBuilder> AllKeys { get; private set; }
+        public PropertyMetadataBuilder PartitionProperty { get; set; }
         public List<PropertyMetadataBuilder> DefaultDisplayProperties { get; private set; }
         public List<PropertyMetadataBuilder> DefaultSortProperties { get; private set; }
         public TypeRelationalMappingBuilder RelationalMapping { get; set; }
@@ -168,6 +169,7 @@ namespace NWheels.DataObjects.Core
             visitor.VisitElementList<IPropertyMetadata, PropertyMetadataBuilder>("Properties", Properties);
             visitor.VisitElementList<IKeyMetadata, KeyMetadataBuilder>("AllKeys", AllKeys);
             PrimaryKey = visitor.VisitElementReference<IKeyMetadata, KeyMetadataBuilder>("PrimaryKey", PrimaryKey);
+            PartitionProperty = visitor.VisitElementReference<IPropertyMetadata, PropertyMetadataBuilder>("PartitionProperty", PartitionProperty);
 
             DefaultDisplayFormat = visitor.VisitAttribute("DefaultDisplayFormat", DefaultDisplayFormat);
 
