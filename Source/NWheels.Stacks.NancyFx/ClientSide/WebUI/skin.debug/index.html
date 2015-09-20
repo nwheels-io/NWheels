@@ -115,7 +115,8 @@
             <div class="border">
                 WIDGET[{{uidl.text}}]
                 <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
-                <div class="content-example">
+                {{model.state.loginFault}}
+                <div class="content-example" ng-if="model.state.loginFault!='PasswordExpired'">
                     <label style="display:inline-block;width:140px">{{translate('loginName')}}</label>
                     <input ng-model="model.data.loginName" type=text id="{{uidl.qualifiedName}}_login" placeholder="{{translate('enterLoginName')}}" /><br />
                 
@@ -128,6 +129,19 @@
                     <label style="display:inline-block;width:140px">&nbsp;</label>
                     <input ng-model="model.state.rememberMe" type=checkbox />
                     <label>{{translate('RememberMe')}}</label>
+                </div>
+                <div class="content-example" ng-if="model.state.loginFault=='PasswordExpired'">
+                    <label style="display:inline-block;width:140px">{{translate('loginName')}}</label>
+                    <input ng-model="model.data.loginName" type=text id="{{uidl.qualifiedName}}_login" placeholder="{{translate('enterLoginName')}}" /><br />
+                
+                    <label style="display:inline-block;width:140px">{{translate('currentPassword')}}</label>
+                    <input ng-model="model.data.password" type=password id="{{uidl.qualifiedName}}_password" placeholder="{{translate('enterCurrentPassword')}}" /><br />
+
+                    <label style="display:inline-block;width:140px">{{translate('newPassword')}}</label>
+                    <input ng-model="model.data.newPassword" type=password id="{{uidl.qualifiedName}}_newPassword" placeholder="{{translate('enterNewPassword')}}" /><br />
+                    
+                    <label style="display:inline-block;width:140px">&nbsp;</label>
+                    <button ng-click="$emit(uidl.qualifiedName + ':ChangePassword:Executing')">{{translate('ChangePassword')}}</button><br />
                 </div>
             </div>
         </script>
@@ -230,8 +244,8 @@
                 WIDGET[{{uidl.widgetType}}]
                 <div class="layout">
                     <div class="layout bold" style="border-bottom:1px solid gray;">{{translate(uidl.text)}}</div>
-                    <div class="layout bold"><span class="bold"><big><big>123</big></big></span></div>
-                    <div class="layout"><small><small>{{translate(uidl.values[0].label)}}&nbsp;</small></small></div>
+                    <div class="layout bold"><span class="bold"><big><big>{{model.state.data[uidl.valueDataProperty]}}</big></big></span></div>
+                    <div class="layout"><small><small>{{translate(uidl.label)}}&nbsp;</small></small></div>
                 </div>
             </div>
         </script>
@@ -253,6 +267,7 @@
             <div class="border">
                 WIDGET[{{uidl.widgetType}}]
                 <div class="layout bold">{{translate(uidl.text)}}</div>
+                <span class="bold"><big>Current Revenue:<big>{{model.state.data[uidl.currentValueDataProperty]}}</big></big></span>
             </div>
         </script>
 

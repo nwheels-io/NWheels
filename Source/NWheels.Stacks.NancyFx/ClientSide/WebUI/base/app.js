@@ -5,8 +5,8 @@ var theApp = angular.module('theApp', ['breeze.angular']);
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.service('commandService',
-['$http', '$q', '$interval',
-function ($http, $q, $interval) {
+['$http', '$q', '$interval', '$timeout',
+function ($http, $q, $interval, $timeout) {
 
     var m_pendingCommands = {};
     var m_pollTimer = null;
@@ -93,8 +93,8 @@ function ($http, $q, $interval) {
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.service('uidlService',
-['$q', '$http', '$rootScope', 'commandService',
-function ($q, $http, $rootScope, commandService) {
+['$q', '$http', '$rootScope', '$timeout', 'commandService',
+function ($q, $http, $rootScope, $timeout, commandService) {
 
     var m_uidl = null;
     var m_app = null;
@@ -313,7 +313,9 @@ function ($q, $http, $rootScope, commandService) {
                     var screen = m_index.screens[behavior.targetQualifiedName];
                     $rootScope.currentScreen = screen;
                     location.hash = screen.qualifiedName;
-                    $rootScope.$broadcast(screen.qualifiedName + ':NavigatedHere', input);
+                    $timeout(function() {
+                        $rootScope.$broadcast(screen.qualifiedName + ':NavigatedHere', input);
+                    });
                     break;
                 case 'ScreenPart':
                     var screenPart = m_index.screenParts[behavior.targetQualifiedName];
@@ -429,7 +431,10 @@ function ($q, $http, $rootScope, commandService) {
                 var alteration = behavior.alterations[i];
                 switch (alteration.type) {
                     case 'Copy':
-                        var value = Enumerable.Return(context).Select('ctx=>ctx.' + alteration.sourceExpression).Single();
+                        var value = (
+                            alteration.sourceExpression==='null' || !alteration.sourceExpression
+                            ? null
+                            : Enumerable.Return(context).Select('ctx=>ctx.' + alteration.sourceExpression).Single());
                         var target = context;
                         for (var j = 0; j < alteration.destinationNavigations.length - 1; j++) {
                             target = target[alteration.destinationNavigations[j]];
@@ -450,11 +455,15 @@ function ($q, $http, $rootScope, commandService) {
                 console.log('screenPartContainer::on-NavReq', scope.uidl.qualifiedName, '->', data.screenPart.qualifiedName);
                 scope.currentScreenPart = data.screenPart;
                 location.hash = data.screenPart.qualifiedName;
-                scope.$broadcast(data.screenPart.qualifiedName + ':NavigatedHere', data.input);
+                $timeout(function() {
+                    scope.$broadcast(data.screenPart.qualifiedName + ':NavigatedHere', data.input);
+                });
             });
             if (scope.uidl.initalScreenPartQualifiedName) {
                 scope.currentScreenPart = m_index.screenParts[scope.uidl.initalScreenPartQualifiedName];
-                scope.$broadcast(scope.uidl.initalScreenPartQualifiedName + ':NavigatedHere');
+                $timeout(function() {
+                    scope.$broadcast(scope.uidl.initalScreenPartQualifiedName + ':NavigatedHere');
+                });
             }
         },
     };
