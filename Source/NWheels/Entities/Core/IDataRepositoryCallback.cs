@@ -8,6 +8,12 @@ namespace NWheels.Entities.Core
 {
     public interface IDataRepositoryCallback
     {
-        void Invoke<TEntityContract, TEntityImpl>(IEntityRepository<TEntityContract> repo);
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface IDataRepositoryCallback<TEntityContract> : IDataRepositoryCallback
+    {
+        void Invoke<TEntityImpl>(IEntityRepository<TEntityContract> repo) where TEntityImpl : TEntityContract;
     }
 }

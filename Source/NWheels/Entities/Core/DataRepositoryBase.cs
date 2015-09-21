@@ -103,9 +103,13 @@ namespace NWheels.Entities.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void RegisterEntityRepository<TEntityContract, TEntityImpl>(IEntityRepository<TEntityContract> repo)
+            where TEntityImpl : TEntityContract
         {
             _entityRepositoryByContractType.Add(typeof(TEntityContract), (IEntityRepository)repo); 
-            _genericCallbacksByContractType.Add(typeof(TEntityContract), callback => callback.Invoke<TEntityContract, TEntityImpl>(repo));
+            _genericCallbacksByContractType.Add(typeof(TEntityContract),
+                callback => {
+                    ((IDataRepositoryCallback<TEntityContract>)callback).Invoke<TEntityImpl>(repo);
+                });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
