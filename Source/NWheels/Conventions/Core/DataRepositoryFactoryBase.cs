@@ -271,7 +271,7 @@ namespace NWheels.Conventions.Core
 
                         backingField.Assign(cw.New<PartitionedRepository<TT.TContract, TT.TIndex1>>(
                             cw.Lambda<TT.TIndex1, IEntityRepository<TT.TContract>>(partitionValue => this.GetNewEntityRepositoryExpression(cw, partitionValue)),
-                            Static.Func(c => ResolutionExtensions.Resolve<IDomainContextLogger>(c), cw.This<DataRepositoryBase>().Prop(x => x.Components))
+                            Static.Func(ResolutionExtensions.Resolve<IDomainContextLogger>, cw.This<DataRepositoryBase>().Prop(x => x.Components))
                         ));
                     }
                 });

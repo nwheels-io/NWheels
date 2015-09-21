@@ -17,7 +17,7 @@ namespace NWheels.Entities.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected PartitionedRepository(Func<TPartition, IEntityRepository<TEntity>> repositoryFactory, IDomainContextLogger logger)
+        public PartitionedRepository(Func<TPartition, IEntityRepository<TEntity>> repositoryFactory, IDomainContextLogger logger)
         {
             _logger = logger;
             _repositoryFactory = repositoryFactory;

@@ -323,6 +323,7 @@ namespace NWheels.DataObjects.Core
 
         internal void EndBuild()
         {
+            this.PartitionProperty = this.Properties.FirstOrDefault(p => p.IsPartition);
             _propertyByName = this.Properties.ToDictionary(p => p.Name);
             _propertyByDeclaration = this.Properties.ToDictionary(p => p.ContractPropertyInfo);
         }
