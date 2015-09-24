@@ -13,6 +13,7 @@ namespace NWheels.DataObjects.Core.Factories
 {
     public class PropertyImplementationStrategyMap
     {
+        private readonly bool _useDomainObjectAsBaseType;
         private readonly List<StrategyRule> _strategyRules;
         private readonly Dictionary<IPropertyMetadata, IPropertyImplementationStrategy> _map;
         private HashSet<PropertyInfo> _baseProperties;
@@ -20,8 +21,9 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private PropertyImplementationStrategyMap()
+        private PropertyImplementationStrategyMap(bool useDomainObjectAsBaseType)
         {
+            _useDomainObjectAsBaseType = useDomainObjectAsBaseType;
             _strategyRules = new List<StrategyRule>();
             _map = new Dictionary<IPropertyMetadata, IPropertyImplementationStrategy>();
         }
@@ -97,6 +99,11 @@ namespace NWheels.DataObjects.Core.Factories
         {
             var baseProperties = new HashSet<PropertyInfo>();
 
+            if ( _useDomainObjectAsBaseType && metaType.DomainObjectType != null )
+            {
+                return baseProperties;
+            }
+
             if  ( metaType.BaseType != null )
             {
                 baseProperties.UnionWith(metaType.BaseType.Properties.Select(p => p.ContractPropertyInfo));
@@ -157,9 +164,9 @@ namespace NWheels.DataObjects.Core.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public Builder()
+            public Builder(bool useDomainObjectAsBaseType = false)
             {
-                _mapBeingBuilt = new PropertyImplementationStrategyMap();
+                _mapBeingBuilt = new PropertyImplementationStrategyMap(useDomainObjectAsBaseType);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

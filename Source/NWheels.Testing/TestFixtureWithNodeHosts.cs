@@ -20,6 +20,7 @@ using NWheels.Hosting;
 using NWheels.Hosting.Core;
 using NWheels.Logging;
 using NWheels.Logging.Core;
+using NWheels.Stacks.Nlog;
 using NWheels.Testing.Controllers;
 using NWheels.Testing.Entities.Impl;
 
@@ -96,7 +97,8 @@ namespace NWheels.Testing
             _controller.InjectingComponents += (sender, args) => {
                 args.ContainerBuilder.RegisterInstance<TestFixtureWithNodeHosts>(this).AsSelf().As<TestFixtureWithNodeHosts>();
                 args.ContainerBuilder
-                    .RegisterInstance(new ConsolePlainLog(string.Format(" {0}[{1}] ", NodeName, NodeInstanceId), LogLevel.Debug, _clock))
+                    //.RegisterInstance(new ConsolePlainLog(string.Format(" {0}[{1}] ", NodeName, NodeInstanceId), LogLevel.Debug, _clock))
+                    .RegisterInstance(NLogBasedPlainLog.Instance)
                     .As<IPlainLog>();
 
                 if ( !HasDatabase )
