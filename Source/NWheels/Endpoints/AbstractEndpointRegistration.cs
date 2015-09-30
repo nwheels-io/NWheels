@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Hapil;
+using NWheels.Extensions;
 
 namespace NWheels.Endpoints
 {
@@ -109,7 +110,7 @@ namespace NWheels.Endpoints
         {
             get
             {
-                return TrailingSlashSafeUri(this.Address);
+                return this.Address.EnsureTrailingSlash();
             }
         }
 
@@ -139,20 +140,6 @@ namespace NWheels.Endpoints
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static int _s_nextEndpointIndex = 0;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static Uri TrailingSlashSafeUri(Uri uri)
-        {
-            var uriString = uri.ToString();
-
-            if (uriString.EndsWith("/"))
-            {
-                return uri;
-            }
-
-            return new Uri(uriString + "/");
-        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

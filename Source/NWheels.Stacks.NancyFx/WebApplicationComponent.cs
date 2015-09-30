@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
+using Nancy;
 using Nancy.Bootstrappers.Autofac;
 using Nancy.Hosting.Self;
 using NWheels.Authorization;
@@ -94,6 +95,34 @@ namespace NWheels.Stacks.NancyFx
         UidlApplication IWebModuleContext.Application
         {
             get { return _application; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string SkinName 
+        {
+            get { return _application.DefaultSkin; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string SkinSubFolderName
+        {
+            get { return "skin." + this.SkinName; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string BaseSubFolderName
+        {
+            get { return "base"; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IRootPathProvider IWebModuleContext.PathProvider 
+        {
+            get { return _hostBootstrapper; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

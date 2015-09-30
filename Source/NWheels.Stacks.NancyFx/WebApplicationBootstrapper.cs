@@ -57,7 +57,7 @@ namespace NWheels.Stacks.NancyFx
         protected override void ConfigureConventions(NancyConventions nancyConventions)
         {
             nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/base", "Base"));
-            nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/skin", "Skin." + _context.Application.DefaultSkin));
+            nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/skin", "Skin." + _context.SkinName));
             
             base.ConfigureConventions(nancyConventions);
         }

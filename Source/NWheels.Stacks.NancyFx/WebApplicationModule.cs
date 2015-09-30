@@ -96,7 +96,7 @@ namespace NWheels.Stacks.NancyFx
         private void RegisterRoutes()
         {
             base.Get["/"] = route => {
-                return Response.AsFile("Skin." + _context.Application.DefaultSkin + "\\index.html", "text/html");
+                return GetIndexHtml(); //Response.AsFile("Skin." + _context.Application.DefaultSkin + "\\index.html", "text/html");
             };
 
             base.Get["/uidl.json"] = route => {
@@ -132,6 +132,17 @@ namespace NWheels.Stacks.NancyFx
                 _transactionScriptByName[scriptType.Name] = entry;
                 _transactionScriptByName[scriptType.SimpleQualifiedName()] = entry;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Response GetIndexHtml()
+        {
+            var filePath = Path.Combine(_context.PathProvider.GetRootPath(), _context.SkinSubFolderName, "index.html");
+            var fileContents = File.ReadAllText(filePath);
+            var resolvedMacrosFileContents = fileContents.Replace("##BASE_URL##", this.Request.Url.ToString().EnsureTrailingSlash());
+
+            return Response.AsText(resolvedMacrosFileContents, "text/html");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
