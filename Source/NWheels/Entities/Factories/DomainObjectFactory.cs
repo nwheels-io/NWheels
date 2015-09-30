@@ -78,7 +78,7 @@ namespace NWheels.Entities.Factories
             var metaType = _metadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
             var persistableObjectFactoryType = context.TypeKey.SecondaryInterfaces[0];
 
-            var propertyMapBuilder = new PropertyImplementationStrategyMap.Builder();
+            var propertyMapBuilder = new PropertyImplementationStrategyMap.Builder(useDomainObjectAsBaseType: true);
             var domainFactoryContext = 
                 new DomainObjectFactoryContext(context, _metadataCache, metaType, persistableObjectFactoryType, propertyMapBuilder.MapBeingBuilt);
 

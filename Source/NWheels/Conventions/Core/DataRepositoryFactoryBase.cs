@@ -128,6 +128,7 @@ namespace NWheels.Conventions.Core
             private readonly HashSet<Type> _entityContractsInRepository;
             private readonly EntityObjectFactory _entityFactory;
             private readonly List<Action<ConstructorWriter>> _initializers;
+            private readonly Dictionary<Type, Field<IEntityRepository<TT.TContract>>> _repositoryFieldByContract;
             private DataRepositoryFactoryBase _ownerFactory;
             private Field<EntityObjectFactory> _entityFactoryField;
             private Field<IDomainObjectFactory> _domainObjectFactoryField;
@@ -140,6 +141,7 @@ namespace NWheels.Conventions.Core
                 _metadataCache = metadataCache;
                 _entityFactory = entityFactory;
                 _entitiesInRepository = new List<EntityInRepository>();
+                _repositoryFieldByContract = new Dictionary<Type, Field<IEntityRepository<TypeTemplate.TContract>>>();
                 _entityContractsInRepository = new HashSet<Type>();
                 _initializers = new List<Action<ConstructorWriter>>();
 
@@ -273,6 +275,12 @@ namespace NWheels.Conventions.Core
                             cw.Lambda<TT.TIndex1, IEntityRepository<TT.TContract>>(partitionValue => this.GetNewEntityRepositoryExpression(cw, partitionValue)),
                             Static.Func(ResolutionExtensions.Resolve<IDomainContextLogger>, cw.This<DataRepositoryBase>().Prop(x => x.Components))
                         ));
+
+                        var repoField = writer.Field<IEntityRepository<TT.TContract>>("m_" + entity.Metadata.Name);
+                        repoField.Assign(GetNewEntityRepositoryExpression(cw, partitionValue: null));
+                        cw.This<DataRepositoryBase>().Void(x => x.RegisterEntityRepository<TT.TContract, TT.TImpl>, repoField);
+
+                        _repositoryFieldByContract[entity.ContractType] = repoField;
                     }
                 });
             }
@@ -350,6 +358,11 @@ namespace NWheels.Conventions.Core
                             {
                                 var backingField = writer.OwnerClass.GetPropertyBackingField(entity.RepositoryProperty);
                                 repoArray.ItemAt(index).Assign(backingField.AsOperand<IEntityRepository>());
+                            }
+                            else if ( entity.PartitionedRepositoryProperty != null )
+                            {
+                                var repoField = _repositoryFieldByContract[entity.ContractType];
+                                repoArray.ItemAt(index).Assign(repoField.CastTo<IEntityRepository>());
                             }
                             else
                             {

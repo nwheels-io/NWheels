@@ -153,6 +153,13 @@ namespace NWheels.Stacks.MongoDb
             }
 
             var baseName = metadata.Name.TrimLead("Abstract");
+
+            if ( partitionValue != null )
+            {
+                var nameProperty = partitionValue.GetType().GetProperty("Name");
+                partitionValue = nameProperty.GetValue(partitionValue);
+            }
+
             var partitionSuffix = (partitionValue != null ? "_" + partitionValue.ToString() : "");
 
             return baseName + partitionSuffix;
