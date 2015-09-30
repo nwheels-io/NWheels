@@ -27,6 +27,7 @@ namespace NWheels.Stacks.NancyFx
         private readonly WebModuleLoggingHook _loggingHook;
         private readonly ISessionManager _sessionManager;
         private readonly IWebApplicationLogger _logger;
+        private readonly IFrameworkUIConfig _frameworkUIConfig;
         private readonly UidlApplication _application;
         private readonly Dictionary<string, object> _apiServicesByContractName;
         private readonly Dictionary<string, WebApiDispatcherBase> _apiDispatchersByContractName;
@@ -45,7 +46,8 @@ namespace NWheels.Stacks.NancyFx
             WebApiDispatcherFactory dispatcherFactory,
             WebModuleLoggingHook loggingHook,
             ISessionManager sessionManager,
-            IWebApplicationLogger logger)
+            IWebApplicationLogger logger,
+            IFrameworkUIConfig frameworkUIConfig)
         {
             _components = components;
             _endpointRegistration = endpointRegistration;
@@ -55,6 +57,7 @@ namespace NWheels.Stacks.NancyFx
             _sessionManager = sessionManager;
             _loggingHook = loggingHook;
             _logger = logger;
+            _frameworkUIConfig = frameworkUIConfig;
 
             _application = (UidlApplication)components.Resolve(endpointRegistration.Contract);
             
@@ -119,7 +122,7 @@ namespace NWheels.Stacks.NancyFx
             _module = _components.Resolve<WebApplicationModule>(TypedParameter.From<IWebModuleContext>(this));
             var sessionHook = new WebModuleSessionHook(_module, _sessionManager, _logger);
 
-            _hostBootstrapper = new WebApplicationBootstrapper(this, _module, _loggingHook, sessionHook);
+            _hostBootstrapper = new WebApplicationBootstrapper(this, _module, _loggingHook, sessionHook, _frameworkUIConfig);
             _host = new NancyHost(_hostBootstrapper, new[] { TrailingSlashSafeUri(_endpointRegistration.Address) });
         }
 

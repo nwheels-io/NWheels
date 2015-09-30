@@ -10,6 +10,7 @@ using Nancy.Bootstrappers.Autofac;
 using Nancy.Conventions;
 using Nancy.Session;
 using NWheels.Utilities;
+using NWheels.UI;
 
 namespace NWheels.Stacks.NancyFx
 {
@@ -27,13 +28,14 @@ namespace NWheels.Stacks.NancyFx
             IWebModuleContext context, 
             WebApplicationModule module, 
             WebModuleLoggingHook loggingHook, 
-            WebModuleSessionHook sessionHook)
+            WebModuleSessionHook sessionHook,
+            IFrameworkUIConfig frameworkUIConfig)
         {
             _context = context;
             _module = module;
             _loggingHook = loggingHook;
             _sessionHook = sessionHook;
-            _contentRootPath = PathUtility.HostBinPath("ClientSide", "WebUI");
+            _contentRootPath = frameworkUIConfig.WebContentRootPath;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

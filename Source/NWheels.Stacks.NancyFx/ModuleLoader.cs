@@ -9,6 +9,7 @@ using NWheels.Endpoints;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.UI.Factories;
+using NWheels.UI;
 
 namespace NWheels.Stacks.NancyFx
 {
@@ -19,6 +20,7 @@ namespace NWheels.Stacks.NancyFx
             builder.NWheelsFeatures().Logging().RegisterLogger<IWebApplicationLogger>();
 
             builder.RegisterType<WebApplicationComponent>().InstancePerDependency();
+            builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkUIConfig>();
 
             builder.RegisterAdapter<WebAppEndpointRegistration, ILifecycleEventListener>(
                 (context, registration) => {
