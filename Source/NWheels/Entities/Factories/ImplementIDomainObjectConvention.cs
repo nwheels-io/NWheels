@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Reflection;
 using Hapil;
+using Hapil.Members;
 using Hapil.Writers;
 using NWheels.DataObjects.Core;
 using NWheels.Entities.Core;
@@ -156,27 +157,19 @@ namespace NWheels.Entities.Factories
             out MethodInfo beforeDelete, 
             out MethodInfo afterDelete)
         {
-            if ( _context.MetaType.DomainObjectType != null )
-            {
-                beforeSave = TryFindEntityTriggerMethod(TriggerMethodNameBeforeSave);
-                afterSave = TryFindEntityTriggerMethod(TriggerMethodNameAfterSave);
-                beforeDelete = TryFindEntityTriggerMethod(TriggerMethodNameBeforeDelete);
-                afterDelete = TryFindEntityTriggerMethod(TriggerMethodNameAfterDelete);
-            }
-            else
-            {
-                beforeSave = null;
-                afterSave = null;
-                beforeDelete = null;
-                afterDelete = null;
-            }
+            var members = TypeMemberCache.Of(_context.BaseContext.BaseType);
+
+            beforeSave = TryFindEntityTriggerMethod(members, TriggerMethodNameBeforeSave);
+            afterSave = TryFindEntityTriggerMethod(members, TriggerMethodNameAfterSave);
+            beforeDelete = TryFindEntityTriggerMethod(members, TriggerMethodNameBeforeDelete);
+            afterDelete = TryFindEntityTriggerMethod(members, TriggerMethodNameAfterDelete);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private MethodInfo TryFindEntityTriggerMethod(string methodName)
+        private MethodInfo TryFindEntityTriggerMethod(TypeMemberCache members, string methodName)
         {
-            return _context.DomainObjectMembers
+            return members
                 .SelectVoids(m => m.Name == methodName && !m.IsPublic && m.GetParameters().Length == 0)
                 .ToArray()
                 .FirstOrDefault();
