@@ -6,13 +6,14 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
+using NWheels.Extensions;
 
 namespace NWheels.UI.Uidl
 {
     [DataContract(Name = "MetaProperty", Namespace = UidlDocument.DataContractNamespace)]
     public class UidlMetaProperty
     {
-        public UidlMetaProperty(IPropertyMetadata metadata)
+        public UidlMetaProperty(IPropertyMetadata metadata, HashSet<Type> relatedTypes)
         {
             this.Name = metadata.Name;
             this.Kind = metadata.Kind;
@@ -28,6 +29,11 @@ namespace NWheels.UI.Uidl
             this.DefaultDisplayName = metadata.DefaultDisplayName;
             this.DefaultDisplayFormat = metadata.DefaultDisplayFormat;
             this.DefaultSortAscending = metadata.DefaultSortAscending;
+
+            if ( metadata.Relation != null && metadata.Relation.RelatedPartyType != null )
+            {
+                relatedTypes.Add(metadata.Relation.RelatedPartyType.ContractType);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -116,6 +122,8 @@ namespace NWheels.UI.Uidl
                 this.ThisPartyKind = metadata.ThisPartyKind;
                 this.ThisPartyKeyName = metadata.ThisPartyKey != null ? metadata.ThisPartyKey.Name : null;
                 this.RelatedPartyTypeName = metadata.RelatedPartyType != null ? metadata.RelatedPartyType.Name : null;
+                this.RelatedPartyMetaTypeName = 
+                    metadata.RelatedPartyType != null ? metadata.RelatedPartyType.ContractType.AssemblyQualifiedNameNonVersioned() : null;
                 this.RelatedPartyKind = metadata.RelatedPartyKind;
                 this.RelatedPartyKeyName = metadata.RelatedPartyKey != null ? metadata.RelatedPartyKey.Name : null;
                 this.InversePropertyName = metadata.InverseProperty != null ? metadata.InverseProperty.Name : null;
@@ -133,6 +141,8 @@ namespace NWheels.UI.Uidl
             public string ThisPartyKeyName { get; set; }
             [DataMember]
             public string RelatedPartyTypeName { get; set; }
+            [DataMember]
+            public string RelatedPartyMetaTypeName { get; set; }
             [DataMember]
             public RelationPartyKind RelatedPartyKind { get; set; }
             [DataMember]

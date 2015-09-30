@@ -32,7 +32,7 @@ namespace NWheels.Stacks.NancyFx
             using ( StreamWriter writer = new StreamWriter(new UnclosableStreamWrapper(outputStream)) )
             {
                 JavaScriptSerializer serializer = new JavaScriptSerializer(
-                    null, false, JsonSettings.MaxJsonLength, JsonSettings.MaxRecursions, false, true);
+                    null, false, Int32.MaxValue, Int32.MaxValue, false, true);
 
                 serializer.RegisterConverters(
                     new JavaScriptConverter[] { new ExcludeNonDataMemberPropertiesConverter() },

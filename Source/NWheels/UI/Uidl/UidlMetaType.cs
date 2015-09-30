@@ -59,13 +59,13 @@ namespace NWheels.UI.Uidl
     [DataContract(Name = "ObjectMetaType", Namespace = UidlDocument.DataContractNamespace)]
     public class UidlObjectMetaType : UidlMetaType
     {
-        public UidlObjectMetaType(Type type, ITypeMetadata metadata)
+        public UidlObjectMetaType(Type type, ITypeMetadata metadata, HashSet<Type> relatedTypes)
             : base(type)
         {
             base.TypeKind = UidlMetaTypeKind.Object;
             this.BaseTypeName = metadata.BaseType != null ? metadata.BaseType.Name : null;
             this.DerivedTypeNames = metadata.DerivedTypes.Select(t => t.Name).ToList();
-            this.Properties = metadata.Properties.ToDictionary(p => p.Name, p => new UidlMetaProperty(p));
+            this.Properties = metadata.Properties.ToDictionary(p => p.Name, p => new UidlMetaProperty(p, relatedTypes));
             this.PrimaryKey = metadata.PrimaryKey != null ? new MetaKey(metadata.PrimaryKey) : null;
             this.AllKeys = metadata.AllKeys.ToDictionary(k => k.Name, k => new MetaKey(k));
             this.DefaultDisplayFormat = metadata.DefaultDisplayFormat;

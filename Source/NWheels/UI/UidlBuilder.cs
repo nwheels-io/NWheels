@@ -71,14 +71,23 @@ namespace NWheels.UI
 
         public string RegisterMetaType(Type type)
         {
-            var typeKey = type.AssemblyQualifiedNameNonVersioned();
+            var allTypesToAdd = new HashSet<Type>();
+            allTypesToAdd.Add(type);
 
-            if ( !_document.MetaTypes.ContainsKey(typeKey) )
+            while ( allTypesToAdd.Count > 0 )
             {
-                _document.MetaTypes.Add(typeKey, CreateMetaType(type));
+                var typeToAdd = allTypesToAdd.First();
+                var typeKey = typeToAdd.AssemblyQualifiedNameNonVersioned();
+
+                if ( !_document.MetaTypes.ContainsKey(typeKey) )
+                {
+                    _document.MetaTypes.Add(typeKey, CreateMetaType(typeToAdd, allTypesToAdd));
+                }
+
+                allTypesToAdd.Remove(typeToAdd);
             }
 
-            return typeKey;
+            return type.AssemblyQualifiedNameNonVersioned();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -215,13 +224,13 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private UidlMetaType CreateMetaType(Type type)
+        private UidlMetaType CreateMetaType(Type type, HashSet<Type> relatedTypes)
         {
             UidlMetaType metaType;
 
             if ( DataObjectContractAttribute.IsDataObjectContract(type) )
             {
-                metaType = new UidlObjectMetaType(type, _metadataCache.GetTypeMetadata(type));
+                metaType = new UidlObjectMetaType(type, _metadataCache.GetTypeMetadata(type), relatedTypes);
             }
             else if (typeof(IEntityId).IsAssignableFrom(type))
             {
