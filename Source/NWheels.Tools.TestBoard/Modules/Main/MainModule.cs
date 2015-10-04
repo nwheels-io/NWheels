@@ -14,6 +14,7 @@ using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Menus;
 using Gemini.Framework.Services;
+using Gemini.Framework.ToolBars;
 using Gemini.Modules.Inspector;
 using Gemini.Modules.Output;
 using Gemini.Modules.Output.Commands;
@@ -61,7 +62,8 @@ namespace NWheels.Tools.TestBoard.Modules.Main
         public override void Initialize()
         {
             Shell.ShowFloatingWindowsInTaskbar = true;
-            Shell.ToolBars.Items.Clear();
+            //Shell.ToolBars.Items.Clear();
+            //Shell.ToolBars.Visible = true;
 
             _mainWindow.Icon = ToImageSource(Resources.AppIcon);
 
@@ -175,6 +177,11 @@ namespace NWheels.Tools.TestBoard.Modules.Main
                 Shell.StatusBar.Items[1].Message = (isReady ? "App: " + app.CurrentState.ToString().SplitPascalCase() : "");
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Export]
+        public static ToolBarDefinition MainToolBar = new ToolBarDefinition(0, "Main");
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

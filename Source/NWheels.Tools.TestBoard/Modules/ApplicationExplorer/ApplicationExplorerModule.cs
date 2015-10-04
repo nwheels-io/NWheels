@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Menus;
+using Gemini.Framework.ToolBars;
 using Gemini.Modules.PropertyGrid;
 using NWheels.Tools.TestBoard.Modules.Main;
 
@@ -57,6 +58,20 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         [Export]
         public static MenuItemDefinition ApplicationCloseAllMenuItem =
             new CommandMenuItemDefinition<CloseAllApplicationsCommandDefinition>(ApplicationControlMenuGroup, 2);
+
+        [Export]
+        public static MenuItemDefinition BreakInDebuggerMenuItem =
+            new CommandMenuItemDefinition<BreakInDebuggerCommandDefinition>(Gemini.Modules.MainMenu.MenuDefinitions.ToolsOptionsMenuGroup, 3);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Export]
+        public static ToolBarItemGroupDefinition ApplicationExplorerToolBarGroup = 
+            new ToolBarItemGroupDefinition(MainModule.MainToolBar, 10);
+
+        [Export]
+        public static ToolBarItemDefinition BreakInDebuggerToolBarItem = 
+            new CommandToolBarItemDefinition<BreakInDebuggerCommandDefinition>(ApplicationExplorerToolBarGroup, 0);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

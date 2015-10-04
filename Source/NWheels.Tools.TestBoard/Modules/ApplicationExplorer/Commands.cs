@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -398,6 +399,51 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         public override Task Run(Command command)
         {
             return Task.Run(() => _controller.CloseAll());
+        }
+    }
+
+    #endregion
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+    
+    #region BreakInDebugger
+
+    [CommandDefinition]
+    public class BreakInDebuggerCommandDefinition : CommandDefinition
+    {
+        public const string CommandName = "Application.BreakInDebugger";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string Name
+        {
+            get { return CommandName; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string Text
+        {
+            get { return "Break In Debugger"; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string ToolTip
+        {
+            get { return "Break In Debugger"; }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [CommandHandler]
+    public class BreakInDebuggerCommandHandler : CommandHandlerBase<BreakInDebuggerCommandDefinition>
+    {
+        public override Task Run(Command command)
+        {
+            Debugger.Launch();
+            return Task.FromResult(true);
         }
     }
 
