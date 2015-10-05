@@ -13,16 +13,22 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected AbstractCommandMessage(IFramework framework, ISession session)
+        protected AbstractCommandMessage(IFramework framework, ISession session, bool isSynchronous)
             : base(framework)
         {
             Principal = session.UserPrincipal;
             Session = session;
+            IsSynchronous = isSynchronous;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IPrincipal Principal { get; private set; }
         public ISession Session { get; private set; }
+        public bool IsSynchronous { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public CommandResultMessage Result { get; set; }
     }
 }

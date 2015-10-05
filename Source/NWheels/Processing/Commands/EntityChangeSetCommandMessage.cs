@@ -9,8 +9,8 @@ namespace NWheels.Processing.Commands
 {
     public class EntityChangeSetCommandMessage : AbstractCommandMessage
     {
-        public EntityChangeSetCommandMessage(IFramework framework, ISession session, IReadOnlyList<ChangeItem> changes)
-            : base(framework, session)
+        public EntityChangeSetCommandMessage(IFramework framework, ISession session, IReadOnlyList<ChangeItem> changes, bool synchronous)
+            : base(framework, session, synchronous)
         {
             this.Changes = changes;
         }

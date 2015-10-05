@@ -107,7 +107,11 @@ namespace NWheels.Stacks.NancyFx
                 return ExecuteDomainApi(route.contract, route.operation);
             };
 
-            base.Post["/command/{target}/{contract}/{operation?}/{entityId?}"] = (route) => {
+            base.Post["/command/requestReply/{target}/{contract}/{operation?}/{entityId?}"] = (route) => {
+                return ExecuteCommand(route.target, route.contract, route.operation, route.entityId);
+            };
+
+            base.Post["/command/oneWay/{target}/{contract}/{operation?}/{entityId?}"] = (route) => {
                 return EnqueueCommand(route.target, route.contract, route.operation, route.entityId);
             };
 
@@ -176,9 +180,33 @@ namespace NWheels.Stacks.NancyFx
             return Response.AsJson(replyObject);
         }
 
+        //----------------------------------------------------------------------------- ------------------------------------------------------------------------
+
+        private object ExecuteCommand(string target, string contractName, string operationName, string entityId)
+        {
+            var command = CreateCommandMessage(target, contractName, synchronous: true);
+
+            _serviceBus.DispatchMessageOnCurrentThread(command);
+
+            return Response.AsJson(command.Result.TakeSerializableSnapshot());
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private object EnqueueCommand(string target, string contractName, string operationName, string entityId)
+        {
+            var command = CreateCommandMessage(target, contractName, synchronous: false);
+
+            _serviceBus.EnqueueMessage(command);
+
+            return Response.AsJson(new {
+                CommandMessageId = command.MessageId
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private AbstractCommandMessage CreateCommandMessage(string target, string contractName, bool synchronous)
         {
             AbstractCommandMessage command;
             var targetType = ParseUtility.Parse<ApiCallTargetType>(target);
@@ -186,21 +214,26 @@ namespace NWheels.Stacks.NancyFx
             switch ( targetType )
             {
                 case ApiCallTargetType.TransactionScript:
-                    var scriptEntry = _transactionScriptByName[contractName];
-                    var call = _callFactory.NewMessageCallObject(scriptEntry.ExecuteMethodInfo);
-                    var commandValueBinder = (CommandValueBinder)Activator.CreateInstance(typeof(CommandValueBinder<>).MakeGenericType(call.GetType()));
-                    commandValueBinder.BindCommandValues(this, call);
-                    command = new TransactionScriptCommandMessage(_framework, _sessionManager.CurrentSession, scriptEntry.TransactionScriptType, call);
+                    command = CreateTransactionScriptCommand(contractName, synchronous);
                     break;
                 default:
                     throw new NotSupportedException("Command target '" + target + "' is not supported.");
             }
 
-            _serviceBus.EnqueueMessage(command);
+            return command;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private AbstractCommandMessage CreateTransactionScriptCommand(string contractName, bool synchronous)
+        {
+            var scriptEntry = _transactionScriptByName[contractName];
+            var call = _callFactory.NewMessageCallObject(scriptEntry.ExecuteMethodInfo);
             
-            return Response.AsJson(new {
-                CommandMessageId = command.MessageId
-            });
+            var commandValueBinder = (CommandValueBinder)Activator.CreateInstance(typeof(CommandValueBinder<>).MakeGenericType(call.GetType()));
+            commandValueBinder.BindCommandValues(this, call);
+            
+            return new TransactionScriptCommandMessage(_framework, _sessionManager.CurrentSession, scriptEntry.TransactionScriptType, call, synchronous);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

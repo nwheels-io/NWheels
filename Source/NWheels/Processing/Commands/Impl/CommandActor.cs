@@ -99,7 +99,7 @@ namespace NWheels.Processing.Commands.Impl
                     {
                         resultValue = concreteExecutor(command);
                     }
-                    
+
                     EnqueueSuccessfulCommandResult(command, resultValue);
                 }
                 catch ( Exception e )
@@ -167,7 +167,7 @@ namespace NWheels.Processing.Commands.Impl
                 resultValue,
                 success: true);
 
-            _serviceBus.EnqueueMessage(resultMessage);
+            ReturnResultMessage(command, resultMessage);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -185,8 +185,22 @@ namespace NWheels.Processing.Commands.Impl
                 faultCode: fault != null ? fault.FaultCode : "InternalError",
                 faultSubCode: fault != null ? fault.FaultSubCode : string.Empty,
                 faultReason: fault != null ? fault.FaultReason : "Request failed due to an internal error.");
-            
-            _serviceBus.EnqueueMessage(resultMessage);
+
+            ReturnResultMessage(command, resultMessage);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ReturnResultMessage(AbstractCommandMessage command, CommandResultMessage resultMessage)
+        {
+            if ( command.IsSynchronous )
+            {
+                command.Result = resultMessage;
+            }
+            else
+            {
+                _serviceBus.EnqueueMessage(resultMessage);
+            }
         }
     }
 }

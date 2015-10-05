@@ -16,8 +16,8 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ServiceMethodCommandMessage(IFramework framework, ISession session, IMethodCallObject call)
-            : base(framework, session)
+        public ServiceMethodCommandMessage(IFramework framework, ISession session, IMethodCallObject call, bool synchronous)
+            : base(framework, session, synchronous)
         {
             _call = call;
         }

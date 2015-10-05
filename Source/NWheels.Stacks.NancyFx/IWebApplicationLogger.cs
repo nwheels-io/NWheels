@@ -20,6 +20,9 @@ namespace NWheels.Stacks.NancyFx
         [LogError]
         void RequestFailed(Exception error);
 
+        [LogError]
+        void CommandFailed(string command, Exception error);
+
         [LogVerbose]
         void WebApplicationActivating(string appName, Uri url, string localPath);
 

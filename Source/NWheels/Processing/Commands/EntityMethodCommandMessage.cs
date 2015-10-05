@@ -18,8 +18,8 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EntityMethodCommandMessage(IFramework framework, ISession session, IEntityId entityId, IMethodCallObject call)
-            : base(framework, session)
+        public EntityMethodCommandMessage(IFramework framework, ISession session, IEntityId entityId, IMethodCallObject call, bool synchronous)
+            : base(framework, session, synchronous)
         {
             _entityId = entityId;
             _call = call;

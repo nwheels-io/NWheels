@@ -13,7 +13,7 @@ function ($http, $q, $interval, $timeout) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    function enqueueCommand(callType, requestPath, requestData) {
+    function sendCommand(callType, requestPath, requestData) {
         var commandCompletion = $q.defer();
 
         $http.post(requestPath, requestData).then(
@@ -21,7 +21,13 @@ function ($http, $q, $interval, $timeout) {
                 if (callType === 'OneWay') {
                     commandCompletion.resolve({ success: true });
                 } else {
-                    m_pendingCommands[response.data.commandMessageId] = commandCompletion;
+                    var resultMessage = response.data;
+                    //m_pendingCommands[response.data.commandMessageId] = commandCompletion;
+                    if (resultMessage.success === true) {
+                        commandCompletion.resolve(resultMessage.result);
+                    } else {
+                        commandCompletion.reject(resultMessage);
+                    }
                 }
             },
             function (response) {
@@ -83,7 +89,7 @@ function ($http, $q, $interval, $timeout) {
     //-----------------------------------------------------------------------------------------------------------------
 
     return {
-        enqueueCommand: enqueueCommand,
+        sendCommand: sendCommand,
         receiveMessages: receiveMessages,
         startPollingMessages: startPollingMessages,
         stopPollingMessages: stopPollingMessages
@@ -373,8 +379,13 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 var parameterValue = Enumerable.Return(parameterContext).Select('ctx=>ctx.' + behavior.parameterExpressions[i]).Single();
                 requestData[behavior.parameterNames[i]] = parameterValue;
             }
-            var requestPath = 'command/' + behavior.callTargetType + '/' + behavior.contractName + '/' + behavior.operationName;
-            return commandService.enqueueCommand(behavior.callType, requestPath, requestData);
+            var requestPath = 
+                'command/' + behavior.callType + 
+                '/' + behavior.callTargetType + 
+                '/' + behavior.contractName + 
+                '/' + behavior.operationName;
+            
+            return commandService.sendCommand(behavior.callType, requestPath, requestData);
             /*            
                         var commandCompletion = $q.defer();
                         

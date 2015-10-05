@@ -9,8 +9,8 @@ namespace NWheels.Processing.Commands
 {
     public class TransactionScriptCommandMessage : ServiceMethodCommandMessage
     {
-        public TransactionScriptCommandMessage(IFramework framework, ISession session, Type transactionScriptType, IMethodCallObject call)
-            : base(framework, session, call)
+        public TransactionScriptCommandMessage(IFramework framework, ISession session, Type transactionScriptType, IMethodCallObject call, bool synchronous)
+            : base(framework, session, call, synchronous)
         {
             this.TransactionScriptType = transactionScriptType;
         }
