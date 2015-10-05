@@ -108,6 +108,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected override IOperand<IEntityRepository<TT.TContract>> GetNewEntityRepositoryExpression(
+                EntityInRepository entity,
                 MethodWriterBase writer,
                 IOperand<TT.TIndex1> partitionValue)
             {

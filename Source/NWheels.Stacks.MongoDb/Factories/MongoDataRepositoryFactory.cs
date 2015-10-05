@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using Autofac;
 using Hapil;
+using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
 using MongoDB.Bson;
@@ -13,6 +15,7 @@ using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
+using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
 
 // ReSharper disable ConvertToLambdaExpression
@@ -95,18 +98,64 @@ namespace NWheels.Stacks.MongoDb.Factories
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected override IOperand<IEntityRepository<TT.TContract>> GetNewEntityRepositoryExpression(
+                EntityInRepository entity,
                 MethodWriterBase writer,
                 IOperand<TT.TIndex1> partitionValue)
             {
+                Operand<object> partitionValueArgument;
+                Operand<Func<object, string>> partitionNameFuncArgument;
+                GetPartitionOperands(writer, entity, partitionValue, out partitionValueArgument, out partitionNameFuncArgument);
+
                 return writer.New<MongoEntityRepository<TT.TContract, TT.TImpl>>(
-                    // ownerRepo
-                    writer.This<MongoDataRepositoryBase>(),                             
-                    // metadataCache
+                    writer.This<MongoDataRepositoryBase>(), 
                     base.MetadataCacheField,
-                    // objectFactory
                     base.EntityFactoryField,
-                    // partitionValue
-                    object.ReferenceEquals(null, partitionValue) ? writer.Const<object>(null) : partitionValue.CastTo<object>());
+                    partitionValueArgument,
+                    partitionNameFuncArgument);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void GetPartitionOperands(
+                MethodWriterBase writer,
+                EntityInRepository entity, 
+                IOperand<TT.TIndex1> partitionValue,
+                out Operand<object> partitionValueArgument, 
+                out Operand<Func<object, string>> partitionNameFuncArgument)
+            {
+                if ( entity.PartitionedRepositoryProperty == null || object.ReferenceEquals(null, partitionValue) )
+                {
+                    partitionValueArgument = writer.Const<object>(null);
+                    partitionNameFuncArgument = writer.Const<Func<object, string>>(null);
+                    return;
+                }
+
+                var partitionAttribute = entity.Metadata.PartitionProperty.ContractPropertyInfo.GetCustomAttribute<PropertyContract.PartitionAttribute>();
+                partitionValueArgument = partitionValue.CastTo<object>();
+
+                if ( string.IsNullOrEmpty(partitionAttribute.PartitionNameProperty) )
+                {
+                    partitionNameFuncArgument = writer.Lambda<object, string>(obj => obj.Func<string>(x => x.ToString));
+                }
+                else
+                {
+                    var partitionNamePropertyInfo = GetPartitionNamePropertyInfo(partitionAttribute);
+
+                    using ( TT.CreateScope<TT.TIndex2>(entity.Metadata.PartitionProperty.ClrType) )
+                    {
+                        partitionNameFuncArgument = writer.Delegate<object, string>(
+                            (delw, obj) => {
+                                delw.Return(obj.Prop<TT.TIndex2>(partitionNamePropertyInfo).Func<string>(x => x.ToString));
+                            });
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private PropertyInfo GetPartitionNamePropertyInfo(PropertyContract.PartitionAttribute partitionAttribute)
+            {
+                return TypeMemberCache.Of<TT.TIndex1>().Properties.Single(p => p.Name.EqualsIgnoreCase(partitionAttribute.PartitionNameProperty));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -141,7 +190,7 @@ namespace NWheels.Stacks.MongoDb.Factories
                     {
                         Static.Void(RuntimeHelpers.CreateSearchIndex,
                             database,
-                            w.Const(MongoDataRepositoryBase.GetMongoCollectionName(entity.Metadata, null)),
+                            w.Const(MongoDataRepositoryBase.GetMongoCollectionName(entity.Metadata, null, null)),
                             w.Const(key.Properties.First().Name));
                     }
 
@@ -151,7 +200,7 @@ namespace NWheels.Stacks.MongoDb.Factories
                         {
                             Static.Void(RuntimeHelpers.CreateUniqueIndex,
                                 database,
-                                w.Const(MongoDataRepositoryBase.GetMongoCollectionName(entity.Metadata, null)),
+                                w.Const(MongoDataRepositoryBase.GetMongoCollectionName(entity.Metadata, null, null)),
                                 w.Const(uniqueProperty.Name));
                         }
                     }

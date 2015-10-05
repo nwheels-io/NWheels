@@ -44,7 +44,8 @@ namespace NWheels.Stacks.MongoDb
             MongoDataRepositoryBase ownerRepo, 
             ITypeMetadataCache metadataCache, 
             IEntityObjectFactory objectFactory, 
-            object partitionValue = null)
+            object partitionValue = null,
+            Func<object, string> partitionNameFunc = null)
         {
             _ownerRepo = ownerRepo;
             _framework = ownerRepo.Components.Resolve<IFramework>();
@@ -54,7 +55,7 @@ namespace NWheels.Stacks.MongoDb
             _keyPropertyExpression = GetKeyPropertyExpression(_metadata);
             _objectFactory = objectFactory;
             _logger = ownerRepo.Components.Resolve<IMongoDbLogger>();
-            _mongoCollection = ownerRepo.GetCollection<TEntityImpl>(MongoDataRepositoryBase.GetMongoCollectionName(_metadata, partitionValue));
+            _mongoCollection = ownerRepo.GetCollection<TEntityImpl>(MongoDataRepositoryBase.GetMongoCollectionName(_metadata, partitionValue, partitionNameFunc));
             _queryProvider = null;
         }
 

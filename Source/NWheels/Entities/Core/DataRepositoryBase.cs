@@ -14,6 +14,7 @@ namespace NWheels.Entities.Core
     public abstract class DataRepositoryBase : IApplicationDataRepository
     {
         private readonly Dictionary<Type, IEntityRepository> _entityRepositoryByContractType;
+        private readonly Dictionary<Type, IPartitionedRepository> _partitionedRepositoryByContractType;
         private readonly Dictionary<Type, Action<IDataRepositoryCallback>> _genericCallbacksByContractType;
         private readonly IComponentContext _components;
         private readonly IServiceBus _serviceBus;
@@ -29,6 +30,7 @@ namespace NWheels.Entities.Core
         protected DataRepositoryBase(IResourceConsumerScopeHandle consumerScope, IComponentContext components, bool autoCommit)
         {
             _entityRepositoryByContractType = new Dictionary<Type, IEntityRepository>();
+            _partitionedRepositoryByContractType = new Dictionary<Type, IPartitionedRepository>();
             _genericCallbacksByContractType = new Dictionary<Type, Action<IDataRepositoryCallback>>();
             _autoCommit = autoCommit;
             _components = components;
@@ -114,6 +116,13 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void RegisterPartitionedRepository<TEntityContract, TPartition>(IPartitionedRepository<TEntityContract, TPartition> repo)
+        {
+            _partitionedRepositoryByContractType.Add(typeof(TEntityContract), (IPartitionedRepository)repo);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IEntityRepository GetEntityRepository(Type entityContractType)
         {
             IEntityRepository repository;
@@ -143,6 +152,47 @@ namespace NWheels.Entities.Core
                 }
             }
 
+            return false;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEntityRepository GetEntityRepository(object entity)
+        {
+            IEntityRepository repository;
+
+            if ( TryGetEntityRepository(entity, out repository) )
+            {
+                return repository;
+            }
+
+            throw new KeyNotFoundException(
+                "Entity repository for contract '" + ((IObject)entity).ContractType.FullName + "' could not be found in the data repository.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool TryGetEntityRepository(object entity, out IEntityRepository entityRepository)
+        {
+            var contractType = ((IObject)entity).ContractType;
+            var partitioned = (entity.As<IPersistableObject>() as IPartitionedObject);
+
+            if ( partitioned != null )
+            {
+                IPartitionedRepository partitionedRepository;
+
+                if ( _partitionedRepositoryByContractType.TryGetValue(contractType, out partitionedRepository) )
+                {
+                    entityRepository = partitionedRepository[partitioned.PartitionValue];
+                    return true;
+                }
+            }
+            else
+            {
+                return TryGetEntityRepository(contractType, out entityRepository);
+            }
+
+            entityRepository = null;
             return false;
         }
 

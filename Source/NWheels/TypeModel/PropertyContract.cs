@@ -88,6 +88,10 @@ namespace NWheels.DataObjects
             }
 
             #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string PartitionNameProperty { get; set; }
         }
 
         public static class Semantic

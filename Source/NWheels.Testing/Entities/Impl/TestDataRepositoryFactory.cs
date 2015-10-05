@@ -60,6 +60,7 @@ namespace NWheels.Testing.Entities.Impl
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected override IOperand<IEntityRepository<TypeTemplate.TContract>> GetNewEntityRepositoryExpression(
+                EntityInRepository entity,
                 MethodWriterBase writer,
                 IOperand<TypeTemplate.TIndex1> partitionValue)
             {

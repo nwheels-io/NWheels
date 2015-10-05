@@ -120,8 +120,10 @@
     <Compile Include="Endpoints\INetworkEndpointTransport.cs" />
     <Compile Include="Endpoints\IAbstractNetwrokTransportConfig.cs" />
     <Compile Include="Endpoints\INetworkProtocolConfigContainer.cs" />
+    <Compile Include="Entities\Core\IPartitionedObject.cs" />
     <Compile Include="Entities\Core\SchemaMigrationCollection.cs" />
     <Compile Include="Entities\EntityChangeMessage.cs" />
+    <Compile Include="Entities\Factories\ImplementIPartitionedObjectConvention.cs" />
     <Compile Include="Entities\Impl\PartitionedRepository.cs" />
     <Compile Include="Entities\IPartitionedRepository.cs" />
     <Compile Include="Exceptions\IFaultException.cs" />

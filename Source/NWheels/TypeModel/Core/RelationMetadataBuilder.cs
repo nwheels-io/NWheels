@@ -6,7 +6,10 @@
 
         public override string ReferenceName
         {
-            get { return RelatedPartyType.Name; }
+            get
+            {
+                return (RelatedPartyType != null ? RelatedPartyType.Name : null);
+            }
         }
 
         #endregion

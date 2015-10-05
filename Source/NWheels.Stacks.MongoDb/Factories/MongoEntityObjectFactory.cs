@@ -35,6 +35,7 @@ namespace NWheels.Stacks.MongoDb.Factories
                 new EntityObjectStateConvention(), 
                 new ImplementIEntityObjectConvention(metaType, propertyMap), 
                 new ImplementIEntityPartObjectConvention(metaType), 
+                new ImplementIPartitionedObjectConvention(metaType), 
                 new EnsureDomainObjectConvention(metaType), 
                 new DependencyInjectionConvention(metaType, propertyMap, forceApply: true), 
                 new NestedObjectsConvention(propertyMap), 

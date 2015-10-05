@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Autofac;
 using MongoDB.Driver;
@@ -79,17 +80,17 @@ namespace NWheels.Stacks.MongoDb
         {
             foreach ( var entityToInsert in base.InsertBatch )
             {
-                ((IMongoEntityRepository)base.GetEntityRepository(entityToInsert.ContractType)).CommitInsert(entityToInsert);
+                ((IMongoEntityRepository)base.GetEntityRepository(entityToInsert)).CommitInsert(entityToInsert);
             }
             
             foreach ( var entityToUpdate in base.UpdateBatch )
             {
-                ((IMongoEntityRepository)base.GetEntityRepository(entityToUpdate.ContractType)).CommitUpdate(entityToUpdate);
+                ((IMongoEntityRepository)base.GetEntityRepository(entityToUpdate)).CommitUpdate(entityToUpdate);
             }
 
             foreach ( var entityToDelete in base.DeleteBatch )
             {
-                ((IMongoEntityRepository)base.GetEntityRepository(entityToDelete.ContractType)).CommitDelete(entityToDelete);
+                ((IMongoEntityRepository)base.GetEntityRepository(entityToDelete)).CommitDelete(entityToDelete);
             }
         }
 
@@ -145,11 +146,11 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal static string GetMongoCollectionName(ITypeMetadata metadata, object partitionValue)
+        internal static string GetMongoCollectionName(ITypeMetadata metadata, object partitionValue, Func<object, string> partitionNameFunc)
         {
             if ( metadata.BaseType != null )
             {
-                return GetMongoCollectionName(metadata.BaseType, partitionValue);
+                return GetMongoCollectionName(metadata.BaseType, partitionValue, partitionNameFunc);
             }
 
             var baseName = metadata.Name.TrimLead("Abstract");

@@ -9,7 +9,7 @@ using NWheels.Logging;
 
 namespace NWheels.Entities.Impl
 {
-    public class PartitionedRepository<TEntity, TPartition> : IPartitionedRepository<TEntity, TPartition>
+    public class PartitionedRepository<TEntity, TPartition> : IPartitionedRepository<TEntity, TPartition>, IPartitionedRepository
     {
         private readonly Func<TPartition, IEntityRepository<TEntity>> _repositoryFactory;
         private readonly IDomainContextLogger _logger;
@@ -38,6 +38,20 @@ namespace NWheels.Entities.Impl
                         _logger.CreatRepositoryPartition(entity: typeof(TEntity), partitionValue: partitionValue);
                         return _repositoryFactory(key);
                     });
+            }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Implementation of IPartitionedRepository
+
+        IEntityRepository IPartitionedRepository.this[object partition]
+        {
+            get
+            {
+                return (IEntityRepository)this[(TPartition)partition];
             }
         }
 

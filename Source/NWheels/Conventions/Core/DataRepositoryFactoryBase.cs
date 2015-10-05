@@ -244,7 +244,7 @@ namespace NWheels.Conventions.Core
                             .GetPropertyBackingField(entity.RepositoryProperty)
                             .AsOperand<IEntityRepository<TT.TContract>>();
 
-                        backingField.Assign(GetNewEntityRepositoryExpression(cw, partitionValue: null));
+                        backingField.Assign(GetNewEntityRepositoryExpression(entity, cw, partitionValue: null));
                         cw.This<DataRepositoryBase>().Void(x => x.RegisterEntityRepository<TT.TContract, TT.TImpl>, backingField);
                     }
                 });
@@ -272,12 +272,14 @@ namespace NWheels.Conventions.Core
                             .AsOperand<IPartitionedRepository<TT.TContract, TT.TIndex1>>();
 
                         backingField.Assign(cw.New<PartitionedRepository<TT.TContract, TT.TIndex1>>(
-                            cw.Lambda<TT.TIndex1, IEntityRepository<TT.TContract>>(partitionValue => this.GetNewEntityRepositoryExpression(cw, partitionValue)),
+                            cw.Lambda<TT.TIndex1, IEntityRepository<TT.TContract>>(partitionValue => this.GetNewEntityRepositoryExpression(entity, cw, partitionValue)),
                             Static.Func(ResolutionExtensions.Resolve<IDomainContextLogger>, cw.This<DataRepositoryBase>().Prop(x => x.Components))
                         ));
 
+                        cw.This<DataRepositoryBase>().Void(x => x.RegisterPartitionedRepository<TT.TContract, TT.TIndex1>, backingField);
+
                         var repoField = writer.Field<IEntityRepository<TT.TContract>>("m_" + entity.Metadata.Name);
-                        repoField.Assign(GetNewEntityRepositoryExpression(cw, partitionValue: null));
+                        repoField.Assign(GetNewEntityRepositoryExpression(entity, cw, partitionValue: null));
                         cw.This<DataRepositoryBase>().Void(x => x.RegisterEntityRepository<TT.TContract, TT.TImpl>, repoField);
 
                         _repositoryFieldByContract[entity.ContractType] = repoField;
@@ -294,6 +296,7 @@ namespace NWheels.Conventions.Core
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected abstract IOperand<IEntityRepository<TT.TContract>> GetNewEntityRepositoryExpression(
+                EntityInRepository entity,
                 MethodWriterBase writer,
                 IOperand<TT.TIndex1> partitionValue);
 
