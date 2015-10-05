@@ -239,6 +239,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             data: {},
             state: {}
         };
+        scope.appScope = $rootScope.appScope;
 
         if (scope.uidl) {
             console.log('uidlService::implementController', scope.uidl.qualifiedName);
@@ -817,6 +818,7 @@ function ($http, $scope, $rootScope, uidlService, entityService, commandService)
         $rootScope.entityService = entityService;
         $rootScope.uidlService = uidlService;
         $rootScope.commandService = commandService;
+        $rootScope.appScope = $scope;
 
         uidlService.implementController($scope);
 
