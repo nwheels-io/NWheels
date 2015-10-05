@@ -11,32 +11,19 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
 {
-    [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-    public class Crud : WidgetBase<Crud, Empty.Data, Empty.State>
+    [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "Crud")]
+    public class Crud<TEntity> : WidgetBase<Crud<TEntity>, Empty.Data, ICrudViewState<TEntity>>
+        where TEntity : class
     {
         public Crud(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
-            DisplayColumns = new List<string>();
-            Form = new CrudForm("Form", this);
+            this.WidgetType = "Crud";
+            this.TemplateName = "Crud";
+            this.EntityName = typeof(TEntity).Name.TrimLead("I").TrimTail("Entity");
+            this.Form = new CrudForm<TEntity, Empty.Data, ICrudFormState<TEntity>>("Form", this);
+            this.DisplayColumns = new List<string>();
         }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override void DescribePresenter(PresenterBuilder<Crud, Empty.Data, Empty.State> presenter)
-        {
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [DataMember]
-        public string EntityName { get; set; }
-        [DataMember]
-        public string EntityMetaType { get; set; }
-        [DataMember]
-        public List<string> DisplayColumns { get; set; }
-        [DataMember, ManuallyAssigned]
-        public CrudForm Form { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -51,30 +38,14 @@ namespace NWheels.UI.Toolbox
         {
             return new WidgetUidlNode[] { Form };
         }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "Crud")]
-    public class Crud<TEntity> : Crud
-        where TEntity : class
-    {
-        public Crud(string idName, ControlledUidlNode parent)
-            : base(idName, parent)
-        {
-            this.WidgetType = "Crud";
-            this.TemplateName = "Crud";
-            this.EntityName = typeof(TEntity).Name.TrimLead("I").TrimTail("Entity");
-            this.Form = new CrudForm<TEntity>("Form", this);
-        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Crud<TEntity> Column<T>(Expression<Func<TEntity, T>> propertySelector)
         {
             var property = propertySelector.GetPropertyInfo();
-            
-            if ( this.DisplayColumns == null )
+
+            if (this.DisplayColumns == null)
             {
                 this.DisplayColumns = new List<string>();
             }
@@ -85,9 +56,55 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [DataMember]
+        public string EntityName { get; set; }
+        [DataMember]
+        public string EntityMetaType { get; set; }
+        [DataMember]
+        public List<string> DisplayColumns { get; set; }
+        [DataMember, ManuallyAssigned]
+        public CrudForm<TEntity, Empty.Data, ICrudFormState<TEntity>> Form { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void DescribePresenter(PresenterBuilder<Crud<TEntity>, Empty.Data, ICrudViewState<TEntity>> presenter)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void OnBuild(UidlBuilder builder)
         {
-            base.EntityMetaType = builder.RegisterMetaType(typeof(TEntity));
+            this.EntityMetaType = builder.RegisterMetaType(typeof(TEntity));
         }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [ViewModelContract]
+    public interface ICrudViewState<TEntity>
+    {
+        TEntity CurrentEntity { get; set; }
+        ICollection<ICrudNavigatedEntity> NavigatedEntities { get; set; }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [ViewModelContract]
+    public interface ICrudNavigatedEntity
+    {
+        Type Contract { get; set; }
+        string Name { get; set; }
+        string MetaType { get; set; }
+        object Id { get; set; }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [ViewModelContract]
+    public interface ICrudFormState<TEntity>
+    {
+        TEntity CurrentEntity { get; set; }
+        ICollection<ICrudNavigatedEntity> NavigatedEntities { get; set; }
     }
 }

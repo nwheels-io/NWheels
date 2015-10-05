@@ -12,4 +12,11 @@ namespace NWheels.UI
         public TState State { get; set; }
         public TInput Input { get; set; }
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class ViewModel<TData, TState, TInput, TParent> : ViewModel<TData, TState, TInput>
+    {
+        public TParent ParentModel { get; set; }
+    }
 }
