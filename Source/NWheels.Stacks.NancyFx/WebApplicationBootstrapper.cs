@@ -35,7 +35,7 @@ namespace NWheels.Stacks.NancyFx
             _module = module;
             _loggingHook = loggingHook;
             _sessionHook = sessionHook;
-            _contentRootPath = frameworkUIConfig.WebContentRootPath;
+            _contentRootPath = PathUtility.GetAbsolutePath(frameworkUIConfig.WebContentRootPath, relativeTo: PathUtility.HostBinPath());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
