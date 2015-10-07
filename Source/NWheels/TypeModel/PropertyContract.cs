@@ -8,8 +8,56 @@ namespace NWheels.DataObjects
     public static class PropertyContract
     {
         [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-        public class KeyAttribute : PropertyContractAttribute
+        public abstract class KeyAttribute : PropertyContractAttribute
         {
+            protected KeyAttribute(KeyKind kind)
+            {
+                this.Kind = kind;
+            }
+            public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+            {
+                base.ApplyTo(property, cache);
+                var key = new KeyMetadataBuilder() {
+                    Kind = this.Kind
+                };
+                key.Properties.Add(property);
+                ConfigureKey(key, property, cache);
+                property.DeclaringContract.AllKeys.Add(key);
+                property.DeclaringContract.PrimaryKey = key;
+            }
+            public KeyKind Kind { get; private set; }
+            protected abstract void ConfigureKey(KeyMetadataBuilder key, PropertyMetadataBuilder property, TypeMetadataCache cache);
+        }
+
+        [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+        public class SearchKeyAttribute : KeyAttribute
+        {
+            public SearchKeyAttribute() : base(KeyKind.Index)
+            {
+            }
+            protected override void ConfigureKey(KeyMetadataBuilder key, PropertyMetadataBuilder property, TypeMetadataCache cache)
+            {
+                key.Name = "SK_" + property.Name;
+            }
+        }
+
+        [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+        public class PrimaryKeyAttribute : KeyAttribute
+        {
+            public PrimaryKeyAttribute() : base(KeyKind.Primary)
+            {
+            }
+            public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+            {
+                base.ApplyTo(property, cache);
+                property.Kind = PropertyKind.Scalar;
+                property.Role = PropertyRole.Key;
+                property.Validation.IsRequired = true;
+            }
+            protected override void ConfigureKey(KeyMetadataBuilder key, PropertyMetadataBuilder property, TypeMetadataCache cache)
+            {
+                key.Name = "PK_" + property.DeclaringContract.Name;
+            }
         }
 
         [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
