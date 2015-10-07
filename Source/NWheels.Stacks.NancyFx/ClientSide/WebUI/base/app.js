@@ -837,7 +837,7 @@ function ($http, $scope, $rootScope, uidlService, entityService, commandService)
         $rootScope.currentLocale = uidlService.getCurrentLocale();
         $scope.pageTitle = $scope.translate($scope.app.text) + ' - ' + $scope.translate($scope.currentScreen.text);
 
-        commandService.startPollingMessages();
+        //commandService.startPollingMessages();
     });
 
     /*
