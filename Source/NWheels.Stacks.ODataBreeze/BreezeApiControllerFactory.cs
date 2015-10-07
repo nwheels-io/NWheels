@@ -15,6 +15,7 @@ using NWheels.Endpoints;
 using NWheels.Exceptions;
 using NWheels.Extensions;
 using System.Web.Http;
+using Autofac;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
@@ -88,7 +89,9 @@ namespace NWheels.Stacks.ODataBreeze
 
             private static void ImplementConstructor(ImplementationClassWriter<TypeTemplate.TBase> writer)
             {
-                writer.Constructor<IFramework, ITypeMetadataCache>((cw, framework, metadataCache) => cw.Base(framework, metadataCache));
+                writer.Constructor<IComponentContext, IFramework, ITypeMetadataCache>((cw, components, framework, metadataCache) => 
+                    cw.Base(components, framework, metadataCache)
+                );
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

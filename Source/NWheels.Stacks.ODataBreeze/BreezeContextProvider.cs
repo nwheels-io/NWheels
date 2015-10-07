@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Autofac;
 using Breeze.ContextProvider;
 using Hapil;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Csdl;
 using Microsoft.Data.Edm.Library;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.Extensions;
 using NWheels.Entities;
@@ -19,14 +21,16 @@ namespace NWheels.Stacks.ODataBreeze
     public class BreezeContextProvider<TDataRepo> : ContextProvider
         where TDataRepo : class, IApplicationDataRepository
     {
+        private readonly IComponentContext _components;
         private readonly IFramework _framework;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly TDataRepo _querySource;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public BreezeContextProvider(IFramework framework, ITypeMetadataCache metadataCache)
+        public BreezeContextProvider(IComponentContext components, IFramework framework, ITypeMetadataCache metadataCache)
         {
+            _components = components;
             _framework = framework;
             _metadataCache = metadataCache;
             _querySource = framework.NewUnitOfWork<TDataRepo>(autoCommit: false);
@@ -43,7 +47,7 @@ namespace NWheels.Stacks.ODataBreeze
 
         protected override string BuildJsonMetadata()
         {
-            var builder = new BreezeMetadataBuilder(_metadataCache);
+            var builder = new BreezeMetadataBuilder(_metadataCache, _components.Resolve<IDomainObjectFactory>(), _components.Resolve<IEntityObjectFactory>());
 
             builder.AddDataService("rest/");
 

@@ -21,7 +21,7 @@ namespace NWheels.Stacks.MongoDb
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<MongoEntityObjectFactory>().SingleInstance();
+            builder.RegisterType<MongoEntityObjectFactory>().As<MongoEntityObjectFactory, EntityObjectFactory, IEntityObjectFactory>() .SingleInstance();
             builder.RegisterType<MongoDataRepositoryFactory>().As<DataRepositoryFactoryBase, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<MongoDatabaseInitializer>().As<IStorageInitializer>().SingleInstance();
             builder.NWheelsFeatures().Entities().UseDefaultIdsOfType<ObjectId>();

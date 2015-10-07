@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using Autofac;
 using Breeze.ContextProvider;
 using Breeze.WebApi2;
 using Newtonsoft.Json.Linq;
@@ -35,9 +36,9 @@ namespace NWheels.Stacks.ODataBreeze
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected BreezeApiControllerBase(IFramework framework, ITypeMetadataCache metadataCache)
+        protected BreezeApiControllerBase(IComponentContext components, IFramework framework, ITypeMetadataCache metadataCache)
         {
-            _contextProvider = new BreezeContextProvider<TDataRepo>(framework, metadataCache);
+            _contextProvider = new BreezeContextProvider<TDataRepo>(components, framework, metadataCache);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

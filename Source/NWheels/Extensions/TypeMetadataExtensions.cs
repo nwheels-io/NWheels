@@ -43,7 +43,7 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static Type GetImplementationBy<TFactory>(this ITypeMetadata metadata) where TFactory : IEntityObjectFactory
+        public static Type GetImplementationBy<TFactory>(this ITypeMetadata metadata) where TFactory : class
         {
             return GetImplementationBy(metadata, typeof(TFactory));
         }
