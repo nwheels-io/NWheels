@@ -49,10 +49,13 @@ namespace NWheels.DataObjects
             }
             public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
             {
-                base.ApplyTo(property, cache);
-                property.Kind = PropertyKind.Scalar;
-                property.Role = PropertyRole.Key;
-                property.Validation.IsRequired = true;
+                if ( property.DeclaringContract.PrimaryKey == null )
+                {
+                    base.ApplyTo(property, cache);
+                    property.Kind = PropertyKind.Scalar;
+                    property.Role = PropertyRole.Key;
+                    property.Validation.IsRequired = true;
+                }
             }
             protected override void ConfigureKey(KeyMetadataBuilder key, PropertyMetadataBuilder property, TypeMetadataCache cache)
             {
