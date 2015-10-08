@@ -28,6 +28,13 @@ namespace NWheels.Tools.TestBoard
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected override void OnExit(object sender, EventArgs e)
+        {   
+            base.OnExit(sender, e);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             try

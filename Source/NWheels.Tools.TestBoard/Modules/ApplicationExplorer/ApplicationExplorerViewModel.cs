@@ -33,18 +33,42 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
     {
         private readonly IApplicationControllerService _controllerService;
         private readonly IShell _shell;
+        private readonly IMessageBoxService _messageBoxService;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
-        public ApplicationExplorerViewModel(IEventAggregator events, IShell shell, IApplicationControllerService controllerService)
+        public ApplicationExplorerViewModel(
+            IEventAggregator events, 
+            IShell shell, 
+            IApplicationControllerService controllerService, 
+            IMessageBoxService messageBoxService)
         {
             _shell = shell;
             _controllerService = controllerService;
+            _messageBoxService = messageBoxService;
             
             this.ExplorerItems = new ObservableCollection<ExplorerItem>();
 
             events.Subscribe(this);
+            Application.Current.MainWindow.Closing += MainWindow_Closing;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if ( _controllerService.Applications.Any(app => app.CurrentState != NodeState.Down) )
+            {
+                if ( _messageBoxService.WarningYesNo("One or more applications are still running. Do you want to stop them and exit?") )
+                {
+                    _controllerService.CloseAll();
+                }
+                else
+                {
+                    e.Cancel = true;
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

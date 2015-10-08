@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Menus;

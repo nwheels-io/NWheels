@@ -92,6 +92,16 @@ namespace NWheels.Tools.TestBoard.Services
 
             using ( TakeExclusiveAccess() )
             {
+                if ( application.CanDeactivate() )
+                {
+                    application.Deactivate();
+                }
+
+                if ( application.CanUnload() )
+                {
+                    application.Unload();
+                }
+
                 if ( _applicationByFilePath.ContainsValue(application) )
                 {
                     _applicationByFilePath.Remove(_applicationByFilePath.First(kvp => kvp.Value == application).Key);
