@@ -2,6 +2,12 @@
 
 var theApp = angular.module('theApp', ['breeze.angular']);
 
+//-----------------------------------------------------------------------------------------------------------------
+
+function toCamelCase(s) {
+    return s.charAt(0).toLowerCase() + s.slice(1);
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.service('commandService',
@@ -129,12 +135,6 @@ function ($q, $http, $rootScope, $timeout, commandService) {
         }
 
         m_currentScreen = m_index.screens[m_app.defaultInitialScreenQualifiedName];
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    function toCamelCase(s) {
-        return s.charAt(0).toLowerCase() + s.slice(1);
     }
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -531,6 +531,12 @@ function ($q, $http, $rootScope, $timeout, commandService) {
         implement: function (scope) {
             var metaType = scope.uidlService.getMetaType(scope.uidl.entityMetaType);
 
+            scope.metaType = metaType;
+            
+            if (!scope.uidl.displayColumns || !scope.uidl.displayColumns.length) {
+                scope.uidl.displayColumns = scope.uidl.defaultDisplayColumns;
+            }
+            
             scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
                 return metaType.properties[toCamelCase(name)];
             }).ToArray();
@@ -542,6 +548,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.editEntity = function (entity) {
+                scope.entityService.editEntity(entity);
                 scope.model.entity = entity;
                 scope.uiShowCrudForm = true;
             };
@@ -569,6 +576,11 @@ function ($q, $http, $rootScope, $timeout, commandService) {
         implement: function (scope) {
             var metaType = scope.uidlService.getMetaType(scope.uidl.entityMetaType);
 
+            scope.tabSetIndex = 0;
+            scope.plainFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers!='Tab' && $.modifiers!='Section'").ToArray();
+            scope.sectionFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Section'").ToArray();
+            scope.tabSetFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Tab'").ToArray();
+
             scope.notifyFormClosing = function () {
                 scope.$emit(scope.uidl.qualifiedName + ':Closing');
             };
@@ -581,6 +593,10 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.cancelEdit = function () {
                 scope.entityService.rejectChanges();
                 scope.notifyFormClosing();
+            };
+            
+            scope.selectTab = function(index) {
+                scope.tabSetIndex = index;
             };
         }
     };
@@ -649,6 +665,7 @@ function ($http, $q, $timeout, breeze, logger) {
     var service = {
         createEntity: createEntity,
         queryEntity: queryEntity,
+        editEntity: editEntity,
         hasChanges: hasChanges,
         saveChanges: saveChanges,
         rejectChanges: rejectChanges,
@@ -681,6 +698,12 @@ function ($http, $q, $timeout, breeze, logger) {
             logger.error(error.message, "Query failed");
             return $q.reject(error); // so downstream promise users know it failed
         }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function editEntity(entityObj) {
+        //manager.attachEntity(entityObj, breeze.EntityState.Modified);
     }
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -948,6 +971,58 @@ theApp.directive('uidlWidget', ['uidlService', 'entityService', function (uidlSe
                 console.log('uidlWidget::watch(uidl)', oldValue ? oldValue.qualifiedName : '0', '->', $scope.uidl ? $scope.uidl.qualifiedName : '0');
                 uidlService.implementController($scope);
             });
+        }
+    };
+}]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+theApp.directive('uidlGridField', ['uidlService', 'entityService', function (uidlService, entityService) {
+    return {
+        scope: {
+            property: '=',
+            value: '='
+        },
+        restrict: 'E',
+        replace: true,
+        link: function (scope, elem, attrs) {
+        },
+        templateUrl: 'uidl-element-template-GridField',
+        controller: function ($scope) {
+        }
+    };
+}]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uidlService, entityService) {
+    return {
+        scope: {
+            uidl: '=',
+            entity: '='
+        },
+        restrict: 'E',
+        replace: true,
+        link: function (scope, elem, attrs) {
+            //console.log('uidlWidget::link', scope.uidl.qualifiedName);
+            //uidlService.implementController(scope);
+        },
+        templateUrl: 'uidl-element-template-FormField', // '<ng-include src="\'uidl-element-template-FormField\'"></ng-include>',
+        controller: function ($scope) {
+            $scope.uidlService = uidlService;
+            $scope.entityService = entityService;
+            
+            if ($scope.uidl.fieldType==='Lookup') {
+                var metaType = uidlService.getMetaType($scope.uidl.lookupEntityMetaType);
+
+                $scope.lookupMetaType = metaType;
+                $scope.lookupValueProperty = metaType.primaryKey.propertyNames[0];
+                $scope.lookupTextProperty = metaType.defaultDisplayPropertyNames[0];
+                
+                $scope.entityService.queryEntity($scope.uidl.lookupEntityName).then(function (data) {
+                    $scope.lookupResultSet = data.results;
+                });
+            }
         }
     };
 }]);

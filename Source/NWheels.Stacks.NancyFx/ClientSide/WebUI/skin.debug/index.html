@@ -18,12 +18,19 @@
         <script src="base/app.js"></script>
         
         <style>
-            body, button, input { font-family: Consolas; font-size: 14pt; padding:0px; margin:0px; }
+            body, button, input, select { font-family: Consolas; font-size: 14pt; padding:0px; margin:0px; }
             div.border { padding : 10px; margin : 10px; border : 2px solid black; }
             div.content-example { padding : 10px; margin : 10px; border : 2px solid #e0e0e0; background-color: #e0e0e0; }
             div.inline-alert { padding : 5px; margin : 5px 10px 5px 10px; border : none; background-color: yellow; }
             div.layout { padding : 0; margin : 0; border : none; }
             div.flow { float: left; }
+            
+            td.tabSet { background-color: #e0e0e0; padding:10px 0px 5px 0px !important; } 
+            div.tab { float: left; background-color: black;color:lightgray;padding:10px;margin:7px 2px 0 0; height:23px; cursor:pointer;}
+            div.tab:hover { color:white; }
+            div.tab.selected { background-color: white; color:black; margin:0px 2px 0 0;height:30px;}
+            div.tabContent { background-color: white; margin:0; padding: 10px; clear:left; }
+            
             .clearfix { overflow: auto; zoom: 1; } 
             .bold { font-weight:bold; } 
             table.data { margin:5px;border-collapse: separate; border-spacing: 2px; }
@@ -33,7 +40,7 @@
             table.data tbody tr { background-color: white; }
             table.data tbody tr:hover { background-color: #f0f0f0; cursor:pointer; }
 
-            table.dataForm { margin:5px;border-collapse: collapse; border-spacing: 3px; }
+            table.dataForm { margin:5px;border-collapse: collapse; border-spacing: 3px;min-width: 500px; }
             table.dataForm th, table.dataForm td { font-weight:normal;  padding:10px 15px 10px 15px;  }
             table.dataForm th { background-color:black; color:white;font-size: 12pt;}
             table.dataForm td { font-size: 11pt; height:24px;}
@@ -349,7 +356,9 @@
                     </thead>
                     <tbody>
                         <tr ng-repeat="resultRow in resultSet">
-                            <td ng-repeat="property in displayProperties" ng-click="editEntity(resultRow)">{{resultRow[property.name]}}</td>
+                            <td ng-repeat="property in displayProperties" ng-click="editEntity(resultRow)">
+                                <uidl-grid-field property="property" value="resultRow[property.name]"></uidl-grid-field>
+                            </td>
                             <td ng-class="{danger: resultRow.uiShowConfirmDelete}" style="width:130px;">
                                 <a href="" ng-hide="resultRow.uiShowConfirmDelete" ng-click="resultRow.uiShowConfirmDelete=true"><b>Delete</b></a>
                                 <span ng-show="resultRow.uiShowConfirmDelete" >
@@ -372,9 +381,27 @@
                 </div>
                 <table class="dataForm clearfix">
                     <tbody>
-                        <tr ng-repeat="field in uidl.displayFields">
-                            <td>{{translate(field)}}</td>
-                            <td><input type="text" ng-model="parentModel.entity[field]" /></td>
+                        <tr ng-repeat="field in plainFields">
+                            <td>{{translate(field.propertyName)}}</td>
+                            <td>
+                                <uidl-form-field uidl="field" entity="parentModel.entity" />
+                                <!--input type="text" ng-model="parentModel.entity[field.propertyName]" /-->
+                            </td>
+                        </tr>
+                        <tr ng-if="tabSetFields">
+                            <td colspan="2" class="tabSet">
+                                <div ng-class="{tab: true, selected: $index==tabSetIndex}"                                     
+                                    ng-repeat="field in tabSetFields"
+                                    ng-click="selectTab($index)">
+                                    {{translate(field.propertyName)}}
+                                </div>
+                                <div class="tabContent clearfix">
+                                        {{field.propertyName}}
+                                    <div class="Layout" ng-repeat="field in tabSetFields" ng-if="$index==tabSetIndex">
+                                        <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget"></uidl-widget>
+                                    </div>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -385,6 +412,29 @@
             </div>
         </script>
 
+        <script type="text/ng-template" id="uidl-element-template-GridField">
+            <div class="layout">
+                <span ng-if="property.kind!=='Relation'">{{value}}</span>
+                <a ng-if="property.kind==='Relation'">Go to</a>
+            </div>
+        </script>
+        
+        <script type="text/ng-template" id="uidl-element-template-FormField">
+            <div class="layout">
+                <span ng-if="uidl.fieldType==='Label'">{{entity[uidl.propertyName]}}</span>
+                <input ng-if="uidl.fieldType==='Edit'" type="text" ng-model="entity[uidl.propertyName]" />
+                <select ng-if="uidl.fieldType==='Lookup'" ng-options="item as item[lookupTextProperty] for item in lookupResultSet track by item.Id" ng-model="entity[uidl.propertyName]"></select>
+            </div>
+        </script>
+
+        <script type="text/ng-template" id="uidl-element-template-FormField">
+            <div class="layout">
+                <span ng-if="uidl.fieldType==='Label'">{{entity[uidl.propertyName]}}</span>
+                <input ng-if="uidl.fieldType==='Edit'" type="text" ng-model="entity[uidl.propertyName]" />
+                <select ng-if="uidl.fieldType==='Lookup'" ng-options="item as item[lookupTextProperty] for item in lookupResultSet track by item.Id" ng-model="entity[uidl.propertyName]"></select>
+            </div>
+        </script>
+        
         <!------ HARD CODED  -------->
         
         <script type="text/ng-template" id="uidl-element-template-AffiliateSignUpForm">

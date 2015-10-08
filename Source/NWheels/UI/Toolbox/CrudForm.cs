@@ -123,12 +123,19 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
+        {
+            return this.Fields.Select(f => f.NestedWidget).Where(w => w != null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void BuildFields(UidlBuilder builder)
         {
             var metaType = builder.MetadataCache.GetTypeMetadata(typeof(TEntity));
             var fieldsToAdd = new HashSet<string>();
 
-            if (_visibleFields.Count > 0)
+            if ( _visibleFields.Count > 0 )
             {
                 fieldsToAdd.UnionWith(_visibleFields);
             }
@@ -142,10 +149,13 @@ namespace NWheels.UI.Toolbox
 
             Fields.AddRange(fieldsToAdd.Select(f => new CrudFormField(f)));
 
-            foreach (var field in Fields)
+            foreach ( var field in Fields )
             {
-                field.Build(metaType);
+                field.Build(this, metaType);
             }
+
+            Fields.Sort((x, y) => y.OrderIndex.CompareTo(x.OrderIndex));
+            builder.BuildNodes(this.Fields.Select(f => f.NestedWidget).Where(widget => widget != null).Cast<AbstractUidlNode>().ToArray());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -189,15 +199,18 @@ namespace NWheels.UI.Toolbox
         public string LookupEntityMetaType { get; set; }
         [DataMember]
         public string LookupFilterExpression { get; set; }
+        [DataMember]
+        public WidgetUidlNode NestedWidget { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         internal IPropertyMetadata MetaProperty { get; private set; }
+        internal int OrderIndex { get; private set; }
         internal Type LookupEntityContract { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal void Build(ITypeMetadata metaType)
+        internal void Build(ControlledUidlNode parent, ITypeMetadata metaType)
         {
             this.MetaProperty = metaType.GetPropertyByName(this.PropertyName);
 
@@ -210,8 +223,37 @@ namespace NWheels.UI.Toolbox
             if ( MetaProperty.Relation != null && MetaProperty.Relation.RelatedPartyType != null )
             {
                 this.LookupEntityName = MetaProperty.Relation.RelatedPartyType.Name;
+                this.LookupEntityContract = MetaProperty.Relation.RelatedPartyType.ContractType;
                 this.LookupEntityMetaType = MetaProperty.Relation.RelatedPartyType.ContractType.AssemblyQualifiedNameNonVersioned();
             }
+
+            this.OrderIndex = GetOrderIndex();
+            this.NestedWidget = CreateNestedWidget(parent);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private WidgetUidlNode CreateNestedWidget(ControlledUidlNode parent)
+        {
+            Type widgetClosedType = null;
+            object widgetInstance = null;
+
+            switch ( this.FieldType )
+            {
+                case CrudFieldType.LookupMany:
+                    widgetClosedType = typeof(Crud<>).MakeGenericType(this.LookupEntityContract);
+                    widgetInstance = Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName, parent);
+                    break;
+                case CrudFieldType.NestedForm:
+                    widgetClosedType = typeof(CrudForm<,,>).MakeGenericType(
+                        this.LookupEntityContract, 
+                        typeof(Empty.Data), 
+                        typeof(ICrudFormState<>).MakeGenericType(this.LookupEntityContract));
+                    widgetInstance = Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName, parent);
+                    break;
+            }
+
+            return (widgetInstance as WidgetUidlNode);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -221,7 +263,7 @@ namespace NWheels.UI.Toolbox
             switch ( this.MetaProperty.Kind )
             {
                 case PropertyKind.Scalar:
-                    return CrudFieldType.Edit;
+                    return (MetaProperty.Role == PropertyRole.None && !MetaProperty.IsCalculated ? CrudFieldType.Edit : CrudFieldType.Label);
                 case PropertyKind.Part:
                     return CrudFieldType.NestedForm;
                 case PropertyKind.Relation:
@@ -238,7 +280,7 @@ namespace NWheels.UI.Toolbox
             switch ( type )
             {
                 case CrudFieldType.Label:
-                    return CrudFieldModifiers.ReadOnly;
+                    return CrudFieldModifiers.ReadOnly | (MetaProperty.IsCalculated ? CrudFieldModifiers.None : CrudFieldModifiers.System);
                 case CrudFieldType.Edit:
                     return CrudFieldModifiers.None;
                 case CrudFieldType.Lookup:
@@ -250,6 +292,46 @@ namespace NWheels.UI.Toolbox
                 default:
                     return CrudFieldModifiers.None;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private int GetOrderIndex()
+        {
+            int value = 0;
+
+            if ( Modifiers.HasFlag(CrudFieldModifiers.System) )
+            {
+                value |= 0x1000;
+            }
+
+            if ( MetaProperty.DeclaringContract.DefaultDisplayProperties.Contains(MetaProperty) )
+            {
+                value |= 0x800;
+            }
+
+            if ( Modifiers.HasFlag(CrudFieldModifiers.ReadOnly) )
+            {
+                value |= 0x400;
+            }
+
+            switch ( FieldType )
+            {
+                case CrudFieldType.Lookup:
+                    value |= 0x200;
+                    break;
+                case CrudFieldType.Edit:
+                    value |= 0x100;
+                    break;
+                case CrudFieldType.NestedForm:
+                    value |= 0x80;
+                    break;
+                case CrudFieldType.LookupMany:
+                    value |= 0x40;
+                    break;
+            }
+
+            return value;
         }
     }
 
@@ -286,6 +368,7 @@ namespace NWheels.UI.Toolbox
         TypeAhead = 0x04,
         Ellipsis = 0x08,
         Section = 0x10,
-        Tab = 0x20
+        Tab = 0x20,
+        System = 0x200
     }
 }

@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.DataObjects;
 using NWheels.Extensions;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
@@ -45,7 +46,7 @@ namespace NWheels.UI.Toolbox
         {
             var property = propertySelector.GetPropertyInfo();
 
-            if (this.DisplayColumns == null)
+            if ( this.DisplayColumns == null )
             {
                 this.DisplayColumns = new List<string>();
             }
@@ -62,6 +63,8 @@ namespace NWheels.UI.Toolbox
         public string EntityMetaType { get; set; }
         [DataMember]
         public List<string> DisplayColumns { get; set; }
+        [DataMember]
+        public List<string> DefaultDisplayColumns { get; set; }
         [DataMember, ManuallyAssigned]
         public CrudForm<TEntity, Empty.Data, ICrudFormState<TEntity>> Form { get; set; }
 
@@ -76,6 +79,12 @@ namespace NWheels.UI.Toolbox
         protected override void OnBuild(UidlBuilder builder)
         {
             this.EntityMetaType = builder.RegisterMetaType(typeof(TEntity));
+
+            var metaType = builder.MetadataCache.GetTypeMetadata(typeof(TEntity));
+            this.DefaultDisplayColumns = metaType.Properties
+                .Where(p => p.Kind == PropertyKind.Scalar && p.Role == PropertyRole.None)
+                .Select(p => p.Name)
+                .ToList();
         }
     }
 
