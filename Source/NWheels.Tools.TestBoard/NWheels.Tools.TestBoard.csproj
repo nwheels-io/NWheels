@@ -183,6 +183,7 @@
     <Compile Include="Messages\AppStateChangedMessage.cs" />
     <Compile Include="Messages\AppClosedMessage.cs" />
     <Compile Include="Messages\AppOpenedMessage.cs" />
+    <Compile Include="Messages\ShuttingDownMessage.cs" />
     <Compile Include="Modules\ApplicationExplorer\ApplicationExplorerView.xaml.cs">
       <DependentUpon>ApplicationExplorerView.xaml</DependentUpon>
     </Compile>

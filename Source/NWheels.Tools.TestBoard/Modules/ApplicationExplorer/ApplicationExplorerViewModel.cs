@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Commands;
@@ -32,6 +33,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         IHandle<AppStateChangedMessage>
     {
         private readonly IApplicationControllerService _controllerService;
+        private readonly IEventAggregator _events;
         private readonly IShell _shell;
         private readonly IMessageBoxService _messageBoxService;
 
@@ -44,6 +46,7 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
             IApplicationControllerService controllerService, 
             IMessageBoxService messageBoxService)
         {
+            _events = events;
             _shell = shell;
             _controllerService = controllerService;
             _messageBoxService = messageBoxService;
@@ -60,13 +63,22 @@ namespace NWheels.Tools.TestBoard.Modules.ApplicationExplorer
         {
             if ( _controllerService.Applications.Any(app => app.CurrentState != NodeState.Down) )
             {
+                e.Cancel = true;
+
                 if ( _messageBoxService.WarningYesNo("One or more applications are still running. Do you want to stop them and exit?") )
                 {
-                    _controllerService.CloseAll();
-                }
-                else
-                {
-                    e.Cancel = true;
+                    var mainWindowDispatcher = Application.Current.MainWindow.Dispatcher;
+
+                    _events.Publish(new ShuttingDownMessage(), action => action());
+
+                    Task.Run(
+                        () => {
+                            _controllerService.CloseAll();
+                            mainWindowDispatcher.InvokeAsync(
+                                () => {
+                                    Application.Current.Shutdown();
+                                });
+                        });
                 }
             }
         }

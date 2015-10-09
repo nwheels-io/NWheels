@@ -33,7 +33,8 @@ namespace NWheels.Tools.TestBoard.Modules.Main
         ModuleBase, 
         IHandle<AppOpenedMessage>, 
         IHandle<AppClosedMessage>,
-        IHandle<AppStateChangedMessage>
+        IHandle<AppStateChangedMessage>,
+        IHandle<ShuttingDownMessage>
     {
         public const string MainWindowTitle = "NWheels Test Board";
 
@@ -43,6 +44,7 @@ namespace NWheels.Tools.TestBoard.Modules.Main
         private readonly IOutput _output;
         private readonly IEventAggregator _eventAggregator;
         private readonly IApplicationControllerService _controllerService;
+        private bool _shuttingDown = false;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -121,6 +123,14 @@ namespace NWheels.Tools.TestBoard.Modules.Main
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        void IHandle<ShuttingDownMessage>.Handle(ShuttingDownMessage message)
+        {
+            _shuttingDown = true;
+            UpdateWindowTitle();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override IEnumerable<Type> DefaultTools
         {
             get
@@ -146,7 +156,11 @@ namespace NWheels.Tools.TestBoard.Modules.Main
 
         private void UpdateWindowTitle()
         {
-            if ( _controllerService.Applications.Count == 0 )
+            if ( _shuttingDown )
+            {
+                _mainWindow.Title = string.Format("{0} - {1}", "Shutting down", MainWindowTitle);
+            }
+            else if ( _controllerService.Applications.Count == 0 )
             {
                 _mainWindow.Title = MainWindowTitle;
             }
