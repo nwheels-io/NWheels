@@ -388,7 +388,7 @@
                                 <!--input type="text" ng-model="parentModel.entity[field.propertyName]" /-->
                             </td>
                         </tr>
-                        <tr ng-if="tabSetFields">
+                        <tr ng-if="tabSetFields.length">
                             <td colspan="2" class="tabSet">
                                 <div ng-class="{tab: true, selected: $index==tabSetIndex}"                                     
                                     ng-repeat="field in tabSetFields"
@@ -396,22 +396,35 @@
                                     {{translate(field.propertyName)}}
                                 </div>
                                 <div class="tabContent clearfix">
-                                        {{field.propertyName}}
+                                    {{field.propertyName}}
                                     <div class="Layout" ng-repeat="field in tabSetFields" ng-if="$index==tabSetIndex">
-                                        <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget"></uidl-widget>
+                                        <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="parentModel"></uidl-widget>
                                     </div>
                                 </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <div class="layout">
+                <div ng-if="!uidl.isNested" class="layout">
                     <button class="dataForm" ng-click="saveChanges()">Save</button>
                     <button class="dataForm" ng-click="cancelEdit()">Cancel</button>
                 </div>
             </div>
         </script>
 
+        <script type="text/ng-template" id="uidl-element-template-TypeSelector">
+            <div class="content-example">
+                Type
+                <select 
+                    ng-options="s.restTypeName as s.text for s in uidl.selections" 
+                    ng-model="selectedType">
+                </select>
+            </div>
+            <div ng-repeat="selection in uidl.selections" class="Layout">
+                <uidl-widget ng-if="selectedType==selection.restTypeName" uidl="selection.widget" parent-model="model"></uidl-widget>
+            </div>
+        </script>
+        
         <script type="text/ng-template" id="uidl-element-template-GridField">
             <div class="layout">
                 <span ng-if="property.kind!=='Relation'">{{value}}</span>

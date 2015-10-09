@@ -562,9 +562,11 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.entityService.deleteEntityAndSave(entity);
             };
 
-            scope.$on(scope.uidl.form.qualifiedName + ':Closing', function (input) {
-                scope.uiShowCrudForm = false;
-            });
+            if(scope.uidl.form) {
+                scope.$on(scope.uidl.form.qualifiedName + ':Closing', function (input) {
+                    scope.uiShowCrudForm = false;
+                });
+            }
 
             scope.queryEntities();
         }
@@ -598,6 +600,22 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.selectTab = function(index) {
                 scope.tabSetIndex = index;
             };
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_controllerImplementations['TypeSelector'] = {
+        implement: function (scope) {
+            for (var i = 0; i < scope.uidl.selections.length; i++) {
+                var selection = scope.uidl.selections[i];
+                var metaType = scope.uidlService.getMetaType(selection.metaTypeName);
+                selection.restTypeName = metaType.restTypeName;
+            }
+            scope.model = { 
+                entity: scope.parentModel.entity[scope.parentUidl.propertyName] 
+            };
+            scope.selectedType = scope.model.entity.entityType.shortName;
         }
     };
 

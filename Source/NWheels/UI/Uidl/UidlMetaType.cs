@@ -5,6 +5,8 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Conventions.Core;
+using NWheels.Entities;
 using NWheels.Extensions;
 
 namespace NWheels.UI.Uidl
@@ -59,10 +61,11 @@ namespace NWheels.UI.Uidl
     [DataContract(Name = "ObjectMetaType", Namespace = UidlDocument.DataContractNamespace)]
     public class UidlObjectMetaType : UidlMetaType
     {
-        public UidlObjectMetaType(Type type, ITypeMetadata metadata, HashSet<Type> relatedTypes)
+        public UidlObjectMetaType(Type type, Type domainObjectType, ITypeMetadata metadata, HashSet<Type> relatedTypes)
             : base(type)
         {
             base.TypeKind = UidlMetaTypeKind.Object;
+            this.Name = metadata.Name;
             this.BaseTypeName = metadata.BaseType != null ? metadata.BaseType.Name : null;
             this.DerivedTypeNames = metadata.DerivedTypes.Select(t => t.Name).ToList();
             this.Properties = metadata.Properties.ToDictionary(p => p.Name, p => new UidlMetaProperty(p, relatedTypes));
@@ -72,11 +75,13 @@ namespace NWheels.UI.Uidl
             this.DefaultDisplayPropertyNames = metadata.DefaultDisplayProperties.Select(p => p.Name).ToList();
             this.DefaultSortPropertyNames = metadata.DefaultSortProperties.Select(p => p.Name).ToList();
 
-            SetRestType(metadata);
+            SetRestType(domainObjectType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [DataMember]
+        public string Name { get; set; }
         [DataMember]
         public string BaseTypeName { get; set; }
         [DataMember]
@@ -100,16 +105,12 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void SetRestType(ITypeMetadata metadata)
+        private void SetRestType(Type domainObjectType)
         {
-            var implementations = metadata.GetAllImplementations().ToArray();
-
-            if ( implementations.Any() )
+            if ( domainObjectType != null )
             {
-                var implementationType = implementations.Single().Value; //TODO: get rid of this limitation - introduce REST entity factory
-
-                this.RestTypeName = implementationType.Name;
-                this.RestTypeNamespace = implementationType.Namespace;
+                this.RestTypeName = domainObjectType.Name;
+                this.RestTypeNamespace = domainObjectType.Namespace;
             }
         }
 

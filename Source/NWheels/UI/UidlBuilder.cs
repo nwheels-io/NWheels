@@ -5,7 +5,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using Hapil;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Extensions;
@@ -17,15 +19,19 @@ namespace NWheels.UI
 {
     public class UidlBuilder
     {
+        private readonly IDomainObjectFactory _domainObjectFactory;
+        private readonly IEntityObjectFactory _entityObjectFactory;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly UidlDocument _document;
         private UidlApplication _applicationBeingAdded = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UidlBuilder(ITypeMetadataCache metadataCache)
+        public UidlBuilder(ITypeMetadataCache metadataCache, IDomainObjectFactory domainObjectFactory, IEntityObjectFactory entityObjectFactory)
         {
             _metadataCache = metadataCache;
+            _domainObjectFactory = domainObjectFactory;
+            _entityObjectFactory = entityObjectFactory;
             _document = new UidlDocument();
         }
 
@@ -34,6 +40,7 @@ namespace NWheels.UI
         public void AddApplication(UidlApplication application)
         {
             _applicationBeingAdded = application;
+            _applicationBeingAdded.MetadataCache = _metadataCache;
 
             try
             {
@@ -152,6 +159,7 @@ namespace NWheels.UI
                 else
                 {
                     var instance = (AbstractUidlNode)Activator.CreateInstance(property.PropertyType, property.Name, parent);
+                    instance.MetadataCache = _metadataCache;
                     property.SetValue(parent, instance);
                     instantiatedNodes.Add(instance);
                     TryApplyWidgetTemplate(instance, property);
@@ -230,7 +238,8 @@ namespace NWheels.UI
 
             if ( DataObjectContractAttribute.IsDataObjectContract(type) )
             {
-                metaType = new UidlObjectMetaType(type, _metadataCache.GetTypeMetadata(type), relatedTypes);
+                var domainObjectType = GetDomainObjectType(type);
+                metaType = new UidlObjectMetaType(type, domainObjectType, _metadataCache.GetTypeMetadata(type), relatedTypes);
             }
             else if (typeof(IEntityId).IsAssignableFrom(type))
             {
@@ -246,6 +255,25 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private Type GetDomainObjectType(Type contractType)
+        {
+            var metaType = _metadataCache.GetTypeMetadata(contractType);
+            
+            Type persistableObjectType;
+            
+            if ( metaType.TryGetImplementation(_entityObjectFactory.GetType(), out persistableObjectType) )
+            {
+                return _domainObjectFactory.GetOrBuildDomainObjectType(contractType, _entityObjectFactory.GetType());
+            }
+            else
+            {
+                var allImplementations = metaType.GetAllImplementations();
+                return (allImplementations.Any() ? allImplementations.First().Value : null);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private UidlScreenPart GetOrCreateScreenPartInstance(Type screenPartType)
         {
             var existingInstance = _applicationBeingAdded.ScreenParts.FirstOrDefault(s => s.GetType() == screenPartType);
@@ -256,6 +284,7 @@ namespace NWheels.UI
             }
 
             var newInstance = (UidlScreenPart)Activator.CreateInstance(screenPartType, screenPartType.FriendlyName(), _applicationBeingAdded);
+            newInstance.MetadataCache = _metadataCache;
             _applicationBeingAdded.ScreenParts.Add(newInstance);
             
             InstantiateDeclaredMemberNodes(newInstance);
@@ -268,9 +297,10 @@ namespace NWheels.UI
         public static UidlDocument GetApplicationDocument(
             UidlApplication application, 
             ITypeMetadataCache metadataCache, 
-            ILocalizationProvider localizationProvider)
+            ILocalizationProvider localizationProvider,
+            IComponentContext components)
         {
-            var builder = new UidlBuilder(metadataCache);
+            var builder = new UidlBuilder(metadataCache, components.Resolve<IDomainObjectFactory>(), components.Resolve<IEntityObjectFactory>());
             builder.AddApplication(application);
 
             var localStrings = localizationProvider.GetLocalStrings(builder.GetTranslatables(), CultureInfo.CurrentUICulture);

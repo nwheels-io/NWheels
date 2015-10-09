@@ -24,12 +24,20 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public CrudForm(string idName, ControlledUidlNode parent)
+            : this(idName, parent, isNested: false)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public CrudForm(string idName, ControlledUidlNode parent, bool isNested)
             : base(idName, parent)
         {
             this.WidgetType = "CrudForm";
             this.TemplateName = "CrudForm";
             this.EntityName = typeof(TEntity).Name.TrimLead("I").TrimTail("Entity");
             this.Fields = new List<CrudFormField>();
+            this.IsNested = isNested;
 
             _visibleFields = new List<string>();
             _hiddenFields = new List<string>();
@@ -97,6 +105,8 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
+        public bool IsNested { get; set; }
+        [DataMember]
         public string EntityName { get; set; }
         [DataMember]
         public string EntityMetaType { get; set; }
@@ -125,7 +135,7 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
-            return this.Fields.Select(f => f.NestedWidget).Where(w => w != null);
+            return this.Fields.SelectMany(f => f.GetNestedWidgets());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -141,7 +151,7 @@ namespace NWheels.UI.Toolbox
             }
             else
             {
-                fieldsToAdd.UnionWith(metaType.Properties.Select(p => p.Name));
+                fieldsToAdd.UnionWith(metaType.Properties.Where(ShouldAutoIncludeField).Select(p => p.Name) );
             }
 
             fieldsToAdd.ExceptWith(_hiddenFields);
@@ -155,7 +165,19 @@ namespace NWheels.UI.Toolbox
             }
 
             Fields.Sort((x, y) => y.OrderIndex.CompareTo(x.OrderIndex));
-            builder.BuildNodes(this.Fields.Select(f => f.NestedWidget).Where(widget => widget != null).Cast<AbstractUidlNode>().ToArray());
+            builder.BuildNodes(this.Fields.SelectMany(f => f.GetNestedWidgets()).Cast<AbstractUidlNode>().ToArray());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool ShouldAutoIncludeField(IPropertyMetadata property)
+        {
+            if ( property.Kind == PropertyKind.Relation && property.Relation.Kind.IsIn(RelationKind.CompositionParent, RelationKind.AggregationParent) )
+            {
+                return false;
+            }
+
+            return true;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -225,35 +247,67 @@ namespace NWheels.UI.Toolbox
                 this.LookupEntityName = MetaProperty.Relation.RelatedPartyType.Name;
                 this.LookupEntityContract = MetaProperty.Relation.RelatedPartyType.ContractType;
                 this.LookupEntityMetaType = MetaProperty.Relation.RelatedPartyType.ContractType.AssemblyQualifiedNameNonVersioned();
+                this.NestedWidget = CreateNestedWidget(parent, MetaProperty.Relation.RelatedPartyType);
             }
 
             this.OrderIndex = GetOrderIndex();
-            this.NestedWidget = CreateNestedWidget(parent);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private WidgetUidlNode CreateNestedWidget(ControlledUidlNode parent)
+        internal IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
-            Type widgetClosedType = null;
-            object widgetInstance = null;
+            if ( this.NestedWidget != null )
+            {
+                return new WidgetUidlNode[] { this.NestedWidget };
+            }
+            else
+            {
+                return new WidgetUidlNode[0];
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private List<CrudFormFieldNestedWidget> CreateNestedWidgets(ControlledUidlNode parent)
+        {
+            var relatedMetaType = this.MetaProperty.Relation.RelatedPartyType;
+            var allConcreteTypes = new List<ITypeMetadata>();
+
+            if ( !relatedMetaType.IsAbstract )
+            {
+                allConcreteTypes.Add(relatedMetaType);
+            }
+
+            allConcreteTypes.AddRange(relatedMetaType.DerivedTypes.Where(t => !t.IsAbstract));
+
+            var results = allConcreteTypes.Select(
+                concreteType => new CrudFormFieldNestedWidget() {
+                    MetaType = concreteType.ContractType.AssemblyQualifiedNameNonVersioned(),
+                    Widget = CreateNestedWidget(parent, concreteType)
+                }).ToList();
+
+            return results;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private WidgetUidlNode CreateNestedWidget(ControlledUidlNode parent, ITypeMetadata nestedMetaType)
+        {
+            WidgetUidlNode widgetInstance = null;
 
             switch ( this.FieldType )
             {
                 case CrudFieldType.LookupMany:
-                    widgetClosedType = typeof(Crud<>).MakeGenericType(this.LookupEntityContract);
-                    widgetInstance = Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName, parent);
+                    var widgetClosedType = typeof(Crud<>).MakeGenericType(nestedMetaType.ContractType);
+                    widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName, parent);
                     break;
                 case CrudFieldType.NestedForm:
-                    widgetClosedType = typeof(CrudForm<,,>).MakeGenericType(
-                        this.LookupEntityContract, 
-                        typeof(Empty.Data), 
-                        typeof(ICrudFormState<>).MakeGenericType(this.LookupEntityContract));
-                    widgetInstance = Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName, parent);
+                    widgetInstance = UidlUtility.CreateFormOrTypeSelector(nestedMetaType, "Form", parent, isNested: true);
                     break;
             }
 
-            return (widgetInstance as WidgetUidlNode);
+            return widgetInstance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -267,7 +321,14 @@ namespace NWheels.UI.Toolbox
                 case PropertyKind.Part:
                     return CrudFieldType.NestedForm;
                 case PropertyKind.Relation:
-                    return (MetaProperty.IsCollection ? CrudFieldType.LookupMany : CrudFieldType.Lookup);
+                    if ( MetaProperty.Relation.Kind == RelationKind.Composition && !MetaProperty.IsCollection )
+                    {
+                        return CrudFieldType.NestedForm;
+                    }
+                    else
+                    {
+                        return (MetaProperty.IsCollection ? CrudFieldType.LookupMany : CrudFieldType.Lookup);
+                    }
                 default:
                     return CrudFieldType.Default;
             }
@@ -337,6 +398,17 @@ namespace NWheels.UI.Toolbox
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+    public class CrudFormFieldNestedWidget
+    {
+        [DataMember]
+        public string MetaType { get; set; }
+        [DataMember]
+        public WidgetUidlNode Widget { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
     public enum CrudFormMode
     {
         CrudWidget,
@@ -354,7 +426,7 @@ namespace NWheels.UI.Toolbox
         Edit,
         Lookup,
         LookupMany,
-        NestedForm
+        NestedForm,
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -145,7 +145,7 @@ namespace NWheels.Stacks.NancyFx
 
         public override void Load()
         {
-            _uidl = UidlBuilder.GetApplicationDocument(_application, _metadataCache, _localizationProvider);
+            _uidl = UidlBuilder.GetApplicationDocument(_application, _metadataCache, _localizationProvider, _components);
             BuildApiDispatchers(_components, _dispatcherFactory);
 
             _module = _components.Resolve<WebApplicationModule>(TypedParameter.From<IWebModuleContext>(this));

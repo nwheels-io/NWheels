@@ -317,6 +317,11 @@ namespace NWheels.DataObjects.Core
             }
 
             this.DerivedTypes.Add(derivedType);
+
+            if ( this.BaseType != null )
+            {
+                this.BaseType.RegisterDerivedType(derivedType);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

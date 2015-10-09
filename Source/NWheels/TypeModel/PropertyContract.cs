@@ -391,7 +391,7 @@ namespace NWheels.DataObjects
                 {
                     var relation = property.SafeGetRelation();
 
-                    relation.Kind = RelationKind.Aggregation;
+                    relation.Kind = RelationKind.AggregationParent;
                     relation.Multiplicity = property.IsCollection ? RelationMultiplicity.ManyToMany : RelationMultiplicity.ManyToOne;
                     relation.ThisPartyKind = RelationPartyKind.Dependent;
                 }
@@ -403,7 +403,7 @@ namespace NWheels.DataObjects
                 {
                     var relation = property.SafeGetRelation();
 
-                    relation.Kind = RelationKind.Composition;
+                    relation.Kind = RelationKind.CompositionParent;
                     relation.Multiplicity = RelationMultiplicity.ManyToOne;
                     relation.ThisPartyKind = RelationPartyKind.Dependent;
                 }

@@ -22,8 +22,10 @@ namespace NWheels.UI.Toolbox
             this.WidgetType = "Crud";
             this.TemplateName = "Crud";
             this.EntityName = typeof(TEntity).Name.TrimLead("I").TrimTail("Entity");
-            this.Form = new CrudForm<TEntity, Empty.Data, ICrudFormState<TEntity>>("Form", this);
             this.DisplayColumns = new List<string>();
+            this.MetaType = this.MetadataCache.GetTypeMetadata(typeof(TEntity));
+
+            CreateForm();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -67,6 +69,8 @@ namespace NWheels.UI.Toolbox
         public List<string> DefaultDisplayColumns { get; set; }
         [DataMember, ManuallyAssigned]
         public CrudForm<TEntity, Empty.Data, ICrudFormState<TEntity>> Form { get; set; }
+        [DataMember, ManuallyAssigned]
+        public TypeSelector FormTypeSelector { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -85,6 +89,20 @@ namespace NWheels.UI.Toolbox
                 .Where(p => p.Kind == PropertyKind.Scalar && p.Role == PropertyRole.None)
                 .Select(p => p.Name)
                 .ToList();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal ITypeMetadata MetaType { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        private void CreateForm()
+        {
+            var formOrTypeSelector = UidlUtility.CreateFormOrTypeSelector(MetaType, "Form", parent: this, isNested: false);
+
+            this.Form = formOrTypeSelector as CrudForm<TEntity, Empty.Data, ICrudFormState<TEntity>>;
+            this.FormTypeSelector = formOrTypeSelector as TypeSelector;
         }
     }
 

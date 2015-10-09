@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
+using NWheels.DataObjects;
 
 namespace NWheels.UI.Uidl
 {
@@ -24,6 +25,11 @@ namespace NWheels.UI.Uidl
             // ReSharper disable once DoNotCallOverridableMethodsInConstructor
             this.IdName = (idName == IdNameAsTypeMacro ? GetIdNameFromType() : idName);
             this.QualifiedName = (parent != null ? parent.QualifiedName + ":" : "") + IdName;
+
+            if ( parent != null )
+            {
+                this.MetadataCache = parent.MetadataCache;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -41,5 +47,9 @@ namespace NWheels.UI.Uidl
         {
             return this.GetType().FriendlyName();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal ITypeMetadataCache MetadataCache { get; set; }
     }
 }
