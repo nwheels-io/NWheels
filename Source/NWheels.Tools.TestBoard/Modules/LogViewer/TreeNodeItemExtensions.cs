@@ -34,7 +34,7 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
                 }
             }
 
-            return parentNode;
+            return null;
         }
     }
 }

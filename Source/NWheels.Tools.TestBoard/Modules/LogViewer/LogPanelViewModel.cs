@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using NWheels.Extensions;
 using NWheels.Logging;
 
 namespace NWheels.Tools.TestBoard.Modules.LogViewer
@@ -20,6 +21,8 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
         private List<Task> _loaderTasks;
         private TreeNodeItem<ThreadLogViewModel.NodeItem> _selectedItem;
         private ThreadLogViewModel.NodeItem _selectedNode;
+        private bool _autoScrollMode;
+        private bool _showAllLogs;
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -31,6 +34,9 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
             _loaderTasks = new List<Task>();
 
             Items = new ObservableCollection<TreeNodeItem<ThreadLogViewModel.NodeItem>>();
+
+            _autoScrollMode = true;
+            _showAllLogs = false;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -110,22 +116,30 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
             ThreadLogSnapshot threadLog;
 
             TreeNodeItem<ThreadLogViewModel.NodeItem> rootCauseErrorNode = null;
+            TreeNodeItem<ThreadLogViewModel.NodeItem> lastDisplayedNode = null;
 
             while ( _pendingThreadLogs.TryDequeue(out threadLog) && count++ < 100 )
             {
+                if ( !ShouldDisplayLog(threadLog) )
+                {
+                    continue;
+                }
+
                 var tuple = new ThreadLogModelTuple(this, threadLog);
                 _threadLogModelTuples.Add(tuple);
                 Items.Add(tuple.RootNodeItem);
+                
+                lastDisplayedNode = tuple.RootNodeItem;
 
                 if ( rootCauseErrorNode == null )
                 {
                     rootCauseErrorNode = tuple.RootNodeItem.ExpandToRootCauseError();
-
-                    if ( rootCauseErrorNode != null )
-                    {
-                        this.SelectedItem = rootCauseErrorNode;
-                    }
                 }
+            }
+
+            if ( (lastDisplayedNode != null || rootCauseErrorNode != null) && _autoScrollMode )
+            {
+                this.SelectedItem = (rootCauseErrorNode ?? lastDisplayedNode);
             }
         }
 
@@ -173,7 +187,57 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool AutoScrollMode
+        {
+            get
+            {
+                return _autoScrollMode;
+            }
+            set
+            {
+                _autoScrollMode = value;
+
+                if ( PropertyChanged != null )
+                {
+                    PropertyChanged(this, new PropertyChangedEventArgs("AutoScrollMode"));
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool ShowAllLogs
+        {
+            get
+            {
+                return _showAllLogs;
+            }
+            set
+            {
+                _showAllLogs = value;
+
+                if ( PropertyChanged != null )
+                {
+                    PropertyChanged(this, new PropertyChangedEventArgs("ShowAllLogs"));
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public event PropertyChangedEventHandler PropertyChanged;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool ShouldDisplayLog(ThreadLogSnapshot threadLog)
+        {
+            if ( _showAllLogs )
+            {
+                return true;
+            }
+
+            return (threadLog.TaskType.IsIn(ThreadTaskType.StartUp, ThreadTaskType.ShutDown) || threadLog.RootActivity.Level >= LogLevel.Warning);
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

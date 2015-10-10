@@ -171,6 +171,7 @@
     <Compile Include="AppIcons.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Converters\DateTimeDateConverter.cs" />
+    <Compile Include="Converters\SwitchBindingExtension.cs" />
     <Compile Include="Converters\EnumStringConverter.cs" />
     <Compile Include="Converters\IsFirstItemConverter.cs" />
     <Compile Include="Converters\LogNodeDetailsTextConverter.cs" />

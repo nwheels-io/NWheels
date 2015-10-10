@@ -27,6 +27,7 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
         {
             ((ITreeNodeItemEventHandlers)((FrameworkElement)sender).DataContext).ItemPreviewKeyDown(sender, e);
         }
+
         //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)

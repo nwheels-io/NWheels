@@ -41,5 +41,12 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
         {
             ((LogViewerViewModel)DataContext).Logs.DisplayPendingLogs();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ClearLogs(object sender, ExecutedRoutedEventArgs e)
+        {
+            ((LogViewerViewModel)DataContext).Logs.Clear();
+        }
     }
 }

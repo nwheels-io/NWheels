@@ -16,6 +16,7 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
         private readonly List<ILogConnection> _connections;
         private readonly string _explorerItemPath;
         private readonly LogPanelViewModel _logs;
+        private bool _captureMode;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -28,28 +29,9 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
             AddLogConnectionsTo(controller);
 
             _logs = new LogPanelViewModel();
-
+            
+            _captureMode = true;
             StartCapture();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void StartCapture()
-        {
-            foreach ( var connection in _connections )
-            {
-                connection.StartCapture();
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void StopCapture()
-        {
-            foreach ( var connection in _connections )
-            {
-                connection.StopCapture();
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -90,6 +72,54 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
             }
 
             base.TryClose(dialogResult);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool CaptureMode
+        {
+            get
+            {
+                return _captureMode;
+            }
+            set
+            {
+                if ( value != _captureMode )
+                {
+                    _captureMode = value;
+
+                    if ( _captureMode )
+                    {
+                        StartCapture();
+                    }
+                    else
+                    {
+                        StopCapture();
+                    }
+
+                    base.NotifyOfPropertyChange(() => this.CaptureMode);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void StartCapture()
+        {
+            foreach ( var connection in _connections )
+            {
+                connection.StartCapture();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void StopCapture()
+        {
+            foreach ( var connection in _connections )
+            {
+                connection.StopCapture();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
