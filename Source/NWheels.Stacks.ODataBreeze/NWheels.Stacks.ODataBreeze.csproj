@@ -156,6 +156,7 @@
     <Compile Include="EdmModelBuilder.cs" />
     <Compile Include="HardCoded\UserAccountsController.cs" />
     <Compile Include="HardCoded\UserAccountsContextProvider.cs" />
+    <Compile Include="IBreezeEndpointLogger.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="BreezeEndpointComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
