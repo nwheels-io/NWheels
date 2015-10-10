@@ -25,7 +25,7 @@ namespace NWheels.Entities.Core
             _updateBatch = new HashSet<IEntityObject>();
             _deleteBatch = new HashSet<IEntityObject>();
 
-            base.BeginLifetimeScope();
+            BeginLifetimeScope();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,11 +33,11 @@ namespace NWheels.Entities.Core
         public override void Dispose()
         {
             bool shouldDisposeResourcesNow;
-            base.DisposeConsumerScope(out shouldDisposeResourcesNow);
+            DisposeConsumerScope(out shouldDisposeResourcesNow);
 
             if ( shouldDisposeResourcesNow )
             {
-                base.EndLifetimeScope();
+                EndLifetimeScope();
             }
         }
 

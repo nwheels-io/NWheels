@@ -218,7 +218,7 @@ namespace NWheels.Stacks.EntityFramework
 
         public TEntityContract New()
         {
-            var persistableObject = _ownerRepo.EntityFactory.NewEntity<TEntityContract>();
+            var persistableObject = _ownerRepo.PersistableObjectFactory.NewEntity<TEntityContract>();
             var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>(persistableObject);
 
             return domainObject;
@@ -228,7 +228,7 @@ namespace NWheels.Stacks.EntityFramework
 
         public TConcreteEntity New<TConcreteEntity>() where TConcreteEntity : class, TEntityContract
         {
-            var persistableObject = _ownerRepo.EntityFactory.NewEntity<TConcreteEntity>();
+            var persistableObject = _ownerRepo.PersistableObjectFactory.NewEntity<TConcreteEntity>();
             var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TConcreteEntity>(persistableObject);
 
             return domainObject;
@@ -238,7 +238,7 @@ namespace NWheels.Stacks.EntityFramework
 
         public TEntityContract New(Type concreteContract)
         {
-            var persistableObject = (TEntityContract)_ownerRepo.EntityFactory.NewEntity(concreteContract);
+            var persistableObject = (TEntityContract)_ownerRepo.PersistableObjectFactory.NewEntity(concreteContract);
             var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>(persistableObject);
 
             return domainObject;

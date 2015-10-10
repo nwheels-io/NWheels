@@ -186,7 +186,7 @@ namespace NWheels.Stacks.EntityFramework.Tests
             private ITypeMetadataCache _metadataCache;
             private static DbCompiledModel _s_compiledModel;
             private static object _s_compiledModelSyncRoot = new object();
-            public new IEntityObjectFactory EntityFactory;
+            public IEntityObjectFactory EntityFactory;
             private IEntityRepository<Interfaces.Repository1.IAttribute> m_Attributes;
             private IEntityRepository<Interfaces.Repository1.ICategory> m_Categories;
             private IEntityRepository<Interfaces.Repository1.IOrder> m_Orders;

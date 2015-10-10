@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Conventions.Core;
 using NWheels.Entities.Core;
 
 namespace NWheels.Entities
@@ -17,5 +18,6 @@ namespace NWheels.Entities
         bool TryGetEntityRepository(Type entityContractType, out IEntityRepository entityRepository);
         IEntityRepository GetEntityRepository(object entity);
         bool TryGetEntityRepository(object entity, out IEntityRepository entityRepository);
+        IEntityObjectFactory PersistableObjectFactory { get; }
     }
 }

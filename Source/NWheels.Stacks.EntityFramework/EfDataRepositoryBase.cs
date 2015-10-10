@@ -80,7 +80,7 @@ namespace NWheels.Stacks.EntityFramework
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEntityObjectFactory EntityFactory
+        public override IEntityObjectFactory PersistableObjectFactory
         {
             get { return _entityFactory; }
         }

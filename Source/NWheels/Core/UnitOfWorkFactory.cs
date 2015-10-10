@@ -8,6 +8,7 @@ using NWheels.Concurrency;
 using NWheels.Entities;
 using Autofac;
 using NWheels.DataObjects;
+using NWheels.Entities.Core;
 
 namespace NWheels.Core
 {
@@ -16,6 +17,7 @@ namespace NWheels.Core
         private readonly ConcurrentDictionary<Type, FactoryByContract> _unitOfWorkFactoryPerRepositoryContract;
         private readonly IComponentContext _components;
         private readonly ITypeMetadataCache _metadataCache;
+        private IDomainContextLogger _domainContextLogger;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -49,6 +51,11 @@ namespace NWheels.Core
                 },
                 externallyOwned: true);
 
+            if ( !consumerScope.IsOutermost )
+            {
+                Logger.NewNestedUnitOfWork(domainContext: consumerScope.Resource.ToString());
+            }
+
             return consumerScope.Resource;
         }
 
@@ -61,6 +68,21 @@ namespace NWheels.Core
                 key => FactoryByContract.Create(key, this));
 
             return factoryByContract.NewUnitOfWork(autoCommit, isolationLevel);
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IDomainContextLogger Logger
+        {
+            get
+            {
+                if ( _domainContextLogger == null )
+                {
+                    _domainContextLogger = _components.Resolve<IDomainContextLogger>();
+                }
+
+                return _domainContextLogger;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -15,6 +15,7 @@ namespace NWheels.Stacks.MongoDb
     public abstract class MongoDataRepositoryBase : UnitOfWorkDataRepositoryBase
     {
         private readonly MongoDatabase _database;
+        private readonly IEntityObjectFactory _entityObjectFactory;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -28,6 +29,23 @@ namespace NWheels.Stacks.MongoDb
             : base(consumerScope, components, autoCommit)
         {
             _database = database;
+            _entityObjectFactory = objectFactory;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void BeginLifetimeScope()
+        {
+            base.BeginLifetimeScope();
+            _s_current = this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void EndLifetimeScope()
+        {
+            _s_current = null;
+            base.EndLifetimeScope();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -72,6 +90,16 @@ namespace NWheels.Stacks.MongoDb
             result.AddRange(entityRepo.GetByIdList<TEntityContract>(idsNotInCache));
 
             return result;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override IEntityObjectFactory PersistableObjectFactory 
+        {
+            get
+            {
+                return _entityObjectFactory;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -137,11 +165,32 @@ namespace NWheels.Stacks.MongoDb
             get { return _database; }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ThreadStatic]
+        private static MongoDataRepositoryBase _s_current;
+
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static MongoDataRepositoryBase ResolveFrom(IComponentContext components)
         {
-            return (MongoDataRepositoryBase)components.Resolve<DataRepositoryBase>();
+            //return (MongoDataRepositoryBase)components.Resolve<DataRepositoryBase>();
+
+            var instance = _s_current;
+
+            if ( instance == null )
+            {
+                throw new InvalidOperationException("There is currently no instance of MongoDataRepositoryBase associated with the current thread.");
+            }
+            
+            return instance;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static MongoDataRepositoryBase Current
+        {
+            get { return _s_current; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

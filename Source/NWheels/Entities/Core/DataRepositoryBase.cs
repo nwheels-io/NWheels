@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Linq;
 using Autofac;
 using NWheels.Concurrency;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects.Core;
 using NWheels.Extensions;
 using NWheels.Logging;
@@ -40,6 +41,8 @@ namespace NWheels.Entities.Core
             _componentLifetimeScope = null;
             _consumerScope = consumerScope;
             _disposed = false;
+
+            _logger.NewRootUnitOfWork(domainContext: this.ToString());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -234,6 +237,10 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public abstract IEntityObjectFactory PersistableObjectFactory { get; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected abstract IEnumerable<IEntityObject> GetCurrentChangeSet();
         protected abstract void OnCommitChanges();
         protected abstract void OnRollbackChanges();
@@ -289,7 +296,7 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected void BeginLifetimeScope()
+        protected virtual void BeginLifetimeScope()
         {
             if ( _componentLifetimeScope != null )
             {
@@ -305,7 +312,7 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected void EndLifetimeScope()
+        protected virtual void EndLifetimeScope()
         {
             if ( _componentLifetimeScope == null)
             {

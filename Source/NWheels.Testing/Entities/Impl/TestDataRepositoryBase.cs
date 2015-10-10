@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using NWheels.Concurrency;
+using NWheels.Conventions.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
@@ -13,9 +14,17 @@ namespace NWheels.Testing.Entities.Impl
 {
     public abstract class TestDataRepositoryBase : DataRepositoryBase
     {
-        protected TestDataRepositoryBase(IResourceConsumerScopeHandle consumerScope, IComponentContext components, bool autoCommit)
+        private readonly IEntityObjectFactory _entityObjectFactory;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected TestDataRepositoryBase(
+            IResourceConsumerScopeHandle consumerScope, 
+            IComponentContext components, 
+            bool autoCommit)
             : base(consumerScope, components, autoCommit)
         {
+            _entityObjectFactory = components.Resolve<IEntityObjectFactory>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -23,6 +32,17 @@ namespace NWheels.Testing.Entities.Impl
         public void ResetState()
         {
             base.ResetCurrentState(UnitOfWorkState.Untouched);
+
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override IEntityObjectFactory PersistableObjectFactory 
+        {
+            get
+            {
+                return _entityObjectFactory;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
