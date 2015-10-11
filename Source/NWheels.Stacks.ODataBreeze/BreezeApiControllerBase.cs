@@ -40,7 +40,7 @@ namespace NWheels.Stacks.ODataBreeze
         private readonly IBreezeEndpointLogger _logger;
         private readonly ThreadStaticAnchor<PerContextResourceConsumerScope<TDataRepo>> _domainContextAnchor;
         private readonly ThreadStaticAnchor<DataRepositoryBase> _dataRepoAnchor;
-        private BreezeContextProvider<TDataRepo> _contextProvider;
+        private readonly BreezeContextProvider<TDataRepo> _contextProvider;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -50,6 +50,7 @@ namespace NWheels.Stacks.ODataBreeze
             _components = components;
             _framework = framework;
             _logger = components.Resolve<IBreezeEndpointLogger>();
+            _contextProvider = new BreezeContextProvider<TDataRepo>(_components, _framework, _metadataCache, _logger);
             _domainContextAnchor = new ThreadStaticAnchor<PerContextResourceConsumerScope<TDataRepo>>();
             _dataRepoAnchor = new ThreadStaticAnchor<DataRepositoryBase>();
         }
@@ -77,13 +78,6 @@ namespace NWheels.Stacks.ODataBreeze
         [Route("SaveChanges")]
         public SaveResult SaveChanges(JObject saveBundle)
         {
-            //TODO: remove this once we are sure the bug is solved
-            PerContextResourceConsumerScope<TDataRepo> stale;
-            if ( (stale = _domainContextAnchor.Current) != null )
-            {
-                _logger.StaleUnitOfWorkEncountered(stale.Resource.ToString(), ((DataRepositoryBase)(object)stale.Resource).InitializerThreadText);
-            }
-
             using ( var activity = _logger.RestWriteInProgress() )
             {
 
@@ -144,11 +138,6 @@ namespace NWheels.Stacks.ODataBreeze
         {
             get
             {
-                if ( _contextProvider == null )
-                {
-                    _contextProvider = new BreezeContextProvider<TDataRepo>(_components, _framework, _metadataCache, _logger);
-                }
-                
                 return _contextProvider;
             }
         }
