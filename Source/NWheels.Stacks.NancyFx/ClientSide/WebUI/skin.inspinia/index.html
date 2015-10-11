@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+
+<html ng-app="theApp" ng-controller="appStart">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title ng-bind="translate(app.text) + ' | ' + translate(currentScreen.text)">LOADING . . .</title>
+    <base href="http://localhost:8901/affiliate/" />
+
+    <link href="skin/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="skin/assets/font-awesome/css/font-awesome.css" rel="stylesheet">
+
+    <!-- Toastr style -->
+    <link href="skin/assets/css/plugins/toastr/toastr.min.css" rel="stylesheet">
+
+    <!-- Gritter -->
+    <link href="skin/assets/js/plugins/gritter/jquery.gritter.css" rel="stylesheet">
+
+    <link href="skin/assets/css/animate.css" rel="stylesheet">
+    <link href="skin/assets/css/style.css" rel="stylesheet">
+
+    <script src="skin/assets/app/angular-1.3.16/angular.min.js"></script>
+    <script src="skin/assets/app/linqjs-2.2.0.2/linq.min.js"></script>
+    <script src="skin/assets/app/breeze/breeze.debug.js"></script>
+    <script src="skin/assets/app/breeze/breeze.bridge.angular.js"></script>
+    <!--script src="assets/app/jquery-1.8.3/jquery-1.8.3.min.js"></script-->
+    <script src="skin/assets/app/toastr/toastr.js"></script>
+    <script src="skin/assets/app/breeze/breeze.savequeuing.js"></script>
+    <!--script src="assets/plugins/datajs-1.1.1/datajs-1.1.1.js"></script-->
+    
+    <script src="base/app.js"></script>
+    
+</head>
+
+<body>
+    <div id="wrapper" ng-if="app">
+        <uidl-screen ng-if="currentScreen" uidl="currentScreen"></uidl-screen>
+    </div>
+
+    <script type="text/ng-template" id="uidl-screen">
+        <uidl-widget uidl="uidl.contentRoot"></uidl-widget>
+    </script>
+
+    <script type="text/ng-template" id="uidl-screen-part">
+        <uidl-widget uidl="uidl.contentRoot"></uidl-widget>
+    </script>
+
+    <script type="text/ng-template" id="uidl-element-template-Splash">
+        <uidl-widget uidl="uidl.insideContent"></uidl-widget>
+    </script>
+    
+    <script type="text/ng-template" id="uidl-element-template-UserLoginForm">
+        <div class="middle-box text-center loginscreen   animated fadeInDown">
+            <div>
+                <div>
+                    <h1 class="logo-name">AFP</h1>
+                </div>
+                <h2>Sign In</h2>
+                <p ng-if="model.state.loginFault!='PasswordExpired'">Log in to your account.</p>
+                <form class="m-t" role="form" ng-if="model.state.loginFault!='PasswordExpired'">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.data.loginName" >
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" placeholder="Password" required="" ng-model="model.data.password" >
+                    </div>
+                    <button class="btn btn-primary block full-width m-b" ng-click="$emit(uidl.qualifiedName + ':LogIn:Executing')">{{translate('Login')}}</button>
+                </form>
+                <p ng-if="model.state.loginFault=='PasswordExpired'">Please change your password.</p>
+                <form class="m-t" role="form" ng-if="model.state.loginFault=='PasswordExpired'">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.data.loginName" >
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" placeholder="Current Password" required="" ng-model="model.data.password" >
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" placeholder="New Password" required="" ng-model="model.data.newPassword" >
+                    </div>
+                    <button class="btn btn-primary block full-width m-b" ng-click="$emit(uidl.qualifiedName + ':ChangePassword:Executing')">Change Password</button>
+                </form>
+                <p class="m-t"> <small>Powered by BitWize</small> </p>
+            </div>
+        </div>
+    </script>
+    
+    <script type="text/ng-template" id="uidl-element-template-CurrentLoggedInUser">
+        <a href="" ng-click="$emit(uidl.qualifiedName + ':LogOut:Executing')">
+            <i class="fa fa-sign-out"></i> {{translate('LogOut')}}
+        </a>
+    </script>
+
+    <script type="text/ng-template" id="uidl-element-template-ManagementConsole">
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header" style="padding-top:45px;padding-bottom:47px;">
+                        <div class="dropdown profile-element"> <span>
+                                <!--img alt="image" class="img-circle" src="img/profile_small.jpg" /-->
+                                 </span>
+                            <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                                <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">{{appScope.model.state.user.fullName}}</strong>
+                                 </span> <span class="text-muted text-xs block">{{appScope.model.state.user.userRoles[0]}} <!--b class="caret"></b--></span> </span> </a>
+                            <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                                <li><a href="profile.html">Profile</a></li>
+                                <li><a href="contacts.html">Contacts</a></li>
+                                <li><a href="mailbox.html">Mailbox</a></li>
+                                <li class="divider"></li>
+                                <li><a href="login.html">Logout</a></li>
+                            </ul>
+                        </div>
+                        <div class="logo-element">
+                            IN+
+                        </div>
+                    </li>
+                    <li ng-repeat="item in uidl.mainMenu.items" ng-include="'uidl-element-template-ManagementConsole-menu-item'"></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="gray-bg">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top gray-bg" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#" ng-click="$broadcast('AffiliateApp:DashboardScreenPart:Refresh:Executing')"><i class="fa fa-refresh"></i> </a>
+                        <form role="search" class="navbar-form-custom" action="search_results.html">
+                            <div class="form-group">
+                                <!--input type="text" placeholder="Search for something..." class="form-control" name="top-search" id="top-search"-->
+                            </div>
+                        </form>
+                    </div>
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li class="dropdown">
+                            <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
+                                <i class="fa fa-envelope"></i>  <span class="label label-warning">16</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-messages">
+                                <li>
+                                    <div class="dropdown-messages-box">
+                                        <a href="profile.html" class="pull-left">
+                                            <img alt="image" class="img-circle" src="img/a7.jpg">
+                                        </a>
+                                        <div class="media-body">
+                                            <small class="pull-right">46h ago</small>
+                                            <strong>Mike Loreipsum</strong> started following <strong>Monica Smith</strong>. <br>
+                                            <small class="text-muted">3 days ago at 7:58 pm - 10.06.2014</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="divider"></li>
+                                <li>
+                                    <div class="dropdown-messages-box">
+                                        <a href="profile.html" class="pull-left">
+                                            <img alt="image" class="img-circle" src="img/a4.jpg">
+                                        </a>
+                                        <div class="media-body ">
+                                            <small class="pull-right text-navy">5h ago</small>
+                                            <strong>Chris Johnatan Overtunk</strong> started following <strong>Monica Smith</strong>. <br>
+                                            <small class="text-muted">Yesterday 1:21 pm - 11.06.2014</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="divider"></li>
+                                <li>
+                                    <div class="dropdown-messages-box">
+                                        <a href="profile.html" class="pull-left">
+                                            <img alt="image" class="img-circle" src="img/profile.jpg">
+                                        </a>
+                                        <div class="media-body ">
+                                            <small class="pull-right">23h ago</small>
+                                            <strong>Monica Smith</strong> love <strong>Kim Smith</strong>. <br>
+                                            <small class="text-muted">2 days ago at 2:30 am - 11.06.2014</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="divider"></li>
+                                <li>
+                                    <div class="text-center link-block">
+                                        <a href="mailbox.html">
+                                            <i class="fa fa-envelope"></i> <strong>Read All Messages</strong>
+                                        </a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
+                                <i class="fa fa-bell"></i>  <span class="label label-primary">8</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-alerts">
+                                <li>
+                                    <a href="mailbox.html">
+                                        <div>
+                                            <i class="fa fa-envelope fa-fw"></i> You have 16 messages
+                                            <span class="pull-right text-muted small">4 minutes ago</span>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li class="divider"></li>
+                                <li>
+                                    <a href="profile.html">
+                                        <div>
+                                            <i class="fa fa-twitter fa-fw"></i> 3 New Followers
+                                            <span class="pull-right text-muted small">12 minutes ago</span>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li class="divider"></li>
+                                <li>
+                                    <a href="grid_options.html">
+                                        <div>
+                                            <i class="fa fa-upload fa-fw"></i> Server Rebooted
+                                            <span class="pull-right text-muted small">4 minutes ago</span>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li class="divider"></li>
+                                <li>
+                                    <div class="text-center link-block">
+                                        <a href="notifications.html">
+                                            <strong>See All Alerts</strong>
+                                            <i class="fa fa-angle-right"></i>
+                                        </a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>                        
+                        <li ng-repeat="widget in uidl.statusBar.containedWidgets">
+                            <uidl-widget uidl="widget"></uidl-widget>
+                        </li>
+                     </ul>
+                </nav>  
+            </div>
+            <div class="row wrapper border-bottom white-bg page-heading" style="padding-bottom:15px;margin-bottom:15px;">
+                <div class="col-lg-10">
+                    <h2>{{mainContentScreenPart.text || 'Dashboard'}}</h2>
+                </div>
+            </div>            
+            <uidl-widget uidl="uidl.mainContent"></uidl-widget>
+        </div>
+        <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
+    </script>
+    
+    <script type="text/ng-template" id="uidl-element-template-ManagementConsole-menu-item">
+        <a ng-class="{bold: item.level==0}" ng-show="item.notifications[1].subscribedBehaviorQualifiedNames.length" href="" ng-click="$emit(item.notifications[1].qualifiedName)"><i class="fa fa-diamond"></i>{{translate(item.text)}}</a>
+        <span ng-class="{bold: item.level==0}" ng-hide="item.notifications[1].subscribedBehaviorQualifiedNames.length">{{translate(item.text)}}</span>
+        <ul>
+            <li ng-repeat="item in item.subItems" ng-include="'uidl-element-template-ManagementConsole-menu-item'"></li>
+        </ul>
+    </script>
+    
+    <script type="text/ng-template" id="uidl-element-template-Container">
+        <uidl-widget ng-repeat="widget in uidl.containedWidgets" uidl="widget"></uidl-widget>
+    </script>
+    
+    <script type="text/ng-template" id="uidl-element-template-LayoutHorizontal">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td style="vertical-align: top;" ng-repeat="widget in uidl.containedWidgets">
+                    <uidl-widget uidl="widget"></uidl-widget>
+                </td>
+            </tr>
+        </table>
+    </script>
+    
+    <script type="text/ng-template" id="uidl-element-template-LayoutVertical">
+        <div ng-repeat="widget in uidl.containedWidgets">
+            <uidl-widget uidl="widget"></uidl-widget>
+        </div>
+    </script>
+    
+    <script type="text/ng-template" id="uidl-element-template-LayoutFlow">
+        <div style="layout" ng-repeat="widget in uidl.containedWidgets">
+            <uidl-widget uidl="widget"></uidl-widget>
+        </div>
+    </script>
+    
+    <script type="text/ng-template" id="uidl-element-template-ScreenPartContainer">
+        <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
+        <uidl-screen-part ng-if="currentScreenPart" uidl="currentScreenPart"></uidl-screen-part>
+    </script>
+    
+    <script type="text/ng-template" id="uidl-element-template-Text">
+        {{translate(uidl.text)}}
+    </script>
+    
+    <script type="text/ng-template" id="uidl-element-template-Gauge">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <span class="label label-success pull-right">{{translate(uidl.badgeText)}}</span>
+                <h5>{{translate(uidl.text)}}</h5>
+            </div>
+            <div class="ibox-content">
+                <h1 class="no-margins">{{model.state.data[uidl.valueDataProperty] | number}}</h1>
+                <!--div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div-->
+                <small>{{translate(uidl.values[0].label)}}</small>
+            </div>
+        </div>
+    </script>
+    
+    <script type="text/ng-template" id="uidl-element-template-Chat">
+        <div>Message 1 . . . </div>
+        <div>Message 2 . . . </div>
+        <div>Message 3 . . . </div>
+        <textarea></textarea>
+        <button>Send</button>
+    </script>
+    
+    <script type="text/ng-template" id="uidl-element-template-Chart">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <div>
+                                <!--span class="pull-right text-right">
+                                <small>Average value of sales in the past month in: <strong>United states</strong></small>
+                                    <br/>
+                                    All sales: 162,862
+                                </span-->
+                    <h3 class="font-bold no-margins">
+                        Current Revenue
+                    </h3>
+                    <small>Sales marketing.</small>
+                </div>
+
+                <div class="m-t-sm">
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div>
+                                <canvas id="lineChart" height="114"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <ul class="stat-list m-t-lg">
+                                <li>
+                                    <h2 class="no-margins">{{model.state.data[uidl.currentValueDataProperty] | currency}}</h2>
+                                    <small>Total earnings in current period</small>
+                                    <div class="progress progress-mini">
+                                        <div class="progress-bar" style="width: 48%;"></div>
+                                    </div>
+                                </li>
+                                <!--li>
+                                    <h2 class="no-margins "></h2>
+                                    <small>Earnings in last month</small>
+                                    <div class="progress progress-mini">
+                                        <div class="progress-bar" style="width: 60%;"></div>
+                                    </div>
+                                </li-->
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="m-t-md">
+                    <small class="pull-right">
+                        <i class="fa fa-clock-o"> </i>
+                        <!--Update on 16.07.2015-->
+                    </small>
+                    <small>
+                        <!--<strong>Analysis of sales:</strong> The value has been changed over time, and last month reached a level over $50,000.-->
+                    </small>
+                </div>
+
+            </div>
+        </div>
+    </script>
+    
+    <script type="text/ng-template" id="uidl-element-template-Report">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>{{translate(uidl.text)}}</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th ng-repeat="property in displayProperties">{{translate(property.name)}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="resultRow in resultSet">
+                                    <td>1</td>
+                                    <td ng-repeat="property in displayProperties" ng-click="editEntity(resultRow)">{{resultRow[property.name]}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="uidl-element-template-Dashboard">
+        <div class="row">
+            <div class="col-lg-2" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType=='Gauge'" style="vertical-align:top;">
+                <uidl-widget uidl="widget"></uidl-widget>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType=='Chart'" style="vertical-align:top;">
+                <uidl-widget uidl="widget"></uidl-widget>
+            </div>
+            <div class="col-lg-4" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType=='Chat'" style="vertical-align:top;">
+                <uidl-widget uidl="widget"></uidl-widget>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType=='Report'" style="vertical-align:top;">
+                <uidl-widget uidl="widget"></uidl-widget>
+            </div>
+        </div>
+    </script>
+    
+    <!------ HARD CODED  -------->
+    
+    <script type="text/ng-template" id="uidl-element-template-AffiliateSignUpForm">
+        <div class="middle-box text-center loginscreen   animated fadeInDown">
+            <div>
+                <div>
+                    <h1 class="logo-name">AFP</h1>
+                </div>
+                <h2>Sign Up</h2>
+                <p>Apply for an affiliate account.</p>
+                <form class="m-t" role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.data.fullName" >
+                    </div>
+                    <div class="form-group">
+                        <input type="email" class="form-control" placeholder="Email" required="" ng-model="model.data.emailAddress" >
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Phone Number" required="" ng-model="model.data.phoneNumber" >
+                    </div>
+                    <!--div class="form-group">
+                            <div class="checkbox i-checks"><label> <input type="checkbox"><i></i> Agree the terms and policy </label></div>
+                    </div-->
+                    <button class="btn btn-primary block full-width m-b" ng-click="$emit(uidl.qualifiedName + ':SignUp:Executing')">Apply</button>
+
+                    <!--p class="text-muted text-center"><small>Already have an account?</small></p>
+                    <a class="btn btn-sm btn-white btn-block" href="login.html">Login</a-->
+                </form>
+                <p class="m-t"> <small>Powered by BitWize</small> </p>
+            </div>
+        </div>
+    </script>
+
+
+
+    <!--script>
+        $(document).ready(function() {
+            setTimeout(function() {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    showMethod: 'slideDown',
+                    timeOut: 4000
+                };
+                toastr.success('Responsive Admin Theme', 'Welcome to INSPINIA');
+
+            }, 1300);
+
+
+            var data1 = [
+                [0,4],[1,8],[2,5],[3,10],[4,4],[5,16],[6,5],[7,11],[8,6],[9,11],[10,30],[11,10],[12,13],[13,4],[14,3],[15,3],[16,6]
+            ];
+            var data2 = [
+                [0,1],[1,0],[2,2],[3,0],[4,1],[5,3],[6,1],[7,5],[8,2],[9,3],[10,2],[11,1],[12,0],[13,2],[14,8],[15,0],[16,0]
+            ];
+            $("#flot-dashboard-chart").length && $.plot($("#flot-dashboard-chart"), [
+                data1, data2
+            ],
+                    {
+                        series: {
+                            lines: {
+                                show: false,
+                                fill: true
+                            },
+                            splines: {
+                                show: true,
+                                tension: 0.4,
+                                lineWidth: 1,
+                                fill: 0.4
+                            },
+                            points: {
+                                radius: 0,
+                                show: true
+                            },
+                            shadowSize: 2
+                        },
+                        grid: {
+                            hoverable: true,
+                            clickable: true,
+                            tickColor: "#d5d5d5",
+                            borderWidth: 1,
+                            color: '#d5d5d5'
+                        },
+                        colors: ["#1ab394", "#1C84C6"],
+                        xaxis:{
+                        },
+                        yaxis: {
+                            ticks: 4
+                        },
+                        tooltip: false
+                    }
+            );
+
+            var doughnutData = [
+                {
+                    value: 300,
+                    color: "#a3e1d4",
+                    highlight: "#1ab394",
+                    label: "App"
+                },
+                {
+                    value: 50,
+                    color: "#dedede",
+                    highlight: "#1ab394",
+                    label: "Software"
+                },
+                {
+                    value: 100,
+                    color: "#A4CEE8",
+                    highlight: "#1ab394",
+                    label: "Laptop"
+                }
+            ];
+
+            var doughnutOptions = {
+                segmentShowStroke: true,
+                segmentStrokeColor: "#fff",
+                segmentStrokeWidth: 2,
+                percentageInnerCutout: 45, // This is 0 for Pie charts
+                animationSteps: 100,
+                animationEasing: "easeOutBounce",
+                animateRotate: true,
+                animateScale: false
+            };
+
+            var ctx = document.getElementById("doughnutChart").getContext("2d");
+            var DoughnutChart = new Chart(ctx).Doughnut(doughnutData, doughnutOptions);
+
+            var polarData = [
+                {
+                    value: 300,
+                    color: "#a3e1d4",
+                    highlight: "#1ab394",
+                    label: "App"
+                },
+                {
+                    value: 140,
+                    color: "#dedede",
+                    highlight: "#1ab394",
+                    label: "Software"
+                },
+                {
+                    value: 200,
+                    color: "#A4CEE8",
+                    highlight: "#1ab394",
+                    label: "Laptop"
+                }
+            ];
+
+            var polarOptions = {
+                scaleShowLabelBackdrop: true,
+                scaleBackdropColor: "rgba(255,255,255,0.75)",
+                scaleBeginAtZero: true,
+                scaleBackdropPaddingY: 1,
+                scaleBackdropPaddingX: 1,
+                scaleShowLine: true,
+                segmentShowStroke: true,
+                segmentStrokeColor: "#fff",
+                segmentStrokeWidth: 2,
+                animationSteps: 100,
+                animationEasing: "easeOutBounce",
+                animateRotate: true,
+                animateScale: false
+            };
+            var ctx = document.getElementById("polarChart").getContext("2d");
+            var Polarchart = new Chart(ctx).PolarArea(polarData, polarOptions);
+
+        });
+    </script-->
+</body>
+</html>
