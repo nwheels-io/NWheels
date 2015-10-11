@@ -35,18 +35,23 @@ namespace NWheels.Stacks.ODataBreeze
         where TDataRepo : class, IApplicationDataRepository
     {
         private readonly IFramework _framework;
-        private readonly BreezeContextProvider<TDataRepo> _contextProvider;
+        private readonly IComponentContext _components;
+        private readonly ITypeMetadataCache _metadataCache;
         private readonly IBreezeEndpointLogger _logger;
         private readonly ThreadStaticAnchor<PerContextResourceConsumerScope<TDataRepo>> _domainContextAnchor;
+        private readonly ThreadStaticAnchor<DataRepositoryBase> _dataRepoAnchor;
+        private BreezeContextProvider<TDataRepo> _contextProvider;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected BreezeApiControllerBase(IComponentContext components, IFramework framework, ITypeMetadataCache metadataCache)
         {
+            _metadataCache = metadataCache;
+            _components = components;
             _framework = framework;
             _logger = components.Resolve<IBreezeEndpointLogger>();
-            _contextProvider = new BreezeContextProvider<TDataRepo>(components, framework, metadataCache, _logger);
             _domainContextAnchor = new ThreadStaticAnchor<PerContextResourceConsumerScope<TDataRepo>>();
+            _dataRepoAnchor = new ThreadStaticAnchor<DataRepositoryBase>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,12 +62,12 @@ namespace NWheels.Stacks.ODataBreeze
         {
             try
             {
-                var metadataJsonString = _contextProvider.Metadata();
+                var metadataJsonString = ContextProvider.Metadata();
                 return metadataJsonString;
             }
             finally
             {
-                _domainContextAnchor.Clear();
+                CleanupCurrentThread();
             }
         }
 
@@ -81,7 +86,6 @@ namespace NWheels.Stacks.ODataBreeze
 
             using ( var activity = _logger.RestWriteInProgress() )
             {
-                var dataRepoAnchor = new ThreadStaticAnchor<DataRepositoryBase>();
 
                 try
                 {
@@ -89,8 +93,8 @@ namespace NWheels.Stacks.ODataBreeze
 
                     using ( var context = _framework.NewUnitOfWork<TDataRepo>() )
                     {
-                        dataRepoAnchor.Current = (DataRepositoryBase)(object)context;
-                        result = _contextProvider.SaveChanges(saveBundle);
+                        _dataRepoAnchor.Current = (DataRepositoryBase)(object)context;
+                        result = ContextProvider.SaveChanges(saveBundle);
                         context.CommitChanges();
                     }
 
@@ -105,8 +109,7 @@ namespace NWheels.Stacks.ODataBreeze
                 }
                 finally
                 {
-                    dataRepoAnchor.Clear();
-                    _domainContextAnchor.Clear();
+                    CleanupCurrentThread();
                 }
             }
         }
@@ -128,10 +131,26 @@ namespace NWheels.Stacks.ODataBreeze
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void CleanupCurrentThread()
+        {
+            _dataRepoAnchor.Clear();
+            _domainContextAnchor.Clear();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         public BreezeContextProvider<TDataRepo> ContextProvider
         {
-            get { return _contextProvider; }
+            get
+            {
+                if ( _contextProvider == null )
+                {
+                    _contextProvider = new BreezeContextProvider<TDataRepo>(_components, _framework, _metadataCache, _logger);
+                }
+                
+                return _contextProvider;
+            }
         }
     }
 }

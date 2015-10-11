@@ -151,11 +151,16 @@ namespace NWheels.Stacks.ODataBreeze
                             .Set<HttpGetAttribute>()
                             .Set<QueryableAttribute>()
                             .Set<RouteAttribute>(values => values.Arg<string>(entityMetadata.Name)),
-                        w => w.Return(
-                            w.This<BreezeApiControllerBase<CTT.TDataRepo>>()
-                            .Prop<BreezeContextProvider<CTT.TDataRepo>>(x => x.ContextProvider)
-                            .Prop<CTT.TDataRepo>(x => x.QuerySource)
-                            .Prop<IQueryable<TT.TContract>>(entityRepoProperty)));
+                        w => {
+                            var resultLocal = w.Local<IQueryable<TT.TContract>>();
+                            resultLocal.Assign(
+                                w.This<BreezeApiControllerBase<CTT.TDataRepo>>()
+                                .Prop<BreezeContextProvider<CTT.TDataRepo>>(x => x.ContextProvider)
+                                .Prop<CTT.TDataRepo>(x => x.QuerySource)
+                                .Prop<IQueryable<TT.TContract>>(entityRepoProperty));
+                            w.This<BreezeApiControllerBase<CTT.TDataRepo>>().Void(x => x.CleanupCurrentThread);
+                            w.Return(resultLocal);
+                        });
                 }
             }
         }
