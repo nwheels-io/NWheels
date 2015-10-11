@@ -220,7 +220,7 @@ namespace NWheels.Conventions.Core
 
             protected virtual void ImplementEntityRepositoryProperties(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
-                foreach ( var entity in EntitiesInRepository.Where(e => e.RepositoryProperty != null) )
+                foreach ( var entity in EntitiesInRepository.Where(e => e.Metadata.IsEntity && e.PartitionedRepositoryProperty == null) )
                 {
                     ImplementEntityRepositoryProperty(writer, entity);
                 }
@@ -235,17 +235,23 @@ namespace NWheels.Conventions.Core
 
             protected virtual void ImplementEntityRepositoryProperty(ImplementationClassWriter<TypeTemplate.TInterface> writer, EntityInRepository entity)
             {
-                writer.Property(entity.RepositoryProperty).Implement(p => p.Get(w => w.Return(p.BackingField)));
+                if ( entity.RepositoryProperty != null )
+                {
+                    writer.Property(entity.RepositoryProperty).Implement(p => p.Get(w => w.Return(p.BackingField)));
+                }
 
                 Initializers.Add(cw => {
                     using (TT.CreateScope<TT.TContract, TT.TImpl>(entity.ContractType, entity.ImplementationType))
                     {
-                        var backingField = writer.OwnerClass
-                            .GetPropertyBackingField(entity.RepositoryProperty)
-                            .AsOperand<IEntityRepository<TT.TContract>>();
+                        var backingField = (
+                            entity.RepositoryProperty != null
+                            ? writer.OwnerClass.GetPropertyBackingField(entity.RepositoryProperty).AsOperand<IEntityRepository<TT.TContract>>()
+                            : writer.Field<IEntityRepository<TT.TContract>>("m_" + entity.Metadata.Name));
 
                         backingField.Assign(GetNewEntityRepositoryExpression(entity, cw, partitionValue: null));
                         cw.This<DataRepositoryBase>().Void(x => x.RegisterEntityRepository<TT.TContract, TT.TImpl>, backingField);
+                        
+                        _repositoryFieldByContract[entity.ContractType] = backingField;
                     }
                 });
             }
@@ -357,15 +363,18 @@ namespace NWheels.Conventions.Core
                         {
                             var entity = EntitiesInRepository[index];
 
-                            if ( entity.RepositoryProperty != null )
+                            //if ( entity.RepositoryProperty != null )
+                            //{
+                            //    var backingField = writer.OwnerClass.GetPropertyBackingField(entity.RepositoryProperty);
+                            //    repoArray.ItemAt(index).Assign(backingField.AsOperand<IEntityRepository>());
+                            //}
+                            //else if ( entity.PartitionedRepositoryProperty != null )
+
+                            Field<IEntityRepository<TT.TContract>> backingField;
+
+                            if ( _repositoryFieldByContract.TryGetValue(entity.ContractType, out backingField) )
                             {
-                                var backingField = writer.OwnerClass.GetPropertyBackingField(entity.RepositoryProperty);
-                                repoArray.ItemAt(index).Assign(backingField.AsOperand<IEntityRepository>());
-                            }
-                            else if ( entity.PartitionedRepositoryProperty != null )
-                            {
-                                var repoField = _repositoryFieldByContract[entity.ContractType];
-                                repoArray.ItemAt(index).Assign(repoField.CastTo<IEntityRepository>());
+                                repoArray.ItemAt(index).Assign(backingField.CastTo<IEntityRepository>());
                             }
                             else
                             {
@@ -460,6 +469,11 @@ namespace NWheels.Conventions.Core
                     {
                         FindEntityContractsInRepository(property.Relation.RelatedPartyType);
                     }
+                }
+
+                foreach ( var derivedType in type.DerivedTypes )
+                {
+                    FindEntityContractsInRepository(derivedType);
                 }
             }
 

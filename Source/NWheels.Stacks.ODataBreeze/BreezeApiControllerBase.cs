@@ -80,17 +80,13 @@ namespace NWheels.Stacks.ODataBreeze
         {
             using ( var activity = _logger.RestWriteInProgress() )
             {
-
                 try
                 {
-                    SaveResult result;
-
-                    using ( var context = _framework.NewUnitOfWork<TDataRepo>() )
-                    {
-                        _dataRepoAnchor.Current = (DataRepositoryBase)(object)context;
-                        result = ContextProvider.SaveChanges(saveBundle);
-                        context.CommitChanges();
-                    }
+                    _dataRepoAnchor.Current = (DataRepositoryBase)(object)_contextProvider.QuerySource;
+                    
+                    var result = ContextProvider.SaveChanges(saveBundle);
+                    
+                    _contextProvider.QuerySource.CommitChanges();
 
                     _logger.RestWriteCompleted();
                     return result;
