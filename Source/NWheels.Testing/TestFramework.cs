@@ -359,6 +359,7 @@ namespace NWheels.Testing
             builder.RegisterInstance(_dynamicModule).As<DynamicModule>();
             builder.RegisterType<ThreadRegistry>().SingleInstance();
             builder.RegisterGeneric(typeof(Auto<>)).SingleInstance();
+            builder.RegisterType<UniversalThreadLogAnchor>().As<IThreadLogAnchor>().SingleInstance();
 
             builder.RegisterInstance(_loggerFactory).As<LoggerObjectFactory, IAutoObjectFactory>();
             builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory, IConfigurationObjectFactory, ConfigurationObjectFactory>().SingleInstance();

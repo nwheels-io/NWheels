@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
+using NWheels.Concurrency;
 using NWheels.Core;
 using NWheels.DataObjects.Core;
 using NWheels.Entities.Core;
@@ -158,6 +159,24 @@ namespace NWheels.Entities.Factories
             }
 
             return domainObjectFactory.CreateDomainObjectInstance<TContract>(containedObject);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool InitializeDomainObjectConstructor<TEntity>(out IComponentContext components, out TEntity persistableObject)
+            where TEntity : class
+        {
+            var currentDomainContext = new ThreadStaticAnchor<DataRepositoryBase>().Current;
+
+            if ( currentDomainContext == null )
+            {
+                throw new InvalidOperationException("No active domain context on current thread.");
+            }
+
+            components = currentDomainContext.Components;
+            persistableObject = currentDomainContext.PersistableObjectFactory.NewEntity<TEntity>();
+
+            return true;
         }
     }
 }

@@ -10,6 +10,7 @@ using Autofac.Integration.WebApi;
 using Microsoft.Owin.Hosting;
 using NWheels.Endpoints;
 using NWheels.Entities;
+using NWheels.Extensions;
 using NWheels.Hosting;
 using Module = Autofac.Module;
 
@@ -25,6 +26,8 @@ namespace NWheels.Stacks.ODataBreeze
                 (context, endpoint) => context.Resolve<BreezeEndpointComponent>(TypedParameter.From(endpoint)));
 
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
+
+            builder.NWheelsFeatures().Logging().RegisterLogger<IBreezeEndpointLogger>();
         }
     }
 }

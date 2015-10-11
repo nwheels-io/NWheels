@@ -21,8 +21,10 @@ using Breeze.WebApi2;
 using Newtonsoft.Json.Linq;
 using NWheels.Authorization;
 using NWheels.Authorization.Core;
+using NWheels.Concurrency;
 using NWheels.DataObjects;
 using NWheels.Entities;
+using NWheels.Entities.Core;
 using NWheels.Extensions;
 
 namespace NWheels.Stacks.ODataBreeze
@@ -32,13 +34,19 @@ namespace NWheels.Stacks.ODataBreeze
     public abstract class BreezeApiControllerBase<TDataRepo> : ApiController
         where TDataRepo : class, IApplicationDataRepository
     {
+        private readonly IFramework _framework;
         private readonly BreezeContextProvider<TDataRepo> _contextProvider;
+        private readonly IBreezeEndpointLogger _logger;
+        private readonly ThreadStaticAnchor<PerContextResourceConsumerScope<TDataRepo>> _domainContextAnchor;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected BreezeApiControllerBase(IComponentContext components, IFramework framework, ITypeMetadataCache metadataCache)
         {
-            _contextProvider = new BreezeContextProvider<TDataRepo>(components, framework, metadataCache);
+            _framework = framework;
+            _logger = components.Resolve<IBreezeEndpointLogger>();
+            _contextProvider = new BreezeContextProvider<TDataRepo>(components, framework, metadataCache, _logger);
+            _domainContextAnchor = new ThreadStaticAnchor<PerContextResourceConsumerScope<TDataRepo>>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,8 +55,15 @@ namespace NWheels.Stacks.ODataBreeze
         [Route("Metadata")]
         public string Metadata()
         {
-            var metadataJsonString = _contextProvider.Metadata();
-            return metadataJsonString;
+            try
+            {
+                var metadataJsonString = _contextProvider.Metadata();
+                return metadataJsonString;
+            }
+            finally
+            {
+                _domainContextAnchor.Clear();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,8 +72,60 @@ namespace NWheels.Stacks.ODataBreeze
         [Route("SaveChanges")]
         public SaveResult SaveChanges(JObject saveBundle)
         {
-            return _contextProvider.SaveChanges(saveBundle);
+            //TODO: remove this once we are sure the bug is solved
+            PerContextResourceConsumerScope<TDataRepo> stale;
+            if ( (stale = _domainContextAnchor.Current) != null )
+            {
+                _logger.StaleUnitOfWorkEncountered(stale.Resource.ToString(), ((DataRepositoryBase)(object)stale.Resource).InitializerThreadText);
+            }
+
+            using ( var activity = _logger.RestWriteInProgress() )
+            {
+                var dataRepoAnchor = new ThreadStaticAnchor<DataRepositoryBase>();
+
+                try
+                {
+                    SaveResult result;
+
+                    using ( var context = _framework.NewUnitOfWork<TDataRepo>() )
+                    {
+                        dataRepoAnchor.Current = (DataRepositoryBase)(object)context;
+                        result = _contextProvider.SaveChanges(saveBundle);
+                        context.CommitChanges();
+                    }
+
+                    _logger.RestWriteCompleted();
+                    return result;
+                }
+                catch ( Exception e )
+                {
+                    activity.Fail(e);
+                    _logger.RestWriteFailed(e);
+                    throw;
+                }
+                finally
+                {
+                    dataRepoAnchor.Clear();
+                    _domainContextAnchor.Clear();
+                }
+            }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of ApiController
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if ( disposing )
+            {
+                _contextProvider.Dispose();
+            }
+        }
+
+        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         

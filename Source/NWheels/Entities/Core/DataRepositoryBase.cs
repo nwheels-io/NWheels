@@ -8,6 +8,7 @@ using NWheels.Conventions.Core;
 using NWheels.DataObjects.Core;
 using NWheels.Extensions;
 using NWheels.Logging;
+using NWheels.Logging.Core;
 using NWheels.Processing.Messages;
 
 namespace NWheels.Entities.Core
@@ -30,6 +31,9 @@ namespace NWheels.Entities.Core
 
         protected DataRepositoryBase(IResourceConsumerScopeHandle consumerScope, IComponentContext components, bool autoCommit)
         {
+            var currentThreadLog = components.Resolve<IThreadLogAnchor>().CurrentThreadLog;
+            InitializerThreadText = (currentThreadLog != null ? currentThreadLog.RootActivity.SingleLineText : string.Empty);
+
             _entityRepositoryByContractType = new Dictionary<Type, IEntityRepository>();
             _partitionedRepositoryByContractType = new Dictionary<Type, IPartitionedRepository>();
             _genericCallbacksByContractType = new Dictionary<Type, Action<IDataRepositoryCallback>>();
@@ -238,6 +242,10 @@ namespace NWheels.Entities.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public abstract IEntityObjectFactory PersistableObjectFactory { get; }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string InitializerThreadText { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

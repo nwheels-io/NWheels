@@ -37,14 +37,14 @@ namespace NWheels.Stacks.MongoDb
         protected override void BeginLifetimeScope()
         {
             base.BeginLifetimeScope();
-            _s_current = this;
+            _s_anchor.Current = this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void EndLifetimeScope()
         {
-            _s_current = null;
+            _s_anchor.Current = null;
             base.EndLifetimeScope();
         }
 
@@ -167,20 +167,18 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [ThreadStatic]
-        private static MongoDataRepositoryBase _s_current;
+        private static readonly LogicalCallContextAnchor<MongoDataRepositoryBase> _s_anchor = new LogicalCallContextAnchor<MongoDataRepositoryBase>();
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static MongoDataRepositoryBase ResolveFrom(IComponentContext components)
         {
-            //return (MongoDataRepositoryBase)components.Resolve<DataRepositoryBase>();
-
-            var instance = _s_current;
+            var instance = _s_anchor.Current;
 
             if ( instance == null )
             {
-                throw new InvalidOperationException("There is currently no instance of MongoDataRepositoryBase associated with the current thread.");
+                return (MongoDataRepositoryBase)components.Resolve<DataRepositoryBase>();
+                //throw new InvalidOperationException("There is currently no instance of MongoDataRepositoryBase associated with the current thread.");
             }
             
             return instance;
@@ -190,7 +188,10 @@ namespace NWheels.Stacks.MongoDb
 
         public static MongoDataRepositoryBase Current
         {
-            get { return _s_current; }
+            get
+            {
+                return _s_anchor.Current;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

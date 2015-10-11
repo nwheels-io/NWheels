@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using Autofac;
 using Hapil;
@@ -75,6 +76,16 @@ namespace NWheels.Entities.Factories
                             }
                         });
                 });
+                
+                writer.DefaultConstructor(
+                    cw => {
+                        var persistable = cw.Local<TT.TContract>();
+                        var components = cw.Local<IComponentContext>();
+                        Static.GenericFunc((c, p) => RuntimeEntityModelHelpers.InitializeDomainObjectConstructor(out c, out p), components, persistable);
+                        
+                        cw.This(persistable, components);
+                    });
+
             }
         }
 

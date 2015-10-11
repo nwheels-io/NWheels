@@ -10,31 +10,55 @@ using Hapil;
 using Microsoft.Data.Edm;
 using Microsoft.Data.Edm.Csdl;
 using Microsoft.Data.Edm.Library;
+using NWheels.Concurrency;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Extensions;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 
 namespace NWheels.Stacks.ODataBreeze
 {
-    public class BreezeContextProvider<TDataRepo> : ContextProvider
+    public class BreezeContextProvider<TDataRepo> : ContextProvider, IDisposable
         where TDataRepo : class, IApplicationDataRepository
     {
         private readonly IComponentContext _components;
         private readonly IFramework _framework;
         private readonly ITypeMetadataCache _metadataCache;
+        private readonly IBreezeEndpointLogger _logger;
         private readonly TDataRepo _querySource;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public BreezeContextProvider(IComponentContext components, IFramework framework, ITypeMetadataCache metadataCache)
+        public BreezeContextProvider(IComponentContext components, IFramework framework, ITypeMetadataCache metadataCache, IBreezeEndpointLogger logger)
         {
             _components = components;
             _framework = framework;
             _metadataCache = metadataCache;
+            _logger = logger;
+
+            //TODO: remove this once we are sure the bug is solved
+            PerContextResourceConsumerScope<TDataRepo> stale;
+            if ( (stale = new ThreadStaticAnchor<PerContextResourceConsumerScope<TDataRepo>>().Current) != null )
+            {
+                _logger.StaleUnitOfWorkEncountered(stale.Resource.ToString(), ((DataRepositoryBase)(object)stale.Resource).InitializerThreadText);
+            }
+
+            _logger.CreatingQuerySource(domainContext: typeof(TDataRepo).Name);
             _querySource = framework.NewUnitOfWork<TDataRepo>(autoCommit: false);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Implementation of IDisposable
+
+        public void Dispose()
+        {
+            _logger.DisposingQuerySource(domainContext: typeof(TDataRepo).Name);
+        }
+
+        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -86,15 +110,14 @@ namespace NWheels.Stacks.ODataBreeze
 
             using ( var data = _framework.NewUnitOfWork<TDataRepo>() )
             {
-                var entityRepositories = data.GetEntityRepositories().Where(repo => repo != null).ToDictionary(repo => repo.ImplementationType);
+                var entityRepositories = data.GetEntityRepositories().Where(repo => repo != null).ToDictionary(repo => repo.ContractType);
 
                 foreach ( var typeGroup in saveWorkState.SaveMap )
                 {
-                    var entityImplementationType = typeGroup.Key;
-                    var entityRepository = entityRepositories[entityImplementationType];
-
                     foreach ( var entityToSave in typeGroup.Value )
                     {
+                        var entityRepository = entityRepositories[entityToSave.Entity.As<IObject>().ContractType];
+
                         switch ( entityToSave.EntityState )
                         {
                             case Breeze.ContextProvider.EntityState.Added:

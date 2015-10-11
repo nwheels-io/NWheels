@@ -17,5 +17,14 @@ namespace NWheels.Stacks.ODataBreeze
 
         [LogError]
         void RestWriteFailed(Exception e);
+
+        [LogCritical]
+        void StaleUnitOfWorkEncountered(string domainContext, string initializedBy);
+
+        [LogDebug]
+        void CreatingQuerySource(string domainContext);
+
+        [LogDebug]
+        void DisposingQuerySource(string domainContext);
     }
 }
