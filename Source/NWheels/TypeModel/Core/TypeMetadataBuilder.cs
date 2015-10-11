@@ -72,6 +72,8 @@ namespace NWheels.DataObjects.Core
         public Type ContractType { get; set; }
         public Type DomainObjectType { get; set; }
         public bool IsAbstract { get; set; }
+        public bool IsEntity { get; set; }
+        public bool IsEntityPart { get; set; }
         public string DefaultDisplayFormat { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

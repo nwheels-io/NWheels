@@ -8,6 +8,7 @@ using Hapil;
 using NWheels.Conventions;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
+using NWheels.Extensions;
 
 namespace NWheels.Entities
 {
@@ -21,6 +22,8 @@ namespace NWheels.Entities
             base.ApplyTo(type, cache);
 
             type.IsAbstract = IsAbstract;
+            type.IsEntity = type.ContractType.IsEntityContract();
+            type.IsEntityPart = type.ContractType.IsEntityPartContract();
 
             if ( BaseEntity != null )
             {

@@ -19,6 +19,8 @@ namespace NWheels.DataObjects
         Type DomainObjectType { get; }
         bool TryGetImplementation(Type factoryType, out Type implementationType);
         IEnumerable<KeyValuePair<Type, Type>> GetAllImplementations();
+        bool IsEntity { get; }
+        bool IsEntityPart { get; }
         bool IsAbstract { get; }
         ITypeMetadata BaseType { get; }
         IReadOnlyList<ITypeMetadata> DerivedTypes { get; }
