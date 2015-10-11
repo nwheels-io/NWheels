@@ -189,7 +189,7 @@ namespace NWheels.Stacks.Nlog
                 KeepFileOpen = false,
             };
 
-            target.Layout = @"${date:format=yyyy-MM-dd HH\:mm\:ss.fff}|${level:uppercase=true}|${message}|${exception:format=ToString}";
+            target.Layout = @"${date:universalTime=True:format=yyyy-MM-dd HH\:mm\:ss.fff}|${level:uppercase=true}|${message}|${exception:format=ToString}";
             config.AddTarget(PlainTextFileTargetName, target);
 
             var plainTextFileRule = new LoggingRule(PlainTextLoggerName, LogLevel.Trace, target);
