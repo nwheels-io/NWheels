@@ -287,7 +287,9 @@
                             <th ng-repeat="property in displayProperties">{{translate(property.name)}}</th>
                       </tr>
                       <tr>
-                          <th ng-repeat="property in displayProperties"><select><option selected>Choose {{property.name}}</option></select></th>
+                        <th ng-repeat="property in displayProperties track by $index">
+							<uidl-report-lookup entity-meta-type="getPropertyRelatedMetaType(property.name)" />
+						  </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -305,6 +307,14 @@
                 </div>
             </div>
         </script>
+		
+		<script type="text/ng-template" id="uidl-element-template-report-lookup">
+			<div>
+				<select>
+					<option ng-repeat="opt in resultSet">{{opt.Name}}</option>
+				</select>
+			</div>
+		</script>
         
         <script type="text/ng-template" id="uidl-element-template-ReportDefaultRow">
              <td ng-repeat="column in parentModel.columns" ng-click="parentModel.onView(parentModel.row)">{{parentModel.row[column.name]}}</td>

@@ -281,6 +281,19 @@ function ($q, $http, $rootScope, $timeout, commandService) {
         return m_uidl.metaTypes[toCamelCase(name)];
     }
 
+	function getRelatedMetaType(entityName, propertyName) {
+        var fromMetaType = m_uidl.metaTypes[toCamelCase(entityName)];
+		var fromMetaProperty = fromMetaType.properties[toCamelCase(propertyName)];
+		
+		if (fromMetaProperty.relation && fromMetaProperty.relation.relatedPartyMetaTypeName) {
+			return m_uidl.metaTypes[toCamelCase(fromMetaProperty.relation.relatedPartyMetaTypeName)];
+		}
+		else {
+			return null;
+		}
+	};
+	
+
     //-----------------------------------------------------------------------------------------------------------------
     /*
         function takeMessagesFromServer() {
@@ -521,6 +534,10 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 alert('VIEW ENTITY ' + entity);
             };
 
+			scope.getPropertyRelatedMetaType = function(propertyName) {
+				return scope.uidlService.getRelatedMetaType(scope.uidl.entityMetaType, propertyName);
+			};
+
             scope.queryEntities();
         }
     };
@@ -648,6 +665,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
         getCurrentScreen: getCurrentScreen,
         getCurrentLocale: getCurrentLocale,
         getMetaType: getMetaType,
+        getRelatedMetaType: getRelatedMetaType,
         //takeMessagesFromServer: takeMessagesFromServer,
         implementController: implementController,
     };
@@ -1109,6 +1127,22 @@ theApp.directive('uidlController', ['$compile', '$parse', function ($compile, $p
     };
 }]);
 
+theApp.directive('uidlReportLookup', ['entityService', function(entityService) {
+	return {
+		scope: {
+			entityMetaType: '='
+		},
+		templateUrl: 'uidl-element-template-report-lookup',
+		controller: function($scope) {
+			if ($scope.entityMetaType == null)
+				return;
+			
+			entityService.queryEntity($scope.entityMetaType.name).then(function (data) {
+				$scope.resultSet = data.results;
+			});
+		}
+	}
+}]);
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.filter('localized', ['$scope', function ($scope) {
