@@ -14,5 +14,6 @@ namespace NWheels.Entities.Core
         void BeforeCommit();
         void AfterCommit();
         EntityState State { get; }
+        object TemporaryKey { get; set; }
     }
 }

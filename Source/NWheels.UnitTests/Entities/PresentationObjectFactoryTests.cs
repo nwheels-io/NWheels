@@ -674,6 +674,13 @@ namespace NWheels.UnitTests.Entities
                 return (TEntityContract)(object)new HardCodedDomainObject_ContractEntity((IContractEntity)(object)underlyingPersistableObject, _components);
             }
 
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IDomainObject CreateDomainObjectInstance(IPersistableObject underlyingPersistableObject)
+            {
+                return (IDomainObject)(object)new HardCodedDomainObject_ContractEntity((IContractEntity)(object)underlyingPersistableObject, _components);
+            }
+
             #endregion
         }
 

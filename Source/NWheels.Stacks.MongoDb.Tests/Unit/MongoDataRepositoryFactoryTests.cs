@@ -71,7 +71,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
                 repository.GetEntityRepositories().Select(repo => repo != null ? repo.ContractType : null),
                 Is.EquivalentTo(new[] {
                     typeof(IR1.ICategory), typeof(IR1.IAttribute), typeof(IR1.IProduct), typeof(IR1.IOrder), typeof(IR1.IOrderLine), typeof(IR1.ICustomer), 
-                    typeof(IR1.IContactDetail), typeof(IR1.IEmailContactDetail), null, null, null, null, null
+                    typeof(IR1.IContactDetail), typeof(IR1.IEmailContactDetail), typeof(IR1.IPhoneContactDetail), typeof(IR1.IPostContactDetail), null, null, null
                 }));
             
             Assert.That(

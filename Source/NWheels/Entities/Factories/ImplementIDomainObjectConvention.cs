@@ -46,6 +46,7 @@ namespace NWheels.Entities.Factories
             
             ImplementGetContainedObject(writer);
             ImplementToString(writer);
+            ImplementTemporaryKey(domainObjectImplementation);
         }
 
         #endregion
@@ -84,6 +85,13 @@ namespace NWheels.Entities.Factories
                             _context.EntityStateField));
                     })
                 );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementTemporaryKey(ImplementationClassWriter<IDomainObject> writer)
+        {
+            writer.Property(intf => intf.TemporaryKey).ImplementAutomatic();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

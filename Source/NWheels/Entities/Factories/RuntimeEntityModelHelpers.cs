@@ -166,17 +166,27 @@ namespace NWheels.Entities.Factories
         public static bool InitializeDomainObjectConstructor<TEntity>(out IComponentContext components, out TEntity persistableObject)
             where TEntity : class
         {
-            var currentDomainContext = new ThreadStaticAnchor<DataRepositoryBase>().Current;
+            var domainContext = CurrentDomainContext;
 
-            if ( currentDomainContext == null )
+            if ( domainContext == null )
             {
                 throw new InvalidOperationException("No active domain context on current thread.");
             }
 
-            components = currentDomainContext.Components;
-            persistableObject = currentDomainContext.PersistableObjectFactory.NewEntity<TEntity>();
+            components = domainContext.Components;
+            persistableObject = domainContext.PersistableObjectFactory.NewEntity<TEntity>();
 
             return true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static DataRepositoryBase CurrentDomainContext
+        {
+            get
+            {
+                return new ThreadStaticAnchor<DataRepositoryBase>().Current;
+            }
         }
     }
 }

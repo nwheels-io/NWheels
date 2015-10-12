@@ -154,6 +154,8 @@
     <Compile Include="BreezeMetadataBuilder.cs" />
     <Compile Include="BreezeWebApiConfig.cs" />
     <Compile Include="EdmModelBuilder.cs" />
+    <Compile Include="EndpointBreezeConfig.cs" />
+    <Compile Include="DomainObjectJsonConverter.cs" />
     <Compile Include="HardCoded\UserAccountsController.cs" />
     <Compile Include="HardCoded\UserAccountsContextProvider.cs" />
     <Compile Include="IBreezeEndpointLogger.cs" />
