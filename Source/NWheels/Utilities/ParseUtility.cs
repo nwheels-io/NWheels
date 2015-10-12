@@ -68,5 +68,21 @@ namespace NWheels.Utilities
                 return s_NonTypedParsersByType[asType](s);
             }
         }
+
+        public static DateTime TryParse(string s, DateTime defaultValue)
+        {
+            if ( string.IsNullOrEmpty(s) )
+                return defaultValue;
+
+            DateTime value;
+            if (DateTime.TryParse(s, out value))
+            {
+                return value;
+            }
+            else
+            {
+                return defaultValue;
+            }
+        }
     }
 }
