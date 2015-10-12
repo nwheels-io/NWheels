@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Entities.Factories;
 using NWheels.Extensions;
+using BreezeEntityState = Breeze.ContextProvider.EntityState;
 
 namespace NWheels.Stacks.ODataBreeze
 {
@@ -26,44 +28,41 @@ namespace NWheels.Stacks.ODataBreeze
         
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            if ( existingValue == null )
-            {
-                var domainObject = CreateDomainObject(objectType, reader);
-                existingValue = domainObject;
-            }
-
-            serializer.Populate(reader, existingValue);
-
-            return existingValue;
+            var domainObject = CreateOrRetrieveDomainObject(objectType, reader);
+            serializer.Populate(reader, domainObject);
+            return domainObject;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IDomainObject CreateDomainObject(Type implementationType, JsonReader reader)
+        private IDomainObject CreateOrRetrieveDomainObject(Type implementationType, JsonReader reader)
         {
-            var domainContext = RuntimeEntityModelHelpers.CurrentDomainContext;
-
-            if ( domainContext == null )
-            {
-                throw new InvalidOperationException("No domain context on current thread.");
-            }
-
+            var domainContext = GetCurrentDomainContext();
             var contractType = implementationType.GetInterfaces().First(intf => intf.IsEntityContract());
-            var persistableObject = (IPersistableObject)domainContext.PersistableObjectFactory.NewEntity(contractType);
-            
-            var domainFactory = domainContext.Components.Resolve<IDomainObjectFactory>();
-            var domainObject = domainFactory.CreateDomainObjectInstance(persistableObject);
-
-            var tokenReader = (JTokenReader)reader;
-            var objectToken = (JObject)tokenReader.CurrentToken;
-
             var metaType = domainContext.Components.Resolve<ITypeMetadataCache>().GetTypeMetadata(contractType);
-            
-            if ( metaType.PrimaryKey != null && metaType.PrimaryKey.Properties.Count == 1 )
+            var idProperty = metaType.PrimaryKey.Properties[0];
+
+            var entityJson = (JObject)((JTokenReader)reader).CurrentToken;
+            var entityState = ReadEntityState(entityJson);
+
+            IDomainObject domainObject;
+
+            switch ( entityState )
             {
-                var keyMetaProperty = metaType.PrimaryKey.Properties[0];
-                var temporaryKeyValue = objectToken.Property(keyMetaProperty.Name).Value;
-                domainObject.TemporaryKey = temporaryKeyValue;
+                case BreezeEntityState.Added:
+                    var persistableObject = (IPersistableObject)domainContext.PersistableObjectFactory.NewEntity(contractType);
+                    var domainFactory = domainContext.Components.Resolve<IDomainObjectFactory>();
+                    domainObject = domainFactory.CreateDomainObjectInstance(persistableObject);
+                    domainObject.TemporaryKey = ReadTemporaryKey(idProperty, entityJson);
+                    break;
+                case BreezeEntityState.Modified:
+                case BreezeEntityState.Deleted:
+                    var repository = domainContext.GetEntityRepository(contractType);
+                    var entityId = ReadEntityId(metaType, idProperty, entityJson);
+                    domainObject = (IDomainObject)repository.TryGetById(entityId);
+                    break;
+                default:
+                    throw new NotSupportedException("cannot handle entity in state: " + entityState);
             }
 
             return domainObject;
@@ -94,6 +93,54 @@ namespace NWheels.Stacks.ODataBreeze
             {
                 return false;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static IEntityId ReadEntityId(ITypeMetadata metaType, IPropertyMetadata idProperty, JObject entityJson)
+        {
+            var entityIdJson = (JValue)entityJson.Property(idProperty.Name).Value;
+            var entityIdString = entityIdJson.Value.ToString();
+
+            var parseMethod = idProperty.ClrType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static);
+            object parsedIdValue = parseMethod.Invoke(null, new object[] { entityIdString });
+
+            var closedEntityIdType = typeof(EntityId<,>).MakeGenericType(metaType.ContractType, idProperty.ClrType);
+            var entityIdInstance = (IEntityId)Activator.CreateInstance(closedEntityIdType, parsedIdValue);
+
+            return entityIdInstance;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static object ReadTemporaryKey(IPropertyMetadata idProperty, JObject entityJson)
+        {
+            var entityIdJson = (JValue)entityJson.Property(idProperty.Name).Value;
+            return entityIdJson.Value;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static BreezeEntityState ReadEntityState(JObject entityJson)
+        {
+            var entityAspectJson = (JObject)entityJson.Property("entityAspect").Value;
+            var entityStateJson = (JValue)entityAspectJson.Property("entityState").Value;
+
+            return (BreezeEntityState)Enum.Parse(typeof(BreezeEntityState), entityStateJson.Value.ToString());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        private static DataRepositoryBase GetCurrentDomainContext()
+        {
+            var domainContext = RuntimeEntityModelHelpers.CurrentDomainContext;
+
+            if ( domainContext == null )
+            {
+                throw new InvalidOperationException("No domain context on current thread.");
+            }
+
+            return domainContext;
         }
     }
 }

@@ -542,6 +542,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             }).ToArray();
 
             scope.queryEntities = function () {
+                scope.resultSet = null;
                 scope.entityService.queryEntity(scope.uidl.entityName).then(function (data) {
                     scope.resultSet = data.results;
                 });
@@ -559,14 +560,23 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.deleteEntity = function (entity) {
-                scope.entityService.deleteEntityAndSave(entity);
+                scope.entityService.deleteEntityAndSave(entity).then(function(result) {
+                    scope.queryEntities();
+                    scope.uiShowCrudForm = false;
+                });
             };
 
-            if(scope.uidl.form) {
+            if (scope.uidl.form) {
                 scope.$on(scope.uidl.form.qualifiedName + ':Closing', function (input) {
+                    scope.queryEntities();
                     scope.uiShowCrudForm = false;
                 });
             }
+
+            scope.$on(scope.uidl.form.qualifiedName + ':Refreshing', function (input) {
+                scope.queryEntities();
+                scope.uiShowCrudForm = false;
+            });
 
             scope.queryEntities();
         }
@@ -735,7 +745,10 @@ function ($http, $q, $timeout, breeze, logger) {
                 return;
             }
             aspect.setDeleted();
-            saveChanges();
+            return saveChanges();
+        }
+        else {
+            return $q.resolve(true);
         }
     }
 
@@ -766,6 +779,7 @@ function ($http, $q, $timeout, breeze, logger) {
         function saveSucceeded(saveResult) {
             logger.success("# of entities saved = " + saveResult.entities.length);
             logger.log(saveResult);
+            return saveResult;
         }
 
         function saveFailed(error) {

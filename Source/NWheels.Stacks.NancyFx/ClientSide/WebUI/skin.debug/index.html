@@ -344,7 +344,7 @@
                     WIDGET[{{uidl.widgetType}}&lt;{{uidl.entityName}}&gt;]
                     <span ng-hide="resultSet">Query Running</span>
                     <span ng-show="resultSet">{{resultSet.length}} row(s)</span>
-                    <span ng-show="resultSet"> | <a href="" ng-click="newEntity()">Add New</a></span>
+                    <span ng-show="resultSet"> | <a href="" ng-click="newEntity()">Add New</a> | <a href="" ng-click="queryEntities()">Refresh</a></span>
                 </div>
                 <table class="data" ng-hide="uiShowCrudForm">
                     <thead>
