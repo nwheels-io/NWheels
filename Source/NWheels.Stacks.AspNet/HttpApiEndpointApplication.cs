@@ -26,7 +26,7 @@ namespace NWheels.Stacks.AspNet
 {
     public class HttpApiEndpointApplication : HttpApplication
     {
-        private static readonly IPlainLog _s_sLog;
+        private static readonly IPlainLog _s_log;
         private NodeHost _nodeHost;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ namespace NWheels.Stacks.AspNet
         static HttpApiEndpointApplication()
         {
             CrashLog.RegisterUnhandledExceptionHandler();
-            _s_sLog = NLogBasedPlainLog.Instance;
+            _s_log = NLogBasedPlainLog.Instance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,10 +50,18 @@ namespace NWheels.Stacks.AspNet
 
         private void WebApiApplication_BeginRequest(object sender, EventArgs e)
         {
-            if ( RequestLogger != null )
+            try
             {
-                var context = HttpContext.Current;
-                context.Items[RequestLogger] = RequestLogger.IncomingRequest(context.Request.HttpMethod, context.Request.Path);
+                if ( RequestLogger != null )
+                {
+                    var context = HttpContext.Current;
+                    context.Items[RequestLogger] = RequestLogger.IncomingRequest(context.Request.HttpMethod, context.Request.Path);
+                }
+            }
+            catch ( Exception exc )
+            {
+                _s_log.Error("WebApiApplication_BeginRequest {0}", exc.ToString());
+                throw;
             }
         }
 
@@ -91,7 +99,7 @@ namespace NWheels.Stacks.AspNet
 
         protected void Application_Start()
         {
-            _s_sLog.Info("Application_Start: privateBinPath=[{0}]", AppDomain.CurrentDomain.SetupInformation.PrivateBinPath);
+            _s_log.Info("Application_Start: privateBinPath=[{0}]", AppDomain.CurrentDomain.SetupInformation.PrivateBinPath);
 
             try
             {
@@ -106,6 +114,7 @@ namespace NWheels.Stacks.AspNet
                         builder.RegisterModule<NWheels.Stacks.Nlog.ModuleLoader>();
                         //builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
                         builder.RegisterType<AspNetRegistrationComponent>().AsImplementedInterfaces().SingleInstance();
+                        builder.RegisterType<RequestLoggerComponent>().AsImplementedInterfaces().SingleInstance();
                         builder.RegisterWebApiFilterProvider(globalWebAppConfig);
                     });
 
@@ -122,11 +131,11 @@ namespace NWheels.Stacks.AspNet
                         config.MapHttpAttributeRoutes();
                     });
 
-                _s_sLog.Info("Application_Start: SUCCESS");
+                _s_log.Info("Application_Start: SUCCESS");
             }
             catch ( Exception e )
             {
-                _s_sLog.Critical("Application_Start: FAILURE! {0}", e.ToString());
+                _s_log.Critical("Application_Start: FAILURE! {0}", e.ToString());
                 throw;
             }
         }
@@ -144,7 +153,7 @@ namespace NWheels.Stacks.AspNet
 
             bootConfig.Validate();
 
-            _s_sLog.Debug(bootConfig.ToLogString());
+            _s_log.Debug(bootConfig.ToLogString());
 
             return bootConfig;
         }
