@@ -26,5 +26,8 @@ namespace NWheels.Stacks.ODataBreeze
 
         [LogDebug]
         void DisposingQuerySource(string domainContext);
+
+        [LogDebug]
+        void ContractResolverAddingForeignKeyProperty(string type, string property);
     }
 }

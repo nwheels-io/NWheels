@@ -153,12 +153,14 @@
     <Compile Include="BreezeApiControllerFactory.cs" />
     <Compile Include="BreezeMetadataBuilder.cs" />
     <Compile Include="BreezeWebApiConfig.cs" />
+    <Compile Include="DomainObjectContractResolver.cs" />
     <Compile Include="EdmModelBuilder.cs" />
     <Compile Include="EndpointBreezeConfig.cs" />
     <Compile Include="DomainObjectJsonConverter.cs" />
     <Compile Include="HardCoded\UserAccountsController.cs" />
     <Compile Include="HardCoded\UserAccountsContextProvider.cs" />
     <Compile Include="IBreezeEndpointLogger.cs" />
+    <Compile Include="JsonSerializationUtility.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="BreezeEndpointComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -29,6 +29,7 @@ namespace NWheels.Stacks.ODataBreeze
 {
     public class BreezeEndpointComponent : LifecycleEventListenerBase, IEndpoint
     {
+        private readonly IComponentContext _components;
         private readonly IComponentContext _baseContainer;
         private readonly DynamicModule _dyanmicModule;
         private readonly ITypeMetadataCache _metadataCache;
@@ -49,6 +50,7 @@ namespace NWheels.Stacks.ODataBreeze
             RestApiEndpointRegistration endpointRegistration,
             Auto<ILogger> logger)
         {
+            _components = components;
             _dyanmicModule = dyanmicModule;
             _metadataCache = metadataCache;
             _sessionManager = sessionManager;
@@ -92,6 +94,8 @@ namespace NWheels.Stacks.ODataBreeze
 
         public override void Load()
         {
+            EndpointBreezeConfig.Components = _components;
+
             _containerLifetimeScope = ((ILifetimeScope)_baseContainer).BeginLifetimeScope();
             GenerateBreezeApiController();
         }
@@ -143,6 +147,8 @@ namespace NWheels.Stacks.ODataBreeze
         {
             _containerLifetimeScope.Dispose();
             _containerLifetimeScope = null;
+
+            EndpointBreezeConfig.Components = null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
