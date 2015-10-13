@@ -21,7 +21,7 @@ namespace NWheels.UI.Toolbox
             this.BaseMetaType = baseMetaType;
             this.BaseTypeName = baseMetaType.Name;
             this.BaseMetaTypeName = baseMetaType.ContractType.AssemblyQualifiedNameNonVersioned();
-            this.Selections = baseMetaType.DerivedTypes.Select(t => new Selection(t)).ToList();
+            this.Selections = baseMetaType.DerivedTypes.Where(t => !t.IsAbstract).Select(t => new Selection(t)).ToList();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

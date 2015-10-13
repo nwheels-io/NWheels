@@ -344,7 +344,7 @@
                     WIDGET[{{uidl.widgetType}}&lt;{{uidl.entityName}}&gt;]
                     <span ng-hide="resultSet">Query Running</span>
                     <span ng-show="resultSet">{{resultSet.length}} row(s)</span>
-                    <span ng-show="resultSet"> | <a href="" ng-click="newEntity()">Add New</a> | <a href="" ng-click="queryEntities()">Refresh</a></span>
+                    <span ng-show="resultSet"> | <a href="" ng-click="newEntity()">Add New</a> | <a href="" ng-click="refresh()">Refresh</a></span>
                 </div>
                 <table class="data" ng-hide="uiShowCrudForm">
                     <thead>
@@ -369,7 +369,8 @@
                     </tbody>
                 </table>
                 <div class="layout" ng-if="uiShowCrudForm">
-                    <uidl-widget uidl="uidl.form" parent-model="model"></uidl-widget>
+                    <uidl-widget ng-if="uidl.form" uidl="uidl.form" parent-model="model"></uidl-widget>
+                    <uidl-widget ng-if="uidl.formTypeSelector" uidl="uidl.formTypeSelector" parent-model="model"></uidl-widget>
                 </div>
             </div>
         </script>

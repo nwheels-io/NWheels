@@ -541,6 +541,11 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 return metaType.properties[toCamelCase(name)];
             }).ToArray();
 
+            scope.refresh = function () {
+                scope.queryEntities();
+                scope.uiShowCrudForm = false;
+            };
+
             scope.queryEntities = function () {
                 scope.resultSet = null;
                 scope.entityService.queryEntity(scope.uidl.entityName).then(function (data) {
@@ -568,15 +573,18 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
             if (scope.uidl.form) {
                 scope.$on(scope.uidl.form.qualifiedName + ':Closing', function (input) {
-                    scope.queryEntities();
-                    scope.uiShowCrudForm = false;
+                    scope.refresh();
                 });
             }
 
-            scope.$on(scope.uidl.form.qualifiedName + ':Refreshing', function (input) {
-                scope.queryEntities();
-                scope.uiShowCrudForm = false;
-            });
+            if (scope.uidl.formTypeSelector) {
+                for (var i = 0; i < scope.uidl.formTypeSelector.selections.length; i++) {
+                    var selection = scope.uidl.formTypeSelector.selections[i];
+                    scope.$on(selection.widget.qualifiedName + ':Closing', function (input) {
+                        scope.refresh();
+                    });
+                }
+            }
 
             scope.queryEntities();
         }
@@ -623,7 +631,10 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 selection.restTypeName = metaType.restTypeName;
             }
             scope.model = { 
-                entity: scope.parentModel.entity[scope.parentUidl.propertyName] 
+                entity: (
+                    scope.parentUidl ? // parentUidl exists when nested in CrudForm
+                    scope.parentModel.entity[scope.parentUidl.propertyName] :   // when nested in CrudForm widget
+                    scope.parentModel.entity)                                   // when nested in Crud widget
             };
             scope.selectedType = scope.model.entity.entityType.shortName;
         }

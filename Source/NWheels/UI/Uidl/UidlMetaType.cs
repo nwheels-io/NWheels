@@ -76,6 +76,11 @@ namespace NWheels.UI.Uidl
             this.DefaultSortPropertyNames = metadata.DefaultSortProperties.Select(p => p.Name).ToList();
 
             SetRestType(domainObjectType);
+
+            foreach ( var derivedType in metadata.DerivedTypes )
+            {
+                relatedTypes.Add(derivedType.ContractType);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
