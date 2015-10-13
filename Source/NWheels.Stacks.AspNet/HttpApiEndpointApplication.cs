@@ -228,15 +228,31 @@ namespace NWheels.Stacks.AspNet
         {
             public override void Log(ExceptionLoggerContext context)
             {
-                base.Log(context);
-
-                if ( RequestLogger != null )
+                try
                 {
-                    RequestLogger.RequestError(
-                        context.Request.Method.ToString(),
-                        context.Request.RequestUri.PathAndQuery,
-                        context.ExceptionContext.ControllerContext.Controller.GetType().Name,
-                        context.Exception);
+                    _s_log.Error(string.Format(
+                        "REQUEST FAILED|{0}|{1}|{2}", 
+                        context.Request.Method, context.Request.RequestUri.PathAndQuery, context.Exception));
+
+                    base.Log(context);
+
+                    if ( RequestLogger != null )
+                    {
+                        RequestLogger.RequestError(
+                            context.Request.Method.ToString(),
+                            context.Request.RequestUri.PathAndQuery,
+                            context.ExceptionContext.ControllerContext.Controller.GetType().Name,
+                            context.Exception);
+                    }
+                }
+                catch ( Exception e )
+                {
+                    _s_log.Error("FAILED TO LOG REQUEST FAILURE: " + e);
+
+                    if ( context.Exception != null )
+                    {
+                        _s_log.Error(context.Exception.ToString());
+                    }
                 }
             }
         }
