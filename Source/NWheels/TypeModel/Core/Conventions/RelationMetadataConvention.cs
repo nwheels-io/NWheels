@@ -125,6 +125,8 @@ namespace NWheels.DataObjects.Core.Conventions
             property.Relation.InverseProperty =
                 property.Relation.RelatedPartyType.Properties
                     .FirstOrDefault(p => p.Kind == PropertyKind.Relation && p.Relation.RelatedPartyType.ContractType == type.ContractType);
+
+            CompleteInversePropertyRelation(property);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -147,6 +149,23 @@ namespace NWheels.DataObjects.Core.Conventions
             property.Relation.InverseProperty =
                 property.Relation.RelatedPartyType.Properties
                     .FirstOrDefault(p => p.Kind == PropertyKind.Relation && p.Relation.RelatedPartyType.ContractType == type.ContractType);
+
+            CompleteInversePropertyRelation(property);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void CompleteInversePropertyRelation(PropertyMetadataBuilder property)
+        {
+            if ( property.Relation.InverseProperty != null )
+            {
+                property.Relation.InverseProperty.Relation.InverseProperty = property;
+
+                if ( property.Relation.InverseProperty.Relation.RelatedPartyKey == null )
+                {
+                    property.Relation.InverseProperty.Relation.RelatedPartyKey = property.Relation.ThisPartyKey;
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

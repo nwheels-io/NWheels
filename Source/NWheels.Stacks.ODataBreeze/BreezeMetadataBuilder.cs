@@ -127,13 +127,33 @@ namespace NWheels.Stacks.ODataBreeze
 
         private void AddNavigationProperty(ITypeMetadata typeMetadata, StructuralType structuralType, IPropertyMetadata property)
         {
-            structuralType.NavigationProperties.Add(new NavigationProperty {
+            var navigationProperty = new NavigationProperty {
                 Name = property.Name,
                 AssociationName = GetAssociationName(property),
                 EntityTypeName = GetQualifiedStructuralTypeName(property.Relation.RelatedPartyType),
-                IsScalar = property.Relation.Multiplicity.IsIn(RelationMultiplicity.OneToOne, RelationMultiplicity.ManyToOne)                
-            });
+                IsScalar = property.Relation.Multiplicity.IsIn(RelationMultiplicity.OneToOne, RelationMultiplicity.ManyToOne)
+            };
 
+            if ( !property.IsCollection )
+            {
+                var relatedPartyKey = (property.Relation.RelatedPartyKey ?? property.Relation.RelatedPartyType.PrimaryKey);
+
+                var foreignKeyProperty = new DataProperty {
+                    Name = property.Name + "$FK",
+                    DataType = GetBreezeDataTypeName(relatedPartyKey.Properties[0].ClrType),
+                    IsScalar = true,
+                    IsNullable = IsNullableProperty(property)
+                };
+
+                navigationProperty.ForeignKeyNames = new List<string> { foreignKeyProperty.Name };
+                structuralType.DataProperties.Add(foreignKeyProperty);
+            }
+            else if ( property.Relation.InverseProperty != null && !property.Relation.InverseProperty.IsCollection )
+            {
+                navigationProperty.InvForeignKeyNames = new List<string> { property.Relation.InverseProperty.Name + "$FK" };
+            }
+
+            structuralType.NavigationProperties.Add(navigationProperty);
             AddEntity(property.Relation.RelatedPartyType.ContractType);
         }
 
@@ -215,7 +235,7 @@ namespace NWheels.Stacks.ODataBreeze
             }
             else
             {
-                return  type.Name;
+                return type.Name;
             }
         }
 
