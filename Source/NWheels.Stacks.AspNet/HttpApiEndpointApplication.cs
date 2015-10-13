@@ -77,18 +77,18 @@ namespace NWheels.Stacks.AspNet
                 if ( context.Response.StatusCode < 400 )
                 {
                     RequestLogger.RequestCompleted(
-                        context.Request.HttpMethod,
-                        context.Request.Path,
-                        context.Response.StatusCode,
-                        (int)activity.MillisecondsDuration);
+                        (context != null && context.Request != null ? context.Request.HttpMethod : "N/A"),
+                        (context != null && context.Request != null ? context.Request.Path : "N/A"),
+                        (context != null && context.Response != null ? context.Response.StatusCode : -1),
+                        (activity != null ? (int)activity.MillisecondsDuration : -1));
                 }
                 else
                 {
                     RequestLogger.RequestFailed(
-                        context.Request.HttpMethod,
-                        context.Request.Path,
-                        (int)activity.MillisecondsDuration,
-                        context.Response.StatusCode);
+                        (context != null && context.Request != null ? context.Request.HttpMethod : "N/A"),
+                        (context != null && context.Request != null ? context.Request.Path : "N/A"),
+                        (activity != null ? (int)activity.MillisecondsDuration : -1),
+                        (context != null && context.Response != null ? context.Response.StatusCode : -1));
                 }
 
                 ((IDisposable)activity).Dispose();
@@ -230,26 +230,35 @@ namespace NWheels.Stacks.AspNet
             {
                 try
                 {
-                    _s_log.Error(string.Format(
-                        "REQUEST FAILED|{0}|{1}|{2}", 
-                        context.Request.Method, context.Request.RequestUri.PathAndQuery, context.Exception));
-
                     base.Log(context);
 
-                    if ( RequestLogger != null )
+                    if ( context != null )
                     {
-                        RequestLogger.RequestError(
-                            context.Request.Method.ToString(),
-                            context.Request.RequestUri.PathAndQuery,
-                            context.ExceptionContext.ControllerContext.Controller.GetType().Name,
-                            context.Exception);
+                        if ( RequestLogger != null )
+                        {
+                            RequestLogger.RequestError(
+                                (context.Request != null ? context.Request.Method.ToString() : "N/A"),
+                                (context.Request != null && context.Request.RequestUri != null ? context.Request.RequestUri.PathAndQuery : "N/A"),
+                                (context.ExceptionContext != null && context.ExceptionContext.ControllerContext != null && context.ExceptionContext.ControllerContext.Controller != null
+                                    ? context.ExceptionContext.ControllerContext.Controller.GetType().Name
+                                    : "N/A"),
+                                context.Exception ?? new Exception("N/A"));
+                        }
+                        else
+                        {
+                            _s_log.Error(string.Format(
+                                "REQUEST FAILED|{0}|{1}|{2}", 
+                                (context.Request != null ? context.Request.Method.ToString() : "N/A"), 
+                                (context.Request != null && context.Request.RequestUri != null ? context.Request.RequestUri.PathAndQuery : "N/A"),
+                                context.Exception ?? new Exception("N/A")));
+                        }
                     }
                 }
                 catch ( Exception e )
                 {
                     _s_log.Error("FAILED TO LOG REQUEST FAILURE: " + e);
 
-                    if ( context.Exception != null )
+                    if ( context != null && context.Exception != null )
                     {
                         _s_log.Error(context.Exception.ToString());
                     }
