@@ -38,7 +38,7 @@ namespace NWheels.Stacks.Nlog
             var config = new LoggingConfiguration();
 
             ConfigureTextFileOutput(config);
-            ConfigureNameValuePairOutput(config);
+            //ConfigureNameValuePairOutput(config);
 
             LogManager.Configuration = config;
 
