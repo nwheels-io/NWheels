@@ -18,12 +18,14 @@ namespace NWheels.Stacks.ODataBreeze
     public class DomainObjectContractResolver : DefaultContractResolver
     {
         private readonly IBreezeEndpointLogger _logger;
+        private readonly ITypeMetadataCache _metadataCache;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DomainObjectContractResolver(IBreezeEndpointLogger logger)
+        public DomainObjectContractResolver(ITypeMetadataCache metadataCache, IBreezeEndpointLogger logger)
         {
             _logger = logger;
+            _metadataCache = metadataCache;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,6 +34,8 @@ namespace NWheels.Stacks.ODataBreeze
         {
             IList<JsonProperty> result = base.CreateProperties(type, memberSerialization);
 
+            var contractType = JsonSerializationUtility.GetEntityContractType(type);
+            var metaType = _metadataCache.GetTypeMetadata(contractType);
             var relationProperties = result.Where(p => p.PropertyType.IsEntityContract()).ToArray();
 
             foreach ( var relation in relationProperties )
@@ -42,7 +46,7 @@ namespace NWheels.Stacks.ODataBreeze
                     PropertyType = typeof(string),
                     DeclaringType = relation.DeclaringType,
                     PropertyName = relation.PropertyName + "$FK",
-                    ValueProvider = new ForeignKeyValueProvider(relation),
+                    ValueProvider = new ForeignKeyValueProvider(metaType, relation),
                     Readable = true,
                     Writable = true
                 };
@@ -58,30 +62,42 @@ namespace NWheels.Stacks.ODataBreeze
         public class ForeignKeyValueProvider : IValueProvider
         {
             private readonly JsonProperty _relationProperty;
+            private readonly ITypeMetadata _relatedMetaType;
+            private readonly IPropertyMetadata _relatedKeyMetaProperty;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ForeignKeyValueProvider(JsonProperty relationProperty)
+            public ForeignKeyValueProvider(ITypeMetadata metaType, JsonProperty relationProperty)
             {
                 _relationProperty = relationProperty;
+
+                var metaProperty = metaType.GetPropertyByName(_relationProperty.PropertyName);
+                _relatedMetaType = metaProperty.Relation.RelatedPartyType;
+                
+                var relatedTypeKey = (metaProperty.Relation.RelatedPartyKey ?? _relatedMetaType.PrimaryKey);
+                _relatedKeyMetaProperty = relatedTypeKey.Properties[0];
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public void SetValue(object target, object value)
             {
-                //object relatedEntityObject;
+                var domainContext = JsonSerializationUtility.GetCurrentDomainContext();
 
-                //if ( value != null )
-                //{
+                object relatedEntityObject;
 
-                //}
-                //else
-                //{
-                //    relatedEntityObject = null;
-                //}
+                if ( value != null )
+                {
+                    var relatedEntityId = JsonSerializationUtility.ParseEntityId(_relatedMetaType, _relatedKeyMetaProperty, value.ToString());
+                    var repository = domainContext.GetEntityRepository(_relatedMetaType.ContractType);
+                    relatedEntityObject = repository.TryGetById(relatedEntityId);
+                }
+                else
+                {
+                    relatedEntityObject = null;
+                }
 
-                //_relationProperty.ValueProvider.SetValue(target, relatedEntityObject);
+                _relationProperty.ValueProvider.SetValue(target, relatedEntityObject);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

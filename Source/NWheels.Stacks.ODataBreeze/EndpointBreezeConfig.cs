@@ -7,6 +7,7 @@ using Autofac;
 using Breeze.ContextProvider;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using NWheels.DataObjects;
 
 namespace NWheels.Stacks.ODataBreeze
 {
@@ -19,7 +20,9 @@ namespace NWheels.Stacks.ODataBreeze
             var settings = base.CreateJsonSerializerSettings();
             
             settings.Converters.Add(new DomainObjectJsonConverter());
-            settings.ContractResolver = new DomainObjectContractResolver(Components.Resolve<IBreezeEndpointLogger>());
+            settings.ContractResolver = new DomainObjectContractResolver(
+                Components.Resolve<ITypeMetadataCache>(),
+                Components.Resolve<IBreezeEndpointLogger>());
             
             return settings;
         }

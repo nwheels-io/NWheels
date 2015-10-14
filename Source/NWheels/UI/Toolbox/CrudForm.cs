@@ -172,10 +172,10 @@ namespace NWheels.UI.Toolbox
 
         private bool ShouldAutoIncludeField(IPropertyMetadata property)
         {
-            if ( property.Kind == PropertyKind.Relation && property.Relation.Kind.IsIn(RelationKind.CompositionParent, RelationKind.AggregationParent) )
-            {
-                return false;
-            }
+            //if ( property.Kind == PropertyKind.Relation && property.Relation.Kind.IsIn(RelationKind.CompositionParent, RelationKind.AggregationParent) )
+            //{
+            //    return false;
+            //}
 
             return true;
         }

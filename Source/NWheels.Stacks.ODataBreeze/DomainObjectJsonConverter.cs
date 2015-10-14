@@ -38,7 +38,7 @@ namespace NWheels.Stacks.ODataBreeze
         private IDomainObject CreateOrRetrieveDomainObject(Type implementationType, JsonReader reader)
         {
             var domainContext = JsonSerializationUtility.GetCurrentDomainContext();
-            var contractType = implementationType.GetInterfaces().First(intf => intf.IsEntityContract());
+            var contractType = JsonSerializationUtility.GetEntityContractType(implementationType);
             var metaType = domainContext.Components.Resolve<ITypeMetadataCache>().GetTypeMetadata(contractType);
             var idProperty = metaType.PrimaryKey.Properties[0];
 
@@ -101,19 +101,8 @@ namespace NWheels.Stacks.ODataBreeze
         {
             var entityIdJson = (JValue)entityJson.Property(idProperty.Name).Value;
             var entityIdString = entityIdJson.Value.ToString();
+            var entityIdInstance = JsonSerializationUtility.ParseEntityId(metaType, idProperty, entityIdString);
 
-            var entityIdInstance = ParseEntityId(metaType, idProperty, entityIdString);
-
-            return entityIdInstance;
-        }
-
-        private static IEntityId ParseEntityId(ITypeMetadata metaType, IPropertyMetadata idProperty, string entityIdString)
-        {
-            var parseMethod = idProperty.ClrType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static);
-            object parsedIdValue = parseMethod.Invoke(null, new object[] { entityIdString });
-
-            var closedEntityIdType = typeof(EntityId<,>).MakeGenericType(metaType.ContractType, idProperty.ClrType);
-            var entityIdInstance = (IEntityId)Activator.CreateInstance(closedEntityIdType, parsedIdValue);
             return entityIdInstance;
         }
 
