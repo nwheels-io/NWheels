@@ -19,6 +19,13 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ITypeMetadataCache GetMetadataCache()
+        {
+            return this.MetadataCache;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected AbstractUidlNode(UidlNodeType nodeType, string idName, AbstractUidlNode parent)
         {
             this.NodeType = nodeType;
