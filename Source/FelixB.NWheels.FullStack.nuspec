@@ -14,10 +14,10 @@
       This Full Stack package installs the core framework and the default technology stack, which sets you up and running. Recommended unless you assemble a custom stack.
     </description>
     <summary>A-to-Z architectural recipe and implementation framework for .NET-based enterprise applications</summary>
-    <copyright>Copyright © 2014 Felix Berman</copyright>
+    <copyright>Copyright © 2014-2015 Felix Berman</copyright>
     <tags>Fullstack Enterprise Application Architecture Productivity Cross Platform</tags>
     <dependencies>
-      <dependency id="FelixB.Hapil" version="0.9.9" />
+      <dependency id="FelixB.Hapil" version="0.9.21" />
       <dependency id="Autofac" version="3.5.2" />
     </dependencies>
     <references>
