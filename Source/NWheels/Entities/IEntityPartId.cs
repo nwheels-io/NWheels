@@ -10,7 +10,7 @@ namespace NWheels.Entities
     [EntityPartContract]
     public interface IEntityPartId<out TKey>
     {
-        [PropertyContract.PrimaryKey]
+        [PropertyContract.EntityId]
         TKey Id { get; }
     }
 }

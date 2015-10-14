@@ -33,7 +33,7 @@ namespace NWheels.UnitTests.DataObjects
             [TestDataContract]
             public interface IOrder
             {
-                [PropertyContract.PrimaryKey]
+                [PropertyContract.EntityId]
                 int OrderNumber { get; set; }
 
                 DateTime PlacedAt { get; set; }

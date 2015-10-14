@@ -42,9 +42,9 @@ namespace NWheels.DataObjects
         }
 
         [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-        public class PrimaryKeyAttribute : KeyAttribute
+        public class EntityIdAttribute : KeyAttribute
         {
-            public PrimaryKeyAttribute() : base(KeyKind.Primary)
+            public EntityIdAttribute() : base(KeyKind.Primary)
             {
             }
             public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)

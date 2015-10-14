@@ -96,7 +96,7 @@ namespace NWheels.Entities.Core
     [EntityContract]
     public interface IHiloEntity
     {
-        [PropertyContract.PrimaryKey]
+        [PropertyContract.EntityId]
         int Hi { get; set; }
     }
 
