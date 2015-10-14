@@ -21,7 +21,7 @@ namespace NWheels.UI.Uidl
             base.Notifications.Add(this.RequestNotAuthorized);
 
             this.RequiredDomainApis = new List<Type>();
-            this.DefaultSkin = "Debug";
+            this.DefaultSkin = "inspinia";
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -543,6 +543,13 @@ function ($q, $http, $rootScope, $timeout, commandService) {
     };
 
     //-----------------------------------------------------------------------------------------------------------------
+	m_controllerImplementations['Chart'] = {
+        implement: function(scope) {
+			$timeout(function() {
+				scope.$emit(scope.uidl.qualifiedName + ':RequestingData');
+			});
+        }
+    };
 
     m_controllerImplementations['Crud'] = {
         implement: function (scope) {

@@ -435,7 +435,20 @@
                 <uidl-widget ng-if="selectedType==selection.restTypeName" uidl="selection.widget" parent-model="model"></uidl-widget>
             </div>
         </script>
-        
+
+        <script type="text/ng-template" id="uidl-element-template-TypeSelectorWithTabs">
+            <div class="content-example">
+                Type
+                <select 
+                    ng-options="s.restTypeName as s.text for s in uidl.selections" 
+                    ng-model="selectedType">
+                </select>
+            </div>
+            <div ng-repeat="selection in uidl.selections" class="Layout">
+                <uidl-widget ng-if="selectedType==selection.restTypeName" uidl="selection.widget" parent-model="model"></uidl-widget>
+            </div>
+        </script>
+
         <script type="text/ng-template" id="uidl-element-template-GridField">
             <div class="layout">
                 <span ng-if="property.kind!=='Relation'">{{value}}</span>
