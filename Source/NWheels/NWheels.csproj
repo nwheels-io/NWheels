@@ -285,6 +285,8 @@
     <Compile Include="TypeModel\TimeUnit.cs" />
     <Compile Include="UI\AuthorizationContract.cs" />
     <Compile Include="UI\IFrameworkUIConfig.cs" />
+    <Compile Include="UI\Toolbox\Report.cs" />
+    <Compile Include="UI\Toolbox\ReportSelector.cs" />
     <Compile Include="UI\Toolbox\WidgetScreenPart.cs" />
     <Compile Include="UI\Toolbox\CrudScreenPart.cs" />
     <Compile Include="UI\Toolbox\Dashboard.cs" />
@@ -292,7 +294,7 @@
     <Compile Include="UI\Toolbox\LayoutFlow.cs" />
     <Compile Include="UI\Toolbox\LayoutVertical.cs" />
     <Compile Include="UI\Toolbox\TypeSelector.cs" />
-    <Compile Include="UI\Toolbox\Report.cs" />
+    <Compile Include="UI\Toolbox\ReportDataTable.cs" />
     <Compile Include="UI\Factories\ViewModelObjectFactory.cs" />
     <Compile Include="UI\Toolbox\Chart.cs" />
     <Compile Include="UI\Toolbox\Crud.cs" />

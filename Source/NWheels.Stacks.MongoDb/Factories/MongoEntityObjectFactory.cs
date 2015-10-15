@@ -59,12 +59,20 @@ namespace NWheels.Stacks.MongoDb.Factories
                 p => new NotSupportedPropertyStrategy(context, MetadataCache, metaType, p));
 
             builder.AddRule(
-                p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityContract(), 
+                p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityContract() && ShouldPersistAsArrayOfDocumentIds(p), 
                 p => new ArrayOfDocumentIdsStrategy(context, MetadataCache, metaType, p));
 
             builder.AddRule(
-                p => p.ClrType.IsEntityContract(),
+                p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityContract() && !ShouldPersistAsArrayOfDocumentIds(p),
+                p => new LazyLoadCollectionByForeignKeyStrategy(context, MetadataCache, metaType, p));
+
+            builder.AddRule(
+                p => p.ClrType.IsEntityContract() && ShouldPersistAsDocumentId(p),
                 p => new DocumentIdStrategy(context, MetadataCache, metaType, p));
+
+            builder.AddRule(
+                p => p.ClrType.IsEntityContract() && !ShouldPersistAsDocumentId(p),
+                p => new LazyLoadDocumentByForeignKeyStrategy(context, MetadataCache, metaType, p));
             
             builder.AddRule(
                 p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityPartContract(),
@@ -91,22 +99,46 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static bool IsArrayOfDocumentIds(IPropertyMetadata metaProperty)
+        public static bool ShouldPersistAsArrayOfDocumentIds(IPropertyMetadata metaProperty)
         {
-            if ( metaProperty.Kind != PropertyKind.Relation || !metaProperty.Relation.RelatedPartyType.IsEntity )
-            {
-                return false;
-            }
+            return true;
 
-            if ( metaProperty.Relation.Multiplicity != RelationMultiplicity.OneToMany && metaProperty.Relation.Multiplicity != RelationMultiplicity.ManyToMany )
-            {
-                return false;
-            }
+            //if ( metaProperty.Kind != PropertyKind.Relation || !metaProperty.Relation.RelatedPartyType.IsEntity )
+            //{
+            //    return false;
+            //}
 
-            if ( metaProperty.Relation.Multiplicity == RelationMultiplicity.ManyToMany )
-            {
-                return false;
-            }
+            //switch ( metaProperty.Relation.Multiplicity )
+            //{
+            //    case RelationMultiplicity.ManyToMany:
+            //        return (metaProperty.Relation.ThisPartyKind == RelationPartyKind.Dependent || metaProperty.Relation.InverseProperty == null);
+            //    case RelationMultiplicity.OneToMany:
+            //        return (metaProperty.Relation.InverseProperty == null);
+            //    default:
+            //        return false;
+            //}
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool ShouldPersistAsDocumentId(IPropertyMetadata metaProperty)
+        {
+            return true;
+
+            //if ( metaProperty.Kind != PropertyKind.Relation || !metaProperty.Relation.RelatedPartyType.IsEntity )
+            //{
+            //    return false;
+            //}
+
+            //switch ( metaProperty.Relation.Multiplicity )
+            //{
+            //    case RelationMultiplicity.OneToOne:
+            //        return (metaProperty.Relation.ThisPartyKind == RelationPartyKind.Dependent || metaProperty.Relation.InverseProperty == null);
+            //    case RelationMultiplicity.ManyToOne:
+            //        return true;
+            //    default:
+            //        return false;
+            //}
         }
     }
 }
