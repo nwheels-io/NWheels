@@ -34,7 +34,13 @@
     <script src="base/app.js"></script>
 	
 	<script src="skin/assets/app/chartjs/chart.js"></script>
-    
+    <style>
+        @media (min-width: 768px) {
+            .b-col {
+                float: right;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -50,11 +56,11 @@
         <uidl-widget uidl="uidl.contentRoot"></uidl-widget>
     </script>
 
-    <script type="text/ng-template" id="uidl-element-template-Splash">
+    <script type="text/ng-template" id="uidl-element-template/Splash">
         <uidl-widget uidl="uidl.insideContent"></uidl-widget>
     </script>
     
-    <script type="text/ng-template" id="uidl-element-template-UserLoginForm">
+    <script type="text/ng-template" id="uidl-element-template/UserLoginForm">
         <div class="middle-box text-center loginscreen   animated fadeInDown">
             <div>
                 <div>
@@ -89,13 +95,13 @@
         </div>
     </script>
     
-    <script type="text/ng-template" id="uidl-element-template-CurrentLoggedInUser">
+    <script type="text/ng-template" id="uidl-element-template/CurrentLoggedInUser">
         <a href="" ng-click="$emit(uidl.qualifiedName + ':LogOut:Executing')">
             <i class="fa fa-sign-out"></i> {{translate('LogOut')}}
         </a>
     </script>
 
-    <script type="text/ng-template" id="uidl-element-template-ManagementConsole">
+    <script type="text/ng-template" id="uidl-element-template/ManagementConsole">
         <nav class="navbar-default navbar-static-side" role="navigation">
             <div class="sidebar-collapse">
                 <ul class="nav metismenu" id="side-menu">
@@ -118,7 +124,7 @@
                             IN+
                         </div>
                     </li>
-                    <li ng-repeat="item in uidl.mainMenu.items" ng-include="'uidl-element-template-ManagementConsole-menu-item'"></li>
+                    <li ng-repeat="item in uidl.mainMenu.items" ng-include="'uidl-element-template/ManagementConsole-menu-item'"></li>
                 </ul>
             </div>
         </nav>
@@ -246,19 +252,19 @@
         <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
     </script>
     
-    <script type="text/ng-template" id="uidl-element-template-ManagementConsole-menu-item">
+    <script type="text/ng-template" id="uidl-element-template/ManagementConsole-menu-item">
         <a ng-class="{bold: item.level==0}" ng-show="item.notifications[1].subscribedBehaviorQualifiedNames.length" href="" ng-click="$emit(item.notifications[1].qualifiedName)"><i class="fa fa-diamond"></i>{{translate(item.text)}}</a>
         <span ng-class="{bold: item.level==0}" ng-hide="item.notifications[1].subscribedBehaviorQualifiedNames.length">{{translate(item.text)}}</span>
         <ul>
-            <li ng-repeat="item in item.subItems" ng-include="'uidl-element-template-ManagementConsole-menu-item'"></li>
+            <li ng-repeat="item in item.subItems" ng-include="'uidl-element-template/ManagementConsole-menu-item'"></li>
         </ul>
     </script>
     
-    <script type="text/ng-template" id="uidl-element-template-Container">
+    <script type="text/ng-template" id="uidl-element-template/Container">
         <uidl-widget ng-repeat="widget in uidl.containedWidgets" uidl="widget"></uidl-widget>
     </script>
     
-    <script type="text/ng-template" id="uidl-element-template-LayoutHorizontal">
+    <script type="text/ng-template" id="uidl-element-template/LayoutHorizontal">
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
             <tr>
                 <td style="vertical-align: top;" ng-repeat="widget in uidl.containedWidgets">
@@ -268,28 +274,28 @@
         </table>
     </script>
     
-    <script type="text/ng-template" id="uidl-element-template-LayoutVertical">
+    <script type="text/ng-template" id="uidl-element-template/LayoutVertical">
         <div ng-repeat="widget in uidl.containedWidgets">
             <uidl-widget uidl="widget"></uidl-widget>
         </div>
     </script>
     
-    <script type="text/ng-template" id="uidl-element-template-LayoutFlow">
+    <script type="text/ng-template" id="uidl-element-template/LayoutFlow">
         <div style="layout" ng-repeat="widget in uidl.containedWidgets">
             <uidl-widget uidl="widget"></uidl-widget>
         </div>
     </script>
     
-    <script type="text/ng-template" id="uidl-element-template-ScreenPartContainer">
+    <script type="text/ng-template" id="uidl-element-template/ScreenPartContainer">
         <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
         <uidl-screen-part ng-if="currentScreenPart" uidl="currentScreenPart"></uidl-screen-part>
     </script>
     
-    <script type="text/ng-template" id="uidl-element-template-Text">
+    <script type="text/ng-template" id="uidl-element-template/Text">
         {{translate(uidl.text)}}
     </script>
     
-    <script type="text/ng-template" id="uidl-element-template-Gauge">
+    <script type="text/ng-template" id="uidl-element-template/Gauge">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
                 <span class="label label-success pull-right">{{translate(uidl.badgeText)}}</span>
@@ -303,7 +309,7 @@
         </div>
     </script>
     
-    <script type="text/ng-template" id="uidl-element-template-Chat">
+    <script type="text/ng-template" id="uidl-element-template/Chat">
         <div>Message 1 . . . </div>
         <div>Message 2 . . . </div>
         <div>Message 3 . . . </div>
@@ -311,7 +317,7 @@
         <button>Send</button>
     </script>
     
-    <script type="text/ng-template" id="uidl-element-template-Chart">
+    <script type="text/ng-template" id="uidl-element-template/Chart">
         <div class="ibox float-e-margins">
             <div class="ibox-content">
                 <div>
@@ -370,11 +376,11 @@
         </div>
     </script>
 	
-	<script type="text/ng-template" id="uidl-element-template-MediaFarm">
+	<script type="text/ng-template" id="uidl-element-template/MediaFarm">
 		<uidl-widget uidl="uidl.tabs"></uidl-widget>
 	</script>	
 	
-	<script type="text/ng-template" id="uidl-element-template-TypeSelectorWithTabs">
+	<script type="text/ng-template" id="uidl-element-template/TypeSelectorWithTabs">
 		<div class="row">
 			<div class="col-lg-12">
 				<div class="tabs-container">
@@ -400,7 +406,7 @@
 		</div>
 	</script>	
     
-    <script type="text/ng-template" id="uidl-element-template-Report">
+    <script type="text/ng-template" id="uidl-element-template/Report">
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
@@ -428,7 +434,7 @@
         </div>
     </script>
 
-    <script type="text/ng-template" id="uidl-element-template-Dashboard">
+    <script type="text/ng-template" id="uidl-element-template/Dashboard">
         <div class="row">
             <div class="col-lg-2" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType=='Gauge'" style="vertical-align:top;">
                 <uidl-widget uidl="widget"></uidl-widget>
@@ -451,7 +457,7 @@
     
     <!------ HARD CODED  -------->
     
-    <script type="text/ng-template" id="uidl-element-template-AffiliateSignUpForm">
+    <script type="text/ng-template" id="uidl-element-template/AffiliateSignUpForm">
         <div class="middle-box text-center loginscreen   animated fadeInDown">
             <div>
                 <div>

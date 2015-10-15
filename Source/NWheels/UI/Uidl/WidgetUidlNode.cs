@@ -38,5 +38,7 @@ namespace NWheels.UI.Uidl
         public string WidgetType { get; set; }
         [DataMember]
         public string TemplateName { get; set; }
+        [DataMember]
+        public bool IsApplicationTemplate { get; set; }
     }
 }

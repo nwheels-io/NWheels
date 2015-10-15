@@ -107,7 +107,7 @@
             </div>
         </script>
         
-        <script type="text/ng-template" id="uidl-element-template-Splash">
+        <script type="text/ng-template" id="uidl-element-template/Splash">
             <div class="border">
                 WIDGET[{{uidl.text}}]
                 <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
@@ -118,7 +118,7 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-UserLoginForm">
+        <script type="text/ng-template" id="uidl-element-template/UserLoginForm">
             <div class="border">
                 WIDGET[{{uidl.text}}]
                 <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
@@ -153,13 +153,13 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-CurrentLoggedInUser">
+        <script type="text/ng-template" id="uidl-element-template/CurrentLoggedInUser">
             <div class="border">
                 <a href="" ng-click="$emit(uidl.qualifiedName + ':LogOut:Executing')">{{translate('LogOut')}}</a>
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-ManagementConsole">
+        <script type="text/ng-template" id="uidl-element-template/ManagementConsole">
             <div class="border clearfix">
                 <div class="layout">
                     WIDGET[{{uidl.widgetType}}]
@@ -172,7 +172,7 @@
                     <tr>
                         <td width="350" style="vertical-align: top;">
                             <div class="content-example">
-                                <span ng-repeat="item in uidl.mainMenu.items" ng-include="'uidl-element-template-ManagementConsole-menu-item'"></span>
+                                <span ng-repeat="item in uidl.mainMenu.items" ng-include="'uidl-element-template/ManagementConsole-menu-item'"></span>
                             </div>
                         </td>
                         <td style="vertical-align:top">
@@ -183,19 +183,19 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-ManagementConsole-menu-item">
+        <script type="text/ng-template" id="uidl-element-template/ManagementConsole-menu-item">
             <a ng-class="{bold: item.level==0}" ng-show="item.notifications[1].subscribedBehaviorQualifiedNames.length" href="" ng-click="$emit(item.notifications[1].qualifiedName)">{{translate(item.text)}}</a>
             <span ng-class="{bold: item.level==0}" ng-hide="item.notifications[1].subscribedBehaviorQualifiedNames.length">{{translate(item.text)}}</span>
             <ul>
-                <li ng-repeat="item in item.subItems" ng-include="'uidl-element-template-ManagementConsole-menu-item'"></li>
+                <li ng-repeat="item in item.subItems" ng-include="'uidl-element-template/ManagementConsole-menu-item'"></li>
             </ul>
         </script>
         
-        <script type="text/ng-template" id="uidl-element-template-Container">
+        <script type="text/ng-template" id="uidl-element-template/Container">
             <uidl-widget ng-repeat="widget in uidl.containedWidgets" uidl="widget"></uidl-widget>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-LayoutHorizontal">
+        <script type="text/ng-template" id="uidl-element-template/LayoutHorizontal">
             <div class="border">
                 <div class="layout">
                     WIDGET[{{uidl.widgetType}}]
@@ -210,7 +210,7 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-LayoutVertical">
+        <script type="text/ng-template" id="uidl-element-template/LayoutVertical">
             <div class="border">
                 <div class="layout">
                     WIDGET[{{uidl.widgetType}}]
@@ -221,7 +221,7 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-LayoutFlow">
+        <script type="text/ng-template" id="uidl-element-template/LayoutFlow">
             <div class="border">
                 <div class="layout">
                     WIDGET[{{uidl.widgetType}}]
@@ -232,7 +232,7 @@
             </div>
         </script>
         
-        <script type="text/ng-template" id="uidl-element-template-ScreenPartContainer">
+        <script type="text/ng-template" id="uidl-element-template/ScreenPartContainer">
             <div class="border">
                 WIDGET[{{uidl.widgetType}}]
                 <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
@@ -240,13 +240,13 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-Text">
+        <script type="text/ng-template" id="uidl-element-template/Text">
             <div class="content-example">
                 {{translate(uidl.text)}}
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-Gauge">
+        <script type="text/ng-template" id="uidl-element-template/Gauge">
             <div class="border">
                 WIDGET[{{uidl.widgetType}}]
                 <div class="layout">
@@ -257,7 +257,7 @@
             </div>
         </script>
         
-        <script type="text/ng-template" id="uidl-element-template-Chat">
+        <script type="text/ng-template" id="uidl-element-template/Chat">
             <div class="border">
                 WIDGET[{{uidl.widgetType}}]
                 <div class="content-example">
@@ -270,7 +270,7 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-Chart">
+        <script type="text/ng-template" id="uidl-element-template/Chart">
             <div class="border">
                 WIDGET[{{uidl.widgetType}}]
                 <div class="layout bold">{{translate(uidl.text)}}</div>
@@ -278,7 +278,7 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-Report">
+        <script type="text/ng-template" id="uidl-element-template/Report">
             WIDGET[{{uidl.widgetType}}&lt;{{uidl.entityName}}&gt;]
             <div class="content-example">
                 <table class="data">
@@ -308,7 +308,7 @@
             </div>
         </script>
 		
-		<script type="text/ng-template" id="uidl-element-template-report-lookup">
+		<script type="text/ng-template" id="uidl-element-template/report-lookup">
 			<div>
 				<select>
 					<option ng-repeat="opt in resultSet">{{opt.Name}}</option>
@@ -316,11 +316,11 @@
 			</div>
 		</script>
         
-        <script type="text/ng-template" id="uidl-element-template-ReportDefaultRow">
+        <script type="text/ng-template" id="uidl-element-template/ReportDefaultRow">
              <td ng-repeat="column in parentModel.columns" ng-click="parentModel.onView(parentModel.row)">{{parentModel.row[column.name]}}</td>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-Dashboard">
+        <script type="text/ng-template" id="uidl-element-template/Dashboard">
             <div class="border">
                 WIDGET[{{uidl.widgetType}}]
                 <div class="content-example">
@@ -348,7 +348,7 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-Crud">
+        <script type="text/ng-template" id="uidl-element-template/Crud">
             <div class="content-example">
                 <div class="layout" ng-hide="uiShowCrudForm">
                     WIDGET[{{uidl.widgetType}}&lt;{{uidl.entityName}}&gt;]
@@ -385,7 +385,7 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-CrudForm">
+        <script type="text/ng-template" id="uidl-element-template/CrudForm">
             <div class="content-example">
                 <div class="layout">
                     WIDGET[{{uidl.widgetType}}&lt;{{uidl.entityName}}&gt;]
@@ -423,7 +423,7 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-TypeSelector">
+        <script type="text/ng-template" id="uidl-element-template/TypeSelector">
             <div class="content-example">
                 Type
                 <select 
@@ -436,7 +436,7 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-TypeSelectorWithTabs">
+        <script type="text/ng-template" id="uidl-element-template/TypeSelectorWithTabs">
             <div class="content-example">
                 Type
                 <select 
@@ -449,14 +449,14 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-GridField">
+        <script type="text/ng-template" id="uidl-element-template/GridField">
             <div class="layout">
                 <span ng-if="property.kind!=='Relation'">{{value}}</span>
                 <a ng-if="property.kind==='Relation'">Go to</a>
             </div>
         </script>
         
-        <script type="text/ng-template" id="uidl-element-template-FormField">
+        <script type="text/ng-template" id="uidl-element-template/FormField">
             <div class="layout">
                 <span ng-if="uidl.fieldType==='Label'">{{entity[uidl.propertyName]}}</span>
                 <input ng-if="uidl.fieldType==='Edit'" 
@@ -470,7 +470,7 @@
 
         <!------ HARD CODED  -------->
         
-        <script type="text/ng-template" id="uidl-element-template-AffiliateSignUpForm">
+        <script type="text/ng-template" id="uidl-element-template/AffiliateSignUpForm">
             <div class="border">
                 WIDGET[{{uidl.text}}]
                 <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
@@ -490,10 +490,10 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-AffiliateAccountForm">
+        <script type="text/ng-template" id="uidl-element-template/AffiliateAccountForm">
          </script>
 
-        <script type="text/ng-template" id="uidl-element-template-CreaiveFarmReportRow">
+        <script type="text/ng-template" id="uidl-element-template/CreaiveFarmReportRow">
 			<td colspan="{{parentUidl.displayProperties.length}}">
 				<button ng-click="">Get HTML</button>
 

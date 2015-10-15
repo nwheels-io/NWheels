@@ -285,6 +285,7 @@
     <Compile Include="TypeModel\TimeUnit.cs" />
     <Compile Include="UI\AuthorizationContract.cs" />
     <Compile Include="UI\IFrameworkUIConfig.cs" />
+    <Compile Include="UI\Toolbox\WidgetScreenPart.cs" />
     <Compile Include="UI\Toolbox\CrudScreenPart.cs" />
     <Compile Include="UI\Toolbox\Dashboard.cs" />
     <Compile Include="UI\Toolbox\Chat.cs" />

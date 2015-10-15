@@ -118,6 +118,10 @@ namespace NWheels.Stacks.NancyFx
             base.Post["/takeMessages"] = (route) => {
                 return TakePendingPushMessages();
             };
+
+            base.Get["/uidl-element-template/{templateName}"] = (route) => {
+                return GetApplicationTemplate(route.templateName);
+            };
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -147,6 +151,25 @@ namespace NWheels.Stacks.NancyFx
             var resolvedMacrosFileContents = fileContents.Replace("##BASE_URL##", this.Request.Url.ToString().EnsureTrailingSlash());
 
             return Response.AsText(resolvedMacrosFileContents, "text/html");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Response GetApplicationTemplate(string templateName)
+        {
+            var filePath = PathUtility.ModuleBinPath(
+                _context.Application.GetType().Assembly, 
+                Path.Combine("WebUI", _context.Application.IdName, templateName + ".html"));
+
+            if ( File.Exists(filePath) )
+            {
+                var fileContents = File.ReadAllText(filePath);
+                return Response.AsText(fileContents, "text/html");
+            }
+            else
+            {
+                return HttpStatusCode.NotFound;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -58,6 +58,7 @@ namespace NWheels.Stacks.NancyFx
         {
             nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/base", "Base"));
             nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/skin", "Skin." + _context.SkinName));
+            nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("/apps", "Apps." + _context.Application.IdName));
             
             base.ConfigureConventions(nancyConventions);
         }

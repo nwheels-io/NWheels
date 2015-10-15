@@ -293,7 +293,6 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 		}
 	};
 	
-
     //-----------------------------------------------------------------------------------------------------------------
     /*
         function takeMessagesFromServer() {
@@ -543,6 +542,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
     };
 
     //-----------------------------------------------------------------------------------------------------------------
+
 	m_controllerImplementations['Chart'] = {
         implement: function(scope) {
 			$timeout(function() {
@@ -550,6 +550,8 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 			});
         }
     };
+
+    //-----------------------------------------------------------------------------------------------------------------
 
     m_controllerImplementations['Crud'] = {
         implement: function (scope) {
@@ -1029,7 +1031,7 @@ theApp.directive('uidlWidget', ['uidlService', 'entityService', function (uidlSe
             //console.log('uidlWidget::link', scope.uidl.qualifiedName);
             //uidlService.implementController(scope);
         },
-        template: '<ng-include src="\'uidl-element-template-\' + uidl.templateName"></ng-include>',
+        template: '<ng-include src="\'uidl-element-template/\' + uidl.templateName"></ng-include>',
         controller: function ($scope) {
             $scope.uidlService = uidlService;
             $scope.entityService = entityService;
@@ -1136,6 +1138,8 @@ theApp.directive('uidlController', ['$compile', '$parse', function ($compile, $p
         }
     };
 }]);
+
+//---------------------------------------------------------------------------------------------------------------------
 
 theApp.directive('uidlReportLookup', ['entityService', function(entityService) {
 	return {
