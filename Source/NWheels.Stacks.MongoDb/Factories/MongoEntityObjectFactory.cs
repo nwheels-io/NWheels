@@ -88,5 +88,25 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             return builder.Build(MetadataCache, metaType);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool IsArrayOfDocumentIds(IPropertyMetadata metaProperty)
+        {
+            if ( metaProperty.Kind != PropertyKind.Relation || !metaProperty.Relation.RelatedPartyType.IsEntity )
+            {
+                return false;
+            }
+
+            if ( metaProperty.Relation.Multiplicity != RelationMultiplicity.OneToMany && metaProperty.Relation.Multiplicity != RelationMultiplicity.ManyToMany )
+            {
+                return false;
+            }
+
+            if ( metaProperty.Relation.Multiplicity == RelationMultiplicity.ManyToMany )
+            {
+                return false;
+            }
+        }
     }
 }
