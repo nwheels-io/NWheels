@@ -9,6 +9,7 @@ using System.Windows.Threading;
 using Gemini;
 using Gemini.Modules.Output;
 using NWheels.Hosting.Core;
+using NWheels.Logging.Core;
 using NWheels.Tools.TestBoard.Modules.Main;
 using NWheels.Utilities;
 
@@ -18,6 +19,8 @@ namespace NWheels.Tools.TestBoard
     {
         protected override void OnStartup(object sender, StartupEventArgs e)
         {
+            CrashLog.RegisterUnhandledExceptionHandler();
+
             if ( e.Args.Length > 0 )
             {
                 //base.Application.MainWindow.Title = "COMMAND LINE ARGS";
