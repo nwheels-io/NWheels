@@ -285,20 +285,20 @@
                     <thead>
                         <tr>
                             <th ng-repeat="property in displayProperties">{{translate(property.name)}}</th>
-                      </tr>
-                      <tr>
-                        <th ng-repeat="property in displayProperties track by $index">
+                        </tr>
+                        <tr>
+                          <th ng-repeat="property in displayProperties track by $index">
 							<uidl-report-lookup entity-meta-type="getPropertyRelatedMetaType(property.name)" />
 						  </th>
-                      </tr>
+                        </tr>
                     </thead>
                     <tbody>
                         <tr ng-repeat="resultRow in resultSet">
-                             <uidl-widget 
-									uidl="uidl.rowTemplate" 
-									parent-model="{row: resultRow, columns: displayProperties, onView: viewEntity}" 
-									parent-uidl="uidl">
-							    </uidl-widget>
+                            <uidl-widget 
+                                uidl="uidl.rowTemplate" 
+                                parent-model="{row: resultRow, columns: displayProperties, onView: viewEntity}" 
+                                parent-uidl="uidl">
+                            </uidl-widget>
                         </tr>
                     </tbody>
                 </table>
@@ -459,19 +459,15 @@
         <script type="text/ng-template" id="uidl-element-template-FormField">
             <div class="layout">
                 <span ng-if="uidl.fieldType==='Label'">{{entity[uidl.propertyName]}}</span>
-                <input ng-if="uidl.fieldType==='Edit'" type="text" ng-model="entity[uidl.propertyName]" />
-                <select ng-if="uidl.fieldType==='Lookup'" ng-options="item as item[lookupTextProperty] for item in lookupResultSet track by item.Id" ng-model="entity[uidl.propertyName]"></select>
+                <input ng-if="uidl.fieldType==='Edit'" 
+                    type="text" 
+                    ng-model="entity[uidl.propertyName]" ></input>
+                <select ng-if="uidl.fieldType==='Lookup'" 
+                    ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet" 
+                    ng-model="entity[lookupForeignKeyProperty]"></select>
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template-FormField">
-            <div class="layout">
-                <span ng-if="uidl.fieldType==='Label'">{{entity[uidl.propertyName]}}</span>
-                <input ng-if="uidl.fieldType==='Edit'" type="text" ng-model="entity[uidl.propertyName]" />
-                <select ng-if="uidl.fieldType==='Lookup'" ng-options="item as item[lookupTextProperty] for item in lookupResultSet track by item.Id" ng-model="entity[uidl.propertyName]"></select>
-            </div>
-        </script>
-        
         <!------ HARD CODED  -------->
         
         <script type="text/ng-template" id="uidl-element-template-AffiliateSignUpForm">

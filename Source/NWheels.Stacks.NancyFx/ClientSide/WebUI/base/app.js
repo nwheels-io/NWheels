@@ -1086,7 +1086,10 @@ theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uid
                 $scope.lookupMetaType = metaType;
                 $scope.lookupValueProperty = metaType.primaryKey.propertyNames[0];
                 $scope.lookupTextProperty = metaType.defaultDisplayPropertyNames[0];
-                
+                $scope.lookupForeignKeyProperty = $scope.uidl.propertyName + '_FK';
+             
+                $scope.comboBoxValue = $scope.entity[$scope.lookupForeignKeyProperty];
+             
                 $scope.entityService.queryEntity($scope.uidl.lookupEntityName).then(function (data) {
                     $scope.lookupResultSet = data.results;
                 });

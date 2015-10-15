@@ -28,16 +28,34 @@ namespace NWheels.Stacks.ODataBreeze
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static Type GetEntityContractType(Type type)
+        public static Type TryGetEntityContractType(Type type)
         {
             if ( type.IsEntityContract() )
             {
                 return type;
             }
+            else if ( !type.IsValueType )
+            {
+                return type.GetInterfaces().FirstOrDefault(intf => intf.IsEntityContract());
+            }
             else
             {
-                return type.GetInterfaces().First(intf => intf.IsEntityContract());
+                return null;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Type GetEntityContractType(Type type)
+        {
+            var contractType = TryGetEntityContractType(type);
+
+            if ( contractType == null )
+            {
+                throw new ArgumentException("Cannot determine entity contract for type: " + type.FullName, "type");
+            }
+
+            return contractType;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,6 +68,13 @@ namespace NWheels.Stacks.ODataBreeze
             var closedEntityIdType = typeof(EntityId<,>).MakeGenericType(metaType.ContractType, idProperty.ClrType);
             var entityIdInstance = (IEntityId)Activator.CreateInstance(closedEntityIdType, parsedIdValue);
             return entityIdInstance;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetForeignKeyPropertyName(string entityPropertyName)
+        {
+            return entityPropertyName + "_FK";
         }
     }
 }

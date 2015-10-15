@@ -139,7 +139,7 @@ namespace NWheels.Stacks.ODataBreeze
                 var relatedPartyKey = (property.Relation.RelatedPartyKey ?? property.Relation.RelatedPartyType.PrimaryKey);
 
                 var foreignKeyProperty = new DataProperty {
-                    Name = property.Name + "$FK",
+                    Name = JsonSerializationUtility.GetForeignKeyPropertyName(property.Name),
                     DataType = GetBreezeDataTypeName(relatedPartyKey.Properties[0].ClrType),
                     IsScalar = true,
                     IsNullable = IsNullableProperty(property)
@@ -150,7 +150,9 @@ namespace NWheels.Stacks.ODataBreeze
             }
             else if ( property.Relation.InverseProperty != null && !property.Relation.InverseProperty.IsCollection )
             {
-                navigationProperty.InvForeignKeyNames = new List<string> { property.Relation.InverseProperty.Name + "$FK" };
+                navigationProperty.InvForeignKeyNames = new List<string> {
+                    JsonSerializationUtility.GetForeignKeyPropertyName(property.Relation.InverseProperty.Name)
+                };
             }
 
             structuralType.NavigationProperties.Add(navigationProperty);

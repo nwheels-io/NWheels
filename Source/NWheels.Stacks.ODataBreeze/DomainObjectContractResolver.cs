@@ -33,25 +33,28 @@ namespace NWheels.Stacks.ODataBreeze
         protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
         {
             IList<JsonProperty> result = base.CreateProperties(type, memberSerialization);
+            var contractType = JsonSerializationUtility.TryGetEntityContractType(type);
 
-            var contractType = JsonSerializationUtility.GetEntityContractType(type);
-            var metaType = _metadataCache.GetTypeMetadata(contractType);
-            var relationProperties = result.Where(p => p.PropertyType.IsEntityContract()).ToArray();
-
-            foreach ( var relation in relationProperties )
+            if ( contractType != null )
             {
-                _logger.ContractResolverAddingForeignKeyProperty(type.Name, relation.PropertyName);
+                var metaType = _metadataCache.GetTypeMetadata(contractType);
+                var relationProperties = result.Where(p => p.PropertyType.IsEntityContract()).ToArray();
 
-                var foreignKeyProperty = new JsonProperty {
-                    PropertyType = typeof(string),
-                    DeclaringType = relation.DeclaringType,
-                    PropertyName = relation.PropertyName + "$FK",
-                    ValueProvider = new ForeignKeyValueProvider(metaType, relation),
-                    Readable = true,
-                    Writable = true
-                };
+                foreach ( var relation in relationProperties )
+                {
+                    _logger.ContractResolverAddingForeignKeyProperty(type.Name, relation.PropertyName);
 
-                result.Add(foreignKeyProperty);
+                    var foreignKeyProperty = new JsonProperty {
+                        PropertyType = typeof(string),
+                        DeclaringType = relation.DeclaringType,
+                        PropertyName = JsonSerializationUtility.GetForeignKeyPropertyName(relation.PropertyName),
+                        ValueProvider = new ForeignKeyValueProvider(metaType, relation),
+                        Readable = true,
+                        Writable = true
+                    };
+
+                    result.Add(foreignKeyProperty);
+                }
             }
 
             return result;
