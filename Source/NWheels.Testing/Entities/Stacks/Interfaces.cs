@@ -356,7 +356,7 @@ namespace NWheels.Testing.Entities.Stacks
                 
                 bool IsEmailVerified { get; set; }
                 
-                [PropertyContract.Required]
+                [PropertyContract.Required, PropertyContract.Relation.Composition]
                 ICollection<IPasswordEntity> Passwords { get; }
                 
                 ICollection<IUserRoleEntity> Roles { get; }
