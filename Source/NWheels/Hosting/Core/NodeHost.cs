@@ -982,6 +982,7 @@ namespace NWheels.Hosting.Core
                     catch ( Exception e )
                     {
                         activity.Fail(e);
+                        _logger.ComponentNodeEventFailed(component.GetType(), "NodeConfigured", e);
                         throw;
                     }
                 }
@@ -1000,6 +1001,7 @@ namespace NWheels.Hosting.Core
                     catch ( Exception e )
                     {
                         activity.Fail(e);
+                        _logger.ComponentNodeEventFailed(component.GetType(), "NodeLoading", e);
                         throw;
                     }
                 }
@@ -1018,6 +1020,7 @@ namespace NWheels.Hosting.Core
                     catch ( Exception e )
                     {
                         activity.Fail(e);
+                        _logger.ComponentNodeEventFailed(component.GetType(), "Loading", e);
                         throw;
                     }
                 }
@@ -1036,6 +1039,7 @@ namespace NWheels.Hosting.Core
                     catch ( Exception e )
                     {
                         activity.Fail(e);
+                        _logger.ComponentNodeEventFailed(component.GetType(), "NodeLoaded", e);
                         throw;
                     }
                 }
@@ -1054,6 +1058,7 @@ namespace NWheels.Hosting.Core
                     catch ( Exception e )
                     {
                         activity.Fail(e);
+                        _logger.ComponentNodeEventFailed(component.GetType(), "NodeUnloading", e);
                         throw;
                     }
                 }
@@ -1072,6 +1077,7 @@ namespace NWheels.Hosting.Core
                     catch ( Exception e )
                     {
                         activity.Fail(e);
+                        _logger.ComponentNodeEventFailed(component.GetType(), "Unloading", e);
                         throw;
                     }
                 }
@@ -1090,6 +1096,7 @@ namespace NWheels.Hosting.Core
                     catch ( Exception e )
                     {
                         activity.Fail(e);
+                        _logger.ComponentNodeEventFailed(component.GetType(), "NodeUnloaded", e);
                         throw;
                     }
                 }
@@ -1131,9 +1138,18 @@ namespace NWheels.Hosting.Core
 
             private void CallComponentNodeActivating(ILifecycleEventListener component, int index, bool isLast)
             {
-                using ( _logger.ComponentNodeActivating(component.GetType().FullName) )
+                using ( var activity = _logger.ComponentNodeActivating(component.GetType().FullName) )
                 {
-                    component.NodeActivating();
+                    try
+                    {
+                        component.NodeActivating();
+                    }
+                    catch ( Exception e )
+                    {
+                        activity.Fail(e);
+                        _logger.ComponentNodeEventFailed(component.GetType(), "NodeActivating", e);
+                        throw;
+                    }
                 }
             }
 
@@ -1141,9 +1157,18 @@ namespace NWheels.Hosting.Core
 
             private void CallComponentActivate(ILifecycleEventListener component, int index, bool isLast)
             {
-                using ( _logger.ComponentActivating(component.GetType().FullName) )
+                using ( var activity = _logger.ComponentActivating(component.GetType().FullName) )
                 {
-                    component.Activate();
+                    try
+                    {
+                        component.Activate();
+                    }
+                    catch ( Exception e )
+                    {
+                        activity.Fail(e);
+                        _logger.ComponentNodeEventFailed(component.GetType(), "Activate", e);
+                        throw;
+                    }
                 }
             }
 
@@ -1151,9 +1176,18 @@ namespace NWheels.Hosting.Core
 
             private void CallComponentNodeActivated(ILifecycleEventListener component, int index, bool isLast)
             {
-                using ( _logger.ComponentNodeActivated(component.GetType().FullName) )
+                using ( var activity = _logger.ComponentNodeActivated(component.GetType().FullName) )
                 {
-                    component.NodeActivated();
+                    try
+                    {
+                        component.NodeActivated();
+                    }
+                    catch ( Exception e )
+                    {
+                        activity.Fail(e);
+                        _logger.ComponentNodeEventFailed(component.GetType(), "NodeActivated", e);
+                        throw;
+                    }
                 }
             }
 
@@ -1161,9 +1195,18 @@ namespace NWheels.Hosting.Core
 
             private void CallComponentNodeDeactivating(ILifecycleEventListener component, int index, bool isLast)
             {
-                using ( _logger.ComponentNodeDeactivating(component.GetType().FullName) )
+                using ( var activity = _logger.ComponentNodeDeactivating(component.GetType().FullName) )
                 {
-                    component.NodeDeactivating();
+                    try
+                    {
+                        component.NodeDeactivating();
+                    }
+                    catch ( Exception e )
+                    {
+                        activity.Fail(e);
+                        _logger.ComponentNodeEventFailed(component.GetType(), "NodeDeactivating", e);
+                        throw;
+                    }
                 }
             }
 
@@ -1171,9 +1214,18 @@ namespace NWheels.Hosting.Core
 
             private void CallComponentDeactivate(ILifecycleEventListener component, int index, bool isLast)
             {
-                using ( _logger.ComponentDeactivating(component.GetType().FullName) )
+                using ( var activity = _logger.ComponentDeactivating(component.GetType().FullName) )
                 {
-                    component.Deactivate();
+                    try
+                    {
+                        component.Deactivate();
+                    }
+                    catch ( Exception e )
+                    {
+                        activity.Fail(e);
+                        _logger.ComponentNodeEventFailed(component.GetType(), "Deactivate", e);
+                        throw;
+                    }
                 }
             }
 
@@ -1181,9 +1233,18 @@ namespace NWheels.Hosting.Core
 
             private void CallComponentNodeDeactivated(ILifecycleEventListener component, int index, bool isLast)
             {
-                using ( _logger.ComponentNodeDeactivated(component.GetType().FullName) )
+                using ( var activity = _logger.ComponentNodeDeactivated(component.GetType().FullName) )
                 {
-                    component.NodeDeactivated();
+                    try
+                    {
+                        component.NodeDeactivated();
+                    }
+                    catch ( Exception e )
+                    {
+                        activity.Fail(e);
+                        _logger.ComponentNodeEventFailed(component.GetType(), "NodeDeactivated", e);
+                        throw;
+                    }
                 }
             }
         }

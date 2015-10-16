@@ -144,6 +144,9 @@ namespace NWheels.Hosting.Core
         [LogError]
         NodeHostException NodeHasFailedToUnload();
 
+        [LogError]
+        void ComponentNodeEventFailed(Type component, string @event, Exception error);
+
         [LogDebug]
         void WritingEffectiveConfigurationToDisk(string filePath);
 
