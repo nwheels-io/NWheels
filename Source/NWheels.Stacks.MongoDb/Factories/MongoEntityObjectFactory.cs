@@ -54,33 +54,51 @@ namespace NWheels.Stacks.MongoDb.Factories
             var builder = new PropertyImplementationStrategyMap.Builder();
             Type collectionItemType;
 
+            //-- calculated properties
+
             builder.AddRule(
                 p => p.IsCalculated,
                 p => new NotSupportedPropertyStrategy(context, MetadataCache, metaType, p));
 
-            builder.AddRule(
-                p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityContract() && ShouldPersistAsArrayOfDocumentIds(p), 
-                p => new ArrayOfDocumentIdsStrategy(context, MetadataCache, metaType, p));
+            //-- entity parts
 
             builder.AddRule(
-                p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityContract() && !ShouldPersistAsArrayOfDocumentIds(p),
-                p => new LazyLoadCollectionByForeignKeyStrategy(context, MetadataCache, metaType, p));
-
-            builder.AddRule(
-                p => p.ClrType.IsEntityContract() && ShouldPersistAsDocumentId(p),
-                p => new DocumentIdStrategy(context, MetadataCache, metaType, p));
-
-            builder.AddRule(
-                p => p.ClrType.IsEntityContract() && !ShouldPersistAsDocumentId(p),
-                p => new LazyLoadDocumentByForeignKeyStrategy(context, MetadataCache, metaType, p));
-            
-            builder.AddRule(
-                p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityPartContract(),
+                p => p.Kind == PropertyKind.Part && p.IsCollection,
                 p => new CollectionAdapterStrategy(context, MetadataCache, metaType, p));
 
             builder.AddRule(
-                p => p.ClrType.IsEntityPartContract(),
+                p => p.Kind == PropertyKind.Part && !p.IsCollection,
                 p => new RelationTypecastStrategy(context, MetadataCache, metaType, p));
+
+            //-- entity relations - collections
+
+            builder.AddRule(
+                p => p.Kind == PropertyKind.Relation && p.IsCollection && ShouldPersistAsEmbeddedDocuments(p),
+                p => new CollectionAdapterStrategy(context, MetadataCache, metaType, p));
+
+            builder.AddRule(
+                p => p.Kind == PropertyKind.Relation && p.IsCollection && ShouldPersistAsArrayOfDocumentIds(p), 
+                p => new ArrayOfDocumentIdsStrategy(context, MetadataCache, metaType, p));
+
+            builder.AddRule(
+                p => p.Kind == PropertyKind.Relation && p.IsCollection,
+                p => new LazyLoadCollectionByForeignKeyStrategy(context, MetadataCache, metaType, p));
+
+            //-- entity relations - single (non-collection)
+            
+            builder.AddRule(
+                p => p.Kind == PropertyKind.Relation && !p.IsCollection && ShouldPersistAsEmbeddedDocuments(p),
+                p => new RelationTypecastStrategy(context, MetadataCache, metaType, p));
+
+            builder.AddRule(
+                p => p.Kind == PropertyKind.Relation && !p.IsCollection && ShouldPersistAsDocumentId(p),
+                p => new DocumentIdStrategy(context, MetadataCache, metaType, p));
+
+            builder.AddRule(
+                p => p.Kind == PropertyKind.Relation && !p.IsCollection,
+                p => new LazyLoadDocumentByForeignKeyStrategy(context, MetadataCache, metaType, p));
+
+            //-- scalar properties
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Scalar && p.RelationalMapping != null && p.RelationalMapping.StorageType != null,
@@ -95,6 +113,28 @@ namespace NWheels.Stacks.MongoDb.Factories
                 p => new AutomaticPropertyStrategy(context, MetadataCache, metaType, p));
 
             return builder.Build(MetadataCache, metaType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool ShouldPersistAsEmbeddedDocuments(IPropertyMetadata metaProperty)
+        {
+            if ( metaProperty.Kind != PropertyKind.Relation )
+            {
+                return false;
+            }
+
+            if ( metaProperty.Relation.RelatedPartyType.IsEntityPart )
+            {
+                return true;
+            }
+
+            if ( metaProperty.Relation.RelatedPartyType.IsEntity )
+            {
+                return (metaProperty.Relation.Kind == RelationKind.Composition);
+            }
+
+            return false;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

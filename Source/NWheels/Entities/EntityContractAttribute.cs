@@ -22,8 +22,8 @@ namespace NWheels.Entities
             base.ApplyTo(type, cache);
 
             type.IsAbstract = IsAbstract;
-            type.IsEntity = type.ContractType.IsEntityContract();
-            type.IsEntityPart = type.ContractType.IsEntityPartContract();
+            type.IsEntity = true;
+            type.IsEntityPart = false;
 
             if ( BaseEntity != null )
             {

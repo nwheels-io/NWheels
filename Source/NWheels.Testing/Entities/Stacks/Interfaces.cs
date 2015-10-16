@@ -72,6 +72,7 @@ namespace NWheels.Testing.Entities.Stacks
 
                 string TitleForUser { get; set; }
 
+                [PropertyContract.Relation.Composition]
                 IList<IAttributeValue> Values { get; }
             }
 

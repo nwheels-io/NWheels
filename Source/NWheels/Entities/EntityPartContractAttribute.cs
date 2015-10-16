@@ -4,14 +4,32 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Hapil;
 using NWheels.Conventions;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
+using NWheels.Extensions;
 
 namespace NWheels.Entities
 {
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
     public class EntityPartContractAttribute : DataObjectPartContractAttribute
     {
+        #region Overrides of DataObjectContractAttribute
+
+        public override void ApplyTo(TypeMetadataBuilder type, TypeMetadataCache cache)
+        {
+            base.ApplyTo(type, cache);
+
+            type.IsAbstract = false;
+            type.IsEntity = false;
+            type.IsEntityPart = true;
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static bool IsEntityPartContract(Type type)
         {
             return (type.IsInterface && type.GetCustomAttribute<EntityPartContractAttribute>() != null);
