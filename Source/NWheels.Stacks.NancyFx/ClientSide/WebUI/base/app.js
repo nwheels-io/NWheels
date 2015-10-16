@@ -1057,7 +1057,7 @@ theApp.directive('uidlGridField', ['uidlService', 'entityService', function (uid
         replace: true,
         link: function (scope, elem, attrs) {
         },
-        templateUrl: 'uidl-element-template-GridField',
+        templateUrl: 'uidl-element-template/GridField',
         controller: function ($scope) {
         }
     };
@@ -1077,7 +1077,7 @@ theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uid
             //console.log('uidlWidget::link', scope.uidl.qualifiedName);
             //uidlService.implementController(scope);
         },
-        templateUrl: 'uidl-element-template-FormField', // '<ng-include src="\'uidl-element-template-FormField\'"></ng-include>',
+        templateUrl: 'uidl-element-template/FormField', 
         controller: function ($scope) {
             $scope.uidlService = uidlService;
             $scope.entityService = entityService;
