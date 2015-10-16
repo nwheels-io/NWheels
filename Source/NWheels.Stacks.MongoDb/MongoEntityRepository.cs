@@ -280,6 +280,15 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        IEnumerable<TContract> IMongoEntityRepository.TrackMongoCursor<TContract, TImpl>(MongoCursor<TImpl> cursor)
+        {
+            return new DelegatingTransformingEnumerable<TEntityImpl, TContract>(
+                cursor.Cast<TEntityImpl>(),
+                InjectDependenciesAndTrackAndCastToContract<TContract>);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         void IMongoEntityRepository.CommitInsert(IEntityObject entity)
         {
             using ( var activity = _logger.ExecutingInsert(_metadata.Name, 1) )

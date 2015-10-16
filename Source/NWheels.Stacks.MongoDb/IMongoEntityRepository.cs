@@ -15,5 +15,6 @@ namespace NWheels.Stacks.MongoDb
         void CommitUpdate(IEnumerable<IEntityObject> entities);
         void CommitDelete(IEnumerable<IEntityObject> entities);
         MongoCollection GetMongoCollection();
+        IEnumerable<TContract> TrackMongoCursor<TContract, TImpl>(MongoCursor<TImpl> cursor);
     }
 }

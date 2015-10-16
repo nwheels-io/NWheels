@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Builders;
 using NWheels.Concurrency;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
@@ -90,6 +92,25 @@ namespace NWheels.Stacks.MongoDb
             result.AddRange(entityRepo.GetByIdList<TEntityContract>(idsNotInCache));
 
             return result;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TEntityContract LazyLoadOneByForeignKey<TEntityContract, TEntityImpl, TKey>(string keyPropertyName, TKey keyValue)
+        {
+            return LazyLoadManyByForeignKey<TEntityContract, TEntityImpl, TKey>(keyPropertyName, keyValue).FirstOrDefault();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEnumerable<TEntityContract> LazyLoadManyByForeignKey<TEntityContract, TEntityImpl, TKey>(string keyPropertyName, TKey keyValue)
+        {
+            var entityRepo = (IMongoEntityRepository)base.GetEntityRepository(typeof(TEntityContract));
+            var mongoCollection = entityRepo.GetMongoCollection();
+
+            var cursor = mongoCollection.FindAs<TEntityImpl>(Query.EQ(keyPropertyName, BsonValue.Create(keyValue)));
+
+            return entityRepo.TrackMongoCursor<TEntityContract, TEntityImpl>(cursor);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

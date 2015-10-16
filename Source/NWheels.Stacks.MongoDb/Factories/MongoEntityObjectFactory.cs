@@ -101,44 +101,40 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         public static bool ShouldPersistAsArrayOfDocumentIds(IPropertyMetadata metaProperty)
         {
-            return true;
+            if ( metaProperty.Kind != PropertyKind.Relation || !metaProperty.Relation.RelatedPartyType.IsEntity )
+            {
+                return false;
+            }
 
-            //if ( metaProperty.Kind != PropertyKind.Relation || !metaProperty.Relation.RelatedPartyType.IsEntity )
-            //{
-            //    return false;
-            //}
-
-            //switch ( metaProperty.Relation.Multiplicity )
-            //{
-            //    case RelationMultiplicity.ManyToMany:
-            //        return (metaProperty.Relation.ThisPartyKind == RelationPartyKind.Dependent || metaProperty.Relation.InverseProperty == null);
-            //    case RelationMultiplicity.OneToMany:
-            //        return (metaProperty.Relation.InverseProperty == null);
-            //    default:
-            //        return false;
-            //}
+            switch ( metaProperty.Relation.Multiplicity )
+            {
+                case RelationMultiplicity.ManyToMany:
+                    return (metaProperty.Relation.ThisPartyKind == RelationPartyKind.Dependent || metaProperty.Relation.InverseProperty == null);
+                case RelationMultiplicity.OneToMany:
+                    return (metaProperty.Relation.InverseProperty == null);
+                default:
+                    return false;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static bool ShouldPersistAsDocumentId(IPropertyMetadata metaProperty)
         {
-            return true;
+            if ( metaProperty.Kind != PropertyKind.Relation || !metaProperty.Relation.RelatedPartyType.IsEntity )
+            {
+                return false;
+            }
 
-            //if ( metaProperty.Kind != PropertyKind.Relation || !metaProperty.Relation.RelatedPartyType.IsEntity )
-            //{
-            //    return false;
-            //}
-
-            //switch ( metaProperty.Relation.Multiplicity )
-            //{
-            //    case RelationMultiplicity.OneToOne:
-            //        return (metaProperty.Relation.ThisPartyKind == RelationPartyKind.Dependent || metaProperty.Relation.InverseProperty == null);
-            //    case RelationMultiplicity.ManyToOne:
-            //        return true;
-            //    default:
-            //        return false;
-            //}
+            switch ( metaProperty.Relation.Multiplicity )
+            {
+                case RelationMultiplicity.OneToOne:
+                    return (metaProperty.Relation.ThisPartyKind == RelationPartyKind.Dependent || metaProperty.Relation.InverseProperty == null);
+                case RelationMultiplicity.ManyToOne:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }
