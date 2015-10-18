@@ -22,7 +22,7 @@ namespace NWheels.UI.Toolbox
         public void SetCriteriaModel<TCriteria>()
         {
             var baseMetaType = GetMetadataCache().GetTypeMetadata(typeof(TCriteria));
-            this.ReportTypes = (TypeSelector)UidlUtility.CreateFormOrTypeSelector(baseMetaType, "ReportTypes", this, isNested: true);
+            this.ReportTypes = (TypeSelector)UidlUtility.CreateFormOrTypeSelector(baseMetaType, "ReportTypes", this, isInline: true);
 
             foreach ( var selection in ReportTypes.Selections )
             {

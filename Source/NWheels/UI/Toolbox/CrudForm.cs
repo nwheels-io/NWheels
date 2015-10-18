@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Hapil;
 using NWheels.DataObjects;
 using NWheels.Extensions;
+using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
@@ -37,7 +38,7 @@ namespace NWheels.UI.Toolbox
             this.TemplateName = "CrudForm";
             this.EntityName = typeof(TEntity).Name.TrimLead("I").TrimTail("Entity");
             this.Fields = new List<CrudFormField>();
-            this.IsNested = isNested;
+            this.IsInline = isNested;
 
             _visibleFields = new List<string>();
             _hiddenFields = new List<string>();
@@ -105,7 +106,7 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
-        public bool IsNested { get; set; }
+        public bool IsInline { get; set; }
         [DataMember]
         public string EntityName { get; set; }
         [DataMember]
@@ -222,6 +223,12 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string LookupFilterExpression { get; set; }
         [DataMember]
+        public List<string> StandardValues { get; set; }
+        [DataMember]
+        public bool StandardValuesExclusive { get; set; }
+        [DataMember]
+        public bool StandardValuesMultiple { get; set; }
+        [DataMember, ManuallyAssigned]
         public WidgetUidlNode NestedWidget { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -295,15 +302,20 @@ namespace NWheels.UI.Toolbox
         private WidgetUidlNode CreateNestedWidget(ControlledUidlNode parent, ITypeMetadata nestedMetaType)
         {
             WidgetUidlNode widgetInstance = null;
+            Type widgetClosedType;
 
             switch ( this.FieldType )
             {
                 case CrudFieldType.LookupMany:
-                    var widgetClosedType = typeof(Crud<>).MakeGenericType(nestedMetaType.ContractType);
-                    widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName, parent);
+                    widgetClosedType = typeof(Crud<>).MakeGenericType(nestedMetaType.ContractType);
+                    widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName, parent, CrudGridMode.LookupMany);
                     break;
-                case CrudFieldType.NestedForm:
-                    widgetInstance = UidlUtility.CreateFormOrTypeSelector(nestedMetaType, "Form", parent, isNested: true);
+                case CrudFieldType.InlineGrid:
+                    widgetClosedType = typeof(Crud<>).MakeGenericType(nestedMetaType.ContractType);
+                    widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName, parent, CrudGridMode.Inline);
+                    break;
+                case CrudFieldType.InlineForm:
+                    widgetInstance = UidlUtility.CreateFormOrTypeSelector(nestedMetaType, "Form", parent, isInline: true);
                     break;
             }
 
@@ -317,13 +329,20 @@ namespace NWheels.UI.Toolbox
             switch ( this.MetaProperty.Kind )
             {
                 case PropertyKind.Scalar:
-                    return (MetaProperty.Role == PropertyRole.None && !MetaProperty.IsCalculated ? CrudFieldType.Edit : CrudFieldType.Label);
-                case PropertyKind.Part:
-                    return CrudFieldType.NestedForm;
-                case PropertyKind.Relation:
-                    if ( MetaProperty.Relation.Kind == RelationKind.Composition && !MetaProperty.IsCollection )
+                    if ( MetaProperty.Role.IsIn(PropertyRole.Key, PropertyRole.Version) || MetaProperty.IsCalculated )
                     {
-                        return CrudFieldType.NestedForm;
+                        return CrudFieldType.Label;
+                    }
+                    else
+                    {
+                        return (MetaProperty.ClrType.IsEnum ? CrudFieldType.Lookup : CrudFieldType.Edit);
+                    }
+                case PropertyKind.Part:
+                    return (MetaProperty.IsCollection ? CrudFieldType.InlineGrid : CrudFieldType.InlineForm);
+                case PropertyKind.Relation:
+                    if ( MetaProperty.Relation.Kind == RelationKind.Composition || MetaProperty.Relation.RelatedPartyType.IsEntityPart )
+                    {
+                        return (MetaProperty.IsCollection ? CrudFieldType.InlineGrid : CrudFieldType.InlineForm);
                     }
                     else
                     {
@@ -348,7 +367,9 @@ namespace NWheels.UI.Toolbox
                     return CrudFieldModifiers.DropDown;
                 case CrudFieldType.LookupMany:
                     return CrudFieldModifiers.Tab;
-                case CrudFieldType.NestedForm:
+                case CrudFieldType.InlineForm:
+                    return CrudFieldModifiers.Tab;
+                case CrudFieldType.InlineGrid:
                     return CrudFieldModifiers.Tab;
                 default:
                     return CrudFieldModifiers.None;
@@ -384,11 +405,14 @@ namespace NWheels.UI.Toolbox
                 case CrudFieldType.Edit:
                     value |= 0x100;
                     break;
-                case CrudFieldType.NestedForm:
+                case CrudFieldType.InlineForm:
                     value |= 0x80;
                     break;
-                case CrudFieldType.LookupMany:
+                case CrudFieldType.InlineGrid:
                     value |= 0x40;
+                    break;
+                case CrudFieldType.LookupMany:
+                    value |= 0x20;
                     break;
             }
 
@@ -426,7 +450,8 @@ namespace NWheels.UI.Toolbox
         Edit,
         Lookup,
         LookupMany,
-        NestedForm,
+        InlineGrid,
+        InlineForm,
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

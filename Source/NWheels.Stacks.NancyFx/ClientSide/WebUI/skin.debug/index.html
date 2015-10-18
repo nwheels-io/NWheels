@@ -351,10 +351,10 @@
         <script type="text/ng-template" id="uidl-element-template/Crud">
             <div class="content-example">
                 <div class="layout" ng-hide="uiShowCrudForm">
-                    WIDGET[{{uidl.widgetType}}&lt;{{uidl.entityName}}&gt;]
+                    WIDGET[{{::uidl.widgetType}}&lt;{{::uidl.entityName}}&gt;<span ng=if="uidl.mode!=='Standalone'">:{{::uidl.mode}}</span>]
                     <span ng-hide="resultSet">Query Running</span>
                     <span ng-show="resultSet">{{resultSet.length}} row(s)</span>
-                    <span ng-show="resultSet"> | <a href="" ng-click="newEntity()">Add New</a> | <a href="" ng-click="refresh()">Refresh</a></span>
+                    <span ng-show="resultSet"> | <a href="" ng-click="newEntity()">Add New</a> | <a href="" ng-click="refresh()" ng-if="uidl.mode!=='Inline'">Refresh</a></span>
                 </div>
                 <table class="data" ng-hide="uiShowCrudForm">
                     <thead>
@@ -407,7 +407,6 @@
                                     {{translate(field.propertyName)}}
                                 </div>
                                 <div class="tabContent clearfix">
-                                    {{field.propertyName}}
                                     <div class="Layout" ng-repeat="field in tabSetFields" ng-if="$index==tabSetIndex">
                                         <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="parentModel"></uidl-widget>
                                     </div>
@@ -416,9 +415,9 @@
                         </tr>
                     </tbody>
                 </table>
-                <div ng-if="!uidl.isNested" class="layout">
+                <div ng-if="!uidl.isInline" class="layout">
                     <button class="dataForm" ng-click="saveChanges()">Save</button>
-                    <button class="dataForm" ng-click="cancelEdit()">Cancel</button>
+                    <button class="dataForm" ng-click="rejectChanges()">Cancel</button>
                 </div>
             </div>
         </script>

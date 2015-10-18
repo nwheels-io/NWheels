@@ -574,45 +574,92 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
             scope.queryEntities = function () {
                 scope.resultSet = null;
-                scope.entityService.queryEntity(scope.uidl.entityName).then(function (data) {
-                    scope.resultSet = data.results;
-                });
+                if (scope.uidl.mode !== 'Inline') {
+                    scope.entityService.queryEntity(scope.uidl.entityName).then(function (data) {
+                        scope.resultSet = data.results;
+                    });
+                } else {
+                    scope.resultSet = scope.parentModel.entity[scope.parentUidl.propertyName];
+                }
             };
 
             scope.editEntity = function (entity) {
                 scope.entityService.editEntity(entity);
                 scope.model.entity = entity;
+                scope.model.isNew = false;
                 scope.uiShowCrudForm = true;
             };
 
             scope.newEntity = function () {
-                scope.model.entity = scope.entityService.createEntity(metaType.restTypeName, {});
+                if (scope.uidl.mode !== 'Inline') {
+                    scope.model.entity = scope.entityService.createEntity(metaType.restTypeName, {});
+                } else {
+                    scope.model.entity = scope.entityService.createComplexType(metaType.restTypeName);
+                }
+                scope.model.isNew = true;
                 scope.uiShowCrudForm = true;
             };
 
             scope.deleteEntity = function (entity) {
-                scope.entityService.deleteEntityAndSave(entity).then(function(result) {
-                    scope.queryEntities();
-                    scope.uiShowCrudForm = false;
-                });
+                if (scope.uidl.mode !== 'Inline') {
+                    scope.entityService.deleteEntityAndSave(entity).then(function(result) {
+                        scope.queryEntities();
+                        scope.uiShowCrudForm = false;
+                    });
+                } else {
+                    for (var i = 0; i < scope.resultSet.length; i++) {
+                        if(scope.resultSet[i] === entity) {
+                           scope.resultSet.splice(i, 1);
+                           break;
+                        }
+                    }                
+                }
+                scope.refresh();
             };
 
+            scope.saveChanges = function (entity) {
+                if (scope.uidl.mode !== 'Inline') {
+                    scope.entityService.saveChanges();
+                } else if (scope.model.isNew === true) {
+                    scope.resultSet.push(entity._backingStore);
+                }
+                scope.refresh();
+            };
+
+            scope.rejectChanges = function (entity) {
+                if (scope.uidl.mode !== 'Inline') {
+                    scope.entityService.rejectChanges();
+                }
+                scope.refresh();
+            };
+            
             if (scope.uidl.form) {
-                scope.$on(scope.uidl.form.qualifiedName + ':Closing', function (input) {
-                    scope.refresh();
-                });
+                subscribeToFormNotifiations(scope.uidl.form);
             }
 
             if (scope.uidl.formTypeSelector) {
                 for (var i = 0; i < scope.uidl.formTypeSelector.selections.length; i++) {
                     var selection = scope.uidl.formTypeSelector.selections[i];
-                    scope.$on(selection.widget.qualifiedName + ':Closing', function (input) {
-                        scope.refresh();
-                    });
+                    subscribeToFormNotifiations(selection.widget);
                 }
             }
 
             scope.queryEntities();
+            
+            function subscribeToFormNotifiations(form) {
+                scope.$on(form.qualifiedName + ':Closing', function (event) {
+                    scope.refresh();
+                });
+                scope.$on(form.qualifiedName + ':Saving', function (event) {
+                    scope.saveChanges(scope.model.entity);
+                });
+                scope.$on(form.qualifiedName + ':Rejecting', function (event) {
+                    scope.rejectChanges(scope.model.entity);
+                });
+                scope.$on(form.qualifiedName + ':Deleting', function (event) {
+                    scope.deleteEntity(scope.model.entity);
+                });
+            }
         }
     };
 
@@ -620,26 +667,39 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
     m_controllerImplementations['CrudForm'] = {
         implement: function (scope) {
-            var metaType = scope.uidlService.getMetaType(scope.uidl.entityMetaType);
+            scope.metaType = scope.uidlService.getMetaType(scope.uidl.entityMetaType);
+            scope.breezeMetaType = scope.entityService.getTypeMetadata(scope.metaType.restTypeName);
 
             scope.tabSetIndex = 0;
             scope.plainFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers!='Tab' && $.modifiers!='Section'").ToArray();
             scope.sectionFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Section'").ToArray();
             scope.tabSetFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Tab'").ToArray();
 
-            scope.notifyFormClosing = function () {
-                scope.$emit(scope.uidl.qualifiedName + ':Closing');
+            scope.saveChanges = function () {
+                scope.$emit(scope.uidl.qualifiedName + ':Saving');
             };
 
+            scope.rejectChanges = function () {
+                scope.$emit(scope.uidl.qualifiedName + ':Rejecting');
+            };
+            
+            /*
             scope.saveChanges = function () {
-                scope.entityService.saveChanges();
-                scope.notifyFormClosing();
+                if (scope.breezeMetaType.isComplexType === true && scope.uidl.mode === 'CrudWidget') {
+                    if (scope.parentModel.isNew) {
+                        scope.parent
+                    }
+                } else {
+                    scope.entityService.saveChanges();
+                    scope.notifyFormClosing();
+                }
             };
 
             scope.cancelEdit = function () {
                 scope.entityService.rejectChanges();
                 scope.notifyFormClosing();
             };
+            */
             
             scope.selectTab = function(index) {
                 scope.tabSetIndex = index;
@@ -729,7 +789,9 @@ function ($http, $q, $timeout, breeze, logger) {
     manager.enableSaveQueuing(true);
 
     var service = {
+        getTypeMetadata: getTypeMetadata,
         createEntity: createEntity,
+        createComplexType: createComplexType,
         queryEntity: queryEntity,
         editEntity: editEntity,
         hasChanges: hasChanges,
@@ -742,12 +804,27 @@ function ($http, $q, $timeout, breeze, logger) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    function getTypeMetadata(typeName) {
+        var metadata = manager.metadataStore.getEntityType(typeName);
+        return metadata;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     function createEntity(entityName, initialValues) {
         var entity = manager.createEntity(entityName, initialValues);
         manager.addEntity(entity);
         return entity;
     }
 
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function createComplexType(complexTypeName, initialValues) {
+        var metadata = manager.metadataStore.getEntityType(complexTypeName);
+        var newInstance = metadata.createInstance({});
+        return newInstance;
+    }
+        
     //-----------------------------------------------------------------------------------------------------------------
 
     function queryEntity(entityName, queryBuilderCallback) {
@@ -1089,8 +1166,6 @@ theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uid
                 $scope.lookupValueProperty = metaType.primaryKey.propertyNames[0];
                 $scope.lookupTextProperty = metaType.defaultDisplayPropertyNames[0];
                 $scope.lookupForeignKeyProperty = $scope.uidl.propertyName + '_FK';
-             
-                $scope.comboBoxValue = $scope.entity[$scope.lookupForeignKeyProperty];
              
                 $scope.entityService.queryEntity($scope.uidl.lookupEntityName).then(function (data) {
                     $scope.lookupResultSet = data.results;

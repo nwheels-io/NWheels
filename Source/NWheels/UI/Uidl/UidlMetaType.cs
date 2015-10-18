@@ -53,7 +53,23 @@ namespace NWheels.UI.Uidl
             : base(type)
         {
             base.TypeKind = UidlMetaTypeKind.Value;
+
+            if ( type.IsEnum )
+            {
+                this.StandardValues = Enum.GetNames(type).ToList();
+                this.StandardValuesExclusive = true;
+                this.StandardValuesMultiple = type.HasAttribute<FlagsAttribute>();
+            }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public List<string> StandardValues { get; set; }
+        [DataMember]
+        public bool StandardValuesExclusive { get; set; }
+        [DataMember]
+        public bool StandardValuesMultiple { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

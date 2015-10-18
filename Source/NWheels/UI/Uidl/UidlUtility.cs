@@ -10,11 +10,11 @@ namespace NWheels.UI.Uidl
 {
     public static class UidlUtility
     {
-        public static WidgetUidlNode CreateFormOrTypeSelector(ITypeMetadata metaType, string idName, ControlledUidlNode parent, bool isNested)
+        public static WidgetUidlNode CreateFormOrTypeSelector(ITypeMetadata metaType, string idName, ControlledUidlNode parent, bool isInline)
         {
             if ( metaType.DerivedTypes.Count == 0 )
             {
-                return CreateCrudForm(metaType, idName, parent, isNested);
+                return CreateCrudForm(metaType, idName, parent, isInline);
             }
             else
             {
@@ -22,19 +22,19 @@ namespace NWheels.UI.Uidl
                     idName + "Type",
                     parent,
                     metaType,
-                    concreteType => CreateCrudForm(concreteType, idName, parent, isNested));
+                    concreteType => CreateCrudForm(concreteType, idName, parent, isInline));
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static WidgetUidlNode CreateCrudForm(ITypeMetadata metaType, string idName, ControlledUidlNode parent, bool isNested)
+        public static WidgetUidlNode CreateCrudForm(ITypeMetadata metaType, string idName, ControlledUidlNode parent, bool isInline)
         {
             var closedType = typeof(CrudForm<,,>).MakeGenericType(
                 metaType.ContractType,
                 typeof(Empty.Data),
                 typeof(ICrudFormState<>).MakeGenericType(metaType.ContractType));
-            return (WidgetUidlNode)Activator.CreateInstance(closedType, idName, parent, isNested);
+            return (WidgetUidlNode)Activator.CreateInstance(closedType, idName, parent, isInline);
         }
     }
 }

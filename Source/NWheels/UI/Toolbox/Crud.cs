@@ -17,11 +17,19 @@ namespace NWheels.UI.Toolbox
         where TEntity : class
     {
         public Crud(string idName, ControlledUidlNode parent)
+            : this(idName, parent, CrudGridMode.Standalone)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Crud(string idName, ControlledUidlNode parent, CrudGridMode mode)
             : base(idName, parent)
         {
             this.WidgetType = "Crud";
             this.TemplateName = "Crud";
             this.EntityName = typeof(TEntity).Name.TrimLead("I").TrimTail("Entity");
+            this.Mode = mode;
             this.DisplayColumns = new List<string>();
             this.MetaType = this.MetadataCache.GetTypeMetadata(typeof(TEntity));
 
@@ -64,6 +72,8 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string EntityMetaType { get; set; }
         [DataMember]
+        public CrudGridMode Mode { get; set; }
+        [DataMember]
         public List<string> DisplayColumns { get; set; }
         [DataMember]
         public List<string> DefaultDisplayColumns { get; set; }
@@ -99,11 +109,20 @@ namespace NWheels.UI.Toolbox
         
         private void CreateForm()
         {
-            var formOrTypeSelector = UidlUtility.CreateFormOrTypeSelector(MetaType, "Form", parent: this, isNested: false);
+            var formOrTypeSelector = UidlUtility.CreateFormOrTypeSelector(MetaType, "Form", parent: this, isInline: false);
 
             this.Form = formOrTypeSelector as CrudForm<TEntity, Empty.Data, ICrudFormState<TEntity>>;
             this.FormTypeSelector = formOrTypeSelector as TypeSelector;
         }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum CrudGridMode
+    {
+        Standalone,
+        LookupMany,
+        Inline
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
