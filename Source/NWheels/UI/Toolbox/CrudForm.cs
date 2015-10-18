@@ -42,6 +42,9 @@ namespace NWheels.UI.Toolbox
 
             _visibleFields = new List<string>();
             _hiddenFields = new List<string>();
+
+            this.SearchResultsReceived = new UidlNotification<string>("SearchResultsReceived", this);
+            base.Notifications.Add(this.SearchResultsReceived);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -78,21 +81,33 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CrudForm<TEntity, TData, TState> FilterLookup<TRelatedEntity>(
-            Expression<Func<TEntity, TRelatedEntity>> propertySelector,
-            Expression<Func<ViewModel<TData, TState, Empty.Input>, bool>> filterExpression)
+        public CrudForm<TEntity, TData, TState> Lookup<TLookupEntity>(
+            Expression<Func<TEntity, object>> fieldSelector,
+            Expression<Func<TLookupEntity, object>> lookupValueProperty,
+            Expression<Func<TLookupEntity, object>> lookupDisplayProperty,
+            Expression<Func<ViewModel<TData, TState, Empty.Input>, bool>> filterExpression = null,
+            bool applyDistinctToResults = true)
         {
-            SetLookupEntityContract(propertySelector, typeof(TRelatedEntity));
+            var field = FindOrAddField(fieldSelector);
+            var lookupMetaType = MetadataCache.GetTypeMetadata(typeof(TLookupEntity));
+            
+            field.LookupEntityName = lookupMetaType.Name;
+            field.LookupEntityContract = typeof(TLookupEntity);
+            field.LookupValueProperty = lookupValueProperty.GetPropertyInfo().Name;
+            field.LookupDisplayProperty = lookupDisplayProperty.GetPropertyInfo().Name;
+            field.ApplyDistinctToLookup = applyDistinctToResults;
+
+            field.FieldType = CrudFieldType.Lookup;
+            field.Modifiers = CrudFieldModifiers.DropDown;
+
             return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CrudForm<TEntity, TData, TState> FilterLookup<TRelatedEntity>(
-            Expression<Func<TEntity, ICollection<TRelatedEntity>>> propertySelector,
-            Expression<Func<ViewModel<TData, TState, Empty.Input>, bool>> filterExpression)
+        public CrudForm<TEntity, TData, TState> SetMode(CrudFormMode value)
         {
-            SetLookupEntityContract(propertySelector, typeof(TRelatedEntity));
+            this.Mode = value;
             return this;
         }
 
@@ -120,6 +135,10 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public UidlNotification<string> SearchResultsReceived { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void DescribePresenter(PresenterBuilder<CrudForm<TEntity, TData, TState>, TData, TState> presenter)
         {
         }
@@ -144,25 +163,25 @@ namespace NWheels.UI.Toolbox
         private void BuildFields(UidlBuilder builder)
         {
             var metaType = builder.MetadataCache.GetTypeMetadata(typeof(TEntity));
-            var fieldsToAdd = new HashSet<string>();
+            var fieldsToAdd = new List<string>();
 
             if ( _visibleFields.Count > 0 )
             {
-                fieldsToAdd.UnionWith(_visibleFields);
+                fieldsToAdd.AddRange(_visibleFields.Where(f => !fieldsToAdd.Contains(f)));
             }
             else
             {
-                fieldsToAdd.UnionWith(metaType.Properties.Where(ShouldAutoIncludeField).Select(p => p.Name) );
+                fieldsToAdd.AddRange(metaType.Properties.Where(ShouldAutoIncludeField).Select(p => p.Name).Where(f => !fieldsToAdd.Contains(f)));
             }
 
-            fieldsToAdd.ExceptWith(_hiddenFields);
-            fieldsToAdd.ExceptWith(Fields.Select(f => f.PropertyName));
+            fieldsToAdd = fieldsToAdd.Where(f => !_hiddenFields.Contains(f)).ToList();
+            fieldsToAdd = fieldsToAdd.Where(f => !Fields.Select(p => p.PropertyName).Contains(f)).ToList();
 
             Fields.AddRange(fieldsToAdd.Select(f => new CrudFormField(f)));
 
             foreach ( var field in Fields )
             {
-                field.Build(this, metaType);
+                field.Build(builder, this, metaType);
             }
 
             Fields.Sort((x, y) => y.OrderIndex.CompareTo(x.OrderIndex));
@@ -183,9 +202,9 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void SetLookupEntityContract<TRelatedEntity>(Expression<Func<TEntity, TRelatedEntity>> propertySelector, Type lookupEntityContract)
+        private CrudFormField FindOrAddField(Expression<Func<TEntity, object>> fieldSelector)
         {
-            var propertyName = propertySelector.GetPropertyInfo().Name;
+            var propertyName = fieldSelector.GetPropertyInfo().Name;
             var field = Fields.FirstOrDefault(f => f.PropertyName == propertyName);
 
             if ( field == null )
@@ -194,7 +213,7 @@ namespace NWheels.UI.Toolbox
                 Fields.Add(field);
             }
 
-            field.LookupEntityContract = lookupEntityContract;
+            return field;
         }
     }
 
@@ -223,6 +242,12 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string LookupFilterExpression { get; set; }
         [DataMember]
+        public string LookupValueProperty { get; set; }
+        [DataMember]
+        public string LookupDisplayProperty { get; set; }
+        [DataMember]
+        public bool ApplyDistinctToLookup { get; set; }
+        [DataMember]
         public List<string> StandardValues { get; set; }
         [DataMember]
         public bool StandardValuesExclusive { get; set; }
@@ -239,7 +264,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal void Build(ControlledUidlNode parent, ITypeMetadata metaType)
+        internal void Build(UidlBuilder builder, ControlledUidlNode parent, ITypeMetadata metaType)
         {
             this.MetaProperty = metaType.GetPropertyByName(this.PropertyName);
 
@@ -255,6 +280,18 @@ namespace NWheels.UI.Toolbox
                 this.LookupEntityContract = MetaProperty.Relation.RelatedPartyType.ContractType;
                 this.LookupEntityMetaType = MetaProperty.Relation.RelatedPartyType.ContractType.AssemblyQualifiedNameNonVersioned();
                 this.NestedWidget = CreateNestedWidget(parent, MetaProperty.Relation.RelatedPartyType);
+            }
+
+            if ( this.LookupEntityContract != null )
+            {
+                this.LookupEntityMetaType = builder.RegisterMetaType(this.LookupEntityContract);
+            }
+
+            if ( this.MetaProperty.ClrType.IsEnum )
+            {
+                builder.RegisterMetaType(this.MetaProperty.ClrType);
+                this.StandardValues = Enum.GetNames(this.MetaProperty.ClrType).ToList();
+                this.StandardValuesExclusive = true;
             }
 
             this.OrderIndex = GetOrderIndex();

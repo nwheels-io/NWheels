@@ -682,7 +682,27 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.rejectChanges = function () {
                 scope.$emit(scope.uidl.qualifiedName + ':Rejecting');
             };
-            
+			
+			if (scope.uidl.mode === 'StandaloneCreate') {
+				scope.parentModel = {
+					entity: scope.entityService.createEntity(scope.metaType.restTypeName)
+				};
+			}
+			
+			scope.executeSearch = function () {
+				scope.entityService.queryEntity(scope.uidl.entityName, function(query) {
+					// build query
+					return query;
+				}).then(function (data) {
+					scope.$emit(scope.uidl.qualifiedName + ':SearchResultsReceived', data);	
+                });
+			};
+
+   			scope.test = function() {
+				alert('This is a test');
+			};
+
+
             /*
             scope.saveChanges = function () {
                 if (scope.breezeMetaType.isComplexType === true && scope.uidl.mode === 'CrudWidget') {
@@ -716,13 +736,23 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 var metaType = scope.uidlService.getMetaType(selection.metaTypeName);
                 selection.restTypeName = metaType.restTypeName;
             }
-            scope.model = { 
-                entity: (
-                    scope.parentUidl ? // parentUidl exists when nested in CrudForm
-                    scope.parentModel.entity[scope.parentUidl.propertyName] :   // when nested in CrudForm widget
-                    scope.parentModel.entity)                                   // when nested in Crud widget
-            };
-            scope.selectedType = scope.model.entity.entityType.shortName;
+			
+			if (scope.parentModel) {
+				scope.model = { 
+					entity: (
+						scope.parentUidl ? // parentUidl exists when nested in CrudForm
+						scope.parentModel.entity[scope.parentUidl.propertyName] :   // when nested in CrudForm widget
+						scope.parentModel.entity)                                   // when nested in Crud widget
+				};
+			} else if(scope.uidl.selections.length > 0) {
+				scope.model = { 
+					entity: scope.entityService.createEntity(scope.uidl.selections[0].restTypeName)
+				};
+			}
+			
+			if (scope.model) {
+				scope.selectedType = scope.model.entity.entityType.shortName;
+			}
         }
     };
 
@@ -798,6 +828,7 @@ function ($http, $q, $timeout, breeze, logger) {
         saveChanges: saveChanges,
         rejectChanges: rejectChanges,
         deleteEntityAndSave: deleteEntityAndSave,
+		ensureMetadataLoaded: ensureMetadataLoaded,
         showLocalStateDump: showLocalStateDump
     };
     return service;
@@ -934,6 +965,14 @@ function ($http, $q, $timeout, breeze, logger) {
         document.getElementById(elementId).innerHTML = JSON.stringify(exportedData, undefined, 2);
     }
 
+    //-----------------------------------------------------------------------------------------------------------------
+	
+	function ensureMetadataLoaded() {
+		if (manager.metadataStore.isEmpty()) {
+			return manager.fetchMetadata();
+		}
+	}
+
 }]);
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -994,20 +1033,22 @@ function ($http, $scope, $rootScope, uidlService, entityService, commandService)
     $http.get('uidl.json').then(function (httpResult) {
         uidlService.setDocument(httpResult.data);
 
-        $rootScope.app = uidlService.getApp();
-        $rootScope.uidl = uidlService.getApp();
-        $rootScope.entityService = entityService;
-        $rootScope.uidlService = uidlService;
-        $rootScope.commandService = commandService;
-        $rootScope.appScope = $scope;
+		entityService.ensureMetadataLoaded().then(function() {
+			$rootScope.app = uidlService.getApp();
+			$rootScope.uidl = uidlService.getApp();
+			$rootScope.entityService = entityService;
+			$rootScope.uidlService = uidlService;
+			$rootScope.commandService = commandService;
+			$rootScope.appScope = $scope;
 
-        uidlService.implementController($scope);
+			uidlService.implementController($scope);
 
-        $rootScope.currentScreen = uidlService.getCurrentScreen();
-        $rootScope.currentLocale = uidlService.getCurrentLocale();
-        $scope.pageTitle = $scope.translate($scope.app.text) + ' - ' + $scope.translate($scope.currentScreen.text);
+			$rootScope.currentScreen = uidlService.getCurrentScreen();
+			$rootScope.currentLocale = uidlService.getCurrentLocale();
+			$scope.pageTitle = $scope.translate($scope.app.text) + ' - ' + $scope.translate($scope.currentScreen.text);
 
-        //commandService.startPollingMessages();
+			//commandService.startPollingMessages();
+		});
     });
 
     /*
@@ -1100,7 +1141,7 @@ theApp.directive('uidlWidget', ['uidlService', 'entityService', function (uidlSe
         scope: {
             uidl: '=',
             parentUidl: '=',
-            parentModel: '='
+            parentModel: '=?'
         },
         restrict: 'E',
         replace: true,
@@ -1163,12 +1204,16 @@ theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uid
                 var metaType = uidlService.getMetaType($scope.uidl.lookupEntityMetaType);
 
                 $scope.lookupMetaType = metaType;
-                $scope.lookupValueProperty = metaType.primaryKey.propertyNames[0];
-                $scope.lookupTextProperty = metaType.defaultDisplayPropertyNames[0];
+                $scope.lookupValueProperty = ($scope.uidl.lookupValueProperty ? $scope.uidl.lookupValueProperty : metaType.primaryKey.propertyNames[0]);
+                $scope.lookupTextProperty = ($scope.uidl.lookupDisplayProperty ? $scope.uidl.lookupDisplayProperty : metaType.defaultDisplayPropertyNames[0]);
                 $scope.lookupForeignKeyProperty = $scope.uidl.propertyName + '_FK';
              
                 $scope.entityService.queryEntity($scope.uidl.lookupEntityName).then(function (data) {
                     $scope.lookupResultSet = data.results;
+					
+					if ($scope.uidl.applyDistinctToLookup) {
+						$scope.lookupResultSet = Enumerable.From($scope.lookupResultSet).Distinct('$.' + $scope.lookupTextProperty).ToArray();
+					}
                 });
             }
         }

@@ -385,10 +385,6 @@
         </div>
     </script>
 	
-	<script type="text/ng-template" id="uidl-element-template/MediaFarm">
-		<uidl-widget uidl="uidl.tabs"></uidl-widget>
-	</script>	
-	
 	<script type="text/ng-template" id="uidl-element-template/TypeSelectorWithTabs">
 		<div class="row">
 			<div class="col-lg-12">
@@ -397,24 +393,31 @@
 						<li ng-class="{active: $index == 0}" ng-repeat="selection in uidl.selections"><a data-toggle="tab" href="#tab-{{ $index }}">{{ selection.text }}</a></li>
 					</ul>
 					<div class="tab-content">
-						<div ng-repeat="selection in uidl.selections" id="tab-{{ $index }}" ng-class="tab-pane: true, active: $index == 0">
-							<div class="panel-body" id="filterForm">
-								<div class="row">
-									<div class="form-group">
-										<div class="col-sm-2" ng-repeat="field in selection.widget.fields">
-											<label class="control-label">{{ field.propertyName }}</label>
-											<select class="form-control m-b" name="{{ field.propertyName }}" id="{{ field.propertyName }}"></select>
-										</div>
-									</div>
-								</div>
-							</div>
+						<div ng-repeat="selection in uidl.selections" id="tab-{{ $index }}" ng-class="{'tab-pane': true, active: $index == 0}">
+							<uidl-widget uidl="selection.widget"></uidl-widget>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</script>	
-    
+
+  	<script type="text/ng-template" id="uidl-element-template/FilterForm">
+		<div class="panel-body" id="filterForm">
+			<div class="row">
+				<div class="form-group">
+					<div class="col-sm-2" ng-repeat="field in uidl.fields">
+						<label class="control-label">{{ field.propertyName }}</label>
+						<uidl-form-field uidl="field" entity="field.lookupEntityMetaType" />
+					</div>
+				</div>
+				<div class="col-sm-1">
+					<div class="ibox-tools"><button id="mediaSearch" type="button" class="btn btn-primary" ng-click="executeSearch()">Search123</button></div>
+				</div>
+			</div>
+		</div>
+	</script>	
+
     <script type="text/ng-template" id="uidl-element-template/Report">
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
@@ -464,6 +467,27 @@
         </div>
     </script>
     
+	<script type="text/ng-template" id="uidl-element-template/GridField">
+		<div class="layout">
+			<span ng-if="property.kind!=='Relation'">{{value}}</span>
+			<a ng-if="property.kind==='Relation'">Go to</a>
+		</div>
+	</script>
+	
+	<script type="text/ng-template" id="uidl-element-template/FormField">
+		<div class="layout">
+			<span ng-if="uidl.fieldType==='Label'">{{entity[uidl.propertyName]}}</span>
+			<input ng-if="uidl.fieldType==='Edit'" 
+				type="text" 
+				ng-model="entity[uidl.propertyName]" ></input>
+			<select ng-if="uidl.fieldType==='Lookup'" 
+				ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet" 
+				ng-model="entity[lookupForeignKeyProperty]" class="form-control m-b">
+				<option value="">All</option>
+			</select>
+		</div>
+	</script>
+	
     <!------ HARD CODED  -------->
     
     <script type="text/ng-template" id="uidl-element-template/AffiliateSignUpForm">
