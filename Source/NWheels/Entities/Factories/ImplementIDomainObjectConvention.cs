@@ -98,41 +98,63 @@ namespace NWheels.Entities.Factories
 
         private void ImplementBeforeAfterCommit(ImplementationClassWriter<IDomainObject> writer)
         {
-            MethodInfo beforeSave;
-            MethodInfo afterSave;
-            MethodInfo beforeDelete;
-            MethodInfo afterDelete;
+            MethodInfo[] beforeSave;
+            MethodInfo[] afterSave;
+            MethodInfo[] beforeDelete;
+            MethodInfo[] afterDelete;
             TryFindEntityTriggerMethods(out beforeSave, out afterSave, out beforeDelete, out afterDelete);
 
             writer
                 .Method(x => x.BeforeCommit).Implement(w => {
-                    if ( beforeSave != null )
+                    if ( HaveTriggerMethods(beforeSave) )
                     {
                         w.If(w.This<IDomainObject>().Prop(x => x.State) != EntityState.RetrievedDeleted).Then(() => {
-                            w.This<TT.TBase>().Void(beforeSave);
+                            WriteTriggerMethodCalls(w, beforeSave);
                         });
                     }
-                    if ( beforeDelete != null )
+                    if ( HaveTriggerMethods(beforeDelete) )
                     {
                         w.If(w.This<IDomainObject>().Prop(x => x.State) == EntityState.RetrievedDeleted).Then(() => {
-                            w.This<TT.TBase>().Void(beforeDelete);
+                            WriteTriggerMethodCalls(w, beforeDelete);
                         });
                     }
                 })
                 .Method(x => x.AfterCommit).Implement(w => {
-                    if ( afterSave != null )
+                    if ( HaveTriggerMethods(afterSave) )
                     {
                         w.If(w.This<IDomainObject>().Prop(x => x.State) != EntityState.RetrievedDeleted).Then(() => {
-                            w.This<TT.TBase>().Void(afterSave);
+                            WriteTriggerMethodCalls(w, afterSave);
                         });
                     }
-                    if ( afterDelete != null )
+                    if ( HaveTriggerMethods(afterDelete) )
                     {
                         w.If(w.This<IDomainObject>().Prop(x => x.State) == EntityState.RetrievedDeleted).Then(() => {
-                            w.This<TT.TBase>().Void(afterDelete);
+                            WriteTriggerMethodCalls(w, afterDelete);
                         });
                     }
                 });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool HaveTriggerMethods(MethodInfo[] methods)
+        {
+            return (methods != null && methods.Length > 0);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void WriteTriggerMethodCalls(MethodWriterBase writer, MethodInfo[] methods)
+        {
+            var w = writer;
+
+            if ( methods != null )
+            {
+                foreach ( var method in methods )
+                {
+                    w.This<TT.TBase>().Void(method);
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -160,27 +182,26 @@ namespace NWheels.Entities.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private void TryFindEntityTriggerMethods(
-            out MethodInfo beforeSave, 
-            out MethodInfo afterSave, 
-            out MethodInfo beforeDelete, 
-            out MethodInfo afterDelete)
+            out MethodInfo[] beforeSave, 
+            out MethodInfo[] afterSave, 
+            out MethodInfo[] beforeDelete, 
+            out MethodInfo[] afterDelete)
         {
             var members = TypeMemberCache.Of(_context.BaseContext.BaseType);
 
-            beforeSave = TryFindEntityTriggerMethod(members, TriggerMethodNameBeforeSave);
-            afterSave = TryFindEntityTriggerMethod(members, TriggerMethodNameAfterSave);
-            beforeDelete = TryFindEntityTriggerMethod(members, TriggerMethodNameBeforeDelete);
-            afterDelete = TryFindEntityTriggerMethod(members, TriggerMethodNameAfterDelete);
+            beforeSave = TryFindTriggerMethods(members, TriggerMethodNameBeforeSave);
+            afterSave = TryFindTriggerMethods(members, TriggerMethodNameAfterSave);
+            beforeDelete = TryFindTriggerMethods(members, TriggerMethodNameBeforeDelete);
+            afterDelete = TryFindTriggerMethods(members, TriggerMethodNameAfterDelete);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private MethodInfo TryFindEntityTriggerMethod(TypeMemberCache members, string methodName)
+        private MethodInfo[] TryFindTriggerMethods(TypeMemberCache members, string methodName)
         {
             return members
                 .SelectVoids(m => m.Name == methodName && !m.IsPublic && m.GetParameters().Length == 0)
-                .ToArray()
-                .FirstOrDefault();
+                .ToArray();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
