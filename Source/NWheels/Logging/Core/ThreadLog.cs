@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Threading;
 using NWheels.Hosting;
+using NWheels.Logging.Impl;
 
 namespace NWheels.Logging.Core
 {
@@ -12,9 +14,11 @@ namespace NWheels.Logging.Core
         private readonly ThreadTaskType _taskType;
         private readonly DateTime _startedAtUtc;
         private readonly IClock _clock;
+        private readonly IThreadLogAnchor _anchor;
+        private readonly ulong _startCpuCycles;
         private ActivityLogNode _rootActivity;
         private ActivityLogNode _currentActivity;
-        private readonly IThreadLogAnchor _anchor;
+        private ulong _cpuTimeMicroseconds;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -34,6 +38,12 @@ namespace NWheels.Logging.Core
 
             _rootActivity.AttachToThreadLog(this, parent: null);
             _registry.ThreadStarted(this);
+
+            if ( NativeMethods.CpuCyclesPerMillisecond > 0 )
+            {
+                Thread.BeginThreadAffinity();
+                _startCpuCycles = NativeMethods.GetThreadCycles();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -84,7 +94,8 @@ namespace NWheels.Logging.Core
                 CorrelationId = _correlationId,
                 StartedAtUtc = _startedAtUtc,
                 TaskType = _taskType,
-                RootActivity = _rootActivity.TakeSnapshot()
+                RootActivity = _rootActivity.TakeSnapshot(),
+                CpuMicroseconds = CpuTimeMicroseconds
             };
         }
 
@@ -150,6 +161,16 @@ namespace NWheels.Logging.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ulong CpuTimeMicroseconds
+        {
+            get
+            {
+                return _cpuTimeMicroseconds;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public ActivityLogNode RootActivity
         {
             get
@@ -172,6 +193,14 @@ namespace NWheels.Logging.Core
 
         private void Close()
         {
+            if ( NativeMethods.CpuCyclesPerMillisecond > 0 )
+            {
+                ulong endCpuCycles = NativeMethods.GetThreadCycles();
+                _cpuTimeMicroseconds = 1000 * (endCpuCycles - _startCpuCycles) / NativeMethods.CpuCyclesPerMillisecond;
+                
+                Thread.EndThreadAffinity();
+            }
+
             _anchor.CurrentThreadLog = null;
             _registry.ThreadFinished(this);
         }

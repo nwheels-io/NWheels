@@ -30,6 +30,8 @@ namespace NWheels.Logging
         public ThreadTaskType TaskType { get; set; }
         [DataMember]
         public LogNodeSnapshot RootActivity { get; set; }
+        [DataMember(Order = 2, EmitDefaultValue = false, IsRequired = false)]
+        public ulong CpuMicroseconds { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
