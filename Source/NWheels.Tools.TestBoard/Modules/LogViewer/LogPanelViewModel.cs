@@ -110,7 +110,7 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         
-        public void DisplayPendingLogs()
+        public void DisplayPendingLogs(bool bypassFilter = false)
         {
             int count = 0;
             ThreadLogSnapshot threadLog;
@@ -120,7 +120,7 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
 
             while ( _pendingThreadLogs.TryDequeue(out threadLog) && count++ < 100 )
             {
-                if ( !ShouldDisplayLog(threadLog) )
+                if ( !bypassFilter && !ShouldDisplayLog(threadLog) )
                 {
                     continue;
                 }

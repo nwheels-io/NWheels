@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,8 +12,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
+using NWheels.Extensions;
 
 namespace NWheels.Tools.TestBoard.Modules.LogViewer
 {
@@ -47,6 +48,60 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
         private void ClearLogs(object sender, ExecutedRoutedEventArgs e)
         {
             ((LogViewerViewModel)DataContext).Logs.Clear();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void LogView_DragEnter(object sender, DragEventArgs e)
+        {
+            string[] fileNames;
+            bool allowDrop = GetDroppedFileNames(e, out fileNames);
+            
+            e.Effects = allowDrop ? DragDropEffects.Link : DragDropEffects.None;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void LogView_Drop(object sender, DragEventArgs e)
+        {
+            string[] fileNames;
+            bool allowDrop = GetDroppedFileNames(e, out fileNames);
+            
+            if ( allowDrop )
+            {
+                var logs = ((LogViewerViewModel)DataContext).Logs;
+
+                foreach ( var fileName in fileNames )
+                {
+                    logs.AddLogFromFile(fileName);
+                }
+
+                logs.DisplayPendingLogs(bypassFilter: true);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool GetDroppedFileNames(DragEventArgs e, out string[] files)
+        {
+            bool isFileLegal = false;
+            files = null;
+
+            if ( e.Data.GetDataPresent(DataFormats.FileDrop) )
+            {
+                files = ((string[])e.Data.GetData(DataFormats.FileDrop)).Where(IsFilePathLegal).ToArray();
+                isFileLegal = files.Any();
+            }
+
+            return isFileLegal;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static bool IsFilePathLegal(string filePath)
+        {
+            var extension = Path.GetExtension(filePath);
+            return extension.EqualsIgnoreCase(".threadlog");
         }
     }
 }

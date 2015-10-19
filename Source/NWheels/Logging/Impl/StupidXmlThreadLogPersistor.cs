@@ -67,7 +67,10 @@ namespace NWheels.Logging.Impl
 
         private void PersistLogInXmlFormat(IReadOnlyThreadLog threadLog)
         {
-            if ( threadLog.RootActivity.Level < _logLevel && threadLog.TaskType != ThreadTaskType.StartUp && threadLog.TaskType != ThreadTaskType.ShutDown )
+            if ( threadLog.RootActivity.MillisecondsDuration < 1000 && 
+                threadLog.RootActivity.Level < _logLevel && 
+                threadLog.TaskType != ThreadTaskType.StartUp && 
+                threadLog.TaskType != ThreadTaskType.ShutDown)
             {
                 return;
             }

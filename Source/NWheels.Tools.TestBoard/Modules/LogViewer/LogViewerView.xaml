@@ -38,7 +38,10 @@
             </Button>
         </ToolBar>
         <Grid>
-            <logViewer:LogView DataContext="{Binding Path=Logs}"/>
+            <logViewer:LogView DataContext="{Binding Path=Logs}"
+                               AllowDrop="True"
+                               DragEnter="LogView_DragEnter"
+                               Drop="LogView_Drop"/>
         </Grid>
     </DockPanel>
 </UserControl>
