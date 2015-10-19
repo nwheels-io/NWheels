@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Authorization.Core;
+using NWheels.DataObjects;
 
 namespace NWheels.Authorization
 {
@@ -28,6 +31,13 @@ namespace NWheels.Authorization
         public string[] GetUserRoles()
         {
             return new[] { AnonymousRole };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IRuntimeEntityAccessRule<TEntity> GetEntityAccessRule<TEntity>()
+        {
+            return new AnonymousEntityAccessRule<TEntity>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -110,5 +120,117 @@ namespace NWheels.Authorization
 
         public static readonly string AnonymousRole = "anonymous";
         public static readonly AnonymousPrincipal Instance = new AnonymousPrincipal();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class AnonymousEntityAccessRule<TEntity> : IRuntimeEntityAccessRule<TEntity>
+        {
+            #region Implementation of IRuntimeEntityAccessRule
+
+            public IQueryable<TEntity> AuthorizeQuery(IRuntimeAccessContext context, IQueryable<TEntity> source)
+            {
+                throw AccessDenied();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void AuthorizeRetrieve(IRuntimeAccessContext context)
+            {
+                throw AccessDenied();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void AuthorizeInsert(IRuntimeAccessContext context, object entity)
+            {
+                throw AccessDenied();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void AuthorizeUpdate(IRuntimeAccessContext context, object entity)
+            {
+                throw AccessDenied();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void AuthorizeDelete(IRuntimeAccessContext context, object entity)
+            {
+                throw AccessDenied();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool? CanRetrieve(IRuntimeAccessContext context)
+            {
+                return false;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool? CanInsert(IRuntimeAccessContext context)
+            {
+                return false;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool? CanUpdate(IRuntimeAccessContext context)
+            {
+                return false;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool? CanDelete(IRuntimeAccessContext context)
+            {
+                return false;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool? CanRetrieve(IRuntimeAccessContext context, object entity)
+            {
+                return false;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool? CanInsert(IRuntimeAccessContext context, object entity)
+            {
+                return false;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool? CanUpdate(IRuntimeAccessContext context, object entity)
+            {
+                return false;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool? CanDelete(IRuntimeAccessContext context, object entity)
+            {
+                return false;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ITypeMetadata MetaType
+            {
+                get { return null; }
+            }
+
+            #endregion
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private SecurityException AccessDenied()
+            {
+                return new SecurityException("Anonymous user is not authorized to access data in the system.");
+            }
+        }
     }
 }

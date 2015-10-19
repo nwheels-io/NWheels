@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using NWheels.Authorization;
+using NWheels.Authorization.Core;
 using NWheels.DataObjects;
 using NWheels.Domains.Security;
 using NWheels.Extensions;
@@ -92,7 +93,7 @@ namespace NWheels.Stacks.ODataBreeze.SystemTests
 
                 rule.Name = value.ToString().SplitPascalCase();
                 rule.ClaimValue = value;
-                rule.RuleObject = typeof(TestDataRuleOne);
+                //rule.RuleObject = typeof(TestDataRuleOne);
 
                 data.EntityAccessRules.Insert(rule);
             }
@@ -116,27 +117,7 @@ namespace NWheels.Stacks.ODataBreeze.SystemTests
             {
                 #region Implementation of IEntityAccessRule
 
-                public ITypeMetadata GetTypeMetadata()
-                {
-                    throw new NotImplementedException();
-                }
-
-                public bool CanQuery()
-                {
-                    throw new NotImplementedException();
-                }
-
-                public bool CanInsert()
-                {
-                    throw new NotImplementedException();
-                }
-
-                public bool CanUpdate()
-                {
-                    throw new NotImplementedException();
-                }
-
-                public bool CanDelete()
+                public void BuildRule(IEntityAccessBuilder builder)
                 {
                     throw new NotImplementedException();
                 }

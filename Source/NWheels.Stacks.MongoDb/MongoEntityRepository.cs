@@ -70,7 +70,7 @@ namespace NWheels.Stacks.MongoDb
 
             try
             {
-                var actualEnumerator = _mongoCollection.AsQueryable().GetEnumerator();
+            	var actualEnumerator = _ownerRepo.AuthorizeQuery(_mongoCollection.AsQueryable()).GetEnumerator();
                 var transformingEnumerator = new DelegatingTransformingEnumerator<TEntityImpl, TEntityContract>(
                     actualEnumerator,
                     InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>);
@@ -640,7 +640,8 @@ namespace NWheels.Stacks.MongoDb
             {
                 var specializedExpression = _expressionSpecializer.Specialize(expression);
                 var query = _actualQueryProvider.CreateQuery<TElement>(specializedExpression);
-                return new InterceptingQuery<TElement>(_ownerRepo, query, _ownerRepo._logger);
+                var authorizedQuery = _ownerRepo._ownerRepo.AuthorizeQuery<TElement>(query);
+                return new InterceptingQuery<TElement>(_ownerRepo, authorizedQuery, _ownerRepo._logger);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Authorization;
+using NWheels.Authorization.Core;
 
 namespace NWheels.Testing
 {
@@ -50,6 +51,13 @@ namespace NWheels.Testing
         public string[] GetUserRoles()
         {
             return _userRoles;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IRuntimeEntityAccessRule<TEntity> GetEntityAccessRule<TEntity>()
+        {
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Claims;
+using NWheels.Authorization.Core;
 
 namespace NWheels.Authorization.Claims
 {
@@ -16,9 +17,19 @@ namespace NWheels.Authorization.Claims
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IRuntimeEntityAccessRule<TEntity> GetEntityAccessRule<TEntity>()
+        {
+            return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public abstract bool IsOfType(Type accountEntityType);
         public abstract bool IsInRole(string userRole);
         public abstract string[] GetUserRoles();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public abstract string UserId { get; }
         public abstract string LoginName { get; }
         public abstract string QualifiedLoginName{ get; }

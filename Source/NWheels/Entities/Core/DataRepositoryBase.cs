@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Security;
+using System.Threading;
 using Autofac;
+using NWheels.Authorization;
+using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects.Core;
@@ -14,7 +18,7 @@ using NWheels.Processing.Messages;
 
 namespace NWheels.Entities.Core
 {
-    public abstract class DataRepositoryBase : IApplicationDataRepository
+    public abstract class DataRepositoryBase : IApplicationDataRepository, IRuntimeAccessContext
     {
         private readonly Dictionary<Type, IEntityRepository> _entityRepositoryByContractType;
         private readonly Dictionary<Type, IPartitionedRepository> _partitionedRepositoryByContractType;
@@ -212,8 +216,91 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Implementation of IRuntimeAccessContext
+
+        ISession IRuntimeAccessContext.Session
+        {
+            get
+            {
+                return NWheels.Authorization.Core.Session.Current;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        string IRuntimeAccessContext.UserStory
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Type IRuntimeAccessContext.ApiContract
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        string IRuntimeAccessContext.ApiOperation
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Type IRuntimeAccessContext.DomainContext
+        {
+            get
+            {
+                return this.GetType();
+            }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public virtual void InitializeCurrentSchema()
         {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IQueryable<TEntity> AuthorizeQuery<TEntity>(IQueryable<TEntity> source)
+        {
+            var rule = GetRuntimeEntityAccessRule<TEntity>();
+            return rule.AuthorizeQuery(this, source);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IRuntimeEntityAccessRule<TEntity> GetRuntimeEntityAccessRule<TEntity>()
+        {
+            var identityInfo = (Thread.CurrentPrincipal.Identity as IIdentityInfo);
+
+            if ( identityInfo == null )
+            {
+                throw new SecurityException("User is not authorized to access data.");
+            }
+
+            var rule = identityInfo.GetEntityAccessRule<TEntity>();
+
+            if ( rule == null )
+            {
+                throw new SecurityException("No access rule defined for entity type: " + typeof(TEntity).FullName);
+            }
+
+            return rule;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

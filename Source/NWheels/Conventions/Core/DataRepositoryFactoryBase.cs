@@ -241,7 +241,7 @@ namespace NWheels.Conventions.Core
                 }
 
                 Initializers.Add(cw => {
-                    using (TT.CreateScope<TT.TContract, TT.TImpl>(entity.ContractType, entity.ImplementationType))
+                    using ( TT.CreateScope<TT.TContract, TT.TImpl>(entity.ContractType, entity.ImplementationType) )
                     {
                         var backingField = (
                             entity.RepositoryProperty != null

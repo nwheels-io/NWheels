@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Authorization;
+using NWheels.Authorization.Core;
 using NWheels.DataObjects;
 using NWheels.Entities;
 
@@ -149,11 +150,9 @@ namespace NWheels.Domains.Security
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [EntityContract(UseCodeNamespace = true)]
-    public interface IEntityAccessRuleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim
+    [EntityContract(UseCodeNamespace = true, IsAbstract = true)]
+    public interface IEntityAccessRuleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim, IEntityAccessRule
     {
-        [PropertyContract.Semantic.InheritorOf(typeof(IEntityAccessRule)), PropertyContract.Storage.ClrType]
-        Type RuleObject { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

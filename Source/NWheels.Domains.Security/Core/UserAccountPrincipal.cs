@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Authorization;
+using NWheels.Authorization.Core;
 
 namespace NWheels.Domains.Security.Core
 {
@@ -72,6 +73,13 @@ namespace NWheels.Domains.Security.Core
         public string[] GetUserRoles()
         {
             return _identityInfo.GetUserRoles();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IRuntimeEntityAccessRule<TEntity> GetEntityAccessRule<TEntity>()
+        {
+            return null;//TODO: implement as required
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

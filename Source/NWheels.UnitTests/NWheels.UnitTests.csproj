@@ -78,6 +78,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authorization\Impl\RuntimeEntityAccessRuleTests.cs" />
     <Compile Include="AutoTests.cs" />
     <Compile Include="Concurrency\RealTimeoutManagerTests.cs" />
     <Compile Include="Configuration\ConfigurationSectionConventionTests.cs" />

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Authorization.Core;
+using NWheels.DataObjects;
 
 namespace NWheels.Authorization
 {
@@ -28,6 +30,13 @@ namespace NWheels.Authorization
         public string[] GetUserRoles()
         {
             return new[] { SystemRole };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IRuntimeEntityAccessRule<TEntity> GetEntityAccessRule<TEntity>()
+        {
+            return new SystemEntityAccessRule<TEntity>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -110,5 +119,106 @@ namespace NWheels.Authorization
 
         public static readonly string SystemRole = "SYSTEM";
         public static readonly SystemPrincipal Instance = new SystemPrincipal();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class SystemEntityAccessRule<TEntity> : IRuntimeEntityAccessRule<TEntity>
+        {
+            #region Implementation of IRuntimeEntityAccessRule
+
+            public IQueryable<TEntity> AuthorizeQuery(IRuntimeAccessContext context, IQueryable<TEntity> source)
+            {
+                return source;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public void AuthorizeRetrieve(IRuntimeAccessContext context)
+            {
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public void AuthorizeInsert(IRuntimeAccessContext context, object entity)
+            {
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public void AuthorizeUpdate(IRuntimeAccessContext context, object entity)
+            {
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public void AuthorizeDelete(IRuntimeAccessContext context, object entity)
+            {
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public bool? CanRetrieve(IRuntimeAccessContext context)
+            {
+                return true;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public bool? CanInsert(IRuntimeAccessContext context)
+            {
+                return true;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public bool? CanUpdate(IRuntimeAccessContext context)
+            {
+                return true;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public bool? CanDelete(IRuntimeAccessContext context)
+            {
+                return true;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public bool? CanRetrieve(IRuntimeAccessContext context, object entity)
+            {
+                return true;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public bool? CanInsert(IRuntimeAccessContext context, object entity)
+            {
+                return true;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool? CanUpdate(IRuntimeAccessContext context, object entity)
+            {
+                return true;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool? CanDelete(IRuntimeAccessContext context, object entity)
+            {
+                return true;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ITypeMetadata MetaType
+            {
+                get { return null; }
+            }
+
+            #endregion
+        }
     }
 }

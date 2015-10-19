@@ -9,6 +9,7 @@ using Hapil;
 using NWheels.Extensions;
 using NWheels.Authorization;
 using NWheels.Authorization.Claims;
+using NWheels.Authorization.Core;
 using NWheels.Entities;
 
 namespace NWheels.Domains.Security.Core
@@ -76,6 +77,13 @@ namespace NWheels.Domains.Security.Core
         string[] IIdentityInfo.GetUserRoles()
         {
             return Claims.Where(c => c.Type == UserRoleClaim.UserRoleClaimTypeString).Select(c => c.Value).ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IRuntimeEntityAccessRule<TEntity> GetEntityAccessRule<TEntity>()
+        {
+            return null;//TODO: implement as required
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

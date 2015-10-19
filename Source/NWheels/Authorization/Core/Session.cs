@@ -6,7 +6,7 @@ using NWheels.Endpoints.Core;
 
 namespace NWheels.Authorization.Core
 {
-    public class Session : ISession
+    public class Session : ISession, IRuntimeAccessContext
     {
         private readonly IFramework _framework;
         private readonly IResourceLock _touchLock;
@@ -68,12 +68,73 @@ namespace NWheels.Authorization.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TUser UserAccountAs<TUser>() where TUser : class
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string Id { get; private set; }
         public IPrincipal UserPrincipal { get; private set; }
         public IIdentityInfo UserIdentity { get; private set; }
         public IEndpoint Endpoint { get; private set; }
         public DateTime OpenedAtUtc { get; private set; }
         public DateTime? ExpiresAtUtc { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Implementation of IRuntimeAccessContext
+
+        ISession IRuntimeAccessContext.Session
+        {
+            get
+            {
+                return this;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        string IRuntimeAccessContext.UserStory
+        {
+            get
+            {
+                return null; //TODO: implement this property
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Type IRuntimeAccessContext.ApiContract
+        {
+            get
+            {
+                return null; //TODO: implement this property
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        string IRuntimeAccessContext.ApiOperation
+        {
+            get
+            {
+                return null; //TODO: implement this property
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Type IRuntimeAccessContext.DomainContext
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -104,6 +165,16 @@ namespace NWheels.Authorization.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static ISession Current
+        {
+            get
+            {
+                return CallContextResourceConsumerScope<Session>.CurrentResource;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IRuntimeAccessContext CurrentAccessContext
         {
             get
             {
