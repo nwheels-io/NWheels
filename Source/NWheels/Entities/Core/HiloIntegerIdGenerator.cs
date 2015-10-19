@@ -102,7 +102,6 @@ namespace NWheels.Entities.Core
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [EntityContract]
     public interface IHiloDataRepository : IApplicationDataRepository
     {
         IEntityRepository<IHiloEntity> Hilo { get; }

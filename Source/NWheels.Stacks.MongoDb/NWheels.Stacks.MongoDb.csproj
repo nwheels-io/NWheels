@@ -64,6 +64,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoIncrementIntegerIdGenerator.cs" />
     <Compile Include="Factories\ArrayOfDocumentIdsStrategy.cs" />
     <Compile Include="Factories\BsonDiscriminatorConvention.cs" />
     <Compile Include="Factories\BsonIgnoreConvention.cs" />
