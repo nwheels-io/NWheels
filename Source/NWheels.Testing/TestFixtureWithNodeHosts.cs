@@ -274,10 +274,10 @@ namespace NWheels.Testing
 
             public void Trace(string format, params object[] args)
             {
-                if ( _logLevel <= LogLevel.Verbose )
-                {
-                    Console.WriteLine(GetLogPrefix() + ">trace> " + format.FormatIf(args));
-                }
+                //if ( _logLevel <= LogLevel.Verbose )
+                //{
+                //    Console.WriteLine(GetLogPrefix() + ">trace> " + format.FormatIf(args));
+                //}
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------

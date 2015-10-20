@@ -30,7 +30,7 @@ namespace NWheels.Hosts.Console
             CrashLog.RegisterUnhandledExceptionHandler();
 
             _s_log = NLogBasedPlainLog.Instance;
-            _s_log.ConfigureConsoleOutput();
+            //_s_log.ConfigureConsoleOutput();
             
             _s_log.Info("NWheels Console Host version {0}", typeof(Program).Assembly.GetName().Version);
 
