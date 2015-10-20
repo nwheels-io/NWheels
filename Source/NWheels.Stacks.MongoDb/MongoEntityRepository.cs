@@ -68,13 +68,21 @@ namespace NWheels.Stacks.MongoDb
             var queryLog = _logger.ExecutingQuery(((IQueryable)this).Expression, null/*_mongoCollection.AsQueryable().ToMongoQueryText()*/);
             //_logger.QueryPlanExplained(_mongoCollection.AsQueryable().ExplainTyped<TEntityContract>().ToString());
 
-            var actualEnumerator = _mongoCollection.AsQueryable().GetEnumerator();
-            var transformingEnumerator = new DelegatingTransformingEnumerator<TEntityImpl, TEntityContract>(
-                actualEnumerator,
-                InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>);
-            var loggingEnumerator = new ResultLoggingEnumerator<TEntityContract>(transformingEnumerator, _logger, queryLog);
-
-            return loggingEnumerator;
+            try
+            {
+                var actualEnumerator = _mongoCollection.AsQueryable().GetEnumerator();
+                var transformingEnumerator = new DelegatingTransformingEnumerator<TEntityImpl, TEntityContract>(
+                    actualEnumerator,
+                    InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>);
+                var loggingEnumerator = new ResultLoggingEnumerator<TEntityContract>(transformingEnumerator, _logger, queryLog);
+                return loggingEnumerator;
+            }
+            catch ( Exception e )
+            {
+                queryLog.Fail(e);
+                queryLog.Dispose();
+                throw;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -724,9 +732,15 @@ namespace NWheels.Stacks.MongoDb
 
             public void Dispose()
             {
-                _logger.DisposingQueryResultEnumerator();
-                _enumerationActivity.Dispose();
-                _innerEnumerator.Dispose();
+                try
+                {
+                    _enumerationActivity.Dispose();
+                    _innerEnumerator.Dispose();
+                }
+                finally
+                {
+                    _logger.DisposingQueryResultEnumerator();
+                }
             }
 
             #endregion
