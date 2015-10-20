@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using NWheels.Logging.Impl;
 
 namespace NWheels.Logging
 {
@@ -12,6 +13,7 @@ namespace NWheels.Logging
         private LogNode _lastChild = null;
         private bool _isClosed = false;
         private long? _finalMillisecondsDuration = null;
+        private ulong? _finalCpuCycles = null;
         private Exception _exception = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -75,6 +77,7 @@ namespace NWheels.Logging
             snapshot.SubNodes = subNodes;
             snapshot.IsActivity = true;
             snapshot.Duration = this.MillisecondsDuration;
+            snapshot.CpuTime = this.MillisecondsCpuTime;
 
             return snapshot;
         }
@@ -136,6 +139,24 @@ namespace NWheels.Logging
             get
             {
                 return (_finalMillisecondsDuration ?? ThreadLog.ElapsedThreadMilliseconds - base.MillisecondsTimestamp);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ulong MillisecondsCpuTime
+        {
+            get
+            {
+                if ( ThreadCpuTimeUtility.IsThreadCpuTimeSupported )
+                {
+                    var usedCpuCycles = (_finalCpuCycles ?? ThreadLog.UsedThreadCpuCycles);
+                    return ThreadCpuTimeUtility.GetThreadCpuMilliseconds(usedCpuCycles);
+                }
+                else
+                {
+                    return 0;
+                }
             }
         }
 
@@ -221,6 +242,7 @@ namespace NWheels.Logging
         internal void Close()
         {
             _finalMillisecondsDuration = ThreadLog.ElapsedThreadMilliseconds - base.MillisecondsTimestamp;
+            _finalCpuCycles = ThreadLog.UsedThreadCpuCycles - base.CpuCyclesTimestamp;
             _isClosed = true;
 
             if ( _parent != null )
@@ -239,7 +261,8 @@ namespace NWheels.Logging
         protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
             return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
-                new LogNameValuePair<long> { Name = "$duration", Value = this.MillisecondsDuration }
+                new LogNameValuePair<long> { Name = "$duration", Value = this.MillisecondsDuration },
+                new LogNameValuePair<ulong> { Name = "$cputime", Value = this.MillisecondsCpuTime },
             });
         }
     }

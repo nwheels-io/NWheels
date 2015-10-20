@@ -200,14 +200,21 @@
                         <GridViewColumn Width="70" Header="Duration">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Path=Data.LogNode.Duration}" TextAlignment="Right" />
+                                    <TextBlock Text="{Binding Path=Data.DurationText}" TextAlignment="Right" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="70" Header="CPU Cycles">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Data.CpuCyclesText}" TextAlignment="Right" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
                         <GridViewColumn Width="70" Header="CPU Time">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Path=Data.RandomDuration}" TextAlignment="Right" />
+                                    <TextBlock Text="{Binding Path=Data.CpuTimeText}" TextAlignment="Right" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>

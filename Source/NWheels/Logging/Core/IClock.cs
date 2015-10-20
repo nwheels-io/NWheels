@@ -3,5 +3,6 @@
     internal interface IClock
     {
         long ElapsedMilliseconds { get; }
+        long ElapsedMicroseconds { get; }
     }
 }

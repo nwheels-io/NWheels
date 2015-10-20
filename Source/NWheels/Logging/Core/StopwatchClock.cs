@@ -10,7 +10,20 @@ namespace NWheels.Logging.Core
 
         public long ElapsedMilliseconds
         {
-            get { return _watch.ElapsedMilliseconds; }
+            get
+            {
+                return _watch.ElapsedMilliseconds;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public long ElapsedMicroseconds
+        {
+            get
+            {
+                return (long)(_watch.Elapsed.TotalMilliseconds * 1000.0d);
+            }
         }
     }
 }

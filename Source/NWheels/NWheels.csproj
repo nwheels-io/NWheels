@@ -134,7 +134,7 @@
     <Compile Include="Exceptions\EntityNotFoundException.cs" />
     <Compile Include="Extensions\UriExtensions.cs" />
     <Compile Include="Hosting\EnvironmentConfiguration.cs" />
-    <Compile Include="Logging\Impl\NativeMethods.cs" />
+    <Compile Include="Logging\Impl\ThreadCpuTimeUtility.cs" />
     <Compile Include="Processing\Commands\CommandResultMessage.cs" />
     <Compile Include="Processing\Commands\Factories\IMethodCallObjectFactory.cs" />
     <Compile Include="Processing\Commands\Factories\MethodCallObjectFactory.cs" />

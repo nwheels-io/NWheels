@@ -35,6 +35,9 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
                 this.IsRootActivity = true;
                 this.TaskType = threadLog.TaskType;
                 this.TimestampText = threadLog.StartedAtUtc.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                this.DurationText = threadLog.RootActivity.Duration.ToString("#,##0");
+                this.CpuCyclesText = "+ " + threadLog.RootActivity.CpuCycles.ToString("#,##0");
+                this.CpuTimeText = threadLog.RootActivity.CpuTime.ToString("#,##0");
 
                 SetNodeKind();
             }
@@ -48,7 +51,10 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
                 this.LogNode = logNode;
                 this.IsRootActivity = false;
                 this.TaskType = null;
-                this.TimestampText = "+ " + logNode.MillisecondsTimestamp;
+                this.TimestampText = "+ " + logNode.MillisecondsTimestamp.ToString("#,##0");
+                this.DurationText = (logNode.IsActivity ? logNode.Duration.ToString("#,##0") : ""); 
+                this.CpuCyclesText = "+ " + logNode.CpuCycles.ToString("#,##0");
+                this.CpuTimeText = (logNode.IsActivity ? logNode.CpuTime.ToString("#,##0") : "");
 
                 SetNodeKind();
             }
@@ -129,6 +135,9 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
             public ThreadTaskType? TaskType { get; private set; }
             public LogNodeKind NodeKind { get; private set; }
             public string TimestampText { get; private set; }
+            public string DurationText { get; private set; }
+            public string CpuCyclesText { get; private set; }
+            public string CpuTimeText { get; private set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 

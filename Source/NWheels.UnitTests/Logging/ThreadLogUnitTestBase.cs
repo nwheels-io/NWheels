@@ -27,6 +27,11 @@ namespace NWheels.UnitTests.Logging
         internal class TestClock : IClock
         {
             public long ElapsedMilliseconds { get; set; }
+
+            public long ElapsedMicroseconds
+            {
+                get { return ElapsedMilliseconds * 1000; }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

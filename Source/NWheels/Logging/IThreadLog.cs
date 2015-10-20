@@ -11,7 +11,9 @@ namespace NWheels.Logging
         Guid LogId { get; }
         Guid CorrelationId { get; }
         DateTime ThreadStartedAtUtc { get; }
+        ulong ThreadStartCpuCycles { get; }
         long ElapsedThreadMilliseconds { get; }
+        ulong UsedThreadCpuCycles { get; }
         ActivityLogNode RootActivity { get; }
     }
 

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Hapil;
 using NWheels.Extensions;
+using NWheels.Logging.Impl;
 
 namespace NWheels.Logging
 {
@@ -20,6 +21,7 @@ namespace NWheels.Logging
         private LogContentTypes _contentTypes;
         private LogLevel _level;
         private long _millisecondsTimestamp;
+        private ulong _cpuCyclesTimestamp;
         private IThreadLog _threadLog = null;
         private LogNode _nextSibling = null;
         private ILogNameValuePair[] _listedNameValuePairs = null;
@@ -46,6 +48,7 @@ namespace NWheels.Logging
             var snapshot = new ThreadLogSnapshot.LogNodeSnapshot {
                 MessageId = _messageId,
                 MillisecondsTimestamp = _millisecondsTimestamp,
+                CpuCycles = _cpuCyclesTimestamp,
                 Level = _level,
                 ContentTypes = _contentTypes,
                 NameValuePairs = new List<ThreadLogSnapshot.NameValuePairSnapshot>(capacity: pairs.Length),
@@ -92,6 +95,16 @@ namespace NWheels.Logging
             get
             {
                 return _millisecondsTimestamp;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ulong CpuCyclesTimestamp
+        {
+            get
+            {
+                return _cpuCyclesTimestamp;
             }
         }
 
@@ -221,6 +234,7 @@ namespace NWheels.Logging
         {
             _threadLog = thread;
             _millisecondsTimestamp = thread.ElapsedThreadMilliseconds;
+            _cpuCyclesTimestamp = thread.UsedThreadCpuCycles;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

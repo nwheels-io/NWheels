@@ -30,8 +30,6 @@ namespace NWheels.Logging
         public ThreadTaskType TaskType { get; set; }
         [DataMember]
         public LogNodeSnapshot RootActivity { get; set; }
-        [DataMember(Order = 2, EmitDefaultValue = false, IsRequired = false)]
-        public ulong CpuMicroseconds { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -58,6 +56,10 @@ namespace NWheels.Logging
             public IList<NameValuePairSnapshot> NameValuePairs { get; set; }
             [DataMember]
             public IList<LogNodeSnapshot> SubNodes { get; set; }
+            [DataMember(Order = 2, EmitDefaultValue = false, IsRequired = false)]
+            public ulong CpuCycles { get; set; }
+            [DataMember(Order = 2, EmitDefaultValue = false, IsRequired = false)]
+            public ulong CpuTime { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

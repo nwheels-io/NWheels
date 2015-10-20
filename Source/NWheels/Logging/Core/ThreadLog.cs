@@ -15,10 +15,9 @@ namespace NWheels.Logging.Core
         private readonly DateTime _startedAtUtc;
         private readonly IClock _clock;
         private readonly IThreadLogAnchor _anchor;
-        private readonly ulong _startCpuCycles;
+        private readonly ulong _threadStartCpuCycles;
         private ActivityLogNode _rootActivity;
         private ActivityLogNode _currentActivity;
-        private ulong _cpuTimeMicroseconds;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -36,14 +35,14 @@ namespace NWheels.Logging.Core
             _node = framework.CurrentNode;
             _clock = clock;
 
-            _rootActivity.AttachToThreadLog(this, parent: null);
-            _registry.ThreadStarted(this);
-
-            if ( NativeMethods.CpuCyclesPerMillisecond > 0 )
+            if ( ThreadCpuTimeUtility.IsThreadCpuTimeSupported )
             {
                 Thread.BeginThreadAffinity();
-                _startCpuCycles = NativeMethods.GetThreadCycles();
+                _threadStartCpuCycles = ThreadCpuTimeUtility.GetThreadCycles();
             }
+
+            _rootActivity.AttachToThreadLog(this, parent: null);
+            _registry.ThreadStarted(this);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -94,8 +93,7 @@ namespace NWheels.Logging.Core
                 CorrelationId = _correlationId,
                 StartedAtUtc = _startedAtUtc,
                 TaskType = _taskType,
-                RootActivity = _rootActivity.TakeSnapshot(),
-                CpuMicroseconds = CpuTimeMicroseconds
+                RootActivity = _rootActivity.TakeSnapshot()
             };
         }
 
@@ -151,6 +149,16 @@ namespace NWheels.Logging.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ulong ThreadStartCpuCycles
+        {
+            get
+            {
+                return _threadStartCpuCycles;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public long ElapsedThreadMilliseconds
         {
             get
@@ -161,11 +169,11 @@ namespace NWheels.Logging.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ulong CpuTimeMicroseconds
+        public ulong UsedThreadCpuCycles
         {
             get
             {
-                return _cpuTimeMicroseconds;
+                return ThreadCpuTimeUtility.GetThreadCycles() - _threadStartCpuCycles;
             }
         }
 
@@ -193,11 +201,8 @@ namespace NWheels.Logging.Core
 
         private void Close()
         {
-            if ( NativeMethods.CpuCyclesPerMillisecond > 0 )
+            if ( ThreadCpuTimeUtility.IsThreadCpuTimeSupported )
             {
-                ulong endCpuCycles = NativeMethods.GetThreadCycles();
-                _cpuTimeMicroseconds = 1000 * (endCpuCycles - _startCpuCycles) / NativeMethods.CpuCyclesPerMillisecond;
-                
                 Thread.EndThreadAffinity();
             }
 
