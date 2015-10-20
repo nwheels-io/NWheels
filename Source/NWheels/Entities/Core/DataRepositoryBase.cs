@@ -6,6 +6,7 @@ using Autofac;
 using NWheels.Concurrency;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects.Core;
+using NWheels.Entities.Factories;
 using NWheels.Extensions;
 using NWheels.Logging;
 using NWheels.Logging.Core;
@@ -47,6 +48,7 @@ namespace NWheels.Entities.Core
             _disposed = false;
 
             _logger.NewRootUnitOfWork(domainContext: this.ToString());
+            RuntimeEntityModelHelpers.CurrentDomainContext = this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,6 +57,11 @@ namespace NWheels.Entities.Core
         {
             bool shouldDisposeResourcesNow;
             DisposeConsumerScope(out shouldDisposeResourcesNow);
+
+            if ( shouldDisposeResourcesNow )
+            {
+                RuntimeEntityModelHelpers.CurrentDomainContext = null;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

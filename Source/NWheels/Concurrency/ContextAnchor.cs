@@ -35,8 +35,16 @@ namespace NWheels.Concurrency
 
         public override T Current
         {
-            get { return _s_current; }
-            set { _s_current = value; }
+            get
+            {
+                return _s_current;
+            }
+            set
+            {
+                //object valueAsObject = value;
+                //Console.WriteLine(this.GetType().FriendlyName() + "::Current <- " + (valueAsObject != null ? valueAsObject.GetType().FriendlyName() : "NULL"));
+                _s_current = value;
+            }
         }
 
         #endregion
@@ -67,6 +75,8 @@ namespace NWheels.Concurrency
             }
             set
             {
+                //object valueAsObject = value;
+                //Console.WriteLine(this.GetType().FriendlyName() + "::Current <- " + (valueAsObject != null ? valueAsObject.GetType().FriendlyName() : "NULL"));
                 CallContext.LogicalSetData(_s_logicalCallContextKey, value);
             }
         }

@@ -15,6 +15,10 @@ namespace NWheels.Entities.Factories
 {
     public static class RuntimeEntityModelHelpers
     {
+        private static ThreadStaticAnchor<DataRepositoryBase> _s_domainContextAnchor = new ThreadStaticAnchor<DataRepositoryBase>();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static 
             ContainedToContainerCollectionAdapter<TContained, TContainer, TContainedContract, TContainerContract>
             CreateContainmentCollectionAdapter<TContained, TContainer, TContainedContract, TContainerContract>(
@@ -185,7 +189,11 @@ namespace NWheels.Entities.Factories
         {
             get
             {
-                return new ThreadStaticAnchor<DataRepositoryBase>().Current;
+                return _s_domainContextAnchor.Current;
+            }
+            internal set
+            {
+                _s_domainContextAnchor.Current = value;
             }
         }
     }
