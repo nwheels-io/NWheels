@@ -408,7 +408,7 @@
 				<div class="form-group">
 					<div class="col-sm-2" ng-repeat="field in uidl.fields">
 						<label class="control-label">{{ field.propertyName }}</label>
-						<uidl-form-field uidl="field" entity="field.lookupEntityMetaType" />
+						<uidl-form-field uidl="field" entity="parentModel.entity" />
 					</div>
 				</div>
 				<div class="col-sm-1">
