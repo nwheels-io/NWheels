@@ -24,7 +24,6 @@ namespace NWheels.Stacks.MongoDb
         {
             using (var db = _framework.NewUnitOfWork<IAutoIncrementIdDataRepository>())
             {
-                Console.WriteLine("AutoIncrementIntegerIdGenerator::GenerateValue()");
                 AutoIncrementHandler handler = new AutoIncrementHandler();
                 handler.QualifiedPropertyName = qualifiedPropertyName;
                 db.InvokeGenericOperation(typeof(IAutoIncrementIdEntity), handler);
