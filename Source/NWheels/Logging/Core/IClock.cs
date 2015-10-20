@@ -4,5 +4,6 @@
     {
         long ElapsedMilliseconds { get; }
         long ElapsedMicroseconds { get; }
+        ulong ThreadCpuCycles { get; }
     }
 }

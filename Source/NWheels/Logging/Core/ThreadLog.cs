@@ -38,7 +38,7 @@ namespace NWheels.Logging.Core
             if ( ThreadCpuTimeUtility.IsThreadCpuTimeSupported )
             {
                 Thread.BeginThreadAffinity();
-                _threadStartCpuCycles = ThreadCpuTimeUtility.GetThreadCycles();
+                _threadStartCpuCycles = clock.ThreadCpuCycles;
             }
 
             _rootActivity.AttachToThreadLog(this, parent: null);
@@ -173,7 +173,7 @@ namespace NWheels.Logging.Core
         {
             get
             {
-                return ThreadCpuTimeUtility.GetThreadCycles() - _threadStartCpuCycles;
+                return _clock.ThreadCpuCycles - _threadStartCpuCycles;
             }
         }
 

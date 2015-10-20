@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using NWheels.Logging.Impl;
 
 namespace NWheels.Logging.Core
 {
@@ -23,6 +24,16 @@ namespace NWheels.Logging.Core
             get
             {
                 return (long)(_watch.Elapsed.TotalMilliseconds * 1000.0d);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ulong ThreadCpuCycles
+        {
+            get
+            {
+                return ThreadCpuTimeUtility.GetThreadCycles();
             }
         }
     }

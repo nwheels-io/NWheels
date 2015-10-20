@@ -14,6 +14,8 @@ namespace NWheels.UnitTests.Logging
             Clock = new TestClock();
             Registry = new TestThreadRegistry();
             Anchor = new TestThreadLogAnchor();
+
+            Clock.ThreadCpuCycles = 123456;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,6 +34,8 @@ namespace NWheels.UnitTests.Logging
             {
                 get { return ElapsedMilliseconds * 1000; }
             }
+
+            public ulong ThreadCpuCycles { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
