@@ -79,7 +79,7 @@ namespace NWheels.Domains.Security.Core
 
         public IRuntimeEntityAccessRule<TEntity> GetEntityAccessRule<TEntity>()
         {
-            return null;//TODO: implement as required
+            return new SystemPrincipal.SystemEntityAccessRule<TEntity>(); //temporarily for compatibility
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

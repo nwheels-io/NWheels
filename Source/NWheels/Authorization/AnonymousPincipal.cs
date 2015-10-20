@@ -37,7 +37,8 @@ namespace NWheels.Authorization
 
         public IRuntimeEntityAccessRule<TEntity> GetEntityAccessRule<TEntity>()
         {
-            return new AnonymousEntityAccessRule<TEntity>();
+            return new SystemPrincipal.SystemEntityAccessRule<TEntity>(); //temporarily for compatibility
+            //return new AnonymousEntityAccessRule<TEntity>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

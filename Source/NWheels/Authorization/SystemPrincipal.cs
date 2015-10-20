@@ -122,7 +122,7 @@ namespace NWheels.Authorization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class SystemEntityAccessRule<TEntity> : IRuntimeEntityAccessRule<TEntity>
+        public class SystemEntityAccessRule<TEntity> : IRuntimeEntityAccessRule<TEntity>
         {
             #region Implementation of IRuntimeEntityAccessRule
 
