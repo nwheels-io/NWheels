@@ -136,6 +136,8 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlNotification<string> SearchResultsReceived { get; set; }
+        public UidlNotification<TEntity> Saving { get; set; }
+        public UidlNotification<TEntity> Rejecting { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

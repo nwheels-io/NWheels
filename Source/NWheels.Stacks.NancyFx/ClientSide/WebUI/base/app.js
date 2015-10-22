@@ -668,7 +668,10 @@ function ($q, $http, $rootScope, $timeout, commandService) {
     m_controllerImplementations['CrudForm'] = {
         implement: function (scope) {
             scope.metaType = scope.uidlService.getMetaType(scope.uidl.entityMetaType);
-            scope.breezeMetaType = scope.entityService.getTypeMetadata(scope.metaType.restTypeName);
+
+            if (scope.metaType.restTypeName) {
+                scope.breezeMetaType = scope.entityService.getTypeMetadata(scope.metaType.restTypeName);
+            }
 
             scope.tabSetIndex = 0;
             scope.plainFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers!='Tab' && $.modifiers!='Section'").ToArray();
