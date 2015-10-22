@@ -47,6 +47,12 @@ namespace NWheels.Entities.Core
         {
             var key = ((IEntityObject)entity).GetId();
 
+            if ( key.Value == null )
+            {
+                NotifyEntityState((IEntityObject)entity, EntityState.NewPristine);
+                return;
+            }
+
             if ( !_entityCache.ContainsKey(key) )
             {
                 _entityCache.Add(key, (IEntityObject)entity);
