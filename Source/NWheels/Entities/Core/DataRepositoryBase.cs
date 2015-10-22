@@ -91,11 +91,11 @@ namespace NWheels.Entities.Core
 
                 var changeSet = GetCurrentChangeSet().ToArray();
 
-                //ExecuteValidationPhase(changeSet);
-                //ExecuteBeforeSavePhase(changeSet);
+                ExecuteValidationPhase(changeSet);
+                ExecuteBeforeSavePhase(changeSet);
                 ExecuteCommitToPersistenceLayer();
-                //ExecuteAfterSavePhase(changeSet);
-                //ExecuteNotificationPhase(changeSet);
+                ExecuteAfterSavePhase(changeSet);
+                ExecuteNotificationPhase(changeSet);
 
                 _currentState = UnitOfWorkState.Committed;
             }
