@@ -36,16 +36,16 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.21.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil, Version=0.9.22.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.21\lib\net45\Hapil.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.22\lib\net45\Hapil.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil.Applied, Version=0.9.21.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil.Applied, Version=0.9.22.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.21\lib\net45\Hapil.Applied.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.22\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
     <Reference Include="Hapil.Testing.NUnit">
-      <HintPath>..\packages\FelixB.Hapil.Testing.NUnit.0.9.21\lib\net45\Hapil.Testing.NUnit.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.Testing.NUnit.0.9.22\lib\net45\Hapil.Testing.NUnit.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
