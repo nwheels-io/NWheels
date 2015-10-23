@@ -34,12 +34,13 @@ namespace NWheels.TypeModel.Core.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected CollectionAdapterDualValueStrategy(
+            PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
             IPropertyMetadata metaProperty,
             Type storageType)
-            : base(factoryContext, metadataCache, metaType, metaProperty)
+            : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty)
         {
             _storageType = storageType;
         }
@@ -51,7 +52,7 @@ namespace NWheels.TypeModel.Core.Factories
         protected override void OnBeforeImplementation(ImplementationClassWriter<TT.TInterface> writer)
         {
             MetaProperty.ContractPropertyInfo.PropertyType.IsCollectionType(out _itemContractType);
-            _itemConcreteType = FindImpementationType(_itemContractType);
+            _itemConcreteType = FindImplementationType(_itemContractType);
             _concreteCollectionType = HelpGetConcreteCollectionType(MetaProperty.ClrType, _itemConcreteType);
             _collectionAdapterType = HelpGetCollectionAdapterType(MetaProperty.ClrType, _itemContractType, _itemConcreteType, out _isOrderedCollection);
 

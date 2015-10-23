@@ -24,6 +24,10 @@ namespace NWheels.Stacks.MongoDb.Factories
         {
             var metaType = MetadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
             var propertyMap = BuildPropertyStrategyMap(context, metaType);
+
+            propertyMap.NeedImplementationTypeKey += (sender, args) => {
+                args.TypeKeyToUse = CreateImplementationTypeKey(args.ContractType);
+            };
             
             return new IObjectFactoryConvention[] {
                 new BaseTypeConvention(MetadataCache, metaType), 
@@ -49,6 +53,15 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected override TypeKey CreateImplementationTypeKey(Type entityContractInterface)
+        {
+            return new TypeKey(
+                primaryInterface: entityContractInterface,
+                baseType: BaseTypeConvention.GetBaseType(this, base.MetadataCache.GetTypeMetadata(entityContractInterface)));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private PropertyImplementationStrategyMap BuildPropertyStrategyMap(ObjectFactoryContext context, ITypeMetadata metaType)
         {
             var builder = new PropertyImplementationStrategyMap.Builder();
@@ -58,59 +71,59 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             builder.AddRule(
                 p => p.IsCalculated,
-                p => new NotSupportedPropertyStrategy(context, MetadataCache, metaType, p));
+                p => new NotSupportedPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             //-- entity parts
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Part && p.IsCollection,
-                p => new CollectionAdapterStrategy(context, MetadataCache, metaType, p));
+                p => new CollectionAdapterStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Part && !p.IsCollection,
-                p => new RelationTypecastStrategy(context, MetadataCache, metaType, p));
+                p => new RelationTypecastStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             //-- entity relations - collections
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && p.IsCollection && ShouldPersistAsEmbeddedDocuments(p),
-                p => new CollectionAdapterStrategy(context, MetadataCache, metaType, p));
+                p => new CollectionAdapterStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
-                p => p.Kind == PropertyKind.Relation && p.IsCollection && ShouldPersistAsArrayOfDocumentIds(p), 
-                p => new ArrayOfDocumentIdsStrategy(context, MetadataCache, metaType, p));
+                p => p.Kind == PropertyKind.Relation && p.IsCollection && ShouldPersistAsArrayOfDocumentIds(p),
+                p => new ArrayOfDocumentIdsStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && p.IsCollection,
-                p => new LazyLoadCollectionByForeignKeyStrategy(context, MetadataCache, metaType, p));
+                p => new LazyLoadCollectionByForeignKeyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             //-- entity relations - single (non-collection)
             
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && !p.IsCollection && ShouldPersistAsEmbeddedDocuments(p),
-                p => new RelationTypecastStrategy(context, MetadataCache, metaType, p));
+                p => new RelationTypecastStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && !p.IsCollection && ShouldPersistAsDocumentId(p),
-                p => new DocumentIdStrategy(context, MetadataCache, metaType, p));
+                p => new DocumentIdStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && !p.IsCollection,
-                p => new LazyLoadDocumentByForeignKeyStrategy(context, MetadataCache, metaType, p));
+                p => new LazyLoadDocumentByForeignKeyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             //-- scalar properties
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Scalar && p.RelationalMapping != null && p.RelationalMapping.StorageType != null,
-                p => new StorageDataTypeStrategy(context, MetadataCache, metaType, p));
+                p => new StorageDataTypeStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Scalar && !(p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite),
-                p => new PublicAccessorWrapperStrategy(context, MetadataCache, metaType, p));
+                p => new PublicAccessorWrapperStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Scalar && p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite,
-                p => new AutomaticPropertyStrategy(context, MetadataCache, metaType, p));
+                p => new AutomaticPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             return builder.Build(MetadataCache, metaType);
         }

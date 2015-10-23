@@ -26,12 +26,13 @@ namespace NWheels.TypeModel.Core.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected DualValueStrategy(
+            PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
             IPropertyMetadata metaProperty,
             Type storageType)
-            : base(factoryContext, metadataCache, metaType, metaProperty)
+            : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty)
         {
             _storageType = storageType;
         }

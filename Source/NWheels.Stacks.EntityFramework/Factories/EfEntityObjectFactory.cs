@@ -27,6 +27,10 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
             var propertyMap = BuildPropertyStrategyMap(context, metaType);
 
+            propertyMap.NeedImplementationTypeKey += (sender, args) => {
+                args.TypeKeyToUse = CreateImplementationTypeKey(args.ContractType);
+            };
+
             return new IObjectFactoryConvention[] {
                 new BaseTypeConvention(MetadataCache, metaType), 
                 new PropertyImplementationConvention(metaType, propertyMap),
@@ -47,6 +51,15 @@ namespace NWheels.Stacks.EntityFramework.Factories
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override TypeKey CreateImplementationTypeKey(Type entityContractInterface)
+        {
+            return new TypeKey(
+                primaryInterface: entityContractInterface,
+                baseType: BaseTypeConvention.GetBaseType(this, base.MetadataCache.GetTypeMetadata(entityContractInterface)));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         private PropertyImplementationStrategyMap BuildPropertyStrategyMap(ObjectFactoryContext context, ITypeMetadata metaType)
         {
@@ -56,43 +69,43 @@ namespace NWheels.Stacks.EntityFramework.Factories
             builder.AddRule(
                 p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityContract(),
                 p => new EfPropertyImplementationStrategy( 
-                    implementor: new CollectionAdapterStrategy(context, MetadataCache, metaType, p),
+                    implementor: new CollectionAdapterStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p),
                     configurator: new RelationPropertyConfigurationStrategy(context, metaType, p)));
 
             builder.AddRule(
                 p => p.ClrType.IsCollectionType(out collectionItemType) && collectionItemType.IsEntityPartContract(),
-                p => new EfPropertyImplementationStrategy( 
-                    implementor: new CollectionAdapterJsonStringStrategy(context, MetadataCache, metaType, p),
+                p => new EfPropertyImplementationStrategy(
+                    implementor: new CollectionAdapterJsonStringStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p),
                     configurator: new JsonStringPropertyConfigurationStrategy(context, metaType, p)));
 
             builder.AddRule(
                 p => p.ClrType.IsEntityContract(),
-                p => new EfPropertyImplementationStrategy( 
-                    implementor: new RelationTypecastStrategy(context, MetadataCache, metaType, p),
+                p => new EfPropertyImplementationStrategy(
+                    implementor: new RelationTypecastStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p),
                     configurator: new RelationPropertyConfigurationStrategy(context, metaType, p)));
 
             builder.AddRule(
                 p => p.ClrType.IsEntityPartContract(),
                 p => new EfPropertyImplementationStrategy(
-                    implementor: new RelationTypecastStrategy(context, MetadataCache, metaType, p),
+                    implementor: new RelationTypecastStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p),
                     configurator: new ComplexTypePropertyConfigurationStrategy(context, metaType, p)));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Scalar && p.RelationalMapping.StorageType != null,
                 p => new EfPropertyImplementationStrategy(
-                    implementor: new StorageDataTypeStrategy(context, MetadataCache, metaType, p), 
+                    implementor: new StorageDataTypeStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p), 
                     configurator: new ScalarPropertyConfigurationStrategy(context, metaType, p)));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Scalar && !(p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite),
-                p => new EfPropertyImplementationStrategy( 
-                    implementor: new PublicAccessorWrapperStrategy(context, MetadataCache, metaType, p),
+                p => new EfPropertyImplementationStrategy(
+                    implementor: new PublicAccessorWrapperStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p),
                     configurator: new ScalarPropertyConfigurationStrategy(context, metaType, p)));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Scalar && p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite,
-                p => new EfPropertyImplementationStrategy( 
-                    implementor: new AutomaticPropertyStrategy(context, MetadataCache, metaType, p),
+                p => new EfPropertyImplementationStrategy(
+                    implementor: new AutomaticPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p),
                     configurator: new ScalarPropertyConfigurationStrategy(context, metaType, p)));
 
             return builder.Build(MetadataCache, metaType);

@@ -19,11 +19,12 @@ namespace NWheels.TypeModel.Core.Factories
     public class CollectionAdapterJsonStringStrategy : CollectionAdapterDualValueStrategy
     {
         public CollectionAdapterJsonStringStrategy(
+            PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
             IPropertyMetadata metaProperty)
-            : base(factoryContext, metadataCache, metaType, metaProperty, storageType: typeof(string))
+            : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty, storageType: typeof(string))
         {
         }
 

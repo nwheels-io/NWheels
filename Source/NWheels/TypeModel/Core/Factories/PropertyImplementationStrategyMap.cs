@@ -56,6 +56,29 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TypeKey GetImplementationTypeKey(Type contractType)
+        {
+            TypeKey key = null;
+
+            if ( NeedImplementationTypeKey != null )
+            {
+                var args = new TypeKeyEventArgs(contractType);
+                NeedImplementationTypeKey(this, args);
+                key = args.TypeKeyToUse;
+            }
+
+            if ( key == null )
+            {
+                throw new InvalidOperationException(
+                    "Attempted to invoke FindImplementationType, but no TypeKey was supplied. " +
+                    "Make sure you handle PropertyImplementationStrategyMap.NeedImplementationTypeKey event.");
+            }
+
+            return key;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IEnumerable<IPropertyMetadata> Properties
         {
             get
@@ -82,6 +105,25 @@ namespace NWheels.DataObjects.Core.Factories
             {
                 return _map[metaProperty];
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public event EventHandler<TypeKeyEventArgs> NeedImplementationTypeKey;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class TypeKeyEventArgs : EventArgs
+        {
+            public TypeKeyEventArgs(Type contractType)
+            {
+                ContractType = contractType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type ContractType { get; private set; }
+            public TypeKey TypeKeyToUse { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

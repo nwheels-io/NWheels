@@ -40,7 +40,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
             {
                 var inversePropertyName = EfModelApi.GetGeneratedInversePropertyName(relationSource);
                 var relationSourceImplementationType = 
-                    _factoryContext.Factory.FindDynamicType(new TypeKey(primaryInterface: relationSource.DeclaringContract.ContractType));
+                    _factoryContext.Factory.FindDynamicType(relationSource.DeclaringContract.ContractType);
 
                 using ( TT.CreateScope<TT.TConcrete>(relationSourceImplementationType) )
                 {

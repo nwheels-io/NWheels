@@ -394,7 +394,7 @@ namespace NWheels.Conventions.Core
 
                 writer.AllMethods(IsNewEntityMethod).Implement(m => {
                     var entity = FindEntityInRepositoryByContract(m.OwnerMethod.Signature.ReturnType);
-                    var entityImplementationType = EntityFactory.FindDynamicType(new TypeKey(primaryInterface: entity.ContractType));
+                    var entityImplementationType = EntityFactory.FindImplementationType(entity.ContractType);
 
                     using ( TT.CreateScope<TT.TImpl>(entityImplementationType) )
                     {
@@ -743,8 +743,7 @@ namespace NWheels.Conventions.Core
             {
                 if ( _implementationType == null )
                 {
-                    var implementationTypeKey = new TypeKey(primaryInterface: _contractType);
-                    _implementationType = _ownerConvention.EntityFactory.FindDynamicType(implementationTypeKey);
+                    _implementationType = _ownerConvention.EntityFactory.FindImplementationType(_contractType);
                     ((TypeMetadataBuilder)this.Metadata).UpdateImplementation(_ownerConvention.EntityFactory, _implementationType);
                 }
             }

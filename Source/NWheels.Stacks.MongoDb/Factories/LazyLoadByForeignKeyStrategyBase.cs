@@ -25,11 +25,12 @@ namespace NWheels.Stacks.MongoDb.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected LazyLoadByForeignKeyStrategyBase(
+            PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
             IPropertyMetadata metaProperty)
-            : base(factoryContext, metadataCache, metaType, metaProperty)
+            : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty)
         {
         }
 
@@ -42,9 +43,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             _stateField = writer.Field<DualValueStates>("m_" + MetaProperty.Name + "$state");
 
             _relatedContractType = MetaProperty.Relation.RelatedPartyType.ContractType;
-            
-            var relatedTypeKey = new TypeKey(primaryInterface: _relatedContractType);
-            _relatedImplementationType = base.FactoryContext.Factory.FindDynamicType(relatedTypeKey);
+            _relatedImplementationType = base.FactoryContext.Factory.FindDynamicType(_relatedContractType);
 
             _thisKeyProperty = MetaProperty.DeclaringContract.PrimaryKey.Properties[0];
             _foreignKeyProperty = MetaProperty.Relation.InverseProperty;

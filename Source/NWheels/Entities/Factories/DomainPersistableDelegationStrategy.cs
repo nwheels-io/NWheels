@@ -21,9 +21,10 @@ namespace NWheels.Entities.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public DomainPersistableDelegationStrategy(
+            PropertyImplementationStrategyMap ownerMap,
             DomainObjectFactoryContext context,
             IPropertyMetadata metaProperty)
-            : base(context.BaseContext, context.MetadataCache, context.MetaType, metaProperty)
+            : base(ownerMap, context.BaseContext, context.MetadataCache, context.MetaType, metaProperty)
         {
             _context = context;
         }

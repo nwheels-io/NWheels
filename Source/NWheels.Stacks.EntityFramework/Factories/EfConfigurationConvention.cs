@@ -132,7 +132,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
             if ( _metaType != rootBaseType )
             {
-                rootBaseTypeImplementation = _facotryContext.Factory.FindDynamicType(new TypeKey(primaryInterface: rootBaseType.ContractType));
+                rootBaseTypeImplementation = _facotryContext.Factory.FindDynamicType(rootBaseType.ContractType);
             }
             else
             {

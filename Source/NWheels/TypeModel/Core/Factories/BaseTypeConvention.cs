@@ -26,14 +26,14 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnInspectDeclaration(ObjectFactoryContext context)
         {
-            base.Context.BaseType = FindMostConcreteBaseType();
+            base.Context.BaseType = GetBaseType(context.Factory, _metaType);
         }
 
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private Type FindMostConcreteBaseType()
+        public static Type GetBaseType(ObjectFactoryBase factory, ITypeMetadata metaType)
         {
             Type mostConcreteBaseType;
 
@@ -43,10 +43,10 @@ namespace NWheels.TypeModel.Core.Factories
             }
             else*/
             
-            if ( _metaType.BaseType != null )
+            if ( metaType.BaseType != null )
             {
-                var baseTypeKey = new TypeKey(primaryInterface: _metaType.BaseType.ContractType);
-                mostConcreteBaseType = base.Context.Factory.FindDynamicType(baseTypeKey);
+                var baseTypeKey = factory.CreateTypeKey(metaType.BaseType.ContractType);
+                mostConcreteBaseType = factory.FindDynamicType(baseTypeKey);
             }
             else
             {

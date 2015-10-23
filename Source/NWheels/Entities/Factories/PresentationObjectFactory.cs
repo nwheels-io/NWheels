@@ -75,6 +75,12 @@ namespace NWheels.Entities.Factories
             var presentationFactoryContext = 
                 new PresentationObjectFactoryContext(context, _metadataCache, metaType, propertyMapBuilder.MapBeingBuilt);
 
+            propertyMapBuilder.MapBeingBuilt.NeedImplementationTypeKey += (sender, args) => {
+                args.TypeKeyToUse = new TypeKey(
+                    primaryInterface: args.ContractType,
+                    baseType: PresentationObjectBaseTypeConvention.GetBaseType(context, _metadataCache.GetTypeMetadata(args.ContractType)));
+            };
+
             BuildPropertyStrategyMap(propertyMapBuilder, presentationFactoryContext);
 
             return new IObjectFactoryConvention[] {
@@ -100,15 +106,15 @@ namespace NWheels.Entities.Factories
 
             builder.AddRule(
                 p => p.ClrType.IsEntityContract() || p.ClrType.IsEntityPartContract(),
-                p => new PresentationNestedObjectPropertyStrategy(context, p));
+                p => new PresentationNestedObjectPropertyStrategy(builder.MapBeingBuilt, context, p));
 
             builder.AddRule(
                 p => p.ClrType.IsCollectionType(out collectionItemType) && (collectionItemType.IsEntityContract() || collectionItemType.IsEntityPartContract()),
-                p => new PresentationNestedCollectionPropertyStrategy(context, p));
+                p => new PresentationNestedCollectionPropertyStrategy(builder.MapBeingBuilt, context, p));
 
             builder.AddRule(
                 p => true,
-                p => new PresentationScalarPropertyStrategy(context, p));
+                p => new PresentationScalarPropertyStrategy(builder.MapBeingBuilt, context, p));
 
             builder.Build(context.MetadataCache, context.MetaType);
         }

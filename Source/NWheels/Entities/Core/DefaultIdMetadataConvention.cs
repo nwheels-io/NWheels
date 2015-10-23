@@ -29,7 +29,7 @@ namespace NWheels.Entities.Core
 
         public void Preview(TypeMetadataBuilder type)
         {
-            if ( !EntityContractAttribute.IsEntityContract(type.ContractType) )
+            if ( !type.IsEntity )
             {
                 return;
             }

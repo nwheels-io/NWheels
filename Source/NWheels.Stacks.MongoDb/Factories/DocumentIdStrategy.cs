@@ -7,6 +7,7 @@ using Hapil.Writers;
 using MongoDB.Bson;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
+using NWheels.DataObjects.Core.Factories;
 using NWheels.DataObjects.Core.StorageTypes;
 using NWheels.Entities;
 using NWheels.Entities.Core;
@@ -23,11 +24,12 @@ namespace NWheels.Stacks.MongoDb.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public DocumentIdStrategy(
+            PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
             IPropertyMetadata metaProperty)
-            : base(factoryContext, metadataCache, metaType, metaProperty, storageType: metaProperty.Relation.RelatedPartyType.PrimaryKey.Properties[0].ClrType)
+            : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty, storageType: metaProperty.Relation.RelatedPartyType.PrimaryKey.Properties[0].ClrType)
         {
         }
 
@@ -39,7 +41,7 @@ namespace NWheels.Stacks.MongoDb.Factories
         {
             base.OnBeforeImplementation(writer);
 
-            _implementationType = FindImpementationType(MetaProperty.ClrType);
+            _implementationType = FindImplementationType(MetaProperty.ClrType);
             _componentsField = writer.DependencyField<IComponentContext>("$components");
         }
 

@@ -52,9 +52,28 @@ namespace NWheels.Conventions.Core
 
         public Type GetOrBuildEntityImplementation(Type entityContractInterface) 
         {
-            var typeKey = new TypeKey(primaryInterface: entityContractInterface);
+            var typeKey = CreateImplementationTypeKey(entityContractInterface);
             return base.GetOrBuildType(typeKey).DynamicType;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Type FindImplementationType(Type contractType)
+        {
+            var typeKey = CreateImplementationTypeKey(contractType);
+            return FindDynamicType(typeKey);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of ObjectFactoryBase
+
+        public override TypeKey CreateTypeKey(Type contractType, params Type[] secondaryInterfaceTypes)
+        {
+            return CreateImplementationTypeKey(contractType);
+        }
+
+        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -78,6 +97,13 @@ namespace NWheels.Conventions.Core
         {
             var entityMetadata = (TypeMetadataBuilder)_metadataCache.GetTypeMetadata(key.PrimaryInterface);
             entityMetadata.UpdateImplementation(this, type.DynamicType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual TypeKey CreateImplementationTypeKey(Type entityContractInterface)
+        {
+            return new TypeKey(primaryInterface: entityContractInterface);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

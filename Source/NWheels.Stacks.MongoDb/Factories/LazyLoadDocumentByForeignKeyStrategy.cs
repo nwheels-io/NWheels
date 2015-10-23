@@ -18,11 +18,12 @@ namespace NWheels.Stacks.MongoDb.Factories
     public class LazyLoadDocumentByForeignKeyStrategy : LazyLoadByForeignKeyStrategyBase
     {
         public LazyLoadDocumentByForeignKeyStrategy(
+            PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
             IPropertyMetadata metaProperty)
-            : base(factoryContext, metadataCache, metaType, metaProperty)
+            : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty)
         {
         }
 

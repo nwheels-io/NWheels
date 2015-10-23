@@ -95,7 +95,12 @@ namespace NWheels.Entities.Factories
             var persistableObjectFactoryType = context.TypeKey.SecondaryInterfaces[0];
 
             var propertyMapBuilder = new PropertyImplementationStrategyMap.Builder(useDomainObjectAsBaseType: true);
-            var domainFactoryContext = 
+            
+            propertyMapBuilder.MapBeingBuilt.NeedImplementationTypeKey += (sender, args) => {
+                args.TypeKeyToUse = CreateImplementationTypeKey(args.ContractType, persistableObjectFactoryType: context.TypeKey.SecondaryInterfaces[0]);
+            };
+
+            var domainFactoryContext =
                 new DomainObjectFactoryContext(context, _metadataCache, metaType, persistableObjectFactoryType, propertyMapBuilder.MapBeingBuilt);
 
             BuildPropertyStrategyMap(propertyMapBuilder, domainFactoryContext);
@@ -118,18 +123,24 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected TypeKey CreateImplementationTypeKey(Type entityInterfaceType, Type persistableObjectFactoryType)
+        {
+            return new TypeKey(
+                primaryInterface: entityInterfaceType,
+                secondaryInterfaces: new[] { persistableObjectFactoryType },
+                baseType: DomainObjectBaseTypeConvention.GetBaseType(
+                    this,
+                    _metadataCache.GetTypeMetadata(entityInterfaceType),
+                    persistableObjectFactoryType));            
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private TypeEntry GetOrBuildDomainObjectTypeEntry(Type contractType, Type persistableFactoryType)
         {
-            //Type persistableObjectType;
-
-            //if ( !_metadataCache.GetTypeMetadata(contractType).)
-
-            var typeKey = new TypeKey(
-                primaryInterface: contractType, 
-                baseType: _metadataCache.GetTypeMetadata(contractType).DomainObjectType,
-                secondaryInterfaces: new[] { persistableFactoryType });
-
+            var typeKey = CreateImplementationTypeKey(contractType, persistableFactoryType);
             var typeEntry = GetOrBuildType(typeKey);
+            
             return typeEntry;
         }
 
@@ -147,15 +158,15 @@ namespace NWheels.Entities.Factories
 
             builder.AddRule(
                 p => p.ClrType.IsEntityContract() || p.ClrType.IsEntityPartContract(),
-                p => new DomainPersistableObjectCastStrategy(context, p));
+                p => new DomainPersistableObjectCastStrategy(builder.MapBeingBuilt, context, p));
 
             builder.AddRule(
                 p => p.ClrType.IsCollectionType(out collectionItemType) && (collectionItemType.IsEntityContract() || collectionItemType.IsEntityPartContract()),
-                p => new DomainPersistableCollectionCastStrategy(context, p));
+                p => new DomainPersistableCollectionCastStrategy(builder.MapBeingBuilt, context, p));
 
             builder.AddRule(
                 p => true,
-                p => new DomainPersistableDelegationStrategy(context, p));
+                p => new DomainPersistableDelegationStrategy(builder.MapBeingBuilt, context, p));
 
             builder.Build(context.MetadataCache, context.MetaType);
         }

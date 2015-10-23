@@ -30,6 +30,10 @@ namespace NWheels.UI.Factories
             var metaType = MetadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
             var propertyMap = BuildPropertyStrategyMap(context, metaType);
 
+            propertyMap.NeedImplementationTypeKey += (sender, args) => {
+                args.TypeKeyToUse = CreateImplementationTypeKey(args.ContractType);
+            };
+
             return new IObjectFactoryConvention[] {
                 new BaseTypeConvention(MetadataCache, metaType), 
                 new PropertyImplementationConvention(metaType, propertyMap),
@@ -55,21 +59,30 @@ namespace NWheels.UI.Factories
 
             builder.AddRule(
                 p => p.ClrType.IsCollectionType(out collectionItemType) && (collectionItemType.IsEntityPartContract() || collectionItemType.IsEntityContract()),
-                p => new CollectionAdapterStrategy(context, MetadataCache, metaType, p));
+                p => new CollectionAdapterStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.ClrType.IsEntityPartContract(),
-                p => new RelationTypecastStrategy(context, MetadataCache, metaType, p));
+                p => new RelationTypecastStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => !(p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite),
-                p => new PublicAccessorWrapperStrategy(context, MetadataCache, metaType, p));
+                p => new PublicAccessorWrapperStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite,
-                p => new AutomaticPropertyStrategy(context, MetadataCache, metaType, p));
+                p => new AutomaticPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             return builder.Build(MetadataCache, metaType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override TypeKey CreateImplementationTypeKey(Type entityContractInterface)
+        {
+            return new TypeKey(
+                primaryInterface: entityContractInterface,
+                baseType: BaseTypeConvention.GetBaseType(this, base.MetadataCache.GetTypeMetadata(entityContractInterface)));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

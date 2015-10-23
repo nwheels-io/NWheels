@@ -1,4 +1,7 @@
+using System;
 using Hapil;
+using NWheels.DataObjects;
+using NWheels.Entities.Core;
 
 namespace NWheels.Entities.Factories
 {
@@ -33,5 +36,26 @@ namespace NWheels.Entities.Factories
         }
 
         #endregion
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Type GetBaseType(ObjectFactoryBase factory, ITypeMetadata metaType, Type persistableObjectFactoryType)
+        {
+            if ( metaType.DomainObjectType != null )
+            {
+                return metaType.DomainObjectType;
+            }
+            else if ( metaType.BaseType != null )
+            {
+                return ((IDomainObjectFactory)factory).GetOrBuildDomainObjectType(
+                    metaType.BaseType.ContractType, 
+                    persistableObjectFactoryType);
+            }
+            else
+            {
+                return typeof(object);
+            }
+        }
     }
 }
+

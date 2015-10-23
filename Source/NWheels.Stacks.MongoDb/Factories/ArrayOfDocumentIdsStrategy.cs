@@ -6,6 +6,7 @@ using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
+using NWheels.DataObjects.Core.Factories;
 using NWheels.DataObjects.Core.StorageTypes;
 using NWheels.Entities;
 using NWheels.Entities.Core;
@@ -26,11 +27,12 @@ namespace NWheels.Stacks.MongoDb.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ArrayOfDocumentIdsStrategy(
+            PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
             IPropertyMetadata metaProperty)
-            : base(factoryContext, metadataCache, metaType, metaProperty, storageType: GetArrayOfIdsType(metaType))
+            : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty, storageType: GetArrayOfIdsType(metaType))
         {
         }
 
@@ -43,7 +45,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             base.OnBeforeImplementation(writer);
 
             base.MetaProperty.ClrType.IsCollectionType(out _itemContractType);
-            _itemImplementationType = FindImpementationType(_itemContractType);
+            _itemImplementationType = FindImplementationType(_itemContractType);
             _documentIdType = MetaType.PrimaryKey.Properties[0].ClrType;
             _concreteCollectionType = HelpGetConcreteCollectionType(MetaProperty.ClrType, _itemContractType);
 

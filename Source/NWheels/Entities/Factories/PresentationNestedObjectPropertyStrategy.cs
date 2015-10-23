@@ -20,9 +20,10 @@ namespace NWheels.Entities.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public PresentationNestedObjectPropertyStrategy(
+            PropertyImplementationStrategyMap ownerMap,
             PresentationObjectFactoryContext context,
             IPropertyMetadata metaProperty)
-            : base(context.BaseContext, context.MetadataCache, context.MetaType, metaProperty)
+            : base(ownerMap, context.BaseContext, context.MetadataCache, context.MetaType, metaProperty)
         {
             _context = context;
         }

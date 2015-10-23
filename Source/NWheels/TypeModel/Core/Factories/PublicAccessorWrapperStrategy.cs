@@ -22,11 +22,12 @@ namespace NWheels.TypeModel.Core.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public PublicAccessorWrapperStrategy(
+            PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
             IPropertyMetadata metaProperty)
-            : base(factoryContext, metadataCache, metaType, metaProperty)
+            : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty)
         {
         }
 

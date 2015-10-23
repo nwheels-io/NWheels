@@ -23,11 +23,12 @@ namespace NWheels.TypeModel.Core.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public RelationTypecastStrategy(
+            PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
             IPropertyMetadata metaProperty)
-            : base(factoryContext, metadataCache, metaType, metaProperty)
+            : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty)
         {
         }
 
@@ -37,7 +38,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnBeforeImplementation(ImplementationClassWriter<TT.TInterface> writer)
         {
-            _storageType = FindImpementationType(contractType: base.MetaProperty.ContractPropertyInfo.PropertyType);
+            _storageType = FindImplementationType(contractType: base.MetaProperty.ContractPropertyInfo.PropertyType);
 
             using ( TT.CreateScope<TT.TValue>(_storageType) )
             {

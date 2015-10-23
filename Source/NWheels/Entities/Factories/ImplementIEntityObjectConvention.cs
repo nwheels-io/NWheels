@@ -36,7 +36,7 @@ namespace NWheels.Entities.Factories
             return (
                 context.TypeKey.PrimaryInterface.IsEntityContract() && 
                 _metaType.PrimaryKey != null &&
-                _metaType.PrimaryKey.Properties[0].DeclaringContract == _metaType &&
+                //_metaType.PrimaryKey.Properties[0].DeclaringContract == _metaType &&
                 !_propertStrategyrMap.IsImplementedByBaseEntity(_metaType.PrimaryKey.Properties[0].ContractPropertyInfo));
         }
 

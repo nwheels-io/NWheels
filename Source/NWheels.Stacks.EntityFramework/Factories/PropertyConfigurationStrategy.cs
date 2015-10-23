@@ -41,8 +41,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
         protected Type FindImpementationType(Type contractType)
         {
-            var storageTypeKey = new TypeKey(primaryInterface: contractType);
-            return FactoryContext.Factory.FindDynamicType(storageTypeKey);
+            return FactoryContext.Factory.FindDynamicType(contractType);
         }
     }
 }

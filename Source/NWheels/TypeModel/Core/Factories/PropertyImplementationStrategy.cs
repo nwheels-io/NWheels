@@ -13,6 +13,7 @@ namespace NWheels.DataObjects.Core.Factories
 {
     public abstract class PropertyImplementationStrategy : IPropertyImplementationStrategy
     {
+        private readonly PropertyImplementationStrategyMap _ownerMap;
         private readonly ObjectFactoryContext _factoryContext;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly ITypeMetadata _metaType;
@@ -21,11 +22,16 @@ namespace NWheels.DataObjects.Core.Factories
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected PropertyImplementationStrategy(
+            PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext,
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
             IPropertyMetadata metaProperty)
         {
+            if ( ownerMap == null )
+            {
+                throw new ArgumentNullException("ownerMap");
+            }
             if ( factoryContext == null )
             {
                 throw new ArgumentNullException("factoryContext");
@@ -43,6 +49,7 @@ namespace NWheels.DataObjects.Core.Factories
                 throw new ArgumentNullException("metaProperty");
             }
 
+            _ownerMap = ownerMap;
             _factoryContext = factoryContext;
             _metadataCache = metadataCache;
             _metaType = metaType;
@@ -195,10 +202,10 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected Type FindImpementationType(Type contractType)
+        protected Type FindImplementationType(Type contractType)
         {
-            var storageTypeKey = new TypeKey(primaryInterface: contractType);
-            return _factoryContext.Factory.FindDynamicType(storageTypeKey);
+            var implementationTypeKey = _ownerMap.GetImplementationTypeKey(contractType);
+            return _factoryContext.Factory.FindDynamicType(implementationTypeKey);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
