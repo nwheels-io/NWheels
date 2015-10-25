@@ -119,6 +119,13 @@ namespace NWheels.Entities.Factories
             };
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnClassTypeCreated(TypeKey key, TypeEntry type)
+        {
+            ((TypeMetadataBuilder)_metadataCache.GetTypeMetadata(key.PrimaryInterface)).UpdateImplementation(this.GetType(), type.DynamicType);
+        }
+
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

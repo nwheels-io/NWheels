@@ -18,6 +18,7 @@ using Hapil;
 using Owin;
 using Microsoft.Owin.Hosting;
 using NWheels.Authorization;
+using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Hosting;
@@ -36,6 +37,8 @@ namespace NWheels.Stacks.ODataBreeze
         private readonly ISessionManager _sessionManager;
         private readonly RestApiEndpointRegistration _endpointRegistration;
         private readonly ILogger _logger;
+        private readonly IDomainObjectFactory _domainObjectFactory;
+        private readonly IEntityObjectFactory _persistableObjectFactory;
         private ILifetimeScope _containerLifetimeScope = null;
         private IDisposable _host = null;
         private Type _apiControllerType = null;
@@ -48,6 +51,8 @@ namespace NWheels.Stacks.ODataBreeze
             ITypeMetadataCache metadataCache, 
             ISessionManager sessionManager,
             RestApiEndpointRegistration endpointRegistration,
+            IDomainObjectFactory domainObjectFactory,
+            IEntityObjectFactory persistableObjectFactory,
             Auto<ILogger> logger)
         {
             _components = components;
@@ -56,6 +61,8 @@ namespace NWheels.Stacks.ODataBreeze
             _sessionManager = sessionManager;
             _baseContainer = components;
             _endpointRegistration = endpointRegistration;
+            _domainObjectFactory = domainObjectFactory;
+            _persistableObjectFactory = persistableObjectFactory;
             _logger = logger.Instance;
         }
 
@@ -155,7 +162,7 @@ namespace NWheels.Stacks.ODataBreeze
 
         private void GenerateBreezeApiController()
         {
-            var factory = new BreezeApiControllerFactory(_dyanmicModule, _metadataCache);
+            var factory = new BreezeApiControllerFactory(_dyanmicModule, _metadataCache, _domainObjectFactory, _persistableObjectFactory);
             _apiControllerType = factory.CreateControllerType(_endpointRegistration.Contract);
         }
 

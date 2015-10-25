@@ -22,6 +22,7 @@ namespace NWheels.Entities
         EntityChangeMessage CreateChangeMessage(IEnumerable<IDomainObject> entities, EntityState state);
         Type ContractType { get; }
         Type ImplementationType { get; }
+        Type PersistableObjectFactoryType { get; }
         ITypeMetadata Metadata { get; }
     }
 

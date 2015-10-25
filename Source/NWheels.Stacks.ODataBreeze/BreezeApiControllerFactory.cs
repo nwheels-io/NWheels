@@ -16,10 +16,12 @@ using NWheels.Exceptions;
 using NWheels.Extensions;
 using System.Web.Http;
 using Autofac;
+using Breeze.WebApi2;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
+using NWheels.Entities.Factories;
 using TT = Hapil.TypeTemplate;
 using CTT = NWheels.Stacks.ODataBreeze.BreezeApiControllerFactory.CustomTypeTemplates;
 
@@ -28,13 +30,21 @@ namespace NWheels.Stacks.ODataBreeze
     public class BreezeApiControllerFactory : ConventionObjectFactory
     {
         private readonly ITypeMetadataCache _metadataCache;
+        private readonly IDomainObjectFactory _domainObjectFactory;
+        private readonly IEntityObjectFactory _persistableObjectFactory;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public BreezeApiControllerFactory(DynamicModule module, ITypeMetadataCache metadataCache)
+        public BreezeApiControllerFactory(
+            DynamicModule module, 
+            ITypeMetadataCache metadataCache, 
+            IDomainObjectFactory domainObjectFactory, 
+            IEntityObjectFactory persistableObjectFactory)
             : base(module)
         {
             _metadataCache = metadataCache;
+            _domainObjectFactory = domainObjectFactory;
+            _persistableObjectFactory = persistableObjectFactory;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,7 +60,7 @@ namespace NWheels.Stacks.ODataBreeze
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
             return new IObjectFactoryConvention[] {
-                new ControllerConvention(_metadataCache, dataRepositoryContract: context.TypeKey.PrimaryInterface)
+                new ControllerConvention(_metadataCache, context.TypeKey.PrimaryInterface, _domainObjectFactory, _persistableObjectFactory)
             };
         }
 
@@ -59,14 +69,22 @@ namespace NWheels.Stacks.ODataBreeze
         private class ControllerConvention : ImplementationConvention
         {
             private readonly ITypeMetadataCache _metadataCache;
+            private readonly IDomainObjectFactory _domainObjectFactory;
+            private readonly IEntityObjectFactory _persistableObjectFactory;
             private readonly Type _dataRepositoryContract;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ControllerConvention(ITypeMetadataCache metadataCache, Type dataRepositoryContract)
+            public ControllerConvention(
+                ITypeMetadataCache metadataCache, 
+                Type dataRepositoryContract, 
+                IDomainObjectFactory domainObjectFactory,
+                IEntityObjectFactory persistableObjectFactory)
                 : base(Will.InspectDeclaration | Will.ImplementBaseClass)
             {
                 _metadataCache = metadataCache;
+                _domainObjectFactory = domainObjectFactory;
+                _persistableObjectFactory = persistableObjectFactory;
                 _dataRepositoryContract = dataRepositoryContract;
             }
 
@@ -144,20 +162,27 @@ namespace NWheels.Stacks.ODataBreeze
                 var entityRepoProperty = contractPropertyPair.Value;
                 var entityMetadata = _metadataCache.GetTypeMetadata(entityContractType);
 
-                using ( TT.CreateScope<TT.TContract>(entityContractType) )
+                var domainObjectImplementationType = _domainObjectFactory.GetOrBuildDomainObjectType(entityContractType, _persistableObjectFactory.GetType());
+                var persistableObjectImplementationType = entityMetadata.GetImplementationBy(_persistableObjectFactory.GetType());
+
+                using ( TT.CreateScope<TT.TContract, TT.TImpl, TT.TImpl2>(entityContractType, domainObjectImplementationType, persistableObjectImplementationType) )
                 {
-                    writer.NewVirtualFunction<IQueryable<TT.TContract>>(entityRepoProperty.Name).Implement(
+                    writer.NewVirtualFunction<IQueryable<TT.TImpl>>(entityRepoProperty.Name).Implement(
                         m => Attributes
                             .Set<HttpGetAttribute>()
-                            .Set<QueryableAttribute>()
+                            .Set<EnableBreezeQueryAttribute>()
                             .Set<RouteAttribute>(values => values.Arg<string>(entityMetadata.Name)),
                         w => {
-                            var resultLocal = w.Local<IQueryable<TT.TContract>>();
-                            resultLocal.Assign(
+                            var sourceLocal = w.Local<IQueryable<TT.TContract>>();
+                            sourceLocal.Assign(
                                 w.This<BreezeApiControllerBase<CTT.TDataRepo>>()
                                 .Prop<BreezeContextProvider<CTT.TDataRepo>>(x => x.ContextProvider)
                                 .Prop<CTT.TDataRepo>(x => x.QuerySource)
                                 .Prop<IQueryable<TT.TContract>>(entityRepoProperty));
+                            var resultLocal = w.Local<IQueryable<TT.TImpl>>();
+                            resultLocal.Assign(w.New<BreezeEndpointQueryable<TT.TContract, TT.TImpl, TT.TImpl2>>(
+                                sourceLocal, 
+                                w.This<BreezeApiControllerBase<CTT.TDataRepo>>().Prop(x => x.MetadataCache)));
                             w.This<BreezeApiControllerBase<CTT.TDataRepo>>().Void(x => x.CleanupCurrentThread);
                             w.Return(resultLocal);
                         });

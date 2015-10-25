@@ -36,7 +36,7 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static PropertyInfo GetImplementationBy<TFactory>(this IPropertyMetadata metadata) where TFactory : IEntityObjectFactory
+        public static PropertyInfo GetImplementationBy<TFactory>(this IPropertyMetadata metadata) where TFactory : class
         {
             return GetImplementationBy(metadata, typeof(TFactory));
         }

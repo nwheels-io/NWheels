@@ -11,6 +11,7 @@ using NWheels.DataObjects.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
+using NWheels.Stacks.EntityFramework.Factories;
 using NWheels.TypeModel.Core.Factories;
 using NWheels.Utilities;
 using EntityState = System.Data.Entity.EntityState;
@@ -199,6 +200,16 @@ namespace NWheels.Stacks.EntityFramework
             get
             {
                 return typeof(TEntityImpl);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Type PersistableObjectFactoryType
+        {
+            get
+            {
+                return typeof(EfEntityObjectFactory);
             }
         }
 

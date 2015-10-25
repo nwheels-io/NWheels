@@ -5,7 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using NUnit.Framework;
+using NWheels.Conventions.Core;
 using NWheels.Domains.Security;
+using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Testing;
 
@@ -19,8 +21,9 @@ namespace NWheels.Stacks.ODataBreeze.SystemTests
         {
             //-- arrange
 
-            var factory = new BreezeApiControllerFactory(base.DyamicModule, base.Framework.MetadataCache);
             base.Framework.UpdateComponents(builder => builder.NWheelsFeatures().Logging().RegisterLogger<IBreezeEndpointLogger>());
+            var factory = 
+                new BreezeApiControllerFactory(base.DyamicModule, base.Framework.MetadataCache, base.Resolve<IDomainObjectFactory>(), base.Resolve<IEntityObjectFactory>());
 
             //-- act
 

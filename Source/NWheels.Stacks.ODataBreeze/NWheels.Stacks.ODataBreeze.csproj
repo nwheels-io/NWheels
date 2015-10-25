@@ -151,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BreezeApiControllerFactory.cs" />
+    <Compile Include="BreezeEndpointQueryable.cs" />
     <Compile Include="BreezeMetadataBuilder.cs" />
     <Compile Include="BreezeWebApiConfig.cs" />
     <Compile Include="DomainObjectContractResolver.cs" />
@@ -163,6 +164,7 @@
     <Compile Include="JsonSerializationUtility.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="BreezeEndpointComponent.cs" />
+    <Compile Include="BreezeQueryExpressionSpecializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BreezeContextProvider.cs" />
     <Compile Include="BreezeApiControllerBase.cs" />

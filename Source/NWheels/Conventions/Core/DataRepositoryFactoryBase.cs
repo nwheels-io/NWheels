@@ -318,6 +318,8 @@ namespace NWheels.Conventions.Core
                         _domainObjectFactoryField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IDomainObjectFactory>(c), components));
                     
                         Initializers.ForEach(init => init(cw));
+
+                        cw.This<DataRepositoryBase>().Void(x => x.EnsureDomainObjectTypesCreated);
                     });
             }
 

@@ -137,5 +137,15 @@ namespace NWheels.Stacks.ODataBreeze
                 return _contextProvider;
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ITypeMetadataCache MetadataCache
+        {
+            get
+            {
+                return _metadataCache;
+            }
+        }
     }
 }

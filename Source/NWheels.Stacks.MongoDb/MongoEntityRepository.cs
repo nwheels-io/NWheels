@@ -254,6 +254,16 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Type PersistableObjectFactoryType
+        {
+            get
+            {
+                return typeof(MongoEntityObjectFactory);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         ITypeMetadata IEntityRepository.Metadata
         {
             get

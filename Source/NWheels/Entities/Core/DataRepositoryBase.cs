@@ -24,6 +24,7 @@ namespace NWheels.Entities.Core
         private readonly Dictionary<Type, IPartitionedRepository> _partitionedRepositoryByContractType;
         private readonly Dictionary<Type, Action<IDataRepositoryCallback>> _genericCallbacksByContractType;
         private readonly IComponentContext _components;
+        private readonly IDomainObjectFactory _domainObjectFactory;
         private readonly IServiceBus _serviceBus;
         private readonly IDomainContextLogger _logger;
         private readonly bool _autoCommit;
@@ -44,6 +45,7 @@ namespace NWheels.Entities.Core
             _genericCallbacksByContractType = new Dictionary<Type, Action<IDataRepositoryCallback>>();
             _autoCommit = autoCommit;
             _components = components;
+            _domainObjectFactory = components.Resolve<IDomainObjectFactory>();
             _serviceBus = components.Resolve<IServiceBus>();
             _logger = components.Resolve<IDomainContextLogger>();
             _currentState = UnitOfWorkState.Untouched;
@@ -276,6 +278,16 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public virtual void EnsureDomainObjectTypesCreated()
+        {
+            foreach ( var contractType in _entityRepositoryByContractType.Keys )
+            {
+                _domainObjectFactory.GetOrBuildDomainObjectType(contractType, this.PersistableObjectFactory.GetType());
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IQueryable<TEntity> AuthorizeQuery<TEntity>(IQueryable<TEntity> source)
         {
             return source;
@@ -332,6 +344,16 @@ namespace NWheels.Entities.Core
             get
             {
                 return (_componentLifetimeScope ?? _components);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IDomainObjectFactory DomainObjectFactory
+        {
+            get
+            {
+                return _domainObjectFactory;
             }
         }
 

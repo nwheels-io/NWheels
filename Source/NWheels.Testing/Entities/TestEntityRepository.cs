@@ -8,6 +8,7 @@ using NWheels.DataObjects.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
+using NWheels.Testing.Entities.Impl;
 using NWheels.Utilities;
 
 namespace NWheels.Testing.Entities
@@ -119,6 +120,16 @@ namespace NWheels.Testing.Entities
             get
             {
                 return typeof(TEntity);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Type PersistableObjectFactoryType
+        {
+            get
+            {
+                return typeof(TestEntityObjectFactory);
             }
         }
 
