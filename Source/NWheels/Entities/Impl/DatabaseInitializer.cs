@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels;
+using NWheels.Authorization;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
@@ -18,6 +19,7 @@ namespace NWheels.Entities.Impl
         private readonly Pipeline<IDataRepositoryPopulator> _populators;
         private readonly IFrameworkDatabaseConfig _configuration;
         private readonly ILogger _logger;
+        private readonly ISessionManager _sessionManager;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -25,8 +27,10 @@ namespace NWheels.Entities.Impl
             IStorageInitializer initializer, 
             Pipeline<IDataRepositoryPopulator> populators, 
             Auto<IFrameworkDatabaseConfig> configuration, 
+            ISessionManager sessionManager,
             ILogger logger)
         {
+            _sessionManager = sessionManager;
             _initializer = initializer;
             _populators = populators;
             _configuration = configuration.Instance;
@@ -67,18 +71,21 @@ namespace NWheels.Entities.Impl
         {
             _initializer.CreateStorageSchema(_configuration.ConnectionString);
 
-            foreach ( var populator in _populators )
+            using ( _sessionManager.JoinGlobalSystem() )
             {
-                using ( var populatorActivity = _logger.InvokingDataPopulator(type: populator.GetType().FullName) )
+                foreach ( var populator in _populators )
                 {
-                    try
+                    using ( var populatorActivity = _logger.InvokingDataPopulator(type: populator.GetType().FullName) )
                     {
-                        populator.Populate();
-                    }
-                    catch ( Exception e )
-                    {
-                        populatorActivity.Fail(e);
-                        throw;
+                        try
+                        {
+                            populator.Populate();
+                        }
+                        catch ( Exception e )
+                        {
+                            populatorActivity.Fail(e);
+                            throw;
+                        }
                     }
                 }
             }
