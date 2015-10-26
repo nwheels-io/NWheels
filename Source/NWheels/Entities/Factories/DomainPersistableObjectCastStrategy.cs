@@ -101,6 +101,23 @@ namespace NWheels.Entities.Factories
                     })
                     : null
             );
+
+            if ( MetaProperty.Relation.RelatedPartyType.PrimaryKey != null )
+            {
+                var foreignKeyProperty = MetaProperty.Relation.RelatedPartyType.PrimaryKey.Properties[0].ContractPropertyInfo;
+
+                using ( TT.CreateScope<TT.TKey>(foreignKeyProperty.PropertyType) )
+                {
+                    writer.NewVirtualWritableProperty<TT.TKey>(MetaProperty.Name + "_FK").Implement(
+                        p => p.Get(gw =>
+                        {
+                            gw.Return(gw.This<TT.TInterface>().Prop<TT.TProperty>(ImplementedContractProperty).Prop<TT.TKey>(foreignKeyProperty));
+                        }),
+                        p => p.Set((sw, value) => { })
+                    );
+                }
+            }
+
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -30,35 +30,35 @@ namespace NWheels.Stacks.ODataBreeze
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
-        {
-            IList<JsonProperty> result = base.CreateProperties(type, memberSerialization);
-            var contractType = JsonSerializationUtility.TryGetEntityContractType(type);
+        //protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+        //{
+        //    IList<JsonProperty> result = base.CreateProperties(type, memberSerialization);
+        //    var contractType = JsonSerializationUtility.TryGetEntityContractType(type);
 
-            if ( contractType != null )
-            {
-                var metaType = _metadataCache.GetTypeMetadata(contractType);
-                var relationProperties = result.Where(p => p.PropertyType.IsEntityContract()).ToArray();
+        //    if ( contractType != null )
+        //    {
+        //        var metaType = _metadataCache.GetTypeMetadata(contractType);
+        //        var relationProperties = result.Where(p => p.PropertyType.IsEntityContract()).ToArray();
 
-                foreach ( var relation in relationProperties )
-                {
-                    _logger.ContractResolverAddingForeignKeyProperty(type.Name, relation.PropertyName);
+        //        foreach ( var relation in relationProperties )
+        //        {
+        //            _logger.ContractResolverAddingForeignKeyProperty(type.Name, relation.PropertyName);
 
-                    var foreignKeyProperty = new JsonProperty {
-                        PropertyType = typeof(string),
-                        DeclaringType = relation.DeclaringType,
-                        PropertyName = JsonSerializationUtility.GetForeignKeyPropertyName(relation.PropertyName),
-                        ValueProvider = new ForeignKeyValueProvider(metaType, relation),
-                        Readable = true,
-                        Writable = true
-                    };
+        //            var foreignKeyProperty = new JsonProperty {
+        //                PropertyType = typeof(string),
+        //                DeclaringType = relation.DeclaringType,
+        //                PropertyName = JsonSerializationUtility.GetForeignKeyPropertyName(relation.PropertyName),
+        //                ValueProvider = new ForeignKeyValueProvider(metaType, relation),
+        //                Readable = true,
+        //                Writable = true
+        //            };
 
-                    result.Add(foreignKeyProperty);
-                }
-            }
+        //            result.Add(foreignKeyProperty);
+        //        }
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
