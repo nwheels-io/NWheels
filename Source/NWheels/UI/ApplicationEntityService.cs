@@ -10,6 +10,9 @@ using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
+using System.Reflection;
+using System.ComponentModel;
+using System.Linq.Expressions;
 
 namespace NWheels.UI
 {
@@ -311,17 +314,86 @@ namespace NWheels.UI
                 using ( var context = Framework.NewUnitOfWork<TContext>() )
                 {
                     var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
+                    IQueryable<TEntity> query = repository;
+
+                    foreach (var equalityFilterItem in options.EqualityFilter)
+                    {
+                        var metaProperty = MetaType.GetPropertyByName(equalityFilterItem.Key);
+                        PropertyInfo pi = metaProperty.ContractPropertyInfo;
+                        var expressionFactory = ExpressionFactory<TEntity>.Create(metaProperty);
+                        var expression = expressionFactory.CreateEqualityComparisonExpression(metaProperty, equalityFilterItem.Value);
+                        query = query.Where(expression);
+                    }
+
+                    foreach ( var orderBy in options.OrderBy )
+                    {
+                        var metaProperty = MetaType.GetPropertyByName(orderBy.PropertyName);
+                        var expressionFactory = ExpressionFactory<TEntity>.Create(metaProperty);
+                        query = expressionFactory.OrderBy(query, metaProperty, orderBy.Ascending);
+                    }
+
+                    if ( options.MaxCount.HasValue )
+                    {
+                        query = query.Take(options.MaxCount.Value + (options.ReturnMaxCountPlusOne ? 1 : 0));
+                    }
 
                     if ( options.IsCountOnly )
                     {
-                        resultCount = repository.Count();
+                        resultCount = query.Count();
                         resultSet = null;
                     }
                     else
                     {
-                        resultSet = repository.ToArray().Cast<IDomainObject>().ToArray();
+                        resultSet = query.ToArray().Cast<IDomainObject>().ToArray();
                         resultCount = resultSet.Length;
                     }
+                }
+            }
+
+        }
+
+        private abstract class ExpressionFactory<TEntity>
+        {
+            public abstract Expression<Func<TEntity, bool>> CreateEqualityComparisonExpression(IPropertyMetadata metaProperty, string value);
+            public abstract IQueryable<TEntity> OrderBy(IQueryable<TEntity> query, IPropertyMetadata metaProperty, bool ascending);
+            
+            public static ExpressionFactory<TEntity> Create(IPropertyMetadata metaProperty)
+            {
+                var expressionFactoryType = typeof(ExpressionFactory<,>).MakeGenericType(typeof(TEntity), metaProperty.ClrType);
+                var expressionFactory = (ExpressionFactory<TEntity>)Activator.CreateInstance(expressionFactoryType);
+                return expressionFactory;
+            }
+        }
+
+        private class ExpressionFactory<TEntity, TProperty> : ExpressionFactory<TEntity>
+        {
+            public override Expression<Func<TEntity, bool>> CreateEqualityComparisonExpression(IPropertyMetadata metaProperty, string value)
+            {
+                var parameter = Expression.Parameter(typeof(TEntity), "e");
+
+                object parsedValue = null;
+                if (NWheels.Utilities.ParseUtility.TryParse(value, metaProperty.ClrType, out parsedValue) == false)
+                {
+                    var parseMethod = metaProperty.ClrType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static);
+                    parsedValue = parseMethod.Invoke(null, new object[] { value });
+                }
+                
+                Expression equality = Expression.Equal(
+                    Expression.Property(parameter, metaProperty.ContractPropertyInfo), 
+                    Expression.Constant(parsedValue, metaProperty.ClrType));
+
+                return Expression.Lambda<Func<TEntity, bool>>(equality, new[] { parameter });
+            }
+
+            public override IQueryable<TEntity> OrderBy(IQueryable<TEntity> query, IPropertyMetadata metaProperty, bool ascending)
+            {
+                if (ascending)
+                {
+                    return query.OrderBy<TEntity, TProperty>(metaProperty.ContractPropertyInfo.PropertyExpression<TEntity, TProperty>());
+                }
+                else
+                {
+                    return query.OrderByDescending<TEntity, TProperty>(metaProperty.ContractPropertyInfo.PropertyExpression<TEntity, TProperty>());
                 }
             }
         }

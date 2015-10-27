@@ -15,7 +15,7 @@ namespace NWheels.Extensions
             return (member.GetCustomAttribute<T>() != null);
         }
 
-        public static Expression<Func<TEntity, TProperty>> PropertyExpression<TEntity, TProperty>(PropertyInfo property)
+        public static Expression<Func<TEntity, TProperty>> PropertyExpression<TEntity, TProperty>(this PropertyInfo property)
         {
             var parameter = Expression.Parameter(typeof(TEntity), "e");
             return Expression.Lambda<Func<TEntity, TProperty>>(Expression.Convert(Expression.Property(parameter, property), typeof(TProperty)), new[] { parameter });

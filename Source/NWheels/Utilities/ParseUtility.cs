@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -66,6 +67,20 @@ namespace NWheels.Utilities
             else
             {
                 return s_NonTypedParsersByType[asType](s);
+            }
+        }
+
+        public static bool TryParse(string s, Type asType, out object value)
+        {
+            value = null;
+            try
+            {
+                value = Parse(s, asType);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
 
