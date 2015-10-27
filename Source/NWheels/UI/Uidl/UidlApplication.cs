@@ -21,6 +21,7 @@ namespace NWheels.UI.Uidl
             base.Notifications.Add(this.RequestNotAuthorized);
 
             this.RequiredDomainApis = new List<Type>();
+            this.RequiredDomainContexts = new List<Type>();
             this.DefaultSkin = "inspinia";
         }
 
@@ -56,6 +57,7 @@ namespace NWheels.UI.Uidl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public List<Type> RequiredDomainApis { get; private set; }
+        public List<Type> RequiredDomainContexts { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -63,6 +65,14 @@ namespace NWheels.UI.Uidl
             where TContract : class
         {
             this.RequiredDomainApis.Add(typeof(TContract));            
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected void RequireDomainContext<TContract>()
+            where TContract : class
+        {
+            this.RequiredDomainContexts.Add(typeof(TContract));
         }
     }
 }

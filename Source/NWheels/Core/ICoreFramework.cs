@@ -11,6 +11,7 @@ namespace NWheels.Core
 {
     public interface ICoreFramework
     {
+        IApplicationDataRepository NewUnitOfWork(Type domainContextType, bool autoCommit = true, IsolationLevel? isolationLevel = null);
         IApplicationDataRepository NewUnitOfWorkForEntity(Type entityContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null);
         IComponentContext Components { get; }
     }

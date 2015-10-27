@@ -10,6 +10,7 @@ namespace NWheels.DataObjects
     public interface ITypeMetadataCache
     {
         ITypeMetadata GetTypeMetadata(Type contract);
+        ITypeMetadata GetTypeMetadata(string qualifiedName);
         bool ContainsTypeMetadata(Type contract);
         bool TryGetTypeMetadata(Type contract, out ITypeMetadata metadata);
         IEnumerable<IPropertyMetadata> GetIncomingRelations(ITypeMetadata targetType, Func<IPropertyMetadata, bool> sourcePredicate = null);

@@ -11,6 +11,7 @@ using Nancy.Hosting.Self;
 using NWheels.Authorization;
 using NWheels.DataObjects;
 using NWheels.Endpoints;
+using NWheels.Entities.Core;
 using NWheels.Globalization;
 using NWheels.Hosting;
 using NWheels.UI;
@@ -30,6 +31,7 @@ namespace NWheels.Stacks.NancyFx
         private readonly IWebApplicationLogger _logger;
         private readonly IFrameworkUIConfig _frameworkUIConfig;
         private readonly UidlApplication _application;
+        private readonly ApplicationEntityService _entityService;
         private readonly Dictionary<string, object> _apiServicesByContractName;
         private readonly Dictionary<string, WebApiDispatcherBase> _apiDispatchersByContractName;
         private UidlDocument _uidl;
@@ -61,6 +63,11 @@ namespace NWheels.Stacks.NancyFx
             _frameworkUIConfig = frameworkUIConfig;
 
             _application = (UidlApplication)components.Resolve(endpointRegistration.Contract);
+            _entityService = new ApplicationEntityService(
+                components.Resolve<IFramework>(), 
+                components.Resolve<ITypeMetadataCache>(),
+                components.Resolve<IDomainContextLogger>(), 
+                _application.RequiredDomainContexts);
             
             _apiServicesByContractName = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
             _apiDispatchersByContractName = new Dictionary<string, WebApiDispatcherBase>(StringComparer.InvariantCultureIgnoreCase);
@@ -99,6 +106,13 @@ namespace NWheels.Stacks.NancyFx
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ApplicationEntityService EntityService
+        {
+            get { return _entityService; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string SkinName 
         {
             get { return _application.DefaultSkin; }
@@ -123,6 +137,13 @@ namespace NWheels.Stacks.NancyFx
         IRootPathProvider IWebModuleContext.PathProvider 
         {
             get { return _hostBootstrapper; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IWebApplicationLogger IWebModuleContext.Logger
+        {
+            get { return _logger; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

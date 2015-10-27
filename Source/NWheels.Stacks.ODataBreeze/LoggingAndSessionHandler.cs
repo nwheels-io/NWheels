@@ -74,12 +74,13 @@ namespace NWheels.Stacks.ODataBreeze
                 }
             }
 
-            if ( sessionId != null )
+            if ( _sessionManager.IsValidSessionId(sessionId) )
             {
                 _sessionManager.JoinSession(sessionId);
             }
             else
             {
+                sessionId = null;
                 _sessionManager.JoinGlobalAnonymous();
             }
         }

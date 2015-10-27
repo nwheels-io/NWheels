@@ -59,5 +59,8 @@ namespace NWheels.Entities.Core
 
         [LogVerbose]
         void CreatRepositoryPartition(Type entity, object partitionValue);
+
+        [LogCritical]
+        void StaleUnitOfWorkEncountered(string domainContext, string initializedBy);
     }
 }

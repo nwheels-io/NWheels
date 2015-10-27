@@ -289,6 +289,7 @@
     <Compile Include="TypeModel\Serialization\IObjectSerializerConfigContainer.cs" />
     <Compile Include="TypeModel\TimeUnit.cs" />
     <Compile Include="UI\AuthorizationContract.cs" />
+    <Compile Include="UI\ApplicationEntityService.cs" />
     <Compile Include="UI\IFrameworkUIConfig.cs" />
     <Compile Include="UI\Toolbox\Report.cs" />
     <Compile Include="UI\Toolbox\ReportSelector.cs" />
@@ -306,6 +307,7 @@
     <Compile Include="UI\Toolbox\CrudForm.cs" />
     <Compile Include="UI\Toolbox\LayoutHorizontal.cs" />
     <Compile Include="UI\Toolbox\Text.cs" />
+    <Compile Include="UI\Uidl\RequireDomainContext.cs" />
     <Compile Include="UI\Uidl\UidlAuthorization.cs" />
     <Compile Include="UI\Uidl\UidlUtility.cs" />
     <Compile Include="UI\ViewModel.cs" />

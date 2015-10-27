@@ -19,6 +19,7 @@ using NWheels.Processing.Commands;
 using NWheels.Processing.Commands.Factories;
 using NWheels.Processing.Messages;
 using NWheels.UI;
+using NWheels.UI.Impl;
 using NWheels.UI.Uidl;
 using NWheels.Utilities;
 
@@ -121,6 +122,18 @@ namespace NWheels.Stacks.NancyFx
 
             base.Get["/uidl-element-template/{templateName}"] = (route) => {
                 return GetApplicationTemplate(route.templateName);
+            };
+
+            base.Get["/entity/query/{entityName}"] = (route) => {
+                return QueryEntity(route.entityName);
+            };
+
+            base.Get["/entity/store/{entityName}"] = (route) => {
+                return StoreEntity(route.entityName);
+            };
+
+            base.Get["/entity/storeBatch"] = (route) => {
+                return StoreEntityBatch();
             };
         }
 
@@ -280,6 +293,48 @@ namespace NWheels.Stacks.NancyFx
             }
 
             return Response.AsJson(results);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private object QueryEntity(string entityName)
+        {
+            if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
+            {
+                return HttpStatusCode.NotFound;
+            }
+
+            var queryParameters = ((IEnumerable<KeyValuePair<string, object>>)this.Request.Query).ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.ToStringOrDefault(),
+                StringComparer.InvariantCultureIgnoreCase);
+
+            var options = _context.EntityService.ParseQueryOptions(queryParameters);
+            var json = _context.EntityService.QueryJson(entityName, options);
+
+            return Response.AsText(json, "application/json");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private object StoreEntity(string entityName)
+        {
+            if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
+            {
+                return HttpStatusCode.NotFound;
+            }
+
+            _context.EntityService.StoreEntityJson(entityName, Request.Body);
+
+            return HttpStatusCode.OK;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private object StoreEntityBatch()
+        {
+            _context.EntityService.StoreEntityBatchJson(Request.Body);
+            return HttpStatusCode.OK;
         }
 
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------

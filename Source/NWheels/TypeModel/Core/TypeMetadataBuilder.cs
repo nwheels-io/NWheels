@@ -78,6 +78,16 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string QualifiedName
+        {
+            get
+            {
+                return (!string.IsNullOrEmpty(NamespaceQualifier) ? NamespaceQualifier + "." : string.Empty) + Name;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         ITypeMetadata ITypeMetadata.BaseType
         {
             get { return this.BaseType; }

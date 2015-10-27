@@ -10,6 +10,7 @@ namespace NWheels.DataObjects.Core
     {
         private readonly IComponentContext _components;
         private readonly ConcurrentDictionary<Type, TypeMetadataBuilder> _metadataByContractType = new ConcurrentDictionary<Type, TypeMetadataBuilder>();
+        private readonly ConcurrentDictionary<string, TypeMetadataBuilder> _metadataByQualifiedName = new ConcurrentDictionary<string, TypeMetadataBuilder>();
         private readonly ConcurrentDictionary<Type, ISemanticDataType> _semanticDataTypes;
         private readonly ConcurrentDictionary<Type, IStorageDataType> _storageDataTypes;
         private MetadataConventionSet _conventions;
@@ -43,6 +44,13 @@ namespace NWheels.DataObjects.Core
         public ITypeMetadata GetTypeMetadata(Type primaryContract)
         {
             return _metadataByContractType.GetOrAdd(primaryContract, BuildTypeMetadata);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ITypeMetadata GetTypeMetadata(string qualifiedName)
+        {
+            return _metadataByQualifiedName[qualifiedName];
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -214,7 +222,11 @@ namespace NWheels.DataObjects.Core
             EnsureExtensibilityRegistrations();
 
             var mixinContracts = GetRegisteredMixinContracts(primaryContract);
-            return BuildTypeMetadata(primaryContract, mixinContracts);
+            var metaType = BuildTypeMetadata(primaryContract, mixinContracts);
+
+            _metadataByQualifiedName[metaType.QualifiedName] = metaType;
+
+            return metaType;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

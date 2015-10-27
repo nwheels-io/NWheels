@@ -14,6 +14,9 @@ namespace NWheels.UI
         {
             var requiredApiContracts = this.GetType().GetCustomAttributes<RequireDomainApiAttribute>().Select(attr => attr.ContractType);
             base.RequiredDomainApis.AddRange(requiredApiContracts.Distinct());
+
+            var requiredContextContracts = this.GetType().GetCustomAttributes<RequireDomainContextAttribute>().Select(attr => attr.ContractType);
+            base.RequiredDomainContexts.AddRange(requiredContextContracts.Distinct());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

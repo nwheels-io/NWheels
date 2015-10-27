@@ -14,6 +14,7 @@ namespace NWheels.DataObjects
         bool TryGetPropertyByDeclaration(PropertyInfo declarationInContract, out IPropertyMetadata property);
         string Name { get; }
         string NamespaceQualifier { get; }
+        string QualifiedName { get; }
         Type ContractType { get; }
         IReadOnlyList<Type> MixinContractTypes { get; }
         Type DomainObjectType { get; }

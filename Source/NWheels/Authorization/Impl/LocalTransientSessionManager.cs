@@ -38,6 +38,13 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool IsValidSessionId(string sessionId)
+        {
+            return (!string.IsNullOrEmpty(sessionId) && _sessionById.ContainsKey(sessionId));
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public ISession OpenSession(IPrincipal userPrincipal, IEndpoint originatorEndpoint)
         {
             var newSession = new Session(_framework, userPrincipal, originatorEndpoint, slidingExpiration: null, absoluteExpiration: null);

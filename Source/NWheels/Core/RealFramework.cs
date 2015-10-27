@@ -58,6 +58,13 @@ namespace NWheels.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IApplicationDataRepository NewUnitOfWork(Type domainContextType, bool autoCommit = true, IsolationLevel? isolationLevel = null)
+        {
+            return _unitOfWorkFactory.NewUnitOfWork(domainContextType, autoCommit, isolationLevel);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IApplicationDataRepository NewUnitOfWorkForEntity(Type entityContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null)
         {
             var dataRepositoryFactory = _components.Resolve<IDataRepositoryFactory>();
