@@ -148,9 +148,9 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void RegisterEntitiesFromDomainContext(Type contextType, IApplicationDataRepository coontext)
+        private void RegisterEntitiesFromDomainContext(Type contextType, IApplicationDataRepository context)
         {
-            foreach ( var entityContract in coontext.GetEntityContractsInRepository().Where(t => t != null) )
+            foreach ( var entityContract in context.GetEntityContractsInRepository().Where(t => t != null) )
             {
                 var metaType = _metadataCache.GetTypeMetadata(entityContract);
 
@@ -444,6 +444,7 @@ namespace NWheels.UI
                     context.CommitChanges();
                 }
             }
+
             //-------------------------------------------------------------------------------------------------------------------------------------------------
             
             public override void Update(IDomainObject entity)
@@ -523,17 +524,13 @@ namespace NWheels.UI
                         continue;
                     }
 
-                    object parsedValue;
-
                     switch ( metaProperty.Kind )
                     {
                         case PropertyKind.Scalar:
-                            parsedValue = metaProperty.ParseStringValue(equalityFilterItem.Value);
-                            query = query.Where(metaProperty.MakeEqualityComparison<TEntity>(parsedValue));
+                            query = query.Where(metaProperty.MakeEqualityComparison<TEntity>(valueString: equalityFilterItem.Value));
                             break;
                         case PropertyKind.Relation:
-                            //parsedValue = metaProperty.ParseStringValue(equalityFilterItem.Value);
-                            //query = query.Where(metaProperty.MakeEqualityComparison<TEntity>(parsedValue));
+                            query = query.Where(metaProperty.MakeForeignKeyEqualityComparison<TEntity>(valueString: equalityFilterItem.Value));
                             break;
                         default:
                             throw new NotSupportedException("Cannot filter by property: " + metaProperty.Name);

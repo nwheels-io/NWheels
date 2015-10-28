@@ -175,7 +175,14 @@ namespace NWheels.Stacks.MongoDb
 
             protected override Expression VisitUnary(UnaryExpression node)
             {
-                return base.VisitUnary(node);
+                var replacingOperand = base.Visit(node.Operand);
+
+                if ( replacingOperand == node.Operand )
+                {
+                    return node;
+                }
+
+                return Expression.MakeUnary(node.NodeType, replacingOperand, replacingOperand.Type, null);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

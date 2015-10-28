@@ -378,6 +378,10 @@ namespace NWheels.DataObjects.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public abstract MethodInfo EntityIdGetValueMethod { get; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public static ExpressionFactory Create(Type propertyType)
             {
                 var expressionFactoryType = typeof(ExpressionFactory<>).MakeGenericType(propertyType);
@@ -390,6 +394,18 @@ namespace NWheels.DataObjects.Core
 
         private class ExpressionFactory<TProperty> : ExpressionFactory
         {
+            private readonly MethodInfo _entityIdGetValueMethod;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ExpressionFactory()
+            {
+                Expression<Func<object, TProperty>> entityIdGetValueLambda = obj => EntityId.GetValue<TProperty>(obj);
+                _entityIdGetValueMethod = entityIdGetValueLambda.GetMethodInfo();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public override Expression<Func<TEntity, bool>> EqualityComparison<TEntity>(IPropertyMetadata metaProperty, object value)
             {
                 var parameter = Expression.Parameter(typeof(TEntity), "e");
@@ -407,12 +423,10 @@ namespace NWheels.DataObjects.Core
             public override Expression<Func<TEntity, bool>> ForeignKeyEqualityComparison<TEntity>(IPropertyMetadata metaProperty, object value)
             {
                 var relatedKeyMetaProperty = GetRelatedEntityKeyProperty(metaProperty);
-                
+                var entityIdGetValueMethod = GetExpressionFactory(relatedKeyMetaProperty.ClrType).EntityIdGetValueMethod;
                 var parameter = Expression.Parameter(typeof(TEntity), "e");
                 var target = GetPropertyTargetExpression<TEntity>(metaProperty, parameter);
                 
-                Expression<Func<object, TProperty>> entityIdGetValueLambda = obj => EntityId.GetValue<TProperty>(obj);
-                var entityIdGetValueMethod = entityIdGetValueLambda.GetMethodInfo();
 
                 return Expression.Lambda<Func<TEntity, bool>>(
                     Expression.Equal(
@@ -423,7 +437,7 @@ namespace NWheels.DataObjects.Core
                                 Expression.Property(target, metaProperty.ContractPropertyInfo)
                             }
                         ),
-                        Expression.Constant(value, typeof(TProperty))
+                        Expression.Constant(value, relatedKeyMetaProperty.ClrType)
                     ),
                     new[] { parameter }
                 );
@@ -448,6 +462,16 @@ namespace NWheels.DataObjects.Core
                 else
                 {
                     return query.OrderByDescending<TEntity, TProperty>(propertyExpression);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override MethodInfo EntityIdGetValueMethod
+            {
+                get
+                {
+                    return _entityIdGetValueMethod;
                 }
             }
         }
