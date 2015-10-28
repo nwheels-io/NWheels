@@ -364,8 +364,40 @@ namespace NWheels.UI
                     query = HandleOrderBy(options, query);
                     query = HandleMaxCount(options, query);
 
-                    ExecuteQuery(query, options, out resultSet, out resultCount);
+                    TEntity[] dbResultSet;
+                    ExecuteQuery(query, options, out dbResultSet, out resultCount);
+
+                    resultSet = FilterCalculatedValues(options, dbResultSet).Cast<IDomainObject>().ToArray();
+                    resultCount = resultSet.Length;
                 }
+            }
+
+            private IEnumerable<TEntity> FilterCalculatedValues(QueryOptions options, TEntity[] resultSet)
+            {
+                IQueryable<TEntity> query = null;
+
+                foreach (var equalityFilterItem in options.EqualityFilter)
+                {
+                    var metaProperty = MetaType.GetPropertyByName(equalityFilterItem.Key);
+
+                    if (metaProperty.IsCalculated == false)
+                    {
+                        continue;
+                    }
+
+                    if (query == null)
+                    {
+                        query = resultSet.AsQueryable<TEntity>();
+                    }
+
+                    object parsedValue = metaProperty.ParseStringValue(equalityFilterItem.Value);
+                    query = query.Where(metaProperty.MakeEqualityComparison<TEntity>(parsedValue));
+                }
+
+                if (query == null)
+                    return resultSet;
+
+                return query;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -439,7 +471,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void ExecuteQuery(IQueryable<TEntity> query, QueryOptions options, out IDomainObject[] resultSet, out long resultCount)
+            private void ExecuteQuery(IQueryable<TEntity> query, QueryOptions options, out TEntity[] resultSet, out long resultCount)
             {
                 if ( options.IsCountOnly )
                 {
@@ -448,7 +480,7 @@ namespace NWheels.UI
                 }
                 else
                 {
-                    resultSet = query.ToArray().Cast<IDomainObject>().ToArray();
+                    resultSet = query.ToArray().ToArray();
                     resultCount = resultSet.Length;
                 }
             }
