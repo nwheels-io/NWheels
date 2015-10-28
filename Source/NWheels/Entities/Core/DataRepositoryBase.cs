@@ -290,10 +290,10 @@ namespace NWheels.Entities.Core
 
         public IQueryable<TEntity> AuthorizeQuery<TEntity>(IQueryable<TEntity> source)
         {
-            //return source;
+            return source;
             //TODO: temporarily disabled; re-enable when all applications are ready
-            var rule = GetRuntimeEntityAccessRule<TEntity>();
-            return rule.AuthorizeQuery(this, source);
+            //var rule = GetRuntimeEntityAccessRule<TEntity>();
+            //return rule.AuthorizeQuery(this, source);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

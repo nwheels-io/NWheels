@@ -2,12 +2,15 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using Hapil;
+using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.Conventions.Core;
 using NWheels.Exceptions;
+using NWheels.Extensions;
 using NWheels.Utilities;
 using TT = Hapil.TypeTemplate;
 
@@ -78,6 +81,35 @@ namespace NWheels.DataObjects.Core
         public IEnumerable<KeyValuePair<Type, PropertyInfo>> GetAllImplementations()
         {
             return _implementationPropertyByFactoryType.ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public object ParseStringValue(string s)
+        {
+            object parsedValue = null;
+
+            if ( !ParseUtility.TryParse(s, this.ClrType, out parsedValue) )
+            {
+                var parseMethod = this.ClrType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static);
+                parsedValue = parseMethod.Invoke(null, new object[] { s });
+            }
+
+            return parsedValue;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Expression<Func<TEntity, bool>> MakeEqualityComparison<TEntity>(object value)
+        {
+            return GetExpressionFactory(this.ClrType).EqualityComparison<TEntity>(this, value);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IQueryable<TEntity> MakeOrderBy<TEntity>(IQueryable<TEntity> query, bool ascending)
+        {
+            return GetExpressionFactory(this.ClrType).OrderBy<TEntity>(query, this, ascending);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -267,6 +299,85 @@ namespace NWheels.DataObjects.Core
             }
 
             return this.RelationalMapping;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly ConcurrentDictionary<Type, ExpressionFactory> _s_expressionFactoryByPropertyType = 
+            new ConcurrentDictionary<Type, ExpressionFactory>();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static ExpressionFactory GetExpressionFactory(Type propertyType)
+        {
+            return _s_expressionFactoryByPropertyType.GetOrAdd(propertyType, ExpressionFactory.Create);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private abstract class ExpressionFactory
+        {
+            public abstract Expression<Func<TEntity, bool>> EqualityComparison<TEntity>(IPropertyMetadata metaProperty, object value);
+            public abstract IQueryable<TEntity> OrderBy<TEntity>(IQueryable<TEntity> query, IPropertyMetadata metaProperty, bool ascending);
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static ExpressionFactory Create(Type propertyType)
+            {
+                var expressionFactoryType = typeof(ExpressionFactory<>).MakeGenericType(propertyType);
+                var expressionFactory = (ExpressionFactory)Activator.CreateInstance(expressionFactoryType);
+                return expressionFactory;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class ExpressionFactory<TProperty> : ExpressionFactory
+        {
+            public override Expression<Func<TEntity, bool>> EqualityComparison<TEntity>(IPropertyMetadata metaProperty, object value)
+            {
+                var parameter = Expression.Parameter(metaProperty.ContractPropertyInfo.DeclaringType ?? typeof(TEntity), "e");
+
+                Expression targetExpression = parameter;
+
+                if ( metaProperty.ContractPropertyInfo.DeclaringType != null && metaProperty.ContractPropertyInfo.DeclaringType != typeof(TEntity) )
+                {
+                    targetExpression = Expression.Convert(parameter, metaProperty.ContractPropertyInfo.DeclaringType);
+                }
+
+                Expression equality = Expression.Equal(
+                    Expression.Property(targetExpression, metaProperty.ContractPropertyInfo),
+                    Expression.Constant(value, metaProperty.ClrType));
+
+                return Expression.Lambda<Func<TEntity, bool>>(equality, new[] { parameter });
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override IQueryable<TEntity> OrderBy<TEntity>(IQueryable<TEntity> query, IPropertyMetadata metaProperty, bool ascending)
+            {
+                var parameter = Expression.Parameter(typeof(TEntity), "e");
+                Expression targetExpression = parameter;
+
+                if ( metaProperty.ContractPropertyInfo.DeclaringType != null && metaProperty.ContractPropertyInfo.DeclaringType != typeof(TEntity) )
+                {
+                    targetExpression = Expression.Convert(parameter, metaProperty.ContractPropertyInfo.DeclaringType);
+                }
+                
+                var propertyExpression = Expression.Lambda<Func<TEntity, TProperty>>(
+                    Expression.Property(targetExpression, metaProperty.ContractPropertyInfo), 
+                    new[] { parameter }
+                );
+
+                if ( ascending )
+                {
+                    return query.OrderBy<TEntity, TProperty>(propertyExpression);
+                }
+                else
+                {
+                    return query.OrderByDescending<TEntity, TProperty>(propertyExpression);
+                }
+            }
         }
     }
 }

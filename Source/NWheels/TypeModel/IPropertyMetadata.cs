@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using Hapil;
 using Hapil.Operands;
@@ -14,8 +16,11 @@ namespace NWheels.DataObjects
         bool HasContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute;
         TAttribute TryGetContractAttribute<TAttribute>() where TAttribute : PropertyContractAttribute;
         bool TryGetImplementation(Type factoryType, out PropertyInfo implementationProperty);
-        bool TryGetDefaultValueOperand(MethodWriterBase writer, out IOperand<TypeTemplate.TProperty> valueOperand);
         IEnumerable<KeyValuePair<Type, PropertyInfo>> GetAllImplementations();
+        bool TryGetDefaultValueOperand(MethodWriterBase writer, out IOperand<TypeTemplate.TProperty> valueOperand);
+        object ParseStringValue(string s);
+        Expression<Func<TEntity, bool>> MakeEqualityComparison<TEntity>(object value);
+        IQueryable<TEntity> MakeOrderBy<TEntity>(IQueryable<TEntity> query, bool ascending);
         ITypeMetadata DeclaringContract { get; }
         string Name { get; }
         string ContractQualifiedName { get; }

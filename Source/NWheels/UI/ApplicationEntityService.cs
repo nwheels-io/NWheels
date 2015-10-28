@@ -316,85 +316,67 @@ namespace NWheels.UI
                     var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
                     IQueryable<TEntity> query = repository;
 
-                    foreach (var equalityFilterItem in options.EqualityFilter)
-                    {
-                        var metaProperty = MetaType.GetPropertyByName(equalityFilterItem.Key);
-                        PropertyInfo pi = metaProperty.ContractPropertyInfo;
-                        var expressionFactory = ExpressionFactory<TEntity>.Create(metaProperty);
-                        var expression = expressionFactory.CreateEqualityComparisonExpression(metaProperty, equalityFilterItem.Value);
-                        query = query.Where(expression);
-                    }
+                    query = HandleEqualityFilter(options, query);
+                    query = HandleOrderBy(options, query);
+                    query = HandleMaxCount(options, query);
 
-                    foreach ( var orderBy in options.OrderBy )
-                    {
-                        var metaProperty = MetaType.GetPropertyByName(orderBy.PropertyName);
-                        var expressionFactory = ExpressionFactory<TEntity>.Create(metaProperty);
-                        query = expressionFactory.OrderBy(query, metaProperty, orderBy.Ascending);
-                    }
-
-                    if ( options.MaxCount.HasValue )
-                    {
-                        query = query.Take(options.MaxCount.Value + (options.ReturnMaxCountPlusOne ? 1 : 0));
-                    }
-
-                    if ( options.IsCountOnly )
-                    {
-                        resultCount = query.Count();
-                        resultSet = null;
-                    }
-                    else
-                    {
-                        resultSet = query.ToArray().Cast<IDomainObject>().ToArray();
-                        resultCount = resultSet.Length;
-                    }
+                    ExecuteQuery(query, options, out resultSet, out resultCount);
                 }
             }
 
-        }
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private abstract class ExpressionFactory<TEntity>
-        {
-            public abstract Expression<Func<TEntity, bool>> CreateEqualityComparisonExpression(IPropertyMetadata metaProperty, string value);
-            public abstract IQueryable<TEntity> OrderBy(IQueryable<TEntity> query, IPropertyMetadata metaProperty, bool ascending);
-            
-            public static ExpressionFactory<TEntity> Create(IPropertyMetadata metaProperty)
+            private void ExecuteQuery(IQueryable<TEntity> query, QueryOptions options, out IDomainObject[] resultSet, out long resultCount)
             {
-                var expressionFactoryType = typeof(ExpressionFactory<,>).MakeGenericType(typeof(TEntity), metaProperty.ClrType);
-                var expressionFactory = (ExpressionFactory<TEntity>)Activator.CreateInstance(expressionFactoryType);
-                return expressionFactory;
-            }
-        }
-
-        private class ExpressionFactory<TEntity, TProperty> : ExpressionFactory<TEntity>
-        {
-            public override Expression<Func<TEntity, bool>> CreateEqualityComparisonExpression(IPropertyMetadata metaProperty, string value)
-            {
-                var parameter = Expression.Parameter(typeof(TEntity), "e");
-
-                object parsedValue = null;
-                if (NWheels.Utilities.ParseUtility.TryParse(value, metaProperty.ClrType, out parsedValue) == false)
+                if ( options.IsCountOnly )
                 {
-                    var parseMethod = metaProperty.ClrType.GetMethod("Parse", BindingFlags.Public | BindingFlags.Static);
-                    parsedValue = parseMethod.Invoke(null, new object[] { value });
-                }
-                
-                Expression equality = Expression.Equal(
-                    Expression.Property(parameter, metaProperty.ContractPropertyInfo), 
-                    Expression.Constant(parsedValue, metaProperty.ClrType));
-
-                return Expression.Lambda<Func<TEntity, bool>>(equality, new[] { parameter });
-            }
-
-            public override IQueryable<TEntity> OrderBy(IQueryable<TEntity> query, IPropertyMetadata metaProperty, bool ascending)
-            {
-                if (ascending)
-                {
-                    return query.OrderBy<TEntity, TProperty>(metaProperty.ContractPropertyInfo.PropertyExpression<TEntity, TProperty>());
+                    resultCount = query.Count();
+                    resultSet = null;
                 }
                 else
                 {
-                    return query.OrderByDescending<TEntity, TProperty>(metaProperty.ContractPropertyInfo.PropertyExpression<TEntity, TProperty>());
+                    resultSet = query.ToArray().Cast<IDomainObject>().ToArray();
+                    resultCount = resultSet.Length;
                 }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private IQueryable<TEntity> HandleMaxCount(QueryOptions options, IQueryable<TEntity> query)
+            {
+                if ( options.MaxCount.HasValue )
+                {
+                    query = query.Take(options.MaxCount.Value + (options.ReturnMaxCountPlusOne ? 1 : 0));
+                }
+                
+                return query;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IQueryable<TEntity> HandleOrderBy(QueryOptions options, IQueryable<TEntity> query)
+            {
+                foreach ( var orderBy in options.OrderBy )
+                {
+                    var metaProperty = MetaType.GetPropertyByName(orderBy.PropertyName);
+                    query = metaProperty.MakeOrderBy(query, orderBy.Ascending);
+                }
+                
+                return query;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IQueryable<TEntity> HandleEqualityFilter(QueryOptions options, IQueryable<TEntity> query)
+            {
+                foreach ( var equalityFilterItem in options.EqualityFilter )
+                {
+                    var metaProperty = MetaType.GetPropertyByName(equalityFilterItem.Key);
+                    var parsedValue = metaProperty.ParseStringValue(equalityFilterItem.Value);
+                    query = query.Where(metaProperty.MakeEqualityComparison<TEntity>(parsedValue));
+                }
+                
+                return query;
             }
         }
     }

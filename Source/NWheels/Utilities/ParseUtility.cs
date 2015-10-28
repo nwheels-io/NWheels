@@ -58,6 +58,23 @@ namespace NWheels.Utilities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static bool TryParse<T>(string s, out T value)
+        {
+            value = default(T);
+
+            try
+            {
+                value = Parse<T>(s);
+                return true;
+            }
+            catch ( Exception )
+            {
+                return false;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static object Parse(string s, Type asType)
         {
             if ( asType.IsEnum )
@@ -70,27 +87,35 @@ namespace NWheels.Utilities
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static bool TryParse(string s, Type asType, out object value)
         {
             value = null;
+
             try
             {
                 value = Parse(s, asType);
                 return true;
             }
-            catch (Exception)
+            catch ( Exception )
             {
                 return false;
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static DateTime TryParse(string s, DateTime defaultValue)
         {
             if ( string.IsNullOrEmpty(s) )
+            {
                 return defaultValue;
+            }
 
             DateTime value;
-            if (DateTime.TryParse(s, out value))
+            
+            if ( DateTime.TryParse(s, out value) )
             {
                 return value;
             }
