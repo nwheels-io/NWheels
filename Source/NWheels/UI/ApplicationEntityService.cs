@@ -55,7 +55,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string QueryJson(string entityName, QueryOptions options)
+        public string QueryEntityJson(string entityName, QueryOptions options)
         {
             var handler = _handlerByEntityName[entityName];
             string json;
@@ -82,14 +82,53 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void StoreEntityJson(string entityName, Stream json)
+        public void StoreEntity(string entityName, EntityState entityState, string entityId, string json)
         {
-            throw new NotImplementedException();
+            var handler = _handlerByEntityName[entityName];
+
+            using ( var context = handler.NewUnitOfWork() )
+            {
+                if ( entityState.IsNew() )
+                {
+                    var newEntity = handler.CreateNew();
+                    JsonConvert.PopulateObject(json, newEntity);
+                    handler.Insert(newEntity);
+                }
+                else if ( entityState.IsModified() )
+                {
+                    var existingEntity = handler.GetById(entityId);
+                    JsonConvert.PopulateObject(json, existingEntity);
+                    handler.Update(existingEntity);
+                }
+                else if ( entityState.IsDeleted() )
+                {
+                    handler.Delete(entityId);
+                }
+                else
+                {
+                    throw new ArgumentException("Unexpected value of entity state: " + entityState);
+                }
+
+                context.CommitChanges();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void StoreEntityBatchJson(Stream json)
+        public void DeleteEntity(string entityName, string entityId)
+        {
+            var handler = _handlerByEntityName[entityName];
+
+            using ( var context = handler.NewUnitOfWork() )
+            {
+                handler.Delete(entityId);
+                context.CommitChanges();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void StoreEntityBatchJson(string json)
         {
             throw new NotImplementedException();
         }
@@ -251,8 +290,13 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public abstract IDisposable NewUnitOfWork();
+            public abstract IUnitOfWork NewUnitOfWork();
             public abstract void Query(QueryOptions options, out IDomainObject[] resultSet, out long resultCount);
+            public abstract IDomainObject GetById(string id);
+            public abstract IDomainObject CreateNew();
+            public abstract void Insert(IDomainObject entity);
+            public abstract void Update(IDomainObject entity);
+            public abstract void Delete(string id);
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -295,7 +339,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override IDisposable NewUnitOfWork()
+            public override IUnitOfWork NewUnitOfWork()
             {
                 //TODO: remove this once we are sure the bug is solved
                 PerContextResourceConsumerScope<TContext> stale;
@@ -321,6 +365,75 @@ namespace NWheels.UI
                     query = HandleMaxCount(options, query);
 
                     ExecuteQuery(query, options, out resultSet, out resultCount);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override IDomainObject GetById(string id)
+            {
+                using ( var context = Framework.NewUnitOfWork<TContext>() )
+                {
+                    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
+                    var idProperty = MetaType.PrimaryKey.Properties[0];
+                    IQueryable<TEntity> query = repository.Where(idProperty.MakeEqualityComparison<TEntity>(valueString: id));
+                    var result = query.FirstOrDefault();
+
+                    if ( result == null )
+                    {
+                        throw new ArgumentException("Specfiied entity does not exist.");
+                    }
+
+                    return result as IDomainObject;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override IDomainObject CreateNew()
+            {
+                using ( var context = Framework.NewUnitOfWork<TContext>() )
+                {
+                    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
+                    var result = repository.New();
+
+                    return result as IDomainObject;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void Insert(IDomainObject entity)
+            {
+                using ( var context = Framework.NewUnitOfWork<TContext>() )
+                {
+                    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
+                    repository.Insert((TEntity)entity);
+                    context.CommitChanges();
+                }
+            }
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public override void Update(IDomainObject entity)
+            {
+                using ( var context = Framework.NewUnitOfWork<TContext>() )
+                {
+                    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
+                    repository.Update((TEntity)entity);
+                    context.CommitChanges();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void Delete(string id)
+            {
+                using ( var context = Framework.NewUnitOfWork<TContext>() )
+                {
+                    var entity = GetById(id);
+                    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
+                    repository.Delete((TEntity)entity);
+                    context.CommitChanges();
                 }
             }
 
@@ -372,10 +485,29 @@ namespace NWheels.UI
                 foreach ( var equalityFilterItem in options.EqualityFilter )
                 {
                     var metaProperty = MetaType.GetPropertyByName(equalityFilterItem.Key);
-                    var parsedValue = metaProperty.ParseStringValue(equalityFilterItem.Value);
-                    query = query.Where(metaProperty.MakeEqualityComparison<TEntity>(parsedValue));
+
+                    if ( metaProperty.IsCalculated )
+                    {
+                        continue;
+                    }
+
+                    object parsedValue;
+
+                    switch ( metaProperty.Kind )
+                    {
+                        case PropertyKind.Scalar:
+                            parsedValue = metaProperty.ParseStringValue(equalityFilterItem.Value);
+                            query = query.Where(metaProperty.MakeEqualityComparison<TEntity>(parsedValue));
+                            break;
+                        case PropertyKind.Relation:
+                            //parsedValue = metaProperty.ParseStringValue(equalityFilterItem.Value);
+                            //query = query.Where(metaProperty.MakeEqualityComparison<TEntity>(parsedValue));
+                            break;
+                        default:
+                            throw new NotSupportedException("Cannot filter by property: " + metaProperty.Name);
+                    }
                 }
-                
+
                 return query;
             }
         }

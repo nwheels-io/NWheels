@@ -13,6 +13,7 @@ using Nancy.ModelBinding;
 using Nancy.Responses;
 using NWheels.Authorization;
 using NWheels.Endpoints.Core;
+using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Processing;
 using NWheels.Processing.Commands;
@@ -129,7 +130,7 @@ namespace NWheels.Stacks.NancyFx
             };
 
             base.Get["/entity/store/{entityName}"] = (route) => {
-                return StoreEntity(route.entityName);
+                return StoreEntity(route.entityName, Request.Query.EntityState, Request.Query.EntityId);
             };
 
             base.Get["/entity/storeBatch"] = (route) => {
@@ -310,21 +311,22 @@ namespace NWheels.Stacks.NancyFx
                 StringComparer.InvariantCultureIgnoreCase);
 
             var options = _context.EntityService.ParseQueryOptions(queryParameters);
-            var json = _context.EntityService.QueryJson(entityName, options);
+            var json = _context.EntityService.QueryEntityJson(entityName, options);
 
             return Response.AsText(json, "application/json");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private object StoreEntity(string entityName)
+        private object StoreEntity(string entityName, EntityState entityState, string entityId)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
             {
                 return HttpStatusCode.NotFound;
             }
 
-            _context.EntityService.StoreEntityJson(entityName, Request.Body);
+            var jsonString = new StreamReader(Request.Body).ReadToEnd();
+            _context.EntityService.StoreEntity(entityName, entityState, entityId, jsonString);
 
             return HttpStatusCode.OK;
         }
@@ -333,8 +335,7 @@ namespace NWheels.Stacks.NancyFx
 
         private object StoreEntityBatch()
         {
-            _context.EntityService.StoreEntityBatchJson(Request.Body);
-            return HttpStatusCode.OK;
+            return HttpStatusCode.NotImplemented;
         }
 
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------

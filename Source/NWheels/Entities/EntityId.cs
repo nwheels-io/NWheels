@@ -24,6 +24,13 @@ namespace NWheels.Entities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static T GetValue<T>(object entity)
+        {
+            return GetValidatedEntityObject(entity).GetId().ValueAs<T>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static IEntityObject GetValidatedEntityObject(object obj)
         {
             var entityObject = obj.AsOrNull<IEntityObject>();

@@ -9,6 +9,7 @@ using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.Conventions.Core;
+using NWheels.Entities;
 using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Utilities;
@@ -103,6 +104,30 @@ namespace NWheels.DataObjects.Core
         public Expression<Func<TEntity, bool>> MakeEqualityComparison<TEntity>(object value)
         {
             return GetExpressionFactory(this.ClrType).EqualityComparison<TEntity>(this, value);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Expression<Func<TEntity, bool>> MakeEqualityComparison<TEntity>(string valueString)
+        {
+            return GetExpressionFactory(this.ClrType).EqualityComparison<TEntity>(this, ParseStringValue(valueString));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Expression<Func<TEntity, bool>> MakeForeignKeyEqualityComparison<TEntity>(object value)
+        {
+            return GetExpressionFactory(this.ClrType).ForeignKeyEqualityComparison<TEntity>(this, value);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Expression<Func<TEntity, bool>> MakeForeignKeyEqualityComparison<TEntity>(string valueString)
+        {
+            var relatedEntityKeyProperty = GetRelatedEntityKeyProperty(this);
+            var parsedValue = relatedEntityKeyProperty.ParseStringValue(valueString);
+
+            return GetExpressionFactory(this.ClrType).ForeignKeyEqualityComparison<TEntity>(this, parsedValue);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -313,12 +338,43 @@ namespace NWheels.DataObjects.Core
             return _s_expressionFactoryByPropertyType.GetOrAdd(propertyType, ExpressionFactory.Create);
         }
 
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static IPropertyMetadata GetRelatedEntityKeyProperty(IPropertyMetadata foreignKeyProperty)
+        {
+            if ( foreignKeyProperty.Relation.RelatedPartyKey != null )
+            {
+                return foreignKeyProperty.Relation.RelatedPartyKey.Properties[0];
+            }
+            else if ( foreignKeyProperty.Relation.RelatedPartyType.PrimaryKey != null )
+            {
+                return foreignKeyProperty.Relation.RelatedPartyType.PrimaryKey.Properties[0];
+            }
+            else
+            {
+                return foreignKeyProperty.Relation.RelatedPartyType.Properties.First(p => p.Role == PropertyRole.Key);
+            }
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private abstract class ExpressionFactory
         {
             public abstract Expression<Func<TEntity, bool>> EqualityComparison<TEntity>(IPropertyMetadata metaProperty, object value);
+            public abstract Expression<Func<TEntity, bool>> ForeignKeyEqualityComparison<TEntity>(IPropertyMetadata metaProperty, object value);
             public abstract IQueryable<TEntity> OrderBy<TEntity>(IQueryable<TEntity> query, IPropertyMetadata metaProperty, bool ascending);
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Expression GetPropertyTargetExpression<TEntity>(IPropertyMetadata metaProperty, Expression target)
+            {
+                if ( metaProperty.ContractPropertyInfo.DeclaringType != null && metaProperty.ContractPropertyInfo.DeclaringType != typeof(TEntity) )
+                {
+                    return Expression.Convert(target, metaProperty.ContractPropertyInfo.DeclaringType);
+                }
+
+                return target;
+            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -336,14 +392,8 @@ namespace NWheels.DataObjects.Core
         {
             public override Expression<Func<TEntity, bool>> EqualityComparison<TEntity>(IPropertyMetadata metaProperty, object value)
             {
-                var parameter = Expression.Parameter(metaProperty.ContractPropertyInfo.DeclaringType ?? typeof(TEntity), "e");
-
-                Expression targetExpression = parameter;
-
-                if ( metaProperty.ContractPropertyInfo.DeclaringType != null && metaProperty.ContractPropertyInfo.DeclaringType != typeof(TEntity) )
-                {
-                    targetExpression = Expression.Convert(parameter, metaProperty.ContractPropertyInfo.DeclaringType);
-                }
+                var parameter = Expression.Parameter(typeof(TEntity), "e");
+                var targetExpression = GetPropertyTargetExpression<TEntity>(metaProperty, parameter);
 
                 Expression equality = Expression.Equal(
                     Expression.Property(targetExpression, metaProperty.ContractPropertyInfo),
@@ -354,15 +404,37 @@ namespace NWheels.DataObjects.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public override Expression<Func<TEntity, bool>> ForeignKeyEqualityComparison<TEntity>(IPropertyMetadata metaProperty, object value)
+            {
+                var relatedKeyMetaProperty = GetRelatedEntityKeyProperty(metaProperty);
+                
+                var parameter = Expression.Parameter(typeof(TEntity), "e");
+                var target = GetPropertyTargetExpression<TEntity>(metaProperty, parameter);
+                
+                Expression<Func<object, TProperty>> entityIdGetValueLambda = obj => EntityId.GetValue<TProperty>(obj);
+                var entityIdGetValueMethod = entityIdGetValueLambda.GetMethodInfo();
+
+                return Expression.Lambda<Func<TEntity, bool>>(
+                    Expression.Equal(
+                        Expression.Call(
+                            null,
+                            entityIdGetValueMethod,
+                            new Expression[] { 
+                                Expression.Property(target, metaProperty.ContractPropertyInfo)
+                            }
+                        ),
+                        Expression.Constant(value, typeof(TProperty))
+                    ),
+                    new[] { parameter }
+                );
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public override IQueryable<TEntity> OrderBy<TEntity>(IQueryable<TEntity> query, IPropertyMetadata metaProperty, bool ascending)
             {
                 var parameter = Expression.Parameter(typeof(TEntity), "e");
-                Expression targetExpression = parameter;
-
-                if ( metaProperty.ContractPropertyInfo.DeclaringType != null && metaProperty.ContractPropertyInfo.DeclaringType != typeof(TEntity) )
-                {
-                    targetExpression = Expression.Convert(parameter, metaProperty.ContractPropertyInfo.DeclaringType);
-                }
+                var targetExpression = GetPropertyTargetExpression<TEntity>(metaProperty, parameter);
                 
                 var propertyExpression = Expression.Lambda<Func<TEntity, TProperty>>(
                     Expression.Property(targetExpression, metaProperty.ContractPropertyInfo), 

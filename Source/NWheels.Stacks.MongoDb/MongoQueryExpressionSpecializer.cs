@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using NWheels.DataObjects;
+using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Stacks.MongoDb.Factories;
 
@@ -86,10 +87,17 @@ namespace NWheels.Stacks.MongoDb
                 }
                 else //if ( node.Arguments.Any(arg => ShouldReplaceType(arg.Type)) )
                 {
+                    var replacingArguments = node.Arguments.Select(arg => _ownerSpecializer.Specialize(arg)).ToArray();
+
+                    if ( node.Method.DeclaringType == typeof(EntityId) && replacingArguments.Length == 1 )
+                    {
+                        return replacingArguments[0];
+                    }
+
                     var specialized = Expression.Call(
                         _ownerSpecializer.Specialize(node.Object),
                         node.Method,
-                        node.Arguments.Select(arg => _ownerSpecializer.Specialize(arg)));
+                        replacingArguments);
 
                     return specialized;
                 }
@@ -168,6 +176,30 @@ namespace NWheels.Stacks.MongoDb
             protected override Expression VisitUnary(UnaryExpression node)
             {
                 return base.VisitUnary(node);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override Expression VisitConstant(ConstantExpression node)
+            {
+                return base.VisitConstant(node);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override Expression VisitBinary(BinaryExpression node)
+            {
+                //var left = base.Visit(node.Left);
+                //var right = base.Visit(node.Right);
+
+                //if ( right.Type.IsEntityContract() )
+                //{
+                    
+                //}
+
+                //var replaced = node.Update(left, node.Conversion, right);
+                //return replaced;
+                return base.VisitBinary(node);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
