@@ -39,16 +39,22 @@ namespace NWheels.Stacks.ODataBreeze
         {
             var sessionCookie = request.GetCookie(_sessionCookieName);
 
-            using ( _logger.Request(request.Method, request.RequestUri.AbsolutePath, request.RequestUri.Query) )
+            using (_logger.Request(request.Method, request.RequestUri.AbsolutePath, request.RequestUri.Query))
             {
                 string sessionId;
                 AuthenticateRequest(sessionCookie, out sessionId);
 
-                using ( _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null) )
+                _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null); //TODO: bring back using 
+                //using ( _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null) )
+                //{
+                var response = await base.SendAsync(request, cancellationToken);
+                if (response.Content != null)
                 {
-                    var response = await base.SendAsync(request, cancellationToken);
-                    return response;
+                    response.Content.ReadAsStringAsync().Wait();
                 }
+                _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null); //TODO: remove this, should be carried of logical call context
+                return response;
+                //}
             }
         }
 
