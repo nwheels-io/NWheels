@@ -90,10 +90,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ClientSide\AngularLinqBreeze\angular.min.js" />
-    <Content Include="ClientSide\AngularLinqBreeze\app.js" />
-    <Content Include="ClientSide\AngularLinqBreeze\index.skin-debug.html" />
-    <Content Include="ClientSide\AngularLinqBreeze\linq.min.js" />
     <Content Include="ClientSide\WebUI\base\app.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -149,20 +149,33 @@ namespace NWheels.Stacks.MongoDb
 
                 if ( declaringType != null && declaringType.IsInterface && node.Member is PropertyInfo )
                 {
-                    ITypeMetadata typeMetadata;
+                    ITypeMetadata metaType;
 
-                    if ( declaringType == _thisTypeMetadata.ContractType )
+                    if ( declaringType == _thisTypeMetadata.ContractType )//|| (declaringType.IsEntityPartContract() && declaringType.IsAssignableFrom(_thisTypeMetadata.ContractType)) )
                     {
-                        typeMetadata = _thisTypeMetadata;
+                        metaType = _thisTypeMetadata;
                     }
                     else
                     {
-                        _metadataCache.TryGetTypeMetadata(declaringType, out typeMetadata);
+                        _metadataCache.TryGetTypeMetadata(declaringType, out metaType);
                     }
 
-                    if ( typeMetadata != null )
+                    if ( metaType != null )
                     {
-                        var implementationPropertyInfo = typeMetadata.GetPropertyByDeclaration((PropertyInfo)node.Member).GetImplementationBy<MongoEntityObjectFactory>();
+                        var contractPropertyInfo = (PropertyInfo)node.Member;
+                        PropertyInfo implementationPropertyInfo;
+
+                        if ( !TryGetImplementationPropertyInfo(metaType, contractPropertyInfo, out implementationPropertyInfo) )
+                        {
+                            if ( !TryGetImplementationPropertyInfo(_thisTypeMetadata, contractPropertyInfo, out implementationPropertyInfo) )
+                            {
+                                throw new Exception(string.Format(
+                                    "Could not find implementation for property: {0}.{1}",
+                                    contractPropertyInfo.DeclaringType.Name,
+                                    contractPropertyInfo.Name));
+                            }
+                        }
+                        
                         var replaced = Expression.MakeMemberAccess(_ownerSpecializer.Specialize(node.Expression), implementationPropertyInfo);
                         return replaced;
                     }
@@ -221,6 +234,26 @@ namespace NWheels.Stacks.MongoDb
             private Type GetReplacingType(Type type)
             {
                 return _metadataCache.GetTypeMetadata(type).GetImplementationBy<MongoEntityObjectFactory>();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool TryGetImplementationPropertyInfo(
+                ITypeMetadata metaType,
+                PropertyInfo contractPropertyInfo,
+                out PropertyInfo implementationPropertyInfo)
+            {
+                IPropertyMetadata metaProperty;
+
+                if ( metaType.TryGetPropertyByDeclaration(contractPropertyInfo, out metaProperty) )
+                {
+                    return metaProperty.TryGetImplementationBy<MongoEntityObjectFactory>(out implementationPropertyInfo);
+                }
+                else
+                {
+                    implementationPropertyInfo = null;
+                    return false;
+                }
             }
         }
     }

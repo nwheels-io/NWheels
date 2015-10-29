@@ -125,6 +125,10 @@ namespace NWheels.Stacks.NancyFx
                 return GetApplicationTemplate(route.templateName);
             };
 
+            base.Get["/entity/new/{entityName}"] = (route) => {
+                return NewEntity(route.entityName);
+            };
+
             base.Get["/entity/query/{entityName}"] = (route) => {
                 return QueryEntity(route.entityName);
             };
@@ -294,6 +298,19 @@ namespace NWheels.Stacks.NancyFx
             }
 
             return Response.AsJson(results);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private object NewEntity(string entityName)
+        {
+            if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
+            {
+                return HttpStatusCode.NotFound;
+            }
+
+            var json = _context.EntityService.NewEntityJson(entityName);
+            return Response.AsText(json, "application/json");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

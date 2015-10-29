@@ -13,6 +13,8 @@ using NWheels.Extensions;
 using System.Reflection;
 using System.ComponentModel;
 using System.Linq.Expressions;
+using Newtonsoft.Json.Serialization;
+using NWheels.Entities.Factories;
 
 namespace NWheels.UI
 {
@@ -22,6 +24,7 @@ namespace NWheels.UI
         private readonly ITypeMetadataCache _metadataCache;
         private readonly IDomainContextLogger _domainContextLogger;
         private readonly Dictionary<string, EntityHandler> _handlerByEntityName;
+        private readonly JsonSerializerSettings _serializerSettings;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -37,6 +40,8 @@ namespace NWheels.UI
             _handlerByEntityName = new Dictionary<string, EntityHandler>(StringComparer.InvariantCultureIgnoreCase);
 
             RegisterEntities(domainContextTypes);
+
+            _serializerSettings = CreateSerializerSettings();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -44,6 +49,22 @@ namespace NWheels.UI
         public bool IsEntityNameRegistered(string entityName)
         {
             return _handlerByEntityName.ContainsKey(entityName);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string NewEntityJson(string entityName)
+        {
+            var handler = _handlerByEntityName[entityName];
+            string json;
+
+            using ( handler.NewUnitOfWork() )
+            {
+                var newEntity = handler.CreateNew();
+                json = JsonConvert.SerializeObject(newEntity, _serializerSettings);
+            }
+
+            return json;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -71,10 +92,7 @@ namespace NWheels.UI
                     ResultCount = resultCount
                 };
 
-                json = JsonConvert.SerializeObject(results, new JsonSerializerSettings() {
-                    MaxDepth = 1, 
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                });
+                json = JsonConvert.SerializeObject(results, _serializerSettings);
             }
 
             return json;
@@ -91,13 +109,13 @@ namespace NWheels.UI
                 if ( entityState.IsNew() )
                 {
                     var newEntity = handler.CreateNew();
-                    JsonConvert.PopulateObject(json, newEntity);
+                    JsonConvert.PopulateObject(json, newEntity, _serializerSettings);
                     handler.Insert(newEntity);
                 }
                 else if ( entityState.IsModified() )
                 {
                     var existingEntity = handler.GetById(entityId);
-                    JsonConvert.PopulateObject(json, existingEntity);
+                    JsonConvert.PopulateObject(json, existingEntity, _serializerSettings);
                     handler.Update(existingEntity);
                 }
                 else if ( entityState.IsDeleted() )
@@ -160,6 +178,34 @@ namespace NWheels.UI
                     _handlerByEntityName[metaType.QualifiedName] = handler;
                 }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private JsonSerializerSettings CreateSerializerSettings()
+        {
+            return new JsonSerializerSettings() {
+                ContractResolver = new DomainObjectContractResolver(_metadataCache, this),
+                DateFormatString = "yyyy-MM-dd HH:mm:ss",
+                MaxDepth = 1,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static Type[] GetContractTypes(Type type)
+        {
+            var contracts = new List<Type>();  
+
+            if ( type.IsEntityContract() || type.IsEntityPartContract() )
+            {
+                contracts.Add(type);
+            }
+
+            contracts.AddRange(type.GetInterfaces().Where(intf => intf.IsEntityContract() || intf.IsEntityPartContract()));
+
+            return contracts.ToArray();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -372,20 +418,22 @@ namespace NWheels.UI
                 }
             }
 
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private IEnumerable<TEntity> FilterCalculatedValues(QueryOptions options, TEntity[] resultSet)
             {
                 IQueryable<TEntity> query = null;
 
-                foreach (var equalityFilterItem in options.EqualityFilter)
+                foreach ( var equalityFilterItem in options.EqualityFilter )
                 {
                     var metaProperty = MetaType.GetPropertyByName(equalityFilterItem.Key);
 
-                    if (metaProperty.IsCalculated == false)
+                    if ( metaProperty.IsCalculated == false )
                     {
                         continue;
                     }
 
-                    if (query == null)
+                    if ( query == null )
                     {
                         query = resultSet.AsQueryable<TEntity>();
                     }
@@ -394,8 +442,10 @@ namespace NWheels.UI
                     query = query.Where(metaProperty.MakeEqualityComparison<TEntity>(parsedValue));
                 }
 
-                if (query == null)
+                if ( query == null )
+                {
                     return resultSet;
+                }
 
                 return query;
             }
@@ -538,6 +588,167 @@ namespace NWheels.UI
                 }
 
                 return query;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class DomainObjectContractResolver : DefaultContractResolver
+        {
+            private readonly ITypeMetadataCache _metadataCache;
+            private readonly ApplicationEntityService _ownerService;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public DomainObjectContractResolver(ITypeMetadataCache metadataCache, ApplicationEntityService ownerService)
+            {
+                _metadataCache = metadataCache;
+                _ownerService = ownerService;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of DefaultContractResolver
+
+            protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+            {
+                var properties = base.CreateProperties(type, memberSerialization);
+                var contractTypes = GetContractTypes(type);
+
+                if ( contractTypes.Length > 0 )
+                {
+                    return ReplaceRelationPropertiesWithForeignKeys(contractTypes, properties);
+                }
+
+                return properties;
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IList<JsonProperty> ReplaceRelationPropertiesWithForeignKeys(Type[] contractTypes, IList<JsonProperty> properties)
+            {
+                var resultList = new List<JsonProperty>();
+                var metaTypes = contractTypes.Select(t => _metadataCache.GetTypeMetadata(t)).ToArray();
+
+                foreach ( var originalJsonProperty in properties )
+                {
+                    var metaProperty = GetPropertyByName(metaTypes, originalJsonProperty.PropertyName);
+
+                    if ( ShouldExcludeProperty(metaProperty) )
+                    {
+                        continue;
+                    }
+
+                    if ( !ShouldReplacePropertyWithForeignKey(metaProperty) )
+                    {
+                        resultList.Add(originalJsonProperty);
+                        continue;
+                    }
+                    
+                    var replacingJsonProperty = new JsonProperty {
+                        PropertyType = typeof(string),
+                        DeclaringType = metaProperty.ContractPropertyInfo.DeclaringType,
+                        PropertyName = metaProperty.Name,
+                        ValueProvider = new ForeignKeyValueProvider(_ownerService, metaProperty, originalJsonProperty),
+                        Readable = true,
+                        Writable = true
+                    };
+
+                    resultList.Add(replacingJsonProperty);
+                }
+
+                return resultList;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IPropertyMetadata GetPropertyByName(ITypeMetadata[] metaTypes, string propertyName)
+            {
+                foreach ( var metaType in metaTypes )
+                {
+                    IPropertyMetadata metaProperty;
+
+                    if ( metaType.TryGetPropertyByName(propertyName, out metaProperty) )
+                    {
+                        return metaProperty;
+                    }
+                }
+
+                throw new ArgumentException("Property not found: " + propertyName);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool ShouldExcludeProperty(IPropertyMetadata metaProperty)
+            {
+                return (ShouldReplacePropertyWithForeignKey(metaProperty) && metaProperty.IsCollection);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool ShouldReplacePropertyWithForeignKey(IPropertyMetadata metaProperty)
+            {
+                return (
+                    metaProperty.Kind == PropertyKind.Relation &&
+                    metaProperty.Relation.RelatedPartyType.IsEntity &&
+                    metaProperty.RelationalMapping != null && 
+                    !metaProperty.RelationalMapping.EmbeddedInParent.GetValueOrDefault(false));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ForeignKeyValueProvider : IValueProvider
+        {
+            private readonly ApplicationEntityService _ownerService;
+            private readonly JsonProperty _relationProperty;
+            private readonly ITypeMetadata _relatedMetaType;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ForeignKeyValueProvider(ApplicationEntityService ownerService, IPropertyMetadata metaProperty, JsonProperty relationProperty)
+            {
+                _ownerService = ownerService;
+                _relationProperty = relationProperty;
+                _relatedMetaType = metaProperty.Relation.RelatedPartyType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void SetValue(object target, object value)
+            {
+                object relatedEntityObject;
+
+                if ( value != null )
+                {
+                    var handler = _ownerService._handlerByEntityName[_relatedMetaType.QualifiedName];
+                    relatedEntityObject = handler.GetById(value.ToString());
+                }
+                else
+                {
+                    relatedEntityObject = null;
+                }
+
+                _relationProperty.ValueProvider.SetValue(target, relatedEntityObject);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public object GetValue(object target)
+            {
+                var relatedEntity = _relationProperty.ValueProvider.GetValue(target);
+
+                if ( relatedEntity != null )
+                {
+                    var relatedEntityId = EntityId.ValueOf(relatedEntity);
+                    return relatedEntityId.ToStringOrDefault();
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
     }
