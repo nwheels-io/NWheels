@@ -133,12 +133,16 @@ namespace NWheels.Stacks.NancyFx
                 return QueryEntity(route.entityName);
             };
 
-            base.Get["/entity/store/{entityName}"] = (route) => {
+            base.Post["/entity/store/{entityName}"] = (route) => {
                 return StoreEntity(route.entityName, Request.Query.EntityState, Request.Query.EntityId);
             };
 
-            base.Get["/entity/storeBatch"] = (route) => {
+            base.Post["/entity/storeBatch"] = (route) => {
                 return StoreEntityBatch();
+            };
+
+            base.Post["/entity/delete/{entityName}"] = (route) => {
+                return DeleteEntity(route.entityName, Request.Query.EntityId);
             };
         }
 
@@ -335,17 +339,26 @@ namespace NWheels.Stacks.NancyFx
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private object StoreEntity(string entityName, EntityState entityState, string entityId)
+        private object StoreEntity(string entityName, string entityStateString, string entityIdString)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
             {
                 return HttpStatusCode.NotFound;
             }
 
+            var entityState = ParseUtility.Parse<EntityState>(entityStateString);
             var jsonString = new StreamReader(Request.Body).ReadToEnd();
-            _context.EntityService.StoreEntity(entityName, entityState, entityId, jsonString);
+            
+            var json = _context.EntityService.StoreEntityJson(entityName, entityState, entityIdString, jsonString);
 
-            return HttpStatusCode.OK;
+            if ( json != null )
+            {
+                return Response.AsText(json, "application/json");
+            }
+            else
+            {
+                return HttpStatusCode.OK;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -353,6 +366,20 @@ namespace NWheels.Stacks.NancyFx
         private object StoreEntityBatch()
         {
             return HttpStatusCode.NotImplemented;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private object DeleteEntity(string entityName, string entityId)
+        {
+            if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
+            {
+                return HttpStatusCode.NotFound;
+            }
+
+            _context.EntityService.DeleteEntity(entityName, entityId);
+
+            return HttpStatusCode.OK;
         }
 
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------

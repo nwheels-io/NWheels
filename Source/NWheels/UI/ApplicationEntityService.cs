@@ -100,27 +100,29 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void StoreEntity(string entityName, EntityState entityState, string entityId, string json)
+        public string StoreEntityJson(string entityName, EntityState entityState, string entityId, string json)
         {
             var handler = _handlerByEntityName[entityName];
+            IDomainObject domainObject = null;
 
             using ( var context = handler.NewUnitOfWork() )
             {
                 if ( entityState.IsNew() )
                 {
-                    var newEntity = handler.CreateNew();
-                    JsonConvert.PopulateObject(json, newEntity, _serializerSettings);
-                    handler.Insert(newEntity);
+                    domainObject = handler.CreateNew();
+                    JsonConvert.PopulateObject(json, domainObject, _serializerSettings);
+                    handler.Insert(domainObject);
                 }
                 else if ( entityState.IsModified() )
                 {
-                    var existingEntity = handler.GetById(entityId);
-                    JsonConvert.PopulateObject(json, existingEntity, _serializerSettings);
-                    handler.Update(existingEntity);
+                    domainObject = handler.GetById(entityId);
+                    JsonConvert.PopulateObject(json, domainObject, _serializerSettings);
+                    handler.Update(domainObject);
                 }
                 else if ( entityState.IsDeleted() )
                 {
                     handler.Delete(entityId);
+                    return null;
                 }
                 else
                 {
@@ -129,6 +131,9 @@ namespace NWheels.UI
 
                 context.CommitChanges();
             }
+
+            var resultJson = (domainObject != null ? JsonConvert.SerializeObject(domainObject, _serializerSettings) : null);
+            return resultJson;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
