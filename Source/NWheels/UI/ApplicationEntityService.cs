@@ -13,6 +13,7 @@ using NWheels.Extensions;
 using System.Reflection;
 using System.ComponentModel;
 using System.Linq.Expressions;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NWheels.Entities.Factories;
 
@@ -189,12 +190,16 @@ namespace NWheels.UI
 
         private JsonSerializerSettings CreateSerializerSettings()
         {
-            return new JsonSerializerSettings() {
+            var settings = new JsonSerializerSettings() {
                 ContractResolver = new DomainObjectContractResolver(_metadataCache, this),
                 DateFormatString = "yyyy-MM-dd HH:mm:ss",
-                MaxDepth = 1,
+                MaxDepth = 10,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
+
+            settings.Converters.Add(new DomainObjectConverter(this));
+
+            return settings;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -843,7 +848,10 @@ namespace NWheels.UI
                     relatedEntityObject = null;
                 }
 
-                _relationProperty.ValueProvider.SetValue(target, relatedEntityObject);
+                if ( relatedEntityObject != null )
+                {
+                    _relationProperty.ValueProvider.SetValue(target, relatedEntityObject);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -862,6 +870,83 @@ namespace NWheels.UI
                     return null;
                 }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class DomainObjectConverter : JsonConverter
+        {
+            private readonly ApplicationEntityService _ownerService;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public DomainObjectConverter(ApplicationEntityService ownerService)
+            {
+                _ownerService = ownerService;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            #region Overrides of JsonConverter
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                if ( reader.TokenType == JsonToken.Null )
+                {
+                    return null;
+                }
+
+                JObject jo = JObject.Load(reader);
+
+                var typeName = jo["$type"].Value<string>();
+                var handler = _ownerService._handlerByEntityName[typeName];
+                var target = handler.CreateNew();
+
+                JsonReader jObjectReader = jo.CreateReader();
+                jObjectReader.Culture = reader.Culture;
+                jObjectReader.DateParseHandling = reader.DateParseHandling;
+                jObjectReader.DateTimeZoneHandling = reader.DateTimeZoneHandling;
+                jObjectReader.FloatParseHandling = reader.FloatParseHandling;
+
+                serializer.Populate(jObjectReader, target);
+                return target;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanConvert(Type objectType)
+            {
+                return (objectType.IsEntityContract() || objectType.IsEntityPartContract());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanRead 
+            {
+                get
+                {
+                    return true;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanWrite
+            {
+                get
+                {
+                    return false;
+                }
+            }
+
+            #endregion
         }
     }
 }
