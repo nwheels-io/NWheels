@@ -5,8 +5,7 @@
  *
  */
 
-
-$(document).ready(function () {
+ $(document).ready(function () {
 
 
     // Add body-small class if window less than 768px
@@ -16,8 +15,6 @@ $(document).ready(function () {
         $('body').removeClass('body-small')
     }
 
-    // MetsiMenu
-    $('#side-menu').metisMenu();
 
     // Collapse ibox function
     $('.collapse-link').click(function () {

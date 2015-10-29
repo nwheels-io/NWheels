@@ -506,10 +506,14 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                         }
                     }
                     implementMenuItems(item.subItems);
+					
+
                 }
             }
 
             implementMenuItems(scope.uidl.mainMenu.items);
+			if(window.appInit)
+						window.appInit();
         },
     };
 
@@ -1139,7 +1143,7 @@ theApp.directive('uidlScreenPart', ['uidlService', 'entityService', function (ui
 
 //---------------------------------------------------------------------------------------------------------------------
 
-theApp.directive('uidlWidget', ['uidlService', 'entityService', function (uidlService, entityService) {
+theApp.directive('uidlWidget', ['uidlService', 'entityService', '$timeout', function (uidlService, entityService, $timeout) {
     return {
         scope: {
             uidl: '=',
@@ -1161,6 +1165,14 @@ theApp.directive('uidlWidget', ['uidlService', 'entityService', function (uidlSe
             $scope.$watch('uidl', function (newValue, oldValue) {
                 console.log('uidlWidget::watch(uidl)', oldValue ? oldValue.qualifiedName : '0', '->', $scope.uidl ? $scope.uidl.qualifiedName : '0');
                 uidlService.implementController($scope);
+
+				$timeout(function(){
+					var initFuncName = 'initWidget_' + $scope.uidl.widgetType;
+					var initFunc = window[initFuncName];
+					if(typeof initFunc === 'function') {
+						initFunc($scope.uidl);
+					}
+				});
             });
         }
     };

@@ -34,6 +34,8 @@
     <link href="skin/assets/css/plugins/clockpicker/clockpicker.css" rel="stylesheet">
     <link href="skin/assets/css/plugins/daterangepicker/daterangepicker-bs3.css" rel="stylesheet">
     <link href="skin/assets/css/plugins/select2/select2.min.css" rel="stylesheet">
+    <link href="skin/assets/css/plugins/jqGrid/ui.jqgrid.css" rel="stylesheet">
+    <link href="skin/assets/css/plugins/jQueryUI/jquery-ui-1.10.4.custom.min.css" rel="stylesheet">
     <link href="skin/assets/css/animate.css" rel="stylesheet">
     <link href="skin/assets/css/style.css" rel="stylesheet">
 
@@ -260,13 +262,23 @@
         </div>
         <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
     </script>
+	<script type="text/javascript">
+		function initWidget_ManagementConsole(){
+			$('#side-menu').metisMenu();
+		}
+	</script>
+
     
     <script type="text/ng-template" id="uidl-element-template/ManagementConsole-menu-item">
-        <a ng-class="{bold: item.level==0}" ng-show="item.notifications[1].subscribedBehaviorQualifiedNames.length" href="" ng-click="$emit(item.notifications[1].qualifiedName)"><i class="fa fa-diamond"></i>{{translate(item.text)}}</a>
-        <span ng-class="{bold: item.level==0}" ng-hide="item.notifications[1].subscribedBehaviorQualifiedNames.length">{{translate(item.text)}}</span>
-        <ul>
-            <li ng-repeat="item in item.subItems" ng-include="'uidl-element-template/ManagementConsole-menu-item'"></li>
-        </ul>
+         <a ng-class="{bold: item.level==0}" ng-show="item.subItems.length==0" href="#" ng-click="$emit(item.notifications[1].qualifiedName)"><i class="fa fa-diamond"></i>{{translate(item.text)}}</a>
+        <a href="#" ng-show="item.subItems.length > 0">
+			<i class="fa fa-diamond"></i>
+			<span class="nav-label" ng-class="{bold: item.level==0}">{{translate(item.text)}}</span>
+			<span class="fa arrow"></span>
+		</a>
+		<ul class="nav nav-second-level collapse">
+			<li ng-repeat="item in item.subItems" ng-include="'uidl-element-template/ManagementConsole-menu-item'"></li>
+		</ul>
     </script>
     
     <script type="text/ng-template" id="uidl-element-template/Container">
@@ -317,6 +329,135 @@
             </div>
         </div>
     </script>
+	
+	<script type="text/ng-template" id="uidl-element-template/Crud">
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="ibox ">
+					<div class="ibox-title">
+						<h5>{{::uidl.entityName}}</h5>
+					</div>
+					<div class="ibox-content">
+						<div class="jqGrid_wrapper">
+							<table id="table_list_2"></table>
+							<div id="pager_list_2"></div>
+						</div>
+						<div class="layout" ng-if="uiShowCrudForm">
+							<uidl-widget ng-if="uidl.form" uidl="uidl.form" parent-model="model"></uidl-widget>
+							<uidl-widget ng-if="uidl.formTypeSelector" uidl="uidl.formTypeSelector" parent-model="model"></uidl-widget>
+						</div>
+					
+					</div>
+				</div>
+			</div>
+		</div>
+	</script>
+	<script type="text/javascript">
+	// Examle data for jqGrid
+            var mydata = [
+                {id: "1", invdate: "2010-05-24", name: "test", note: "note", tax: "10.00", total: "2111.00"} ,
+                {id: "2", invdate: "2010-05-25", name: "test2", note: "note2", tax: "20.00", total: "320.00"},
+                {id: "3", invdate: "2007-09-01", name: "test3", note: "note3", tax: "30.00", total: "430.00"},
+                {id: "4", invdate: "2007-10-04", name: "test", note: "note", tax: "10.00", total: "210.00"},
+                {id: "5", invdate: "2007-10-05", name: "test2", note: "note2", tax: "20.00", total: "320.00"},
+                {id: "6", invdate: "2007-09-06", name: "test3", note: "note3", tax: "30.00", total: "430.00"},
+                {id: "7", invdate: "2007-10-04", name: "test", note: "note", tax: "10.00", total: "210.00"},
+                {id: "8", invdate: "2007-10-03", name: "test2", note: "note2", amount: "300.00", tax: "21.00", total: "320.00"},
+                {id: "9", invdate: "2007-09-01", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"},
+                {id: "11", invdate: "2007-10-01", name: "test", note: "note", amount: "200.00", tax: "10.00", total: "210.00"},
+                {id: "12", invdate: "2007-10-02", name: "test2", note: "note2", amount: "300.00", tax: "20.00", total: "320.00"},
+                {id: "13", invdate: "2007-09-01", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"},
+                {id: "14", invdate: "2007-10-04", name: "test", note: "note", amount: "200.00", tax: "10.00", total: "210.00"},
+                {id: "15", invdate: "2007-10-05", name: "test2", note: "note2", amount: "300.00", tax: "20.00", total: "320.00"},
+                {id: "16", invdate: "2007-09-06", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"},
+                {id: "17", invdate: "2007-10-04", name: "test", note: "note", amount: "200.00", tax: "10.00", total: "210.00"},
+                {id: "18", invdate: "2007-10-03", name: "test2", note: "note2", amount: "300.00", tax: "20.00", total: "320.00"},
+                {id: "19", invdate: "2007-09-01", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"},
+                {id: "21", invdate: "2007-10-01", name: "test", note: "note", amount: "200.00", tax: "10.00", total: "210.00"},
+                {id: "22", invdate: "2007-10-02", name: "test2", note: "note2", amount: "300.00", tax: "20.00", total: "320.00"},
+                {id: "23", invdate: "2007-09-01", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"},
+                {id: "24", invdate: "2007-10-04", name: "test", note: "note", amount: "200.00", tax: "10.00", total: "210.00"},
+                {id: "25", invdate: "2007-10-05", name: "test2", note: "note2", amount: "300.00", tax: "20.00", total: "320.00"},
+                {id: "26", invdate: "2007-09-06", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"},
+                {id: "27", invdate: "2007-10-04", name: "test", note: "note", amount: "200.00", tax: "10.00", total: "210.00"},
+                {id: "28", invdate: "2007-10-03", name: "test2", note: "note2", amount: "300.00", tax: "20.00", total: "320.00"},
+                {id: "29", invdate: "2007-09-01", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"}
+            ];
+			
+		function initWidget_Crud() {
+			alert('hi');
+			$("#table_list_2").jqGrid({
+				data: mydata,
+				datatype: "local",
+				height: 450,
+				autowidth: true,
+				shrinkToFit: true,
+				rowNum: 20,
+				rowList: [10, 20, 30],
+				colNames:['Inv No','Date', 'Client', 'Amount','Tax','Total','Notes'],
+				colModel:[
+					{name:'id',index:'id', editable: true, width:60, sorttype:"int",search:true},
+					{name:'invdate',index:'invdate', editable: true, width:90, sorttype:"date", formatter:"date"},
+					{name:'name',index:'name', editable: true, width:100},
+					{name:'amount',index:'amount', editable: true, width:80, align:"right",sorttype:"float", formatter:"number"},
+					{name:'tax',index:'tax', editable: true, width:80, align:"right",sorttype:"float"},
+					{name:'total',index:'total', editable: true, width:80,align:"right",sorttype:"float"},
+					{name:'note',index:'note', editable: true, width:100, sortable:false}
+				],
+				pager: "#pager_list_2",
+				viewrecords: true,
+				caption: "Example jqGrid 2",
+				add: true,
+				edit: true,
+				addtext: 'Add',
+				edittext: 'Edit',
+				hidegrid: false
+			});
+			// Setup buttons
+			$("#table_list_2").jqGrid('navGrid', '#pager_list_2',
+					{edit: true, add: true, del: true, search: true},
+					{height: 200, reloadAfterSubmit: true}
+			);
+		}
+
+	</script>
+
+	<script type="text/ng-template" id="uidl-element-template/CrudForm">
+		<div class="content-example">
+			<div class="layout">
+				WIDGET[{{uidl.widgetType}}&lt;{{uidl.entityName}}&gt;]
+			</div>
+			<table class="dataForm clearfix">
+				<tbody>
+					<tr ng-repeat="field in plainFields">
+						<td>{{translate(field.propertyName)}}</td>
+						<td>
+							<uidl-form-field uidl="field" entity="parentModel.entity" />
+							<!--input type="text" ng-model="parentModel.entity[field.propertyName]" /-->
+						</td>
+					</tr>
+					<tr ng-if="tabSetFields.length">
+						<td colspan="2" class="tabSet">
+							<div ng-class="{tab: true, selected: $index==tabSetIndex}"                                     
+								ng-repeat="field in tabSetFields"
+								ng-click="selectTab($index)">
+								{{translate(field.propertyName)}}
+							</div>
+							<div class="tabContent clearfix">
+								<div class="Layout" ng-repeat="field in tabSetFields" ng-if="$index==tabSetIndex">
+									<uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="parentModel"></uidl-widget>
+								</div>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<div ng-if="!uidl.isInline" class="layout">
+				<button class="dataForm" ng-click="saveChanges()">Save</button>
+				<button class="dataForm" ng-click="rejectChanges()">Cancel</button>
+			</div>
+		</div>
+	</script>
     
     <script type="text/ng-template" id="uidl-element-template/Chat">
         <div>Message 1 . . . </div>
@@ -712,6 +853,9 @@
     <!-- Select2 -->
     <script src="skin/assets/js/plugins/select2/select2.full.min.js"></script>
 
+    <!-- jqGrid -->
+    <script src="skin/assets/js/plugins/jqGrid/i18n/grid.locale-en.js"></script>
+    <script src="skin/assets/js/plugins/jqGrid/jquery.jqGrid.min.js"></script>
 
     <!-- Gritter -->
     <link href="skin/assets/js/plugins/gritter/jquery.gritter.css" rel="stylesheet">
