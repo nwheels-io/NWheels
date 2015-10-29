@@ -20,7 +20,6 @@ namespace NWheels.UI.Toolbox
         {
             this.BaseMetaType = baseMetaType;
             this.BaseTypeName = baseMetaType.Name;
-            this.BaseMetaTypeName = baseMetaType.ContractType.AssemblyQualifiedNameNonVersioned();
             this.Selections = baseMetaType.DerivedTypes.Where(t => !t.IsAbstract).Select(t => new Selection(t)).ToList();
         }
 
@@ -50,8 +49,6 @@ namespace NWheels.UI.Toolbox
 
         [DataMember]
         public string BaseTypeName { get; set; }
-        [DataMember]
-        public string BaseMetaTypeName { get; set; }
         [DataMember, ManuallyAssigned]
         public List<Selection> Selections { get; set; }
 
@@ -99,8 +96,7 @@ namespace NWheels.UI.Toolbox
             {
                 this.Text = (metaType.BaseType != null ? metaType.Name.TrimTail(metaType.BaseType.Name.TrimLead("Abstract")) : metaType.Name);
                 this.MetaType = metaType;
-                this.Name = metaType.Name;
-                this.MetaTypeName = metaType.ContractType.AssemblyQualifiedNameNonVersioned();
+                this.TypeName = metaType.QualifiedName;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -108,9 +104,7 @@ namespace NWheels.UI.Toolbox
             [DataMember]
             public string Text { get; set; }
             [DataMember]
-            public string Name { get; set; }
-            [DataMember]
-            public string MetaTypeName { get; set; }
+            public string TypeName { get; set; }
             [DataMember]
             public WidgetUidlNode Widget { get; set; }
 

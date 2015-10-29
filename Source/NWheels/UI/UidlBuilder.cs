@@ -84,7 +84,7 @@ namespace NWheels.UI
             while ( allTypesToAdd.Count > 0 )
             {
                 var typeToAdd = allTypesToAdd.First();
-                var typeKey = typeToAdd.AssemblyQualifiedNameNonVersioned();
+                var typeKey = MakeTypeKey(type);
 
                 if ( !_document.MetaTypes.ContainsKey(typeKey) )
                 {
@@ -227,6 +227,22 @@ namespace NWheels.UI
                 parentAsControlled.Behaviors.AddRange(instantiatedNodes.OfType<BehaviorUidlNode>());
                 parentAsControlled.Commands.AddRange(instantiatedNodes.OfType<UidlCommand>());
                 parentAsControlled.DataBindings.AddRange(instantiatedNodes.OfType<DataBindingUidlNode>());
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string MakeTypeKey(Type type)
+        {
+            ITypeMetadata metaType;
+
+            if ( _metadataCache.TryGetTypeMetadata(type, out metaType) )
+            {
+                return metaType.QualifiedName;
+            }
+            else
+            {
+                return type.AssemblyQualifiedNameNonVersioned();
             }
         }
 

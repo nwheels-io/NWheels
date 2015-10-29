@@ -81,7 +81,7 @@ namespace NWheels.UI.Uidl
             : base(type)
         {
             base.TypeKind = UidlMetaTypeKind.Object;
-            this.Name = metadata.Name;
+            this.Name = metadata.QualifiedName;
             this.BaseTypeName = metadata.BaseType != null ? metadata.BaseType.Name : null;
             this.DerivedTypeNames = metadata.DerivedTypes.Select(t => t.Name).ToList();
             this.Properties = metadata.Properties.ToDictionary(p => p.Name, p => new UidlMetaProperty(p, relatedTypes));

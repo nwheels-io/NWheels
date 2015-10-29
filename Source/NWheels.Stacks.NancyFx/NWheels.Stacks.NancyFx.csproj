@@ -93,6 +93,7 @@
     <Content Include="ClientSide\WebUI\base\app.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="ClientSide\WebUI\base\entity.js" />
     <Content Include="ClientSide\WebUI\skin.debug\angular-1.3.16\angular.min.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

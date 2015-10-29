@@ -33,8 +33,6 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string EntityName { get; set; }
         [DataMember]
-        public string EntityMetaType { get; set; }
-        [DataMember]
         public List<string> DisplayColumns { get; set; }
         [DataMember, ManuallyAssigned]
         public WidgetUidlNode RowTemplate { get; set; }
@@ -97,7 +95,8 @@ namespace NWheels.UI.Toolbox
 
         protected override void OnBuild(UidlBuilder builder)
         {
-            base.EntityMetaType = builder.RegisterMetaType(typeof(TEntity));
+            builder.RegisterMetaType(typeof(TEntity));
+            base.EntityName = MetadataCache.GetTypeMetadata(typeof(TEntity)).QualifiedName;
         }
     }
 }

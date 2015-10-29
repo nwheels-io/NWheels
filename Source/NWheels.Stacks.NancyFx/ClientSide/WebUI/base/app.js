@@ -1,6 +1,6 @@
 'use strict';
 
-var theApp = angular.module('theApp', ['breeze.angular']);
+var theApp = angular.module('theApp', []);
 
 //-----------------------------------------------------------------------------------------------------------------
 
@@ -521,7 +521,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
     m_controllerImplementations['Report'] = {
         implement: function (scope) {
-            var metaType = scope.uidlService.getMetaType(scope.uidl.entityMetaType);
+            var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
 
             scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
                 return metaType.properties[toCamelCase(name)];
@@ -538,7 +538,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
 			scope.getPropertyRelatedMetaType = function(propertyName) {
-				return scope.uidlService.getRelatedMetaType(scope.uidl.entityMetaType, propertyName);
+			    return scope.uidlService.getRelatedMetaType(scope.uidl.entityName, propertyName);
 			};
 
             scope.queryEntities();
@@ -559,7 +559,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
     m_controllerImplementations['Crud'] = {
         implement: function (scope) {
-            var metaType = scope.uidlService.getMetaType(scope.uidl.entityMetaType);
+            var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
 
             scope.metaType = metaType;
             
@@ -580,7 +580,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.resultSet = null;
                 if (scope.uidl.mode !== 'Inline') {
                     scope.entityService.queryEntity(scope.uidl.entityName).then(function (data) {
-                        scope.resultSet = data.results;
+                        scope.resultSet = data.ResultSet;
                     });
                 } else {
                     scope.resultSet = scope.parentModel.entity[scope.parentUidl.propertyName];
@@ -588,7 +588,6 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.editEntity = function (entity) {
-                scope.entityService.editEntity(entity);
                 scope.model.entity = entity;
                 scope.model.isNew = false;
                 scope.uiShowCrudForm = true;
@@ -596,9 +595,9 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
             scope.newEntity = function () {
                 if (scope.uidl.mode !== 'Inline') {
-                    scope.model.entity = scope.entityService.createEntity(metaType.restTypeName, {});
+                    scope.model.entity = scope.entityService.createEntity(metaType.name, {});
                 } else {
-                    scope.model.entity = scope.entityService.createComplexType(metaType.restTypeName);
+                    scope.model.entity = scope.entityService.createComplexType(metaType.name);
                 }
                 scope.model.isNew = true;
                 scope.uiShowCrudForm = true;
@@ -671,11 +670,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
     m_controllerImplementations['CrudForm'] = {
         implement: function (scope) {
-            scope.metaType = scope.uidlService.getMetaType(scope.uidl.entityMetaType);
-
-            if (scope.metaType.restTypeName) {
-                scope.breezeMetaType = scope.entityService.getTypeMetadata(scope.metaType.restTypeName);
-            }
+            scope.metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
 
             scope.tabSetIndex = 0;
             scope.plainFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers!='Tab' && $.modifiers!='Section'").ToArray();
@@ -692,7 +687,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 			
 			if (scope.uidl.mode === 'StandaloneCreate') {
 				scope.parentModel = {
-					entity: scope.entityService.createEntity(scope.metaType.restTypeName)
+				    entity: scope.entityService.newDomainObject(scope.metaType.name)
 				};
 			}
 			
@@ -705,29 +700,6 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 });
 			};
 
-   			scope.test = function() {
-				alert('This is a test');
-			};
-
-
-            /*
-            scope.saveChanges = function () {
-                if (scope.breezeMetaType.isComplexType === true && scope.uidl.mode === 'CrudWidget') {
-                    if (scope.parentModel.isNew) {
-                        scope.parent
-                    }
-                } else {
-                    scope.entityService.saveChanges();
-                    scope.notifyFormClosing();
-                }
-            };
-
-            scope.cancelEdit = function () {
-                scope.entityService.rejectChanges();
-                scope.notifyFormClosing();
-            };
-            */
-            
             scope.selectTab = function(index) {
                 scope.tabSetIndex = index;
             };
@@ -738,12 +710,6 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
     m_controllerImplementations['TypeSelector'] = {
         implement: function (scope) {
-            for (var i = 0; i < scope.uidl.selections.length; i++) {
-                var selection = scope.uidl.selections[i];
-                var metaType = scope.uidlService.getMetaType(selection.metaTypeName);
-                selection.restTypeName = metaType.restTypeName;
-            }
-			
 			if (scope.parentModel) {
 				scope.model = { 
 					entity: (
@@ -753,12 +719,12 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 				};
 			} else if(scope.uidl.selections.length > 0) {
 				scope.model = { 
-					entity: scope.entityService.createEntity(scope.uidl.selections[0].restTypeName)
+					entity: scope.entityService.newDomainObject(scope.uidl.selections[0].typeName)
 				};
 			}
 			
 			if (scope.model) {
-				scope.selectedType = scope.model.entity.entityType.shortName;
+				scope.selectedType = scope.model.entity['$type'];
 			}
         }
     };
@@ -780,257 +746,6 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-theApp.factory('entityManagerFactory', ['breeze', function (breeze) {
-    configureBreeze();
-    var serviceRoot = window.location.protocol + '//' + window.location.host + '/';
-    var serviceName = serviceRoot + 'rest/';
-    var factory = {
-        newManager: newManager,
-        serviceName: serviceName
-    };
-
-    return factory;
-
-    function configureBreeze() {
-        // use Web API OData to query and save
-        breeze.config.initializeAdapterInstance('dataService', 'webApiOData', true);
-
-        // convert between server-side PascalCase and client-side camelCase
-        breeze.NamingConvention.camelCase.setAsDefault();
-    }
-
-    function newManager() {
-        var mgr = new breeze.EntityManager(serviceName);
-        return mgr;
-    }
-}]);
-
-//---------------------------------------------------------------------------------------------------------------------
-
-theApp.service('entityService',
-['$http', '$q', '$timeout', 'breeze', 'logger',
-function ($http, $q, $timeout, breeze, logger) {
-
-    var serviceRoot = window.location.protocol + '//' + window.location.host + '/';
-    var serviceName = serviceRoot + 'rest/';
-    //var serviceUrl = 'http://localhost:8900/rest/UserAccounts/'; // route to the same origin Web Api controller
-
-    // *** Cross origin service example  ***
-    // When data server and application server are in different origins
-    //var serviceName = 'http://sampleservice.breezejs.com/api/todos/';
-
-    //breeze.config.initializeAdapterInstance('dataService', 'webApiOData', true);
-    //breeze.NamingConvention.camelCase.setAsDefault();
-
-    var manager = new breeze.EntityManager(serviceName);
-    manager.enableSaveQueuing(true);
-
-    var service = {
-        getTypeMetadata: getTypeMetadata,
-        createEntity: createEntity,
-        createComplexType: createComplexType,
-        queryEntity: queryEntity,
-        editEntity: editEntity,
-        hasChanges: hasChanges,
-        saveChanges: saveChanges,
-        rejectChanges: rejectChanges,
-        deleteEntityAndSave: deleteEntityAndSave,
-		ensureMetadataLoaded: ensureMetadataLoaded,
-        showLocalStateDump: showLocalStateDump
-    };
-    return service;
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    function getTypeMetadata(typeName) {
-        var metadata = manager.metadataStore.getEntityType(typeName);
-        return metadata;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    function createEntity(entityName, initialValues) {
-        var entity = manager.createEntity(entityName, initialValues);
-        manager.addEntity(entity);
-        return entity;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    function createComplexType(complexTypeName, initialValues) {
-        var metadata = manager.metadataStore.getEntityType(complexTypeName);
-        var newInstance = metadata.createInstance({});
-        return newInstance;
-    }
-        
-    //-----------------------------------------------------------------------------------------------------------------
-
-    function queryEntity(entityName, queryBuilderCallback) {
-        var query = breeze.EntityQuery.from(entityName);
-
-        if (queryBuilderCallback) {
-            query = queryBuilderCallback(query);
-        }
-
-        var promise = manager.executeQuery(query).catch(queryFailed);
-        return promise;
-
-        function queryFailed(error) {
-            logger.error(error.message, "Query failed");
-            return $q.reject(error); // so downstream promise users know it failed
-        }
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    function editEntity(entityObj) {
-        //manager.attachEntity(entityObj, breeze.EntityState.Modified);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    function deleteEntityAndSave(entity) {
-        if (entity) {
-            var aspect = entity.entityAspect;
-            if (aspect.isBeingSaved && aspect.entityState.isAdded()) {
-                // wait to delete added entity while it is being saved  
-                setTimeout(function () { deleteEntityAndSave(entity); }, 100);
-                return;
-            }
-            aspect.setDeleted();
-            return saveChanges();
-        }
-        else {
-            return $q.resolve(true);
-        }
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    function hasChanges() {
-        return manager.hasChanges();
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    function handleSaveValidationError(error) {
-        var message = "Not saved due to validation error";
-        try { // fish out the first error
-            var firstErr = error.entityErrors[0];
-            message += ": " + firstErr.errorMessage;
-        } catch (e) { /* eat it for now */ }
-        return message;
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    function saveChanges() {
-        return manager.saveChanges()
-            .then(saveSucceeded)
-            .catch(saveFailed);
-
-        function saveSucceeded(saveResult) {
-            logger.success("# of entities saved = " + saveResult.entities.length);
-            logger.log(saveResult);
-            return saveResult;
-        }
-
-        function saveFailed(error) {
-            var reason = error.message;
-            var detail = error.detail;
-
-            if (error.entityErrors) {
-                reason = handleSaveValidationError(error);
-            } else if (detail && detail.ExceptionType &&
-                detail.ExceptionType.indexOf('OptimisticConcurrencyException') !== -1) {
-                // Concurrency error 
-                reason =
-                    "Another user, perhaps the server, " +
-                    "may have deleted one or all of the entities." +
-                    " You may have to restart the app.";
-            } else {
-                reason = "Failed to save changes: " + reason +
-                    " You may have to restart the app.";
-            }
-
-            logger.error(error, reason);
-            return $q.reject(error); // so downstream promise users know it failed
-        }
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    function rejectChanges() {
-        return manager.rejectChanges();
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------
-
-    function showLocalStateDump(elementId) {
-        var exportedData = JSON.parse(manager.exportEntities());
-        exportedData.metadataStore = JSON.parse(exportedData.metadataStore);
-        document.getElementById(elementId).innerHTML = JSON.stringify(exportedData, undefined, 2);
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------
-	
-	function ensureMetadataLoaded() {
-		if (manager.metadataStore.isEmpty()) {
-			return manager.fetchMetadata();
-		}
-	}
-
-}]);
-
-//---------------------------------------------------------------------------------------------------------------------
-
-theApp.factory('logger', ['$log', function ($log) {
-
-    // This logger wraps the toastr logger and also logs to console using ng $log
-    // toastr.js is library by John Papa that shows messages in pop up toast.
-    // https://github.com/CodeSeven/toastr
-
-    toastr.options.timeOut = 2000; // 2 second toast timeout
-    toastr.options.positionClass = 'toast-bottom-right';
-
-    var logger = {
-        error: error,
-        info: info,
-        log: log,  // straight to console; bypass toast
-        success: success,
-        warning: warning
-    };
-
-    return logger;
-
-    function error(message, title) {
-        toastr.error(message, title);
-        $log.error("Error: " + message);
-    }
-
-    function info(message, title) {
-        toastr.info(message, title);
-        $log.info("Info: " + message);
-    }
-
-    function log(message) {
-        $log.log(message);
-    }
-
-    function success(message, title) {
-        toastr.success(message, title);
-        $log.info("Success: " + message);
-    }
-
-    function warning(message, title) {
-        toastr.warning(message, title);
-        $log.warn("Warning: " + message);
-    }
-
-}]);
-
-//---------------------------------------------------------------------------------------------------------------------
-
 theApp.controller('appStart',
 ['$http', '$scope', '$rootScope', 'uidlService', 'entityService', 'commandService',
 function ($http, $scope, $rootScope, uidlService, entityService, commandService) {
@@ -1040,22 +755,20 @@ function ($http, $scope, $rootScope, uidlService, entityService, commandService)
     $http.get('uidl.json').then(function (httpResult) {
         uidlService.setDocument(httpResult.data);
 
-		entityService.ensureMetadataLoaded().then(function() {
-			$rootScope.app = uidlService.getApp();
-			$rootScope.uidl = uidlService.getApp();
-			$rootScope.entityService = entityService;
-			$rootScope.uidlService = uidlService;
-			$rootScope.commandService = commandService;
-			$rootScope.appScope = $scope;
+		$rootScope.app = uidlService.getApp();
+		$rootScope.uidl = uidlService.getApp();
+		$rootScope.entityService = entityService;
+		$rootScope.uidlService = uidlService;
+		$rootScope.commandService = commandService;
+		$rootScope.appScope = $scope;
 
-			uidlService.implementController($scope);
+		uidlService.implementController($scope);
 
-			$rootScope.currentScreen = uidlService.getCurrentScreen();
-			$rootScope.currentLocale = uidlService.getCurrentLocale();
-			$scope.pageTitle = $scope.translate($scope.app.text) + ' - ' + $scope.translate($scope.currentScreen.text);
+		$rootScope.currentScreen = uidlService.getCurrentScreen();
+		$rootScope.currentLocale = uidlService.getCurrentLocale();
+		$scope.pageTitle = $scope.translate($scope.app.text) + ' - ' + $scope.translate($scope.currentScreen.text);
 
-			//commandService.startPollingMessages();
-		});
+		//commandService.startPollingMessages();
     });
 
     /*
@@ -1216,7 +929,7 @@ theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uid
             $scope.entityService = entityService;
             
             if ($scope.uidl.fieldType==='Lookup') {
-                var metaType = uidlService.getMetaType($scope.uidl.lookupEntityMetaType);
+                var metaType = uidlService.getMetaType($scope.uidl.lookupEntityName);
 
                 $scope.lookupMetaType = metaType;
                 $scope.lookupValueProperty = ($scope.uidl.lookupValueProperty ? $scope.uidl.lookupValueProperty : metaType.primaryKey.propertyNames[0]);

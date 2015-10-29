@@ -28,10 +28,10 @@ namespace NWheels.UI.Toolbox
         {
             this.WidgetType = "Crud";
             this.TemplateName = "Crud";
-            this.EntityName = typeof(TEntity).Name.TrimLead("I").TrimTail("Entity");
+            this.MetaType = this.MetadataCache.GetTypeMetadata(typeof(TEntity));
+            this.EntityName = MetaType.QualifiedName;
             this.Mode = mode;
             this.DisplayColumns = new List<string>();
-            this.MetaType = this.MetadataCache.GetTypeMetadata(typeof(TEntity));
 
             CreateForm();
         }
@@ -70,8 +70,6 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string EntityName { get; set; }
         [DataMember]
-        public string EntityMetaType { get; set; }
-        [DataMember]
         public CrudGridMode Mode { get; set; }
         [DataMember]
         public List<string> DisplayColumns { get; set; }
@@ -92,7 +90,7 @@ namespace NWheels.UI.Toolbox
 
         protected override void OnBuild(UidlBuilder builder)
         {
-            this.EntityMetaType = builder.RegisterMetaType(typeof(TEntity));
+            builder.RegisterMetaType(typeof(TEntity));
 
             var metaType = builder.MetadataCache.GetTypeMetadata(typeof(TEntity));
             this.DefaultDisplayColumns = metaType.Properties
@@ -141,7 +139,6 @@ namespace NWheels.UI.Toolbox
     {
         Type Contract { get; set; }
         string Name { get; set; }
-        string MetaType { get; set; }
         object Id { get; set; }
     }
 

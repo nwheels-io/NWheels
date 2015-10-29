@@ -36,7 +36,7 @@ namespace NWheels.UI.Toolbox
         {
             this.WidgetType = "CrudForm";
             this.TemplateName = "CrudForm";
-            this.EntityName = typeof(TEntity).Name.TrimLead("I").TrimTail("Entity");
+            this.EntityName = MetadataCache.GetTypeMetadata(typeof(TEntity)).QualifiedName;
             this.Fields = new List<CrudFormField>();
             this.IsInline = isNested;
 
@@ -91,7 +91,7 @@ namespace NWheels.UI.Toolbox
             var field = FindOrAddField(fieldSelector);
             var lookupMetaType = MetadataCache.GetTypeMetadata(typeof(TLookupEntity));
             
-            field.LookupEntityName = lookupMetaType.Name;
+            field.LookupEntityName = lookupMetaType.QualifiedName;
             field.LookupEntityContract = typeof(TLookupEntity);
             field.LookupValueProperty = lookupValueProperty.GetPropertyInfo().Name;
             field.LookupDisplayProperty = lookupDisplayProperty.GetPropertyInfo().Name;
@@ -125,8 +125,6 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string EntityName { get; set; }
         [DataMember]
-        public string EntityMetaType { get; set; }
-        [DataMember]
         public object EntityId { get; set; }
         [DataMember]
         public CrudFormMode Mode { get; set; }
@@ -150,7 +148,7 @@ namespace NWheels.UI.Toolbox
         protected override void OnBuild(UidlBuilder builder)
         {
             BuildFields(builder);
-            EntityMetaType = builder.RegisterMetaType(typeof(TEntity));
+            builder.RegisterMetaType(typeof(TEntity));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -240,8 +238,6 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string LookupEntityName { get; set; }
         [DataMember]
-        public string LookupEntityMetaType { get; set; }
-        [DataMember]
         public string LookupFilterExpression { get; set; }
         [DataMember]
         public string LookupValueProperty { get; set; }
@@ -278,15 +274,14 @@ namespace NWheels.UI.Toolbox
 
             if ( MetaProperty.Relation != null && MetaProperty.Relation.RelatedPartyType != null )
             {
-                this.LookupEntityName = MetaProperty.Relation.RelatedPartyType.Name;
+                this.LookupEntityName = MetaProperty.Relation.RelatedPartyType.QualifiedName;
                 this.LookupEntityContract = MetaProperty.Relation.RelatedPartyType.ContractType;
-                this.LookupEntityMetaType = MetaProperty.Relation.RelatedPartyType.ContractType.AssemblyQualifiedNameNonVersioned();
                 this.NestedWidget = CreateNestedWidget(parent, MetaProperty.Relation.RelatedPartyType);
             }
 
             if ( this.LookupEntityContract != null )
             {
-                this.LookupEntityMetaType = builder.RegisterMetaType(this.LookupEntityContract);
+                builder.RegisterMetaType(this.LookupEntityContract);
             }
 
             if ( this.MetaProperty.ClrType.IsEnum )
