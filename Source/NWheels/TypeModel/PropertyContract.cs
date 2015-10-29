@@ -257,6 +257,24 @@ namespace NWheels.DataObjects
                 public string Column { get; set; }
                 public string ColumnType { get; set; }
             }
+
+            public class EmbeddedInParentAttribute : PropertyContractAttribute
+            {
+                public EmbeddedInParentAttribute()
+                {
+                    this.IsEmbedded = true;
+                }
+                public EmbeddedInParentAttribute(bool isEmbedded)
+                {
+                    this.IsEmbedded = isEmbedded;
+                }
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+                {
+                    var mapping = property.SafeGetRelationalMapping();
+                    mapping.EmbeddedInParent = IsEmbedded;
+                }
+                public bool IsEmbedded { get; private set; }
+            }
         } 
 
         public static class Validation

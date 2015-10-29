@@ -144,7 +144,16 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             if ( metaProperty.Relation.RelatedPartyType.IsEntity )
             {
-                return (metaProperty.Relation.Kind == RelationKind.Composition);
+                if ( metaProperty.RelationalMapping != null && metaProperty.RelationalMapping.EmbeddedInParent.HasValue )
+                {
+                    return metaProperty.RelationalMapping.EmbeddedInParent.Value;
+                }
+                else
+                {
+                    var shouldEmbedDocuments = (metaProperty.Relation.Kind == RelationKind.Composition);
+                    UpdateProperyRelationalMapping(metaProperty, shouldEmbedDocuments);
+                    return shouldEmbedDocuments;
+                }
             }
 
             return false;
@@ -188,6 +197,14 @@ namespace NWheels.Stacks.MongoDb.Factories
                 default:
                     return false;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void UpdateProperyRelationalMapping(IPropertyMetadata metaProperty, bool embeddedInParent)
+        {
+            var writableMetaProperty = (PropertyMetadataBuilder)metaProperty;
+            writableMetaProperty.SafeGetRelationalMapping().EmbeddedInParent = embeddedInParent;
         }
     }
 }

@@ -24,6 +24,7 @@
         public string ColumnType { get; set; }
         public string RelatedColumnName { get; set; }
         public string RelatedColumnType { get; set; }
+        public bool? EmbeddedInParent { get; set; }
 
         #endregion
 
@@ -37,6 +38,7 @@
             ColumnType = visitor.VisitAttribute("ColumnType", ColumnType);
             RelatedColumnName = visitor.VisitAttribute("RelatedColumnName", RelatedColumnName);
             RelatedColumnType = visitor.VisitAttribute("RelatedColumnType", RelatedColumnType);
+            EmbeddedInParent = visitor.VisitAttribute("EmbeddedInParent", EmbeddedInParent);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

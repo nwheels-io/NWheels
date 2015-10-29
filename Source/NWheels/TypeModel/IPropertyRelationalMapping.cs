@@ -8,5 +8,6 @@
         string ColumnType { get; }
         string RelatedColumnName { get; }
         string RelatedColumnType { get; }
+        bool? EmbeddedInParent { get; }
     }
 }

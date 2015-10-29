@@ -105,7 +105,7 @@ namespace NWheels.Testing.Entities.Stacks
 
                 DateTime PlacedAt { get; set; }
 
-                [PropertyContract.Relation.Composition]
+                [PropertyContract.Relation.Composition, PropertyContract.Storage.EmbeddedInParent(false)]
                 ICollection<IOrderLine> OrderLines { get; }
 
                 [PropertyContract.Relation.Composition]
