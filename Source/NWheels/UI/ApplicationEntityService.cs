@@ -617,9 +617,12 @@ namespace NWheels.UI
 
                 if ( contractTypes.Length > 0 )
                 {
-                    return ReplaceRelationPropertiesWithForeignKeys(contractTypes, properties);
+                    properties = ReplaceRelationPropertiesWithForeignKeys(contractTypes, properties);
                 }
 
+                properties.Insert(0, CreateObjectTypeProperty());
+                properties.Insert(1, CreateEntityIdProperty());
+                
                 return properties;
             }
 
@@ -664,6 +667,34 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private JsonProperty CreateObjectTypeProperty()
+            {
+                return new JsonProperty() {
+                    PropertyName = "$type",
+                    Readable = true,
+                    Writable = false,
+                    PropertyType = typeof(string),
+                    ValueProvider = new DomainObjectTypeValueProvider(_metadataCache),
+                    NullValueHandling = NullValueHandling.Ignore
+                };
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private JsonProperty CreateEntityIdProperty()
+            {
+                return new JsonProperty() {
+                    PropertyName = "$id",
+                    Readable = true,
+                    Writable = false,
+                    PropertyType = typeof(string),
+                    ValueProvider = new EntityIdValueProvider(_metadataCache),
+                    NullValueHandling = NullValueHandling.Ignore
+                };
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private IPropertyMetadata GetPropertyByName(ITypeMetadata[] metaTypes, string propertyName)
             {
                 foreach ( var metaType in metaTypes )
@@ -695,6 +726,82 @@ namespace NWheels.UI
                     metaProperty.Relation.RelatedPartyType.IsEntity &&
                     metaProperty.RelationalMapping != null && 
                     !metaProperty.RelationalMapping.EmbeddedInParent.GetValueOrDefault(false));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class DomainObjectTypeValueProvider : IValueProvider
+        {
+            private readonly ITypeMetadataCache _metadataCache;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public DomainObjectTypeValueProvider(ITypeMetadataCache metadataCache)
+            {
+                _metadataCache = metadataCache;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public object GetValue(object target)
+            {
+                var domainObject = target as IDomainObject;
+
+                if ( domainObject != null )
+                {
+                    var metaType = _metadataCache.GetTypeMetadata(domainObject.ContractType);
+                    return metaType.QualifiedName;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void SetValue(object target, object value)
+            {
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class EntityIdValueProvider : IValueProvider
+        {
+            private readonly ITypeMetadataCache _metadataCache;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public EntityIdValueProvider(ITypeMetadataCache metadataCache)
+            {
+                _metadataCache = metadataCache;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public object GetValue(object target)
+            {
+                var domainObject = target as IDomainObject;
+
+                if ( domainObject != null )
+                {
+                    var metaType = _metadataCache.GetTypeMetadata(domainObject.ContractType);
+                
+                    if ( metaType.IsEntity )
+                    {
+                        return EntityId.Of(domainObject).Value.ToString();
+                    }
+                }
+
+                return null;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void SetValue(object target, object value)
+            {
             }
         }
 
