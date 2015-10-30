@@ -97,7 +97,7 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IApplicationDataRepository NewUnitOfWork(Type repositoryContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null)
+        IApplicationDataRepository ICoreFramework.NewUnitOfWork(Type repositoryContractType, bool autoCommit, IsolationLevel? isolationLevel)
         {
             return _unitOfWorkFactory.NewUnitOfWork(repositoryContractType, autoCommit, isolationLevel);
         }

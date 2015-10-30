@@ -25,6 +25,10 @@ namespace NWheels.Stacks.ODataBreeze.SystemTests
             var factory = 
                 new BreezeApiControllerFactory(base.DyamicModule, base.Framework.MetadataCache, base.Resolve<IDomainObjectFactory>(), base.Resolve<IEntityObjectFactory>());
 
+            using ( Framework.NewUnitOfWork<IUserAccountDataRepository>() )
+            {
+            }
+
             //-- act
 
             var controllerType = factory.CreateControllerType(dataRepositoryContract: typeof(IUserAccountDataRepository));
