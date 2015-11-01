@@ -45,11 +45,18 @@ namespace NWheels.Testing.UnitTests.Entities.Impl
 
             _metadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(_metadataCache));
 
+            var entityObjectFactory = new TestEntityObjectFactory(Framework.Components, base.DyamicModule, _metadataCache);
+
             _factoryUnderTest = new TestDataRepositoryFactory(
                 Framework.Components,
                 base.DyamicModule,
                 _metadataCache,
-                new TestEntityObjectFactory(Framework.Components, base.DyamicModule, _metadataCache));
+                entityObjectFactory);
+
+            Framework.UpdateComponents(
+                builder => {
+                    builder.RegisterInstance(entityObjectFactory).As<IEntityObjectFactory, EntityObjectFactory, TestEntityObjectFactory>();
+                });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -109,7 +116,7 @@ namespace NWheels.Testing.UnitTests.Entities.Impl
 
             //-- act & assert
 
-            CrudOperations.Repository1.ExecuteBasic(repoFactory: () => TestDataRepositoryBase.ResetState(repo));
+            CrudOperations.Repository1.ExecuteBasic(Framework, repoFactory: () => TestDataRepositoryBase.ResetState(repo));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -123,7 +130,7 @@ namespace NWheels.Testing.UnitTests.Entities.Impl
 
             //-- act & assert
 
-            CrudOperations.Repository1.ExecuteAdvancedRetrievals(repoFactory: () => TestDataRepositoryBase.ResetState(repo));
+            CrudOperations.Repository1.ExecuteAdvancedRetrievals(Framework, repoFactory: () => TestDataRepositoryBase.ResetState(repo));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

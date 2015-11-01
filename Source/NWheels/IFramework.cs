@@ -13,7 +13,7 @@ namespace NWheels
 {
     public interface IFramework
     {
-        T New<T>() where T : class;
+        T NewDomainObject<T>() where T : class;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         

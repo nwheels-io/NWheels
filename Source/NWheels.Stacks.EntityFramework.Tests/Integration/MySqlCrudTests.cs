@@ -63,7 +63,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
             //-- Act & Assert
 
-            CrudOperations.Repository1.ExecuteBasic(() => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
+            CrudOperations.Repository1.ExecuteBasic(Framework, () => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
             //-- Act & Assert
 
-            CrudOperations.Repository1.ExecuteAdvancedRetrievals(() => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
+            CrudOperations.Repository1.ExecuteAdvancedRetrievals(Framework, () => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -104,7 +104,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
             //-- Act & Assert
 
-            CrudOperations.Repository1.ExecuteBasic(() => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
+            CrudOperations.Repository1.ExecuteBasic(Framework, () => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
 
             //-- Act & Assert
 
-            CrudOperations.Repository1.ExecuteAdvancedRetrievals(() => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
+            CrudOperations.Repository1.ExecuteAdvancedRetrievals(Framework, () => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

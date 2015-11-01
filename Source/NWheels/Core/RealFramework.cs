@@ -16,6 +16,7 @@ using NWheels.Concurrency.Impl;
 using NWheels.Logging.Core;
 using System.Collections.Concurrent;
 using NWheels.Authorization.Core;
+using NWheels.Conventions.Core;
 
 namespace NWheels.Core
 {
@@ -40,13 +41,11 @@ namespace NWheels.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public T New<T>() where T : class
+        public T NewDomainObject<T>() where T : class
         {
-            using ( var unitOfWork = NewUnitOfWorkForEntity(typeof(T)) )
-            {
-                var entityRepository = unitOfWork.GetEntityRepository(typeof(T));
-                return (T)entityRepository.New(typeof(T));
-            }
+            var entityObjectFactory = _components.Resolve<IEntityObjectFactory>();
+            var persistableObject = entityObjectFactory.NewEntity<T>();
+            return _components.Resolve<IDomainObjectFactory>().CreateDomainObjectInstance<T>(persistableObject);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

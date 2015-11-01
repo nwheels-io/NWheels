@@ -12,9 +12,9 @@ namespace NWheels.Testing.Entities.Stacks
     {
         public static class Repository1
         {
-            public static void ExecuteBasic(Func<Interfaces.Repository1.IOnlineStoreRepository> repoFactory)
+            public static void ExecuteBasic(IFramework framework, Func<Interfaces.Repository1.IOnlineStoreRepository> repoFactory)
             {
-                InsertAttributes(repoFactory());
+                InsertAttributes(framework, repoFactory());
                 InsertCategories(repoFactory());
                 InsertProducts(repoFactory());
                 InsertCustomers(repoFactory());
@@ -32,9 +32,9 @@ namespace NWheels.Testing.Entities.Stacks
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static void ExecuteAdvancedRetrievals(Func<Interfaces.Repository1.IOnlineStoreRepository> repoFactory)
+            public static void ExecuteAdvancedRetrievals(IFramework framework, Func<Interfaces.Repository1.IOnlineStoreRepository> repoFactory)
             {
-                InsertAttributes(repoFactory());
+                InsertAttributes(framework, repoFactory());
                 InsertCategories(repoFactory());
                 InsertProducts(repoFactory());
                 InsertCustomers(repoFactory());
@@ -70,19 +70,27 @@ namespace NWheels.Testing.Entities.Stacks
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private static void InsertAttributes(Interfaces.Repository1.IOnlineStoreRepository repo)
+            private static void InsertAttributes(IFramework framework, Interfaces.Repository1.IOnlineStoreRepository repo)
             {
                 using ( repo )
                 {
-                    var attr1 = repo.Attributes.New();
+                    var attr1 = framework.NewDomainObject<IR1.IAttribute>();
                     attr1.Name = "Size";
                     attr1.TitleForUser = "Size";
-                    attr1.DefaultValue = repo.NewClothingSizeAttributeValue("M", 2, "US");
+
+                    var defaultSize = framework.NewDomainObject<IR1.IClothingSizeAttributeValue>();
+                    defaultSize.Value = "M";
+                    defaultSize.DisplayOrder = 2;
+                    defaultSize.Standard = "US";
+                    
+                    attr1.DefaultValue = defaultSize;
+
                     attr1.Values.Add(repo.NewClothingSizeAttributeValue("S", 1, "US"));
                     attr1.Values.Add(repo.NewClothingSizeAttributeValue("M", 2, "US"));
                     attr1.Values.Add(repo.NewClothingSizeAttributeValue("L", 3, "US"));
 
                     var attr2 = repo.Attributes.New();
+
                     attr2.Name = "Color";
                     attr2.TitleForUser = "Color";
                     attr2.DefaultValue = repo.NewColorAttributeValue("White", 1, "FFF");

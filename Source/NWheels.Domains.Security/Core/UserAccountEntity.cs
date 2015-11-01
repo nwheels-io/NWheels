@@ -20,7 +20,7 @@ namespace NWheels.Domains.Security.Core
 
             DeactivateCurrentPassword();
 
-            var password = Framework.New<IPasswordEntity>();
+            var password = Framework.NewDomainObject<IPasswordEntity>();
                 
             password.User = this;
             password.Hash = CryptoProvider.CalculateHash(passwordString);
@@ -38,7 +38,7 @@ namespace NWheels.Domains.Security.Core
 
             DeactivateCurrentPassword();
 
-            var password = Framework.New<IPasswordEntity>();
+            var password = Framework.NewDomainObject<IPasswordEntity>();
             var passwordLength = new Random().Next(policy.PasswordMinLength, policy.PasswordMaxLength);
             var clearText = GenerateTemporaryPassword(passwordLength);
 

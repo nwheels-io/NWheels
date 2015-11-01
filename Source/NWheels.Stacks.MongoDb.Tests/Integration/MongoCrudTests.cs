@@ -70,7 +70,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             //-- Act & Assert
 
-            CrudOperations.Repository1.ExecuteBasic(repoFactory);
+            CrudOperations.Repository1.ExecuteBasic(Framework, repoFactory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             //-- Act & Assert
 
-            CrudOperations.Repository1.ExecuteAdvancedRetrievals(repoFactory);
+            CrudOperations.Repository1.ExecuteAdvancedRetrievals(Framework, repoFactory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
