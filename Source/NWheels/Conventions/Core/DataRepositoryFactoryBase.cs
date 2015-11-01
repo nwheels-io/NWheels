@@ -150,7 +150,7 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void DecomposeContractProperty(PropertyInfo property, out Type entityContractType, out Type entityImplementationType)
+            public void DecomposeContractProperty(PropertyInfo property, out Type entityContractType)
             {
                 entityContractType = property.PropertyType.GetGenericArguments()[0];
 
@@ -162,7 +162,13 @@ namespace NWheels.Conventions.Core
                         property,
                         "IEntityRepository<T> must specify T which is an entity contract interface");
                 }
+            }
 
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void DecomposeContractProperty(PropertyInfo property, out Type entityContractType, out Type entityImplementationType)
+            {
+                DecomposeContractProperty(property, out entityContractType);
                 entityImplementationType = _entityFactory.GetOrBuildEntityImplementation(entityContractType);
             }
 
@@ -194,6 +200,7 @@ namespace NWheels.Conventions.Core
             {
                 ValidateRepositoryContract(writer);
                 FindEntitiesInRepository(writer);
+                EnsureAllContractsImplemented();
                 _ownerFactory.UpdateEntityRepositoryMap(writer.OwnerClass.Key.PrimaryInterface, this.EntitiesInRepository.Select(e => e.ContractType));
 
                 _entityFactoryField = writer.Field<EntityObjectFactory>("EntityFactory", isPublic: true);
@@ -392,8 +399,6 @@ namespace NWheels.Conventions.Core
 
             protected virtual void ImplementNewEntityMethods(ImplementationClassWriter<TT.TInterface> writer)
             {
-                EnsureAllContractsImplemented();
-
                 writer.AllMethods(IsNewEntityMethod).Implement(m => {
                     var entity = FindEntityInRepositoryByContract(m.OwnerMethod.Signature.ReturnType);
                     var entityImplementationType = EntityFactory.FindImplementationType(entity.ContractType);
@@ -685,7 +690,7 @@ namespace NWheels.Conventions.Core
             public EntityInRepository(PropertyInfo property, DataRepositoryConvention ownerConvention)
             {
                 _ownerConvention = ownerConvention;
-                ownerConvention.DecomposeContractProperty(property, out _contractType, out _implementationType);
+                ownerConvention.DecomposeContractProperty(property, out _contractType);
 
                 if ( property.PropertyType.GetGenericTypeDefinition() == typeof(IEntityRepository<>) )
                 {
@@ -716,7 +721,7 @@ namespace NWheels.Conventions.Core
                 this.RepositoryProperty = null;
                 this.PartitionedRepositoryProperty = null;
                 this.Metadata = ownerConvention.MetadataCache.GetTypeMetadata(_contractType);
-                this.Metadata.TryGetImplementation(_ownerConvention.EntityFactory.GetType(), out _implementationType);
+                //this.Metadata.TryGetImplementation(_ownerConvention.EntityFactory.GetType(), out _implementationType);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
