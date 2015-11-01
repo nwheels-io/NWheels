@@ -594,9 +594,11 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.newEntity = function () {
-                scope.model.entity = scope.entityService.newDomainObject(metaType.name);
-                scope.model.isNew = true;
-                scope.uiShowCrudForm = true;
+                scope.entityService.newDomainObject(metaType.name).then(function(newObj) {
+                    scope.model.entity = newObj;
+                    scope.model.isNew = true;
+                    scope.uiShowCrudForm = true;
+                });
             };
 
             scope.deleteEntity = function (entity) {
