@@ -18,6 +18,7 @@ namespace NWheels.Testing.Entities.Stacks
                 InsertCategories(repoFactory());
                 InsertProducts(repoFactory());
                 InsertCustomers(repoFactory());
+                RetrieveAttributesAndValues(repoFactory());
                 RetrieveProductsByName(repoFactory());
                 InsertOrder1(repoFactory());
                 InsertOrder2(repoFactory());
@@ -76,15 +77,17 @@ namespace NWheels.Testing.Entities.Stacks
                     var attr1 = repo.Attributes.New();
                     attr1.Name = "Size";
                     attr1.TitleForUser = "Size";
-                    attr1.Values.Add(repo.NewAttributeValue("S", 1));
-                    attr1.Values.Add(repo.NewAttributeValue("M", 2));
-                    attr1.Values.Add(repo.NewAttributeValue("L", 3));
+                    attr1.DefaultValue = repo.NewClothingSizeAttributeValue("M", 2, "US");
+                    attr1.Values.Add(repo.NewClothingSizeAttributeValue("S", 1, "US"));
+                    attr1.Values.Add(repo.NewClothingSizeAttributeValue("M", 2, "US"));
+                    attr1.Values.Add(repo.NewClothingSizeAttributeValue("L", 3, "US"));
 
                     var attr2 = repo.Attributes.New();
                     attr2.Name = "Color";
                     attr2.TitleForUser = "Color";
-                    attr2.Values.Add(repo.NewAttributeValue("White", 1));
-                    attr2.Values.Add(repo.NewAttributeValue("Black", 2));
+                    attr2.DefaultValue = repo.NewColorAttributeValue("White", 1, "FFF");
+                    attr2.Values.Add(repo.NewColorAttributeValue("White", 1, "FFF"));
+                    attr2.Values.Add(repo.NewColorAttributeValue("Black", 2, "000"));
 
                     repo.Attributes.Insert(attr1);
                     repo.Attributes.Insert(attr2);
@@ -177,6 +180,53 @@ namespace NWheels.Testing.Entities.Stacks
                     repo.Customers.Insert(customer2);
 
                     repo.CommitChanges();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static void RetrieveAttributesAndValues(Interfaces.Repository1.IOnlineStoreRepository repo)
+            {
+                using ( repo )
+                {
+                    var size = repo.Attributes.Single(a => a.Name == "Size");
+
+                    var sizeDefaultValue = (IR1.IClothingSizeAttributeValue)size.DefaultValue;
+                    Assert.That(sizeDefaultValue.Value, Is.EqualTo("M"));
+                    Assert.That(sizeDefaultValue.DisplayOrder, Is.EqualTo(2));
+                    Assert.That(sizeDefaultValue.Standard, Is.EqualTo("US"));
+
+                    var sizeSmall = (IR1.IClothingSizeAttributeValue)size.Values[0];
+                    Assert.That(sizeSmall.Value, Is.EqualTo("S"));
+                    Assert.That(sizeSmall.DisplayOrder, Is.EqualTo(1));
+                    Assert.That(sizeSmall.Standard, Is.EqualTo("US"));
+
+                    var sizeMedium = (IR1.IClothingSizeAttributeValue)size.Values[1];
+                    Assert.That(sizeMedium.Value, Is.EqualTo("M"));
+                    Assert.That(sizeMedium.DisplayOrder, Is.EqualTo(2));
+                    Assert.That(sizeMedium.Standard, Is.EqualTo("US"));
+
+                    var sizeLarge = (IR1.IClothingSizeAttributeValue)size.Values[2];
+                    Assert.That(sizeLarge.Value, Is.EqualTo("L"));
+                    Assert.That(sizeLarge.DisplayOrder, Is.EqualTo(3));
+                    Assert.That(sizeLarge.Standard, Is.EqualTo("US"));
+
+                    var color = repo.Attributes.Single(a => a.Name == "Color");
+
+                    var colorDefaultValue = (IR1.IColorAttributeValue)color.DefaultValue;
+                    Assert.That(colorDefaultValue.Value, Is.EqualTo("White"));
+                    Assert.That(colorDefaultValue.DisplayOrder, Is.EqualTo(1));
+                    Assert.That(colorDefaultValue.HexRgb, Is.EqualTo("FFF"));
+
+                    var colorWhite = (IR1.IColorAttributeValue)color.Values[0];
+                    Assert.That(colorWhite.Value, Is.EqualTo("White"));
+                    Assert.That(colorWhite.DisplayOrder, Is.EqualTo(1));
+                    Assert.That(colorWhite.HexRgb, Is.EqualTo("FFF"));
+
+                    var colorBlack = (IR1.IColorAttributeValue)color.Values[1];
+                    Assert.That(colorBlack.Value, Is.EqualTo("Black"));
+                    Assert.That(colorBlack.DisplayOrder, Is.EqualTo(2));
+                    Assert.That(colorBlack.HexRgb, Is.EqualTo("000"));
                 }
             }
 

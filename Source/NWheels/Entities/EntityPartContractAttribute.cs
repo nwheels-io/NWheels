@@ -15,7 +15,7 @@ namespace NWheels.Entities
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
     public class EntityPartContractAttribute : DataObjectPartContractAttribute
     {
-        #region Overrides of DataObjectContractAttribute
+        #region Overrides of DataObjectPartContractAttribute
 
         public override void ApplyTo(TypeMetadataBuilder type, TypeMetadataCache cache)
         {

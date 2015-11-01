@@ -21,7 +21,8 @@ namespace NWheels.Testing.Entities.Stacks
             public interface IOnlineStoreRepository : IApplicationDataRepository
             {
                 IOrderLine NewOrderLine(IOrder order, IProduct product, int quantity);
-                IAttributeValue NewAttributeValue(string value, int displayOrder);
+                IClothingSizeAttributeValue NewClothingSizeAttributeValue(string value, int displayOrder, string standard);
+                IColorAttributeValue NewColorAttributeValue(string value, int displayOrder, string hexRgb);
                 IAttributeValueChoice NewAttributeValueChoice(IAttribute attribute, string value);
                 IPostalAddress NewPostalAddress(string streetAddress, string city, string zipCode, string country);
                 IEmailContactDetail NewEmailContactDetail(string email, bool isPrimary);
@@ -73,6 +74,9 @@ namespace NWheels.Testing.Entities.Stacks
                 string TitleForUser { get; set; }
 
                 [PropertyContract.Relation.Composition]
+                IAttributeValue DefaultValue { get; set; }
+
+                [PropertyContract.Relation.Composition]
                 IList<IAttributeValue> Values { get; }
             }
 
@@ -84,6 +88,16 @@ namespace NWheels.Testing.Entities.Stacks
 
                 [PropertyContract.Required(AllowEmpty = false)]
                 string Value { get; set; }
+            }
+            [EntityPartContract]
+            public interface IColorAttributeValue : IAttributeValue
+            {
+                string HexRgb { get; set; }
+            }
+            [EntityPartContract]
+            public interface IClothingSizeAttributeValue : IAttributeValue
+            {
+                string Standard { get; set; }
             }
 
             [EntityPartContract]

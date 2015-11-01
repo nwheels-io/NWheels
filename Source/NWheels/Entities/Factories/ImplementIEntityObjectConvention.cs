@@ -87,8 +87,8 @@ namespace NWheels.Entities.Factories
 
             writer.Method<string>(x => x.ToString).Implement(w => {
                 w.Return(
-                    w.Const(_metaType.Name + "[") + 
-                    TypeFactoryUtility.GetPropertyStringValueOperand(w, keyProperty) + 
+                    w.Const(_metaType.Name + "[") +
+                    TypeFactoryUtility.GetPropertyStringValueOperand(w, keyProperty) +
                     (displayProperty != null ? "|" : "") +
                     TypeFactoryUtility.GetPropertyStringValueOperand(w, displayProperty) + "]");
             });

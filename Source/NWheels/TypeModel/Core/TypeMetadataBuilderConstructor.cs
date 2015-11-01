@@ -68,7 +68,9 @@ namespace NWheels.DataObjects.Core
 
         private void ApplyObjectContractAttribute()
         {
-            var contractAttribute = (_primaryContract.GetCustomAttribute<DataObjectContractAttribute>() as IObjectContractAttribute);
+            var contractAttribute = (
+                (IObjectContractAttribute)_primaryContract.GetCustomAttribute<DataObjectContractAttribute>() ??
+                (IObjectContractAttribute)_primaryContract.GetCustomAttribute<DataObjectPartContractAttribute>());
 
             if ( contractAttribute != null )
             {
