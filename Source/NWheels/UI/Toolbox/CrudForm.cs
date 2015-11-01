@@ -365,7 +365,7 @@ namespace NWheels.UI.Toolbox
                 case PropertyKind.Scalar:
                     if ( MetaProperty.Role.IsIn(PropertyRole.Key, PropertyRole.Version) || MetaProperty.IsCalculated )
                     {
-                        return CrudFieldType.Label;
+                        return (MetaProperty.ContractPropertyInfo.CanWrite ? CrudFieldType.Edit : CrudFieldType.Label);
                     }
                     else
                     {

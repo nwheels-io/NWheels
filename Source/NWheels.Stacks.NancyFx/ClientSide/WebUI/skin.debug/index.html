@@ -82,14 +82,14 @@
         <script type="text/ng-template" id="uidl-screen">
             <div class="border">
                 SCREEN[{{uidl.text}}]
-                <uidl-widget uidl="uidl.contentRoot"></uidl-widget>
+                <uidl-widget ng-if="uidl.contentRoot" uidl="uidl.contentRoot"></uidl-widget>
             </div>
         </script>
         
         <script type="text/ng-template" id="uidl-screen-part">
             <div class="border">
                 SCREEN-PART[{{uidl.text}}]
-                <uidl-widget uidl="uidl.contentRoot"></uidl-widget>
+                <uidl-widget ng-if="uidl.contentRoot" uidl="uidl.contentRoot"></uidl-widget>
             </div>
         </script>
         

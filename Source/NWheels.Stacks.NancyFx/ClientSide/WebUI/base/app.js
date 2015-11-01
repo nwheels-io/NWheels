@@ -594,18 +594,14 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.newEntity = function () {
-                if (scope.uidl.mode !== 'Inline') {
-                    scope.model.entity = scope.entityService.createEntity(metaType.name, {});
-                } else {
-                    scope.model.entity = scope.entityService.createComplexType(metaType.name);
-                }
+                scope.model.entity = scope.entityService.newDomainObject(metaType.name);
                 scope.model.isNew = true;
                 scope.uiShowCrudForm = true;
             };
 
             scope.deleteEntity = function (entity) {
                 if (scope.uidl.mode !== 'Inline') {
-                    scope.entityService.deleteEntityAndSave(entity).then(function(result) {
+                    scope.entityService.deleteEntity(entity).then(function(result) {
                         scope.queryEntities();
                         scope.uiShowCrudForm = false;
                     });
@@ -622,17 +618,14 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
             scope.saveChanges = function (entity) {
                 if (scope.uidl.mode !== 'Inline') {
-                    scope.entityService.saveChanges();
+                    scope.entityService.storeEntity(entity);
                 } else if (scope.model.isNew === true) {
-                    scope.resultSet.push(entity._backingStore);
+                    scope.ResultSet.push(entity._backingStore);
                 }
                 scope.refresh();
             };
 
             scope.rejectChanges = function (entity) {
-                if (scope.uidl.mode !== 'Inline') {
-                    scope.entityService.rejectChanges();
-                }
                 scope.refresh();
             };
             
@@ -877,15 +870,18 @@ theApp.directive('uidlWidget', ['uidlService', 'entityService', '$timeout', func
             //uidlService.implementController($scope);
             $scope.$watch('uidl', function (newValue, oldValue) {
                 console.log('uidlWidget::watch(uidl)', oldValue ? oldValue.qualifiedName : '0', '->', $scope.uidl ? $scope.uidl.qualifiedName : '0');
-                uidlService.implementController($scope);
 
-				$timeout(function(){
-					var initFuncName = 'initWidget_' + $scope.uidl.widgetType;
-					var initFunc = window[initFuncName];
-					if(typeof initFunc === 'function') {
-						initFunc($scope.uidl);
-					}
-				});
+                if ($scope.uidl) {
+                    uidlService.implementController($scope);
+
+                    $timeout(function() {
+                        var initFuncName = 'initWidget_' + $scope.uidl.widgetType;
+                        var initFunc = window[initFuncName];
+                        if (typeof initFunc === 'function') {
+                            initFunc($scope.uidl);
+                        }
+                    });
+                }
             });
         }
     };
