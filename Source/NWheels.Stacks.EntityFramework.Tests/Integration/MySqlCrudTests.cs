@@ -50,45 +50,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void HardCodedImplementation_CrudBasic()
-        {
-            //-- Arrange
-
-            InitializeMetadata();
-            var factory = CreateHardCodedDataRepositoryFactory();
-
-            DropAndCreateTestDatabase();
-            InitializeCompiledModel(factory);
-            CreateTestDatabaseObjects();
-
-            //-- Act & Assert
-
-            ThisTestCrudOperations.Repository1.ExecuteBasic(() => Framework.NewUnitOfWork<IR1.IOnlineStoreRepository>(autoCommit: false));
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Test]
-        public void HardCodedImplementation_AdvancedRetrievals()
-        {
-            //-- Arrange
-
-            InitializeMetadata();
-            var factory = CreateHardCodedDataRepositoryFactory();
-
-            DropAndCreateTestDatabase();
-            InitializeCompiledModel(factory);
-            CreateTestDatabaseObjects();
-
-            //-- Act & Assert
-
-            CrudOperations.Repository1.ExecuteAdvancedRetrievals(() => Framework.NewUnitOfWork<Interfaces.Repository1.IOnlineStoreRepository>(autoCommit: false));
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Test]
-        public void DynamicImplementation_CrudBasic()
+        public void CrudBasic()
         {
             //-- Arrange
 
@@ -107,7 +69,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void DynamicImplementation_AdvancedRetrievals()
+        public void AdvancedRetrievals()
         {
             //-- Arrange
 
@@ -126,7 +88,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void DynamicImplementation_CrudBasicWithDomainObjects()
+        public void CrudBasicWithDomainObjects()
         {
             //-- Arrange
 
@@ -148,7 +110,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void DynamicImplementation_AdvancedRetrievalsWithDomainObjects()
+        public void AdvancedRetrievalsWithDomainObjects()
         {
             //-- Arrange
 
@@ -292,23 +254,6 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
                 (TypeMetadataCache)Framework.MetadataCache,
                 dbProviderFactory,
                 Auto.Of(dbConfig));
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private DataRepositoryFactoryBase CreateHardCodedDataRepositoryFactory()
-        {
-            var connectionString = ConfigurationManager.ConnectionStrings["test_mysql"];
-            //var dbProviderName = connectionString.ProviderName;
-            //var dbProviderFactory = DbProviderFactories.GetFactory(dbProviderName);
-            var dbConfig = Framework.ConfigSection<IFrameworkDatabaseConfig>();
-            dbConfig.ConnectionString = connectionString.ConnectionString;
-
-            return new HardCodedImplementations.DataRepositoryFactory_OnlineStoreRepository(
-                Framework,
-                _dynamicModule,
-                (TypeMetadataCache)Framework.MetadataCache,
-                connectionString);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -19,15 +19,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Unit
     public class EfDataRepositoryFactoryTests : DynamicTypeUnitTestBase
     {
         [Test]
-        public void CanCreateHardCodedDataRepository()
-        {
-            FactoryOperations.Repository1.ExecuteDataRepositoryCreation(Framework, CreateHardCodedDataRepositoryFactory);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [Test]
-        public void CanCreateDynamicDataRepository()
+        public void CanCreateDataRepository()
         {
             FactoryOperations.Repository1.ExecuteDataRepositoryCreation(Framework, CreateDynamicDataRepositoryFactory);
         }
@@ -49,23 +41,6 @@ namespace NWheels.Stacks.EntityFramework.Tests.Unit
                 (TypeMetadataCache)Framework.MetadataCache,
                 dbProviderFactory,
                 Auto.Of(dbConfig));
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private DataRepositoryFactoryBase CreateHardCodedDataRepositoryFactory()
-        {
-            var connectionString = ConfigurationManager.ConnectionStrings["test"];
-            //var dbProviderName = connectionString.ProviderName;
-            //var dbProviderFactory = DbProviderFactories.GetFactory(dbProviderName);
-            var dbConfig = Framework.ConfigSection<IFrameworkDatabaseConfig>();
-            dbConfig.ConnectionString = connectionString.ConnectionString;
-
-            return new HardCodedImplementations.DataRepositoryFactory_OnlineStoreRepository(
-                Framework,
-                base.DyamicModule,
-                (TypeMetadataCache)Framework.MetadataCache,
-                connectionString);
         }
     }
 }

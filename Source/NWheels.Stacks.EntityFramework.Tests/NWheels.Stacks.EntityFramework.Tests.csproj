@@ -78,7 +78,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HardCodedImplementations.cs" />
     <Compile Include="Integration\MySqlCrudTests.cs" />
     <Compile Include="Integration\SqlServerCrudTests.cs" />
     <Compile Include="Integration\DatabaseTestBase.cs" />
