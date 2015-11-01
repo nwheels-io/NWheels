@@ -24,6 +24,11 @@ namespace NWheels.Entities
             type.IsAbstract = false;
             type.IsEntity = false;
             type.IsEntityPart = true;
+
+            if ( BaseEntityPart != null )
+            {
+                type.BaseType = cache.FindTypeMetadataAllowIncomplete(BaseEntityPart);
+            }
         }
 
         #endregion
@@ -34,5 +39,9 @@ namespace NWheels.Entities
         {
             return (type.IsInterface && type.GetCustomAttribute<EntityPartContractAttribute>() != null);
         }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Type BaseEntityPart { get; set; }
     }
 }

@@ -349,12 +349,7 @@ namespace NWheels.DataObjects.Core
 
         internal HashSet<Type> GetBaseContracts()
         {
-            Func<Type, bool> contractPredicate = (
-                this.IsEntity ? 
-                (Func<Type, bool>)DataObjectContractAttribute.IsDataObjectContract : 
-                (Func<Type, bool>)DataObjectPartContractAttribute.IsDataObjectPartContract);
-
-            var allContracts = this.ContractType.GetInterfaces().Where(contractPredicate).ToArray();
+            var allContracts = this.ContractType.GetInterfaces().Where(DataObjectContractAttribute.IsDataObjectContract).ToArray();
             var baseContractSet = new HashSet<Type>(allContracts);
 
             foreach ( var contract in allContracts )
