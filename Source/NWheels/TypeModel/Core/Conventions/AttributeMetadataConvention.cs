@@ -31,14 +31,14 @@ namespace NWheels.DataObjects.Core.Conventions
 
         public void Preview(TypeMetadataBuilder type)
         {
+            ApplyToType(type);
+            ApplyToProperties(type);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Apply(TypeMetadataBuilder type)
         {
-            ApplyToType(type);
-            ApplyToProperties(type);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
