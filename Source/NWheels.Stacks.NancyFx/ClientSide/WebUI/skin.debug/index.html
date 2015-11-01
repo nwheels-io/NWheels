@@ -425,16 +425,15 @@
             </div>
         </script>
 
-        <script type="text/ng-template" id="uidl-element-template/TypeSelector">
+    <script type="text/ng-template" id="uidl-element-template/TypeSelector">
             <div class="content-example">
                 Type
-                <select 
-                    ng-options="s.restTypeName as s.text for s in uidl.selections" 
-                    ng-model="selectedType">
-                </select>
+                <select ng-options="s.typeName as s.text for s in uidl.selections"
+                        ng-model="selectedType"
+                        ng-change="selectedTypeChanged(selectedType)"></select>
             </div>
             <div ng-repeat="selection in uidl.selections" class="Layout">
-                <uidl-widget ng-if="selectedType==selection.restTypeName" uidl="selection.widget" parent-model="model"></uidl-widget>
+                <uidl-widget ng-if="selectedType==selection.typeName" uidl="selection.widget" parent-model="model"></uidl-widget>
             </div>
         </script>
 

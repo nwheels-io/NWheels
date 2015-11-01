@@ -705,22 +705,33 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
     m_controllerImplementations['TypeSelector'] = {
         implement: function (scope) {
-			if (scope.parentModel) {
+            scope.selectedTypeChanged = function (type) {
+                scope.entityService.newDomainObject(type).then(function (newObj) {
+                    scope.model = {
+                        entity: newObj
+                    };
+
+                    if (scope.parentUidl) {
+                        scope.parentModel.entity[scope.parentUidl.propertyName] = newObj;
+                    } else {
+                        scope.parentModel.entity = newObj;
+                    }
+
+                    scope.selectedType = newObj['$type'];
+                });
+            };
+
+            if (scope.parentModel) {
 				scope.model = { 
 					entity: (
 						scope.parentUidl ? // parentUidl exists when nested in CrudForm
 						scope.parentModel.entity[scope.parentUidl.propertyName] :   // when nested in CrudForm widget
 						scope.parentModel.entity)                                   // when nested in Crud widget
 				};
-			} else if(scope.uidl.selections.length > 0) {
-				scope.model = { 
-					entity: scope.entityService.newDomainObject(scope.uidl.selections[0].typeName)
-				};
-			}
-			
-			if (scope.model) {
-				scope.selectedType = scope.model.entity['$type'];
-			}
+				scope.selectedType = (scope.model.entity ? scope.model.entity['$type'] : null);
+            } else if (scope.uidl.selections.length > 0) {
+                scope.selectedTypeChanged(scope.uidl.selections[0].typeName);
+            }
         }
     };
 
