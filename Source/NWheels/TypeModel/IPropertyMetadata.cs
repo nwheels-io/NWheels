@@ -19,11 +19,11 @@ namespace NWheels.DataObjects
         IEnumerable<KeyValuePair<Type, PropertyInfo>> GetAllImplementations();
         bool TryGetDefaultValueOperand(MethodWriterBase writer, out IOperand<TypeTemplate.TProperty> valueOperand);
         object ParseStringValue(string s);
-        Expression<Func<TEntity, bool>> MakeEqualityComparison<TEntity>(object value);
-        Expression<Func<TEntity, bool>> MakeEqualityComparison<TEntity>(string valueString);
-        Expression<Func<TEntity, bool>> MakeForeignKeyEqualityComparison<TEntity>(object value);
-        Expression<Func<TEntity, bool>> MakeForeignKeyEqualityComparison<TEntity>(string valueString);
-        IQueryable<TEntity> MakeOrderBy<TEntity>(IQueryable<TEntity> query, bool ascending);
+        Expression<Func<TEntity, bool>> MakeBinaryExpression<TEntity>(object value, Func<Expression, Expression, Expression> binaryFactory);
+        Expression<Func<TEntity, bool>> MakeBinaryExpression<TEntity>(string valueString, Func<Expression, Expression, Expression> binaryFactory);
+        Expression<Func<TEntity, bool>> MakeForeignKeyBinaryExpression<TEntity>(object value, Func<Expression, Expression, Expression> binaryFactory);
+        Expression<Func<TEntity, bool>> MakeForeignKeyBinaryExpression<TEntity>(string valueString, Func<Expression, Expression, Expression> binaryFactory);
+        IQueryable<TEntity> MakeOrderBy<TEntity>(IQueryable<TEntity> query, bool first, bool ascending);
         ITypeMetadata DeclaringContract { get; }
         string Name { get; }
         string ContractQualifiedName { get; }

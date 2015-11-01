@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -86,11 +87,13 @@ namespace NWheels.UI
             {
                 IDomainObject[] resultSet;
                 long resultCount;
-                handler.Query(options, out resultSet, out resultCount);
+                bool moreAvailable;
+                handler.Query(options, out resultSet, out resultCount, out moreAvailable);
 
                 var results = new QueryResults() {
                     ResultSet = resultSet,
-                    ResultCount = resultCount
+                    ResultCount = resultCount,
+                    MoreAvailable = moreAvailable
                 };
 
                 json = JsonConvert.SerializeObject(results, _serializerSettings);
@@ -224,25 +227,37 @@ namespace NWheels.UI
         {
             public IDomainObject[] ResultSet { get; set; }
             public long ResultCount { get; set; }
+            public bool MoreAvailable { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class QueryOptions
         {
+            public const string CountParameterKey = "$count";
+            public const string SkipParameterKey = "$skip";
+            public const string TakeParameterKey = "$take";
             public const string OrderByParameterKey = "$orderby";
-            public const string MaxCountParameterKey = "$top";
-            public const string CountOnlyParameterKey = "$count";
-            public const string PlusOneParameterKey = "$plus1";
             public const string AscendingParameterModifier = ":asc";
             public const string DescendingParameterModifier = ":desc";
+            public const string EqualOperator = ":eq";
+            public const string NotEqualOperator = ":neq";
+            public const string GreaterThanOperator = ":gt";
+            public const string GreaterThanOrEqualOperator = ":gte";
+            public const string LessThanOperator = ":lt";
+            public const string LessThanOrEqualOperator = ":lte";
+            public const string StringContainsOperator = ":strc";
+            public const string StringStartsWithOperator = ":strsw";
+            public const string StringEndsWithOperator = ":strew";
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public QueryOptions()
             {
-                EqualityFilter = new Dictionary<string, string>();
+                Filter = new List<QueryFilterItem>();
+                InMemoryFilter = new List<QueryFilterItem>();
                 OrderBy = new List<QueryOrderByItem>();
+                InMemoryOrderBy = new List<QueryOrderByItem>();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -252,40 +267,52 @@ namespace NWheels.UI
             {
                 foreach ( var parameter in queryParams )
                 {
-                    if ( parameter.Key.EqualsIgnoreCase(OrderByParameterKey) )
-                    {
-                        AddOrderBy(parameter);
-                    }
-                    else if ( parameter.Key.EqualsIgnoreCase(MaxCountParameterKey) )
-                    {
-                        MaxCount = Int32.Parse(parameter.Value);
-                    }
-                    else if ( parameter.Key.EqualsIgnoreCase(CountOnlyParameterKey) )
+                    if ( parameter.Key.EqualsIgnoreCase(CountParameterKey) )
                     {
                         IsCountOnly = true;
                     }
-                    else if ( parameter.Key.EqualsIgnoreCase(PlusOneParameterKey) )
+                    else if ( parameter.Key.EqualsIgnoreCase(SkipParameterKey) )
                     {
-                        ReturnMaxCountPlusOne = true;
+                        Skip = Int32.Parse(parameter.Value);
+                    }
+                    else if ( parameter.Key.EqualsIgnoreCase(TakeParameterKey) )
+                    {
+                        Take = Int32.Parse(parameter.Value);
+                    }
+                    else if ( parameter.Key.EqualsIgnoreCase(OrderByParameterKey) )
+                    {
+                        AddOrderByItem(parameter);
                     }
                     else
                     {
-                        EqualityFilter[parameter.Key] = parameter.Value;
+                        AddFilterItem(parameter);
                     }
                 }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IDictionary<string, string> EqualityFilter { get; private set; }
-            public IList<QueryOrderByItem> OrderBy { get; private set; }
-            public int? MaxCount { get; private set; }
             public bool IsCountOnly { get; private set; }
-            public bool ReturnMaxCountPlusOne { get; private set; }
+            public IList<QueryFilterItem> Filter { get; private set; }
+            public IList<QueryFilterItem> InMemoryFilter { get; private set; }
+            public IList<QueryOrderByItem> OrderBy { get; private set; }
+            public IList<QueryOrderByItem> InMemoryOrderBy { get; private set; }
+            public int? Skip { get; private set; }
+            public int? Take { get; private set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
-            
-            private void AddOrderBy(KeyValuePair<string, string> parameter)
+
+            public bool NeedInMemoryOperations
+            {
+                get
+                {
+                    return (InMemoryFilter.Count > 0 || InMemoryOrderBy.Count > 0);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void AddOrderByItem(KeyValuePair<string, string> parameter)
             {
                 var subParams = parameter.Value.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -294,6 +321,90 @@ namespace NWheels.UI
                     OrderBy.Add(new QueryOrderByItem(subParam));
                 }
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void AddFilterItem(KeyValuePair<string, string> parameter)
+            {
+                string propertyName;
+                string @operator;
+
+                var operatorIndex = parameter.Key.IndexOf(':');
+
+                if ( operatorIndex > 0 )
+                {
+                    propertyName = parameter.Key.Substring(0, operatorIndex);
+                    @operator = parameter.Key.Substring(operatorIndex);
+                }
+                else
+                {
+                    propertyName = parameter.Key;
+                    @operator = EqualOperator;
+                }
+
+                var filterItem = new QueryFilterItem(propertyName, @operator, parameter.Value);
+                this.Filter.Add(filterItem);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class QueryFilterItem
+        {
+            public QueryFilterItem(string propertyName, string @operator, string stringValue)
+            {
+                PropertyName = propertyName;
+                Operator = @operator;
+                StringValue = stringValue;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Expression<Func<TEntity, bool>> MakePredicateExpression<TEntity>()
+            {
+                if ( MetaProperty == null )
+                {
+                    throw new InvalidOperationException("MetaProperty must be set before calling this method.");
+                }
+
+                var expressionFactory = _s_binaryExpressionFactoryByOperator[Operator];
+
+                if ( MetaProperty.Kind == PropertyKind.Scalar )
+                {
+                    return MetaProperty.MakeBinaryExpression<TEntity>(StringValue, expressionFactory);
+                }
+                else if ( MetaProperty.Kind == PropertyKind.Relation )
+                {
+                    return MetaProperty.MakeForeignKeyBinaryExpression<TEntity>(StringValue, expressionFactory);
+                }
+
+                throw new NotSupportedException("Cannot create filter expression for property of kind: " + MetaProperty.Kind);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string PropertyName { get; private set; }
+            public string Operator { get; private set; }
+            public string StringValue { get; private set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public IPropertyMetadata MetaProperty { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static readonly Dictionary<string, Func<Expression, Expression, Expression>> _s_binaryExpressionFactoryByOperator =
+                new Dictionary<string, Func<Expression, Expression, Expression>>(StringComparer.InvariantCultureIgnoreCase) {
+                    { QueryOptions.EqualOperator, Expression.Equal },
+                    { QueryOptions.NotEqualOperator, Expression.NotEqual },
+                    { QueryOptions.GreaterThanOperator, Expression.GreaterThan },
+                    { QueryOptions.GreaterThanOrEqualOperator, Expression.GreaterThanOrEqual },
+                    { QueryOptions.LessThanOperator, Expression.LessThan },
+                    { QueryOptions.LessThanOrEqualOperator, Expression.LessThanOrEqual },
+                    //{ QueryOptions.StringContainsOperator, (left, right) => Expression.Invoke() },
+                    //{ QueryOptions.StringStartsWithOperator, Expression.Equal },
+                    //{ QueryOptions.StringEndsWithOperator, Expression.Equal },
+                };
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -329,8 +440,24 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public IQueryable<TEntity> ApplyToQuery<TEntity>(IQueryable<TEntity> query, bool first)
+            {
+                if ( MetaProperty == null )
+                {
+                    throw new InvalidOperationException("MetaProperty must be set before calling this method.");
+                }
+
+                return MetaProperty.MakeOrderBy(query, first, ascending: this.Ascending);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public string PropertyName { get; private set; }
             public bool Ascending { get; private set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IPropertyMetadata MetaProperty { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -347,7 +474,7 @@ namespace NWheels.UI
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public abstract IUnitOfWork NewUnitOfWork();
-            public abstract void Query(QueryOptions options, out IDomainObject[] resultSet, out long resultCount);
+            public abstract void Query(QueryOptions options, out IDomainObject[] resultSet, out long resultCount, out bool moreAvailable);
             public abstract IDomainObject GetById(string id);
             public abstract IDomainObject CreateNew();
             public abstract void Insert(IDomainObject entity);
@@ -409,55 +536,81 @@ namespace NWheels.UI
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override void Query(QueryOptions options, out IDomainObject[] resultSet, out long resultCount)
+            public override void Query(QueryOptions options, out IDomainObject[] resultSet, out long resultCount, out bool moreAvailable)
             {
+                resultSet = null;
+                moreAvailable = false;
+
                 using ( var context = Framework.NewUnitOfWork<TContext>() )
                 {
                     var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
-                    IQueryable<TEntity> query = repository;
+                    IQueryable<TEntity> dbQuery = repository;
 
-                    query = HandleEqualityFilter(options, query);
-                    query = HandleOrderBy(options, query);
-                    query = HandleMaxCount(options, query);
+                    dbQuery = HandleFilter(options, dbQuery);
+                    dbQuery = HandleOrderBy(options, dbQuery);
+                    dbQuery = HandlePaging(options, dbQuery);
 
-                    TEntity[] dbResultSet;
-                    ExecuteQuery(query, options, out dbResultSet, out resultCount);
+                    if ( options.IsCountOnly && !options.NeedInMemoryOperations )
+                    {
+                        resultCount = dbQuery.Count();
+                        return;
+                    }
 
-                    resultSet = FilterCalculatedValues(options, dbResultSet).Cast<IDomainObject>().ToArray();
+                    IEnumerable<TEntity> queryResults = new QueryResultEnumerable<TEntity>(dbQuery);
+
+                    if ( options.NeedInMemoryOperations )
+                    {
+                        queryResults = HandleInMemoryOperations(options, queryResults);
+                    }
+
+                    if ( options.IsCountOnly )
+                    {
+                        resultCount = queryResults.Count();
+                        return;
+                    }
+
+                    if ( options.Take.HasValue )
+                    {
+                        var buffer = queryResults.ToList();
+                        moreAvailable = (buffer.Count > options.Take.Value);
+                        resultSet = buffer.Take(options.Take.Value).Cast<IDomainObject>().ToArray();
+                    }
+                    else
+                    {
+                        resultSet = queryResults.Cast<IDomainObject>().ToArray();
+                    }
+
                     resultCount = resultSet.Length;
                 }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private IEnumerable<TEntity> FilterCalculatedValues(QueryOptions options, TEntity[] resultSet)
+            private IEnumerable<TEntity> HandleInMemoryOperations(QueryOptions options, IEnumerable<TEntity> dbCursor)
             {
-                IQueryable<TEntity> query = null;
+                IQueryable<TEntity> inMemoryQuery = dbCursor.AsQueryable();
 
-                foreach ( var equalityFilterItem in options.EqualityFilter )
+                foreach ( var filterItem in options.InMemoryFilter )
                 {
-                    var metaProperty = MetaType.GetPropertyByName(equalityFilterItem.Key);
-
-                    if ( metaProperty.IsCalculated == false )
-                    {
-                        continue;
-                    }
-
-                    if ( query == null )
-                    {
-                        query = resultSet.AsQueryable<TEntity>();
-                    }
-
-                    object parsedValue = metaProperty.ParseStringValue(equalityFilterItem.Value);
-                    query = query.Where(metaProperty.MakeEqualityComparison<TEntity>(parsedValue));
+                    inMemoryQuery = inMemoryQuery.Where(filterItem.MakePredicateExpression<TEntity>());
                 }
 
-                if ( query == null )
+                for ( int i = 0 ; i < options.InMemoryOrderBy.Count ; i++ )
                 {
-                    return resultSet;
+                    inMemoryQuery = options.InMemoryOrderBy[i].ApplyToQuery(inMemoryQuery, first: i == 0);
                 }
 
-                return query;
+                if ( options.Skip.HasValue )
+                {
+                    inMemoryQuery = inMemoryQuery.Skip(options.Skip.Value);
+                }
+
+                if ( options.Take.HasValue )
+                {
+                    inMemoryQuery = inMemoryQuery.Take(options.Take.Value + 1);
+                }
+
+                return inMemoryQuery;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -468,12 +621,15 @@ namespace NWheels.UI
                 {
                     var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
                     var idProperty = MetaType.PrimaryKey.Properties[0];
-                    IQueryable<TEntity> query = repository.Where(idProperty.MakeEqualityComparison<TEntity>(valueString: id));
+                    IQueryable<TEntity> query = repository.Where(idProperty.MakeBinaryExpression<TEntity>(
+                        valueString: id, 
+                        binaryFactory: Expression.Equal));
+                    
                     var result = query.FirstOrDefault();
 
                     if ( result == null )
                     {
-                        throw new ArgumentException("Specfiied entity does not exist.");
+                        throw new ArgumentException("Specified entity does not exist.");
                     }
 
                     return result as IDomainObject;
@@ -547,58 +703,105 @@ namespace NWheels.UI
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
-            
-            private IQueryable<TEntity> HandleMaxCount(QueryOptions options, IQueryable<TEntity> query)
+
+            private IQueryable<TEntity> HandleOrderBy(QueryOptions options, IQueryable<TEntity> dbQuery)
             {
-                if ( options.MaxCount.HasValue )
+                for ( int i = 0 ; i < options.OrderBy.Count ; )
                 {
-                    query = query.Take(options.MaxCount.Value + (options.ReturnMaxCountPlusOne ? 1 : 0));
-                }
-                
-                return query;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private IQueryable<TEntity> HandleOrderBy(QueryOptions options, IQueryable<TEntity> query)
-            {
-                foreach ( var orderBy in options.OrderBy )
-                {
-                    var metaProperty = MetaType.GetPropertyByName(orderBy.PropertyName);
-                    query = metaProperty.MakeOrderBy(query, orderBy.Ascending);
-                }
-                
-                return query;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private IQueryable<TEntity> HandleEqualityFilter(QueryOptions options, IQueryable<TEntity> query)
-            {
-                foreach ( var equalityFilterItem in options.EqualityFilter )
-                {
-                    var metaProperty = MetaType.GetPropertyByName(equalityFilterItem.Key);
+                    var orderItem = options.OrderBy[i];
+                    var metaProperty = MetaType.GetPropertyByName(orderItem.PropertyName);
 
                     if ( metaProperty.IsCalculated )
                     {
-                        continue;
+                        options.Filter.RemoveAt(i);
+                        options.InMemoryOrderBy.Add(orderItem);
                     }
-
-                    switch ( metaProperty.Kind )
+                    else
                     {
-                        case PropertyKind.Scalar:
-                            query = query.Where(metaProperty.MakeEqualityComparison<TEntity>(valueString: equalityFilterItem.Value));
-                            break;
-                        case PropertyKind.Relation:
-                            query = query.Where(metaProperty.MakeForeignKeyEqualityComparison<TEntity>(valueString: equalityFilterItem.Value));
-                            break;
-                        default:
-                            throw new NotSupportedException("Cannot filter by property: " + metaProperty.Name);
+                        dbQuery = metaProperty.MakeOrderBy(dbQuery, first: i == 0, ascending: orderItem.Ascending);
+                        i++;
+                    }
+                }
+                
+                return dbQuery;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IQueryable<TEntity> HandleFilter(QueryOptions options, IQueryable<TEntity> dbQuery)
+            {
+                for ( int i = 0 ; i < options.Filter.Count ; )
+                {
+                    var filterItem = options.Filter[i];
+                    filterItem.MetaProperty = MetaType.GetPropertyByName(filterItem.PropertyName);
+
+                    if ( filterItem.MetaProperty.IsCalculated )
+                    {
+                        options.Filter.RemoveAt(i);
+                        options.InMemoryFilter.Add(filterItem);
+                    }
+                    else
+                    {
+                        var predicateExpression = filterItem.MakePredicateExpression<TEntity>();
+                        dbQuery = dbQuery.Where(predicateExpression);
+                        i++;
                     }
                 }
 
-                return query;
+                return dbQuery;
             }
+            
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IQueryable<TEntity> HandlePaging(QueryOptions options, IQueryable<TEntity> dbQuery)
+            {
+                if ( options.InMemoryFilter.Count == 0 && options.InMemoryOrderBy.Count == 0 )
+                {
+                    if ( options.Skip.HasValue )
+                    {
+                        dbQuery = dbQuery.Skip(options.Skip.Value + 1);
+                    }
+
+                    if ( options.Take.HasValue )
+                    {
+                        dbQuery = dbQuery.Take(options.Take.Value);
+                    }
+                }
+
+                return dbQuery;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class QueryResultEnumerable<TEntity> : IEnumerable<TEntity>
+        {
+            private readonly IEnumerable<TEntity> _dbCursor;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public QueryResultEnumerable(IEnumerable<TEntity> dbCursor)
+            {
+                _dbCursor = dbCursor;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IEnumerable
+
+            public IEnumerator<TEntity> GetEnumerator()
+            {
+                return _dbCursor.GetEnumerator();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            #endregion
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -801,7 +1004,7 @@ namespace NWheels.UI
                 
                     if ( metaType.IsEntity )
                     {
-                        return EntityId.Of(domainObject).Value.ToString();
+                        return EntityId.Of(domainObject).Value.ToStringOrDefault();
                     }
                 }
 

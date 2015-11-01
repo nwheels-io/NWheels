@@ -101,40 +101,48 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Expression<Func<TEntity, bool>> MakeEqualityComparison<TEntity>(object value)
+        public Expression<Func<TEntity, bool>> MakeBinaryExpression<TEntity>(
+            object value, 
+            Func<Expression, Expression, Expression> binaryFactory)
         {
-            return GetExpressionFactory(this.ClrType).EqualityComparison<TEntity>(this, value);
+            return GetExpressionFactory(this.ClrType).Binary<TEntity>(this, value, binaryFactory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Expression<Func<TEntity, bool>> MakeEqualityComparison<TEntity>(string valueString)
+        public Expression<Func<TEntity, bool>> MakeBinaryExpression<TEntity>(
+            string valueString,
+            Func<Expression, Expression, Expression> binaryFactory)
         {
-            return GetExpressionFactory(this.ClrType).EqualityComparison<TEntity>(this, ParseStringValue(valueString));
+            return GetExpressionFactory(this.ClrType).Binary<TEntity>(this, ParseStringValue(valueString), binaryFactory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Expression<Func<TEntity, bool>> MakeForeignKeyEqualityComparison<TEntity>(object value)
+        public Expression<Func<TEntity, bool>> MakeForeignKeyBinaryExpression<TEntity>(
+            object value,
+            Func<Expression, Expression, Expression> binaryFactory)
         {
-            return GetExpressionFactory(this.ClrType).ForeignKeyEqualityComparison<TEntity>(this, value);
+            return GetExpressionFactory(this.ClrType).ForeignKeyBinary<TEntity>(this, value, binaryFactory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Expression<Func<TEntity, bool>> MakeForeignKeyEqualityComparison<TEntity>(string valueString)
+        public Expression<Func<TEntity, bool>> MakeForeignKeyBinaryExpression<TEntity>(
+            string valueString,
+            Func<Expression, Expression, Expression> binaryFactory)
         {
             var relatedEntityKeyProperty = GetRelatedEntityKeyProperty(this);
             var parsedValue = relatedEntityKeyProperty.ParseStringValue(valueString);
 
-            return GetExpressionFactory(this.ClrType).ForeignKeyEqualityComparison<TEntity>(this, parsedValue);
+            return GetExpressionFactory(this.ClrType).ForeignKeyBinary<TEntity>(this, parsedValue, binaryFactory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IQueryable<TEntity> MakeOrderBy<TEntity>(IQueryable<TEntity> query, bool ascending)
+        public IQueryable<TEntity> MakeOrderBy<TEntity>(IQueryable<TEntity> query, bool first, bool ascending)
         {
-            return GetExpressionFactory(this.ClrType).OrderBy<TEntity>(query, this, ascending);
+            return GetExpressionFactory(this.ClrType).OrderBy<TEntity>(query, this, first, ascending);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -360,9 +368,25 @@ namespace NWheels.DataObjects.Core
 
         private abstract class ExpressionFactory
         {
-            public abstract Expression<Func<TEntity, bool>> EqualityComparison<TEntity>(IPropertyMetadata metaProperty, object value);
-            public abstract Expression<Func<TEntity, bool>> ForeignKeyEqualityComparison<TEntity>(IPropertyMetadata metaProperty, object value);
-            public abstract IQueryable<TEntity> OrderBy<TEntity>(IQueryable<TEntity> query, IPropertyMetadata metaProperty, bool ascending);
+            public abstract Expression<Func<TEntity, bool>> Binary<TEntity>(
+                IPropertyMetadata metaProperty, 
+                object value, 
+                Func<Expression, Expression, Expression> expressionFactory);
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public abstract Expression<Func<TEntity, bool>> ForeignKeyBinary<TEntity>(
+                IPropertyMetadata metaProperty, 
+                object value, 
+                Func<Expression, Expression, Expression> expressionFactory);
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public abstract IQueryable<TEntity> OrderBy<TEntity>(
+                IQueryable<TEntity> query, 
+                IPropertyMetadata metaProperty, 
+                bool first, 
+                bool ascending);
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -406,46 +430,49 @@ namespace NWheels.DataObjects.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override Expression<Func<TEntity, bool>> EqualityComparison<TEntity>(IPropertyMetadata metaProperty, object value)
+            public override Expression<Func<TEntity, bool>> Binary<TEntity>(
+                IPropertyMetadata metaProperty, 
+                object value,
+                Func<Expression, Expression, Expression> expressionFactory)
             {
                 var parameter = Expression.Parameter(typeof(TEntity), "e");
                 var targetExpression = GetPropertyTargetExpression<TEntity>(metaProperty, parameter);
 
-                Expression equality = Expression.Equal(
+                Expression binary = expressionFactory(
                     Expression.Property(targetExpression, metaProperty.ContractPropertyInfo),
                     Expression.Constant(value, metaProperty.ClrType));
 
-                return Expression.Lambda<Func<TEntity, bool>>(equality, new[] { parameter });
+                return Expression.Lambda<Func<TEntity, bool>>(binary, new[] { parameter });
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override Expression<Func<TEntity, bool>> ForeignKeyEqualityComparison<TEntity>(IPropertyMetadata metaProperty, object value)
+            public override Expression<Func<TEntity, bool>> ForeignKeyBinary<TEntity>(
+                IPropertyMetadata metaProperty, 
+                object value, 
+                Func<Expression, Expression, Expression> expressionFactory)
             {
                 var relatedKeyMetaProperty = GetRelatedEntityKeyProperty(metaProperty);
                 var entityIdGetValueMethod = GetExpressionFactory(relatedKeyMetaProperty.ClrType).EntityIdGetValueMethod;
                 var parameter = Expression.Parameter(typeof(TEntity), "e");
                 var target = GetPropertyTargetExpression<TEntity>(metaProperty, parameter);
-                
+                var left = Expression.Call(
+                    null,
+                    entityIdGetValueMethod,
+                    new Expression[] { Expression.Property(target, metaProperty.ContractPropertyInfo) });
+                var right = Expression.Constant(value, relatedKeyMetaProperty.ClrType);
+                var binary = expressionFactory(left, right);
 
-                return Expression.Lambda<Func<TEntity, bool>>(
-                    Expression.Equal(
-                        Expression.Call(
-                            null,
-                            entityIdGetValueMethod,
-                            new Expression[] { 
-                                Expression.Property(target, metaProperty.ContractPropertyInfo)
-                            }
-                        ),
-                        Expression.Constant(value, relatedKeyMetaProperty.ClrType)
-                    ),
-                    new[] { parameter }
-                );
+                return Expression.Lambda<Func<TEntity, bool>>(binary, new[] { parameter });
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override IQueryable<TEntity> OrderBy<TEntity>(IQueryable<TEntity> query, IPropertyMetadata metaProperty, bool ascending)
+            public override IQueryable<TEntity> OrderBy<TEntity>(
+                IQueryable<TEntity> query, 
+                IPropertyMetadata metaProperty, 
+                bool first, 
+                bool ascending)
             {
                 var parameter = Expression.Parameter(typeof(TEntity), "e");
                 var targetExpression = GetPropertyTargetExpression<TEntity>(metaProperty, parameter);
@@ -455,13 +482,21 @@ namespace NWheels.DataObjects.Core
                     new[] { parameter }
                 );
 
-                if ( ascending )
+                if ( first && ascending )
                 {
                     return query.OrderBy<TEntity, TProperty>(propertyExpression);
                 }
-                else
+                else if ( first )
                 {
                     return query.OrderByDescending<TEntity, TProperty>(propertyExpression);
+                }
+                else if ( ascending )
+                {
+                    return ((IOrderedQueryable<TEntity>)query).ThenBy<TEntity, TProperty>(propertyExpression);
+                }
+                else 
+                {
+                    return ((IOrderedQueryable<TEntity>)query).ThenByDescending<TEntity, TProperty>(propertyExpression);
                 }
             }
 
