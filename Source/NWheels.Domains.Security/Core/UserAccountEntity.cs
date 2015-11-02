@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Authorization.Core;
 using NWheels.Exceptions;
 using NWheels.Domains.Security.Impl;
 using NWheels.Entities;
@@ -122,8 +123,9 @@ namespace NWheels.Domains.Security.Core
 
         public UserAccountPrincipal CreatePrincipal()
         {
-            var claims = ClaimFactory.CreateClaimsFromContainerEntity(this);
-            var identity = new UserAccountIdentity(this, claims);
+            var claims = ClaimFactory.CreateClaimsFromContainerEntity(this).ToArray();
+            var accessControlList = AccessControlCache.GetAccessControlList(claims);
+            var identity = new UserAccountIdentity(this, claims, accessControlList);
             var principal = new UserAccountPrincipal(identity);
 
             return principal;
@@ -146,6 +148,7 @@ namespace NWheels.Domains.Security.Core
         protected ISecurityDomainLogger Logger { get; set; }
         protected ICryptoProvider CryptoProvider { get; set; }
         protected ClaimFactory ClaimFactory { get; set; }
+        protected AccessControlListCache AccessControlCache { get; set; }
         protected UserAccountPolicySet PolicySet { get; set; }
 
         #endregion

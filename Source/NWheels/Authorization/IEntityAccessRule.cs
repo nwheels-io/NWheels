@@ -8,6 +8,6 @@ namespace NWheels.Authorization
 {
     public interface IEntityAccessRule
     {
-        void BuildRule(IEntityAccessBuilder builder);
+        void BuildAccessControl(IEntityAccessControlBuilder builder);
     }
 }

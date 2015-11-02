@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Autofac;
 using Hapil;
 using NWheels.Authorization;
+using NWheels.Authorization.Core;
+using NWheels.Authorization.Impl;
 using NWheels.Concurrency;
 using NWheels.Concurrency.Core;
 using NWheels.Entities;
@@ -368,6 +370,11 @@ namespace NWheels.Testing
             builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
             builder.RegisterType<TestServiceBus>().As<IServiceBus>().SingleInstance();
+
+            builder.RegisterType<AccessControlListCache>().SingleInstance();
+            builder.RegisterType<LocalTransientSessionManager>().As<ISessionManager, ICoreSessionManager>().SingleInstance();
+            builder.NWheelsFeatures().Logging().RegisterLogger<IAuthorizationLogger>();
+            builder.NWheelsFeatures().Logging().RegisterLogger<ISessionEventLogger>();
             
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IDomainContextLogger>();

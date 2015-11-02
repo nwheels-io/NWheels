@@ -18,7 +18,7 @@ using NWheels.Processing.Messages;
 
 namespace NWheels.Entities.Core
 {
-    public abstract class DataRepositoryBase : IApplicationDataRepository, IRuntimeAccessContext
+    public abstract class DataRepositoryBase : IApplicationDataRepository, IAccessControlContext
     {
         private readonly Dictionary<Type, IEntityRepository> _entityRepositoryByContractType;
         private readonly Dictionary<Type, IPartitionedRepository> _partitionedRepositoryByContractType;
@@ -218,29 +218,24 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        #region Implementation of IRuntimeAccessContext
+        #region Implementation of IAccessControlContext
 
-        ISession IRuntimeAccessContext.Session
+        //TODO: this is temporary implementation of IAccessControlContext. 
+        //the correct implementation would be to "derive child context" from the "base context" - created earlier in the thread.
+        //namely, UserStory, ApiContract, and ApiOperation properties should come from the base context, while DomainContext property should be added by
+        //the child context.
+
+        ISession IAccessControlContext.Session
         {
             get
             {
-                return NWheels.Authorization.Core.Session.Current;
+                return Session.Current;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        string IRuntimeAccessContext.UserStory
-        {
-            get
-            {
-                return null;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        Type IRuntimeAccessContext.ApiContract
+        string IAccessControlContext.UserStory
         {
             get
             {
@@ -250,7 +245,7 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        string IRuntimeAccessContext.ApiOperation
+        Type IAccessControlContext.ApiContract
         {
             get
             {
@@ -260,7 +255,17 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        Type IRuntimeAccessContext.DomainContext
+        string IAccessControlContext.ApiOperation
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Type IAccessControlContext.DomainContext
         {
             get
             {
@@ -290,15 +295,59 @@ namespace NWheels.Entities.Core
 
         public IQueryable<TEntity> AuthorizeQuery<TEntity>(IQueryable<TEntity> source)
         {
-            return source;
-            //TODO: temporarily disabled; re-enable when all applications are ready
-            //var rule = GetRuntimeEntityAccessRule<TEntity>();
-            //return rule.AuthorizeQuery(this, source);
+            var accessControl = GetEntityAccessControl<TEntity>();
+            return accessControl.AuthorizeQuery(this, source);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IRuntimeEntityAccessRule<TEntity> GetRuntimeEntityAccessRule<TEntity>()
+        public bool CanRetrieve<TEntity>(object entity)
+        {
+            var accessControl = GetEntityAccessControl<TEntity>();
+            var authorized = accessControl.CanRetrieve(this, entity);
+            return (authorized == true);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void AuthorizeNew<TEntity>()
+        {
+            var accessControl = GetEntityAccessControl<TEntity>();
+            
+            if ( accessControl.CanInsert(this) != true )
+            {
+                //TODO: replace with logger
+                throw new SecurityException("Current user has no permission to create entity of contract: " + typeof(TEntity).Name);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void AuthorizeInsert<TEntity>(object entity)
+        {
+            var accessControl = GetEntityAccessControl<TEntity>();
+            accessControl.AuthorizeInsert(this, entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void AuthorizeUpdate<TEntity>(object entity)
+        {
+            var accessControl = GetEntityAccessControl<TEntity>();
+            accessControl.AuthorizeUpdate(this, entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void AuthorizeDelete<TEntity>(object entity)
+        {
+            var accessControl = GetEntityAccessControl<TEntity>();
+            accessControl.AuthorizeDelete(this, entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEntityAccessControl<TEntity> GetEntityAccessControl<TEntity>()
         {
             var identityInfo = (Thread.CurrentPrincipal.Identity as IIdentityInfo);
 
@@ -307,14 +356,21 @@ namespace NWheels.Entities.Core
                 throw new SecurityException("User is not authorized to access data.");
             }
 
-            var rule = identityInfo.GetEntityAccessRule<TEntity>();
+            var accessControlList = identityInfo.GetAccessControlList();
 
-            if ( rule == null )
+            if ( accessControlList == null )
             {
-                throw new SecurityException("No access rule defined for entity type: " + typeof(TEntity).FullName);
+                throw new SecurityException("No access controls defined for current user.");
             }
 
-            return rule;
+            var entityAccessControl = accessControlList.GetEntityAccessControl<TEntity>();
+
+            if ( entityAccessControl == null )
+            {
+                throw new SecurityException("No access controls defined for entity type: " + typeof(TEntity).FullName);
+            }
+
+            return entityAccessControl;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

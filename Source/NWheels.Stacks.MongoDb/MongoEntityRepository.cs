@@ -189,12 +189,14 @@ namespace NWheels.Stacks.MongoDb
                 }
 
                 var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)persistableObject);
-                return domainObject;
+
+                if ( _ownerRepo.CanRetrieve<TEntityContract>(domainObject) )
+                {
+                    return domainObject;
+                }
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -448,6 +450,7 @@ namespace NWheels.Stacks.MongoDb
         public TEntityContract New()
         {
             _ownerRepo.ValidateOperationalState();
+            _ownerRepo.AuthorizeNew<TEntityContract>();
 
             var persistableObject = _objectFactory.NewEntity<TEntityContract>();
             return InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>((TEntityImpl)persistableObject);
@@ -458,6 +461,7 @@ namespace NWheels.Stacks.MongoDb
         public TConcreteEntity New<TConcreteEntity>() where TConcreteEntity : class, TEntityContract
         {
             _ownerRepo.ValidateOperationalState();
+            _ownerRepo.AuthorizeNew<TConcreteEntity>();
 
             var persistableObject = _objectFactory.NewEntity<TConcreteEntity>();
             return InjectDependenciesAndTrackAndWrapInDomainObject<TConcreteEntity>((TEntityImpl)(object)persistableObject);
@@ -468,6 +472,7 @@ namespace NWheels.Stacks.MongoDb
         public TEntityContract New(Type concreteContract)
         {
             _ownerRepo.ValidateOperationalState();
+            _ownerRepo.AuthorizeNew<TEntityContract>();
             
             var persistableObject = _objectFactory.NewEntity(concreteContract);
             return InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>((TEntityImpl)persistableObject);
@@ -487,6 +492,16 @@ namespace NWheels.Stacks.MongoDb
         {
             var entityState = entity.As<IDomainObject>().State;
 
+            if ( entityState.IsNew() )
+            {
+                _ownerRepo.AuthorizeInsert<TEntityContract>(entity);
+            }
+
+            if ( entityState.IsRetrieved() )
+            {
+                _ownerRepo.AuthorizeUpdate<TEntityContract>(entity);
+            }
+
             if ( entityState != EntityState.RetrievedPristine )
             {
                 _ownerRepo.ValidateOperationalState();
@@ -499,6 +514,7 @@ namespace NWheels.Stacks.MongoDb
         public void Insert(TEntityContract entity)
         {
             _ownerRepo.ValidateOperationalState();
+            _ownerRepo.AuthorizeInsert<TEntityContract>(entity);
             _ownerRepo.NotifyEntityState((IEntityObject)entity.As<IPersistableObject>(), EntityState.NewModified);
             //_mongoCollection.Insert((TEntityImpl)entity);
         }
@@ -508,6 +524,7 @@ namespace NWheels.Stacks.MongoDb
         public void Update(TEntityContract entity)
         {
             _ownerRepo.ValidateOperationalState();
+            _ownerRepo.AuthorizeUpdate<TEntityContract>(entity);
             _ownerRepo.NotifyEntityState((IEntityObject)entity.As<IPersistableObject>(), EntityState.RetrievedModified);
             //_mongoCollection.Save((TEntityImpl)entity);
         }
@@ -517,6 +534,7 @@ namespace NWheels.Stacks.MongoDb
         public void Delete(TEntityContract entity)
         {
             _ownerRepo.ValidateOperationalState();
+            _ownerRepo.AuthorizeDelete<TEntityContract>(entity);
             _ownerRepo.NotifyEntityState((IEntityObject)entity.As<IPersistableObject>(), EntityState.RetrievedDeleted);
 
             //var query = Query<TEntityImpl>.EQ(_keyPropertyExpression, ((IEntityObject)entity).GetId().Value);

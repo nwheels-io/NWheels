@@ -17,9 +17,9 @@ namespace NWheels.Authorization.Claims
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IRuntimeEntityAccessRule<TEntity> GetEntityAccessRule<TEntity>()
+        public IAccessControlList GetAccessControlList()
         {
-            return null;
+            throw new NotSupportedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

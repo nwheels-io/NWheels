@@ -10,6 +10,8 @@ using NWheels.Extensions;
 using NWheels.Authorization;
 using NWheels.Authorization.Claims;
 using NWheels.Authorization.Core;
+using NWheels.Authorization.Impl;
+using NWheels.DataObjects;
 using NWheels.Entities;
 
 namespace NWheels.Domains.Security.Core
@@ -21,13 +23,15 @@ namespace NWheels.Domains.Security.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         private readonly IUserAccountEntity _userAccount;
+        private readonly IAccessControlList _accessControlList;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UserAccountIdentity(IUserAccountEntity userAccount, IEnumerable<Claim> claims)
+        public UserAccountIdentity(IUserAccountEntity userAccount, IEnumerable<Claim> claims, IAccessControlList accessControlList)
             : base(claims.SelectMany(ExpandWithImpliedClaims))
         {
             _userAccount = userAccount;
+            _accessControlList = accessControlList;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -81,9 +85,16 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IRuntimeEntityAccessRule<TEntity> GetEntityAccessRule<TEntity>()
+        public IAccessControlList GetAccessControlList()
         {
-            return null;//TODO: implement as required
+            return _accessControlList;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEntityAccessControl<TEntity> GetEntityAccessControl<TEntity>()
+        {
+            return _accessControlList.GetEntityAccessControl<TEntity>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

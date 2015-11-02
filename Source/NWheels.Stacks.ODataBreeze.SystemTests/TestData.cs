@@ -8,6 +8,7 @@ using NWheels.Authorization;
 using NWheels.Authorization.Core;
 using NWheels.DataObjects;
 using NWheels.Domains.Security;
+using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Testing;
 
@@ -117,9 +118,15 @@ namespace NWheels.Stacks.ODataBreeze.SystemTests
             {
                 #region Implementation of IEntityAccessRule
 
-                public void BuildRule(IEntityAccessBuilder builder)
+                public void BuildAccessControl(IEntityAccessControlBuilder access)
                 {
-                    throw new NotImplementedException();
+                    access.ToEntity<IUserAccountEntity>()
+                        .IsDefinedHard(
+                            canInsert: false, 
+                            canDelete: false)
+                        .IsDefinedByPredicate(
+                            canRetrieve: (context, user) => context.Session.UserAccountAs<IUserAccountEntity>() == user,
+                            canUpdate: (context, user) => context.Session.UserAccountAs<IUserAccountEntity>() == user);
                 }
 
                 #endregion

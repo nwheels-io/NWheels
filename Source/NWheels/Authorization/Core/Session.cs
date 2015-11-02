@@ -6,7 +6,7 @@ using NWheels.Endpoints.Core;
 
 namespace NWheels.Authorization.Core
 {
-    public class Session : ISession, IRuntimeAccessContext
+    public class Session : ISession, IAccessControlContext
     {
         private readonly IFramework _framework;
         private readonly IResourceLock _touchLock;
@@ -86,7 +86,7 @@ namespace NWheels.Authorization.Core
 
         #region Implementation of IRuntimeAccessContext
 
-        ISession IRuntimeAccessContext.Session
+        ISession IAccessControlContext.Session
         {
             get
             {
@@ -96,7 +96,7 @@ namespace NWheels.Authorization.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        string IRuntimeAccessContext.UserStory
+        string IAccessControlContext.UserStory
         {
             get
             {
@@ -106,7 +106,7 @@ namespace NWheels.Authorization.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        Type IRuntimeAccessContext.ApiContract
+        Type IAccessControlContext.ApiContract
         {
             get
             {
@@ -116,7 +116,7 @@ namespace NWheels.Authorization.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        string IRuntimeAccessContext.ApiOperation
+        string IAccessControlContext.ApiOperation
         {
             get
             {
@@ -126,7 +126,7 @@ namespace NWheels.Authorization.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        Type IRuntimeAccessContext.DomainContext
+        Type IAccessControlContext.DomainContext
         {
             get
             {
@@ -174,7 +174,7 @@ namespace NWheels.Authorization.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static IRuntimeAccessContext CurrentAccessContext
+        public static IAccessControlContext CurrentAccessContext
         {
             get
             {

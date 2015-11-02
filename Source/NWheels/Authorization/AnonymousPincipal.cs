@@ -6,6 +6,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Authorization.Core;
+using NWheels.Authorization.Impl;
 using NWheels.DataObjects;
 
 namespace NWheels.Authorization
@@ -35,10 +36,9 @@ namespace NWheels.Authorization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IRuntimeEntityAccessRule<TEntity> GetEntityAccessRule<TEntity>()
+        public IAccessControlList GetAccessControlList()
         {
-            return new SystemPrincipal.SystemEntityAccessRule<TEntity>(); //temporarily for compatibility
-            //return new AnonymousEntityAccessRule<TEntity>();
+            return new AnonymousAccessControlList();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -124,95 +124,105 @@ namespace NWheels.Authorization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class AnonymousEntityAccessRule<TEntity> : IRuntimeEntityAccessRule<TEntity>
+        private class AnonymousAccessControlList : IAccessControlList
+        {
+            public IEntityAccessControl<TEntity> GetEntityAccessControl<TEntity>()
+            {
+                return new AnonymousEntityAccessControl<TEntity>();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class AnonymousEntityAccessControl<TEntity> : IEntityAccessControl<TEntity>
         {
             #region Implementation of IRuntimeEntityAccessRule
 
-            public IQueryable<TEntity> AuthorizeQuery(IRuntimeAccessContext context, IQueryable<TEntity> source)
+            public IQueryable<TEntity> AuthorizeQuery(IAccessControlContext context, IQueryable source)
             {
                 throw AccessDenied();
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void AuthorizeRetrieve(IRuntimeAccessContext context)
+            public void AuthorizeRetrieve(IAccessControlContext context)
             {
                 throw AccessDenied();
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void AuthorizeInsert(IRuntimeAccessContext context, object entity)
+            public void AuthorizeInsert(IAccessControlContext context, object entity)
             {
                 throw AccessDenied();
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void AuthorizeUpdate(IRuntimeAccessContext context, object entity)
+            public void AuthorizeUpdate(IAccessControlContext context, object entity)
             {
                 throw AccessDenied();
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void AuthorizeDelete(IRuntimeAccessContext context, object entity)
+            public void AuthorizeDelete(IAccessControlContext context, object entity)
             {
                 throw AccessDenied();
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public bool? CanRetrieve(IRuntimeAccessContext context)
+            public bool? CanRetrieve(IAccessControlContext context)
             {
                 return false;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public bool? CanInsert(IRuntimeAccessContext context)
+            public bool? CanInsert(IAccessControlContext context)
             {
                 return false;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public bool? CanUpdate(IRuntimeAccessContext context)
+            public bool? CanUpdate(IAccessControlContext context)
             {
                 return false;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public bool? CanDelete(IRuntimeAccessContext context)
+            public bool? CanDelete(IAccessControlContext context)
             {
                 return false;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public bool? CanRetrieve(IRuntimeAccessContext context, object entity)
+            public bool? CanRetrieve(IAccessControlContext context, object entity)
             {
                 return false;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public bool? CanInsert(IRuntimeAccessContext context, object entity)
+            public bool? CanInsert(IAccessControlContext context, object entity)
             {
                 return false;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public bool? CanUpdate(IRuntimeAccessContext context, object entity)
+            public bool? CanUpdate(IAccessControlContext context, object entity)
             {
                 return false;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public bool? CanDelete(IRuntimeAccessContext context, object entity)
+            public bool? CanDelete(IAccessControlContext context, object entity)
             {
                 return false;
             }

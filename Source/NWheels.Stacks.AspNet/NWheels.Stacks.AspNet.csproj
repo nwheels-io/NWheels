@@ -111,8 +111,11 @@
     <Compile Include="DynamicControllerSelector.cs" />
     <Compile Include="DynamicControllerTypeResolver.cs" />
     <Compile Include="HttpApiEndpointApplication.cs" />
+    <Compile Include="IWebApplicationLogger.cs" />
+    <Compile Include="IWebModuleContext.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UidlApplicationController.cs" />
     <Compile Include="WebApiControllerFactory.cs" />
   </ItemGroup>
   <ItemGroup>

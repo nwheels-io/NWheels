@@ -283,8 +283,10 @@ namespace NWheels.Hosting.Core
             builder.RegisterPipeline<IDataRepositoryPopulator>();
 
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();
-            
+
+            builder.RegisterType<AccessControlListCache>().SingleInstance();
             builder.RegisterType<LocalTransientSessionManager>().As<ISessionManager, ICoreSessionManager>().SingleInstance();
+            builder.NWheelsFeatures().Logging().RegisterLogger<IAuthorizationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<ISessionEventLogger>();
             
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkLoggingConfiguration>();

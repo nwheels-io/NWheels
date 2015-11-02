@@ -155,6 +155,7 @@ namespace NWheels.DataObjects.Core
 
         public TypeMetadataBuilder BaseType { get; set; }
         public List<TypeMetadataBuilder> DerivedTypes { get; private set; }
+        public int InheritanceDepth { get; set; }
         public List<Type> MixinContractTypes { get; private set; }
         public List<PropertyMetadataBuilder> Properties { get; private set; }
         public KeyMetadataBuilder PrimaryKey { get; set; }
@@ -176,8 +177,9 @@ namespace NWheels.DataObjects.Core
             IsAbstract = visitor.VisitAttribute("IsAbstract", IsAbstract);
 
             BaseType = visitor.VisitElementReference<ITypeMetadata, TypeMetadataBuilder>("BaseType", BaseType);
-
             visitor.VisitElementList<ITypeMetadata, TypeMetadataBuilder>("DerivedTypes", DerivedTypes);
+            InheritanceDepth = visitor.VisitAttribute("InheritanceDepth", InheritanceDepth);
+            
             visitor.VisitElementList<IPropertyMetadata, PropertyMetadataBuilder>("Properties", Properties);
             visitor.VisitElementList<IKeyMetadata, KeyMetadataBuilder>("AllKeys", AllKeys);
             PrimaryKey = visitor.VisitElementReference<IKeyMetadata, KeyMetadataBuilder>("PrimaryKey", PrimaryKey);

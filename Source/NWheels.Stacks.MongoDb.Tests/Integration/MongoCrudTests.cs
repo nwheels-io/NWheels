@@ -4,6 +4,7 @@ using Hapil;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using NUnit.Framework;
+using NWheels.Authorization;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
 using NWheels.Entities;
@@ -24,6 +25,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private Hapil.DynamicModule _dyamicModule;
+        private IDisposable _systemSession;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -50,6 +52,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
         public void SetUp()
         {
             DropAndCreateTestDatabase();
+            _systemSession = Framework.Components.Resolve<ISessionManager>().JoinGlobalSystem();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,6 +60,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
         [TearDown]
         public void TearDown()
         {
+            _systemSession.Dispose();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

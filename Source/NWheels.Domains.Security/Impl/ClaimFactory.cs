@@ -52,7 +52,7 @@ namespace NWheels.Domains.Security.Impl
                 {
                     foreach ( var dataRule in claimsContainer.AssociatedDataRules.Select(s => allDataRules[s]) )
                     {
-                        expandedClaims.Add(new EntityAccessRuleClaim(dataRule.ClaimValue));
+                        expandedClaims.Add(new EntityAccessRuleClaim(dataRule, dataRule.ClaimValue));
                     }
                 }
             }

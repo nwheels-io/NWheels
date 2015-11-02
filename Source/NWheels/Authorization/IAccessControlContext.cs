@@ -2,7 +2,7 @@
 
 namespace NWheels.Authorization
 {
-    public interface IRuntimeAccessContext
+    public interface IAccessControlContext
     {
         ISession Session { get; }
         string UserStory { get; }

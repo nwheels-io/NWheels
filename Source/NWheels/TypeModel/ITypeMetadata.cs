@@ -25,6 +25,7 @@ namespace NWheels.DataObjects
         bool IsAbstract { get; }
         ITypeMetadata BaseType { get; }
         IReadOnlyList<ITypeMetadata> DerivedTypes { get; }
+        int InheritanceDepth { get; }
         IReadOnlyList<IPropertyMetadata> Properties { get; }
         IKeyMetadata PrimaryKey { get; }
         IReadOnlyList<IKeyMetadata> AllKeys { get; }

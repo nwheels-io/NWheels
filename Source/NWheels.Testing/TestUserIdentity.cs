@@ -55,9 +55,9 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IRuntimeEntityAccessRule<TEntity> GetEntityAccessRule<TEntity>()
+        public IAccessControlList GetAccessControlList()
         {
-            return null;
+            throw new NotSupportedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

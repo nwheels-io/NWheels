@@ -77,9 +77,9 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IRuntimeEntityAccessRule<TEntity> GetEntityAccessRule<TEntity>()
+        public IAccessControlList GetAccessControlList()
         {
-            return new SystemPrincipal.SystemEntityAccessRule<TEntity>(); //temporarily for compatibility
+            return _identityInfo.GetAccessControlList();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

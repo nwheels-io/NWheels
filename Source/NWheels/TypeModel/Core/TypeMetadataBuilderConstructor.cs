@@ -93,6 +93,7 @@ namespace NWheels.DataObjects.Core
             {
                 _thisType.BaseType = _cache.FindTypeMetadataAllowIncomplete(baseContracts.Single());
                 _thisType.BaseType.RegisterDerivedType(_thisType);
+                _thisType.InheritanceDepth = _thisType.BaseType.InheritanceDepth + 1;
 
                 //for ( var baseType = _thisType.BaseType ; baseType != null ; baseType = baseType.BaseType )
                 //{
