@@ -89,12 +89,12 @@ namespace NWheels.Testing.Entities.Stacks
                 [PropertyContract.Required(AllowEmpty = false)]
                 string Value { get; set; }
             }
-            [EntityPartContract]
+            [EntityPartContract(BaseEntityPart = typeof(IAttributeValue))]
             public interface IColorAttributeValue : IAttributeValue
             {
                 string HexRgb { get; set; }
             }
-            [EntityPartContract]
+            [EntityPartContract(BaseEntityPart = typeof(IAttributeValue))]
             public interface IClothingSizeAttributeValue : IAttributeValue
             {
                 string Standard { get; set; }
