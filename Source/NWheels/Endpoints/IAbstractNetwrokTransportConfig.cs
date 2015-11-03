@@ -10,6 +10,6 @@ namespace NWheels.Endpoints
     [ConfigurationElement(IsAbstract = true)]
     public interface IAbstractNetwrokTransportConfig : IConfigurationElement
     {
-        INetworkEndpointTransport CreateConfiguredComponent();
+        //INetworkEndpointTransport CreateConfiguredComponent();
     }
 }

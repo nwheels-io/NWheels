@@ -19,7 +19,6 @@ namespace NWheels.Stacks.Network
     {
         protected Socket Socket;
         private readonly int _receiveBufferSize;
-        private readonly IFramework _framework;
 
         //
         // Keep alive handling
@@ -270,10 +269,9 @@ namespace NWheels.Stacks.Network
             IFramework framework,
             INetworkEndpointLogger logger,
             IServiceBus serviceBus)
-            : base(cc, connectorClient, registration, logger, serviceBus)
+            : base(cc, connectorClient, framework, registration, logger, serviceBus)
         {
             Socket = s;
-            _framework = framework;
             _receiveBufferSize = receiveBufferSize;
         }
 

@@ -25,6 +25,7 @@ namespace NWheels.Stacks.Network
         protected MessagesDispatcher m_MessagesDispatcher;
 
         private IConnectorClient _connectorClient;
+        protected readonly IFramework _framework;
         protected IServiceBus _serviceBus;
         protected readonly NetworkApiEndpointRegistration Registration;
         protected readonly INetworkEndpointLogger Logger;
@@ -41,6 +42,7 @@ namespace NWheels.Stacks.Network
 
         protected AbstractNetBinaryConnector(NetConnectorsBinaryTransport connectorsManager,
             IConnectorClient connectorClient,
+            IFramework framework,
             NetworkApiEndpointRegistration registration,
             INetworkEndpointLogger logger,
             IServiceBus serviceBus)
@@ -50,6 +52,7 @@ namespace NWheels.Stacks.Network
             Registration = registration;
             Logger = logger;
             _serviceBus = serviceBus;
+            _framework = framework;
 
             ConnectorsManager.RegisterConnector(this);
         }

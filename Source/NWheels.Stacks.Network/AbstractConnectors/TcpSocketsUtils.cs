@@ -302,11 +302,17 @@ namespace NWheels.Stacks.Network
         }
 
         //----------- Connect Section ---------------
-        public static Socket Connect(string remoteAddr, int port)
+        public static Socket Connect(string addr, int port)
         {
             // Establish the remote endpoint for the socket.
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(remoteAddr);
-            IPAddress ipAddress = ipHostInfo.AddressList[0];
+            IPAddress ipAddress;
+
+            if (IPAddress.TryParse(addr, out ipAddress) == false)
+            {
+                IPHostEntry ipHostInfo = Dns.GetHostEntry(addr);
+                ipAddress = ipHostInfo.AddressList[0];
+            }
+
             IPEndPoint ep = new IPEndPoint(ipAddress, port);
 
             // Create a TCP/IP socket.
