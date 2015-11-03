@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security;
-using System.Security.Claims;
 using System.Security.Permissions;
 using System.Security.Principal;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using NUnit.Framework;
 
-namespace NWheels.Domains.Security.UnitTests
+namespace NWheels.Domains.Security.Tests.Unit
 {
     [TestFixture]
     public class AssumptionTests
