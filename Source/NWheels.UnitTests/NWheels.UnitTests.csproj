@@ -85,6 +85,7 @@
     <Compile Include="Authorization\Impl\EntityAccessControlTests.cs" />
     <Compile Include="Authorization\TestingSamples.cs" />
     <Compile Include="AutoTests.cs" />
+    <Compile Include="Concurrency\ConcurrentDictionaryTests.cs" />
     <Compile Include="Concurrency\RealTimeoutManagerTests.cs" />
     <Compile Include="Configuration\ConfigurationSectionConventionTests.cs" />
     <Compile Include="Configuration\XmlConfigurationLoaderTest.cs" />
