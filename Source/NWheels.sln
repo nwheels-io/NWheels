@@ -101,6 +101,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.Network", "N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.EntityFramework.Tests", "NWheels.Stacks.EntityFramework.Tests\NWheels.Stacks.EntityFramework.Tests.csproj", "{CE8B64BC-8E6B-4DF7-8DE7-48EB436007CA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Domains.Security.Tests", "NWheels.Domains.Security.Tests\NWheels.Domains.Security.Tests.csproj", "{FBBBFB70-A8DD-4B99-97AD-4C7B9ABC1EAD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -215,6 +217,10 @@ Global
 		{CE8B64BC-8E6B-4DF7-8DE7-48EB436007CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE8B64BC-8E6B-4DF7-8DE7-48EB436007CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE8B64BC-8E6B-4DF7-8DE7-48EB436007CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBBBFB70-A8DD-4B99-97AD-4C7B9ABC1EAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBBBFB70-A8DD-4B99-97AD-4C7B9ABC1EAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBBBFB70-A8DD-4B99-97AD-4C7B9ABC1EAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBBBFB70-A8DD-4B99-97AD-4C7B9ABC1EAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -257,5 +263,6 @@ Global
 		{6D002239-752E-44DE-8694-8DFC26A1A3FA} = {4829A9A2-7B02-4FD7-8581-FC59B4029699}
 		{EF5AE36A-4539-4DB0-8CBF-DCB906B6AA59} = {6D002239-752E-44DE-8694-8DFC26A1A3FA}
 		{CE8B64BC-8E6B-4DF7-8DE7-48EB436007CA} = {DED7537D-C277-42A1-820B-5C2B78EBA79A}
+		{FBBBFB70-A8DD-4B99-97AD-4C7B9ABC1EAD} = {ADBCD8B1-C625-41FE-8E29-A3DD32D74C0E}
 	EndGlobalSection
 EndGlobal

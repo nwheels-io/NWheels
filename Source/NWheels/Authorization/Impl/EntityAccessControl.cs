@@ -50,18 +50,19 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IQueryable<TEntity> AuthorizeQuery(IAccessControlContext context, IQueryable source)
+        public IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable<TEntity> source)
         {
             AuthorizeRetrieve(context);
 
             if ( _entityQuery != null )
             {
                 var filterExpression = _entityQuery(context);
-                return ((IQueryable<TEntity>)source).Where(filterExpression);
+                var filteredSource = source.Where(filterExpression);
+                return filteredSource;
             }
             else
             {
-                return (IQueryable<TEntity>)source;
+                return source;
             }
         }
 

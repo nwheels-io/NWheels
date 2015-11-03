@@ -24,13 +24,13 @@ namespace NWheels.Authorization.Impl
 
         #region Implementation of IRuntimeEntityAccessRule
 
-        public IQueryable<TEntity> AuthorizeQuery(IAccessControlContext context, IQueryable source)
+        public IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable<TEntity> source)
         {
-            var authorizedQuery = (IQueryable<TEntity>)source;
+            var authorizedQuery = source;
 
             for ( int i = 0 ; i < _sinks.Length ; i++ )
             {
-                authorizedQuery = _sinks[i].AuthorizeQuery(context, authorizedQuery);
+                authorizedQuery = (IQueryable<TEntity>)_sinks[i].AuthorizeQuery(context, authorizedQuery);
             }
 
             return authorizedQuery;

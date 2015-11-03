@@ -62,8 +62,9 @@
       <HintPath>..\packages\protobuf-net.2.0.0.668\lib\net40\protobuf-net.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Shouldly">
-      <HintPath>..\packages\Shouldly.2.5.0\lib\net40\Shouldly.dll</HintPath>
+    <Reference Include="Shouldly, Version=2.6.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Shouldly.2.6.0\lib\net40\Shouldly.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -78,7 +79,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Authorization\Impl\RuntimeEntityAccessRuleTests.cs" />
+    <Compile Include="Authorization\Core\AccessControlListCacheTests.cs" />
+    <Compile Include="Authorization\Impl\AccessControlListTests.cs" />
+    <Compile Include="Authorization\Impl\EntityAccessControlPipeTests.cs" />
+    <Compile Include="Authorization\Impl\EntityAccessControlTests.cs" />
+    <Compile Include="Authorization\TestingSamples.cs" />
     <Compile Include="AutoTests.cs" />
     <Compile Include="Concurrency\RealTimeoutManagerTests.cs" />
     <Compile Include="Configuration\ConfigurationSectionConventionTests.cs" />

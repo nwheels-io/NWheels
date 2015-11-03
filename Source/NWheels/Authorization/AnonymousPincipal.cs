@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
+using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Authorization.Claims;
 using NWheels.Authorization.Core;
 using NWheels.Authorization.Impl;
 using NWheels.DataObjects;
@@ -126,9 +128,22 @@ namespace NWheels.Authorization
 
         private class AnonymousAccessControlList : IAccessControlList
         {
+            private readonly Claim[] _claims = new Claim[] {
+                new UserRoleClaim(AnonymousRole)
+            };
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public IEntityAccessControl<TEntity> GetEntityAccessControl<TEntity>()
             {
                 return new AnonymousEntityAccessControl<TEntity>();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IReadOnlyCollection<Claim> GetClaims()
+            {
+                return _claims;
             }
         }
 
@@ -138,7 +153,7 @@ namespace NWheels.Authorization
         {
             #region Implementation of IRuntimeEntityAccessRule
 
-            public IQueryable<TEntity> AuthorizeQuery(IAccessControlContext context, IQueryable source)
+            public IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable<TEntity> source)
             {
                 throw AccessDenied();
             }

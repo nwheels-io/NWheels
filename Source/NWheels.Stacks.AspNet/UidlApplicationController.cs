@@ -304,7 +304,7 @@ namespace NWheels.Stacks.AspNet
 
         private abstract class CommandValueBinder
         {
-            public abstract void BindCommandValues(object module, IMethodCallObject callObject);
+            public abstract void BindCommandValues(UidlApplicationController controller, IMethodCallObject callObject);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -313,9 +313,8 @@ namespace NWheels.Stacks.AspNet
         {
             #region Overrides of CommandValueBinder
 
-            public override void BindCommandValues(object module, IMethodCallObject callObject)
+            public override void BindCommandValues(UidlApplicationController controller, IMethodCallObject callObject)
             {
-                //TODO: translate thid to web api
                 //module.BindTo<TCallObject>((TCallObject)callObject, new BindingConfig { BodyOnly = true });
             }
 

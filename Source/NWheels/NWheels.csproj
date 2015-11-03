@@ -101,7 +101,6 @@
     <Compile Include="Authorization\Impl\EntityAccessControlPipe.cs" />
     <Compile Include="Authorization\IAccessControlContext.cs" />
     <Compile Include="Authorization\Core\ISessionEventLogger.cs" />
-    <Compile Include="Authorization\EntityPermission.cs" />
     <Compile Include="Authorization\Claims\OperationPermissionClaim.cs" />
     <Compile Include="Authorization\Claims\UserRoleClaim.cs" />
     <Compile Include="Authorization\IEntityAccessControlBuilder.cs" />

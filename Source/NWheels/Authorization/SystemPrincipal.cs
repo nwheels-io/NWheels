@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Authorization.Claims;
 using NWheels.Authorization.Core;
 using NWheels.DataObjects;
 
@@ -131,9 +133,22 @@ namespace NWheels.Authorization
 
         public class SystemAccessControlList : IAccessControlList
         {
+            private readonly Claim[] _claims = new Claim[] {
+                new UserRoleClaim(SystemRole)
+            };
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public IEntityAccessControl<TEntity> GetEntityAccessControl<TEntity>()
             {
                 return new SystemEntityAccessControl<TEntity>();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public IReadOnlyCollection<Claim> GetClaims()
+            {
+                return _claims;
             }
         }
 
@@ -143,9 +158,9 @@ namespace NWheels.Authorization
         {
             #region Implementation of IRuntimeEntityAccessRule
 
-            public IQueryable<TEntity> AuthorizeQuery(IAccessControlContext context, IQueryable source)
+            public IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable<TEntity> source)
             {
-                return (IQueryable<TEntity>)source;
+                return source;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------

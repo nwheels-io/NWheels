@@ -34,7 +34,7 @@ namespace NWheels.Authorization.Core
             var acl = _accessControlListByClaimSetKey.GetOrAdd(
                 key,
                 k => {
-                    return new AccessControlList(_metadataCache, _logger, claimSet.OfType<EntityAccessRuleClaim>().Select(claim => claim.Rule));
+                    return new AccessControlList(_metadataCache, _logger, claimSet, claimSetKey: k);
                 });
 
             return acl;
@@ -45,7 +45,7 @@ namespace NWheels.Authorization.Core
         private string CreateClaimSetKey(Claim[] claimSet)
         {
             var sortedClaims = new List<Claim>(claimSet);
-            sortedClaims.Sort(CompareClaimsByType);
+            sortedClaims.Sort(CompareClaimsByTypeThenByValue);
             
             var key = new StringBuilder();
 
@@ -59,9 +59,16 @@ namespace NWheels.Authorization.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static int CompareClaimsByType(Claim a, Claim b)
+        private static int CompareClaimsByTypeThenByValue(Claim a, Claim b)
         {
-            return StringComparer.InvariantCultureIgnoreCase.Compare(a.Type, b.Type);
+            var result = StringComparer.InvariantCultureIgnoreCase.Compare(a.Type, b.Type);
+
+            if ( result != 0 )
+            {
+                return result;
+            }
+
+            return StringComparer.InvariantCultureIgnoreCase.Compare(a.Value, b.Value);
         }
     }
 }

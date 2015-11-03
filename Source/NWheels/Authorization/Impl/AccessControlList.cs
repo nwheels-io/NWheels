@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Claims;
+using NWheels.Authorization.Claims;
 using NWheels.Authorization.Core;
 using NWheels.DataObjects;
 using NWheels.Extensions;
@@ -11,18 +13,22 @@ namespace NWheels.Authorization.Impl
     internal class AccessControlList : IAccessControlList
     {
         private readonly ITypeMetadataCache _metadataCache;
-        private readonly Dictionary<Type, IEntityAccessControl> _entityAccessControlByContract;
         private readonly IAuthorizationLogger _logger;
+        private readonly Claim[] _claims;
+        private readonly string _claimSetKey;
+        private readonly Dictionary<Type, IEntityAccessControl> _entityAccessControlByContract;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        public AccessControlList(ITypeMetadataCache metadataCache, IAuthorizationLogger logger, IEnumerable<IEntityAccessRule> entityAccessRules)
+
+        public AccessControlList(ITypeMetadataCache metadataCache, IAuthorizationLogger logger, IEnumerable<Claim> claims, string claimSetKey)
         {
             _metadataCache = metadataCache;
             _logger = logger;
+            _claims = claims.ToArray();
+            _claimSetKey = claimSetKey;
             _entityAccessControlByContract = new Dictionary<Type, IEntityAccessControl>();
 
-            BuildAccessControls(entityAccessRules);
+            BuildAccessControls(claims.OfType<EntityAccessRuleClaim>().Select(claim => claim.Rule));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -38,7 +44,24 @@ namespace NWheels.Authorization.Impl
 
             throw _logger.NoRuleDefinedForEntity(contract: typeof(TEntity));
         }
-        
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IReadOnlyCollection<Claim> GetClaims()
+        {
+            return _claims;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of Object
+
+        public override string ToString()
+        {
+            return _claimSetKey ?? base.ToString();
+        }
+
+        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         

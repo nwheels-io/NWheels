@@ -23,8 +23,8 @@ namespace NWheels.Authorization.Core
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IEntityAccessControl<out TEntity> : IEntityAccessControl
+    public interface IEntityAccessControl<in TEntity> : IEntityAccessControl
     {
-        IQueryable<TEntity> AuthorizeQuery(IAccessControlContext context, IQueryable source);
+        IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable<TEntity> source);
     }
 }
