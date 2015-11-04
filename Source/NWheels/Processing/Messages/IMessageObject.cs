@@ -10,5 +10,6 @@ namespace NWheels.Processing.Messages
         DateTime CreatedAtUtc { get; }
         IReadOnlyCollection<IMessageHeader> Headers { get; }
         object Body { get; }
+        Type BodyType { get; }
     }
 }

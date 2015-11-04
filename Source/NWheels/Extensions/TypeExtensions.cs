@@ -148,6 +148,33 @@ namespace NWheels.Extensions
 
             return type.FriendlyName();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static List<Type> GetBaseTypesTopDown(this Type type)
+        {
+            var hierarchy = GetBaseTypesBottomUp(type);
+            hierarchy.Reverse(); // from bottom-up to top-down
+            return hierarchy;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static List<Type> GetBaseTypesBottomUp(this Type type)
+        {
+            var hierarchy = new List<Type>();
+
+            for (
+                var currentType = type;
+                currentType != null;
+                currentType = currentType.BaseType)
+            {
+                hierarchy.Add(currentType);
+            }
+
+            return hierarchy;
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static bool IsSignificantNamespacePart(string part)

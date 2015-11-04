@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Autofac;
+using NWheels.Extensions;
 using NWheels.Hosting;
 
 namespace NWheels.Processing.Messages.Impl
@@ -15,7 +16,7 @@ namespace NWheels.Processing.Messages.Impl
         private readonly IComponentContext _components;
         private readonly IServiceBusEventLogger _logger;
         private readonly BlockingCollection<IMessageObject> _messageQueue;
-        private readonly Hashtable _adaptersByBodyType;
+        private readonly Hashtable _adaptersByBodyType;     //of <Type (= message type), IMessageHandlerAdapter>
         private readonly Object _writeSyncObject;
         private CancellationTokenSource _stopRequest;
         private Thread _workerThread;
@@ -32,7 +33,7 @@ namespace NWheels.Processing.Messages.Impl
             _logger = logger;
             _writeSyncObject = new object();
 
-            IReadOnlyDictionary<Type, IMessageHandlerAdapter>  initialListHandlersByBodyType = MapRegisteredBodyTypes(
+            IReadOnlyDictionary<Type, IMessageHandlerAdapter>  initialListHandlersByBodyType = MapRegisteredBodyTypeInheritors(
                 registeredHandlers.Distinct().ToDictionary(handler => handler.MessageBodyType),
                 registeredBodyTypes);
 
@@ -66,14 +67,14 @@ namespace NWheels.Processing.Messages.Impl
 
         public void DispatchMessageOnCurrentThread(IMessageObject message)
         {
-            IMessageHandlerAdapter adapter = (IMessageHandlerAdapter)_adaptersByBodyType[message.Body.GetType()];
+            IMessageHandlerAdapter adapter = (IMessageHandlerAdapter)_adaptersByBodyType[message.BodyType];
             if (adapter != null)
             {
                 adapter.InvokeHandleMessage(message);
             }
             else
             {
-                _logger.NoSubscribersFound(message.Body.GetType().FullName);
+                _logger.NoSubscribersFound(message.BodyType.FullName);
             }
         }
 
@@ -96,7 +97,9 @@ namespace NWheels.Processing.Messages.Impl
 
                     if ( adapter == null )
                     {
-                        _adaptersByBodyType[messageBodyType] = adapter = CreateMessageHandlerAdapter(_components, handlerInterface);
+                        adapter = CreateMessageHandlerAdapter(_components, handlerInterface);
+                        _adaptersByBodyType[messageBodyType] = adapter;
+                        MapBodyTypeInheritors(_adaptersByBodyType, messageBodyType);
                     }
 
                     adapter.RegisterMessageHandler(actorInstance);
@@ -209,61 +212,16 @@ namespace NWheels.Processing.Messages.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private Dictionary<Type, IMessageHandlerAdapter> MapRegisteredBodyTypes(
+        private Dictionary<Type, IMessageHandlerAdapter> MapRegisteredBodyTypeInheritors(
             Dictionary<Type, IMessageHandlerAdapter> map,
             IEnumerable<MessageTypeRegistration> bodyTypeRegistrations)
         {
             foreach ( var registration in bodyTypeRegistrations )
             {
-                var hierarchy = registration.GetBodyTypeHierarchyTopDown();
-
-                for ( int i = 1 ; i < hierarchy.Count ; i++ )
-                {
-                    var baseType = hierarchy[i - 1];
-                    var derivedType = hierarchy[i];
-
-                    IMessageHandlerAdapter baseAdapter;
-
-                    if ( map.TryGetValue(baseType, out baseAdapter) && !map.ContainsKey(derivedType) )
-                    {
-                        map.Add(derivedType, baseAdapter);
-                    }
-                }
+                MapBodyTypeInheritors(map, registration.BodyType);
             }
 
             return map;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private Hashtable MapRegisteredBodyTypes_hash(
-            Dictionary<Type, IMessageHandlerAdapter> map,
-            IEnumerable<MessageTypeRegistration> bodyTypeRegistrations)
-        {
-            foreach (var registration in bodyTypeRegistrations)
-            {
-                var hierarchy = registration.GetBodyTypeHierarchyTopDown();
-
-                for (int i = 1; i < hierarchy.Count; i++)
-                {
-                    var baseType = hierarchy[i - 1];
-                    var derivedType = hierarchy[i];
-
-                    IMessageHandlerAdapter baseAdapter;
-
-                    if (map.TryGetValue(baseType, out baseAdapter) && !map.ContainsKey(derivedType))
-                    {
-                        map.Add(derivedType, baseAdapter);
-                    }
-                }
-            }
-
-            Hashtable result = new Hashtable();
-            foreach ( var entry in map )
-            {
-                result.Add(entry.Key, entry.Value);
-            }
-            return result;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -288,6 +246,27 @@ namespace NWheels.Processing.Messages.Impl
         private static bool IsMessageHandlerInterface(Type interfaceType)
         {
             return (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IMessageHandler<>));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void MapBodyTypeInheritors(IDictionary map, Type bodyType)
+        {
+            var hierarchy = bodyType.GetBaseTypesTopDown();
+
+            for ( int i = 1 ; i < hierarchy.Count ; i++ )
+            {
+                var baseType = hierarchy[i - 1];
+                var derivedType = hierarchy[i];
+
+                IMessageHandlerAdapter baseAdapter;
+
+                if ( map.Contains(baseType) && !map.Contains(derivedType) )
+                {
+                    baseAdapter = (IMessageHandlerAdapter)map[baseType];
+                    map.Add(derivedType, baseAdapter);
+                }
+            }
         }
     }
 }

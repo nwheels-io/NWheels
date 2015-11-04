@@ -37,6 +37,7 @@ namespace NWheels.Hosts.Console
             try
             {
                 LoadBootConfig(args);
+                System.Console.Title += ": " + _s_bootConfig.ApplicationName + "." + _s_bootConfig.NodeName;
             }
             catch ( Exception e )
             {
