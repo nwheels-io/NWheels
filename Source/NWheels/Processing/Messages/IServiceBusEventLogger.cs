@@ -82,5 +82,10 @@ namespace NWheels.Processing.Messages
 
         [LogError]
         void ContinuationCallbackFailed(MethodInfo method, Exception error);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [LogVerbose]
+        void DynamicSubscribeActor(Type actorType, Type messageType);
     }
 }

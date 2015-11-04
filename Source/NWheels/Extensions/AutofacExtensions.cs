@@ -534,7 +534,7 @@ namespace NWheels.Extensions
 
             public IRegistrationBuilder<TActor, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterActor<TActor>()
             {
-                var messageHandlerInterfaces = typeof(TActor).GetInterfaces().Where(IsMessageHandlerInterface).ToArray();
+                var messageHandlerInterfaces = ServiceBus.GetMessageHandlerInterfaces(typeof(TActor)).ToArray();
 
                 foreach ( var handlerInterface in messageHandlerInterfaces )
                 {

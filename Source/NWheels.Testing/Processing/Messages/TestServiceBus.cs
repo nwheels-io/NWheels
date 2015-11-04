@@ -33,6 +33,11 @@ namespace NWheels.Testing.Processing.Messages
             }
         }
 
+        public void SubscribeActor(object actorInstance)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

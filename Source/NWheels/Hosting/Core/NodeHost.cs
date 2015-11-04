@@ -756,27 +756,65 @@ namespace NWheels.Hosting.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class LoadSequenceCodeBehind : IRevertableSequenceCodeBehind
+        private abstract class NodeLifecycleSequenceBase
         {
             private readonly NodeLifetime _ownerLifetime;
+            private IDisposable _systemSession;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected NodeLifecycleSequenceBase(NodeLifetime ownerLifetime)
+            {
+                _ownerLifetime = ownerLifetime;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected void JoinSystemSession()
+            {
+                _systemSession = _ownerLifetime.LifetimeContainer.Resolve<ISessionManager>().JoinGlobalSystem();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected void LeaveSystemSession()
+            {
+                _systemSession.Dispose();
+                _systemSession = null;
+            }
+            
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected NodeLifetime OwnerLifetime
+            {
+                get { return _ownerLifetime; }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class LoadSequenceCodeBehind : NodeLifecycleSequenceBase, IRevertableSequenceCodeBehind
+        {
             private readonly INodeHostLogger _logger;
             private bool _suppressDynamicArtifacts;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public LoadSequenceCodeBehind(NodeLifetime ownerLifetime)
+                : base(ownerLifetime)
             {
-                _ownerLifetime = ownerLifetime;
-                _logger = _ownerLifetime.Logger;
+                _logger = OwnerLifetime.Logger;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public void BuildSequence(IRevertableSequenceBuilder sequence)
             {
+                sequence.Once().OnPerform(JoinSystemSession).OnRevert(LeaveSystemSession);
                 sequence.Once().OnRevert(SaveDynamicModuleToAssembly);
                 sequence.Once().OnRevert(WriteEffectiveMetadataJson);
                 sequence.Once().OnPerform(LoadConfiguration);
+                sequence.Once().OnPerform(ReconfigurePlainLog);
                 //sequence.Once().OnPerform(CallHostComponentsConfigured);
                 sequence.Once().OnPerform(FindLifecycleComponents);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeConfigured);
@@ -784,16 +822,17 @@ namespace NWheels.Hosting.Core
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoading).OnRevert(CallComponentNodeUnloaded);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentLoad).OnRevert(CallComponentUnload);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoaded).OnRevert(CallComponentNodeUnloading);
+                sequence.Once().OnPerform(LeaveSystemSession).OnRevert(JoinSystemSession);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private void LoadConfiguration()
             {
-                var loader = _ownerLifetime.LifetimeContainer.Resolve<XmlConfigurationLoader>();
-                loader.LoadConfiguration(_ownerLifetime.NodeConfig.ConfigFiles);
+                var loader = OwnerLifetime.LifetimeContainer.Resolve<XmlConfigurationLoader>();
+                loader.LoadConfiguration(OwnerLifetime.NodeConfig.ConfigFiles);
 
-                var loggingConfiguration = _ownerLifetime.LifetimeContainer.Resolve<IFrameworkLoggingConfiguration>();
+                var loggingConfiguration = OwnerLifetime.LifetimeContainer.Resolve<IFrameworkLoggingConfiguration>();
                 _suppressDynamicArtifacts = loggingConfiguration.SuppressDynamicArtifacts;
                 
                 WriteEffectiveConfigurationXml(loader);
@@ -801,15 +840,25 @@ namespace NWheels.Hosting.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private void ReconfigurePlainLog()
+            {
+                var loggingConfiguration = OwnerLifetime.LifetimeContainer.Resolve<IFrameworkLoggingConfiguration>();
+                var plainLog = OwnerLifetime.LifetimeContainer.Resolve<IPlainLog>();
+
+                plainLog.Reconfigure(loggingConfiguration);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private void LoadDataRepositories()
             {
-                var loggingConfiguration = _ownerLifetime.LifetimeContainer.Resolve<IFrameworkLoggingConfiguration>();
+                var loggingConfiguration = OwnerLifetime.LifetimeContainer.Resolve<IFrameworkLoggingConfiguration>();
                 _suppressDynamicArtifacts = loggingConfiguration.SuppressDynamicArtifacts;
 
                 using ( _logger.InitializingDataRepositories() )
                 {
-                    var repositoryFactory = _ownerLifetime.LifetimeContainer.Resolve<IDataRepositoryFactory>();
-                    var allRepositoryRegistrations = _ownerLifetime.LifetimeContainer.Resolve<IEnumerable<DataRepositoryRegistration>>().ToArray();
+                    var repositoryFactory = OwnerLifetime.LifetimeContainer.Resolve<IDataRepositoryFactory>();
+                    var allRepositoryRegistrations = OwnerLifetime.LifetimeContainer.Resolve<IEnumerable<DataRepositoryRegistration>>().ToArray();
 
                     foreach ( var registration in allRepositoryRegistrations )
                     {
@@ -877,7 +926,7 @@ namespace NWheels.Hosting.Core
                     return;
                 }
                 
-                var metadataCache = _ownerLifetime.LifetimeContainer.Resolve<TypeMetadataCache>();
+                var metadataCache = OwnerLifetime.LifetimeContainer.Resolve<TypeMetadataCache>();
 
                 var filePath = PathUtility.HostBinPath("effective-metadata-dump.json");
                 _logger.WritingEffectiveMetadataToDisk(filePath);
@@ -904,7 +953,7 @@ namespace NWheels.Hosting.Core
                     return;
                 }
 
-                var dynamicModule = _ownerLifetime.LifetimeContainer.Resolve<DynamicModule>();
+                var dynamicModule = OwnerLifetime.LifetimeContainer.Resolve<DynamicModule>();
 
                 var filePath = PathUtility.HostBinPath(dynamicModule.SimpleName + ".dll");
                 _logger.SavingDynamicModuleToAssembly(filePath);
@@ -935,11 +984,11 @@ namespace NWheels.Hosting.Core
                     {
                         IEnumerable<ILifecycleEventListener> foundComponents;
 
-                        if ( _ownerLifetime.LifetimeContainer.TryResolve<IEnumerable<ILifecycleEventListener>>(out foundComponents) )
+                        if ( OwnerLifetime.LifetimeContainer.TryResolve<IEnumerable<ILifecycleEventListener>>(out foundComponents) )
                         {
-                            _ownerLifetime.LifecycleComponents.AddRange(foundComponents);
+                            OwnerLifetime.LifecycleComponents.AddRange(foundComponents);
 
-                            foreach ( var component in _ownerLifetime.LifecycleComponents )
+                            foreach ( var component in OwnerLifetime.LifecycleComponents )
                             {
                                 _logger.FoundLifecycleComponent(component.GetType().ToString());
                             }
@@ -949,7 +998,7 @@ namespace NWheels.Hosting.Core
                             _logger.NoLifecycleComponentsFound();
                         }
 
-                        if ( _ownerLifetime.LifecycleComponents.Count == 0 )
+                        if ( OwnerLifetime.LifecycleComponents.Count == 0 )
                         {
                             _logger.NoLifecycleComponentsFound();
                         }
@@ -966,7 +1015,7 @@ namespace NWheels.Hosting.Core
 
             private IList<ILifecycleEventListener> GetLifecycleComponents()
             {
-                return _ownerLifetime.LifecycleComponents;
+                return OwnerLifetime.LifecycleComponents;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -979,7 +1028,7 @@ namespace NWheels.Hosting.Core
                     {
                         var additionalComponents = new List<ILifecycleEventListener>();
                         component.NodeConfigured(additionalComponents);
-                        _ownerLifetime.LifecycleComponents.AddRange(additionalComponents);
+                        OwnerLifetime.LifecycleComponents.AddRange(additionalComponents);
                     }
                     catch ( Exception e )
                     {
@@ -1107,33 +1156,34 @@ namespace NWheels.Hosting.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class ActivateSequenceCodeBehind : IRevertableSequenceCodeBehind
+        private class ActivateSequenceCodeBehind : NodeLifecycleSequenceBase, IRevertableSequenceCodeBehind
         {
-            private readonly NodeLifetime _ownerLifetime;
             private readonly INodeHostLogger _logger;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public ActivateSequenceCodeBehind(NodeLifetime ownerLifetime)
+                : base(ownerLifetime)
             {
-                _ownerLifetime = ownerLifetime;
-                _logger = _ownerLifetime.Logger;
+                _logger = OwnerLifetime.Logger;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public void BuildSequence(IRevertableSequenceBuilder sequence)
             {
+                sequence.Once().OnPerform(JoinSystemSession).OnRevert(LeaveSystemSession);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeActivating).OnRevert(CallComponentNodeDeactivated);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentActivate).OnRevert(CallComponentDeactivate);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeActivated).OnRevert(CallComponentNodeDeactivating);
+                sequence.Once().OnPerform(LeaveSystemSession).OnRevert(JoinSystemSession);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private IList<ILifecycleEventListener> GetLifecycleComponents()
             {
-                return _ownerLifetime.LifecycleComponents;
+                return OwnerLifetime.LifecycleComponents;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

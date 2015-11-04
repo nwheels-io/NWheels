@@ -48,6 +48,13 @@ namespace NWheels.Stacks.Nlog
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void Reconfigure(IFrameworkLoggingConfiguration configuration)
+        {
+            //take into account configuration.PlainLogFolder and configuration.Level
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void ConfigureConsoleOutput()
         {
             var consoleTarget = new ColoredConsoleTarget();

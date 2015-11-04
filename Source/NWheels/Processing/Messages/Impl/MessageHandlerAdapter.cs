@@ -9,6 +9,7 @@ namespace NWheels.Processing.Messages.Impl
     {
         private readonly IComponentContext _components;
         private readonly IServiceBusEventLogger _logger;
+        private List<IMessageHandler<TBody>> _allActors;
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -16,6 +17,21 @@ namespace NWheels.Processing.Messages.Impl
         {
             _components = components;
             _logger = logger;
+            _allActors = new List<IMessageHandler<TBody>>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Initialize()
+        {
+            try
+            {
+                _allActors.AddRange(_components.Resolve<IEnumerable<IMessageHandler<TBody>>>());
+            }
+            catch ( Exception e )
+            {
+                throw _logger.FailedToObtainActorInstance(typeof(TBody).FullName, e);
+            }
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -24,19 +40,9 @@ namespace NWheels.Processing.Messages.Impl
 
         public void InvokeHandleMessage(IMessageObject message)
         {
-            IEnumerable<IMessageHandler<TBody>> allActors;
-
-            try
-            {
-                allActors = _components.Resolve<IEnumerable<IMessageHandler<TBody>>>();
-            }
-            catch ( Exception e )
-            {
-                throw _logger.FailedToObtainActorInstance(typeof(TBody).FullName, e);
-            }
-
             var exceptions = new List<Exception>();
 
+            List<IMessageHandler<TBody>> allActors = _allActors;    // thread safety
             foreach ( var singleActor in allActors )
             {
                 InvokeActor(singleActor, message, exceptions);
@@ -59,6 +65,16 @@ namespace NWheels.Processing.Messages.Impl
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RegisterMessageHandler(object actorInstance)
+        {
+            // Registration is very rare - for thread safety just work on a copy of the list.
+            List<IMessageHandler<TBody>> allActors = new List<IMessageHandler<TBody>>(_allActors);
+            allActors.Add((IMessageHandler<TBody>)actorInstance);
+            _allActors = allActors;
+        }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
