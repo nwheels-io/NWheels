@@ -6,7 +6,7 @@ using NWheels.Endpoints.Core;
 
 namespace NWheels.Authorization.Core
 {
-    public class Session : ISession, IAccessControlContext
+    public class Session : ISession, IAccessControlContext, IScopedConsumptionResource
     {
         private readonly IFramework _framework;
         private readonly IResourceLock _touchLock;
@@ -42,8 +42,7 @@ namespace NWheels.Authorization.Core
 
         public IDisposable Join()
         {
-            Thread.CurrentPrincipal = this.UserPrincipal;
-            return new CallContextResourceConsumerScope<Session>(handle => this, externallyOwned: true);
+            return new CallContextResourceConsumerScope<Session>(handle => this, externallyOwned: true, forceNewResource: true);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -146,7 +145,21 @@ namespace NWheels.Authorization.Core
         }
 
         #endregion
-        
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IScopedConsumptionResource.ActiveScopeChanged(bool currentScopeIsActive)
+        {
+            if ( currentScopeIsActive )
+            {
+                Thread.CurrentPrincipal = this.UserPrincipal;
+            }
+            else
+            {
+                Thread.CurrentPrincipal = null;
+            }
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         internal void Authorize(IPrincipal userPrincipal)

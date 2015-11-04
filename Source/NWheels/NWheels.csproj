@@ -116,6 +116,7 @@
     <Compile Include="Authorization\SystemPrincipal.cs" />
     <Compile Include="Concurrency\ContextAnchor.cs" />
     <Compile Include="Concurrency\Impl\TimeoutManager.cs" />
+    <Compile Include="Concurrency\IScopedConsumptionResource.cs" />
     <Compile Include="Concurrency\ITimeoutHandle.cs" />
     <Compile Include="Concurrency\IResourceConsumerScopeHandle.cs" />
     <Compile Include="Concurrency\PerContextResourceConsumerScope.cs" />

@@ -13,6 +13,7 @@ namespace NWheels.Concurrency
         private readonly T _resource;
         private readonly bool _externallyOwned;
         private readonly int _nestingLevel;
+        private readonly bool _forceNewResource;
         private bool _disposed = false;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -20,23 +21,36 @@ namespace NWheels.Concurrency
         protected PerContextResourceConsumerScope(
             ContextAnchor<PerContextResourceConsumerScope<T>> anchor,
             Func<IResourceConsumerScopeHandle, T> resourceFactory,
-            bool externallyOwned)
+            bool externallyOwned,
+            bool forceNewResource)
         {
             _anchor = anchor;
             _outerScope = anchor.Current;
             anchor.Current = this;
 
             _externallyOwned = externallyOwned;
+            _forceNewResource = forceNewResource;
 
             if ( _outerScope != null )
             {
-                _resource = _outerScope.Resource;
+                if ( forceNewResource )
+                {
+                    _outerScope.NotifyResourceActiveScopeChanged(currentScopeIsActive: false);
+                    _resource = resourceFactory(this);
+                    this.NotifyResourceActiveScopeChanged(currentScopeIsActive: true);
+                }
+                else
+                {
+                    _resource = _outerScope.Resource;
+                }
+
                 _nestingLevel = _outerScope.NestingLevel + 1;
             }
             else
             {
                 _resource = resourceFactory(this);
                 _nestingLevel = 0;
+                this.NotifyResourceActiveScopeChanged(currentScopeIsActive: true);
             }
         }
 
@@ -54,9 +68,16 @@ namespace NWheels.Concurrency
             if ( _outerScope != null )
             {
                 _anchor.Current = _outerScope;
+
+                if ( _forceNewResource )
+                {
+                    this.NotifyResourceActiveScopeChanged(currentScopeIsActive: false);
+                    _outerScope.NotifyResourceActiveScopeChanged(currentScopeIsActive: true);
+                }
             }
             else
             {
+                this.NotifyResourceActiveScopeChanged(currentScopeIsActive: false);
                 _anchor.Current = null;
                 DisposeResource();
             }
@@ -147,14 +168,26 @@ namespace NWheels.Concurrency
                 }
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void NotifyResourceActiveScopeChanged(bool currentScopeIsActive)
+        {
+            var handler = (_resource as IScopedConsumptionResource);
+
+            if ( handler != null )
+            {
+                handler.ActiveScopeChanged(currentScopeIsActive);
+            }
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public class CallContextResourceConsumerScope<T> : PerContextResourceConsumerScope<T>
     {
-        public CallContextResourceConsumerScope(Func<IResourceConsumerScopeHandle, T> resourceFactory, bool externallyOwned = false)
-            : base(new LogicalCallContextAnchor<PerContextResourceConsumerScope<T>>(), resourceFactory, externallyOwned)
+        public CallContextResourceConsumerScope(Func<IResourceConsumerScopeHandle, T> resourceFactory, bool externallyOwned = false, bool forceNewResource = false)
+            : base(new LogicalCallContextAnchor<PerContextResourceConsumerScope<T>>(), resourceFactory, externallyOwned, forceNewResource)
         {
         }
 
@@ -189,8 +222,8 @@ namespace NWheels.Concurrency
 
     public class ThreadStaticResourceConsumerScope<T> : PerContextResourceConsumerScope<T>
     {
-        public ThreadStaticResourceConsumerScope(Func<IResourceConsumerScopeHandle, T> resourceFactory, bool externallyOwned = false)
-            : base(new ThreadStaticAnchor<PerContextResourceConsumerScope<T>>(), resourceFactory, externallyOwned)
+        public ThreadStaticResourceConsumerScope(Func<IResourceConsumerScopeHandle, T> resourceFactory, bool externallyOwned = false, bool forceNewResource = false)
+            : base(new ThreadStaticAnchor<PerContextResourceConsumerScope<T>>(), resourceFactory, externallyOwned, forceNewResource)
         {
         }
 

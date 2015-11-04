@@ -18,7 +18,12 @@ using NWheels.Processing.Messages;
 using NWheels.UI.Uidl;
 using NWheels.Utilities;
 using System.Reflection;
+using System.Web;
 using NWheels.Processing;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 
 namespace NWheels.Stacks.AspNet
 {
@@ -32,6 +37,7 @@ namespace NWheels.Stacks.AspNet
         private readonly ISessionManager _sessionManager;
         private readonly Dictionary<string, TransactionScriptEntry> _transactionScriptByName;
         private readonly ConcurrentDictionary<string, ConcurrentQueue<IMessageObject>> _pendingPushMessagesBySessionId;
+        private readonly JsonSerializerSettings _jsonSettings;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -52,6 +58,7 @@ namespace NWheels.Stacks.AspNet
 
             _transactionScriptByName = new Dictionary<string, TransactionScriptEntry>(StringComparer.InvariantCultureIgnoreCase);
             _pendingPushMessagesBySessionId = new ConcurrentDictionary<string, ConcurrentQueue<IMessageObject>>();
+            _jsonSettings = CreateJsonSerializerSettings();
 
             RegisterTransactionScripts(components);
         }
@@ -59,7 +66,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("/")]
+        [Route("")]
         public IHttpActionResult GetIndexHtml()
         {
             var filePath = Path.Combine(_context.ContentRootPath, _context.SkinSubFolderName, "index.html");
@@ -75,7 +82,27 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("/uidl-element-template/{templateName}")]
+        [Route("skin/{*path}")]
+        public HttpResponseMessage GetSkinStaticContent(string path)
+        {
+            var filePath = Path.Combine(_context.ContentRootPath, _context.SkinSubFolderName, path.Replace("/", "\\"));
+            return LoadFileContentsAsResponse(filePath);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpGet]
+        [Route("base/{*path}")]
+        public HttpResponseMessage GetBaseStaticContent(string path)
+        {
+            var filePath = Path.Combine(_context.ContentRootPath, _context.BaseSubFolderName, path.Replace("/", "\\"));
+            return LoadFileContentsAsResponse(filePath);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpGet]
+        [Route("uidl-element-template/{templateName}")]
         public IHttpActionResult GetApplicationTemplate(string templateName)
         {
             var filePath = PathUtility.ModuleBinPath(
@@ -99,44 +126,46 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("/uidl.json")]
+        [Route("uidl.json")]
         public IHttpActionResult GetUidl()
         {
-            return Json(_context.Uidl);
-        }
-
-        //----------------------------------------------------------------------------- ------------------------------------------------------------------------
-
-        [HttpPost]
-        [Route("/command/requestReply/{target}/{contractName}/{operationName?}/{entityId?}")]
-        public IHttpActionResult ExecuteCommand(string target, string contractName, string operationName, string entityId)
-        {
-            var command = CreateCommandMessage(target, contractName, synchronous: true);
-
-            _serviceBus.DispatchMessageOnCurrentThread(command);
-
-            return Json(command.Result.TakeSerializableSnapshot());
+            return Json(_context.Uidl, _jsonSettings);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("/command/oneWay/{target}/{contractName}/{operationName?}/{entityId?}")]
+        [Route("command/requestReply/{target}/{contractName}/{operationName}")]
+        public IHttpActionResult ExecuteCommand(string target, string contractName, string operationName)
+        {
+            var command = CreateCommandMessage(target, contractName, synchronous: true);
+
+            _serviceBus.DispatchMessageOnCurrentThread(command);
+
+            return Json(command.Result.TakeSerializableSnapshot(), _jsonSettings);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpPost]
+        [Route("command/oneWay/{target}/{contractName}/{operationName?}/{entityId?}")]
         public IHttpActionResult EnqueueCommand(string target, string contractName, string operationName, string entityId)
         {
             var command = CreateCommandMessage(target, contractName, synchronous: false);
 
             _serviceBus.EnqueueMessage(command);
 
-            return Json(new {
-                CommandMessageId = command.MessageId
-            });
+            return Json(
+                new {
+                    CommandMessageId = command.MessageId
+                },
+                _jsonSettings);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("/takeMessages")]
+        [Route("takeMessages")]
         public IHttpActionResult TakePendingPushMessages()
         {
             var results = new List<object>();
@@ -155,13 +184,13 @@ namespace NWheels.Stacks.AspNet
                 }
             }
 
-            return Json(results);
+            return Json(results, _jsonSettings);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("/entity/new/{entityName}")]
+        [Route("entity/new/{entityName}")]
         public IHttpActionResult NewEntity(string entityName)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
@@ -179,7 +208,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("/entity/query/{entityName}")]
+        [Route("entity/query/{entityName}")]
         public IHttpActionResult QueryEntity(string entityName)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
@@ -200,7 +229,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("/entity/store/{entityName}")]
+        [Route("entity/store/{entityName}")]
         public IHttpActionResult StoreEntity(string entityName, string entityStateString, string entityIdString)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
@@ -228,7 +257,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("/entity/storeBatch")]
+        [Route("entity/storeBatch")]
         public IHttpActionResult StoreEntityBatch()
         {
             return StatusCode(HttpStatusCode.NotImplemented);
@@ -237,7 +266,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("/entity/delete/{entityName}")]
+        [Route("entity/delete/{entityName}")]
         public IHttpActionResult DeleteEntity(string entityName, string entityId)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
@@ -248,6 +277,27 @@ namespace NWheels.Stacks.AspNet
             _context.EntityService.DeleteEntity(entityName, entityId);
 
             return StatusCode(HttpStatusCode.OK);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static HttpResponseMessage LoadFileContentsAsResponse(string filePath)
+        {
+            if ( File.Exists(filePath) )
+            {
+                HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+                var fileStream = File.OpenRead(filePath);
+                result.Content = new StreamContent(fileStream);
+                result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+                result.Content.Headers.ContentDisposition.FileName = Path.GetFileName(filePath);
+                result.Content.Headers.ContentType = new MediaTypeHeaderValue(MimeMapping.GetMimeMapping(filePath));
+                result.Content.Headers.ContentLength = fileStream.Length;
+                return result;
+            }
+            else
+            {
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -302,6 +352,19 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static JsonSerializerSettings CreateJsonSerializerSettings()
+        {
+            var jsonSettings = new JsonSerializerSettings {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+
+            jsonSettings.Converters.Add(new StringEnumConverter());
+            
+            return jsonSettings;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private abstract class CommandValueBinder
         {
             public abstract void BindCommandValues(UidlApplicationController controller, IMethodCallObject callObject);
@@ -315,7 +378,8 @@ namespace NWheels.Stacks.AspNet
 
             public override void BindCommandValues(UidlApplicationController controller, IMethodCallObject callObject)
             {
-                //module.BindTo<TCallObject>((TCallObject)callObject, new BindingConfig { BodyOnly = true });
+                var json = controller.Request.Content.ReadAsStringAsync().Result;
+                JsonConvert.PopulateObject(json, callObject, CreateJsonSerializerSettings());
             }
 
             #endregion

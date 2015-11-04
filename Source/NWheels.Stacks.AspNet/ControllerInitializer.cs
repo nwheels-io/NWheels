@@ -48,7 +48,7 @@ namespace NWheels.Stacks.AspNet
                         var handlerType = registration.Contract;
                         _controllerTypes.Add(_factory.CreateControllerType(handlerType));
                     }
-                    catch (Exception e)
+                    catch ( Exception e )
                     {
                         activity.Fail(e);
                         throw;
@@ -59,8 +59,12 @@ namespace NWheels.Stacks.AspNet
             var dynamicAssembly = AppDomain.CurrentDomain.GetAssemblies().First(a => a.IsDynamic && a.GetName().Name == _module.SimpleName);
             var updater = new ContainerBuilder();
             updater.RegisterAssemblyTypes(dynamicAssembly).Where(t => typeof(IHttpController).IsAssignableFrom(t));
-            //var container = updater.Build();
             updater.Update(_components.ComponentRegistry);
+
+            if ( _components.Resolve<IEnumerable<WebAppEndpointRegistration>>().Any() )
+            {
+                _controllerTypes.Add(typeof(UidlApplicationController));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

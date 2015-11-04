@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using NWheels.Authorization;
 using NWheels.Authorization.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
@@ -33,8 +34,13 @@ namespace NWheels.Domains.Security
             string password)
         {
             IUserAccountEntity userAccount;
-            
-            var principal = _authenticationProvider.Authenticate(loginName, SecureStringUtility.ClearToSecure(password), out userAccount);
+            UserAccountPrincipal principal;
+
+            using ( _sessionManager.As<ISessionManager>().JoinGlobalSystem() )
+            {
+                principal = _authenticationProvider.Authenticate(loginName, SecureStringUtility.ClearToSecure(password), out userAccount);
+            }
+
             _sessionManager.AuthorieSession(principal);
 
             var result = new Result(principal);

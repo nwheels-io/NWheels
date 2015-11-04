@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,17 +17,24 @@ using System.Web.Mvc.Routing;
 using System.Web.Routing;
 using Autofac;
 using Autofac.Integration.WebApi;
+using NWheels.Authorization;
 using NWheels.Hosting;
 using NWheels.Hosting.Core;
 using NWheels.Logging;
 using NWheels.Logging.Core;
 using NWheels.Stacks.Nlog;
+using NWheels.Utilities;
 
 namespace NWheels.Stacks.AspNet
 {
     public class HttpApiEndpointApplication : HttpApplication
     {
+        public const string BootConfigAppSettingsKey = "boot.config";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static readonly IPlainLog _s_log;
+        private static string _s_bootConfigFilePath;
         private NodeHost _nodeHost;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,6 +43,7 @@ namespace NWheels.Stacks.AspNet
         {
             CrashLog.RegisterUnhandledExceptionHandler();
             _s_log = NLogBasedPlainLog.Instance;
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -129,6 +138,9 @@ namespace NWheels.Stacks.AspNet
                         //    routeTemplate: "{controller}/{action}");
                         config.DependencyResolver = new AutofacWebApiDependencyResolver(_nodeHost.Components);
                         config.MapHttpAttributeRoutes();
+                        config.MessageHandlers.Add(new LoggingAndSessionHandler(
+                            _nodeHost.Components.Resolve<ISessionManager>(),
+                            _nodeHost.Components.Resolve<IWebApplicationLogger>()));
                     });
 
                 _s_log.Info("Application_Start: SUCCESS");
@@ -148,14 +160,39 @@ namespace NWheels.Stacks.AspNet
 
         private static BootConfiguration BuildBootConfiguration()
         {
-            var bootConfigFilePath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.PrivateBinPath, BootConfiguration.DefaultBootConfigFileName);
-            var bootConfig = BootConfiguration.LoadFromFile(bootConfigFilePath);
+            _s_bootConfigFilePath = (Path.Combine(
+                AppDomain.CurrentDomain.SetupInformation.PrivateBinPath, 
+                ConfigurationManager.AppSettings[BootConfigAppSettingsKey] ?? BootConfiguration.DefaultBootConfigFileName));
+
+            var bootConfig = BootConfiguration.LoadFromFile(_s_bootConfigFilePath);
 
             bootConfig.Validate();
 
             _s_log.Debug(bootConfig.ToLogString());
 
             return bootConfig;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            var assemblyName = new AssemblyName(args.Name);
+            var assemblyProbePaths = new List<string>();
+
+            assemblyProbePaths.Add(Path.Combine(Path.GetDirectoryName(_s_bootConfigFilePath), assemblyName.Name + ".dll"));
+            assemblyProbePaths.Add(PathUtility.HostBinPath("..\\..\\Core\\" + assemblyName.Name + ".dll"));
+            assemblyProbePaths.Add(PathUtility.HostBinPath("..\\..\\Bin\\Core\\" + assemblyName.Name + ".dll"));
+
+            foreach ( var probePath in assemblyProbePaths )
+            {
+                if ( File.Exists(probePath) )
+                {
+                    return Assembly.LoadFrom(probePath);
+                }
+            }
+
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
