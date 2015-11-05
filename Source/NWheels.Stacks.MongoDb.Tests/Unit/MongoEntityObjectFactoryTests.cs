@@ -67,7 +67,8 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
 
             metadataCache.AcceptVisitor(new CrossTypeFixupMetadataVisitor(metadataCache));
 
-            var factory = new MongoEntityObjectFactory(base.Framework.Components, base.DyamicModule, metadataCache);
+            var lazyLoadProxyFactory = new MongoLazyLoadProxyFactory(base.DyamicModule, metadataCache);
+            var factory = new MongoEntityObjectFactory(base.Framework.Components, base.DyamicModule, metadataCache, lazyLoadProxyFactory);
 
             Framework.UpdateComponents(
                 builder => {

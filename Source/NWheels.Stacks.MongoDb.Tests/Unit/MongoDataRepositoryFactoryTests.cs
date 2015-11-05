@@ -113,7 +113,8 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
             updater.RegisterInstance(metadataCache).As<ITypeMetadataCache, TypeMetadataCache>();
             updater.Update(Framework.Components.ComponentRegistry);
 
-            var entityFactory = new MongoEntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
+            var lazyLoadProxyFactory = new MongoLazyLoadProxyFactory(_dyamicModule, metadataCache);
+            var entityFactory = new MongoEntityObjectFactory(Framework.Components, _dyamicModule, metadataCache, lazyLoadProxyFactory);
             var repoFactory = new MongoDataRepositoryFactory(Framework.Components, _dyamicModule, entityFactory, metadataCache, configAuto.Instance);
 
             Framework.UpdateComponents(

@@ -73,6 +73,7 @@
     <Compile Include="Factories\LazyLoadByForeignKeyStrategyBase.cs" />
     <Compile Include="Factories\LazyLoadCollectionByForeignKeyStrategy.cs" />
     <Compile Include="Factories\LazyLoadDocumentByForeignKeyStrategy.cs" />
+    <Compile Include="Factories\MongoLazyLoadProxyFactory.cs" />
     <Compile Include="IMongoDbLogger.cs" />
     <Compile Include="IMongoEntityRepository.cs" />
     <Compile Include="Factories\MongoDatabaseInitializer.cs" />

@@ -13,9 +13,18 @@ namespace NWheels.Stacks.MongoDb.Factories
 {
     public class MongoEntityObjectFactory : EntityObjectFactory
     {
-        public MongoEntityObjectFactory(IComponentContext components, DynamicModule module, TypeMetadataCache metadataCache)
+        private readonly MongoLazyLoadProxyFactory _lazyLoadProxyFactory;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MongoEntityObjectFactory(
+            IComponentContext components, 
+            DynamicModule module, 
+            TypeMetadataCache metadataCache, 
+            MongoLazyLoadProxyFactory lazyLoadProxyFactory)
             : base(components, module, metadataCache)
         {
+            _lazyLoadProxyFactory = lazyLoadProxyFactory;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -109,7 +118,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && !p.IsCollection,
-                p => new LazyLoadDocumentByForeignKeyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => new LazyLoadDocumentByForeignKeyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p, _lazyLoadProxyFactory));
 
             //-- scalar properties
 
