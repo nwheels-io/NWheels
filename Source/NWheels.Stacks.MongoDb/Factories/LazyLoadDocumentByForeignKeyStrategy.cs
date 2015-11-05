@@ -17,20 +17,14 @@ namespace NWheels.Stacks.MongoDb.Factories
 {
     public class LazyLoadDocumentByForeignKeyStrategy : LazyLoadByForeignKeyStrategyBase
     {
-        private readonly MongoLazyLoadProxyFactory _lazyLoadProxyFactory;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public LazyLoadDocumentByForeignKeyStrategy(
             PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
-            IPropertyMetadata metaProperty,
-            MongoLazyLoadProxyFactory lazyLoadProxyFactory)
+            IPropertyMetadata metaProperty)
             : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty)
         {
-            _lazyLoadProxyFactory = lazyLoadProxyFactory;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,13 +33,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         protected override void OnImplementContractProperty(ImplementationClassWriter<TypeTemplate.TInterface> writer)
         {
-            var lazyLoadProxyType = _lazyLoadProxyFactory.GetLazyLoadProxyType(RelatedContractType, RelatedImplementationType);
-
-            using ( TT.CreateScope<TT.TKey, TT.TContract2, TT.TImpl2, TT.TServiceImpl>(
-                ThisKeyProperty.ClrType,    // TT.TKey
-                RelatedContractType,        // TT.TContract2 
-                RelatedImplementationType,  // TT.TImpl2
-                lazyLoadProxyType) )        // TT.TServiceImpl
+            using ( TT.CreateScope<TT.TKey, TT.TContract2, TT.TImpl2>(ThisKeyProperty.ClrType, RelatedContractType, RelatedImplementationType) )
             {
                 writer.Property(MetaProperty.ContractPropertyInfo).Implement(
                     getter: p => p.Get(m => {
@@ -53,11 +41,13 @@ namespace NWheels.Stacks.MongoDb.Factories
 
                         m.If(StateField != DualValueStates.Contract).Then(() => {
                             ValueField.Assign(
-                                m.New<TT.TServiceImpl>(
-                                    m.This<TT.TBase>().Prop<TT.TKey>(ThisKeyProperty.ContractPropertyInfo)
-                                )
-                                .CastTo<TT.TProperty>()
-                            );
+                                Static.Func(MongoDataRepositoryBase.ResolveFrom, ComponentsField)
+                                .Func<string, TT.TKey, TT.TContract2>(
+                                    x => x.LazyLoadOneByForeignKey<TT.TContract2, TT.TImpl2, TT.TKey>, 
+                                    m.Const(ForeignKeyProperty.Name),
+                                    m.This<TT.TBase>().Prop<TT.TKey>(ThisKeyProperty.ContractPropertyInfo))
+                                .CastTo<TT.TProperty>());
+
                             StateField.Assign(DualValueStates.Contract);
                         });
 

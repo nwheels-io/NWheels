@@ -9,6 +9,8 @@ using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
+using NWheels.Entities;
+using NWheels.Entities.Core;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Stacks.MongoDb.Factories
@@ -43,10 +45,12 @@ namespace NWheels.Stacks.MongoDb.Factories
             var metaType = _metadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
 
             var proxyConvention = new ProxyConvention(metaType);
-            var lazyLoadConvention = new LazyLoadConvention(proxyConvention);
+            var entityObjectConvention = new ProxyEntityObjectConvention(proxyConvention);
+            var lazyLoadConvention = new LazyLoadConvention(proxyConvention, entityObjectConvention);
 
             return new IObjectFactoryConvention[] { 
                 proxyConvention, 
+                entityObjectConvention,
                 lazyLoadConvention
             };
         }
@@ -69,7 +73,7 @@ namespace NWheels.Stacks.MongoDb.Factories
         private class ProxyTypeKey : TypeKey
         {
             public ProxyTypeKey(Type contractType, Type implementationType)
-                : base(primaryInterface: contractType)
+                : base(primaryInterface: contractType, secondaryInterfaces: new[] { typeof(IMongoLazyLoadProxy) })
             {
                 this.ImplementationType = implementationType;
             }
@@ -111,6 +115,8 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             protected override void OnImplementPrimaryInterface(ImplementationClassWriter<TypeTemplate.TInterface> writer)
             {
+                writer.ImplementInterface<IMongoLazyLoadProxy>();
+
                 using ( TT.CreateScope<TT.TImpl, TT.TKey>(_proxyTypeKey.ImplementationType, _idMetaProperty.ClrType) )
                 {
                     writer.Field("$id", out _idField);
@@ -171,16 +177,87 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class LazyLoadConvention : DecorationConvention
+        private class ProxyEntityObjectConvention : ImplementationConvention
         {
             private readonly ProxyConvention _proxyConvention;
+            private Field<IDomainObject> _domainObjectField;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public LazyLoadConvention(ProxyConvention proxyConvention)
+            public ProxyEntityObjectConvention(ProxyConvention proxyConvention)
+                : base(Will.ImplementBaseClass)
+            {
+                _proxyConvention = proxyConvention;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Field<IDomainObject> DomainObjectField
+            {
+                get { return _domainObjectField; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of ImplementationConvention
+
+            protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            {
+                var metaType = _proxyConvention.MetaType;
+                var keyPropertyInfo = _proxyConvention.IdMetaProperty.ContractPropertyInfo;
+
+                using ( TT.CreateScope<TT.TContract, TT.TKey>(metaType.ContractType, keyPropertyInfo.PropertyType) )
+                {
+                    var keyBackingField = _proxyConvention.IdField;
+                    _domainObjectField = writer.Field<IDomainObject>("$domainObject");
+
+                    writer.ImplementInterfaceExplicitly<IEntityObject>()
+                        .Method<IEntityId>(intf => intf.GetId).Implement(f => {
+                            f.Return(f.New<EntityId<TT.TContract, TT.TKey>>(keyBackingField));
+                        })
+                        .Method<object>(intf => intf.SetId).Implement((m, value) => {
+                            keyBackingField.Assign(value.CastTo<TT.TKey>());
+                        })
+                        .Method<IDomainObject>(x => x.SetContainerObject).Implement((m, domainObject) => {
+                            _domainObjectField.Assign(domainObject);
+                        })
+                        .Method<IDomainObject>(x => x.GetContainerObject).Implement(m => {
+                            m.Return(_domainObjectField);
+                        })
+                        .Method(x => x.EnsureDomainObject).Implement(m => {
+                        })
+                        .Property<EntityState>(x => x.State).Implement(
+                            p => p.Get(gw => gw.Return(gw.Const(EntityState.RetrievedPristine)))
+                        )
+                        .Property<Type>(x => x.ContractType).Implement(
+                            p => p.Get(gw => gw.Return(gw.Const(_proxyConvention.MetaType.ContractType)))
+                        )
+                        .Property<Type>(x => x.FactoryType).Implement(
+                            p => p.Get(gw => gw.Return(gw.Const(typeof(MongoLazyLoadProxyFactory))))
+                        )
+                        .Property<bool>(x => x.IsModified).Implement(
+                            p => p.Get(gw => gw.Return(gw.Const(false)))
+                        );
+                }
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class LazyLoadConvention : DecorationConvention
+        {
+            private readonly ProxyConvention _proxyConvention;
+            private readonly ProxyEntityObjectConvention _entityConvention;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public LazyLoadConvention(ProxyConvention proxyConvention, ProxyEntityObjectConvention entityConvention)
                 : base(Will.DecorateMethods | Will.DecorateProperties)
             {
                 _proxyConvention = proxyConvention;
+                _entityConvention = entityConvention;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

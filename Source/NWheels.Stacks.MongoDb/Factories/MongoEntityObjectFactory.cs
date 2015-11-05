@@ -114,11 +114,11 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && !p.IsCollection && ShouldPersistAsDocumentId(p),
-                p => new DocumentIdStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => new DocumentIdStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p, _lazyLoadProxyFactory));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && !p.IsCollection,
-                p => new LazyLoadDocumentByForeignKeyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p, _lazyLoadProxyFactory));
+                p => new LazyLoadDocumentByForeignKeyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             //-- scalar properties
 

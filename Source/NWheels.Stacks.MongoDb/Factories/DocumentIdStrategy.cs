@@ -18,8 +18,10 @@ namespace NWheels.Stacks.MongoDb.Factories
 {
     public class DocumentIdStrategy : DualValueStrategy
     {
+        private readonly MongoLazyLoadProxyFactory _lazyLoadProxyFactory;
         private Field<IComponentContext> _componentsField;
         private Type _implementationType;
+        private Type _lazyLoadProxyType;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -28,9 +30,11 @@ namespace NWheels.Stacks.MongoDb.Factories
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
-            IPropertyMetadata metaProperty)
+            IPropertyMetadata metaProperty,
+            MongoLazyLoadProxyFactory lazyLoadProxyFactory)
             : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty, storageType: metaProperty.Relation.RelatedPartyType.PrimaryKey.Properties[0].ClrType)
         {
+            _lazyLoadProxyFactory = lazyLoadProxyFactory;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,6 +46,10 @@ namespace NWheels.Stacks.MongoDb.Factories
             base.OnBeforeImplementation(writer);
 
             _implementationType = FindImplementationType(MetaProperty.ClrType);
+            _lazyLoadProxyType = _lazyLoadProxyFactory.GetLazyLoadProxyType(
+                contractType: MetaProperty.ClrType,
+                implementationType: _implementationType);
+
             _componentsField = writer.DependencyField<IComponentContext>("$components");
         }
 
@@ -101,9 +109,10 @@ namespace NWheels.Stacks.MongoDb.Factories
             MutableOperand<TT.TProperty> contractValue, 
             IOperand<TT.TValue> storageValue)
         {
-            contractValue.Assign(
-                Static.Func(MongoDataRepositoryBase.ResolveFrom, _componentsField)
-                    .Func<TT.TValue, TT.TProperty>(x => x.LazyLoadById<TT.TProperty, TT.TValue>, storageValue));
+            using ( TT.CreateScope<TT.TServiceImpl>(_lazyLoadProxyType) )
+            {
+                contractValue.Assign(method.New<TT.TServiceImpl>(storageValue).CastTo<TT.TProperty>());
+            }
         }
 
         #endregion

@@ -78,6 +78,7 @@
     <Compile Include="IMongoEntityRepository.cs" />
     <Compile Include="Factories\MongoDatabaseInitializer.cs" />
     <Compile Include="Factories\MongoDataRepositoryFactory.cs" />
+    <Compile Include="IMongoLazyLoadProxy.cs" />
     <Compile Include="MongoDataRepositoryBase.cs" />
     <Compile Include="Factories\MongoEntityObjectFactory.cs" />
     <Compile Include="Factories\MongoEntityObjectFactory.Old.cs" />
