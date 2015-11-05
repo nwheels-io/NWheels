@@ -78,6 +78,12 @@ namespace NWheels.UI
 
         public string RegisterMetaType(Type type)
         {
+            Type collectionItemType;
+            if ( type.IsCollectionType(out collectionItemType) )
+            {
+                return RegisterMetaType(collectionItemType);
+            }
+
             var allTypesToAdd = new HashSet<Type>();
             allTypesToAdd.Add(type);
 
@@ -234,10 +240,9 @@ namespace NWheels.UI
 
         private string MakeTypeKey(Type type)
         {
-            ITypeMetadata metaType;
-
-            if ( _metadataCache.TryGetTypeMetadata(type, out metaType) )
+            if ( DataObjectContractAttribute.IsDataObjectContract(type) || DataObjectPartContractAttribute.IsDataObjectPartContract(type) )
             {
+                ITypeMetadata metaType = _metadataCache.GetTypeMetadata(type);
                 return metaType.QualifiedName;
             }
             else

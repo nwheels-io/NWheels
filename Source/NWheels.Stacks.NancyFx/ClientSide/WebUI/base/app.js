@@ -630,34 +630,60 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.rejectChanges = function (entity) {
                 scope.refresh();
             };
-            
-            if (scope.uidl.form) {
-                subscribeToFormNotifiations(scope.uidl.form);
-            }
 
-            if (scope.uidl.formTypeSelector) {
-                for (var i = 0; i < scope.uidl.formTypeSelector.selections.length; i++) {
-                    var selection = scope.uidl.formTypeSelector.selections[i];
-                    subscribeToFormNotifiations(selection.widget);
-                }
-            }
+            scope.$on(uidl.qualifiedName + ':Save:Executing', function (event) {
+                scope.saveChanges(scope.model.entity);
+            });
+            scope.$on(uidl.qualifiedName + ':Cancel:Executing', function (event) {
+                scope.rejectChanges(scope.model.entity);
+            });
+            scope.$on(uidl.qualifiedName + ':Delete:Executing', function (event) {
+                scope.deleteEntity(scope.model.entity);
+            });
 
             scope.queryEntities();
-            
-            function subscribeToFormNotifiations(form) {
-                scope.$on(form.qualifiedName + ':Closing', function (event) {
-                    scope.refresh();
-                });
-                scope.$on(form.qualifiedName + ':Saving', function (event) {
-                    scope.saveChanges(scope.model.entity);
-                });
-                scope.$on(form.qualifiedName + ':Rejecting', function (event) {
-                    scope.rejectChanges(scope.model.entity);
-                });
-                scope.$on(form.qualifiedName + ':Deleting', function (event) {
-                    scope.deleteEntity(scope.model.entity);
-                });
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_controllerImplementations['DataGrid'] = {
+        implement: function (scope) {
+            var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
+
+            scope.metaType = metaType;
+
+            var dataQuery = scope.uidl.dataQuery;
+
+            if (!scope.uidl.displayColumns || !scope.uidl.displayColumns.length) {
+                scope.uidl.displayColumns = scope.uidl.defaultDisplayColumns;
             }
+
+            scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
+                return metaType.properties[toCamelCase(name)];
+            }).ToArray();
+
+            scope.refresh = function () {
+                scope.queryEntities();
+            };
+
+            scope.queryEntities = function () {
+                scope.resultSet = null;
+                if (scope.uidl.mode !== 'Inline') {
+                    scope.entityService.queryEntity(scope.uidl.entityName + dataQuery).then(function (data) {
+                        scope.resultSet = data.ResultSet;
+                    });
+                } else {
+                    scope.resultSet = scope.parentModel.entity[scope.parentUidl.propertyName];
+                }
+            };
+
+            //scope.$on(scope.uidl.qualifiedName + ':Search:Executing', function (event) {
+            //    dataQuery = "";
+            //    scope.queryEntities();
+            //});
+
+            scope.queryEntities();
         }
     };
 
@@ -891,7 +917,7 @@ theApp.directive('uidlWidget', ['uidlService', 'entityService', '$timeout', func
                         var initFuncName = 'initWidget_' + $scope.uidl.widgetType;
                         var initFunc = window[initFuncName];
                         if (typeof initFunc === 'function') {
-                            initFunc($scope.uidl);
+                            initFunc($scope);
                         }
                     });
                 }
@@ -946,7 +972,7 @@ theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uid
                 $scope.lookupForeignKeyProperty = $scope.uidl.propertyName + '_FK';
              
                 $scope.entityService.queryEntity($scope.uidl.lookupEntityName).then(function (data) {
-                    $scope.lookupResultSet = data.results;
+                    $scope.lookupResultSet = data.ResultSet;
 					
 					if ($scope.uidl.applyDistinctToLookup) {
 						$scope.lookupResultSet = Enumerable.From($scope.lookupResultSet).Distinct('$.' + $scope.lookupTextProperty).ToArray();

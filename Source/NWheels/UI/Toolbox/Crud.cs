@@ -82,6 +82,11 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public UidlCommand Save { get; set; }
+        public UidlCommand Cancel { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void DescribePresenter(PresenterBuilder<Crud<TEntity>, Empty.Data, ICrudViewState<TEntity>> presenter)
         {
         }
@@ -111,6 +116,27 @@ namespace NWheels.UI.Toolbox
 
             this.Form = formOrTypeSelector as CrudForm<TEntity, Empty.Data, ICrudFormState<TEntity>>;
             this.FormTypeSelector = formOrTypeSelector as TypeSelector;
+
+            if ( Form != null )
+            {
+                AddFormCommands(Form);
+            }
+
+            if ( FormTypeSelector != null )
+            {
+                foreach ( var typeForm in FormTypeSelector.Selections.Select(s => s.Widget).OfType<IUidlForm>() )
+                {
+                    AddFormCommands(typeForm);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void AddFormCommands(IUidlForm form)
+        {
+            form.Commands.Add(Save);
+            form.Commands.Add(Cancel);
         }
     }
 

@@ -306,7 +306,7 @@
     <Compile Include="UI\Toolbox\LayoutFlow.cs" />
     <Compile Include="UI\Toolbox\LayoutVertical.cs" />
     <Compile Include="UI\Toolbox\TypeSelector.cs" />
-    <Compile Include="UI\Toolbox\ReportDataTable.cs" />
+    <Compile Include="UI\Toolbox\DataGrid.cs" />
     <Compile Include="UI\Factories\ViewModelObjectFactory.cs" />
     <Compile Include="UI\Toolbox\Chart.cs" />
     <Compile Include="UI\Toolbox\Crud.cs" />

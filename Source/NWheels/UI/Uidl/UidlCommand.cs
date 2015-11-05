@@ -18,11 +18,27 @@ namespace NWheels.UI.Uidl
 
             base.Notifications.Add(this.Executing);
             base.Notifications.Add(this.Updating);
+
+            this.Severity = CommandSeverity.Change;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public CommandSeverity Severity { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlNotification Executing { get; private set; }
         public UidlNotification Updating { get; private set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum CommandSeverity
+    {
+        Read,
+        Change,
+        Destroy
     }
 }

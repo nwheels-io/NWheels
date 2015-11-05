@@ -14,8 +14,7 @@ using NWheels.UI.Uidl;
 namespace NWheels.UI.Toolbox
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "CrudForm")]
-    public class CrudForm<TEntity, TData, TState> : WidgetBase<CrudForm<TEntity, TData, TState>, TData, TState>
-        where TEntity : class
+    public class CrudForm<TEntity, TData, TState> : WidgetBase<CrudForm<TEntity, TData, TState>, TData, TState>, IUidlForm
         where TData : class
         where TState : class
     {
@@ -42,9 +41,6 @@ namespace NWheels.UI.Toolbox
 
             _visibleFields = new List<string>();
             _hiddenFields = new List<string>();
-
-            this.SearchResultsReceived = new UidlNotification<string>("SearchResultsReceived", this);
-            base.Notifications.Add(this.SearchResultsReceived);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -115,7 +111,9 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<string> GetTranslatables()
         {
-            return base.GetTranslatables().Concat(Fields.Select(f => f.PropertyName));
+            return base.GetTranslatables()
+                .Concat(Fields.Select(f => f.PropertyName))
+                .Concat(Commands.Select(c => c.Text));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -125,6 +123,8 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string EntityName { get; set; }
         [DataMember]
+        public string SearchQuery { get; set; }
+        [DataMember]
         public object EntityId { get; set; }
         [DataMember]
         public CrudFormMode Mode { get; set; }
@@ -133,9 +133,9 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UidlNotification<string> SearchResultsReceived { get; set; }
-        public UidlNotification<TEntity> Saving { get; set; }
-        public UidlNotification<TEntity> Rejecting { get; set; }
+        //public UidlNotification<string> Search { get; set; }
+        //public UidlNotification<TEntity> Saving { get; set; }
+        //public UidlNotification<TEntity> Rejecting { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -186,6 +186,7 @@ namespace NWheels.UI.Toolbox
 
             Fields.Sort((x, y) => y.OrderIndex.CompareTo(x.OrderIndex));
             builder.BuildNodes(this.Fields.SelectMany(f => f.GetNestedWidgets()).Cast<AbstractUidlNode>().ToArray());
+            builder.BuildNodes(this.Commands.Cast<AbstractUidlNode>().ToArray());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -396,6 +397,10 @@ namespace NWheels.UI.Toolbox
                 case CrudFieldType.Label:
                     return CrudFieldModifiers.ReadOnly | (MetaProperty.IsCalculated ? CrudFieldModifiers.None : CrudFieldModifiers.System);
                 case CrudFieldType.Edit:
+                    if ( MetaProperty.ClrType == typeof(Boolean) )
+                    {
+                        return CrudFieldModifiers.Checkbox;
+                    }
                     return CrudFieldModifiers.None;
                 case CrudFieldType.Lookup:
                     return CrudFieldModifiers.DropDown;
@@ -455,6 +460,12 @@ namespace NWheels.UI.Toolbox
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
+    public interface IUidlForm
+    {
+        List<UidlCommand> Commands { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
     public class CrudFormFieldNestedWidget
@@ -500,6 +511,7 @@ namespace NWheels.UI.Toolbox
         Ellipsis = 0x08,
         Section = 0x10,
         Tab = 0x20,
+        Checkbox = 0x40,
         System = 0x200
     }
 }

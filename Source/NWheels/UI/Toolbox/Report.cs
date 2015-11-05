@@ -6,12 +6,18 @@ using System.Runtime.Serialization;
 using NWheels.Extensions;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
+using NWheels.Processing;
 
 namespace NWheels.UI.Toolbox
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-    public class Report : WidgetBase<Report, Empty.Data, Empty.State>
+    public class Report<TCriteria, TScript, TResultRow> : WidgetBase<Report<TCriteria, TScript, TResultRow>, Empty.Data, Report<TCriteria, TScript, TResultRow>.IReportState>
+        where TScript : ITransactionScript
     {
+        private Expression<Func<TScript, Empty.Data, IReportState, Empty.Payload, TResultRow[]>> _onExecuteCall;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Report(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
@@ -19,15 +25,42 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [DataMember, ManuallyAssigned]
-        public WidgetUidlNode CriteriaForm { get; set; }
-        [DataMember, ManuallyAssigned]
-        public ReportDataTable ResultTable { get; set; }
+        public void OnExecute(Expression<Func<TScript, Empty.Data, IReportState, Empty.Payload, TResultRow[]>> call)
+        {
+            _onExecuteCall = call;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<Report, Empty.Data, Empty.State> presenter)
+        [DataMember]
+        public CrudForm<TCriteria, Empty.Data, Empty.State> CriteriaForm { get; set; }
+        [DataMember]
+        public DataGrid<TResultRow> ResultTable { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UidlCommand ShowReport { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void DescribePresenter(PresenterBuilder<Report<TCriteria, TScript, TResultRow>, Empty.Data, IReportState> presenter)
         {
+            CriteriaForm.Commands.Add(ShowReport);
+
+            presenter.On(ShowReport)
+                .InvokeTransactionScript<TScript>()
+                .WaitForReply(_onExecuteCall)
+                .Then(b => b.Broadcast(ResultTable.DataReceived).WithPayload(m => m.Input).TunnelDown());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class TX : NWheels.Processing.ITransactionScript
+        {
+            public TResultRow[] Execute(TCriteria input)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -36,9 +69,18 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
-            return base.GetNestedWidgets().Concat(new[] { CriteriaForm, ResultTable });
+            return base.GetNestedWidgets().Concat(new WidgetUidlNode[] { CriteriaForm, ResultTable });
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ViewModelContract]
+        public interface IReportState
+        {
+            TCriteria Criteria { get; set; }
+            string DataQuery { get; set; }
+        }
     }
 }

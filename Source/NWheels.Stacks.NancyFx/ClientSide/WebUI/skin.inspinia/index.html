@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html ng-app="theApp" ng-controller="appStart">
 <head>
     <meta charset="utf-8">
@@ -331,82 +331,76 @@
     </script>
 	
 	<script type="text/ng-template" id="uidl-element-template/Crud">
-		<div class="row">
-			<div class="col-lg-12">
-				<div class="ibox ">
-					<div class="ibox-title">
-						<h5>{{::uidl.entityName}}</h5>
-					</div>
-					<div class="ibox-content">
-						<div class="jqGrid_wrapper">
-							<table id="table_list_2"></table>
-							<div id="pager_list_2"></div>
-						</div>
-						<div class="layout" ng-if="uiShowCrudForm">
-							<uidl-widget ng-if="uidl.form" uidl="uidl.form" parent-model="model"></uidl-widget>
-							<uidl-widget ng-if="uidl.formTypeSelector" uidl="uidl.formTypeSelector" parent-model="model"></uidl-widget>
-						</div>
-					
-					</div>
-				</div>
-			</div>
-		</div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="ibox ">
+                    <div class="ibox-title">
+                        <h5>{{::uidl.entityName}}</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <p>
+                            <button type="button" class="btn btn-w-m btn-primary" ng-click="newEntity()" data-toggle="modal" data-target="#modal_{{::uidl.elementName}}">Add</button>
+                            <button type="button" class="btn btn-w-m btn-primary" ng-click="refresh()">Refresh</button>
+                        </p>
+                        <div class="jqGrid_wrapper">
+                            <table id="table_{{::uidl.elementName}}"></table>
+                            <div id="pager_{{::uidl.elementName}}"></div>
+                        </div>
+                        <div id="modal_{{::uidl.elementName}}" class="modal fade">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-body" ng-if="uiShowCrudForm">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <uidl-widget ng-if="uidl.form" uidl="uidl.form" parent-model="model"></uidl-widget>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <uidl-widget ng-if="uidl.formTypeSelector" uidl="uidl.formTypeSelector" parent-model="model"></uidl-widget>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 	</script>
 	<script type="text/javascript">
 	// Examle data for jqGrid
-            var mydata = [
-                {id: "1", invdate: "2010-05-24", name: "test", note: "note", tax: "10.00", total: "2111.00"} ,
-                {id: "2", invdate: "2010-05-25", name: "test2", note: "note2", tax: "20.00", total: "320.00"},
-                {id: "3", invdate: "2007-09-01", name: "test3", note: "note3", tax: "30.00", total: "430.00"},
-                {id: "4", invdate: "2007-10-04", name: "test", note: "note", tax: "10.00", total: "210.00"},
-                {id: "5", invdate: "2007-10-05", name: "test2", note: "note2", tax: "20.00", total: "320.00"},
-                {id: "6", invdate: "2007-09-06", name: "test3", note: "note3", tax: "30.00", total: "430.00"},
-                {id: "7", invdate: "2007-10-04", name: "test", note: "note", tax: "10.00", total: "210.00"},
-                {id: "8", invdate: "2007-10-03", name: "test2", note: "note2", amount: "300.00", tax: "21.00", total: "320.00"},
-                {id: "9", invdate: "2007-09-01", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"},
-                {id: "11", invdate: "2007-10-01", name: "test", note: "note", amount: "200.00", tax: "10.00", total: "210.00"},
-                {id: "12", invdate: "2007-10-02", name: "test2", note: "note2", amount: "300.00", tax: "20.00", total: "320.00"},
-                {id: "13", invdate: "2007-09-01", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"},
-                {id: "14", invdate: "2007-10-04", name: "test", note: "note", amount: "200.00", tax: "10.00", total: "210.00"},
-                {id: "15", invdate: "2007-10-05", name: "test2", note: "note2", amount: "300.00", tax: "20.00", total: "320.00"},
-                {id: "16", invdate: "2007-09-06", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"},
-                {id: "17", invdate: "2007-10-04", name: "test", note: "note", amount: "200.00", tax: "10.00", total: "210.00"},
-                {id: "18", invdate: "2007-10-03", name: "test2", note: "note2", amount: "300.00", tax: "20.00", total: "320.00"},
-                {id: "19", invdate: "2007-09-01", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"},
-                {id: "21", invdate: "2007-10-01", name: "test", note: "note", amount: "200.00", tax: "10.00", total: "210.00"},
-                {id: "22", invdate: "2007-10-02", name: "test2", note: "note2", amount: "300.00", tax: "20.00", total: "320.00"},
-                {id: "23", invdate: "2007-09-01", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"},
-                {id: "24", invdate: "2007-10-04", name: "test", note: "note", amount: "200.00", tax: "10.00", total: "210.00"},
-                {id: "25", invdate: "2007-10-05", name: "test2", note: "note2", amount: "300.00", tax: "20.00", total: "320.00"},
-                {id: "26", invdate: "2007-09-06", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"},
-                {id: "27", invdate: "2007-10-04", name: "test", note: "note", amount: "200.00", tax: "10.00", total: "210.00"},
-                {id: "28", invdate: "2007-10-03", name: "test2", note: "note2", amount: "300.00", tax: "20.00", total: "320.00"},
-                {id: "29", invdate: "2007-09-01", name: "test3", note: "note3", amount: "400.00", tax: "30.00", total: "430.00"}
-            ];
 			
-		function initWidget_Crud() {
-			alert('hi');
-			$("#table_list_2").jqGrid({
-				data: mydata,
-				datatype: "local",
-				height: 450,
+		function initWidget_Crud($scope) {
+			//alert('hi');
+			var columnsModel = [];
+			$scope.displayProperties.forEach(function(displayPropery,idx){
+				columnsModel.push({
+					name: displayPropery.name,
+					label: $scope.translate(displayPropery.name),
+					index: displayPropery.name, 
+					editable: false, 
+					width:60, 
+					sorttype:displayPropery.dataType, 
+					search:true
+					});
+			});
+			
+			$("#table_" + $scope.uidl.elementName).jqGrid({
+				datatype: function(){$scope.entityService.queryEntity($scope.uidl.entityName).then(function(responseData){
+					var thegrid = jQuery("#table_" + $scope.uidl.elementName)[0];
+					thegrid.addJSONData(responseData.ResultSet);
+				})},
+				height: 250,
 				autowidth: true,
 				shrinkToFit: true,
-				rowNum: 20,
+				rowNum: 10,
 				rowList: [10, 20, 30],
-				colNames:['Inv No','Date', 'Client', 'Amount','Tax','Total','Notes'],
-				colModel:[
-					{name:'id',index:'id', editable: true, width:60, sorttype:"int",search:true},
-					{name:'invdate',index:'invdate', editable: true, width:90, sorttype:"date", formatter:"date"},
-					{name:'name',index:'name', editable: true, width:100},
-					{name:'amount',index:'amount', editable: true, width:80, align:"right",sorttype:"float", formatter:"number"},
-					{name:'tax',index:'tax', editable: true, width:80, align:"right",sorttype:"float"},
-					{name:'total',index:'total', editable: true, width:80,align:"right",sorttype:"float"},
-					{name:'note',index:'note', editable: true, width:100, sortable:false}
-				],
-				pager: "#pager_list_2",
+				colModel: columnsModel,
+				pager: "#pager_" + $scope.uidl.elementName,
 				viewrecords: true,
-				caption: "Example jqGrid 2",
+				caption: $scope.uidl.entityName,
 				add: true,
 				edit: true,
 				addtext: 'Add',
@@ -414,7 +408,7 @@
 				hidegrid: false
 			});
 			// Setup buttons
-			$("#table_list_2").jqGrid('navGrid', '#pager_list_2',
+			$("#table_" + $scope.uidl.elementName).jqGrid('navGrid', '#table_' + $scope.uidl.elementName,
 					{edit: true, add: true, del: true, search: true},
 					{height: 200, reloadAfterSubmit: true}
 			);
@@ -422,42 +416,92 @@
 
 	</script>
 
-	<script type="text/ng-template" id="uidl-element-template/CrudForm">
-		<div class="content-example">
-			<div class="layout">
-				WIDGET[{{uidl.widgetType}}&lt;{{uidl.entityName}}&gt;]
-			</div>
-			<table class="dataForm clearfix">
-				<tbody>
-					<tr ng-repeat="field in plainFields">
-						<td>{{translate(field.propertyName)}}</td>
-						<td>
-							<uidl-form-field uidl="field" entity="parentModel.entity" />
-							<!--input type="text" ng-model="parentModel.entity[field.propertyName]" /-->
-						</td>
-					</tr>
-					<tr ng-if="tabSetFields.length">
-						<td colspan="2" class="tabSet">
-							<div ng-class="{tab: true, selected: $index==tabSetIndex}"                                     
-								ng-repeat="field in tabSetFields"
-								ng-click="selectTab($index)">
-								{{translate(field.propertyName)}}
-							</div>
-							<div class="tabContent clearfix">
-								<div class="Layout" ng-repeat="field in tabSetFields" ng-if="$index==tabSetIndex">
-									<uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="parentModel"></uidl-widget>
-								</div>
-							</div>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-			<div ng-if="!uidl.isInline" class="layout">
-				<button class="dataForm" ng-click="saveChanges()">Save</button>
-				<button class="dataForm" ng-click="rejectChanges()">Cancel</button>
-			</div>
-		</div>
-	</script>
+    <script type="text/ng-template" id="uidl-element-template/DataGrid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="ibox ">
+                    <div class="ibox-title">
+                        <h5>{{::uidl.entityName}}</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="jqGrid_wrapper">
+                            <table id="rdt_{{::uidl.elementName}}"></table>
+                            <div id="rdtpager_{{::uidl.elementName}}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/javascript">
+        // Examle data for jqGrid
+
+        function initWidget_DataGrid($scope) {
+            var columnsModel = [];
+            $scope.displayProperties.forEach(function (displayPropery, idx) {
+                columnsModel.push({
+                    name: displayPropery.name,
+                    label: $scope.translate(displayPropery.name),
+                    index: displayPropery.name,
+                    editable: false,
+                    width: 60,
+                    sorttype: displayPropery.dataType,
+                    search: true
+                });
+            });
+
+            $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
+                var thegrid = $("#rdt_" + $scope.uidl.elementName);
+                thegrid.addJSONData(data);
+            });
+
+            $("#rdt_" + $scope.uidl.elementName).jqGrid({
+                height: 250,
+                autowidth: true,
+                shrinkToFit: true,
+                rowNum: 10,
+                rowList: [10, 20, 30],
+                colModel: columnsModel,
+                pager: "#rdtpager_" + $scope.uidl.elementName,
+                viewrecords: true,
+                caption: $scope.uidl.entityName,
+                add: true,
+                edit: true,
+                addtext: 'Add',
+                edittext: 'Edit',
+                hidegrid: false
+            });
+            // Setup buttons
+            $("#rdt_" + $scope.uidl.elementName).jqGrid('navGrid', '#rdt_' + $scope.uidl.elementName,
+					{ edit: true, add: true, del: true, search: true },
+					{ height: 200, reloadAfterSubmit: true }
+			);
+        }
+
+    </script>
+
+    <script type="text/ng-template" id="uidl-element-template/CrudForm">
+        <div class="form-group" ng-repeat="field in plainFields">
+            <label class="control-label">{{translate(field.propertyName)}}</label>
+            <uidl-form-field uidl="field" entity="parentModel.entity" />
+        </div>
+        <div ng-if="tabSetFields.length">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li ng-class="{active: $index == 0}" ng-repeat="field in tabSetFields"><a data-toggle="tab" href="#tab-{{ $index }}">{{translate(field.propertyName)}}</a></li>
+
+                </ul>
+                <div class="tab-content">
+                    <div ng-repeat="field in tabSetFields" id="tab-{{ $index }}" ng-class="{'tab-pane': true, active: $index == 0}">
+                        <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="parentModel"></uidl-widget>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div ng-if="!uidl.isInline" class="layout">
+            <button ng-repeat="command in uidl.commands" type="button" class="btn btn-w-m btn-primary" ng-click="$emit(command.qualifiedName + ':Executing')">{{::translate(command.text)}}</button>
+        </div>
+    </script>
     
     <script type="text/ng-template" id="uidl-element-template/Chat">
         <div>Message 1 . . . </div>
@@ -526,6 +570,18 @@
         </div>
     </script>
 	
+	<script type="text/ng-template" id="uidl-element-template/TypeSelector">
+		<div class="row">
+            <div class="form-group">
+                <label class="control-label">Type</label>
+                <select ng-options="s.typeName as s.text for s in uidl.selections" ng-model="selectedType" ng-change="selectedTypeChanged(selectedType)" class="form-control m-b"></select>
+            </div>
+			<div ng-repeat="selection in uidl.selections" class="Layout">
+				<uidl-widget ng-if="selectedType==selection.typeName" uidl="selection.widget" parent-model="model"></uidl-widget>
+			</div>
+		</div>
+	</script>
+	
 	<script type="text/ng-template" id="uidl-element-template/TypeSelectorWithTabs">
 		<div class="row">
 			<div class="col-lg-12">
@@ -562,27 +618,8 @@
     <script type="text/ng-template" id="uidl-element-template/Report">
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <h5>{{translate(uidl.text)}}</h5>
-                </div>
-                <div class="ibox-content">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th ng-repeat="property in displayProperties">{{translate(property.name)}}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="resultRow in resultSet">
-                                    <td>1</td>
-                                    <td ng-repeat="property in displayProperties" ng-click="editEntity(resultRow)">{{resultRow[property.name]}}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <uidl-widget uidl="uidl.criteriaForm"></uidl-widget>
+                <uidl-widget uidl="uidl.resultTable"></uidl-widget>
             </div>
         </div>
     </script>
@@ -616,17 +653,14 @@
 	</script>
 	
 	<script type="text/ng-template" id="uidl-element-template/FormField">
-		<div class="layout">
-			<span ng-if="uidl.fieldType==='Label'">{{entity[uidl.propertyName]}}</span>
-			<input ng-if="uidl.fieldType==='Edit'" 
-				type="text" 
-				ng-model="entity[uidl.propertyName]" ></input>
-			<select ng-if="uidl.fieldType==='Lookup'" 
-				ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet" 
-				ng-model="entity[lookupForeignKeyProperty]" class="form-control m-b">
-				<option value="">All</option>
-			</select>
-		</div>
+        <div class="form-group">
+            <label class="control-label" ng-if="uidl.fieldType==='Label'">{{entity[uidl.propertyName]}}</label>
+            <input class="form-control m-b" ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'" type="checkbox" ng-model="entity[uidl.propertyName]"></input>
+            <input class="form-control m-b" ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='None'" type="text" ng-model="entity[uidl.propertyName]"></input>
+            <select class="form-control m-b"  ng-if="uidl.fieldType==='Lookup'" ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet" ng-model="entity[lookupForeignKeyProperty]">
+                <option value="">All</option>
+            </select>
+        </div>
 	</script>
 	
     <!------ HARD CODED  -------->
@@ -800,7 +834,7 @@
     </script-->
     
     <script src="skin/assets/js/jquery-2.1.1.js"></script>
-    <script src="skin/assets/js/bootstrap.min.js"></script>
+    <script src="skin/assets/js/bootstrap.js"></script>
 
     <!-- Custom and plugin javascript -->
     <script src="skin/assets/js/inspinia.js"></script>
@@ -875,6 +909,7 @@
     <script src="skin/assets/app/breeze/breeze.savequeuing.js"></script>
 
     <script src="base/app.js"></script>
+	<script src="base/entity.js"></script>
 	<script src="skin/assets/app/chartjs/chart.js"></script>
 
 </body>

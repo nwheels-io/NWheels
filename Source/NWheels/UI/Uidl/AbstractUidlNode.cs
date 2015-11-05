@@ -32,6 +32,7 @@ namespace NWheels.UI.Uidl
             // ReSharper disable once DoNotCallOverridableMethodsInConstructor
             this.IdName = (idName == IdNameAsTypeMacro ? GetIdNameFromType() : idName);
             this.QualifiedName = (parent != null ? parent.QualifiedName + ":" : "") + IdName;
+            this.ElementName = (parent != null ? parent.ElementName + "-" : "") + IdName.Replace("<", "").Replace(">", "");
 
             if ( parent != null )
             {
@@ -47,6 +48,8 @@ namespace NWheels.UI.Uidl
         public string IdName { get; set; }
         [DataMember]
         public string QualifiedName { get; set; }
+        [DataMember]
+        public string ElementName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
