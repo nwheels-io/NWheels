@@ -167,6 +167,7 @@
     <Compile Include="Processing\Rules\Impl\RealRuleEngine.cs" />
     <Compile Include="TypeModel\Core\Factories\NotSupportedPropertyStrategy.cs" />
     <Compile Include="TypeModel\Core\StorageTypes\MoneyStorageType.cs" />
+    <Compile Include="TypeModel\ITypeLogicMetadata.cs" />
     <Compile Include="TypeModel\Serialization\BinarySerializer.cs" />
     <Compile Include="TypeModel\Serialization\IObjectSerializer.cs" />
     <Compile Include="Entities\Core\IDomainObject.cs" />

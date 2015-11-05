@@ -75,6 +75,11 @@ namespace NWheels.Entities.Factories
                                 strategy.WriteInitialization(cw, components, persistable);
                             }
                         });
+
+                    if ( _context.OnWriteOnNewTriggerCalls != null )
+                    {
+                        _context.OnWriteOnNewTriggerCalls(cw);
+                    }
                 });
                 
                 writer.DefaultConstructor(
@@ -85,7 +90,6 @@ namespace NWheels.Entities.Factories
                         
                         cw.This(persistable, components);
                     });
-
             }
         }
 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NWheels.Authorization;
 using NWheels.Authorization.Core;
 using NWheels.DataObjects;
+using NWheels.Domains.Security.Core;
 using NWheels.Entities;
 
 namespace NWheels.Domains.Security
@@ -18,6 +19,8 @@ namespace NWheels.Domains.Security
         IEntityRepository<IEntityAccessRuleEntity> EntityAccessRules { get; }
         IEntityRepository<IPasswordEntity> Passwords { get; }
         IPasswordEntity NewPassword(string clearText);
+
+        IAllowAllEntityAccessRuleEntity NewAllowAllEntityAccessRule();
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -153,6 +156,12 @@ namespace NWheels.Domains.Security
     [EntityContract(UseCodeNamespace = true, IsAbstract = true)]
     public interface IEntityAccessRuleEntity : IEntityPartUniqueDisplayName, IEntityPartClaim, IEntityAccessRule
     {
+    }
+    public abstract class EntityAccessRuleEntity : IEntityAccessRuleEntity
+    {
+        public abstract void BuildAccessControl(IEntityAccessControlBuilder builder);
+        public abstract string Name { get; set; }
+        public abstract string ClaimValue { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

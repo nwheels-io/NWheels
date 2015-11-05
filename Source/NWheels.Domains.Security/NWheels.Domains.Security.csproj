@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChangePasswordTransactionScript.cs" />
+    <Compile Include="Core\IAllowAllEntityAccessRuleEntity.cs" />
     <Compile Include="Core\UserAccountEntity.cs" />
     <Compile Include="Core\UserAccountPolicy.cs" />
     <Compile Include="Core\UserAccountPolicySet.cs" />

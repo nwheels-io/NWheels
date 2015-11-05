@@ -4,6 +4,7 @@ using System.Reflection;
 using Hapil;
 using Hapil.Members;
 using Hapil.Operands;
+using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core.Factories;
 using NWheels.Extensions;
@@ -87,6 +88,7 @@ namespace NWheels.Entities.Factories
         public TypeMemberCache DomainObjectMembers { get; private set; }
         public TypeMemberCache PersistableObjectMembers { get; private set; }
         public PropertyImplementationStrategyMap PropertyMap { get; private set; }
+        public Action<ConstructorWriter> OnWriteOnNewTriggerCalls { get; set; }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 

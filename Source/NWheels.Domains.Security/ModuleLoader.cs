@@ -31,6 +31,7 @@ namespace NWheels.Domains.Security
             builder.RegisterType<UserAccountPolicySet>();
 
             builder.NWheelsFeatures().ObjectContracts().Concretize<IUserAccountEntity>().With<UserAccountEntity>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IAllowAllEntityAccessRuleEntity>().With<AllowAllEntityAccessRuleEntity>();
         }
     }
 }

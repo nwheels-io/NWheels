@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using Hapil;
@@ -5,6 +6,7 @@ using Hapil.Members;
 using Hapil.Writers;
 using NWheels.DataObjects.Core;
 using NWheels.Entities.Core;
+using NWheels.Extensions;
 using NWheels.TypeModel.Core;
 using TT = Hapil.TypeTemplate;
 
@@ -12,6 +14,8 @@ namespace NWheels.Entities.Factories
 {
     public class ImplementIDomainObjectConvention : ImplementationConvention
     {
+        public const string TriggerMethodNameOnNew = "EntityTriggerOnNew";
+        public const string TriggerMethodNameOnValidateInvariants = "EntityTriggerOnValidateInvariants";
         public const string TriggerMethodNameBeforeSave = "EntityTriggerBeforeSave";
         public const string TriggerMethodNameAfterSave = "EntityTriggerAfterSave";
         public const string TriggerMethodNameBeforeDelete = "EntityTriggerBeforeDelete";
@@ -22,18 +26,32 @@ namespace NWheels.Entities.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private readonly DomainObjectFactoryContext _context;
+        private MethodInfo[] _onNew;
+        private MethodInfo[] _onValidate;
+        private MethodInfo[] _beforeSave;
+        private MethodInfo[] _afterSave;
+        private MethodInfo[] _beforeDelete;
+        private MethodInfo[] _afterDelete;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ImplementIDomainObjectConvention(DomainObjectFactoryContext context)
-            : base(Will.ImplementBaseClass)
+            : base(Will.InspectDeclaration | Will.ImplementBaseClass)
         {
             _context = context;
+            _context.OnWriteOnNewTriggerCalls = WriteOnNewTriggerMethodCalls;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Overrides of ImplementationConvention
+
+        protected override void OnInspectDeclaration(ObjectFactoryContext context)
+        {
+            TryFindEntityTriggerMethods(context.BaseType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void OnImplementBaseClass(ImplementationClassWriter<TT.TBase> writer)
         {
@@ -41,7 +59,8 @@ namespace NWheels.Entities.Factories
 
             var domainObjectImplementation = writer.ImplementInterfaceExplicitly<IDomainObject>();
             ImplementState(domainObjectImplementation);
-            ImplementBeforeAfterCommit(domainObjectImplementation);
+            ImplementBeforeCommit(domainObjectImplementation);
+            ImplementAfterCommit(domainObjectImplementation);
             ImplementValidate(domainObjectImplementation);
             
             ImplementGetContainedObject(writer);
@@ -96,43 +115,45 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ImplementBeforeAfterCommit(ImplementationClassWriter<IDomainObject> writer)
+        private void ImplementBeforeCommit(ImplementationClassWriter<IDomainObject> writer)
         {
-            MethodInfo[] beforeSave;
-            MethodInfo[] afterSave;
-            MethodInfo[] beforeDelete;
-            MethodInfo[] afterDelete;
-            TryFindEntityTriggerMethods(out beforeSave, out afterSave, out beforeDelete, out afterDelete);
+            writer.Method(x => x.BeforeCommit).Implement(w => {
+                if ( HaveTriggerMethods(_onValidate) || HaveTriggerMethods(_beforeSave) )
+                {
+                    w.If(w.This<IDomainObject>().Prop(x => x.State) != EntityState.RetrievedDeleted).Then(() => {
+                        WriteTriggerMethodCalls(w, _onValidate);
+                        WriteTriggerMethodCalls(w, _beforeSave);
+                    });
+                }
 
-            writer
-                .Method(x => x.BeforeCommit).Implement(w => {
-                    if ( HaveTriggerMethods(beforeSave) )
-                    {
-                        w.If(w.This<IDomainObject>().Prop(x => x.State) != EntityState.RetrievedDeleted).Then(() => {
-                            WriteTriggerMethodCalls(w, beforeSave);
-                        });
-                    }
-                    if ( HaveTriggerMethods(beforeDelete) )
-                    {
-                        w.If(w.This<IDomainObject>().Prop(x => x.State) == EntityState.RetrievedDeleted).Then(() => {
-                            WriteTriggerMethodCalls(w, beforeDelete);
-                        });
-                    }
-                })
-                .Method(x => x.AfterCommit).Implement(w => {
-                    if ( HaveTriggerMethods(afterSave) )
-                    {
-                        w.If(w.This<IDomainObject>().Prop(x => x.State) != EntityState.RetrievedDeleted).Then(() => {
-                            WriteTriggerMethodCalls(w, afterSave);
-                        });
-                    }
-                    if ( HaveTriggerMethods(afterDelete) )
-                    {
-                        w.If(w.This<IDomainObject>().Prop(x => x.State) == EntityState.RetrievedDeleted).Then(() => {
-                            WriteTriggerMethodCalls(w, afterDelete);
-                        });
-                    }
-                });
+                if ( HaveTriggerMethods(_beforeDelete) )
+                {
+                    w.If(w.This<IDomainObject>().Prop(x => x.State) == EntityState.RetrievedDeleted).Then(() => {
+                        WriteTriggerMethodCalls(w, _beforeDelete);
+                    });
+                }
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementAfterCommit(ImplementationClassWriter<IDomainObject> writer)
+        {
+            writer.Method(x => x.AfterCommit).Implement(w => {
+                if ( HaveTriggerMethods(_afterSave) )
+                {
+                    w.If(w.This<IDomainObject>().Prop(x => x.State) != EntityState.RetrievedDeleted).Then(() => {
+                        WriteTriggerMethodCalls(w, _afterSave);
+                    });
+                }
+
+                if ( HaveTriggerMethods(_afterDelete) )
+                {
+                    w.If(w.This<IDomainObject>().Prop(x => x.State) == EntityState.RetrievedDeleted).Then(() => {
+                        WriteTriggerMethodCalls(w, _afterDelete);
+                    });
+                }
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -159,6 +180,13 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private void WriteOnNewTriggerMethodCalls(ConstructorWriter writer)
+        {
+            WriteTriggerMethodCalls(writer, _onNew);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void ImplementValidate(ImplementationClassWriter<IDomainObject> writer)
         {
             writer.Method(x => x.Validate).Implement(w => {
@@ -166,6 +194,8 @@ namespace NWheels.Entities.Factories
                     strategy => {
                         strategy.WriteValidation(w);
                     });
+
+                WriteTriggerMethodCalls(w, _onValidate);
             });
         }
 
@@ -181,27 +211,31 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void TryFindEntityTriggerMethods(
-            out MethodInfo[] beforeSave, 
-            out MethodInfo[] afterSave, 
-            out MethodInfo[] beforeDelete, 
-            out MethodInfo[] afterDelete)
+        private void TryFindEntityTriggerMethods(Type baseType)
         {
-            var members = TypeMemberCache.Of(_context.BaseContext.BaseType);
+            var members = TypeMemberCache.Of(baseType);
 
-            beforeSave = TryFindTriggerMethods(members, TriggerMethodNameBeforeSave);
-            afterSave = TryFindTriggerMethods(members, TriggerMethodNameAfterSave);
-            beforeDelete = TryFindTriggerMethods(members, TriggerMethodNameBeforeDelete);
-            afterDelete = TryFindTriggerMethods(members, TriggerMethodNameAfterDelete);
+            _onNew = TryFindTriggerMethods<EntityImplementation.TriggerOnNewAttribute>(members, TriggerMethodNameOnNew);
+            _onValidate = TryFindTriggerMethods<EntityImplementation.TriggerOnValidateInvariantsAttribute>(members, TriggerMethodNameOnValidateInvariants);
+            _beforeSave = TryFindTriggerMethods<EntityImplementation.TriggerBeforeSaveAttribute>(members, TriggerMethodNameBeforeSave);
+            _afterSave = TryFindTriggerMethods<EntityImplementation.TriggerAfterSaveAttribute>(members, TriggerMethodNameAfterSave);
+            _beforeDelete = TryFindTriggerMethods<EntityImplementation.TriggerBeforeDeleteAttribute>(members, TriggerMethodNameBeforeDelete);
+            _afterDelete = TryFindTriggerMethods<EntityImplementation.TriggerAfterDeleteAttribute>(members, TriggerMethodNameAfterDelete);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private MethodInfo[] TryFindTriggerMethods(TypeMemberCache members, string methodName)
+        private MethodInfo[] TryFindTriggerMethods<TAttribute>(TypeMemberCache members, string methodName)
+            where TAttribute : Attribute
         {
-            return members
-                .SelectVoids(m => m.Name == methodName && !m.IsPublic && m.GetParameters().Length == 0)
+            var foundMethods = members
+                .SelectVoids(m => 
+                    m.GetParameters().Length == 0 &&
+                    !m.IsPublic && 
+                    (m.Name == methodName || m.HasAttribute<TAttribute>()))
                 .ToArray();
+
+            return foundMethods;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
