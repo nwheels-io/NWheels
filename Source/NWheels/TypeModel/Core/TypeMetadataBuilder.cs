@@ -123,6 +123,16 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        IPropertyMetadata ITypeMetadata.EntityIdProperty
+        {
+            get
+            {
+                return this.EntityIdProperty;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         IReadOnlyList<IKeyMetadata> ITypeMetadata.AllKeys
         {
             get { return _allKeysAdapter; }
@@ -167,6 +177,15 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public PropertyMetadataBuilder EntityIdProperty
+        {
+            get
+            {
+                return PrimaryKey.Properties[0];
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {

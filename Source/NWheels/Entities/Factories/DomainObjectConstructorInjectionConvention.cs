@@ -32,7 +32,7 @@ namespace NWheels.Entities.Factories
             using ( TypeTemplate.CreateScope<TT.TContract, TT2.TDomain, TT2.TPersistable>(
                 _context.MetaType.ContractType, writer.OwnerClass.TypeBuilder, _context.PersistableObjectType) )
             {
-                _context.PersistableObjectField = writer.Field<TT2.TPersistable>("$persistable");
+                _context.PersistableObjectField = writer.Field<TT.TContract>("$persistable");
                 _context.DomainObjectFactoryField = writer.Field<IDomainObjectFactory>("$domainFactory");
                 _context.FrameworkField = writer.Field<IFramework>("$framework");
                 _context.EntityStateField = writer.Field<EntityState>("$entityState");
@@ -50,7 +50,7 @@ namespace NWheels.Entities.Factories
                         cw.Base();
                     }
 
-                    _context.PersistableObjectField.Assign(persistable.CastTo<TT2.TPersistable>());
+                    _context.PersistableObjectField.Assign(persistable.CastTo<TT.TContract>());
                     _context.DomainObjectFactoryField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IDomainObjectFactory>(c), components));
                     _context.FrameworkField.Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<IFramework>(c), components));
                     _context.EntityStateField.Assign(persistable.CastTo<IEntityObjectBase>().Prop(x => x.State));

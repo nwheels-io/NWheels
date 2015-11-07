@@ -80,7 +80,7 @@ namespace NWheels.Entities.Factories
         public ITypeMetadata MetaType { get; private set; }
         public Type PersistableFactoryType { get; private set; }
         public Type PersistableObjectType { get; private set; }
-        public Field<TT2.TPersistable> PersistableObjectField { get; set; }
+        public Field<TT.TContract> PersistableObjectField { get; set; }
         public Field<IDomainObjectFactory> DomainObjectFactoryField { get; set; }
         public Field<IFramework> FrameworkField { get; set; }
         public Field<EntityState> EntityStateField { get; set; }

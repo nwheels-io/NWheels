@@ -11,6 +11,7 @@ using NWheels.DataObjects.Core.Factories;
 using NWheels.Exceptions;
 using NWheels.TypeModel.Core;
 using TT = Hapil.TypeTemplate;
+using TT2 = NWheels.Entities.Factories.DomainObjectFactory.TemplateTypes;
 
 namespace NWheels.Entities.Factories
 {
@@ -55,7 +56,7 @@ namespace NWheels.Entities.Factories
                             else
                             {
                                 var readerMethodInfo = _context.PersistableObjectMembers.Methods.First(m => m.Name == GetReadAccessorMethodName(MetaProperty));
-                                gw.Return(_context.PersistableObjectField.Func<TT.TProperty>(readerMethodInfo));
+                                gw.Return(_context.PersistableObjectField.CastTo<TT2.TPersistable>().Func<TT.TProperty>(readerMethodInfo));
                             }
                         }) : 
                         null,
@@ -70,7 +71,7 @@ namespace NWheels.Entities.Factories
                             else
                             {
                                 var writerMethodInfo = _context.PersistableObjectMembers.Methods.First(m => m.Name == GetWriteAccessorMethodName(MetaProperty));
-                                _context.PersistableObjectField.Void(writerMethodInfo, value);
+                                _context.PersistableObjectField.CastTo<TT2.TPersistable>().Void(writerMethodInfo, value);
                             }
                         }) :
                         null
