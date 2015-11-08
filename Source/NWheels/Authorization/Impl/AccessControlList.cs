@@ -17,6 +17,7 @@ namespace NWheels.Authorization.Impl
         private readonly Claim[] _claims;
         private readonly string _claimSetKey;
         private readonly Dictionary<Type, IEntityAccessControl> _entityAccessControlByContract;
+        private IEntityAccessControl _defaultControl;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -33,16 +34,18 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEntityAccessControl<TEntity> GetEntityAccessControl<TEntity>()
+        public IEntityAccessControl GetEntityAccessControl(Type entityContractType)
         {
-            IEntityAccessControl control;
+            IEntityAccessControl controlForEntity;
 
-            if ( _entityAccessControlByContract.TryGetValue(typeof(TEntity), out control) )
+            if ( _entityAccessControlByContract.TryGetValue(entityContractType, out controlForEntity) )
             {
-                return (IEntityAccessControl<TEntity>)control;
+                return controlForEntity;
             }
-
-            throw _logger.NoRuleDefinedForEntity(contract: typeof(TEntity));
+            else
+            {
+                return _defaultControl;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -74,72 +77,7 @@ namespace NWheels.Authorization.Impl
                 builder.AddRule(rule);
             }
 
-            builder.FillAccessControlsByContract(_entityAccessControlByContract);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class EntityAccessControlBuilder : IEntityAccessControlBuilder
-        {
-            private readonly ITypeMetadataCache _metadataCache;
-            private readonly Dictionary<Type, List<IEntityAccessControl>> _controlListByContract;
-            
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public EntityAccessControlBuilder(ITypeMetadataCache metadataCache)
-            {
-                _metadataCache = metadataCache;
-                _controlListByContract = new Dictionary<Type, List<IEntityAccessControl>>();
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            IEntityAccessControlBuilder<TEntity> IEntityAccessControlBuilder.ToEntity<TEntity>()
-            {
-                var metaType = _metadataCache.GetTypeMetadata(typeof(TEntity));
-                var control = new EntityAccessControl<TEntity>(metaType);
-
-                RegisterControlForTypeAndInheritors(metaType, control);
-
-                return control;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public void AddRule(IEntityAccessRule rule)
-            {
-                rule.BuildAccessControl(this);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public void FillAccessControlsByContract(Dictionary<Type, IEntityAccessControl> accessControlByContract)
-            {
-                foreach ( var contractEntry in _controlListByContract )
-                {
-                    if ( contractEntry.Value.Count == 1 )
-                    {
-                        accessControlByContract.Add(contractEntry.Key, contractEntry.Value[0]);
-                    }
-                    else if ( contractEntry.Value.Count > 1 )
-                    {
-                        contractEntry.Value.Sort((x, y) => y.MetaType.InheritanceDepth.CompareTo(x.MetaType.InheritanceDepth));
-                        var controlPipe = EntityAccessControlPipe.Create(contractType: contractEntry.Key, sinks: contractEntry.Value);
-                        accessControlByContract.Add(contractEntry.Key, controlPipe);
-                    }
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void RegisterControlForTypeAndInheritors<TEntity>(ITypeMetadata metaType, EntityAccessControl<TEntity> control)
-            {
-                for ( var affectedMetaType = metaType ; affectedMetaType != null ; affectedMetaType = affectedMetaType.BaseType )
-                {
-                    var controlList = _controlListByContract.GetOrAdd(affectedMetaType.ContractType, key => new List<IEntityAccessControl>());
-                    controlList.Add(control);
-                }
-            }
+            builder.FillEntityAccessControlDictionary(_entityAccessControlByContract, out _defaultControl);
         }
     }
 }

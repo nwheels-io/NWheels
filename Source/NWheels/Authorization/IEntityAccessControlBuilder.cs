@@ -5,36 +5,69 @@ namespace NWheels.Authorization
 {
     public interface IEntityAccessControlBuilder
     {
-        IEntityAccessControlBuilder<TEntity> ToEntity<TEntity>();
+        INonTypedEntityAccessControlBuilder ToAllEntities();
+        ITypedEntityAccessControlBuilder<T> ToEntity<T>();
+        INonTypedEntityAccessControlBuilder ToEntities<T1, T2>();
+        INonTypedEntityAccessControlBuilder ToEntities<T1, T2, T3>();
+        INonTypedEntityAccessControlBuilder ToEntities<T1, T2, T3, T4>();
+        INonTypedEntityAccessControlBuilder ToEntities<T1, T2, T3, T4, T5>();
+        INonTypedEntityAccessControlBuilder ToEntities<T1, T2, T3, T4, T5, T6>();
+        INonTypedEntityAccessControlBuilder ToEntities<T1, T2, T3, T4, T5, T6, T7>();
+        INonTypedEntityAccessControlBuilder ToEntities<T1, T2, T3, T4, T5, T6, T7, T8>();
+        INonTypedEntityAccessControlBuilder ToEntities(params Type[] entityContractTypes);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IEntityAccessControlBuilder<TEntity>
+    public interface INonTypedEntityAccessControlBuilder
     {
-        IEntityAccessControlBuilder<TEntity> IsDenied();
-        IEntityAccessControlBuilder<TEntity> IsReadOnly();
-        IEntityAccessControlBuilder<TEntity> IsDeniedIf(Func<IAccessControlContext, bool> condition);
-        IEntityAccessControlBuilder<TEntity> IsReadOnlyIf(Func<IAccessControlContext, bool> condition);
-        IEntityAccessControlBuilder<TEntity> IsDeniedUnless(Func<IAccessControlContext, bool> condition);
-        IEntityAccessControlBuilder<TEntity> IsReadOnlyUnless(Func<IAccessControlContext, bool> condition);
+        INonTypedEntityAccessControlBuilder IsDenied();
+        INonTypedEntityAccessControlBuilder IsReadOnly();
+        INonTypedEntityAccessControlBuilder IsDeniedIf(Func<IAccessControlContext, bool> condition);
+        INonTypedEntityAccessControlBuilder IsReadOnlyIf(Func<IAccessControlContext, bool> condition);
+        INonTypedEntityAccessControlBuilder IsDeniedUnless(Func<IAccessControlContext, bool> condition);
+        INonTypedEntityAccessControlBuilder IsReadOnlyUnless(Func<IAccessControlContext, bool> condition);
+
+        INonTypedEntityAccessControlBuilder IsDefinedHard(
+            bool? canRetrieve = null,
+            bool? canInsert = null,
+            bool? canUpdate = null,
+            bool? canDelete = null);
+
+        INonTypedEntityAccessControlBuilder IsDefinedByContext(
+            Func<IAccessControlContext, bool> canRetrieve = null,
+            Func<IAccessControlContext, bool> canInsert = null,
+            Func<IAccessControlContext, bool> canUpdate = null,
+            Func<IAccessControlContext, bool> canDelete = null);
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface ITypedEntityAccessControlBuilder<TEntity>
+    {
+        ITypedEntityAccessControlBuilder<TEntity> IsDenied();
+        ITypedEntityAccessControlBuilder<TEntity> IsReadOnly();
+        ITypedEntityAccessControlBuilder<TEntity> IsDeniedIf(Func<IAccessControlContext, bool> condition);
+        ITypedEntityAccessControlBuilder<TEntity> IsReadOnlyIf(Func<IAccessControlContext, bool> condition);
+        ITypedEntityAccessControlBuilder<TEntity> IsDeniedUnless(Func<IAccessControlContext, bool> condition);
+        ITypedEntityAccessControlBuilder<TEntity> IsReadOnlyUnless(Func<IAccessControlContext, bool> condition);
         
-        IEntityAccessControlBuilder<TEntity> IsDefinedHard(
+        ITypedEntityAccessControlBuilder<TEntity> IsDefinedHard(
             bool? canRetrieve = null,
             bool? canInsert = null,
             bool? canUpdate = null,
             bool? canDelete = null);
         
-        IEntityAccessControlBuilder<TEntity> IsFilteredByQuery(
+        ITypedEntityAccessControlBuilder<TEntity> IsFilteredByQuery(
             Func<IAccessControlContext, Expression<Func<TEntity, bool>>> canRetrieveWhere = null);
 
-        IEntityAccessControlBuilder<TEntity> IsDefinedByContext(
+        ITypedEntityAccessControlBuilder<TEntity> IsDefinedByContext(
             Func<IAccessControlContext, bool> canRetrieve = null,
             Func<IAccessControlContext, bool> canInsert = null,
             Func<IAccessControlContext, bool> canUpdate = null,
             Func<IAccessControlContext, bool> canDelete = null);
 
-        IEntityAccessControlBuilder<TEntity> IsDefinedByPredicate(
+        ITypedEntityAccessControlBuilder<TEntity> IsDefinedByPredicate(
             Func<IAccessControlContext, TEntity, bool> canRetrieve = null,
             Func<IAccessControlContext, TEntity, bool> canInsert = null,
             Func<IAccessControlContext, TEntity, bool> canUpdate = null,

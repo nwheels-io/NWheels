@@ -22,7 +22,7 @@ namespace NWheels.Domains.Security.Core
 
         public override void BuildAccessControl(IEntityAccessControlBuilder builder)
         {
-            builder.ToEntity<object>().IsDefinedHard(canRetrieve: true, canInsert: true, canUpdate: true, canDelete: true);
+            builder.ToAllEntities().IsDefinedHard(canRetrieve: true, canInsert: true, canUpdate: true, canDelete: true);
         }
 
         #endregion

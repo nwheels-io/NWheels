@@ -18,13 +18,6 @@ namespace NWheels.Authorization.Core
         bool? CanInsert(IAccessControlContext context, object entity);
         bool? CanUpdate(IAccessControlContext context, object entity);
         bool? CanDelete(IAccessControlContext context, object entity);
-        ITypeMetadata MetaType { get; }
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public interface IEntityAccessControl<in TEntity> : IEntityAccessControl
-    {
-        IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable<TEntity> source);
+        IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable source);
     }
 }

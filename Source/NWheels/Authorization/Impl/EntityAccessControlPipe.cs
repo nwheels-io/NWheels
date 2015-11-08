@@ -8,29 +8,28 @@ using NWheels.DataObjects;
 
 namespace NWheels.Authorization.Impl
 {
-    internal class EntityAccessControlPipe<TEntity> : IEntityAccessControl<TEntity>
+    internal class EntityAccessControlPipe : IEntityAccessControl
     {
-        private IEntityAccessControl<TEntity>[] _sinks;
+        private IEntityAccessControl[] _sinks;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EntityAccessControlPipe(IEnumerable<IEntityAccessControl<TEntity>> sinks)
+        public EntityAccessControlPipe(IEnumerable<IEntityAccessControl> sinks)
         {
             _sinks = sinks.ToArray();
-            this.MetaType = _sinks[0].MetaType;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Implementation of IRuntimeEntityAccessRule
 
-        public IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable<TEntity> source)
+        public IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable source)
         {
             var authorizedQuery = source;
 
             for ( int i = 0 ; i < _sinks.Length ; i++ )
             {
-                authorizedQuery = (IQueryable<TEntity>)_sinks[i].AuthorizeQuery(context, authorizedQuery);
+                authorizedQuery = _sinks[i].AuthorizeQuery(context, authorizedQuery);
             }
 
             return authorizedQuery;
@@ -233,36 +232,6 @@ namespace NWheels.Authorization.Impl
             }
 
             return true;
-        }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    internal static class EntityAccessControlPipe
-    {
-        public static IEntityAccessControl Create(Type contractType, IEnumerable<IEntityAccessControl> sinks)
-        {
-            var factoryType = typeof(PipeFactory<>).MakeGenericType(contractType);
-            var factory = (PipeFactory)Activator.CreateInstance(factoryType);
-
-            return factory.CreatePipe(sinks);
-        }
-
-        //------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private abstract class PipeFactory
-        {
-            public abstract IEntityAccessControl CreatePipe(IEnumerable<IEntityAccessControl> sinks);
-        }
-
-        //------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class PipeFactory<TEntity> : PipeFactory
-        {
-            public override IEntityAccessControl CreatePipe(IEnumerable<IEntityAccessControl> sinks)
-            {
-                return new EntityAccessControlPipe<TEntity>(sinks.Cast<IEntityAccessControl<TEntity>>());
-            }
         }
     }
 }

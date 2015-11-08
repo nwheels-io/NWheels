@@ -43,13 +43,6 @@ namespace NWheels.Authorization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEntityAccessControl<TEntity> GetEntityAccessControl<TEntity>()
-        {
-            return new SystemEntityAccessControl<TEntity>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public string UserId
         {
             get { return null; }
@@ -131,7 +124,7 @@ namespace NWheels.Authorization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class SystemAccessControlList : IAccessControlList
+        public class SystemAccessControlList : IAccessControlList, IEntityAccessControl
         {
             private readonly Claim[] _claims = new Claim[] {
                 new UserRoleClaim(SystemRole)
@@ -139,26 +132,27 @@ namespace NWheels.Authorization
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IEntityAccessControl<TEntity> GetEntityAccessControl<TEntity>()
+            #region Implementation of IAccessControlList
+
+            public IEntityAccessControl GetEntityAccessControl(Type entityContractType)
             {
-                return new SystemEntityAccessControl<TEntity>();
+                return this;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
-            
+
             public IReadOnlyCollection<Claim> GetClaims()
             {
                 return _claims;
             }
-        }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            #endregion
 
-        public class SystemEntityAccessControl<TEntity> : IEntityAccessControl<TEntity>
-        {
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
             #region Implementation of IRuntimeEntityAccessRule
 
-            public IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable<TEntity> source)
+            public IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable source)
             {
                 return source;
             }
@@ -241,13 +235,6 @@ namespace NWheels.Authorization
             public bool? CanDelete(IAccessControlContext context, object entity)
             {
                 return true;
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public ITypeMetadata MetaType
-            {
-                get { return null; }
             }
 
             #endregion

@@ -126,7 +126,7 @@ namespace NWheels.Authorization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class AnonymousAccessControlList : IAccessControlList
+        private class AnonymousAccessControlList : IAccessControlList, IEntityAccessControl
         {
             private readonly Claim[] _claims = new Claim[] {
                 new UserRoleClaim(AnonymousRole)
@@ -134,9 +134,11 @@ namespace NWheels.Authorization
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IEntityAccessControl<TEntity> GetEntityAccessControl<TEntity>()
+            #region Implementation of IAccessControlList
+
+            public IEntityAccessControl GetEntityAccessControl(Type entityContractType)
             {
-                return new AnonymousEntityAccessControl<TEntity>();
+                return this;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -145,15 +147,14 @@ namespace NWheels.Authorization
             {
                 return _claims;
             }
-        }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            #endregion
 
-        private class AnonymousEntityAccessControl<TEntity> : IEntityAccessControl<TEntity>
-        {
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             #region Implementation of IRuntimeEntityAccessRule
 
-            public IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable<TEntity> source)
+            public IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable source)
             {
                 throw AccessDenied();
             }

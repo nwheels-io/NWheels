@@ -347,7 +347,7 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEntityAccessControl<TEntity> GetEntityAccessControl<TEntity>()
+        public IEntityAccessControl GetEntityAccessControl<TEntity>()
         {
             var identityInfo = (Thread.CurrentPrincipal.Identity as IIdentityInfo);
 
@@ -363,7 +363,7 @@ namespace NWheels.Entities.Core
                 throw new SecurityException("No access controls defined for current user.");
             }
 
-            var entityAccessControl = accessControlList.GetEntityAccessControl<TEntity>();
+            var entityAccessControl = accessControlList.GetEntityAccessControl(typeof(TEntity));
 
             if ( entityAccessControl == null )
             {

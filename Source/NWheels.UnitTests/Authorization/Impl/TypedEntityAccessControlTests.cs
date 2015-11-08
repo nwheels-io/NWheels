@@ -14,17 +14,16 @@ using Shouldly;
 namespace NWheels.UnitTests.Authorization.Impl
 {
     [TestFixture]
-    public class EntityAccessControlTests : UnitTestBase
+    public class TypedEntityAccessControlTests : UnitTestBase
     {
         [Test]
         public void CanAuthroizeQuery()
         {
             //- arrange
 
-            var metaType = Framework.MetadataCache.GetTypeMetadata(typeof(TestingSamples.IEntityOne));
-            var control = new EntityAccessControl<TestingSamples.IEntityOne>(metaType);
+            var control = new TypedEntityAccessControl<TestingSamples.IEntityOne>();
 
-            IEntityAccessControlBuilder<TestingSamples.IEntityOne> controlBuilder = control;
+            ITypedEntityAccessControlBuilder<TestingSamples.IEntityOne> controlBuilder = control;
             controlBuilder
                 .IsDefinedHard(canRetrieve: true)
                 .IsFilteredByQuery(accessContext => entity => entity.Id > 100);
@@ -62,13 +61,12 @@ namespace NWheels.UnitTests.Authorization.Impl
         {
             //- arrange
 
-            var baseMetaType = Framework.MetadataCache.GetTypeMetadata(typeof(TestingSamples.IEntityTwoBase));
-            var baseControl = new EntityAccessControl<TestingSamples.IEntityTwoBase>(baseMetaType);
+            var baseControl = new TypedEntityAccessControl<TestingSamples.IEntityTwoBase>();
 
             // (!) base control can be cast to derived entity type
-            IEntityAccessControl<TestingSamples.IEntityTwoDerivativeA> derivedControl = baseControl; 
+            IEntityAccessControl derivedControl = baseControl; 
             
-            IEntityAccessControlBuilder<TestingSamples.IEntityTwoBase> baseControlBuilder = baseControl;
+            ITypedEntityAccessControlBuilder<TestingSamples.IEntityTwoBase> baseControlBuilder = baseControl;
             baseControlBuilder
                 .IsDefinedHard(canRetrieve: true)
                 .IsFilteredByQuery(accessContext => entity => entity.Id > 100);
@@ -107,11 +105,9 @@ namespace NWheels.UnitTests.Authorization.Impl
         {
             //- arrange
 
-            var baseMetaType = Framework.MetadataCache.GetTypeMetadata(typeof(TestingSamples.IEntityTwoBase));
-            var baseControl = new EntityAccessControl<TestingSamples.IEntityTwoBase>(baseMetaType);
+            var baseControl = new TypedEntityAccessControl<TestingSamples.IEntityTwoBase>();
 
-
-            IEntityAccessControlBuilder<TestingSamples.IEntityTwoBase> baseControlBuilder = baseControl;
+            ITypedEntityAccessControlBuilder<TestingSamples.IEntityTwoBase> baseControlBuilder = baseControl;
             baseControlBuilder
                 .IsDefinedHard(canRetrieve: true)
                 .IsFilteredByQuery(accessContext => entity => entity.Id > 100);

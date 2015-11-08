@@ -10,34 +10,12 @@ using NWheels.DataObjects;
 
 namespace NWheels.Authorization.Impl
 {
-    internal class EntityAccessControl<TEntity> : IEntityAccessControl, IEntityAccessControl<TEntity>, IEntityAccessControlBuilder<TEntity>
+    internal class NonTypedEntityAccessControl : IEntityAccessControl, INonTypedEntityAccessControlBuilder
     {
-        private readonly ITypeMetadata _metaType;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         private Func<IAccessControlContext, bool> _globalRetrieve = null;
         private Func<IAccessControlContext, bool> _globalInsert = null;
         private Func<IAccessControlContext, bool> _globalUpdate = null;
         private Func<IAccessControlContext, bool> _globalDelete = null;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private Func<IAccessControlContext, Expression<Func<TEntity, bool>>> _entityQuery = null;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private Func<IAccessControlContext, TEntity, bool> _entityRetrieve = null;
-        private Func<IAccessControlContext, TEntity, bool> _entityInsert = null;
-        private Func<IAccessControlContext, TEntity, bool> _entityUpdate = null;
-        private Func<IAccessControlContext, TEntity, bool> _entityDelete = null;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public EntityAccessControl(ITypeMetadata metaType)
-        {
-            _metaType = metaType;
-        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -50,20 +28,10 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable<TEntity> source)
+        public virtual IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable source)
         {
             AuthorizeRetrieve(context);
-
-            if ( _entityQuery != null )
-            {
-                var filterExpression = _entityQuery(context);
-                var filteredSource = source.Where(filterExpression);
-                return filteredSource;
-            }
-            else
-            {
-                return source;
-            }
+            return source;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -137,11 +105,11 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool? CanRetrieve(IAccessControlContext context, object entity)
+        public virtual bool? CanRetrieve(IAccessControlContext context, object entity)
         {
-            if ( _entityRetrieve != null )
+            if ( !CanRetrieve(context).GetValueOrDefault(false) )
             {
-                return _entityRetrieve(context, (TEntity)entity);
+                return false;
             }
 
             return null;
@@ -149,69 +117,47 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool? CanInsert(IAccessControlContext context, object entity)
+        public virtual bool? CanInsert(IAccessControlContext context, object entity)
         {
             if ( !CanInsert(context).GetValueOrDefault(false) )
             {
                 return false;
             }
 
-            if ( _entityInsert != null )
-            {
-                return _entityInsert(context, (TEntity)entity);
-            }
-
             return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool? CanUpdate(IAccessControlContext context, object entity)
+        public virtual bool? CanUpdate(IAccessControlContext context, object entity)
         {
             if ( !CanUpdate(context).GetValueOrDefault(false) )
             {
                 return false;
             }
 
-            if ( _entityUpdate != null )
-            {
-                return _entityUpdate(context, (TEntity)entity);
-            }
-
             return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool? CanDelete(IAccessControlContext context, object entity)
+        public virtual bool? CanDelete(IAccessControlContext context, object entity)
         {
             if ( !CanDelete(context).GetValueOrDefault(false) )
             {
                 return false;
             }
 
-            if ( _entityDelete != null )
-            {
-                return _entityDelete(context, (TEntity)entity);
-            }
-
             return null;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public ITypeMetadata MetaType
-        {
-            get { return _metaType; }
         }
 
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        #region Implementation of IRuntimeEntityAccessRule
+        #region Implementation of INonTypedEntityAccessControlBuilder
 
-        IEntityAccessControlBuilder<TEntity> IEntityAccessControlBuilder<TEntity>.IsDenied()
+        INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsDenied()
         {
             _globalRetrieve = _s_globalFalse;
             _globalInsert = _s_globalFalse;
@@ -222,7 +168,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IEntityAccessControlBuilder<TEntity> IEntityAccessControlBuilder<TEntity>.IsReadOnly()
+        INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsReadOnly()
         {
             _globalRetrieve = _s_globalTrue;
             _globalInsert = _s_globalFalse;
@@ -233,7 +179,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IEntityAccessControlBuilder<TEntity> IEntityAccessControlBuilder<TEntity>.IsDeniedIf(Func<IAccessControlContext, bool> condition)
+        INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsDeniedIf(Func<IAccessControlContext, bool> condition)
         {
             CombineAndNot(ref _globalRetrieve, condition);
             CombineAndNot(ref _globalInsert, condition);
@@ -244,7 +190,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IEntityAccessControlBuilder<TEntity> IEntityAccessControlBuilder<TEntity>.IsReadOnlyIf(Func<IAccessControlContext, bool> condition)
+        INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsReadOnlyIf(Func<IAccessControlContext, bool> condition)
         {
             CombineOr(ref _globalRetrieve, condition);
             CombineAndNot(ref _globalInsert, condition);
@@ -255,7 +201,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IEntityAccessControlBuilder<TEntity> IEntityAccessControlBuilder<TEntity>.IsDeniedUnless(Func<IAccessControlContext, bool> condition)
+        INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsDeniedUnless(Func<IAccessControlContext, bool> condition)
         {
             CombineAnd(ref _globalRetrieve, condition);
             CombineAnd(ref _globalInsert, condition);
@@ -266,7 +212,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IEntityAccessControlBuilder<TEntity> IEntityAccessControlBuilder<TEntity>.IsReadOnlyUnless(Func<IAccessControlContext, bool> condition)
+        INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsReadOnlyUnless(Func<IAccessControlContext, bool> condition)
         {
             _globalRetrieve = _s_globalTrue;
             CombineAndNot(ref _globalInsert, condition);
@@ -277,7 +223,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IEntityAccessControlBuilder<TEntity> IEntityAccessControlBuilder<TEntity>.IsDefinedHard(bool? canRetrieve, bool? canInsert, bool? canUpdate, bool? canDelete)
+        INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsDefinedHard(bool? canRetrieve, bool? canInsert, bool? canUpdate, bool? canDelete)
         {
             if ( canRetrieve.HasValue )
             {
@@ -304,27 +250,10 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IEntityAccessControlBuilder<TEntity> IEntityAccessControlBuilder<TEntity>.IsFilteredByQuery(
-            Func<IAccessControlContext, Expression<Func<TEntity, bool>>> canRetrieveWhere)
-        {
-            if ( _entityQuery == null )
-            {
-                _entityQuery = canRetrieveWhere;
-            }
-            else
-            {
-                throw new NotSupportedException("Multiple narrowing queries are not supported within one rule.");
-            }
-
-            return this;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        IEntityAccessControlBuilder<TEntity> IEntityAccessControlBuilder<TEntity>.IsDefinedByContext(
-            Func<IAccessControlContext, bool> canRetrieve, 
-            Func<IAccessControlContext, bool> canInsert, 
-            Func<IAccessControlContext, bool> canUpdate, 
+        INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsDefinedByContext(
+            Func<IAccessControlContext, bool> canRetrieve,
+            Func<IAccessControlContext, bool> canInsert,
+            Func<IAccessControlContext, bool> canUpdate,
             Func<IAccessControlContext, bool> canDelete)
         {
             if ( canRetrieve != null )
@@ -350,9 +279,27 @@ namespace NWheels.Authorization.Impl
             return this;
         }
 
+        #if false
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IEntityAccessControlBuilder<TEntity> IEntityAccessControlBuilder<TEntity>.IsDefinedByPredicate(
+        ITypedEntityAccessControlBuilder<TEntity> ITypedEntityAccessControlBuilder<TEntity>.IsFilteredByQuery(
+            Func<IAccessControlContext, Expression<Func<TEntity, bool>>> canRetrieveWhere)
+        {
+            if ( _entityQuery == null )
+            {
+                _entityQuery = canRetrieveWhere;
+            }
+            else
+            {
+                throw new NotSupportedException("Multiple narrowing queries are not supported within one rule.");
+            }
+
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        ITypedEntityAccessControlBuilder<TEntity> ITypedEntityAccessControlBuilder<TEntity>.IsDefinedByPredicate(
             Func<IAccessControlContext, TEntity, bool> canRetrieve, 
             Func<IAccessControlContext, TEntity, bool> canInsert, 
             Func<IAccessControlContext, TEntity, bool> canUpdate, 
@@ -381,30 +328,31 @@ namespace NWheels.Authorization.Impl
             return this;
         }
 
+        #endif
+
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ValidateOrThrow(string operation, bool? evaluatedAuthorizarion)
+        protected void ValidateOrThrow(string operation, bool? evaluatedAuthorizarion)
         {
             if ( !evaluatedAuthorizarion.GetValueOrDefault(false) )
             {
-                throw new SecurityException(string.Format(
-                    "User is not authorized to perform requested operation '{0}' on entity type '{1}'.",
-                    operation, this.MetaType.Name));
+                throw new SecurityException(string.Format("User is not authorized to perform the requested '{0}' operation.", operation));
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static readonly Func<IAccessControlContext, bool> _s_globalTrue = context => true;
-        private static readonly Func<IAccessControlContext, bool> _s_globalFalse = context => false;
+        protected static readonly Func<IAccessControlContext, bool> _s_globalTrue = context => true;
+        protected static readonly Func<IAccessControlContext, bool> _s_globalFalse = context => false;
+        #if false
         private static readonly Func<IAccessControlContext, TEntity, bool> _s_entityTrue = (context, entity) => true;
         private static readonly Func<IAccessControlContext, TEntity, bool> _s_entityFalse = (context, entity) => false;
-
+        #endif
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void CombineOr(ref Func<IAccessControlContext, bool> current, Func<IAccessControlContext, bool> additional)
+        protected static void CombineOr(ref Func<IAccessControlContext, bool> current, Func<IAccessControlContext, bool> additional)
         {
             if ( current == null )
             {
@@ -420,8 +368,10 @@ namespace NWheels.Authorization.Impl
             }
         }
 
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #if false
         private static void CombineOr(ref Func<IAccessControlContext, TEntity, bool> current, Func<IAccessControlContext, TEntity, bool> additional)
         {
             if ( current == null )
@@ -437,10 +387,11 @@ namespace NWheels.Authorization.Impl
                 };
             }
         }
+        #endif
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void CombineAnd(ref Func<IAccessControlContext, bool> current, Func<IAccessControlContext, bool> additional)
+        protected static void CombineAnd(ref Func<IAccessControlContext, bool> current, Func<IAccessControlContext, bool> additional)
         {
             if ( current == null )
             {
@@ -458,6 +409,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #if false
         private static void CombineAnd(ref Func<IAccessControlContext, TEntity, bool> current, Func<IAccessControlContext, TEntity, bool> additional)
         {
             if ( current == null )
@@ -473,10 +425,11 @@ namespace NWheels.Authorization.Impl
                 };
             }
         }
+        #endif
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void CombineAndNot(ref Func<IAccessControlContext, bool> current, Func<IAccessControlContext, bool> additional)
+        protected static void CombineAndNot(ref Func<IAccessControlContext, bool> current, Func<IAccessControlContext, bool> additional)
         {
             if ( current == null )
             {
@@ -494,6 +447,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #if false
         private static void CombineAndNot(ref Func<IAccessControlContext, TEntity, bool> current, Func<IAccessControlContext, TEntity, bool> additional)
         {
             if ( current == null )
@@ -509,5 +463,6 @@ namespace NWheels.Authorization.Impl
                 };
             }
         }
+        #endif
     }
-}
+}   

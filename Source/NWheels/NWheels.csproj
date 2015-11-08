@@ -98,6 +98,8 @@
     <Compile Include="Authorization\Core\ICoreSessionManager.cs" />
     <Compile Include="Authorization\IAuthorizationLogger.cs" />
     <Compile Include="Authorization\Impl\AccessControlList.cs" />
+    <Compile Include="Authorization\Impl\EntityAccessControlBuilder.cs" />
+    <Compile Include="Authorization\Impl\TypedEntityAccessControl.cs" />
     <Compile Include="Authorization\Impl\EntityAccessControlPipe.cs" />
     <Compile Include="Authorization\IAccessControlContext.cs" />
     <Compile Include="Authorization\Core\ISessionEventLogger.cs" />
@@ -107,7 +109,7 @@
     <Compile Include="Authorization\Core\IEntityAccessControl.cs" />
     <Compile Include="Authorization\IEntityAccessRule.cs" />
     <Compile Include="Authorization\IIdentityInfo.cs" />
-    <Compile Include="Authorization\Impl\EntityAccessControl.cs" />
+    <Compile Include="Authorization\Impl\NonTypedEntityAccessControl.cs" />
     <Compile Include="Authorization\ISession.cs" />
     <Compile Include="Authorization\ISessionManager.cs" />
     <Compile Include="Authorization\Core\Session.cs" />

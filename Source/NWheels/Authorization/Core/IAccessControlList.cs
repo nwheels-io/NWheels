@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace NWheels.Authorization.Core
 {
     public interface IAccessControlList
     {
-        IEntityAccessControl<TEntity> GetEntityAccessControl<TEntity>();
+        IEntityAccessControl GetEntityAccessControl(Type entityContractType);
         IReadOnlyCollection<Claim> GetClaims();
     }
 }

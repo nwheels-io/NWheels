@@ -32,11 +32,6 @@ namespace NWheels.Domains.Security.Core
         {
             _userAccount = userAccount;
             _accessControlList = accessControlList;
-
-            if ( ((IIdentityInfo)this).IsInRole("Administrator") )
-            {
-                _accessControlList = SystemPrincipal.Instance.GetAccessControlList();
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -93,13 +88,6 @@ namespace NWheels.Domains.Security.Core
         public IAccessControlList GetAccessControlList()
         {
             return _accessControlList;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public IEntityAccessControl<TEntity> GetEntityAccessControl<TEntity>()
-        {
-            return _accessControlList.GetEntityAccessControl<TEntity>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
