@@ -13,8 +13,8 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
 {
-    [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "CrudForm")]
-    public class CrudForm<TEntity, TData, TState> : WidgetBase<CrudForm<TEntity, TData, TState>, TData, TState>, IUidlForm
+    [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "Form")]
+    public class Form<TEntity, TData, TState> : WidgetBase<Form<TEntity, TData, TState>, TData, TState>, IUidlForm
         where TData : class
         where TState : class
     {
@@ -23,20 +23,20 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CrudForm(string idName, ControlledUidlNode parent)
+        public Form(string idName, ControlledUidlNode parent)
             : this(idName, parent, isNested: false)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CrudForm(string idName, ControlledUidlNode parent, bool isNested)
+        public Form(string idName, ControlledUidlNode parent, bool isNested)
             : base(idName, parent)
         {
-            this.WidgetType = "CrudForm";
-            this.TemplateName = "CrudForm";
+            this.WidgetType = "Form";
+            this.TemplateName = "Form";
             this.EntityName = MetadataCache.GetTypeMetadata(typeof(TEntity)).QualifiedName;
-            this.Fields = new List<CrudFormField>();
+            this.Fields = new List<FormField>();
             this.IsInline = isNested;
 
             _visibleFields = new List<string>();
@@ -45,12 +45,12 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CrudForm<TEntity, TData, TState> Field(
+        public Form<TEntity, TData, TState> Field(
             Expression<Func<TEntity, object>> propertySelector,
-            CrudFieldType type = CrudFieldType.Default,
-            CrudFieldModifiers modifiers = CrudFieldModifiers.None)
+            FormFieldType type = FormFieldType.Default,
+            FormFieldModifiers modifiers = FormFieldModifiers.None)
         {
-            var field = new CrudFormField(propertySelector.GetPropertyInfo().Name) {
+            var field = new FormField(propertySelector.GetPropertyInfo().Name) {
                 FieldType = type,
                 Modifiers = modifiers
             };
@@ -61,7 +61,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CrudForm<TEntity, TData, TState> ShowFields(params Expression<Func<TEntity, object>>[] propertySelectors)
+        public Form<TEntity, TData, TState> ShowFields(params Expression<Func<TEntity, object>>[] propertySelectors)
         {
             _visibleFields.AddRange(propertySelectors.Select(e => e.GetPropertyInfo().Name));
             return this;
@@ -69,7 +69,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CrudForm<TEntity, TData, TState> HideFields(params Expression<Func<TEntity, object>>[] propertySelectors)
+        public Form<TEntity, TData, TState> HideFields(params Expression<Func<TEntity, object>>[] propertySelectors)
         {
             _hiddenFields.AddRange(propertySelectors.Select(e => e.GetPropertyInfo().Name));
             return this;
@@ -77,7 +77,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CrudForm<TEntity, TData, TState> Lookup<TLookupEntity>(
+        public Form<TEntity, TData, TState> Lookup<TLookupEntity>(
             Expression<Func<TEntity, object>> fieldSelector,
             Expression<Func<TLookupEntity, object>> lookupValueProperty,
             Expression<Func<TLookupEntity, object>> lookupDisplayProperty,
@@ -93,15 +93,15 @@ namespace NWheels.UI.Toolbox
             field.LookupDisplayProperty = lookupDisplayProperty.GetPropertyInfo().Name;
             field.ApplyDistinctToLookup = applyDistinctToResults;
 
-            field.FieldType = CrudFieldType.Lookup;
-            field.Modifiers = CrudFieldModifiers.DropDown;
+            field.FieldType = FormFieldType.Lookup;
+            field.Modifiers = FormFieldModifiers.DropDown;
 
             return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CrudForm<TEntity, TData, TState> SetMode(CrudFormMode value)
+        public Form<TEntity, TData, TState> SetMode(FormMode value)
         {
             this.Mode = value;
             return this;
@@ -113,7 +113,9 @@ namespace NWheels.UI.Toolbox
         {
             return base.GetTranslatables()
                 .Concat(Fields.Select(f => f.PropertyName))
-                .Concat(Commands.Select(c => c.Text));
+                .Concat(Commands
+                    .Where(c => c != null) //TODO: correctly handle nested form field forms (make sure InstantianeDeclaredMembers is called)
+                    .Select(c => c.Text)); 
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -127,9 +129,9 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public object EntityId { get; set; }
         [DataMember]
-        public CrudFormMode Mode { get; set; }
+        public FormMode Mode { get; set; }
         [DataMember]
-        public List<CrudFormField> Fields { get; set; }
+        public List<FormField> Fields { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -139,7 +141,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<CrudForm<TEntity, TData, TState>, TData, TState> presenter)
+        protected override void DescribePresenter(PresenterBuilder<Form<TEntity, TData, TState>, TData, TState> presenter)
         {
         }
 
@@ -177,7 +179,7 @@ namespace NWheels.UI.Toolbox
             fieldsToAdd = fieldsToAdd.Where(f => !_hiddenFields.Contains(f)).ToList();
             fieldsToAdd = fieldsToAdd.Where(f => !Fields.Select(p => p.PropertyName).Contains(f)).ToList();
 
-            Fields.AddRange(fieldsToAdd.Select(f => new CrudFormField(f)));
+            Fields.AddRange(fieldsToAdd.Select(f => new FormField(f)));
 
             foreach ( var field in Fields )
             {
@@ -203,14 +205,14 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private CrudFormField FindOrAddField(Expression<Func<TEntity, object>> fieldSelector)
+        private FormField FindOrAddField(Expression<Func<TEntity, object>> fieldSelector)
         {
             var propertyName = fieldSelector.GetPropertyInfo().Name;
             var field = Fields.FirstOrDefault(f => f.PropertyName == propertyName);
 
             if ( field == null )
             {
-                field = new CrudFormField(propertyName);
+                field = new FormField(propertyName);
                 Fields.Add(field);
             }
 
@@ -220,10 +222,28 @@ namespace NWheels.UI.Toolbox
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-    public class CrudFormField
+    [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "Form")]
+    public class Form<TEntity> : Form<TEntity, Empty.Data, Empty.State>
     {
-        public CrudFormField(string propertyName)
+        public Form(string idName, ControlledUidlNode parent)
+            : base(idName, parent)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Form(string idName, ControlledUidlNode parent, bool isNested = false)
+            : base(idName, parent, isNested)
+        {
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+    public class FormField
+    {
+        public FormField(string propertyName)
         {
             this.PropertyName = propertyName;
         }
@@ -233,9 +253,9 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string PropertyName { get; set; }
         [DataMember]
-        public CrudFieldType FieldType { get; set; }
+        public FormFieldType FieldType { get; set; }
         [DataMember]
-        public CrudFieldModifiers Modifiers { get; set; }
+        public FormFieldModifiers Modifiers { get; set; }
         [DataMember]
         public string LookupEntityName { get; set; }
         [DataMember]
@@ -267,7 +287,7 @@ namespace NWheels.UI.Toolbox
         {
             this.MetaProperty = metaType.GetPropertyByName(this.PropertyName);
 
-            if ( this.FieldType == CrudFieldType.Default )
+            if ( this.FieldType == FormFieldType.Default )
             {
                 this.FieldType = GetDefaultFieldType();
                 this.Modifiers = GetDefaultModifiers(this.FieldType);
@@ -311,7 +331,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private List<CrudFormFieldNestedWidget> CreateNestedWidgets(ControlledUidlNode parent)
+        private List<FormFieldNestedWidget> CreateNestedWidgets(ControlledUidlNode parent)
         {
             var relatedMetaType = this.MetaProperty.Relation.RelatedPartyType;
             var allConcreteTypes = new List<ITypeMetadata>();
@@ -324,7 +344,7 @@ namespace NWheels.UI.Toolbox
             allConcreteTypes.AddRange(relatedMetaType.DerivedTypes.Where(t => !t.IsAbstract));
 
             var results = allConcreteTypes.Select(
-                concreteType => new CrudFormFieldNestedWidget() {
+                concreteType => new FormFieldNestedWidget() {
                     MetaType = concreteType.ContractType.AssemblyQualifiedNameNonVersioned(),
                     Widget = CreateNestedWidget(parent, concreteType)
                 }).ToList();
@@ -341,15 +361,15 @@ namespace NWheels.UI.Toolbox
 
             switch ( this.FieldType )
             {
-                case CrudFieldType.LookupMany:
+                case FormFieldType.LookupMany:
                     widgetClosedType = typeof(Crud<>).MakeGenericType(nestedMetaType.ContractType);
                     widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName, parent, CrudGridMode.LookupMany);
                     break;
-                case CrudFieldType.InlineGrid:
+                case FormFieldType.InlineGrid:
                     widgetClosedType = typeof(Crud<>).MakeGenericType(nestedMetaType.ContractType);
                     widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName, parent, CrudGridMode.Inline);
                     break;
-                case CrudFieldType.InlineForm:
+                case FormFieldType.InlineForm:
                     widgetInstance = UidlUtility.CreateFormOrTypeSelector(nestedMetaType, "Form", parent, isInline: true);
                     break;
             }
@@ -359,59 +379,59 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private CrudFieldType GetDefaultFieldType()
+        private FormFieldType GetDefaultFieldType()
         {
             switch ( this.MetaProperty.Kind )
             {
                 case PropertyKind.Scalar:
                     if ( MetaProperty.Role.IsIn(PropertyRole.Key, PropertyRole.Version) || MetaProperty.IsCalculated )
                     {
-                        return (MetaProperty.ContractPropertyInfo.CanWrite ? CrudFieldType.Edit : CrudFieldType.Label);
+                        return (MetaProperty.ContractPropertyInfo.CanWrite ? FormFieldType.Edit : FormFieldType.Label);
                     }
                     else
                     {
-                        return (MetaProperty.ClrType.IsEnum ? CrudFieldType.Lookup : CrudFieldType.Edit);
+                        return (MetaProperty.ClrType.IsEnum ? FormFieldType.Lookup : FormFieldType.Edit);
                     }
                 case PropertyKind.Part:
-                    return (MetaProperty.IsCollection ? CrudFieldType.InlineGrid : CrudFieldType.InlineForm);
+                    return (MetaProperty.IsCollection ? FormFieldType.InlineGrid : FormFieldType.InlineForm);
                 case PropertyKind.Relation:
                     if ( MetaProperty.Relation.Kind == RelationKind.Composition || MetaProperty.Relation.RelatedPartyType.IsEntityPart )
                     {
-                        return (MetaProperty.IsCollection ? CrudFieldType.InlineGrid : CrudFieldType.InlineForm);
+                        return (MetaProperty.IsCollection ? FormFieldType.InlineGrid : FormFieldType.InlineForm);
                     }
                     else
                     {
-                        return (MetaProperty.IsCollection ? CrudFieldType.LookupMany : CrudFieldType.Lookup);
+                        return (MetaProperty.IsCollection ? FormFieldType.LookupMany : FormFieldType.Lookup);
                     }
                 default:
-                    return CrudFieldType.Default;
+                    return FormFieldType.Default;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private CrudFieldModifiers GetDefaultModifiers(CrudFieldType type)
+        private FormFieldModifiers GetDefaultModifiers(FormFieldType type)
         {
             switch ( type )
             {
-                case CrudFieldType.Label:
-                    return CrudFieldModifiers.ReadOnly | (MetaProperty.IsCalculated ? CrudFieldModifiers.None : CrudFieldModifiers.System);
-                case CrudFieldType.Edit:
+                case FormFieldType.Label:
+                    return FormFieldModifiers.ReadOnly | (MetaProperty.IsCalculated ? FormFieldModifiers.None : FormFieldModifiers.System);
+                case FormFieldType.Edit:
                     if ( MetaProperty.ClrType == typeof(Boolean) )
                     {
-                        return CrudFieldModifiers.Checkbox;
+                        return FormFieldModifiers.Checkbox;
                     }
-                    return CrudFieldModifiers.None;
-                case CrudFieldType.Lookup:
-                    return CrudFieldModifiers.DropDown;
-                case CrudFieldType.LookupMany:
-                    return CrudFieldModifiers.Tab;
-                case CrudFieldType.InlineForm:
-                    return CrudFieldModifiers.Tab;
-                case CrudFieldType.InlineGrid:
-                    return CrudFieldModifiers.Tab;
+                    return FormFieldModifiers.None;
+                case FormFieldType.Lookup:
+                    return FormFieldModifiers.DropDown;
+                case FormFieldType.LookupMany:
+                    return FormFieldModifiers.Tab;
+                case FormFieldType.InlineForm:
+                    return FormFieldModifiers.Tab;
+                case FormFieldType.InlineGrid:
+                    return FormFieldModifiers.Tab;
                 default:
-                    return CrudFieldModifiers.None;
+                    return FormFieldModifiers.None;
             }
         }
 
@@ -421,7 +441,7 @@ namespace NWheels.UI.Toolbox
         {
             int value = 0;
 
-            if ( Modifiers.HasFlag(CrudFieldModifiers.System) )
+            if ( Modifiers.HasFlag(FormFieldModifiers.System) )
             {
                 value |= 0x1000;
             }
@@ -431,26 +451,26 @@ namespace NWheels.UI.Toolbox
                 value |= 0x800;
             }
 
-            if ( Modifiers.HasFlag(CrudFieldModifiers.ReadOnly) )
+            if ( Modifiers.HasFlag(FormFieldModifiers.ReadOnly) )
             {
                 value |= 0x400;
             }
 
             switch ( FieldType )
             {
-                case CrudFieldType.Lookup:
+                case FormFieldType.Lookup:
                     value |= 0x200;
                     break;
-                case CrudFieldType.Edit:
+                case FormFieldType.Edit:
                     value |= 0x100;
                     break;
-                case CrudFieldType.InlineForm:
+                case FormFieldType.InlineForm:
                     value |= 0x80;
                     break;
-                case CrudFieldType.InlineGrid:
+                case FormFieldType.InlineGrid:
                     value |= 0x40;
                     break;
-                case CrudFieldType.LookupMany:
+                case FormFieldType.LookupMany:
                     value |= 0x20;
                     break;
             }
@@ -460,6 +480,7 @@ namespace NWheels.UI.Toolbox
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
+    
     public interface IUidlForm
     {
         List<UidlCommand> Commands { get; }
@@ -468,7 +489,7 @@ namespace NWheels.UI.Toolbox
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-    public class CrudFormFieldNestedWidget
+    public class FormFieldNestedWidget
     {
         [DataMember]
         public string MetaType { get; set; }
@@ -478,7 +499,7 @@ namespace NWheels.UI.Toolbox
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public enum CrudFormMode
+    public enum FormMode
     {
         CrudWidget,
         StandaloneView,
@@ -488,7 +509,7 @@ namespace NWheels.UI.Toolbox
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public enum CrudFieldType
+    public enum FormFieldType
     {
         Default,
         Label,
@@ -502,7 +523,7 @@ namespace NWheels.UI.Toolbox
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [Flags]
-    public enum CrudFieldModifiers
+    public enum FormFieldModifiers
     {
         None = 0x00,
         ReadOnly = 0x01,

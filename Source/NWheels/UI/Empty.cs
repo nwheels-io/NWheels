@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace NWheels.UI
 {
+    /// <summary>
+    /// Provides empty placeholder types for generic UIDL types
+    /// </summary>
     public static class Empty
     {
         public class Input
@@ -18,6 +21,9 @@ namespace NWheels.UI
         {
         }
         public class State
+        {
+        }
+        public class Context
         {
         }
     }

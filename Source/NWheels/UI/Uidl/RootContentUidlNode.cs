@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Extensions;
 using NWheels.UI.Core;
 
 namespace NWheels.UI.Uidl
@@ -34,5 +36,23 @@ namespace NWheels.UI.Uidl
 
         [DataMember, ManuallyAssigned]
         public WidgetUidlNode ContentRoot { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of AbstractUidlNode
+
+        protected internal override void OnDeclaredMemberNodeCreated(PropertyInfo declaration, AbstractUidlNode instance)
+        {
+            base.OnDeclaredMemberNodeCreated(declaration, instance);
+
+            var widget = (instance as WidgetUidlNode);
+
+            if ( widget != null && declaration.HasAttribute<ContentRootAttribute>() )
+            {
+                this.ContentRoot = widget;
+            }
+        }
+
+        #endregion
     }
 }

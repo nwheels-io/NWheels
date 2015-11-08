@@ -32,12 +32,17 @@ namespace NWheels.UI.Toolbox
 
         [DataMember]
         public string EntityName { get; set; }
-        [DataMember]
-        public string DataQuery { get; set; }
+        
+        //TODO: allow uniform query for both entities and transacrion script results
+        //[DataMember]
+        //public string DataQuery { get; set; }
+        
         [DataMember]
         public List<string> DisplayColumns { get; set; }
+        
         [DataMember, ManuallyAssigned]
         public WidgetUidlNode RowTemplate { get; set; }
+        
         [DataMember]
         public DataGridDefaultRow DefaultRowTemplate { get; set; }
 

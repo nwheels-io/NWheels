@@ -1,5 +1,8 @@
 ﻿<!DOCTYPE html>
 <html ng-app="theApp" ng-controller="appStart">
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+HEAD, JS/CSS LINKS
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +17,6 @@
 
     <!-- Toastr style -->
     <link href="skin/assets/css/plugins/toastr/toastr.min.css" rel="stylesheet">
-
     
     <!--script src="assets/plugins/datajs-1.1.1/datajs-1.1.1.js"></script-->
     
@@ -39,12 +41,11 @@
     <link href="skin/assets/css/animate.css" rel="stylesheet">
     <link href="skin/assets/css/style.css" rel="stylesheet">
 
-   <!-- Data Tables -->
+    <!-- Data Tables -->
     <link href="skin/assets/css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
     <link href="skin/assets/css/plugins/dataTables/dataTables.responsive.css" rel="stylesheet">
     <link href="skin/assets/css/plugins/dataTables/dataTables.tableTools.min.css" rel="stylesheet">
 
-    
     <style>
         @media (min-width: 768px) {
             .b-col {
@@ -55,22 +56,53 @@
 </head>
 
 <body>
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    PAGE BODY
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <div id="wrapper" ng-if="app">
         <uidl-screen ng-if="currentScreen" uidl="currentScreen"></uidl-screen>
     </div>
 
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL SCREEN
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-screen">
         <uidl-widget uidl="uidl.contentRoot"></uidl-widget>
     </script>
 
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL SCREEN PART
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-screen-part">
         <uidl-widget uidl="uidl.contentRoot"></uidl-widget>
     </script>
 
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL USER ALERT - INLINE
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="uidl-user-alert-inline">
+        <div ng-show="alert" class="inline-alert clearfix">
+            {{translate(alert.uidl.type)}} : {{translate(alert.uidl.text)}}
+            <button ng-click="alert.answer('Cancel')" style="float:right;">x</button>
+            <div ng-show="alert.uidl.resutChoices.length">
+                <button ng-repeat="choice in alert.uidl.resultChoices"
+                        ng-click="alert.answer(choice)">
+                    {{choice}}
+                </button>
+            </div>
+        </div>
+    </script>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - SPLASH
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Splash">
         <uidl-widget uidl="uidl.insideContent"></uidl-widget>
     </script>
     
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - USER LOGIN FORM
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/UserLoginForm">
         <div class="middle-box text-center loginscreen   animated fadeInDown">
             <div>
@@ -106,12 +138,18 @@
         </div>
     </script>
     
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - CURRENT LOGGED-IN USER
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/CurrentLoggedInUser">
         <a href="" ng-click="$emit(uidl.qualifiedName + ':LogOut:Executing')">
             <i class="fa fa-sign-out"></i> {{translate('LogOut')}}
         </a>
     </script>
 
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - MANAGEMENT CONSOLE
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/ManagementConsole">
         <nav class="navbar-default navbar-static-side" role="navigation">
             <div class="sidebar-collapse">
@@ -268,7 +306,9 @@
 		}
 	</script>
 
-    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - MANAGEMENT CONSOLE MENU ITEM
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/ManagementConsole-menu-item">
          <a ng-class="{bold: item.level==0}" ng-show="item.subItems.length==0" href="#" ng-click="$emit(item.notifications[1].qualifiedName)"><i class="fa fa-diamond"></i>{{translate(item.text)}}</a>
         <a href="#" ng-show="item.subItems.length > 0">
@@ -281,41 +321,31 @@
 		</ul>
     </script>
     
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - CONTAINER
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Container">
         <uidl-widget ng-repeat="widget in uidl.containedWidgets" uidl="widget"></uidl-widget>
     </script>
     
-    <script type="text/ng-template" id="uidl-element-template/LayoutHorizontal">
-        <table cellpadding="0" cellspacing="0" border="0" width="100%">
-            <tr>
-                <td style="vertical-align: top;" ng-repeat="widget in uidl.containedWidgets">
-                    <uidl-widget uidl="widget"></uidl-widget>
-                </td>
-            </tr>
-        </table>
-    </script>
-    
-    <script type="text/ng-template" id="uidl-element-template/LayoutVertical">
-        <div ng-repeat="widget in uidl.containedWidgets">
-            <uidl-widget uidl="widget"></uidl-widget>
-        </div>
-    </script>
-    
-    <script type="text/ng-template" id="uidl-element-template/LayoutFlow">
-        <div style="layout" ng-repeat="widget in uidl.containedWidgets">
-            <uidl-widget uidl="widget"></uidl-widget>
-        </div>
-    </script>
-    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - SCREEN PART CONTAINER
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/ScreenPartContainer">
         <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
         <uidl-screen-part ng-if="currentScreenPart" uidl="currentScreenPart"></uidl-screen-part>
     </script>
-    
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - TEXT
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Text">
         {{translate(uidl.text)}}
     </script>
     
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - GAUGE
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Gauge">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
@@ -330,6 +360,9 @@
         </div>
     </script>
 	
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - CRUD
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<script type="text/ng-template" id="uidl-element-template/Crud">
         <div class="row">
             <div class="col-lg-12">
@@ -416,6 +449,9 @@
 
 	</script>
 
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - DATA GRID
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/DataGrid">
         <div class="row">
             <div class="col-lg-12">
@@ -440,7 +476,7 @@
             var columnsModel = [];
             $scope.displayProperties.forEach(function (displayPropery, idx) {
                 columnsModel.push({
-                    name: displayPropery.name,
+                    name: toCamelCase(displayPropery.name),
                     label: $scope.translate(displayPropery.name),
                     index: displayPropery.name,
                     editable: false,
@@ -452,7 +488,7 @@
 
             $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
                 var thegrid = $("#rdt_" + $scope.uidl.elementName);
-                thegrid.addJSONData(data);
+                thegrid[0].addJSONData(data);
             });
 
             $("#rdt_" + $scope.uidl.elementName).jqGrid({
@@ -480,7 +516,10 @@
 
     </script>
 
-    <script type="text/ng-template" id="uidl-element-template/CrudForm">
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - FORM
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="uidl-element-template/Form">
         <div class="form-group" ng-repeat="field in plainFields">
             <label class="control-label">{{translate(field.propertyName)}}</label>
             <uidl-form-field uidl="field" entity="parentModel.entity" />
@@ -503,6 +542,9 @@
         </div>
     </script>
     
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - CHAT
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Chat">
         <div>Message 1 . . . </div>
         <div>Message 2 . . . </div>
@@ -511,6 +553,9 @@
         <button>Send</button>
     </script>
     
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - CHART
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Chart">
         <div class="ibox float-e-margins">
             <div class="ibox-content">
@@ -570,6 +615,9 @@
         </div>
     </script>
 	
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - TYPE SELECTOR
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<script type="text/ng-template" id="uidl-element-template/TypeSelector">
 		<div class="row">
             <div class="form-group">
@@ -582,6 +630,9 @@
 		</div>
 	</script>
 	
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - TYPE SELECTOR WITH TABS
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<script type="text/ng-template" id="uidl-element-template/TypeSelectorWithTabs">
 		<div class="row">
 			<div class="col-lg-12">
@@ -599,6 +650,9 @@
 		</div>
 	</script>	
 
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - FILTER FORM
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   	<script type="text/ng-template" id="uidl-element-template/FilterForm">
 		<div class="panel-body" id="filterForm">
 			<div class="row">
@@ -615,6 +669,9 @@
 		</div>
 	</script>	
 
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - REPORT
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Report">
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
@@ -624,6 +681,9 @@
         </div>
     </script>
 
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - DASHBOARD
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Dashboard">
         <div class="row">
             <div class="col-lg-2" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType=='Gauge'" style="vertical-align:top;">
@@ -645,6 +705,9 @@
         </div>
     </script>
     
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - GRID FIELD
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<script type="text/ng-template" id="uidl-element-template/GridField">
 		<div class="layout">
 			<span ng-if="property.kind!=='Relation'">{{value}}</span>
@@ -652,6 +715,9 @@
 		</div>
 	</script>
 	
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - FORM FIELD
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<script type="text/ng-template" id="uidl-element-template/FormField">
         <div class="form-group">
             <label class="control-label" ng-if="uidl.fieldType==='Label'">{{entity[uidl.propertyName]}}</label>

@@ -9,4 +9,12 @@ namespace NWheels.Processing
     public interface ITransactionScript
     {
     }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface ITransactionScript<TContext, TInput, TOutput> : ITransactionScript
+    {
+        TInput InitializeInput(TContext context);
+        TOutput Execute(TInput input);
+    }
 }

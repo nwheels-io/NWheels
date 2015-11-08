@@ -21,6 +21,8 @@ namespace NWheels.UI.Toolbox
         public Report(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
+            base.WidgetType = "Report";
+            base.TemplateName = "Report";
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,7 +35,7 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
-        public CrudForm<TCriteria, Empty.Data, Empty.State> CriteriaForm { get; set; }
+        public Form<TCriteria> CriteriaForm { get; set; }
         [DataMember]
         public DataGrid<TResultRow> ResultTable { get; set; }
 
@@ -55,16 +57,6 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class TX : NWheels.Processing.ITransactionScript
-        {
-            public TResultRow[] Execute(TCriteria input)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         #region Overrides of WidgetUidlNode
 
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
@@ -80,7 +72,6 @@ namespace NWheels.UI.Toolbox
         public interface IReportState
         {
             TCriteria Criteria { get; set; }
-            string DataQuery { get; set; }
         }
     }
 }

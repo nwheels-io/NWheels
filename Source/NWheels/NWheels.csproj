@@ -299,6 +299,7 @@
     <Compile Include="UI\AuthorizationContract.cs" />
     <Compile Include="UI\ApplicationEntityService.cs" />
     <Compile Include="UI\IFrameworkUIConfig.cs" />
+    <Compile Include="UI\ContentRootAttribute.cs" />
     <Compile Include="UI\Toolbox\Report.cs" />
     <Compile Include="UI\Toolbox\ReportSelector.cs" />
     <Compile Include="UI\Toolbox\WidgetScreenPart.cs" />
@@ -312,7 +313,7 @@
     <Compile Include="UI\Factories\ViewModelObjectFactory.cs" />
     <Compile Include="UI\Toolbox\Chart.cs" />
     <Compile Include="UI\Toolbox\Crud.cs" />
-    <Compile Include="UI\Toolbox\CrudForm.cs" />
+    <Compile Include="UI\Toolbox\Form.cs" />
     <Compile Include="UI\Toolbox\LayoutHorizontal.cs" />
     <Compile Include="UI\Toolbox\Text.cs" />
     <Compile Include="UI\Uidl\RequireDomainContext.cs" />

@@ -34,6 +34,8 @@ namespace NWheels.UI
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected abstract void DescribePresenter(PresenterBuilder<TScreenPart, TData, TState> presenter);
+        protected virtual void DescribePresenter(PresenterBuilder<TScreenPart, TData, TState> presenter)
+        {
+        }
     }
 }

@@ -166,9 +166,11 @@ namespace NWheels.UI
                 {
                     var instance = (AbstractUidlNode)Activator.CreateInstance(property.PropertyType, property.Name, parent);
                     instance.MetadataCache = _metadataCache;
+                    
                     property.SetValue(parent, instance);
                     instantiatedNodes.Add(instance);
                     TryApplyWidgetTemplate(instance, property);
+                    //parent.OnDeclaredMemberNodeCreated(property, instance);
                 }
             }
 

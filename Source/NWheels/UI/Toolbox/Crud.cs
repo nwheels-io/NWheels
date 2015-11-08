@@ -76,7 +76,7 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public List<string> DefaultDisplayColumns { get; set; }
         [DataMember, ManuallyAssigned]
-        public CrudForm<TEntity, Empty.Data, ICrudFormState<TEntity>> Form { get; set; }
+        public Form<TEntity, Empty.Data, ICrudFormState<TEntity>> Form { get; set; }
         [DataMember, ManuallyAssigned]
         public TypeSelector FormTypeSelector { get; set; }
 
@@ -102,6 +102,8 @@ namespace NWheels.UI.Toolbox
                 .Where(p => p.Kind == PropertyKind.Scalar && p.Role == PropertyRole.None)
                 .Select(p => p.Name)
                 .ToList();
+
+            AddFormCommands();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -114,9 +116,14 @@ namespace NWheels.UI.Toolbox
         {
             var formOrTypeSelector = UidlUtility.CreateFormOrTypeSelector(MetaType, "Form", parent: this, isInline: false);
 
-            this.Form = formOrTypeSelector as CrudForm<TEntity, Empty.Data, ICrudFormState<TEntity>>;
+            this.Form = formOrTypeSelector as Form<TEntity, Empty.Data, ICrudFormState<TEntity>>;
             this.FormTypeSelector = formOrTypeSelector as TypeSelector;
+        }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void AddFormCommands()
+        {
             if ( Form != null )
             {
                 AddFormCommands(Form);

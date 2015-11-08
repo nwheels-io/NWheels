@@ -521,27 +521,23 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
     m_controllerImplementations['Report'] = {
         implement: function (scope) {
-            var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
+            //var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
 
-            scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
-                return metaType.properties[toCamelCase(name)];
-            }).ToArray();
+            //scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
+            //    return metaType.properties[toCamelCase(name)];
+            //}).ToArray();
 
-            scope.queryEntities = function () {
-                scope.entityService.queryEntity(scope.uidl.entityName).then(function (data) {
-                    scope.resultSet = data.results;
-                });
-            };
+            //scope.queryEntities = function () {
+            //    scope.entityService.queryEntity(scope.uidl.entityName).then(function (data) {
+            //        scope.resultSet = data.results;
+            //    });
+            //};
 
-            scope.viewEntity = function (entity) {
-                alert('VIEW ENTITY ' + entity);
-            };
+			//scope.getPropertyRelatedMetaType = function(propertyName) {
+			//    return scope.uidlService.getRelatedMetaType(scope.uidl.entityName, propertyName);
+			//};
 
-			scope.getPropertyRelatedMetaType = function(propertyName) {
-			    return scope.uidlService.getRelatedMetaType(scope.uidl.entityName, propertyName);
-			};
-
-            scope.queryEntities();
+            //scope.queryEntities();
         }
     };
 
@@ -689,7 +685,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    m_controllerImplementations['CrudForm'] = {
+    m_controllerImplementations['Form'] = {
         implement: function (scope) {
             scope.metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
 
