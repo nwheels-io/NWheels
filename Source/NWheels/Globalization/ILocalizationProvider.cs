@@ -16,7 +16,7 @@ namespace NWheels.Globalization
     {
         public Dictionary<string, string> GetLocalStrings(IEnumerable<string> stringIds, CultureInfo culture)
         {
-            return stringIds.ToDictionary(s => s, s => s.SplitPascalCase());
+            return stringIds.ToDictionary(s => s, s => s.SplitPascalCase().ConvertToPascalCase());
         }
     }
 }

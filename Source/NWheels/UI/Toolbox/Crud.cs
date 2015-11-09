@@ -31,16 +31,8 @@ namespace NWheels.UI.Toolbox
             this.MetaType = this.MetadataCache.GetTypeMetadata(typeof(TEntity));
             this.EntityName = MetaType.QualifiedName;
             this.Mode = mode;
-            this.DisplayColumns = new List<string>();
 
             CreateForm();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public override IEnumerable<string> GetTranslatables()
-        {
-            return base.GetTranslatables().Concat(DisplayColumns ?? new List<string>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -52,29 +44,12 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Crud<TEntity> Column<T>(Expression<Func<TEntity, T>> propertySelector)
-        {
-            var property = propertySelector.GetPropertyInfo();
-
-            if ( this.DisplayColumns == null )
-            {
-                this.DisplayColumns = new List<string>();
-            }
-
-            this.DisplayColumns.Add(property.Name);
-            return this;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         [DataMember]
         public string EntityName { get; set; }
         [DataMember]
         public CrudGridMode Mode { get; set; }
         [DataMember]
-        public List<string> DisplayColumns { get; set; }
-        [DataMember]
-        public List<string> DefaultDisplayColumns { get; set; }
+        public DataGrid<TEntity> Grid { get; set; }
         [DataMember, ManuallyAssigned]
         public Form<TEntity, Empty.Data, ICrudFormState<TEntity>> Form { get; set; }
         [DataMember, ManuallyAssigned]
@@ -89,6 +64,7 @@ namespace NWheels.UI.Toolbox
 
         protected override void DescribePresenter(PresenterBuilder<Crud<TEntity>, Empty.Data, ICrudViewState<TEntity>> presenter)
         {
+            this.Grid.UsePascalCase = true;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -98,12 +74,10 @@ namespace NWheels.UI.Toolbox
             builder.RegisterMetaType(typeof(TEntity));
 
             var metaType = builder.MetadataCache.GetTypeMetadata(typeof(TEntity));
-            this.DefaultDisplayColumns = metaType.Properties
-                .Where(p => p.Kind == PropertyKind.Scalar && p.Role == PropertyRole.None)
-                .Select(p => p.Name)
-                .ToList();
 
             AddFormCommands();
+
+            builder.BuildManuallyInstantiatedNodes(Form, FormTypeSelector);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -126,22 +100,23 @@ namespace NWheels.UI.Toolbox
         {
             if ( Form != null )
             {
-                AddFormCommands(Form);
+                ConfigureForm(Form);
             }
 
             if ( FormTypeSelector != null )
             {
                 foreach ( var typeForm in FormTypeSelector.Selections.Select(s => s.Widget).OfType<IUidlForm>() )
                 {
-                    AddFormCommands(typeForm);
+                    ConfigureForm(typeForm);
                 }
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void AddFormCommands(IUidlForm form)
+        private void ConfigureForm(IUidlForm form)
         {
+            form.UsePascalCase = true;
             form.Commands.Add(Save);
             form.Commands.Add(Cancel);
         }

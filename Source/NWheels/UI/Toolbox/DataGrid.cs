@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
+using NWheels.DataObjects;
 using NWheels.Extensions;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
@@ -40,11 +41,17 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public List<string> DisplayColumns { get; set; }
         
+        [DataMember]
+        public List<string> DefaultDisplayColumns { get; set; }
+        
         [DataMember, ManuallyAssigned]
         public WidgetUidlNode RowTemplate { get; set; }
-        
+
         [DataMember]
         public DataGridDefaultRow DefaultRowTemplate { get; set; }
+
+        [DataMember]
+        public bool UsePascalCase { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -52,6 +59,17 @@ namespace NWheels.UI.Toolbox
         {
             return base.GetTranslatables().Concat(DisplayColumns ?? new List<string>());
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of WidgetBase<DataGrid,Data,State>
+
+        protected override void OnBuild(UidlBuilder builder)
+        {
+            builder.BuildManuallyInstantiatedNodes(RowTemplate);
+        }
+
+        #endregion
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -108,6 +126,12 @@ namespace NWheels.UI.Toolbox
         {
             builder.RegisterMetaType(typeof(TDataRow));
             base.EntityName = MetadataCache.GetTypeMetadata(typeof(TDataRow)).QualifiedName;
+
+            var metaType = builder.MetadataCache.GetTypeMetadata(typeof(TDataRow));
+            base.DefaultDisplayColumns = metaType.Properties
+                .Where(p => p.Kind == PropertyKind.Scalar && p.Role == PropertyRole.None)
+                .Select(p => p.Name)
+                .ToList();
         }
     }
 }

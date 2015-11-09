@@ -1,4 +1,5 @@
 using System.Linq;
+using NWheels.Extensions;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI
@@ -30,6 +31,8 @@ namespace NWheels.UI
         {
             DescribePresenter(new PresenterBuilder<TScreenPart, TData, TState>(builder, this));
             builder.DescribeNodePresenters(this.ContentRoot);
+
+            this.Text = this.Text.TrimTail("ScreenPart");
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

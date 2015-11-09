@@ -22,7 +22,7 @@ namespace NWheels.UI.Toolbox
         {
             foreach ( var property in propertySelectors )
             {
-                Crud.Column(property);
+                Crud.Grid.Column(property);
             }
         }
 
@@ -31,11 +31,13 @@ namespace NWheels.UI.Toolbox
         protected override void DescribePresenter(PresenterBuilder<CrudScreenPart<TEntity>, Empty.Data, Empty.State> presenter)
         {
             ContentRoot = Crud;
+
+            var metaType = base.MetadataCache.GetTypeMetadata(typeof(TEntity));
+            this.Text = metaType.Name + "Management";
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Crud<TEntity> Crud { get; set; }
     }
-
 }

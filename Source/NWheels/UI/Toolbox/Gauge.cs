@@ -52,6 +52,13 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected override void OnBuild(UidlBuilder builder)
+        {
+            builder.BuildManuallyInstantiatedNodes(UpdateSource);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void DescribePresenter(PresenterBuilder<Gauge, Empty.Data, IGaugeState> presenter)
         {
             presenter.On(UpdateSource).AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Data));

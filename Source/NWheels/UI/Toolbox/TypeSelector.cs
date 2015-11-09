@@ -60,6 +60,13 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected override void OnBuild(UidlBuilder builder)
+        {
+            builder.BuildManuallyInstantiatedNodes(Selections.Select(s => s.Widget).Cast<AbstractUidlNode>().ToArray());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
             return Selections.Select(s => s.Widget);

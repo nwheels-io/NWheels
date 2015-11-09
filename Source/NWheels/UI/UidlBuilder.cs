@@ -147,6 +147,18 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal void BuildManuallyInstantiatedNodes(params AbstractUidlNode[] nodes)
+        {
+            foreach ( var node in nodes.Where(n => n != null) )
+            {
+                InstantiateDeclaredMemberNodes(node);
+            }
+            
+            BuildNodes(nodes);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal void InstantiateDeclaredMemberNodes(AbstractUidlNode parent)
         {
             var instantiatedNodes = new List<AbstractUidlNode>();
@@ -341,6 +353,17 @@ namespace NWheels.UI
                 property.DeclaringType.IsAssignableFrom(parent.GetType()) && 
                 typeof(AbstractUidlNode).IsAssignableFrom(property.PropertyType) && 
                 !property.HasAttribute<ManuallyAssignedAttribute>());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static bool IsManuallyAssignedDeclaredMemberNodeProperty(AbstractUidlNode parent, PropertyInfo property)
+        {
+            return (
+                property.CanWrite &&
+                property.DeclaringType.IsAssignableFrom(parent.GetType()) &&
+                typeof(AbstractUidlNode).IsAssignableFrom(property.PropertyType) &&
+                property.HasAttribute<ManuallyAssignedAttribute>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

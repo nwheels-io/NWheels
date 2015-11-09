@@ -58,12 +58,64 @@ namespace NWheels.UI.Toolbox
 
                 if ( property.PropertyType.IsAnonymousType() )
                 {
-                    DefineNavigation(property.GetValue(anonymous), item.SubItems, level + 1, parent);
+                    var subItemObject = property.GetValue(anonymous);
+                    ApplyThisItemProperties(item, subItemObject);
+                    DefineNavigation(subItemObject, item.SubItems, level + 1, parent);
                 }
                 else if ( property.PropertyType == typeof(ItemAction) )
                 {
-                    item.Action = (ItemAction)property.GetValue(anonymous);
+                    DefineItemAction(anonymous, property, item);
                 }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ApplyThisItemProperties(MenuItem item, object anonymous)
+        {
+            var thisProperty = anonymous.GetType().GetProperty("this");
+
+            if ( thisProperty != null )
+            {
+                var thisValues = thisProperty.GetValue(anonymous);
+
+                if ( thisValues != null )
+                {
+                    CopyProperties(thisValues, item);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void CopyProperties(object source, object destination)
+        {
+            foreach ( var sourceProperty in source.GetType().GetProperties() )
+            {
+                var destinationProperty = destination.GetType().GetProperty(sourceProperty.Name);
+
+                if ( destinationProperty != null && destinationProperty.CanWrite )
+                {
+                    var value = sourceProperty.GetValue(source);
+                    destinationProperty.SetValue(destination, value);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void DefineItemAction(object anonymous, PropertyInfo property, MenuItem item)
+        {
+            item.Action = (ItemAction)property.GetValue(anonymous);
+
+            if ( item.Action.Text != null )
+            {
+                item.Text = item.Action.Text;
+            }
+
+            if ( item.Action.Icon != null )
+            {
+                item.Icon = item.Action.Icon;
             }
         }
 
@@ -71,7 +123,7 @@ namespace NWheels.UI.Toolbox
 
         private static bool IsMenuItemProperty(PropertyInfo property)
         {
-            return (property.DeclaringType != typeof(object));
+            return (property.DeclaringType != typeof(object) && property.Name != "this");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -161,9 +213,28 @@ namespace NWheels.UI.Toolbox
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ItemAction Appearance(string text = null, string icon = null)
+            {
+                if ( text != null )
+                {
+                    this.Text = text;
+                }
+
+                if ( icon != null )
+                {
+                    this.Icon = icon;
+                }
+
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
              
             public DescribeActionCallback OnDescribe { get; private set; }
             public UidlAuthorization Authorization { get; private set; }
+            public string Text { get; set; }
+            public string Icon { get; set; }
         }
     }
 

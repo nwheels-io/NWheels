@@ -150,17 +150,19 @@ HEAD, JS/CSS LINKS
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - MANAGEMENT CONSOLE
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <script type="text/ng-template" id="uidl-element-template/ManagementConsole">
+<script type="text/ng-template" id="uidl-element-template/ManagementConsole">
         <nav class="navbar-default navbar-static-side" role="navigation">
             <div class="sidebar-collapse">
                 <ul class="nav metismenu" id="side-menu">
-                    <li class="nav-header" style="padding-top:45px;padding-bottom:47px;">
-                        <div class="dropdown profile-element"> <span>
+                    <li class="nav-header" style="padding-top:45px;padding-bottom:100px;">
+                        <div class="dropdown profile-element"> 
+                            <span>
                                 <!--img alt="image" class="img-circle" src="img/profile_small.jpg" /-->
-                                 </span>
+                            </span>
                             <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                                 <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">{{appScope.model.state.user.fullName}}</strong>
-                                 </span> <span class="text-muted text-xs block">{{appScope.model.state.user.userRoles[0]}} <!--b class="caret"></b--></span> </span> </a>
+                                 </span> <span class="text-muted text-xs block">{{appScope.model.state.user.userRoles[0]}} <!--b class="caret"></b--></span> </span> 
+                            </a>
                             <ul class="dropdown-menu animated fadeInRight m-t-xs">
                                 <li><a href="profile.html">Profile</a></li>
                                 <li><a href="contacts.html">Contacts</a></li>
@@ -182,7 +184,7 @@ HEAD, JS/CSS LINKS
             <div class="row border-bottom">
                 <nav class="navbar navbar-static-top gray-bg" role="navigation" style="margin-bottom: 0">
                     <div class="navbar-header">
-                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#" ng-click="$broadcast('AffiliateApp:DashboardScreenPart:Refresh:Executing')"><i class="fa fa-refresh"></i> </a>
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>                        
                         <form role="search" class="navbar-form-custom" action="search_results.html">
                             <div class="form-group">
                                 <!--input type="text" placeholder="Search for something..." class="form-control" name="top-search" id="top-search"-->
@@ -190,7 +192,10 @@ HEAD, JS/CSS LINKS
                         </form>
                     </div>
                     <ul class="nav navbar-top-links navbar-right">
-                        <li class="dropdown">
+                        <li>
+                            <h3 class="text-muted welcome-message" style="padding: 20px 10px 20px 10px;margin:0;">{{::translate(appScope.uidl.text)}}</h3>
+                        </li>
+                        <!--li class="dropdown">
                             <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
                                 <i class="fa fa-envelope"></i>  <span class="label label-warning">16</span>
                             </a>
@@ -242,8 +247,8 @@ HEAD, JS/CSS LINKS
                                     </div>
                                 </li>
                             </ul>
-                        </li>
-                        <li class="dropdown">
+                        </li-->
+                        <!--li class="dropdown">
                             <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
                                 <i class="fa fa-bell"></i>  <span class="label label-primary">8</span>
                             </a>
@@ -284,7 +289,7 @@ HEAD, JS/CSS LINKS
                                     </div>
                                 </li>
                             </ul>
-                        </li>                        
+                        </li-->                        
                         <li ng-repeat="widget in uidl.statusBar.containedWidgets">
                             <uidl-widget uidl="widget"></uidl-widget>
                         </li>
@@ -293,32 +298,38 @@ HEAD, JS/CSS LINKS
             </div>
             <div class="row wrapper border-bottom white-bg page-heading" style="padding-bottom:15px;margin-bottom:15px;">
                 <div class="col-lg-10">
-                    <h2>{{mainContentScreenPart.text || 'Dashboard'}}</h2>
+                    <h2>{{translate(mainContentScreenPart.text)}}</h2>
+                    <ol class="breadcrumb">
+                        <li><a href="##BASE_URL##">Home</a></li>
+                        <li class="active"><strong>{{translate(mainContentScreenPart.text)}}</strong></li>
+                    </ol>
                 </div>
             </div>            
-            <uidl-widget uidl="uidl.mainContent"></uidl-widget>
+            <div class="wrapper wrapper-content  animated fadeInRight">
+                <uidl-widget uidl="uidl.mainContent"></uidl-widget>
+            </div>
         </div>
         <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
     </script>
-	<script type="text/javascript">
-		function initWidget_ManagementConsole(){
-			$('#side-menu').metisMenu();
-		}
-	</script>
+    <script type="text/javascript">
+        function initWidget_ManagementConsole(){
+            $('#side-menu').metisMenu();
+        }
+    </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - MANAGEMENT CONSOLE MENU ITEM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/ManagementConsole-menu-item">
-         <a ng-class="{bold: item.level==0}" ng-show="item.subItems.length==0" href="#" ng-click="$emit(item.notifications[1].qualifiedName)"><i class="fa fa-diamond"></i>{{translate(item.text)}}</a>
+        <a ng-class="{bold: item.level==0}" ng-show="item.subItems.length==0" href="#" ng-click="$emit(item.notifications[1].qualifiedName)"><i ng-if="item.icon" style="width:19px;" class="fa fa-{{::item.icon}}"></i>{{::item.text}}</a>
         <a href="#" ng-show="item.subItems.length > 0">
-			<i class="fa fa-diamond"></i>
-			<span class="nav-label" ng-class="{bold: item.level==0}">{{translate(item.text)}}</span>
-			<span class="fa arrow"></span>
-		</a>
-		<ul class="nav nav-second-level collapse">
-			<li ng-repeat="item in item.subItems" ng-include="'uidl-element-template/ManagementConsole-menu-item'"></li>
-		</ul>
+            <i class="fa fa-{{::item.icon}}" style="width:16px;"></i>
+            <span class="nav-label" ng-class="{bold: item.level==0}">{{item.text}}</span>
+            <span class="fa arrow"></span>
+        </a>
+        <ul class="nav nav-second-level collapse">
+            <li ng-repeat="item in item.subItems" ng-include="'uidl-element-template/ManagementConsole-menu-item'"></li>
+        </ul>
     </script>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -359,39 +370,38 @@ HEAD, JS/CSS LINKS
             </div>
         </div>
     </script>
-	
+    
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - CRUD
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<script type="text/ng-template" id="uidl-element-template/Crud">
+    <script type="text/ng-template" id="uidl-element-template/Crud">
         <div class="row">
             <div class="col-lg-12">
-                <div class="ibox ">
-                    <div class="ibox-title">
-                        <h5>{{::uidl.entityName}}</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <p>
-                            <button type="button" class="btn btn-w-m btn-primary" ng-click="newEntity()" data-toggle="modal" data-target="#modal_{{::uidl.elementName}}">Add</button>
-                            <button type="button" class="btn btn-w-m btn-primary" ng-click="refresh()">Refresh</button>
-                        </p>
-                        <div class="jqGrid_wrapper">
-                            <table id="table_{{::uidl.elementName}}"></table>
-                            <div id="pager_{{::uidl.elementName}}"></div>
-                        </div>
-                        <div id="modal_{{::uidl.elementName}}" class="modal fade">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-body" ng-if="uiShowCrudForm">
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <uidl-widget ng-if="uidl.form" uidl="uidl.form" parent-model="model"></uidl-widget>
-                                            </div>
+                <div class="ibox-title">
+                    <button class="btn btn-primary btn-circle btn-lg btn-outline" type="button" ng-click="newEntity();">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                    <button class="btn btn-success btn-circle btn-lg btn-outline" type="button" ng-click="refresh()">
+                        <i class="fa fa-refresh"></i>
+                    </button>
+
+                    <!--button type="button" class="btn btn-w-m btn-primary" ng-click="newEntity()" data-toggle="modal" data-target="#modal_{{::uidl.elementName}}">Add</!--button>
+                    <button type="button" class="btn btn-w-m btn-primary" ng-click="refresh()">Refresh</button-->
+                </div>
+                <div class="ibox-content">
+                    <uidl-widget uidl="uidl.grid" parent-model="model"></uidl-widget>
+                    <div id="modal_{{::uidl.elementName}}" class="modal fade">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-body" ng-if="uiShowCrudForm">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <uidl-widget ng-if="uidl.form" uidl="uidl.form" parent-model="model"></uidl-widget>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <uidl-widget ng-if="uidl.formTypeSelector" uidl="uidl.formTypeSelector" parent-model="model"></uidl-widget>
-                                            </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <uidl-widget ng-if="uidl.formTypeSelector" uidl="uidl.formTypeSelector" parent-model="model"></uidl-widget>
                                         </div>
                                     </div>
                                 </div>
@@ -401,72 +411,20 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
         </div>
-	</script>
-	<script type="text/javascript">
-	// Examle data for jqGrid
-			
-		function initWidget_Crud($scope) {
-			//alert('hi');
-			var columnsModel = [];
-			$scope.displayProperties.forEach(function(displayPropery,idx){
-				columnsModel.push({
-					name: displayPropery.name,
-					label: $scope.translate(displayPropery.name),
-					index: displayPropery.name, 
-					editable: false, 
-					width:60, 
-					sorttype:displayPropery.dataType, 
-					search:true
-					});
-			});
-			
-			$("#table_" + $scope.uidl.elementName).jqGrid({
-				datatype: function(){$scope.entityService.queryEntity($scope.uidl.entityName).then(function(responseData){
-					var thegrid = jQuery("#table_" + $scope.uidl.elementName)[0];
-					thegrid.addJSONData(responseData.ResultSet);
-				})},
-				height: 250,
-				autowidth: true,
-				shrinkToFit: true,
-				rowNum: 10,
-				rowList: [10, 20, 30],
-				colModel: columnsModel,
-				pager: "#pager_" + $scope.uidl.elementName,
-				viewrecords: true,
-				caption: $scope.uidl.entityName,
-				add: true,
-				edit: true,
-				addtext: 'Add',
-				edittext: 'Edit',
-				hidegrid: false
-			});
-			// Setup buttons
-			$("#table_" + $scope.uidl.elementName).jqGrid('navGrid', '#table_' + $scope.uidl.elementName,
-					{edit: true, add: true, del: true, search: true},
-					{height: 200, reloadAfterSubmit: true}
-			);
-		}
-
-	</script>
+    </script>
+    <script type="text/javascript">
+        function initWidget_Crud($scope) {
+            //...
+        }
+    </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - DATA GRID
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/DataGrid">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="ibox ">
-                    <div class="ibox-title">
-                        <h5>{{::uidl.entityName}}</h5>
-                    </div>
-                    <div class="ibox-content">
-                        <div class="jqGrid_wrapper">
-                            <table id="rdt_{{::uidl.elementName}}"></table>
-                            <div id="rdtpager_{{::uidl.elementName}}"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="jqGrid_wrapper">
+            <table id="rdt_{{::uidl.elementName}}"></table>
+            <div id="rdtpager_{{::uidl.elementName}}"></div>
         </div>
     </script>
     <script type="text/javascript">
@@ -475,8 +433,9 @@ HEAD, JS/CSS LINKS
         function initWidget_DataGrid($scope) {
             var columnsModel = [];
             $scope.displayProperties.forEach(function (displayPropery, idx) {
+                var jsonPropertyName = ($scope.uidl.usePascalCase === true ? displayPropery.name : toCamelCase(displayPropery.name));
                 columnsModel.push({
-                    name: toCamelCase(displayPropery.name),
+                    name: jsonPropertyName,
                     label: $scope.translate(displayPropery.name),
                     index: displayPropery.name,
                     editable: false,
@@ -500,18 +459,18 @@ HEAD, JS/CSS LINKS
                 colModel: columnsModel,
                 pager: "#rdtpager_" + $scope.uidl.elementName,
                 viewrecords: true,
-                caption: $scope.uidl.entityName,
-                add: true,
-                edit: true,
-                addtext: 'Add',
-                edittext: 'Edit',
+                //caption: $scope.uidl.entityName,
+                add: false,
+                edit: false,
+                //addtext: 'Add',
+                //edittext: 'Edit',
                 hidegrid: false
             });
             // Setup buttons
             $("#rdt_" + $scope.uidl.elementName).jqGrid('navGrid', '#rdt_' + $scope.uidl.elementName,
-					{ edit: true, add: true, del: true, search: true },
-					{ height: 200, reloadAfterSubmit: true }
-			);
+                    { edit: true, add: true, del: true, search: true },
+                    { height: 200, reloadAfterSubmit: true }
+            );
         }
 
     </script>
@@ -528,7 +487,6 @@ HEAD, JS/CSS LINKS
             <div class="tabs-container">
                 <ul class="nav nav-tabs">
                     <li ng-class="{active: $index == 0}" ng-repeat="field in tabSetFields"><a data-toggle="tab" href="#tab-{{ $index }}">{{translate(field.propertyName)}}</a></li>
-
                 </ul>
                 <div class="tab-content">
                     <div ng-repeat="field in tabSetFields" id="tab-{{ $index }}" ng-class="{'tab-pane': true, active: $index == 0}">
@@ -560,114 +518,114 @@ HEAD, JS/CSS LINKS
         <div class="ibox float-e-margins">
             <div class="ibox-content">
                 <div>
-					<h3 class="font-bold no-margins">
-						Current Revenue
-					</h3>
-					<small>Sales marketing.</small>
-				</div>
+                    <h3 class="font-bold no-margins">
+                        Current Revenue
+                    </h3>
+                    <small>Sales marketing.</small>
+                </div>
 
-				<div class="m-t-sm">
-					<div class="row" ng-controller="chartJsController">
-						<div class="col-md-8">
-							<div>
-								<canvas id="{{uidl.qualifiedName}}_context" height="114"></canvas>
-							</div>
-						</div>
-						<div class="col-md-4">
-							<ul class="stat-list m-t-lg">
-								<li ng-repeat="sum in lineData.summaries">
-									<h2 class="no-margins">{{ sum.value | currency}}</h2>
-									<small>{{ sum.label }}</small>
-									<div class="progress progress-mini">
-										<div class="progress-bar" style="width: 48%;"></div>
-									</div>
-								</li>
-								<li>
-									<table>
-										<tbody>
-											<tr ng-repeat="legend in lineData.datasets">
-												<td class="legendColorBox">
-													<div style="border:1px solid #ccc;padding:1px">
-														<div style="width:4px;height:0;border:5px solid {{ legend.fillColor }};overflow:hidden"></div>
-													</div>
-												</td>
-												<td class="legendLabel">{{ legend.label }}</td>
-											</tr>
-										</tbody>
-									</table>
-								</li>
-							</ul>
-						</div>
-					</div>
-				</div>
+                <div class="m-t-sm">
+                    <div class="row" ng-controller="chartJsController">
+                        <div class="col-md-8">
+                            <div>
+                                <canvas id="{{uidl.qualifiedName}}_context" height="114"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <ul class="stat-list m-t-lg">
+                                <li ng-repeat="sum in lineData.summaries">
+                                    <h2 class="no-margins">{{ sum.value | currency}}</h2>
+                                    <small>{{ sum.label }}</small>
+                                    <div class="progress progress-mini">
+                                        <div class="progress-bar" style="width: 48%;"></div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <table>
+                                        <tbody>
+                                            <tr ng-repeat="legend in lineData.datasets">
+                                                <td class="legendColorBox">
+                                                    <div style="border:1px solid #ccc;padding:1px">
+                                                        <div style="width:4px;height:0;border:5px solid {{ legend.fillColor }};overflow:hidden"></div>
+                                                    </div>
+                                                </td>
+                                                <td class="legendLabel">{{ legend.label }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
-				<div class="m-t-md">
-					<small class="pull-right">
-						<i class="fa fa-clock-o"> </i>
-						<!--Update on 16.07.2015-->
-					</small>
-					<small>
-						<!--<strong>Analysis of sales:</strong> The value has been changed over time, and last month reached a level over $50,000.-->
-					</small>
-				</div>
+                <div class="m-t-md">
+                    <small class="pull-right">
+                        <i class="fa fa-clock-o"> </i>
+                        <!--Update on 16.07.2015-->
+                    </small>
+                    <small>
+                        <!--<strong>Analysis of sales:</strong> The value has been changed over time, and last month reached a level over $50,000.-->
+                    </small>
+                </div>
 
             </div>
         </div>
     </script>
-	
+    
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - TYPE SELECTOR
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<script type="text/ng-template" id="uidl-element-template/TypeSelector">
-		<div class="row">
+    <script type="text/ng-template" id="uidl-element-template/TypeSelector">
+        <div class="row">
             <div class="form-group">
                 <label class="control-label">Type</label>
                 <select ng-options="s.typeName as s.text for s in uidl.selections" ng-model="selectedType" ng-change="selectedTypeChanged(selectedType)" class="form-control m-b"></select>
             </div>
-			<div ng-repeat="selection in uidl.selections" class="Layout">
-				<uidl-widget ng-if="selectedType==selection.typeName" uidl="selection.widget" parent-model="model"></uidl-widget>
-			</div>
-		</div>
-	</script>
-	
+            <div ng-repeat="selection in uidl.selections" class="Layout">
+                <uidl-widget ng-if="selectedType==selection.typeName" uidl="selection.widget" parent-model="model"></uidl-widget>
+            </div>
+        </div>
+    </script>
+    
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - TYPE SELECTOR WITH TABS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<script type="text/ng-template" id="uidl-element-template/TypeSelectorWithTabs">
-		<div class="row">
-			<div class="col-lg-12">
-				<div class="tabs-container">
-					<ul class="nav nav-tabs">
-						<li ng-class="{active: $index == 0}" ng-repeat="selection in uidl.selections"><a data-toggle="tab" href="#tab-{{ $index }}">{{ selection.text }}</a></li>
-					</ul>
-					<div class="tab-content">
-						<div ng-repeat="selection in uidl.selections" id="tab-{{ $index }}" ng-class="{'tab-pane': true, active: $index == 0}">
-							<uidl-widget uidl="selection.widget"></uidl-widget>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</script>	
+    <script type="text/ng-template" id="uidl-element-template/TypeSelectorWithTabs">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="tabs-container">
+                    <ul class="nav nav-tabs">
+                        <li ng-class="{active: $index == 0}" ng-repeat="selection in uidl.selections"><a data-toggle="tab" href="#tab-{{ $index }}">{{ selection.text }}</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div ng-repeat="selection in uidl.selections" id="tab-{{ $index }}" ng-class="{'tab-pane': true, active: $index == 0}">
+                            <uidl-widget uidl="selection.widget"></uidl-widget>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>	
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - FILTER FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  	<script type="text/ng-template" id="uidl-element-template/FilterForm">
-		<div class="panel-body" id="filterForm">
-			<div class="row">
-				<div class="form-group">
-					<div class="col-sm-2" ng-repeat="field in uidl.fields">
-						<label class="control-label">{{ field.propertyName }}</label>
-						<uidl-form-field uidl="field" entity="parentModel.entity" />
-					</div>
-				</div>
-				<div class="col-sm-1">
-					<div class="ibox-tools"><button id="mediaSearch" type="button" class="btn btn-primary" ng-click="executeSearch()">Search123</button></div>
-				</div>
-			</div>
-		</div>
-	</script>	
+    <script type="text/ng-template" id="uidl-element-template/FilterForm">
+        <div class="panel-body" id="filterForm">
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-sm-2" ng-repeat="field in uidl.fields">
+                        <label class="control-label">{{ field.propertyName }}</label>
+                        <uidl-form-field uidl="field" entity="parentModel.entity" />
+                    </div>
+                </div>
+                <div class="col-sm-1">
+                    <div class="ibox-tools"><button id="mediaSearch" type="button" class="btn btn-primary" ng-click="executeSearch()">Search123</button></div>
+                </div>
+            </div>
+        </div>
+    </script>	
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - REPORT
@@ -708,17 +666,17 @@ HEAD, JS/CSS LINKS
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - GRID FIELD
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<script type="text/ng-template" id="uidl-element-template/GridField">
-		<div class="layout">
-			<span ng-if="property.kind!=='Relation'">{{value}}</span>
-			<a ng-if="property.kind==='Relation'">Go to</a>
-		</div>
-	</script>
-	
+    <script type="text/ng-template" id="uidl-element-template/GridField">
+        <div class="layout">
+            <span ng-if="property.kind!=='Relation'">{{value}}</span>
+            <a ng-if="property.kind==='Relation'">Go to</a>
+        </div>
+    </script>
+    
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - FORM FIELD
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<script type="text/ng-template" id="uidl-element-template/FormField">
+    <script type="text/ng-template" id="uidl-element-template/FormField">
         <div class="form-group">
             <label class="control-label" ng-if="uidl.fieldType==='Label'">{{entity[uidl.propertyName]}}</label>
             <input class="form-control m-b" ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'" type="checkbox" ng-model="entity[uidl.propertyName]"></input>
@@ -727,8 +685,8 @@ HEAD, JS/CSS LINKS
                 <option value="">All</option>
             </select>
         </div>
-	</script>
-	
+    </script>
+    
     <!------ HARD CODED  -------->
     
     <script type="text/ng-template" id="uidl-element-template/AffiliateSignUpForm">
@@ -975,8 +933,8 @@ HEAD, JS/CSS LINKS
     <script src="skin/assets/app/breeze/breeze.savequeuing.js"></script>
 
     <script src="base/app.js"></script>
-	<script src="base/entity.js"></script>
-	<script src="skin/assets/app/chartjs/chart.js"></script>
+    <script src="base/entity.js"></script>
+    <script src="skin/assets/app/chartjs/chart.js"></script>
 
 </body>
 </html>

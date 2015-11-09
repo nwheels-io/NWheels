@@ -37,7 +37,6 @@ namespace NWheels.UI.Toolbox
             this.TemplateName = "Form";
             this.EntityName = MetadataCache.GetTypeMetadata(typeof(TEntity)).QualifiedName;
             this.Fields = new List<FormField>();
-            this.IsInline = isNested;
 
             _visibleFields = new List<string>();
             _hiddenFields = new List<string>();
@@ -101,43 +100,25 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Form<TEntity, TData, TState> SetMode(FormMode value)
-        {
-            this.Mode = value;
-            return this;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public override IEnumerable<string> GetTranslatables()
         {
             return base.GetTranslatables()
                 .Concat(Fields.Select(f => f.PropertyName))
                 .Concat(Commands
-                    .Where(c => c != null) //TODO: correctly handle nested form field forms (make sure InstantianeDeclaredMembers is called)
+                    //.Where(c => c != null) //TODO: correctly handle nested form field forms (make sure InstantianeDeclaredMembers is called)
                     .Select(c => c.Text)); 
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
-        public bool IsInline { get; set; }
-        [DataMember]
         public string EntityName { get; set; }
-        [DataMember]
-        public string SearchQuery { get; set; }
         [DataMember]
         public object EntityId { get; set; }
         [DataMember]
-        public FormMode Mode { get; set; }
-        [DataMember]
         public List<FormField> Fields { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        //public UidlNotification<string> Search { get; set; }
-        //public UidlNotification<TEntity> Saving { get; set; }
-        //public UidlNotification<TEntity> Rejecting { get; set; }
+        [DataMember]
+        public bool UsePascalCase { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -313,6 +294,8 @@ namespace NWheels.UI.Toolbox
             }
 
             this.OrderIndex = GetOrderIndex();
+
+            builder.BuildManuallyInstantiatedNodes(NestedWidget);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -483,6 +466,7 @@ namespace NWheels.UI.Toolbox
     
     public interface IUidlForm
     {
+        bool UsePascalCase { get; set; }
         List<UidlCommand> Commands { get; }
     }
 
@@ -495,16 +479,6 @@ namespace NWheels.UI.Toolbox
         public string MetaType { get; set; }
         [DataMember]
         public WidgetUidlNode Widget { get; set; }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public enum FormMode
-    {
-        CrudWidget,
-        StandaloneView,
-        StandaloneCreate,
-        StandaloneUpdate
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

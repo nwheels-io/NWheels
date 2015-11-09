@@ -481,12 +481,14 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 location.hash = data.screenPart.qualifiedName;
                 $timeout(function() {
                     scope.$broadcast(data.screenPart.qualifiedName + ':NavigatedHere', data.input);
+                    $rootScope.$broadcast(scope.uidl.qualifiedName + ':ScreenPartLoaded', scope.currentScreenPart);
                 });
             });
             if (scope.uidl.initalScreenPartQualifiedName) {
                 scope.currentScreenPart = m_index.screenParts[scope.uidl.initalScreenPartQualifiedName];
                 $timeout(function() {
                     scope.$broadcast(scope.uidl.initalScreenPartQualifiedName + ':NavigatedHere');
+                    $rootScope.$broadcast(scope.uidl.qualifiedName + ':ScreenPartLoaded', scope.currentScreenPart);
                 });
             }
         },
@@ -506,14 +508,18 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                         }
                     }
                     implementMenuItems(item.subItems);
-					
-
                 }
             }
 
             implementMenuItems(scope.uidl.mainMenu.items);
-			if(window.appInit)
-						window.appInit();
+
+            if (window.appInit) {
+			    window.appInit();
+            }
+
+            scope.$on(scope.uidl.qualifiedName + ':MainContent:ScreenPartLoaded', function (event, data) {
+                scope.mainContentScreenPart = data;
+            });
         },
     };
 
@@ -556,7 +562,6 @@ function ($q, $http, $rootScope, $timeout, commandService) {
     m_controllerImplementations['Crud'] = {
         implement: function (scope) {
             var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
-
             scope.metaType = metaType;
             
             if (!scope.uidl.displayColumns || !scope.uidl.displayColumns.length) {
@@ -577,9 +582,15 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 if (scope.uidl.mode !== 'Inline') {
                     scope.entityService.queryEntity(scope.uidl.entityName).then(function (data) {
                         scope.resultSet = data.ResultSet;
+                        $timeout(function() {
+                            scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
+                        });
                     });
                 } else {
                     scope.resultSet = scope.parentModel.entity[scope.parentUidl.propertyName];
+                    $timeout(function() {
+                        scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
+                    });
                 }
             };
 
@@ -627,13 +638,13 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.refresh();
             };
 
-            scope.$on(uidl.qualifiedName + ':Save:Executing', function (event) {
+            scope.$on(scope.uidl.qualifiedName + ':Save:Executing', function (event) {
                 scope.saveChanges(scope.model.entity);
             });
-            scope.$on(uidl.qualifiedName + ':Cancel:Executing', function (event) {
+            scope.$on(scope.uidl.qualifiedName + ':Cancel:Executing', function (event) {
                 scope.rejectChanges(scope.model.entity);
             });
-            scope.$on(uidl.qualifiedName + ':Delete:Executing', function (event) {
+            scope.$on(scope.uidl.qualifiedName + ':Delete:Executing', function (event) {
                 scope.deleteEntity(scope.model.entity);
             });
 
@@ -649,7 +660,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
             scope.metaType = metaType;
 
-            var dataQuery = scope.uidl.dataQuery;
+            //var dataQuery = scope.uidl.dataQuery;
 
             if (!scope.uidl.displayColumns || !scope.uidl.displayColumns.length) {
                 scope.uidl.displayColumns = scope.uidl.defaultDisplayColumns;
@@ -659,27 +670,27 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 return metaType.properties[toCamelCase(name)];
             }).ToArray();
 
-            scope.refresh = function () {
-                scope.queryEntities();
-            };
+            //scope.refresh = function () {
+            //    scope.queryEntities();
+            //};
 
-            scope.queryEntities = function () {
-                scope.resultSet = null;
-                if (scope.uidl.mode !== 'Inline') {
-                    scope.entityService.queryEntity(scope.uidl.entityName + dataQuery).then(function (data) {
-                        scope.resultSet = data.ResultSet;
-                    });
-                } else {
-                    scope.resultSet = scope.parentModel.entity[scope.parentUidl.propertyName];
-                }
-            };
+            //scope.queryEntities = function () {
+            //    scope.resultSet = null;
+            //    if (scope.uidl.mode !== 'Inline') {
+            //        scope.entityService.queryEntity(scope.uidl.entityName + dataQuery).then(function (data) {
+            //            scope.resultSet = data.ResultSet;
+            //        });
+            //    } else {
+            //        scope.resultSet = scope.parentModel.entity[scope.parentUidl.propertyName];
+            //    }
+            //};
 
             //scope.$on(scope.uidl.qualifiedName + ':Search:Executing', function (event) {
             //    dataQuery = "";
             //    scope.queryEntities();
             //});
 
-            scope.queryEntities();
+            //scope.queryEntities();
         }
     };
 
@@ -694,13 +705,13 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.sectionFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Section'").ToArray();
             scope.tabSetFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Tab'").ToArray();
 
-            scope.saveChanges = function () {
-                scope.$emit(scope.uidl.qualifiedName + ':Saving');
-            };
+            //scope.saveChanges = function () {
+            //    scope.$emit(scope.uidl.qualifiedName + ':Saving');
+            //};
 
-            scope.rejectChanges = function () {
-                scope.$emit(scope.uidl.qualifiedName + ':Rejecting');
-            };
+            //scope.rejectChanges = function () {
+            //    scope.$emit(scope.uidl.qualifiedName + ':Rejecting');
+            //};
 			
 			if (scope.uidl.mode === 'StandaloneCreate') {
 				scope.parentModel = {
@@ -708,14 +719,14 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 				};
 			}
 			
-			scope.executeSearch = function () {
-				scope.entityService.queryEntity(scope.uidl.entityName, function(query) {
-					// build query
-					return query;
-				}).then(function (data) {
-					scope.$emit(scope.uidl.qualifiedName + ':SearchResultsReceived', data);	
-                });
-			};
+			//scope.executeSearch = function () {
+			//	scope.entityService.queryEntity(scope.uidl.entityName, function(query) {
+			//		// build query
+			//		return query;
+			//	}).then(function (data) {
+			//		scope.$emit(scope.uidl.qualifiedName + ':SearchResultsReceived', data);	
+            //    });
+			//};
 
             scope.selectTab = function(index) {
                 scope.tabSetIndex = index;
@@ -795,8 +806,9 @@ function ($http, $scope, $rootScope, uidlService, entityService, commandService)
 		$rootScope.currentScreen = uidlService.getCurrentScreen();
 		$rootScope.currentLocale = uidlService.getCurrentLocale();
 		$scope.pageTitle = $scope.translate($scope.app.text) + ' - ' + $scope.translate($scope.currentScreen.text);
+        $scope.uidl = $rootScope.app;
 
-		//commandService.startPollingMessages();
+        //commandService.startPollingMessages();
     });
 
     /*
