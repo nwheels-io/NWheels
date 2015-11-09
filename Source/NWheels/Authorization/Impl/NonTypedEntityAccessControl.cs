@@ -107,36 +107,21 @@ namespace NWheels.Authorization.Impl
 
         public virtual bool? CanRetrieve(IAccessControlContext context, object entity)
         {
-            if ( !CanRetrieve(context).GetValueOrDefault(false) )
-            {
-                return false;
-            }
-
-            return null;
+            return CanRetrieve(context);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public virtual bool? CanInsert(IAccessControlContext context, object entity)
         {
-            if ( !CanInsert(context).GetValueOrDefault(false) )
-            {
-                return false;
-            }
-
-            return null;
+            return CanInsert(context);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public virtual bool? CanUpdate(IAccessControlContext context, object entity)
         {
-            if ( !CanUpdate(context).GetValueOrDefault(false) )
-            {
-                return false;
-            }
-
-            return null;
+            return CanUpdate(context);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
