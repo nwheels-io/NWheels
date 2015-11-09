@@ -12,7 +12,7 @@ using NWheels.UI.Uidl;
 namespace NWheels.UI.Toolbox
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-    public class Chart : WidgetBase<Chart, Empty.Data, Chart.IChartState>
+    public class Chart : WidgetBase<Chart, Empty.Data, Empty.State>
     {
         public Chart(string idName, ControlledUidlNode parent)
             : base(idName, parent)
@@ -21,30 +21,12 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [DataMember]
-        public string CurrentValueDataProperty { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public UidlNotification RequestingData { get; set; }
         public UidlNotification<ChartData> DataReceived { get; set; }
-        public UidlNotification<ChartData> DataReady { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<Chart, Empty.Data, IChartState> presenter)
+        protected override void DescribePresenter(PresenterBuilder<Chart, Empty.Data, Empty.State> presenter)
         {
-            presenter.On(DataReceived)
-                .AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Data))
-                .Then(b => b.Broadcast<ChartData>(DataReady).WithPayload(m => m.Input).TunnelDown());
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [ViewModelContract]
-        public interface IChartState
-        {
-            ChartData Data { get; set; }
         }
     }
 

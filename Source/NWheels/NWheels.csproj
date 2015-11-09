@@ -300,6 +300,7 @@
     <Compile Include="UI\ApplicationEntityService.cs" />
     <Compile Include="UI\IFrameworkUIConfig.cs" />
     <Compile Include="UI\ContentRootAttribute.cs" />
+    <Compile Include="UI\Toolbox\ChartReport.cs" />
     <Compile Include="UI\Toolbox\Report.cs" />
     <Compile Include="UI\Toolbox\ReportSelector.cs" />
     <Compile Include="UI\Toolbox\WidgetScreenPart.cs" />

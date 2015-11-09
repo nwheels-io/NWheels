@@ -51,7 +51,7 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public DataGrid<TEntity> Grid { get; set; }
         [DataMember, ManuallyAssigned]
-        public Form<TEntity, Empty.Data, ICrudFormState<TEntity>> Form { get; set; }
+        public Form<TEntity> Form { get; set; }
         [DataMember, ManuallyAssigned]
         public TypeSelector FormTypeSelector { get; set; }
 
@@ -90,7 +90,7 @@ namespace NWheels.UI.Toolbox
         {
             var formOrTypeSelector = UidlUtility.CreateFormOrTypeSelector(MetaType, "Form", parent: this, isInline: false);
 
-            this.Form = formOrTypeSelector as Form<TEntity, Empty.Data, ICrudFormState<TEntity>>;
+            this.Form = formOrTypeSelector as Form<TEntity>;
             this.FormTypeSelector = formOrTypeSelector as TypeSelector;
         }
 

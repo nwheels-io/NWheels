@@ -30,10 +30,7 @@ namespace NWheels.UI.Uidl
 
         public static WidgetUidlNode CreateCrudForm(ITypeMetadata metaType, string idName, ControlledUidlNode parent, bool isInline)
         {
-            var closedType = typeof(Form<,,>).MakeGenericType(
-                metaType.ContractType,
-                typeof(Empty.Data),
-                typeof(ICrudFormState<>).MakeGenericType(metaType.ContractType));
+            var closedType = typeof(Form<>).MakeGenericType(metaType.ContractType);
             return (WidgetUidlNode)Activator.CreateInstance(closedType, idName, parent, isInline);
         }
     }

@@ -182,7 +182,7 @@ namespace NWheels.UI
                     property.SetValue(parent, instance);
                     instantiatedNodes.Add(instance);
                     TryApplyWidgetTemplate(instance, property);
-                    //parent.OnDeclaredMemberNodeCreated(property, instance);
+                    parent.OnDeclaredMemberNodeCreated(property, instance);
                 }
             }
 

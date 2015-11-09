@@ -11,24 +11,24 @@ using NWheels.Processing;
 namespace NWheels.UI.Toolbox
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-    public class Report<TCriteria, TScript, TResultRow> : WidgetBase<Report<TCriteria, TScript, TResultRow>, Empty.Data, Report<TCriteria, TScript, TResultRow>.IReportState>
+    public class ChartReport<TCriteria, TScript> : WidgetBase<ChartReport<TCriteria, TScript>, Empty.Data, ChartReport<TCriteria, TScript>.IReportState>
         where TScript : ITransactionScript
         where TCriteria : class
     {
-        private Expression<Func<TScript, Empty.Data, IReportState, Empty.Payload, TResultRow[]>> _onExecuteCall;
+        private Expression<Func<TScript, Empty.Data, IReportState, Empty.Payload, ChartData>> _onExecuteCall;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Report(string idName, ControlledUidlNode parent)
+        public ChartReport(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
-            base.WidgetType = "Report";
-            base.TemplateName = "Report";
+            base.WidgetType = "ChartReport";
+            base.TemplateName = "ChartReport";
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void OnExecute(Expression<Func<TScript, Empty.Data, IReportState, Empty.Payload, TResultRow[]>> call)
+        public void OnExecute(Expression<Func<TScript, Empty.Data, IReportState, Empty.Payload, ChartData>> call)
         {
             _onExecuteCall = call;
         }
@@ -38,7 +38,7 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public Form<TCriteria> CriteriaForm { get; set; }
         [DataMember]
-        public DataGrid<TResultRow> ResultTable { get; set; }
+        public Chart ResultChart { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -46,14 +46,14 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<Report<TCriteria, TScript, TResultRow>, Empty.Data, IReportState> presenter)
+        protected override void DescribePresenter(PresenterBuilder<ChartReport<TCriteria, TScript>, Empty.Data, IReportState> presenter)
         {
             CriteriaForm.Commands.Add(ShowReport);
 
             presenter.On(ShowReport)
                 .InvokeTransactionScript<TScript>()
                 .WaitForReply(_onExecuteCall)
-                .Then(b => b.Broadcast(ResultTable.DataReceived).WithPayload(m => m.Input).TunnelDown());
+                .Then(b => b.Broadcast(ResultChart.DataReceived).WithPayload(m => m.Input).TunnelDown());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
-            return base.GetNestedWidgets().Concat(new WidgetUidlNode[] { CriteriaForm, ResultTable });
+            return base.GetNestedWidgets().Concat(new WidgetUidlNode[] { CriteriaForm, ResultChart });
         }
 
         #endregion

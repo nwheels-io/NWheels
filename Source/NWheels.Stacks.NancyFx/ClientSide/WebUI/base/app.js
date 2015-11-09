@@ -527,6 +527,12 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
     m_controllerImplementations['Report'] = {
         implement: function (scope) {
+            scope.model.state.criteria = {};
+
+            $timeout(function() {
+                scope.$broadcast(scope.uidl.qualifiedName + ':CriteriaForm:ModelSetter', scope.model.state.criteria);
+            });
+
             //var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
 
             //scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
@@ -539,11 +545,23 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             //    });
             //};
 
-			//scope.getPropertyRelatedMetaType = function(propertyName) {
-			//    return scope.uidlService.getRelatedMetaType(scope.uidl.entityName, propertyName);
-			//};
+            //scope.getPropertyRelatedMetaType = function(propertyName) {
+            //    return scope.uidlService.getRelatedMetaType(scope.uidl.entityName, propertyName);
+            //};
 
             //scope.queryEntities();
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_controllerImplementations['ChartReport'] = {
+        implement: function (scope) {
+            scope.model.state.criteria = {};
+
+            $timeout(function () {
+                scope.$broadcast(scope.uidl.qualifiedName + ':CriteriaForm:ModelSetter', scope.model.state.criteria);
+            });
         }
     };
 

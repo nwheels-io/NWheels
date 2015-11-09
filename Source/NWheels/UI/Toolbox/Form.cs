@@ -14,9 +14,8 @@ using NWheels.UI.Uidl;
 namespace NWheels.UI.Toolbox
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "Form")]
-    public class Form<TEntity, TData, TState> : WidgetBase<Form<TEntity, TData, TState>, TData, TState>, IUidlForm
-        where TData : class
-        where TState : class
+    public class Form<TEntity> : WidgetBase<Form<TEntity>, Form<TEntity>.IFormData, Empty.State>, IUidlForm
+        where TEntity : class
     {
         private readonly List<string> _visibleFields;
         private readonly List<string> _hiddenFields;
@@ -44,7 +43,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Form<TEntity, TData, TState> Field(
+        public Form<TEntity> Field(
             Expression<Func<TEntity, object>> propertySelector,
             FormFieldType type = FormFieldType.Default,
             FormFieldModifiers modifiers = FormFieldModifiers.None)
@@ -60,7 +59,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Form<TEntity, TData, TState> ShowFields(params Expression<Func<TEntity, object>>[] propertySelectors)
+        public Form<TEntity> ShowFields(params Expression<Func<TEntity, object>>[] propertySelectors)
         {
             _visibleFields.AddRange(propertySelectors.Select(e => e.GetPropertyInfo().Name));
             return this;
@@ -68,7 +67,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Form<TEntity, TData, TState> HideFields(params Expression<Func<TEntity, object>>[] propertySelectors)
+        public Form<TEntity> HideFields(params Expression<Func<TEntity, object>>[] propertySelectors)
         {
             _hiddenFields.AddRange(propertySelectors.Select(e => e.GetPropertyInfo().Name));
             return this;
@@ -76,11 +75,11 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Form<TEntity, TData, TState> Lookup<TLookupEntity>(
+        public Form<TEntity> Lookup<TLookupEntity>(
             Expression<Func<TEntity, object>> fieldSelector,
             Expression<Func<TLookupEntity, object>> lookupValueProperty,
             Expression<Func<TLookupEntity, object>> lookupDisplayProperty,
-            Expression<Func<ViewModel<TData, TState, Empty.Input>, bool>> filterExpression = null,
+            Expression<Func<ViewModel<IFormData, Empty.State, Empty.Input>, bool>> filterExpression = null,
             bool applyDistinctToResults = true)
         {
             var field = FindOrAddField(fieldSelector);
@@ -122,8 +121,13 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<Form<TEntity, TData, TState>, TData, TState> presenter)
+        public UidlNotification<TEntity> ModelSetter { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void DescribePresenter(PresenterBuilder<Form<TEntity>, IFormData, Empty.State> presenter)
         {
+            presenter.On(ModelSetter).AlterModel((alt => alt.Copy(vm => vm.Input).To(vm => vm.Data.Entity)));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -199,23 +203,12 @@ namespace NWheels.UI.Toolbox
 
             return field;
         }
-    }
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "Form")]
-    public class Form<TEntity> : Form<TEntity, Empty.Data, Empty.State>
-    {
-        public Form(string idName, ControlledUidlNode parent)
-            : base(idName, parent)
-        {
-        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Form(string idName, ControlledUidlNode parent, bool isNested = false)
-            : base(idName, parent, isNested)
+        public interface IFormData
         {
+            TEntity Entity { get; set; }
         }
     }
 
