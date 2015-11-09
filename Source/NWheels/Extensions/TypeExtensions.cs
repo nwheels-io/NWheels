@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Hapil;
 using NWheels.Configuration;
 using NWheels.Entities;
+using NWheels.UI;
 
 namespace NWheels.Extensions
 {
@@ -128,6 +129,13 @@ namespace NWheels.Extensions
         public static bool IsEntityPartContract(this Type contract)
         {
             return (contract.IsInterface && EntityPartContractAttribute.IsEntityPartContract(contract));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool IsViewModelContract(this Type contract)
+        {
+            return (contract.IsInterface && contract.HasAttribute<ViewModelContractAttribute>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -11,6 +11,7 @@ using NWheels.Entities.Core;
 using NWheels.Globalization;
 using NWheels.Hosting;
 using NWheels.UI;
+using NWheels.UI.Factories;
 using NWheels.UI.Uidl;
 using NWheels.Utilities;
 
@@ -55,6 +56,7 @@ namespace NWheels.Stacks.AspNet
             _entityService = new ApplicationEntityService(
                 components.Resolve<IFramework>(),
                 components.Resolve<ITypeMetadataCache>(),
+                components.Resolve<IViewModelObjectFactory>(),
                 components.Resolve<IDomainContextLogger>(),
                 _application.RequiredDomainContexts);
 

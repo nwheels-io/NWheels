@@ -572,7 +572,25 @@ HEAD, JS/CSS LINKS
             </div>
         </div>
     </script>
-    
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - POINT CHART
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="uidl-element-template/PointChart">   
+        <table ng-if="model.state.data" border="1" style="margin-top: 10px; background: white" cellpadding="3" cellspacing="1">
+            <tr>
+                <td>&nbsp;</td>
+                <td>{{model.state.data.series[0].label}}</td>
+                <td>{{model.state.data.series[1].label}}</td>
+            </tr>
+            <tr ng-repeat="label in model.state.data.labels track by $index">
+                <td>{{label}}</td>
+                <td>{{model.state.data.series[0].values[$index]}}</td>
+                <td>{{model.state.data.series[1].values[$index]}}</td>
+            </tr>
+        </table>
+    </script>
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - TYPE SELECTOR
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

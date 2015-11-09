@@ -74,6 +74,7 @@ namespace NWheels.DataObjects.Core
         public bool IsAbstract { get; set; }
         public bool IsEntity { get; set; }
         public bool IsEntityPart { get; set; }
+        public bool IsViewModel { get; set; }
         public string DefaultDisplayFormat { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

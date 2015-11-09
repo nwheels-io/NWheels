@@ -20,6 +20,7 @@ namespace NWheels.TypeModel
         Year = 0x80,
         HourMinuteSecond = Hour | Minute | Second,
         HourMinute = Hour | Minute,
-        MinuteSecond = Minute | Second
+        MinuteSecond = Minute | Second,
+        YearMonthDay = Year | Month | Day
     }
 }

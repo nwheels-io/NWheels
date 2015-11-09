@@ -572,6 +572,9 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 			$timeout(function() {
 				scope.$emit(scope.uidl.qualifiedName + ':RequestingData');
 			});
+			scope.$on(scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
+			    scope.model.state.data = data;
+			});
         }
     };
 
@@ -995,7 +998,7 @@ theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uid
                 $scope.lookupMetaType = metaType;
                 $scope.lookupValueProperty = ($scope.uidl.lookupValueProperty ? $scope.uidl.lookupValueProperty : metaType.primaryKey.propertyNames[0]);
                 $scope.lookupTextProperty = ($scope.uidl.lookupDisplayProperty ? $scope.uidl.lookupDisplayProperty : metaType.defaultDisplayPropertyNames[0]);
-                $scope.lookupForeignKeyProperty = $scope.uidl.propertyName + '_FK';
+                $scope.lookupForeignKeyProperty = $scope.uidl.propertyName;// + '_FK';
              
                 $scope.entityService.queryEntity($scope.uidl.lookupEntityName).then(function (data) {
                     $scope.lookupResultSet = data.ResultSet;

@@ -17,6 +17,7 @@ using System.Linq.Expressions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NWheels.Entities.Factories;
+using NWheels.UI.Factories;
 
 namespace NWheels.UI
 {
@@ -24,6 +25,7 @@ namespace NWheels.UI
     {
         private readonly IFramework _framework;
         private readonly ITypeMetadataCache _metadataCache;
+        private readonly IViewModelObjectFactory _viewModelFactory;
         private readonly IDomainContextLogger _domainContextLogger;
         private readonly Dictionary<string, EntityHandler> _handlerByEntityName;
         private readonly JsonSerializerSettings _serializerSettings;
@@ -32,12 +34,14 @@ namespace NWheels.UI
 
         public ApplicationEntityService(
             IFramework framework, 
-            ITypeMetadataCache metadataCache, 
+            ITypeMetadataCache metadataCache,
+            IViewModelObjectFactory viewModelFactory,
             IDomainContextLogger domainContextLogger, 
             IEnumerable<Type> domainContextTypes)
         {
             _framework = framework;
             _metadataCache = metadataCache;
+            _viewModelFactory = viewModelFactory;
             _domainContextLogger = domainContextLogger;
             _handlerByEntityName = new Dictionary<string, EntityHandler>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -162,6 +166,23 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public JsonSerializerSettings CreateSerializerSettings()
+        {
+            var settings = new JsonSerializerSettings() {
+                ContractResolver = new DomainObjectContractResolver(_metadataCache, this),
+                DateFormatString = "yyyy-MM-dd HH:mm:ss",
+                MaxDepth = 10,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+
+            settings.Converters.Add(new DomainObjectConverter(this));
+            settings.Converters.Add(new ViewModelObjectConverter(this, _viewModelFactory));
+
+            return settings;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void RegisterEntities(IEnumerable<Type> domainContextTypes)
         {
             foreach ( var contextType in domainContextTypes )
@@ -191,27 +212,11 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private JsonSerializerSettings CreateSerializerSettings()
-        {
-            var settings = new JsonSerializerSettings() {
-                ContractResolver = new DomainObjectContractResolver(_metadataCache, this),
-                DateFormatString = "yyyy-MM-dd HH:mm:ss",
-                MaxDepth = 10,
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            };
-
-            settings.Converters.Add(new DomainObjectConverter(this));
-
-            return settings;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         private static Type[] GetContractTypes(Type type)
         {
             var contracts = new List<Type>();  
 
-            if ( type.IsEntityContract() || type.IsEntityPartContract() )
+            if ( type.IsEntityContract() || type.IsEntityPartContract() || type.IsViewModelContract() )
             {
                 contracts.Add(type);
             }
@@ -934,9 +939,17 @@ namespace NWheels.UI
 
             private bool ShouldReplacePropertyWithForeignKey(IPropertyMetadata metaProperty)
             {
+                if ( metaProperty.Kind != PropertyKind.Relation || !metaProperty.Relation.RelatedPartyType.IsEntity )
+                {
+                    return false;
+                }
+
+                if ( metaProperty.DeclaringContract.IsViewModel )
+                {
+                    return true;
+                }
+
                 return (
-                    metaProperty.Kind == PropertyKind.Relation &&
-                    metaProperty.Relation.RelatedPartyType.IsEntity &&
                     metaProperty.RelationalMapping != null && 
                     !metaProperty.RelationalMapping.EmbeddedInParent.GetValueOrDefault(false));
             }
@@ -1106,6 +1119,15 @@ namespace NWheels.UI
                     return null;
                 }
 
+                if ( reader.TokenType != JsonToken.StartObject )
+                {
+                    var idValue = reader.Value;
+                    var metaType = _ownerService._metadataCache.GetTypeMetadata(objectType);
+                    var handler2 = _ownerService._handlerByEntityName[metaType.QualifiedName];
+                    var entity = handler2.GetById(idValue.ToString());
+                    return entity;
+                }
+
                 JObject jo = JObject.Load(reader);
 
                 var typeName = jo["$type"].Value<string>();
@@ -1132,6 +1154,84 @@ namespace NWheels.UI
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override bool CanRead 
+            {
+                get
+                {
+                    return true;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanWrite
+            {
+                get
+                {
+                    return false;
+                }
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ViewModelObjectConverter : JsonConverter
+        {
+            private readonly ApplicationEntityService _ownerService;
+            private readonly IViewModelObjectFactory _viewModelFactory;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ViewModelObjectConverter(ApplicationEntityService ownerService, IViewModelObjectFactory viewModelFactory)
+            {
+                _ownerService = ownerService;
+                _viewModelFactory = viewModelFactory;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of JsonConverter
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                if ( reader.TokenType == JsonToken.Null )
+                {
+                    return null;
+                }
+
+                var target = _viewModelFactory.NewEntity(objectType);
+
+                JObject jo = JObject.Load(reader);
+                JsonReader jObjectReader = jo.CreateReader();
+                jObjectReader.Culture = reader.Culture;
+                jObjectReader.DateParseHandling = reader.DateParseHandling;
+                jObjectReader.DateTimeZoneHandling = reader.DateTimeZoneHandling;
+                jObjectReader.FloatParseHandling = reader.FloatParseHandling;
+
+                var nestedSerializer = JsonSerializer.Create(_ownerService._serializerSettings);
+                nestedSerializer.Populate(jObjectReader, target);
+
+                return target;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanConvert(Type objectType)
+            {
+                return objectType.HasAttribute<ViewModelContractAttribute>();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanRead
             {
                 get
                 {

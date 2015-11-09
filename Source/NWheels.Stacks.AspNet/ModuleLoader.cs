@@ -10,6 +10,7 @@ using NWheels.Endpoints;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.UI;
+using NWheels.UI.Factories;
 
 namespace NWheels.Stacks.AspNet
 {
@@ -25,6 +26,8 @@ namespace NWheels.Stacks.AspNet
             builder.NWheelsFeatures().Logging().RegisterLogger<IWebApplicationLogger>();
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<ControllerInitializer>().As<ControllerInitializer>();
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkUIConfig>();
+
+            builder.RegisterType<ViewModelObjectFactory>().As<ViewModelObjectFactory, IViewModelObjectFactory>().SingleInstance();
 
             //builder.RegisterAdapter<HttpApiEndpointRegistration, IHttpController>((ctx, endpoint) => 
             //    ctx.Resolve<WebApiControllerFactory>().CreateControllerInstance(ctx.Resolve(endpoint.Contract))

@@ -171,7 +171,15 @@ namespace NWheels.DataObjects
                 }
             }
 
-            public class DateAttribute : DataTypeAttribute { public DateAttribute() : base(typeof(SemanticType.DefaultOf<DateTime>)) { } }
+            public class DateAttribute : DataTypeAttribute
+            {
+                public DateAttribute(TimeUnits units = TimeUnits.HourMinuteSecond)
+                    : base(typeof(SemanticType.DefaultOf<DateTime>))
+                {
+                    
+                }
+            }
+
             public class TimeAttribute : DataTypeAttribute { public TimeAttribute() : base(typeof(SemanticType.DefaultOf<TimeSpan>)) { } }
             
             public class DurationAttribute : DataTypeAttribute {

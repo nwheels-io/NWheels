@@ -22,6 +22,7 @@ namespace NWheels.DataObjects
         IEnumerable<KeyValuePair<Type, Type>> GetAllImplementations();
         bool IsEntity { get; }
         bool IsEntityPart { get; }
+        bool IsViewModel { get; }
         bool IsAbstract { get; }
         ITypeMetadata BaseType { get; }
         IReadOnlyList<ITypeMetadata> DerivedTypes { get; }

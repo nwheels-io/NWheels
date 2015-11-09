@@ -11,6 +11,7 @@ using Nancy;
 using Nancy.Json;
 using Nancy.ModelBinding;
 using Nancy.Responses;
+using Newtonsoft.Json;
 using NWheels.Authorization;
 using NWheels.Endpoints.Core;
 using NWheels.Entities;
@@ -274,10 +275,11 @@ namespace NWheels.Stacks.NancyFx
         {
             var scriptEntry = _transactionScriptByName[contractName];
             var call = _callFactory.NewMessageCallObject(scriptEntry.ExecuteMethodInfo);
-            
-            var commandValueBinder = (CommandValueBinder)Activator.CreateInstance(typeof(CommandValueBinder<>).MakeGenericType(call.GetType()));
-            commandValueBinder.BindCommandValues(this, call);
-            
+
+            var jsonString = new StreamReader(Request.Body).ReadToEnd();
+            var serializerSettings = _context.EntityService.CreateSerializerSettings();
+            JsonConvert.PopulateObject(jsonString, call, serializerSettings);
+
             return new TransactionScriptCommandMessage(_framework, _sessionManager.CurrentSession, scriptEntry.TransactionScriptType, call, synchronous);
         }
 
@@ -389,26 +391,27 @@ namespace NWheels.Stacks.NancyFx
         //    return ("Content/Skin.Default/" + viewName + ".html");
         //}
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private abstract class CommandValueBinder
-        {
-            public abstract void BindCommandValues(INancyModule module, IMethodCallObject callObject);
-        }
+        //private abstract class CommandValueBinder
+        //{
+        //    public abstract void BindCommandValues(INancyModule module, IMethodCallObject callObject);
+        //}
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class CommandValueBinder<TCallObject> : CommandValueBinder
-        {
-            #region Overrides of CommandValueBinder
+        //private class CommandValueBinder<TCallObject> : CommandValueBinder
+        //{
+        //    #region Overrides of CommandValueBinder
 
-            public override void BindCommandValues(INancyModule module, IMethodCallObject callObject)
-            {
-                module.BindTo<TCallObject>((TCallObject)callObject, new BindingConfig { BodyOnly = true });
-            }
+        //    public override void BindCommandValues(INancyModule module, IMethodCallObject callObject)
+        //    {
+        //        module.Request.Body
+        //        module.BindTo<TCallObject>((TCallObject)callObject, new BindingConfig { BodyOnly = true });
+        //    }
 
-            #endregion
-        }
+        //    #endregion
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
