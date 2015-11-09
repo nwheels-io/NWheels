@@ -376,7 +376,7 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Crud">
         <div class="row">
-            <div class="col-lg-12">
+            <div ng-hide="uiShowCrudForm" class="col-lg-12">
                 <div class="ibox-title">
                     <button class="btn btn-primary btn-circle btn-lg btn-outline" type="button" ng-click="newEntity();">
                         <i class="fa fa-plus"></i>
@@ -384,30 +384,22 @@ HEAD, JS/CSS LINKS
                     <button class="btn btn-success btn-circle btn-lg btn-outline" type="button" ng-click="refresh()">
                         <i class="fa fa-refresh"></i>
                     </button>
-
-                    <!--button type="button" class="btn btn-w-m btn-primary" ng-click="newEntity()" data-toggle="modal" data-target="#modal_{{::uidl.elementName}}">Add</!--button>
-                    <button type="button" class="btn btn-w-m btn-primary" ng-click="refresh()">Refresh</button-->
                 </div>
                 <div class="ibox-content">
                     <uidl-widget uidl="uidl.grid" parent-model="model"></uidl-widget>
-                    <div id="modal_{{::uidl.elementName}}" class="modal fade">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-body" ng-if="uiShowCrudForm">
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <uidl-widget ng-if="uidl.form" uidl="uidl.form" parent-model="model"></uidl-widget>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <uidl-widget ng-if="uidl.formTypeSelector" uidl="uidl.formTypeSelector" parent-model="model"></uidl-widget>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+            </div>
+            
+            <div ng-show="uiShowCrudForm" class="col-lg-12">
+                <div class="ibox-title">
+                    <h2>
+                        <i class="fa text-muted" ng-class="{'fa-asterisk':model.isNew, 'fa-edit':!model.isNew}"></i>
+                        &nbsp;{{translate(uidl.entityName)}}
+                    </h2>
+                </div>
+                <div class="ibox-content">
+                    <uidl-widget ng-if="uidl.form" uidl="uidl.form"></uidl-widget>
+                    <uidl-widget ng-if="uidl.formTypeSelector" uidl="uidl.formTypeSelector" parent-model="model"></uidl-widget>
                 </div>
             </div>
         </div>
@@ -459,11 +451,8 @@ HEAD, JS/CSS LINKS
                 colModel: columnsModel,
                 pager: "#rdtpager_" + $scope.uidl.elementName,
                 viewrecords: true,
-                //caption: $scope.uidl.entityName,
                 add: false,
                 edit: false,
-                //addtext: 'Add',
-                //edittext: 'Edit',
                 hidegrid: false
             });
             // Setup buttons
@@ -479,27 +468,57 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Form">
-        <div class="form-group" ng-repeat="field in plainFields">
-            <label class="control-label">{{translate(field.propertyName)}}</label>
-            <uidl-form-field uidl="field" entity="model.data.entity" />
-        </div>
-        <div ng-if="tabSetFields.length">
-            <div class="tabs-container">
+        <form class="form-horizontal">
+            <div class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields">
+                <label class="col-lg-2 control-label">{{::translate(field.propertyName)}}</label>
+                <div class="col-lg-4">
+                    <uidl-form-field uidl="field" entity="model.data.entity" />
+                    <!--span class="help-block m-b-none">Example block-level help text here.</span-->
+                </div>
+            </div>
+            <div ng-if="tabSetFields.length" class="tabs-container" style="margin-top:20px;">
                 <ul class="nav nav-tabs">
-                    <li ng-class="{active: $index == 0}" ng-repeat="field in tabSetFields"><a data-toggle="tab" href="#tab-{{ $index }}">{{translate(field.propertyName)}}</a></li>
+                    <li ng-class="{active: $index == tabSetIndex}" ng-repeat="field in tabSetFields"><a ng-click="selectTab($index)">{{translate(field.propertyName)}}</a></li>
                 </ul>
                 <div class="tab-content">
-                    <div ng-repeat="field in tabSetFields" id="tab-{{ $index }}" ng-class="{'tab-pane': true, active: $index == 0}">
-                        <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="parentModel"></uidl-widget>
+                    <div ng-repeat="field in tabSetFields" ng-class="{'tab-pane': true, active: $index == tabSetIndex}" ng-show="$index == tabSetIndex">
+                        <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="model.data.entity"></uidl-widget>
                     </div>
                 </div>
             </div>
-        </div>
-        <div ng-if="!uidl.isInline" class="layout">
-            <button ng-repeat="command in uidl.commands" type="button" class="btn btn-w-m btn-primary" ng-click="$emit(command.qualifiedName + ':Executing')">{{::translate(command.text)}}</button>
-        </div>
+            <div class="form-group">
+                <label class="col-lg-2 control-label"></label>
+                <div class="col-lg-4">
+                    <button ng-repeat="command in uidl.commands" type="button" class="btn btn-w-m btn-primary" ng-click="$emit(command.qualifiedName + ':Executing')">{{::translate(command.text)}}</button>
+                </div>
+            </div>
+        </form>
     </script>
     
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - FORM FIELD
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="uidl-element-template/FormField">
+        <div>
+            <!-- LABEL -->
+            <input ng-if="uidl.fieldType==='Label'" disabled="" class="form-control m-b" type="text" ng-model="entity[uidl.propertyName]">
+            <!-- CHECKBOX -->
+            <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'" class="onoffswitch">
+                <input type="checkbox" class="onoffswitch-checkbox" ng-model="entity[uidl.propertyName]" id="{{::uniqueFieldId}}">
+                <label class="onoffswitch-label" for="{{::uniqueFieldId}}" style="margin: 5px 0px 5px 0px;">
+                    <span class="onoffswitch-inner"></span>
+                    <span class="onoffswitch-switch"></span>
+                </label>
+            </div>
+            <!-- TEXT -->
+            <input ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='None'" class="form-control m-b" type="text" ng-model="entity[uidl.propertyName]"></input>
+            <!-- DROP DOWN -->
+            <select ng-if="uidl.fieldType==='Lookup'" class="form-control m-b" ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet" ng-model="entity[lookupForeignKeyProperty]">
+                <option value="">All</option>
+            </select>
+        </div>
+    </script>
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - CHAT
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -595,15 +614,15 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - TYPE SELECTOR
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/TypeSelector">
-        <div class="row">
-            <div class="form-group">
-                <label class="control-label">Type</label>
-                <select ng-options="s.typeName as s.text for s in uidl.selections" ng-model="selectedType" ng-change="selectedTypeChanged(selectedType)" class="form-control m-b"></select>
+        <form class="form-horizontal">
+            <div class="form-group" style="margin-top:20px; margin-bottom:0px;">
+                <label class="col-lg-2 control-label">Type</label>
+                <div class="col-lg-4">
+                    <select ng-options="s.typeName as s.text for s in uidl.selections" ng-model="selectedType" ng-change="selectedTypeChanged(selectedType)" class="form-control m-b"></select>
+                </div>
             </div>
-            <div ng-repeat="selection in uidl.selections" class="Layout">
-                <uidl-widget ng-if="selectedType==selection.typeName" uidl="selection.widget" parent-model="model"></uidl-widget>
-            </div>
-        </div>
+        </form>
+        <uidl-widget ng-repeat="selection in uidl.selections" ng-if="selectedType==selection.typeName" uidl="selection.widget" parent-model="model.entity"></uidl-widget>
     </script>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -703,19 +722,6 @@ HEAD, JS/CSS LINKS
         </div>
     </script>
     
-    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    UIDL WIDGET - FORM FIELD
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <script type="text/ng-template" id="uidl-element-template/FormField">
-        <div class="form-group">
-            <label class="control-label" ng-if="uidl.fieldType==='Label'">{{entity[uidl.propertyName]}}</label>
-            <input class="form-control m-b" ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'" type="checkbox" ng-model="entity[uidl.propertyName]"></input>
-            <input class="form-control m-b" ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='None'" type="text" ng-model="entity[uidl.propertyName]"></input>
-            <select class="form-control m-b"  ng-if="uidl.fieldType==='Lookup'" ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet" ng-model="entity[lookupForeignKeyProperty]">
-                <option value="">All</option>
-            </select>
-        </div>
-    </script>
     
     <!------ HARD CODED  -------->
     

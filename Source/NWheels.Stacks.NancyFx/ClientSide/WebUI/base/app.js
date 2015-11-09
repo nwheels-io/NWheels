@@ -532,24 +532,6 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             $timeout(function() {
                 scope.$broadcast(scope.uidl.qualifiedName + ':CriteriaForm:ModelSetter', scope.model.state.criteria);
             });
-
-            //var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
-
-            //scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
-            //    return metaType.properties[toCamelCase(name)];
-            //}).ToArray();
-
-            //scope.queryEntities = function () {
-            //    scope.entityService.queryEntity(scope.uidl.entityName).then(function (data) {
-            //        scope.resultSet = data.results;
-            //    });
-            //};
-
-            //scope.getPropertyRelatedMetaType = function(propertyName) {
-            //    return scope.uidlService.getRelatedMetaType(scope.uidl.entityName, propertyName);
-            //};
-
-            //scope.queryEntities();
         }
     };
 
@@ -618,14 +600,22 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.editEntity = function (entity) {
                 scope.model.entity = entity;
                 scope.model.isNew = false;
-                scope.uiShowCrudForm = true;
+                scope.$broadcast(scope.uidl.qualifiedName + ':Form:ModelSetter', scope.model.entity);
+
+                $timeout(function() {
+                    scope.uiShowCrudForm = true;
+                });
             };
 
             scope.newEntity = function () {
                 scope.entityService.newDomainObject(metaType.name).then(function(newObj) {
                     scope.model.entity = newObj;
                     scope.model.isNew = true;
-                    scope.uiShowCrudForm = true;
+                    scope.$broadcast(scope.uidl.qualifiedName + ':Form:ModelSetter', scope.model.entity);
+
+                    $timeout(function () {
+                        scope.uiShowCrudForm = true;
+                    });
                 });
             };
 
@@ -648,9 +638,11 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
             scope.saveChanges = function (entity) {
                 if (scope.uidl.mode !== 'Inline') {
-                    scope.entityService.storeEntity(entity);
-                } else if (scope.model.isNew === true) {
-                    scope.ResultSet.push(entity._backingStore);
+                    scope.entityService.storeEntity(entity).then(function() {
+                        scope.refresh();
+                    });
+                } else {
+                    scope.resultSet.push(entity._backingStore);
                 }
                 scope.refresh();
             };
@@ -658,6 +650,11 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.rejectChanges = function (entity) {
                 scope.refresh();
             };
+
+            scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
+                scope.resultSet = data;
+                scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
+            });
 
             scope.$on(scope.uidl.qualifiedName + ':Save:Executing', function (event) {
                 scope.saveChanges(scope.model.entity);
@@ -765,27 +762,45 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                         entity: newObj
                     };
 
+                    scope.selectedType = newObj['$type'];
+
                     if (scope.parentUidl) {
-                        scope.parentModel.entity[scope.parentUidl.propertyName] = newObj;
+                        // parent is FORM FIELD
+                        scope.parentModel[scope.parentUidl.propertyName] = newObj;
                     } else {
+                        // parent is CRUD
                         scope.parentModel.entity = newObj;
                     }
 
-                    scope.selectedType = newObj['$type'];
+                    scope.sendModelToSelectedWidget();
                 });
             };
 
-            if (scope.parentModel) {
-				scope.model = { 
-					entity: (
-						scope.parentUidl ? // parentUidl exists when nested in CrudForm
-						scope.parentModel.entity[scope.parentUidl.propertyName] :   // when nested in CrudForm widget
-						scope.parentModel.entity)                                   // when nested in Crud widget
-				};
-				scope.selectedType = (scope.model.entity ? scope.model.entity['$type'] : null);
+            scope.sendModelToSelectedWidget = function() {
+                var selection = Enumerable.From(scope.uidl.selections).Where("$.typeName=='" + scope.selectedType + "'").First();
+                var selectedWidgetQualifiedName = selection.widget.qualifiedName;
+                scope.$broadcast(selectedWidgetQualifiedName + ':ModelSetter', scope.model.entity);
+            };
+
+            scope.model = {
+                entity: null
+            };
+
+            if (scope.parentUidl) { 
+                // parent is FORM FIELD
+                scope.model.entity = scope.parentModel[scope.parentUidl.propertyName];
+            } else {
+                // parent is CRUD
+                scope.model.entity = scope.parentModel.entity;
+            }
+
+            if (scope.model.entity) {
+                scope.selectedType = scope.model.entity['$type'];
             } else if (scope.uidl.selections.length > 0) {
                 scope.selectedTypeChanged(scope.uidl.selections[0].typeName);
             }
+
+            scope.sendModelToSelectedWidget();
         }
     };
 
@@ -976,6 +991,8 @@ theApp.directive('uidlGridField', ['uidlService', 'entityService', function (uid
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uidlService, entityService) {
+    var uniqueFieldId = 1;
+
     return {
         scope: {
             uidl: '=',
@@ -984,8 +1001,7 @@ theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uid
         restrict: 'E',
         replace: true,
         link: function (scope, elem, attrs) {
-            //console.log('uidlWidget::link', scope.uidl.qualifiedName);
-            //uidlService.implementController(scope);
+            scope.uniqueFieldId = 'uidlFormField' + uniqueFieldId++;
         },
         templateUrl: 'uidl-element-template/FormField', 
         controller: function ($scope) {
@@ -993,20 +1009,27 @@ theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uid
             $scope.entityService = entityService;
             
             if ($scope.uidl.fieldType==='Lookup') {
-                var metaType = uidlService.getMetaType($scope.uidl.lookupEntityName);
+                if ($scope.uidl.lookupEntityName) {
+                    var metaType = uidlService.getMetaType($scope.uidl.lookupEntityName);
 
-                $scope.lookupMetaType = metaType;
-                $scope.lookupValueProperty = ($scope.uidl.lookupValueProperty ? $scope.uidl.lookupValueProperty : metaType.primaryKey.propertyNames[0]);
-                $scope.lookupTextProperty = ($scope.uidl.lookupDisplayProperty ? $scope.uidl.lookupDisplayProperty : metaType.defaultDisplayPropertyNames[0]);
-                $scope.lookupForeignKeyProperty = $scope.uidl.propertyName;// + '_FK';
-             
-                $scope.entityService.queryEntity($scope.uidl.lookupEntityName).then(function (data) {
-                    $scope.lookupResultSet = data.ResultSet;
-					
-					if ($scope.uidl.applyDistinctToLookup) {
-						$scope.lookupResultSet = Enumerable.From($scope.lookupResultSet).Distinct('$.' + $scope.lookupTextProperty).ToArray();
-					}
-                });
+                    $scope.lookupMetaType = metaType;
+                    $scope.lookupValueProperty = ($scope.uidl.lookupValueProperty ? $scope.uidl.lookupValueProperty : metaType.primaryKey.propertyNames[0]);
+                    $scope.lookupTextProperty = ($scope.uidl.lookupDisplayProperty ? $scope.uidl.lookupDisplayProperty : metaType.defaultDisplayPropertyNames[0]);
+                    $scope.lookupForeignKeyProperty = $scope.uidl.propertyName; // + '_FK';
+
+                    $scope.entityService.queryEntity($scope.uidl.lookupEntityName).then(function(data) {
+                        $scope.lookupResultSet = data.ResultSet;
+
+                        if ($scope.uidl.applyDistinctToLookup) {
+                            $scope.lookupResultSet = Enumerable.From($scope.lookupResultSet).Distinct('$.' + $scope.lookupTextProperty).ToArray();
+                        }
+                    });
+                } else if ($scope.uidl.standardValues) {
+                    $scope.lookupValueProperty = 'Key';
+                    $scope.lookupTextProperty = 'Value';
+                    $scope.lookupForeignKeyProperty = $scope.uidl.propertyName;
+                    $scope.lookupResultSet = Enumerable.From($scope.uidl.standardValues).ToArray();
+                }
             }
         }
     };
