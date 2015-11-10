@@ -756,13 +756,6 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                     Enumerable.From(scope.uidl.fields)
                         .Where("$.fieldType=='InlineGrid' || $.fieldType=='InlineForm'")
                         .ForEach(function (field) {
-                            if (!data[field.propertyName]) {
-                                if (field.fieldType == 'InlineGrid') {
-                                    data[field.propertyName] = [];
-                                } else {
-                                    data[field.propertyName] = {};
-                                }
-                            }
                             scope.$broadcast(field.nestedWidget.qualifiedName + ':ModelSetter', data[field.propertyName]);
                         });
                 });
@@ -782,15 +775,16 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
                     scope.selectedType = newObj['$type'];
 
-                    if (scope.parentUidl) {
-                        // parent is FORM FIELD
-                        scope.parentModel[scope.parentUidl.propertyName] = newObj;
-                    } else {
-                        // parent is CRUD
-                        scope.parentModel.entity = newObj;
+                    if (scope.parentModel) {
+                        if (scope.parentUidl) {
+                            // parent is FORM FIELD
+                            scope.parentModel[scope.parentUidl.propertyName] = newObj;
+                        } else {
+                            // parent is CRUD
+                            scope.parentModel.entity = newObj;
+                        }
+                        scope.sendModelToSelectedWidget();
                     }
-
-                    scope.sendModelToSelectedWidget();
                 });
             };
 
@@ -800,25 +794,35 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.$broadcast(selectedWidgetQualifiedName + ':ModelSetter', scope.model.entity);
             };
 
+            scope.parentModelReceived = function() {
+                if (scope.parentUidl) {
+                    // parent is FORM FIELD
+                    scope.model.entity = scope.parentModel[scope.parentUidl.propertyName];
+                } else {
+                    // parent is CRUD
+                    scope.model.entity = scope.parentModel.entity;
+                }
+            };
+
             scope.model = {
                 entity: null
             };
 
-            if (scope.parentUidl) { 
-                // parent is FORM FIELD
-                scope.model.entity = scope.parentModel[scope.parentUidl.propertyName];
-            } else {
-                // parent is CRUD
-                scope.model.entity = scope.parentModel.entity;
+            if (scope.parentModel) {
+                scope.parentModelReceived();
             }
+
+            scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function (event, data) {
+                if (data) {
+                    scope.parentModel = data;
+                    scope.parentModelReceived();
+                }
+            });
 
             if (scope.model.entity) {
                 scope.selectedType = scope.model.entity['$type'];
-            } else if (scope.uidl.selections.length > 0) {
-                scope.selectedTypeChanged(scope.uidl.selections[0].typeName);
+                scope.sendModelToSelectedWidget();
             }
-
-            scope.sendModelToSelectedWidget();
         }
     };
 
@@ -952,6 +956,8 @@ theApp.directive('uidlScreenPart', ['uidlService', 'entityService', function (ui
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.directive('uidlWidget', ['uidlService', 'entityService', '$timeout', function (uidlService, entityService, $timeout) {
+    var uniqueWidgetId = 1;
+
     return {
         scope: {
             uidl: '=',
@@ -961,13 +967,13 @@ theApp.directive('uidlWidget', ['uidlService', 'entityService', '$timeout', func
         restrict: 'E',
         replace: true,
         link: function (scope, elem, attrs) {
-            //console.log('uidlWidget::link', scope.uidl.qualifiedName);
-            //uidlService.implementController(scope);
+            scope.uniqueWidgetId = 'uidlWidget' + uniqueWidgetId++;
         },
         template: '<ng-include src="\'uidl-element-template/\' + uidl.templateName"></ng-include>',
         controller: function ($scope) {
             $scope.uidlService = uidlService;
             $scope.entityService = entityService;
+            $scope.$timeout = $timeout;
             //console.log('uidlWidget::controller', $scope.uidl.qualifiedName);
             //uidlService.implementController($scope);
             $scope.$watch('uidl', function (newValue, oldValue) {
@@ -1137,6 +1143,9 @@ theApp.filter('localized', ['$scope', function ($scope) {
 
 theApp.filter('reverse', function () {
     return function (items) {
+        if (!items) {
+            return items;
+        }
         return items.slice().reverse();
     };
 });

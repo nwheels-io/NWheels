@@ -378,10 +378,16 @@ HEAD, JS/CSS LINKS
         <div class="row">
             <div ng-hide="uiShowCrudForm" class="col-lg-12">
                 <div class="ibox-title">
-                    <button class="btn btn-primary btn-circle btn-lg btn-outline" type="button" ng-click="newEntity();">
+                    <button class="btn btn-primary btn-circle btn-lg btn-outline" style="margin-right:5px" type="button" ng-click="newEntity();" title="Add New">
                         <i class="fa fa-plus"></i>
                     </button>
-                    <button class="btn btn-success btn-circle btn-lg btn-outline" type="button" ng-click="refresh()">
+                    <button class="btn btn-success btn-circle btn-lg btn-outline" style="margin-right:5px" type="button" ng-click="editEntity(selectedEntity)" title="Edit Selected">
+                        <i class="fa fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-circle btn-lg btn-outline" style="margin-right:5px" type="button" ng-click="deleteEntity(selectedEntity)" title="Delete Selected">
+                        <i class="fa fa-times"></i>
+                    </button>
+                    <button class="btn btn-default btn-circle btn-lg btn-outline" style="margin-right:5px" type="button" ng-click="refresh()" title="Refresh">
                         <i class="fa fa-refresh"></i>
                     </button>
                 </div>
@@ -415,51 +421,56 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/DataGrid">
         <div class="jqGrid_wrapper">
-            <table id="rdt_{{::uidl.elementName}}"></table>
-            <div id="rdtpager_{{::uidl.elementName}}"></div>
+            <table id="rdt_{{uniqueWidgetId}}"></table>
+            <div id="rdtpager_{{uniqueWidgetId}}"></div>
         </div>
     </script>
     <script type="text/javascript">
         // Examle data for jqGrid
 
         function initWidget_DataGrid($scope) {
-            var columnsModel = [];
-            $scope.displayProperties.forEach(function (displayPropery, idx) {
-                var jsonPropertyName = ($scope.uidl.usePascalCase === true ? displayPropery.name : toCamelCase(displayPropery.name));
-                columnsModel.push({
-                    name: jsonPropertyName,
-                    label: $scope.translate(displayPropery.name),
-                    index: displayPropery.name,
-                    editable: false,
-                    width: 60,
-                    sorttype: displayPropery.dataType,
-                    search: true
+            $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
+                $scope.$timeout(function () {
+                    $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
+
+                    var columnsModel = [];
+
+                    $scope.displayProperties.forEach(function (displayPropery, idx) {
+                        var jsonPropertyName = ($scope.uidl.usePascalCase === true ? displayPropery.name : toCamelCase(displayPropery.name));
+                        columnsModel.push({
+                            name: jsonPropertyName,
+                            label: $scope.translate(displayPropery.name),
+                            index: displayPropery.name,
+                            editable: false,
+                            width: 180,
+                            sorttype: displayPropery.dataType,
+                            search: true
+                        });
+                    });
+
+                    $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
+                        height: 250,
+                        shrinkToFit: false,
+                        width: null,
+                        rowNum: 10,
+                        rowList: [10, 20, 30],
+                        colModel: columnsModel,
+                        pager: "#rdtpager_" + $scope.uniqueWidgetId,
+                        viewrecords: true,
+                        add: false,
+                        edit: false,
+                        hidegrid: false
+                    });
+
+                    var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
+                    thegrid[0].addJSONData(data);
                 });
             });
-
-            $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
-                var thegrid = $("#rdt_" + $scope.uidl.elementName);
-                thegrid[0].addJSONData(data);
-            });
-
-            $("#rdt_" + $scope.uidl.elementName).jqGrid({
-                height: 250,
-                autowidth: true,
-                shrinkToFit: true,
-                rowNum: 10,
-                rowList: [10, 20, 30],
-                colModel: columnsModel,
-                pager: "#rdtpager_" + $scope.uidl.elementName,
-                viewrecords: true,
-                add: false,
-                edit: false,
-                hidegrid: false
-            });
             // Setup buttons
-            $("#rdt_" + $scope.uidl.elementName).jqGrid('navGrid', '#rdt_' + $scope.uidl.elementName,
-                    { edit: true, add: true, del: true, search: true },
-                    { height: 200, reloadAfterSubmit: true }
-            );
+            //$("#rdt_" + $scope.uniqueWidgetId).jqGrid('navGrid', '#rdt_' + $scope.uniqueWidgetId,
+            //    { edit: true, add: true, del: true, search: true },
+            //    { height: 200, reloadAfterSubmit: true }
+            //);
         }
 
     </script>
