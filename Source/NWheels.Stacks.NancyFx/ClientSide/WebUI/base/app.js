@@ -722,6 +722,8 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.sectionFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Section'").ToArray();
             scope.tabSetFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Tab'").ToArray();
 
+            scope.commandInProgress = false;
+
             //scope.saveChanges = function () {
             //    scope.$emit(scope.uidl.qualifiedName + ':Saving');
             //};
@@ -749,8 +751,14 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.tabSetIndex = index;
             };
 
+            scope.invokeCommand = function (commandQualifiedName) {
+                scope.commandInProgress = true;
+                scope.$emit(commandQualifiedName + ':Executing');
+            }
+
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
                 scope.model.data.entity = data;
+                scope.commandInProgress = false;
 
                 $timeout(function() {
                     Enumerable.From(scope.uidl.fields)

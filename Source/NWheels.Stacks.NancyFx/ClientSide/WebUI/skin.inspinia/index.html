@@ -504,8 +504,9 @@ HEAD, JS/CSS LINKS
                             type="button"
                             class="btn btn-rounded btn-lg pull-right"
                             style="margin-right:5px;"
+                            ng-disabled="commandInProgress"
                             ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy'}"
-                            ng-click="$emit(command.qualifiedName + ':Executing')"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                            ng-click="invokeCommand(command.qualifiedName)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                 </div>
             </div>
         </form>
