@@ -293,7 +293,12 @@ namespace NWheels.UI
         private Type GetDomainObjectType(Type contractType)
         {
             var metaType = _metadataCache.GetTypeMetadata(contractType);
-            
+
+            if ( metaType.IsAbstract )
+            {
+                return contractType;
+            }
+
             Type persistableObjectType;
             
             if ( metaType.TryGetImplementation(_entityObjectFactory.GetType(), out persistableObjectType) )
