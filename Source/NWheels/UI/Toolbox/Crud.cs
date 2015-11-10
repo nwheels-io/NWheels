@@ -65,6 +65,10 @@ namespace NWheels.UI.Toolbox
         protected override void DescribePresenter(PresenterBuilder<Crud<TEntity>, Empty.Data, ICrudViewState<TEntity>> presenter)
         {
             this.Grid.UsePascalCase = true;
+            this.Save.Icon = "check";
+            this.Save.Severity = CommandSeverity.Change;
+            this.Cancel.Icon = "times";
+            this.Cancel.Severity = CommandSeverity.Loose;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -117,8 +121,12 @@ namespace NWheels.UI.Toolbox
         private void ConfigureForm(IUidlForm form)
         {
             form.UsePascalCase = true;
-            form.Commands.Add(Save);
-            form.Commands.Add(Cancel);
+
+            if ( form.Commands.Count == 0 )
+            {
+                form.Commands.Add(Save);
+                form.Commands.Add(Cancel);
+            }
         }
     }
 

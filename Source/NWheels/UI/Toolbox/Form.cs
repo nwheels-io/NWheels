@@ -101,11 +101,18 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<string> GetTranslatables()
         {
+            var metaTypeTranslatables = new List<string>();
+
+            for ( var metaType = MetadataCache.GetTypeMetadata(typeof(TEntity)) ; metaType != null ; metaType = metaType.BaseType )
+            {
+                metaTypeTranslatables.Add(metaType.QualifiedName);
+            }
+
             return base.GetTranslatables()
+                .Concat(metaTypeTranslatables)
                 .Concat(Fields.Select(f => f.PropertyName))
-                .Concat(Commands
-                    //.Where(c => c != null) //TODO: correctly handle nested form field forms (make sure InstantianeDeclaredMembers is called)
-                    .Select(c => c.Text)); 
+                .Concat(Fields.Where(f => f.StandardValues != null && f.StandardValuesExclusive).SelectMany(f => f.StandardValues))
+                .Concat(Commands.Select(c => c.Text)); 
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -127,7 +134,7 @@ namespace NWheels.UI.Toolbox
 
         protected override void DescribePresenter(PresenterBuilder<Form<TEntity>, IFormData, Empty.State> presenter)
         {
-            presenter.On(ModelSetter).AlterModel((alt => alt.Copy(vm => vm.Input).To(vm => vm.Data.Entity)));
+            //presenter.On(ModelSetter).AlterModel((alt => alt.Copy(vm => vm.Input).To(vm => vm.Data.Entity)));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

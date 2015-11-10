@@ -581,8 +581,8 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.queryEntities = function () {
-                scope.resultSet = null;
                 if (scope.uidl.mode !== 'Inline') {
+                    scope.resultSet = null;
                     scope.entityService.queryEntity(scope.uidl.entityName).then(function (data) {
                         scope.resultSet = data.ResultSet;
                         $timeout(function() {
@@ -590,7 +590,6 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                         });
                     });
                 } else {
-                    scope.resultSet = scope.parentModel.entity[scope.parentUidl.propertyName];
                     $timeout(function() {
                         scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
                     });
@@ -642,7 +641,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                         scope.refresh();
                     });
                 } else {
-                    scope.resultSet.push(entity._backingStore);
+                    scope.resultSet.push(entity);
                 }
                 scope.refresh();
             };
@@ -749,6 +748,25 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.selectTab = function(index) {
                 scope.tabSetIndex = index;
             };
+
+            scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
+                scope.model.data.entity = data;
+
+                $timeout(function() {
+                    Enumerable.From(scope.uidl.fields)
+                        .Where("$.fieldType=='InlineGrid' || $.fieldType=='InlineForm'")
+                        .ForEach(function (field) {
+                            if (!data[field.propertyName]) {
+                                if (field.fieldType == 'InlineGrid') {
+                                    data[field.propertyName] = [];
+                                } else {
+                                    data[field.propertyName] = {};
+                                }
+                            }
+                            scope.$broadcast(field.nestedWidget.qualifiedName + ':ModelSetter', data[field.propertyName]);
+                        });
+                });
+            });
         }
     };
 
@@ -815,6 +833,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
         getRelatedMetaType: getRelatedMetaType,
         //takeMessagesFromServer: takeMessagesFromServer,
         implementController: implementController,
+        translate: translate
     };
 
 }]);
@@ -1025,10 +1044,18 @@ theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uid
                         }
                     });
                 } else if ($scope.uidl.standardValues) {
-                    $scope.lookupValueProperty = 'Key';
-                    $scope.lookupTextProperty = 'Value';
+                    $scope.lookupValueProperty = 'id';
+                    $scope.lookupTextProperty = 'text';
                     $scope.lookupForeignKeyProperty = $scope.uidl.propertyName;
-                    $scope.lookupResultSet = Enumerable.From($scope.uidl.standardValues).ToArray();
+                    $scope.lookupResultSet = [];
+
+                    for (var i = 0; i < $scope.uidl.standardValues.length; i++) {
+                        var value = $scope.uidl.standardValues[i];
+                        $scope.lookupResultSet.push({
+                            id: value,
+                            text: uidlService.translate(value)
+                        });
+                    }
                 }
             }
         }

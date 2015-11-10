@@ -39,6 +39,7 @@ namespace NWheels.UI.Uidl
     {
         Read,
         Change,
+        Loose,
         Destroy
     }
 }

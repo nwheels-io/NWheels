@@ -12,9 +12,30 @@ namespace NWheels.Extensions
     {
         public static IEnumerable<T> ConcatIf<T>(this IEnumerable<T> first, IEnumerable<T> secondOrNull) where T : class
         {
-            if (secondOrNull != null)
+            if ( secondOrNull != null )
             {
                 return first.Concat(secondOrNull);
+            }
+            else
+            {
+                return first;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<T> ConcatOne<T>(this IEnumerable<T> first, T second)
+        {
+            return first.Concat(new T[] { second });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<T> ConcatOneIf<T>(this IEnumerable<T> first, T second) where T : class
+        {
+            if ( second != null )
+            {
+                return first.Concat(new T[] { second });
             }
             else
             {
