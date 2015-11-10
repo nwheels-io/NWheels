@@ -189,7 +189,7 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [HttpPost]
+        [HttpGet]
         [Route("entity/new/{entityName}")]
         public IHttpActionResult NewEntity(string entityName)
         {
@@ -326,8 +326,9 @@ namespace NWheels.Stacks.AspNet
             var scriptEntry = _transactionScriptByName[contractName];
             var call = _callFactory.NewMessageCallObject(scriptEntry.ExecuteMethodInfo);
 
-            var commandValueBinder = (CommandValueBinder)Activator.CreateInstance(typeof(CommandValueBinder<>).MakeGenericType(call.GetType()));
-            commandValueBinder.BindCommandValues(this, call);
+            var jsonString = Request.Content.ReadAsStringAsync().Result;
+            var serializerSettings = _context.EntityService.CreateSerializerSettings();
+            JsonConvert.PopulateObject(jsonString, call, serializerSettings);
 
             return new TransactionScriptCommandMessage(_framework, _sessionManager.CurrentSession, scriptEntry.TransactionScriptType, call, synchronous);
         }

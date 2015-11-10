@@ -459,7 +459,10 @@ HEAD, JS/CSS LINKS
                         viewrecords: true,
                         add: false,
                         edit: false,
-                        hidegrid: false
+                        hidegrid: false,
+                        onSelectRow: function (id) {
+                            var rowId = $("#rdt_" + $scope.uniqueWidgetId);
+                        }
                     });
 
                     var thegrid = $("#rdt_" + $scope.uniqueWidgetId);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
@@ -41,17 +42,32 @@ namespace NWheels.Stacks.AspNet
                 //using ( _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null) )
                 //{
                 var response = await base.SendAsync(request, cancellationToken);
-                if (response.Content != null)
+                
+                if ( response.Content != null )
                 {
                     response.Content.ReadAsStringAsync().Wait();
                 }
-                _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null); //TODO: remove this, should be carried of logical call context
+                
+                SetResponseSessionCookie(response);
                 return response;
                 //}
             }
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void SetResponseSessionCookie(HttpResponseMessage response)
+        {
+            if ( Session.Current != null )
+            {
+                var encryptedSessionId = Convert.ToBase64String(_sessionManager.As<ICoreSessionManager>().EncryptSessionId(Session.Current.Id));
+                var responseSessionCookie = new Cookie(_sessionCookieName, encryptedSessionId);
+                responseSessionCookie.HttpOnly = true;
+                response.Headers.SetCookie(responseSessionCookie);
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

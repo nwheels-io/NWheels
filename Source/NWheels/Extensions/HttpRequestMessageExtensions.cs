@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -28,6 +29,8 @@ namespace NWheels.Extensions
                           .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
         /// <summary>
         /// Returns an individual querystring value
         /// </summary>
@@ -48,6 +51,8 @@ namespace NWheels.Extensions
             return match.Value;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
         /// <summary>
         /// Returns an individual HTTP Header value
         /// </summary>
@@ -62,6 +67,8 @@ namespace NWheels.Extensions
 
             return keys.First();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         /// <summary>
         /// Retrieves an individual cookie from the cookies collection
@@ -78,5 +85,23 @@ namespace NWheels.Extensions
             return null;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void SetCookie(this HttpResponseHeaders headers, Cookie cookie)
+        {
+            var cookieBuilder = new StringBuilder(WebUtility.UrlEncode(cookie.Name) + "=" + WebUtility.UrlEncode(cookie.Value));
+            
+            if ( cookie.HttpOnly )
+            {
+                cookieBuilder.Append("; HttpOnly");
+            }
+
+            if ( cookie.Secure )
+            {
+                cookieBuilder.Append("; Secure");
+            }
+
+            headers.Add("Set-Cookie", cookieBuilder.ToString());
+        }
     }
 }
