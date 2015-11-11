@@ -4,13 +4,15 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
+using System.Web.SessionState;
 using NWheels.Authorization;
 using NWheels.Authorization.Core;
 using NWheels.Extensions;
 
 namespace NWheels.Stacks.AspNet
 {
-    public class LoggingAndSessionHandler : DelegatingHandler
+    public class LoggingAndSessionHandler : DelegatingHandler, IRequiresSessionState
     {
         private readonly ISessionManager _sessionManager;
         private readonly IWebApplicationLogger _logger;
@@ -31,14 +33,13 @@ namespace NWheels.Stacks.AspNet
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var sessionCookie = request.GetCookie(_sessionCookieName);
+            var sessionId = HttpContext.Current.Session[_sessionCookieName] as string;
 
             using ( _logger.Request(request.Method.ToString(), request.RequestUri.AbsolutePath, request.RequestUri.Query) )
             {
-                string sessionId;
-                AuthenticateRequest(sessionCookie, out sessionId);
+                AuthenticateRequest(ref sessionId);
 
-                _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null); //TODO: bring back using 
+                _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null); //TODO: bring back the using 
                 //using ( _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null) )
                 //{
                 var response = await base.SendAsync(request, cancellationToken);
@@ -48,7 +49,7 @@ namespace NWheels.Stacks.AspNet
                     response.Content.ReadAsStringAsync().Wait();
                 }
                 
-                SetResponseSessionCookie(response);
+                SetResponseSessionCookie(request, response);
                 return response;
                 //}
             }
@@ -58,37 +59,18 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void SetResponseSessionCookie(HttpResponseMessage response)
+        private void SetResponseSessionCookie(HttpRequestMessage request, HttpResponseMessage response)
         {
-            if ( Session.Current != null )
+            if ( Session.Current != null && Session.Current.UserIdentity.IsAuthenticated )
             {
-                var encryptedSessionId = Convert.ToBase64String(_sessionManager.As<ICoreSessionManager>().EncryptSessionId(Session.Current.Id));
-                var responseSessionCookie = new Cookie(_sessionCookieName, encryptedSessionId);
-                responseSessionCookie.HttpOnly = true;
-                response.Headers.SetCookie(responseSessionCookie);
+                HttpContext.Current.Session[_sessionCookieName] = Session.Current.Id;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void AuthenticateRequest(string sessionCookie, out string sessionId)
+        private void AuthenticateRequest(ref string sessionId)
         {
-            sessionId = null;
-            var encryptedSessionCookie = sessionCookie;//WebUtility.UrlDecode(sessionCookie);
-
-            if ( encryptedSessionCookie != null )
-            {
-                try
-                {
-                    sessionId = _sessionManager.As<ICoreSessionManager>().DecryptSessionId(Convert.FromBase64String(encryptedSessionCookie));
-                }
-                catch ( CryptographicException e )
-                {
-                    _logger.FailedToDecryptSessionCookie(error: e);
-                    sessionId = null;
-                }
-            }
-
             if ( _sessionManager.IsValidSessionId(sessionId) )
             {
                 _sessionManager.JoinSession(sessionId);

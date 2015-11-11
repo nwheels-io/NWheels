@@ -52,6 +52,7 @@ namespace NWheels.Stacks.AspNet
         {
             base.Init();
             base.BeginRequest += WebApiApplication_BeginRequest;
+            base.PostAuthorizeRequest += WebApiApplication_PostAuthorizeRequest;
             base.EndRequest += WebApiApplication_EndRequest;
         }
 
@@ -72,6 +73,13 @@ namespace NWheels.Stacks.AspNet
                 _s_log.Error("WebApiApplication_BeginRequest {0}", exc.ToString());
                 throw;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void WebApiApplication_PostAuthorizeRequest(object sender, EventArgs e)
+        {
+            System.Web.HttpContext.Current.SetSessionStateBehavior(System.Web.SessionState.SessionStateBehavior.Required);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
