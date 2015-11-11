@@ -384,9 +384,9 @@ HEAD, JS/CSS LINKS
                     <button class="btn btn-success btn-circle btn-lg btn-outline" style="margin-right:5px" type="button" ng-click="editEntity(selectedEntity)" title="Edit Selected">
                         <i class="fa fa-edit"></i>
                     </button>
-                    <button class="btn btn-danger btn-circle btn-lg btn-outline" style="margin-right:5px" type="button" ng-click="deleteEntity(selectedEntity)" title="Delete Selected">
+                    <!--button class="btn btn-danger btn-circle btn-lg btn-outline" style="margin-right:5px" type="button" ng-click="deleteEntity(selectedEntity)" title="Delete Selected">
                         <i class="fa fa-times"></i>
-                    </button>
+                    </button-->
                     <button class="btn btn-default btn-circle btn-lg btn-outline" style="margin-right:5px" type="button" ng-click="refresh()" title="Refresh">
                         <i class="fa fa-refresh"></i>
                     </button>
@@ -430,6 +430,7 @@ HEAD, JS/CSS LINKS
 
         function initWidget_DataGrid($scope) {
             $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
+                $scope.ResultSet = data;
                 $scope.$timeout(function () {
                     $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
 
@@ -449,6 +450,7 @@ HEAD, JS/CSS LINKS
                     });
 
                     $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
+                        datatype: 'local',
                         height: 250,
                         shrinkToFit: false,
                         width: null,
@@ -463,7 +465,7 @@ HEAD, JS/CSS LINKS
                         onSelectRow: function (rowId) {
                             var grid = $(this);
                             var rowData = grid.jqGrid('getRowData', rowId);
-                            var localRowData = grid.jqGrid('getLocalRow', rowId);
+                            $scope.$emit($scope.uidl.qualifiedName + ':EntitySelectedById', rowData.Id);
                         }
                     });
 

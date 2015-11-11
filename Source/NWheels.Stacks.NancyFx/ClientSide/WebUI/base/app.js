@@ -564,6 +564,12 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
     m_controllerImplementations['Crud'] = {
         implement: function (scope) {
+            if (scope.uidl.formTypeSelector !== null && scope.uidl.formTypeSelector.selections.length === 1) {
+                scope.uidl.entityName = scope.uidl.formTypeSelector.selections[0].widget.entityName;
+                scope.uidl.form = scope.uidl.formTypeSelector.selections[0].widget;
+                scope.uidl.formTypeSelector = null;
+            }
+
             var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
             scope.metaType = metaType;
             
@@ -571,9 +577,9 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.uidl.displayColumns = scope.uidl.defaultDisplayColumns;
             }
             
-            scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
-                return metaType.properties[toCamelCase(name)];
-            }).ToArray();
+            //scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
+            //    return metaType.properties[toCamelCase(name)];
+            //}).ToArray();
 
             scope.refresh = function () {
                 scope.queryEntities();
@@ -583,7 +589,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.queryEntities = function () {
                 if (scope.uidl.mode !== 'Inline') {
                     scope.resultSet = null;
-                    scope.entityService.queryEntity(scope.uidl.entityName).then(function (data) {
+                    scope.entityService.queryEntity(scope.uidl.grid.entityName).then(function (data) {
                         scope.resultSet = data.ResultSet;
                         $timeout(function() {
                             scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
@@ -596,10 +602,23 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 }
             };
 
+            scope.$on(scope.uidl.qualifiedName + ':Grid:EntitySelected', function(event, data) {
+                scope.selectedEntity = data;
+            });
+
+            scope.$on(scope.uidl.qualifiedName + ':Grid:EntitySelectedById', function (event, id) {
+                scope.selectedEntity = Enumerable.From(scope.resultSet).Where("$.Id == '" + id + "'").First();
+            });
+
             scope.editEntity = function (entity) {
                 scope.model.entity = entity;
                 scope.model.isNew = false;
-                scope.$broadcast(scope.uidl.qualifiedName + ':Form:ModelSetter', scope.model.entity);
+
+                if (scope.uidl.formTypeSelector) {
+                    scope.$broadcast(scope.uidl.formTypeSelector.qualifiedName + ':ModelSetter', scope.model.entity);
+                } else {
+                    scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelSetter', scope.model.entity);
+                }
 
                 $timeout(function() {
                     scope.uiShowCrudForm = true;
@@ -607,14 +626,22 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.newEntity = function () {
-                scope.entityService.newDomainObject(metaType.name).then(function(newObj) {
-                    scope.model.entity = newObj;
-                    scope.model.isNew = true;
-                    scope.$broadcast(scope.uidl.qualifiedName + ':Form:ModelSetter', scope.model.entity);
-
-                    $timeout(function () {
-                        scope.uiShowCrudForm = true;
+                if (scope.uidl.formTypeSelector) {
+                    scope.newEntityCreated({});
+                } else {
+                    scope.entityService.newDomainObject(metaType.name).then(function (newObj) {
+                        scope.newEntityCreated(newObj);
                     });
+                }
+            };
+
+            scope.newEntityCreated = function(newObj) {
+                scope.model.entity = newObj;
+                scope.model.isNew = true;
+                scope.$broadcast(scope.uidl.qualifiedName + ':Form:ModelSetter', scope.model.entity);
+
+                $timeout(function () {
+                    scope.uiShowCrudForm = true;
                 });
             };
 
@@ -796,10 +823,12 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 });
             };
 
-            scope.sendModelToSelectedWidget = function() {
+            scope.sendModelToSelectedWidget = function () {
                 var selection = Enumerable.From(scope.uidl.selections).Where("$.typeName=='" + scope.selectedType + "'").First();
                 var selectedWidgetQualifiedName = selection.widget.qualifiedName;
-                scope.$broadcast(selectedWidgetQualifiedName + ':ModelSetter', scope.model.entity);
+                $timeout(function() {
+                    scope.$broadcast(selectedWidgetQualifiedName + ':ModelSetter', scope.model.entity);
+                });
             };
 
             scope.parentModelReceived = function() {
@@ -809,6 +838,10 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 } else {
                     // parent is CRUD
                     scope.model.entity = scope.parentModel.entity;
+                }
+
+                if (scope.model.entity) {
+                    scope.selectedType = scope.model.entity['$type'];
                 }
             };
 
@@ -822,8 +855,15 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function (event, data) {
                 if (data) {
-                    scope.parentModel = data;
+                    if (scope.parentUidl) {
+                        // parent is FORM FIELD
+                        scope.parentModel[scope.parentUidl.propertyName] = data;
+                    } else {
+                        // parent is CRUD
+                        scope.parentModel.entity = data;
+                    }
                     scope.parentModelReceived();
+                    scope.sendModelToSelectedWidget();
                 }
             });
 

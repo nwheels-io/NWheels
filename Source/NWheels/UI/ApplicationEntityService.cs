@@ -45,7 +45,7 @@ namespace NWheels.UI
             _domainContextLogger = domainContextLogger;
             _handlerByEntityName = new Dictionary<string, EntityHandler>(StringComparer.InvariantCultureIgnoreCase);
 
-            RegisterEntities(domainContextTypes);
+            RegisterDomainObjects(domainContextTypes);
 
             _serializerSettings = CreateSerializerSettings();
         }
@@ -183,30 +183,48 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void RegisterEntities(IEnumerable<Type> domainContextTypes)
+        private void RegisterDomainObjects(IEnumerable<Type> domainContextTypes)
         {
             foreach ( var contextType in domainContextTypes )
             {
-                using ( var coontext = _framework.As<ICoreFramework>().NewUnitOfWork(contextType) )
+                using ( var coontextInstance = _framework.As<ICoreFramework>().NewUnitOfWork(contextType) )
                 {
-                    RegisterEntitiesFromDomainContext(contextType, coontext);
+                    RegisterDomainObjectTypesFromContext(contextType, coontextInstance);
                 }
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void RegisterEntitiesFromDomainContext(Type contextType, IApplicationDataRepository context)
+        private void RegisterDomainObjectTypesFromContext(Type contextType, IApplicationDataRepository contextInstance)
         {
-            foreach ( var entityContract in context.GetEntityContractsInRepository().Where(t => t != null) )
+            foreach ( var entityContract in contextInstance.GetEntityContractsInRepository().Where(t => t != null) )
             {
                 var metaType = _metadataCache.GetTypeMetadata(entityContract);
+                RegisterDomainObjectType(contextType, metaType);
+            }
+        }
 
-                if ( !_handlerByEntityName.ContainsKey(metaType.QualifiedName) )
-                {
-                    var handler = EntityHandler.Create(this, metaType, contextType);
-                    _handlerByEntityName[metaType.QualifiedName] = handler;
-                }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void RegisterDomainObjectType(Type contextType, ITypeMetadata metaType)
+        {
+            if ( _handlerByEntityName.ContainsKey(metaType.QualifiedName) )
+            {
+                return;
+            }
+
+            var handler = EntityHandler.Create(this, metaType, contextType);
+            _handlerByEntityName[metaType.QualifiedName] = handler;
+
+            foreach ( var property in metaType.Properties.Where(p => p.Kind.IsIn(PropertyKind.Part, PropertyKind.Relation)) )
+            {
+                RegisterDomainObjectType(contextType, property.Relation.RelatedPartyType);
+            }
+
+            foreach ( var derivedType in metaType.DerivedTypes )
+            {
+                RegisterDomainObjectType(contextType, derivedType);
             }
         }
 
@@ -647,14 +665,6 @@ namespace NWheels.UI
             public override IDomainObject CreateNew()
             {
                 return Framework.NewDomainObject<TEntity>() as IDomainObject;
-
-                //using ( var context = Framework.NewUnitOfWork<TContext>() )
-                //{
-                //    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
-                //    var result = repository.New();
-
-                //    return result as IDomainObject;
-                //}
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

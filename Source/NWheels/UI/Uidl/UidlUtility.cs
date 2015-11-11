@@ -14,9 +14,9 @@ namespace NWheels.UI.Uidl
         {
             var availableConcreteTypes = new[] { metaType }.Concat(metaType.DerivedTypes).Where(t => !t.IsAbstract).ToArray();
 
-            if ( availableConcreteTypes.Length == 1 )
+            if ( availableConcreteTypes.Length == 1 && availableConcreteTypes[0] == metaType )
             {
-                return CreateCrudForm(availableConcreteTypes[0], idName, parent, isInline);
+                return CreateCrudForm(metaType, idName, parent, isInline);
             }
             else
             {

@@ -271,7 +271,7 @@ namespace NWheels.UI
         {
             UidlMetaType metaType;
 
-            if ( DataObjectContractAttribute.IsDataObjectContract(type) )
+            if ( DataObjectContractAttribute.IsDataObjectContract(type) || DataObjectPartContractAttribute.IsDataObjectPartContract(type) )
             {
                 var domainObjectType = GetDomainObjectType(type);
                 metaType = new UidlObjectMetaType(type, domainObjectType, _metadataCache.GetTypeMetadata(type), relatedTypes);
