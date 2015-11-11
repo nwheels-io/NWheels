@@ -519,6 +519,7 @@ namespace NWheels.UI
 
         private class EntityHandler<TContext, TEntity> : EntityHandler
             where TContext : class, IApplicationDataRepository
+            where TEntity : class
         {
             public EntityHandler(ApplicationEntityService owner, ITypeMetadata metaType, Type domainContextType)
                  : base(owner, metaType, domainContextType)
@@ -645,13 +646,15 @@ namespace NWheels.UI
 
             public override IDomainObject CreateNew()
             {
-                using ( var context = Framework.NewUnitOfWork<TContext>() )
-                {
-                    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
-                    var result = repository.New();
+                return Framework.NewDomainObject<TEntity>() as IDomainObject;
 
-                    return result as IDomainObject;
-                }
+                //using ( var context = Framework.NewUnitOfWork<TContext>() )
+                //{
+                //    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
+                //    var result = repository.New();
+
+                //    return result as IDomainObject;
+                //}
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

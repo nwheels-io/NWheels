@@ -321,10 +321,10 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - MANAGEMENT CONSOLE MENU ITEM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/ManagementConsole-menu-item">
-        <a ng-class="{bold: item.level==0}" ng-show="item.subItems.length==0" href="#" ng-click="$emit(item.notifications[1].qualifiedName)"><i ng-if="item.icon" style="width:19px;" class="fa fa-{{::item.icon}}"></i>{{::item.text}}</a>
+        <a ng-class="{bold: item.level==0}" ng-show="item.subItems.length==0" href="#" ng-click="$emit(item.notifications[1].qualifiedName)"><i ng-if="item.icon" style="width:19px;" class="fa fa-{{::item.icon}}"></i>{{::translate(item.text)}}</a>
         <a href="#" ng-show="item.subItems.length > 0">
-            <i class="fa fa-{{::item.icon}}" style="width:16px;"></i>
-            <span class="nav-label" ng-class="{bold: item.level==0}">{{item.text}}</span>
+            <i ng-if="item.icon" style="width:16px;" class="fa fa-{{::item.icon}}"></i>
+            <span class="nav-label" ng-class="{bold: item.level==0}">{{::translate(item.text)}}</span>
             <span class="fa arrow"></span>
         </a>
         <ul class="nav nav-second-level collapse">
@@ -460,8 +460,10 @@ HEAD, JS/CSS LINKS
                         add: false,
                         edit: false,
                         hidegrid: false,
-                        onSelectRow: function (id) {
-                            var rowId = $("#rdt_" + $scope.uniqueWidgetId);
+                        onSelectRow: function (rowId) {
+                            var grid = $(this);
+                            var rowData = grid.jqGrid('getRowData', rowId);
+                            var localRowData = grid.jqGrid('getLocalRow', rowId);
                         }
                     });
 

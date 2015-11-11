@@ -15,12 +15,12 @@ namespace NWheels.UI.Toolbox
 {
     public class TypeSelector : WidgetBase<TypeSelector, Empty.Data, Empty.State>
     {
-        public TypeSelector(string idName, ControlledUidlNode parent, ITypeMetadata baseMetaType)
+        public TypeSelector(string idName, ControlledUidlNode parent, ITypeMetadata baseMetaType, IEnumerable<ITypeMetadata> availableConcreteTypes)
             : base(idName, parent)
         {
             this.BaseMetaType = baseMetaType;
             this.BaseTypeName = baseMetaType.Name;
-            this.Selections = baseMetaType.DerivedTypes.Where(t => !t.IsAbstract).Select(t => new Selection(t)).ToList();
+            this.Selections = availableConcreteTypes.Select(t => new Selection(t)).ToList();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -82,11 +82,13 @@ namespace NWheels.UI.Toolbox
             string idName, 
             ControlledUidlNode parent, 
             ITypeMetadata baseType, 
+            IEnumerable<ITypeMetadata> availableConcreteTypes,
             Func<ITypeMetadata, WidgetUidlNode> concreteWidgetFactory)
         {
-            var selector = new TypeSelector(idName, parent, baseType);
+            var concreteTypesArray = availableConcreteTypes.ToArray();
+            var selector = new TypeSelector(idName, parent, baseType, concreteTypesArray);
 
-            foreach ( var concreteType in baseType.DerivedTypes.Where(t => !t.IsAbstract) )
+            foreach ( var concreteType in concreteTypesArray )
             {
                 selector.SetWidget(concreteType.ContractType, concreteWidgetFactory(concreteType));
             }

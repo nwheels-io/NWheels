@@ -21,9 +21,8 @@ namespace NWheels.Entities
         {
             base.ApplyTo(type, cache);
 
-            type.IsAbstract = false;
-            type.IsEntity = false;
             type.IsEntityPart = true;
+            type.IsAbstract = this.IsAbstract;
 
             if ( BaseEntityPart != null )
             {
@@ -43,5 +42,9 @@ namespace NWheels.Entities
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Type BaseEntityPart { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsAbstract { get; set; }
     }
 }

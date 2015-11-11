@@ -352,7 +352,12 @@ namespace NWheels.DataObjects.Core
 
         internal HashSet<Type> GetBaseContracts()
         {
-            var allContracts = this.ContractType.GetInterfaces().Where(DataObjectContractAttribute.IsDataObjectContract).ToArray();
+            var allContracts = this.ContractType.GetInterfaces().Where(t =>
+                this.IsEntity ?
+                DataObjectContractAttribute.IsDataObjectContract(t) :
+                DataObjectPartContractAttribute.IsDataObjectPartContract(t))
+                .ToArray();
+
             var baseContractSet = new HashSet<Type>(allContracts);
 
             foreach ( var contract in allContracts )

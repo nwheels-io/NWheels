@@ -12,9 +12,11 @@ namespace NWheels.UI.Uidl
     {
         public static WidgetUidlNode CreateFormOrTypeSelector(ITypeMetadata metaType, string idName, ControlledUidlNode parent, bool isInline)
         {
-            if ( metaType.DerivedTypes.Count == 0 )
+            var availableConcreteTypes = new[] { metaType }.Concat(metaType.DerivedTypes).Where(t => !t.IsAbstract).ToArray();
+
+            if ( availableConcreteTypes.Length == 1 )
             {
-                return CreateCrudForm(metaType, idName, parent, isInline);
+                return CreateCrudForm(availableConcreteTypes[0], idName, parent, isInline);
             }
             else
             {
@@ -22,6 +24,7 @@ namespace NWheels.UI.Uidl
                     idName + "Type",
                     parent,
                     metaType,
+                    availableConcreteTypes,
                     concreteType => CreateCrudForm(concreteType, idName, parent, isInline));
             }
         }
