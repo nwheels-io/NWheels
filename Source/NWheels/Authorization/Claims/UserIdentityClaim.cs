@@ -38,5 +38,25 @@ namespace NWheels.Authorization.Claims
         public abstract string AuthenticationType { get; }
         public abstract bool IsAuthenticated { get; }
         public abstract string Name { get; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsGlobalSystem
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsGlobalAnonymous
+        {
+            get
+            {
+                return false;
+            }
+        }
     }
 }

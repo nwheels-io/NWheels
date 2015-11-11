@@ -68,6 +68,11 @@ namespace NWheels.Testing
         public string PersonFullName { get; private set; }
         public string EmailAddress { get; private set; }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsGlobalSystem { get; set; }
+        public bool IsGlobalAnonymous { get; set; }
+
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

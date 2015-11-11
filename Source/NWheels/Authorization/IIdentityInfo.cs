@@ -21,5 +21,7 @@ namespace NWheels.Authorization
         string QualifiedLoginName { get; }
         string PersonFullName { get; }
         string EmailAddress { get; }
+        bool IsGlobalSystem { get; }
+        bool IsGlobalAnonymous { get; }
     }
 }

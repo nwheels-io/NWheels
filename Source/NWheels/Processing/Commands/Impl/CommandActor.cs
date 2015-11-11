@@ -94,13 +94,19 @@ namespace NWheels.Processing.Commands.Impl
                 try
                 {
                     object resultValue;
+                    string newSessionId = null;
 
                     using ( _sessionManager.JoinSession(command.Session.Id) )
                     {
                         resultValue = concreteExecutor(command);
+
+                        if ( _sessionManager.CurrentSession.Id != command.Session.Id )
+                        {
+                            newSessionId = _sessionManager.CurrentSession.Id;
+                        }
                     }
 
-                    EnqueueSuccessfulCommandResult(command, resultValue);
+                    EnqueueSuccessfulCommandResult(command, resultValue, newSessionId);
                 }
                 catch ( Exception e )
                 {
@@ -158,14 +164,15 @@ namespace NWheels.Processing.Commands.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void EnqueueSuccessfulCommandResult(AbstractCommandMessage command, object resultValue)
+        private void EnqueueSuccessfulCommandResult(AbstractCommandMessage command, object resultValue, string newSessionId)
         {
             var resultMessage = new CommandResultMessage(
                 _framework,
                 command.Session,
                 command.MessageId,
                 resultValue,
-                success: true);
+                success: true,
+                newSessionId: newSessionId);
 
             ReturnResultMessage(command, resultMessage);
         }

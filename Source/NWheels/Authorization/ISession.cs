@@ -13,5 +13,6 @@ namespace NWheels.Authorization
         IEndpoint Endpoint { get; }
         DateTime OpenedAtUtc { get; }
         DateTime? ExpiresAtUtc { get; }
+        bool IsGlobalImmutable { get; }
     }
 }

@@ -15,6 +15,7 @@ using System.Web.Http.Dispatcher;
 using System.Web.Http.ExceptionHandling;
 using System.Web.Mvc.Routing;
 using System.Web.Routing;
+using System.Web.SessionState;
 using Autofac;
 using Autofac.Integration.WebApi;
 using NWheels.Authorization;
@@ -54,6 +55,14 @@ namespace NWheels.Stacks.AspNet
             base.BeginRequest += WebApiApplication_BeginRequest;
             base.PostAuthorizeRequest += WebApiApplication_PostAuthorizeRequest;
             base.EndRequest += WebApiApplication_EndRequest;
+
+            var sessionModule = (SessionStateModule)base.Modules["Session"];
+            sessionModule.Start += SessionModule_OnStart;
+        }
+
+        private void SessionModule_OnStart(object sender, EventArgs eventArgs)
+        {
+            var sessionId = Session.SessionID;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

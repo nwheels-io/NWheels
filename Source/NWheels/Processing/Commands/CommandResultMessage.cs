@@ -18,6 +18,7 @@ namespace NWheels.Processing.Commands
             Guid commandMessageId,
             object result,
             bool success, 
+            string newSessionId = null,
             string faultCode = null, 
             string faultSubCode = null, 
             string faultReason = null)
@@ -26,6 +27,7 @@ namespace NWheels.Processing.Commands
             this.CommandMessageId = commandMessageId;
             this.Result = result;
             this.Success = success;
+            this.NewSessionId = newSessionId;
             this.FaultCode = faultCode;
             this.FaultSubCode = faultSubCode;
             this.FaultReason = faultReason;
@@ -43,6 +45,7 @@ namespace NWheels.Processing.Commands
         public Guid CommandMessageId { get; private set; }
         public object Result { get; private set; }
         public bool Success { get; private set; }
+        public string NewSessionId { get; private set; }
         public string FaultCode { get; private set; }
         public string FaultSubCode { get; private set; }
         public string FaultReason { get; private set; }

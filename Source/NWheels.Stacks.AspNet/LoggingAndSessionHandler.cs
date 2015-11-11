@@ -33,25 +33,47 @@ namespace NWheels.Stacks.AspNet
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var sessionId = HttpContext.Current.Session[_sessionCookieName] as string;
+            //HttpContext.Current.Session[this.GetType().FullName] = true; // force ASP.NET to actually create a session
 
-            using ( _logger.Request(request.Method.ToString(), request.RequestUri.AbsolutePath, request.RequestUri.Query) )
+            using ( var activity = _logger.Request(request.Method.ToString(), request.RequestUri.AbsolutePath, request.RequestUri.Query) )
             {
-                AuthenticateRequest(ref sessionId);
-
-                _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null); //TODO: bring back the using 
-                //using ( _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null) )
-                //{
-                var response = await base.SendAsync(request, cancellationToken);
-                
-                if ( response.Content != null )
+                try
                 {
-                    response.Content.ReadAsStringAsync().Wait();
+                    var sessionId = HttpContext.Current.Session[_sessionCookieName] as string;
+
+                    if ( _sessionManager.IsValidSessionId(sessionId) )
+                    {
+                        _sessionManager.JoinSession(sessionId);
+                    }
+                    else
+                    {
+                        _sessionManager.JoinGlobalAnonymous();
+                    }
+
+                    //_sessionManager.JoinSessionOrOpenAnonymous(sessionId, null); //TODO: bring back the using 
+                    //using ( _sessionManager.JoinSessionOrOpenAnonymous(sessionId, null) )
+                    //{
+                    var response = await base.SendAsync(request, cancellationToken);
+
+                    //if ( response.Content != null )
+                    //{
+                    //    // cause response writers to work now, while in the context of current session and thread log.
+                    //    // otherwise response writers will be invoked after current session is detached from the thread,
+                    //    // and may be blocked by access control or function incorrectly, and will not be captured by thread log.
+                    //    response.Content.ReadAsStringAsync().Wait();
+                    //}
+
+                    //SetResponseSessionCookie(request, response);
+                    Session.Clear();
+                    return response;
+                    //}
                 }
-                
-                SetResponseSessionCookie(request, response);
-                return response;
-                //}
+                catch ( Exception e )
+                {
+                    activity.Fail(e);
+                    _logger.RequestFailed(e);
+                    throw;
+                }
             }
         }
 
@@ -71,15 +93,6 @@ namespace NWheels.Stacks.AspNet
 
         private void AuthenticateRequest(ref string sessionId)
         {
-            if ( _sessionManager.IsValidSessionId(sessionId) )
-            {
-                _sessionManager.JoinSession(sessionId);
-            }
-            else
-            {
-                sessionId = null;
-                _sessionManager.JoinGlobalAnonymous();
-            }
         }
     }
 }

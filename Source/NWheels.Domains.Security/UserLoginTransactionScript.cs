@@ -15,11 +15,11 @@ namespace NWheels.Domains.Security
     public class UserLoginTransactionScript : ITransactionScript
     {
         private readonly IAuthenticationProvider _authenticationProvider;
-        private readonly ICoreSessionManager _sessionManager;
+        private readonly ISessionManager _sessionManager;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UserLoginTransactionScript(IAuthenticationProvider authenticationProvider, ICoreSessionManager sessionManager)
+        public UserLoginTransactionScript(IAuthenticationProvider authenticationProvider, ISessionManager sessionManager)
         {
             _authenticationProvider = authenticationProvider;
             _sessionManager = sessionManager;
@@ -36,12 +36,19 @@ namespace NWheels.Domains.Security
             IUserAccountEntity userAccount;
             UserAccountPrincipal principal;
 
-            using ( _sessionManager.As<ISessionManager>().JoinGlobalSystem() )
+            var currentSession = _sessionManager.CurrentSession;
+
+            using ( _sessionManager.JoinGlobalSystem() )
             {
                 principal = _authenticationProvider.Authenticate(loginName, SecureStringUtility.ClearToSecure(password), out userAccount);
             }
 
-            _sessionManager.AuthorieSession(principal);
+            if ( currentSession.IsGlobalImmutable )
+            {
+                _sessionManager.OpenAnonymous(currentSession.Endpoint);
+            }
+            
+            _sessionManager.As<ICoreSessionManager>().AuthorieSession(principal);
 
             var result = new Result(principal);
             return result;

@@ -80,6 +80,16 @@ namespace NWheels.Authorization.Core
         public IEndpoint Endpoint { get; private set; }
         public DateTime OpenedAtUtc { get; private set; }
         public DateTime? ExpiresAtUtc { get; private set; }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsGlobalImmutable
+        {
+            get
+            {
+                return (UserIdentity.IsGlobalSystem || UserIdentity.IsGlobalAnonymous);
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

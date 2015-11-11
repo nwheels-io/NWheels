@@ -24,6 +24,7 @@ using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using NWheels.Authorization.Core;
 
 namespace NWheels.Stacks.AspNet
 {
@@ -142,14 +143,20 @@ namespace NWheels.Stacks.AspNet
 
             _serviceBus.DispatchMessageOnCurrentThread(command);
 
+            if ( command.Result.NewSessionId != null )
+            {
+                var sessionIdKey = _sessionManager.As<ICoreSessionManager>().SessionIdCookieName;
+                HttpContext.Current.Session[sessionIdKey] = command.Result.NewSessionId;
+            }
+
             return Json(command.Result.TakeSerializableSnapshot(), _jsonSettings);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("command/oneWay/{target}/{contractName}/{operationName?}/{entityId?}")]
-        public IHttpActionResult EnqueueCommand(string target, string contractName, string operationName, string entityId)
+        [Route("command/oneWay/{target}/{contractName}/{operationName}")]
+        public IHttpActionResult EnqueueCommand(string target, string contractName, string operationName)
         {
             var command = CreateCommandMessage(target, contractName, synchronous: false);
 
@@ -230,12 +237,15 @@ namespace NWheels.Stacks.AspNet
 
         [HttpPost]
         [Route("entity/store/{entityName}")]
-        public IHttpActionResult StoreEntity(string entityName, string entityStateString, string entityIdString)
+        public IHttpActionResult StoreEntity(string entityName)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
             {
                 return StatusCode(HttpStatusCode.NotFound);
             }
+
+            var entityStateString = "NewModified";
+            string entityIdString = null;
 
             var entityState = ParseUtility.Parse<EntityState>(entityStateString);
             var jsonString = Request.Content.ReadAsStringAsync().Result;
