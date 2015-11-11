@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
+using Hapil;
 using NWheels.DataObjects;
 using NWheels.Extensions;
 using NWheels.UI.Core;
@@ -128,10 +129,31 @@ namespace NWheels.UI.Toolbox
             base.EntityName = MetadataCache.GetTypeMetadata(typeof(TDataRow)).QualifiedName;
 
             var metaType = builder.MetadataCache.GetTypeMetadata(typeof(TDataRow));
+            
             base.DefaultDisplayColumns = metaType.Properties
-                .Where(p => p.Kind == PropertyKind.Scalar && p.Role == PropertyRole.None)
+                .Where(ShouldDisplayPropertyByDefault)
                 .Select(p => p.Name)
                 .ToList();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool ShouldDisplayPropertyByDefault(IPropertyMetadata metaProperty)
+        {
+            return (
+                (metaProperty.Role == PropertyRole.None && metaProperty.Kind == PropertyKind.Scalar) ||
+                (metaProperty.Role == PropertyRole.Key && ShouldDisplayKeyPropertyOfType(metaProperty)));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool ShouldDisplayKeyPropertyOfType(IPropertyMetadata metaProperty)
+        {
+            return (
+                metaProperty.ClrType == typeof(string) || 
+                metaProperty.ClrType.IsIntegralType() || 
+                metaProperty.ClrType == typeof(DateTime) || 
+                metaProperty.ClrType == typeof(TimeSpan));
         }
     }
 }
