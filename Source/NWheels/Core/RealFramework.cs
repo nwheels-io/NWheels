@@ -35,7 +35,7 @@ namespace NWheels.Core
             _components = components;
             _nodeConfig = nodeConfig;
             _threadLogAnchor = threadLogAnchor;
-            _unitOfWorkFactory = new UnitOfWorkFactory(components);
+            _unitOfWorkFactory = components.Resolve<UnitOfWorkFactory>();
             _timeoutManager = timeoutManager;
         }
 

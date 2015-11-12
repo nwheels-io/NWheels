@@ -305,6 +305,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterInstance(new PascalCaseRelationalMappingConvention(usePluralTableNames: true)).As<IRelationalMappingConvention>();
             builder.RegisterType<MetadataConventionSet>().InstancePerDependency(); // avoid caching because modules can add new registrations
             builder.RegisterType<TypeMetadataCache>().As<ITypeMetadataCache, TypeMetadataCache>().SingleInstance();
+            builder.RegisterType<UnitOfWorkFactory>().SingleInstance();
 
             builder.RegisterType<VoidLocalizationProvider>().As<ILocalizationProvider>().SingleInstance();
 
@@ -875,7 +876,8 @@ namespace NWheels.Hosting.Core
                 {
                     try
                     {
-                        var repoInstance = factory.NewUnitOfWork(null, registration.DataRepositoryType, autoCommit: false);
+                        var unitOfWorkFactory = OwnerLifetime.LifetimeContainer.Resolve<UnitOfWorkFactory>();
+                        var repoInstance = unitOfWorkFactory.NewUnitOfWork(registration.DataRepositoryType, autoCommit: false);
                         repoInstance.Dispose();
                     }
                     catch ( Exception e )

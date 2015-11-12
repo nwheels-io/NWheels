@@ -50,7 +50,7 @@ namespace NWheels.Stacks.MongoDb.Factories
         public override IApplicationDataRepository NewUnitOfWork(IResourceConsumerScopeHandle consumerScope, Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
         {
             var connectionString = new MongoConnectionStringBuilder(_config.GetContextConnectionString(domainContextType: repositoryType));
-            var client = new MongoClient(_config.ConnectionString);
+            var client = new MongoClient(connectionString.ConnectionString);
             var server = client.GetServer();
             var database = server.GetDatabase(connectionString.DatabaseName);
 

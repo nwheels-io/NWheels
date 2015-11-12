@@ -41,6 +41,11 @@ namespace NWheels.Entities.Impl
 
         public override void NodeConfigured(List<ILifecycleEventListener> additionalComponentsToHost)
         {
+            if ( _configuration.ConnectionString == null )
+            {
+                return;
+            }
+
             if ( _initializer.StorageSchemaExists(_configuration.ConnectionString) )
             {
                 _logger.FoundDatabase(_configuration.ConnectionString);
