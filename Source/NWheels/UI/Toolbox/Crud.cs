@@ -17,13 +17,13 @@ namespace NWheels.UI.Toolbox
         where TEntity : class
     {
         public Crud(string idName, ControlledUidlNode parent)
-            : this(idName, parent, CrudGridMode.Standalone)
+            : this(idName, parent, DataGridMode.Standalone)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Crud(string idName, ControlledUidlNode parent, CrudGridMode mode)
+        public Crud(string idName, ControlledUidlNode parent, DataGridMode mode)
             : base(idName, parent)
         {
             this.WidgetType = "Crud";
@@ -47,7 +47,7 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string EntityName { get; set; }
         [DataMember]
-        public CrudGridMode Mode { get; set; }
+        public DataGridMode Mode { get; set; }
         [DataMember]
         public DataGrid<TEntity> Grid { get; set; }
         [DataMember, ManuallyAssigned]
@@ -65,6 +65,7 @@ namespace NWheels.UI.Toolbox
         protected override void DescribePresenter(PresenterBuilder<Crud<TEntity>, Empty.Data, ICrudViewState<TEntity>> presenter)
         {
             this.Grid.UsePascalCase = true;
+            this.Grid.Mode = this.Mode;
             this.Save.Icon = "check";
             this.Save.Severity = CommandSeverity.Change;
             this.Cancel.Icon = "times";
@@ -128,15 +129,6 @@ namespace NWheels.UI.Toolbox
                 form.Commands.Add(Cancel);
             }
         }
-    }
-
-    //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-    public enum CrudGridMode
-    {
-        Standalone,
-        LookupMany,
-        Inline
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------

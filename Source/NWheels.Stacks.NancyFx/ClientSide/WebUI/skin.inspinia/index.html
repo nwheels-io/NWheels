@@ -436,6 +436,17 @@ HEAD, JS/CSS LINKS
 
                     var columnsModel = [];
 
+                    if ($scope.uidl.mode === 'LookupMany') {
+                        columnsModel.push({
+                            name: "id_selected",
+                            label: "Select",
+                            formatter: "checkbox",
+                            formatoptions: { disabled: false },
+                            edittype: "checkbox",
+                            width: 80
+                        });
+                    }
+
                     $scope.displayProperties.forEach(function (displayPropery, idx) {
                         var jsonPropertyName = ($scope.uidl.usePascalCase === true ? displayPropery.name : toCamelCase(displayPropery.name));
                         columnsModel.push({

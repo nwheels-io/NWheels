@@ -54,6 +54,9 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public bool UsePascalCase { get; set; }
 
+        [DataMember]
+        public DataGridMode Mode { get; set; }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override IEnumerable<string> GetTranslatables()
@@ -155,5 +158,14 @@ namespace NWheels.UI.Toolbox
                 metaProperty.ClrType == typeof(DateTime) || 
                 metaProperty.ClrType == typeof(TimeSpan));
         }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum DataGridMode
+    {
+        Standalone,
+        LookupMany,
+        Inline
     }
 }
