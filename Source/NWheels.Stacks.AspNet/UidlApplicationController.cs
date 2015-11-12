@@ -244,8 +244,9 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            var entityStateString = "NewModified";
-            string entityIdString = null;
+            var queryString = Request.GetQueryString();
+            var entityStateString = queryString.GetValueOrDefault("EntityState", EntityState.NewModified.ToString());
+            var entityIdString = queryString.GetValueOrDefault("EntityId", null);
 
             var entityState = ParseUtility.Parse<EntityState>(entityStateString);
             var jsonString = Request.Content.ReadAsStringAsync().Result;

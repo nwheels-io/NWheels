@@ -463,9 +463,10 @@ HEAD, JS/CSS LINKS
                         edit: false,
                         hidegrid: false,
                         onSelectRow: function (rowId) {
-                            var grid = $(this);
-                            var rowData = grid.jqGrid('getRowData', rowId);
-                            $scope.$emit($scope.uidl.qualifiedName + ':EntitySelectedById', rowData.Id);
+                            $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
+                            //var grid = $(this);
+                            //var rowData = grid.jqGrid('getRowData', rowId);
+                            //$scope.$emit($scope.uidl.qualifiedName + ':EntitySelectedById', rowData.Id);
                         }
                     });
 

@@ -481,6 +481,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 location.hash = data.screenPart.qualifiedName;
                 $timeout(function() {
                     scope.$broadcast(data.screenPart.qualifiedName + ':NavigatedHere', data.input);
+                    scope.$broadcast(data.screenPart.contentRoot.qualifiedName + ':NavigatedHere', data.input);
                     $rootScope.$broadcast(scope.uidl.qualifiedName + ':ScreenPartLoaded', scope.currentScreenPart);
                 });
             });
@@ -602,12 +603,27 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 }
             };
 
-            scope.$on(scope.uidl.qualifiedName + ':Grid:EntitySelected', function(event, data) {
+            scope.resetCrudState = function() {
+                scope.uiShowCrudForm = false;
+                scope.entity = null;
+                scope.resultSet = null;
+            };
+
+
+            scope.$on(scope.uidl.qualifiedName + ':NavigatedHere', function (event) {
+                scope.resetCrudState();
+            });
+
+            scope.$on(scope.uidl.qualifiedName + ':Grid:ObjectSelected', function (event, data) {
                 scope.selectedEntity = data;
             });
 
-            scope.$on(scope.uidl.qualifiedName + ':Grid:EntitySelectedById', function (event, id) {
+            scope.$on(scope.uidl.qualifiedName + ':Grid:ObjectSelectedById', function (event, id) {
                 scope.selectedEntity = Enumerable.From(scope.resultSet).Where("$.Id == '" + id + "'").First();
+            });
+
+            scope.$on(scope.uidl.qualifiedName + ':Grid:ObjectSelectedByIndex', function (event, index) {
+                scope.selectedEntity = scope.resultSet[index];
             });
 
             scope.editEntity = function (entity) {
@@ -668,7 +684,9 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                         scope.refresh();
                     });
                 } else {
-                    scope.resultSet.push(entity);
+                    if (scope.model.isNew) {
+                        scope.resultSet.push(entity);
+                    }
                 }
                 scope.refresh();
             };
@@ -678,6 +696,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
+                scope.resetCrudState();
                 scope.resultSet = data;
                 scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
             });

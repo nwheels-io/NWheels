@@ -12,7 +12,10 @@ namespace NWheels.Processing.Messages.Impl
 
         public void HandleMessage(AbstractSessionPushMessage message)
         {
-            message.ToSession.Endpoint.PushMessage(message.ToSession, message);
+            if ( message.ToSession.Endpoint != null )
+            {
+                message.ToSession.Endpoint.PushMessage(message.ToSession, message);
+            }
         }
 
         #endregion

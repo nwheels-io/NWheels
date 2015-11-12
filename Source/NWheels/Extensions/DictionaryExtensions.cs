@@ -37,6 +37,20 @@ namespace NWheels.Extensions
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue) 
+        {
+            TValue value;
+
+            if ( dictionary.TryGetValue(key, out value) )
+            {
+                return value;
+            }
+
+            return defaultValue;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
         public static TValue GetOrThrow<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, Exception> keyNotFoundExceptionFactory)
         {

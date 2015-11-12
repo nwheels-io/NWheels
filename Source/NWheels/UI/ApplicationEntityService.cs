@@ -14,6 +14,7 @@ using NWheels.Extensions;
 using System.Reflection;
 using System.ComponentModel;
 using System.Linq.Expressions;
+using Hapil;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NWheels.Entities.Factories;
@@ -123,8 +124,15 @@ namespace NWheels.UI
                 }
                 else if ( entityState.IsModified() )
                 {
+                    var traceWriter = new MemoryTraceWriter();
+                    var populationSerializerSettings = CreateSerializerSettings();
+                    populationSerializerSettings.TraceWriter = traceWriter;
+
                     domainObject = handler.GetById(entityId);
-                    JsonConvert.PopulateObject(json, domainObject, _serializerSettings);
+                    JsonConvert.PopulateObject(json, domainObject, populationSerializerSettings);//_serializerSettings);
+
+                    Console.WriteLine(traceWriter.ToString());
+
                     handler.Update(domainObject);
                 }
                 else if ( entityState.IsDeleted() )
@@ -848,7 +856,10 @@ namespace NWheels.UI
 
                 if ( contractTypes.Length > 0 )
                 {
-                    properties = ReplaceRelationPropertiesWithForeignKeys(contractTypes, properties);
+                    var metaTypes = contractTypes.Select(t => _metadataCache.GetTypeMetadata(t)).ToArray();
+                    
+                    properties = ReplaceRelationPropertiesWithForeignKeys(metaTypes, properties);
+                    ConfigureEmbeddedCollectionProperties(metaTypes, properties);
                 }
 
                 properties.Insert(0, CreateObjectTypeProperty());
@@ -861,10 +872,28 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private IList<JsonProperty> ReplaceRelationPropertiesWithForeignKeys(Type[] contractTypes, IList<JsonProperty> properties)
+            private void ConfigureEmbeddedCollectionProperties(ITypeMetadata[] metaTypes, IList<JsonProperty> jsonProperties)
+            {
+                foreach ( var jsonProperty in jsonProperties )
+                {
+                    var metaProperty = GetPropertyByName(metaTypes, jsonProperty.PropertyName);
+
+                    if ( IsEmbeddedObjectCollectionProperty(metaProperty) )
+                    {
+                        var converterClosedType = typeof(EmbeddedDomainObjectCollectionConverter<>).MakeGenericType(metaProperty.Relation.RelatedPartyType.ContractType);
+                        var converterInstance = (JsonConverter)Activator.CreateInstance(converterClosedType, _ownerService, metaProperty);
+                        jsonProperty.MemberConverter = converterInstance;
+
+                        //jsonProperty.ValueProvider = new EmbeddedCollectionValueProvider(innerProvider: jsonProperty.ValueProvider);
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IList<JsonProperty> ReplaceRelationPropertiesWithForeignKeys(ITypeMetadata[] metaTypes, IList<JsonProperty> properties)
             {
                 var resultList = new List<JsonProperty>();
-                var metaTypes = contractTypes.Select(t => _metadataCache.GetTypeMetadata(t)).ToArray();
 
                 foreach ( var originalJsonProperty in properties )
                 {
@@ -965,6 +994,23 @@ namespace NWheels.UI
                 return (
                     metaProperty.RelationalMapping != null && 
                     !metaProperty.RelationalMapping.EmbeddedInParent.GetValueOrDefault(false));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool IsEmbeddedObjectCollectionProperty(IPropertyMetadata metaProperty)
+            {
+                if ( !metaProperty.IsCollection )
+                {
+                    return false;
+                }
+
+                if ( metaProperty.Relation != null && metaProperty.Relation.RelatedPartyType.IsEntityPart )
+                {
+                    return true;
+                }
+
+                return (metaProperty.RelationalMapping != null && metaProperty.RelationalMapping.EmbeddedInParent.GetValueOrDefault(false));
             }
         }
 
@@ -1103,6 +1149,35 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public class EmbeddedCollectionValueProvider : IValueProvider
+        {
+            private readonly IValueProvider _innerProvider;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public EmbeddedCollectionValueProvider(IValueProvider innerProvider)
+            {
+                _innerProvider = innerProvider;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public object GetValue(object target)
+            {
+                var value = _innerProvider.GetValue(target);
+                return value;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void SetValue(object target, object value)
+            {
+                _innerProvider.SetValue(target, value);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class DomainObjectConverter : JsonConverter
         {
             private readonly ApplicationEntityService _ownerService;
@@ -1132,13 +1207,11 @@ namespace NWheels.UI
                     return null;
                 }
 
-                if ( reader.TokenType != JsonToken.StartObject )
+                object relatedDomainObject;
+                
+                if ( LoadRelatedDomainObjectByForeignKey(reader, objectType, out relatedDomainObject) )
                 {
-                    var idValue = reader.Value;
-                    var metaType = _ownerService._metadataCache.GetTypeMetadata(objectType);
-                    var handler2 = _ownerService._handlerByEntityName[metaType.QualifiedName];
-                    var entity = handler2.GetById(idValue.ToString());
-                    return entity;
+                    return relatedDomainObject;
                 }
 
                 JObject jo = JObject.Load(reader);
@@ -1185,6 +1258,186 @@ namespace NWheels.UI
             }
 
             #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private bool LoadRelatedDomainObjectByForeignKey(JsonReader reader, Type objectType, out object relatedDomainObject)
+            {
+                if ( reader.TokenType == JsonToken.StartObject ) 
+                {
+                    // JSON contains object contents - proceed and populate it
+                    relatedDomainObject = null;
+                    return false;
+                }
+
+                var idValue = reader.Value;
+                var relatedMetaType = _ownerService._metadataCache.GetTypeMetadata(objectType);
+                var foreignKeyHandler = _ownerService._handlerByEntityName[relatedMetaType.QualifiedName];
+                    
+                relatedDomainObject = foreignKeyHandler.GetById(idValue.ToString());
+                return true;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class EmbeddedDomainObjectCollectionConverter<TObject> : JsonConverter
+            where TObject : class
+        {
+            private readonly ApplicationEntityService _ownerService;
+            private readonly IPropertyMetadata _metaProperty;
+            private readonly ITypeMetadata _relatedMetaType;
+            private readonly EntityHandler _relatedEntityHandler;
+            
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public EmbeddedDomainObjectCollectionConverter(ApplicationEntityService ownerService, IPropertyMetadata metaProperty)
+            {
+                _ownerService = ownerService;
+                _metaProperty = metaProperty;
+                _relatedMetaType = _metaProperty.Relation.RelatedPartyType;
+                _relatedEntityHandler = _ownerService._handlerByEntityName[_relatedMetaType.QualifiedName];
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of JsonConverter
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                if ( reader.TokenType != JsonToken.StartArray )
+                {
+                    throw new FormatException("Expected StartArray in input JSON, but was: " + reader.TokenType);
+                }
+
+                var existingCollection = (ICollection<TObject>)existingValue;
+                int arrayItemIndex = 0;
+
+                while ( reader.Read() && reader.TokenType != JsonToken.EndArray )
+                {
+                    JObject jo = JObject.Load(reader);
+
+                    TObject itemToPopulate = null;
+
+                    if ( _relatedMetaType.IsEntity )
+                    {
+                        var idString = jo["$id"].Value<string>();
+                        itemToPopulate = existingCollection.FirstOrDefault(obj => obj.As<IEntityObject>().GetId().Value.ToString() == idString);
+                    }
+                    else
+                    {
+                        var existingItemIndexToken = jo["$index"];
+                        var itemIndex = (existingItemIndexToken != null ? Int32.Parse(existingItemIndexToken.Value<string>()) : arrayItemIndex);
+                        itemToPopulate = existingCollection.Skip(itemIndex).Take(1).FirstOrDefault();
+                    }
+
+                    if ( itemToPopulate == null )
+                    {
+                        itemToPopulate = (TObject)_relatedEntityHandler.CreateNew();
+                        existingCollection.Add(itemToPopulate);
+                    }
+
+                    JsonReader jObjectReader = jo.CreateReader();
+                    jObjectReader.Culture = reader.Culture;
+                    jObjectReader.DateParseHandling = reader.DateParseHandling;
+                    jObjectReader.DateTimeZoneHandling = reader.DateTimeZoneHandling;
+                    jObjectReader.FloatParseHandling = reader.FloatParseHandling;
+
+                    serializer.Populate(jObjectReader, itemToPopulate);
+
+                    arrayItemIndex++;
+                }
+
+                return existingValue;
+
+
+                //if ( reader.TokenType == JsonToken.Null )
+                //{
+                //    return null;
+                //}
+
+                //object relatedDomainObject;
+
+                //if ( LoadRelatedDomainObjectByForeignKey(reader, objectType, out relatedDomainObject) )
+                //{
+                //    return relatedDomainObject;
+                //}
+
+                //JObject jo = JObject.Load(reader);
+
+                //var typeName = jo["$type"].Value<string>();
+                //var handler = _ownerService._handlerByEntityName[typeName];
+                //var target = handler.CreateNew();
+
+                //JsonReader jObjectReader = jo.CreateReader();
+                //jObjectReader.Culture = reader.Culture;
+                //jObjectReader.DateParseHandling = reader.DateParseHandling;
+                //jObjectReader.DateTimeZoneHandling = reader.DateTimeZoneHandling;
+                //jObjectReader.FloatParseHandling = reader.FloatParseHandling;
+
+                //serializer.Populate(jObjectReader, target);
+                //return target;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanConvert(Type objectType)
+            {
+                Type itemType;
+                
+                return (
+                    objectType.IsCollectionType(out itemType) && 
+                    (itemType.IsEntityContract() || itemType.IsEntityPartContract()));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanRead
+            {
+                get
+                {
+                    return true;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanWrite
+            {
+                get
+                {
+                    return false;
+                }
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool LoadRelatedDomainObjectByForeignKey(JsonReader reader, Type objectType, out object relatedDomainObject)
+            {
+                if ( reader.TokenType == JsonToken.StartObject )
+                {
+                    // JSON contains object contents - proceed and populate it
+                    relatedDomainObject = null;
+                    return false;
+                }
+
+                var idValue = reader.Value;
+                var relatedMetaType = _ownerService._metadataCache.GetTypeMetadata(objectType);
+                var foreignKeyHandler = _ownerService._handlerByEntityName[relatedMetaType.QualifiedName];
+
+                relatedDomainObject = foreignKeyHandler.GetById(idValue.ToString());
+                return true;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
