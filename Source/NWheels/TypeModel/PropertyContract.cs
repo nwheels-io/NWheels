@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.StorageTypes;
 using NWheels.TypeModel;
@@ -472,6 +473,48 @@ namespace NWheels.DataObjects
                     relation.Multiplicity = metadata.IsCollection ? RelationMultiplicity.ManyToMany : RelationMultiplicity.ManyToOne;
                     relation.ThisPartyKind = RelationPartyKind.Dependent;
                 }
+            }
+
+            public class LinkToAttribute : PropertyContractAttribute
+            {
+                public LinkToAttribute(Type contractType)
+                {
+                    this.ContractType = contractType;
+                }
+
+                public override void ApplyTo(PropertyMetadataBuilder metadata, TypeMetadataCache cache)
+                {
+                    var relation = metadata.SafeGetRelation();
+                    
+                    if ( relation.RelatedPartyType != null )
+                    {
+                        return;
+                    }
+
+                    relation.ThisPartyKind = RelationPartyKind.Dependent;
+                    relation.RelatedPartyType = cache.FindTypeMetadataAllowIncomplete(ContractType);
+                    relation.ThisPartyKey = new KeyMetadataBuilder();
+                    relation.ThisPartyKey.Name = "FK_" + relation.RelatedPartyType.Name;
+                    relation.ThisPartyKey.Kind = KeyKind.Foreign;
+
+                    if ( string.IsNullOrEmpty(this.PropertyName) )
+                    {
+                        if ( relation.RelatedPartyType.PrimaryKey != null )
+                        {
+                            relation.ThisPartyKey.Properties.AddRange(relation.RelatedPartyType.PrimaryKey.Properties);
+                        }
+                    }
+                    else
+                    {
+                        var property = relation.RelatedPartyType.GetPropertyByName(this.PropertyName);
+                        relation.ThisPartyKey.Properties.Add((PropertyMetadataBuilder)property);
+                    }
+
+                    metadata.DeclaringContract.AllKeys.Add(relation.ThisPartyKey);
+                }
+
+                public Type ContractType { get; private set; }
+                public string PropertyName { get; set; }
             }
         }
 

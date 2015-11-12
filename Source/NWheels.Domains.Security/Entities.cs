@@ -123,17 +123,23 @@ namespace NWheels.Domains.Security
     [EntityPartContract]
     public interface IEntityPartClaimsContainer
     {
-        [PropertyContract.Relation.Composition, PropertyContract.Storage.Json]
+        [PropertyContract.Relation.LinkTo(typeof(IUserRoleEntity), PropertyName = "ClaimValue"), 
+            PropertyContract.Relation.Composition, 
+            PropertyContract.Storage.Json]
         string[] AssociatedRoles { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Relation.Composition, PropertyContract.Storage.Json]
+        [PropertyContract.Relation.LinkTo(typeof(IOperationPermissionEntity), PropertyName = "ClaimValue"), 
+            PropertyContract.Relation.Composition, 
+            PropertyContract.Storage.Json]
         string[] AssociatedPermissions { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [PropertyContract.Relation.Composition, PropertyContract.Storage.Json]
+        [PropertyContract.Relation.LinkTo(typeof(IEntityAccessRuleEntity), PropertyName = "ClaimValue"), 
+            PropertyContract.Relation.Composition, 
+            PropertyContract.Storage.Json]
         string[] AssociatedDataRules { get; set; }
     }
 
