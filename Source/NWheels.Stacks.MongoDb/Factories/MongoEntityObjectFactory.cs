@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Autofac;
 using Hapil;
 using NWheels.Conventions.Core;
@@ -7,6 +8,7 @@ using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Factories;
 using NWheels.Entities.Factories;
 using NWheels.Extensions;
+using NWheels.TypeModel;
 using NWheels.TypeModel.Core.Factories;
 
 namespace NWheels.Stacks.MongoDb.Factories
@@ -24,6 +26,8 @@ namespace NWheels.Stacks.MongoDb.Factories
         {
             var metaType = MetadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
             var propertyMap = BuildPropertyStrategyMap(context, metaType);
+
+            UpdateProperyRelationalMappings(propertyMap);
 
             propertyMap.NeedImplementationTypeKey += (sender, args) => {
                 args.TypeKeyToUse = CreateImplementationTypeKey(args.ContractType);
@@ -144,15 +148,13 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             if ( metaProperty.Relation.RelatedPartyType.IsEntity )
             {
-                if ( metaProperty.RelationalMapping != null && metaProperty.RelationalMapping.EmbeddedInParent.HasValue )
+                if ( metaProperty.RelationalMapping != null && metaProperty.RelationalMapping.StorageStyle != PropertyStorageStyle.Undefined )
                 {
-                    return metaProperty.RelationalMapping.EmbeddedInParent.Value;
+                    return metaProperty.RelationalMapping.IsEmbeddedInParent;
                 }
                 else
                 {
-                    var shouldEmbedDocuments = (metaProperty.Relation.Kind == RelationKind.Composition);
-                    UpdateProperyRelationalMapping(metaProperty, shouldEmbedDocuments);
-                    return shouldEmbedDocuments;
+                    return (metaProperty.Relation.Kind == RelationKind.Composition);
                 }
             }
 
@@ -201,10 +203,27 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void UpdateProperyRelationalMapping(IPropertyMetadata metaProperty, bool embeddedInParent)
+        private static readonly Dictionary<Type, PropertyStorageStyle> _s_storageStyleByStrategyType = new Dictionary<Type, PropertyStorageStyle>() {
+            { typeof(RelationTypecastStrategy), PropertyStorageStyle.EmbeddedObject },
+            { typeof(CollectionAdapterStrategy), PropertyStorageStyle.EmbeddedObjectCollection },
+            { typeof(DocumentIdStrategy), PropertyStorageStyle.InlineForeignKey },
+            { typeof(ArrayOfDocumentIdsStrategy), PropertyStorageStyle.EmbeddedForeignKeyCollection },
+        };
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void UpdateProperyRelationalMappings(PropertyImplementationStrategyMap propertyMap)
         {
-            var writableMetaProperty = (PropertyMetadataBuilder)metaProperty;
-            writableMetaProperty.SafeGetRelationalMapping().EmbeddedInParent = embeddedInParent;
+            foreach ( var strategy in propertyMap.Strategies )
+            {
+                PropertyStorageStyle storageStyle;
+
+                if ( _s_storageStyleByStrategyType.TryGetValue(strategy.GetType(), out storageStyle) )
+                {
+                    var writableMetaProperty = (PropertyMetadataBuilder)strategy.MetaProperty;
+                    writableMetaProperty.SafeGetRelationalMapping().StorageStyle = storageStyle;
+                }
+            }
         }
     }
 }

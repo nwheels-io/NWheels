@@ -1,4 +1,6 @@
-﻿namespace NWheels.DataObjects.Core
+﻿using NWheels.TypeModel;
+
+namespace NWheels.DataObjects.Core
 {
     public class PropertyRelationalMappingBuilder : MetadataElement<IPropertyRelationalMapping>, IPropertyRelationalMapping
     {
@@ -19,12 +21,41 @@
         #region IPropertyRelationalMapping Members
 
         public IStorageDataType StorageType { get; set; }
+        public PropertyStorageStyle StorageStyle { get; set; }
         public string TableName { get; set; }
         public string ColumnName { get; set; }
         public string ColumnType { get; set; }
         public string RelatedColumnName { get; set; }
         public string RelatedColumnType { get; set; }
-        public bool? EmbeddedInParent { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsEmbeddedInParent
+        {
+            get
+            {
+                var storageStyle = this.StorageStyle;
+
+                return (
+                    storageStyle == PropertyStorageStyle.InlineScalar || 
+                    storageStyle == PropertyStorageStyle.EmbeddedObject ||
+                    storageStyle == PropertyStorageStyle.EmbeddedObjectCollection);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsForeignKeyEmbeddedInParent
+        {
+            get
+            {
+                var storageStyle = this.StorageStyle;
+
+                return (
+                    storageStyle == PropertyStorageStyle.InlineForeignKey ||
+                    storageStyle == PropertyStorageStyle.EmbeddedForeignKeyCollection);
+            }
+        }
 
         #endregion
 
@@ -38,7 +69,7 @@
             ColumnType = visitor.VisitAttribute("ColumnType", ColumnType);
             RelatedColumnName = visitor.VisitAttribute("RelatedColumnName", RelatedColumnName);
             RelatedColumnType = visitor.VisitAttribute("RelatedColumnType", RelatedColumnType);
-            EmbeddedInParent = visitor.VisitAttribute("EmbeddedInParent", EmbeddedInParent);
+            StorageStyle = visitor.VisitAttribute("StorageStyle", StorageStyle);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

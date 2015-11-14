@@ -165,7 +165,8 @@ namespace NWheels.UI.Toolbox
     public enum DataGridMode
     {
         Standalone,
+        Inline,
+        LookupOne,
         LookupMany,
-        Inline
     }
 }

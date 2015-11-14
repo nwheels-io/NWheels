@@ -609,7 +609,6 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.resultSet = null;
             };
 
-
             scope.$on(scope.uidl.qualifiedName + ':NavigatedHere', function (event) {
                 scope.resetCrudState();
             });
@@ -805,14 +804,56 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
                 scope.model.data.entity = data;
                 scope.commandInProgress = false;
+                scope.tabSetIndex = 0;
 
                 $timeout(function() {
                     Enumerable.From(scope.uidl.fields)
-                        .Where("$.fieldType=='InlineGrid' || $.fieldType=='InlineForm'")
+                        .Where("$.fieldType=='InlineGrid' || $.fieldType=='InlineForm' || $.fieldType=='LookupMany'")
                         .ForEach(function (field) {
                             scope.$broadcast(field.nestedWidget.qualifiedName + ':ModelSetter', data[field.propertyName]);
                         });
                 });
+            });
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_controllerImplementations['LookupGrid'] = {
+        implement: function (scope) {
+            var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
+            scope.metaType = metaType;
+
+            if (!scope.uidl.displayColumns || !scope.uidl.displayColumns.length) {
+                scope.uidl.displayColumns = scope.uidl.defaultDisplayColumns;
+            }
+
+            scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
+                return metaType.properties[toCamelCase(name)];
+            }).ToArray();
+
+            scope.queryLookupRecords = function () {
+                scope.lookupRecords = null;
+                scope.entityService.queryEntity(scope.uidl.entityName).then(function (data) {
+                    scope.lookupRecords = data.ResultSet;
+                    var modelAsEnumerable = Enumerable.From(scope.model); 
+                    for (var i = 0; i < scope.lookupRecords.length; i++) {
+                        var record = scope.lookupRecords[i];
+                        record.isChecked = modelAsEnumerable.Any("$ == '" + record['$id'] + "'");
+                    }
+                    $timeout(function () {
+                        scope.$broadcast(scope.uidl.qualifiedName + ':DataReceived', scope.lookupRecords);
+                    });
+                });
+            };
+
+            scope.refresh = function () {
+                scope.queryLookupRecords();
+            };
+
+            scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
+                scope.model = data;
+                scope.queryLookupRecords();
             });
         }
     };

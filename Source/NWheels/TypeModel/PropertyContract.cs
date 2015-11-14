@@ -280,7 +280,7 @@ namespace NWheels.DataObjects
                 public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
                 {
                     var mapping = property.SafeGetRelationalMapping();
-                    mapping.EmbeddedInParent = IsEmbedded;
+                    mapping.StorageStyle = (property.IsCollection ? PropertyStorageStyle.EmbeddedObjectCollection : PropertyStorageStyle.EmbeddedObject);
                 }
                 public bool IsEmbedded { get; private set; }
             }

@@ -18,6 +18,7 @@ using Hapil;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NWheels.Entities.Factories;
+using NWheels.TypeModel;
 using NWheels.UI.Factories;
 
 namespace NWheels.UI
@@ -265,6 +266,9 @@ namespace NWheels.UI
 
         public class QueryOptions
         {
+            public const string SelectParameterKey = "$select";
+            public const string IncludeParameterKey = "$include";
+            public const string PropertyAliasModifier = ":as:";
             public const string CountParameterKey = "$count";
             public const string SkipParameterKey = "$skip";
             public const string TakeParameterKey = "$take";
@@ -298,7 +302,15 @@ namespace NWheels.UI
             {
                 foreach ( var parameter in queryParams )
                 {
-                    if ( parameter.Key.EqualsIgnoreCase(CountParameterKey) )
+                    if ( parameter.Key.EqualsIgnoreCase(SelectParameterKey) )
+                    {
+                        this.SelectPropertyNames = ParsePropertyList(parameter.Value);
+                    }
+                    else if ( parameter.Key.EqualsIgnoreCase(IncludeParameterKey) )
+                    {
+                        this.IncludePropertyNames = ParsePropertyList(parameter.Value);
+                    }
+                    else if ( parameter.Key.EqualsIgnoreCase(CountParameterKey) )
                     {
                         IsCountOnly = true;
                     }
@@ -321,9 +333,12 @@ namespace NWheels.UI
                 }
             }
 
+
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public bool IsCountOnly { get; private set; }
+            public IList<QuerySelectItem> SelectPropertyNames { get; private set; }
+            public IList<QuerySelectItem> IncludePropertyNames { get; private set; }
             public IList<QueryFilterItem> Filter { get; private set; }
             public IList<QueryFilterItem> InMemoryFilter { get; private set; }
             public IList<QueryOrderByItem> OrderBy { get; private set; }
@@ -339,6 +354,21 @@ namespace NWheels.UI
                 {
                     return (InMemoryFilter.Count > 0 || InMemoryOrderBy.Count > 0);
                 }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private List<QuerySelectItem> ParsePropertyList(string parameterValue)
+            {
+                var destination = new List<QuerySelectItem>();
+                var propertySpecifiers = parameterValue.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach ( var specifier in propertySpecifiers )
+                {
+                    destination.Add(new QuerySelectItem(specifier));
+                }
+
+                return destination;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -376,6 +406,33 @@ namespace NWheels.UI
                 var filterItem = new QueryFilterItem(propertyName, @operator, parameter.Value);
                 this.Filter.Add(filterItem);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class QuerySelectItem
+        {
+            public QuerySelectItem(string propertySpecifier)
+            {
+                var aliasPosition = propertySpecifier.IndexOf(QueryOptions.PropertyAliasModifier, StringComparison.InvariantCultureIgnoreCase);
+                var propertyPathString = (aliasPosition > 0 ? propertySpecifier.Substring(0, aliasPosition) : propertySpecifier);
+
+                this.PropertyPath = propertyPathString.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if ( aliasPosition > 0 )
+                {
+                    this.AliasName = propertySpecifier.Substring(aliasPosition + QueryOptions.PropertyAliasModifier.Length);
+                }
+                else
+                {
+                    this.AliasName = propertyPathString;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IReadOnlyList<string> PropertyPath { get; private set; }
+            public string AliasName { get; private set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -904,25 +961,54 @@ namespace NWheels.UI
                         continue;
                     }
 
-                    if ( !ShouldReplacePropertyWithForeignKey(metaProperty) )
+                    if ( ShouldReplacePropertyWithForeignKey(metaProperty) )
+                    {
+                        resultList.Add(CreateReplacementForeignKeyProperty(metaProperty, originalJsonProperty));
+                    }
+                    else if ( ShouldReplacePropertyWithForeignKeyCollection(metaProperty) )
+                    {
+                        resultList.Add(CreateReplacementForeignKeyCollectionProperty(metaProperty, originalJsonProperty));
+                    }
+                    else
                     {
                         resultList.Add(originalJsonProperty);
-                        continue;
                     }
-                    
-                    var replacingJsonProperty = new JsonProperty {
-                        PropertyType = typeof(string),
-                        DeclaringType = metaProperty.ContractPropertyInfo.DeclaringType,
-                        PropertyName = metaProperty.Name,
-                        ValueProvider = new ForeignKeyValueProvider(_ownerService, metaProperty, originalJsonProperty),
-                        Readable = true,
-                        Writable = true
-                    };
-
-                    resultList.Add(replacingJsonProperty);
                 }
 
                 return resultList;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private JsonProperty CreateReplacementForeignKeyProperty(IPropertyMetadata metaProperty, JsonProperty originalJsonProperty)
+            {
+                var replacingJsonProperty = new JsonProperty {
+                    PropertyType = typeof(string),
+                    DeclaringType = metaProperty.ContractPropertyInfo.DeclaringType,
+                    PropertyName = metaProperty.Name,
+                    ValueProvider = new ForeignKeyValueProvider(_ownerService, metaProperty, originalJsonProperty),
+                    Readable = true,
+                    Writable = true
+                };
+                
+                return replacingJsonProperty;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private JsonProperty CreateReplacementForeignKeyCollectionProperty(IPropertyMetadata metaProperty, JsonProperty originalJsonProperty)
+            {
+                var replacingJsonProperty = new JsonProperty
+                {
+                    PropertyType = typeof(string),
+                    DeclaringType = metaProperty.ContractPropertyInfo.DeclaringType,
+                    PropertyName = metaProperty.Name,
+                    ValueProvider = new ForeignKeyValueProvider(_ownerService, metaProperty, originalJsonProperty),
+                    Readable = true,
+                    Writable = true
+                };
+
+                return replacingJsonProperty;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -974,7 +1060,7 @@ namespace NWheels.UI
 
             private bool ShouldExcludeProperty(IPropertyMetadata metaProperty)
             {
-                return (ShouldReplacePropertyWithForeignKey(metaProperty) && metaProperty.IsCollection);
+                return (metaProperty.RelationalMapping != null && metaProperty.RelationalMapping.StorageStyle == PropertyStorageStyle.InverseForeignKey);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -993,7 +1079,26 @@ namespace NWheels.UI
 
                 return (
                     metaProperty.RelationalMapping != null && 
-                    !metaProperty.RelationalMapping.EmbeddedInParent.GetValueOrDefault(false));
+                    metaProperty.RelationalMapping.StorageStyle == PropertyStorageStyle.InlineForeignKey);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool ShouldReplacePropertyWithForeignKeyCollection(IPropertyMetadata metaProperty)
+            {
+                if ( metaProperty.Kind != PropertyKind.Relation || !metaProperty.Relation.RelatedPartyType.IsEntity )
+                {
+                    return false;
+                }
+
+                if ( metaProperty.DeclaringContract.IsViewModel )
+                {
+                    return true;
+                }
+
+                return (
+                    metaProperty.RelationalMapping != null &&
+                    metaProperty.RelationalMapping.StorageStyle == PropertyStorageStyle.EmbeddedForeignKeyCollection);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1010,7 +1115,7 @@ namespace NWheels.UI
                     return true;
                 }
 
-                return (metaProperty.RelationalMapping != null && metaProperty.RelationalMapping.EmbeddedInParent.GetValueOrDefault(false));
+                return (metaProperty.RelationalMapping != null && metaProperty.RelationalMapping.IsEmbeddedInParent);
             }
         }
 

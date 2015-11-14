@@ -131,6 +131,20 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        IPropertyMetadata ITypeMetadata.EntityIdProperty
+        {
+            get { return this.EntityIdProperty; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IPropertyMetadata ITypeMetadata.PartitionProperty
+        {
+            get { return this.PartitionProperty; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         IReadOnlyList<IPropertyMetadata> ITypeMetadata.DefaultDisplayProperties
         {
             get { return _defaultDisplayPropertiesAdapter; }
@@ -168,6 +182,15 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public PropertyMetadataBuilder EntityIdProperty
+        {
+            get
+            {
+                return (PrimaryKey != null && PrimaryKey.Properties.Count == 1 ? PrimaryKey.Properties[0] : null);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {

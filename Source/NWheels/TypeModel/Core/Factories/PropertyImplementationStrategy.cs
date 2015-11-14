@@ -7,6 +7,7 @@ using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.Extensions;
+using NWheels.TypeModel;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.DataObjects.Core.Factories
@@ -302,6 +303,14 @@ namespace NWheels.DataObjects.Core.Factories
             {
                 WriteInitializeWithGeneratedValue(constructorWriter, components);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected void SetMetaPropertyStorageStyle(PropertyStorageStyle storageStyle)
+        {
+            var writableMetaProperty = (PropertyMetadataBuilder)this.MetaProperty;
+            writableMetaProperty.SafeGetRelationalMapping().StorageStyle = storageStyle;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
