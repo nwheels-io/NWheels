@@ -10,6 +10,7 @@ namespace NWheels.Entities.Core
 {
     public interface IDomainObject : IObject, IContain<IPersistableObject>
     {
+        //string ConcatValues();
         void Validate();
         void BeforeCommit();
         void AfterCommit();

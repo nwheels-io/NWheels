@@ -185,6 +185,25 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static StringBuilder AppendNonDefaultPropertyValue<T>(StringBuilder text, string propertyName, T propertyValue)
+        {
+            object valueAsObject = propertyValue;
+
+            if ( valueAsObject != null && !propertyValue.Equals(default(T)) )
+            {
+                if ( text.Length > 0 )
+                {
+                    text.Append(", ");
+                }
+
+                text.Append(propertyName + " = " + propertyValue.ToString());
+            }
+
+            return text;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static DataRepositoryBase CurrentDomainContext
         {
             get

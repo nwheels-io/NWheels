@@ -596,12 +596,13 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.queryEntities = function () {
+                scope.resultSet = null;
                 if (scope.uidl.mode !== 'Inline') {
-                    scope.resultSet = null;
                     scope.entityService.queryEntity(scope.uidl.grid.entityName).then(function (data) {
-                        scope.resultSet = data.ResultSet;
-                        $timeout(function() {
-                            scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
+                        var receivedResultSet = data.ResultSet;
+                        $timeout(function () {
+                            scope.resultSet = receivedResultSet;
+                            scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', receivedResultSet);
                         });
                     });
                 } else {
