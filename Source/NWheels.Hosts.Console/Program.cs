@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
@@ -18,6 +19,7 @@ namespace NWheels.Hosts.Console
 {
     class Program
     {
+        private static string _s_bootConfigFilePath;
         private static BootConfiguration _s_bootConfig;
         private static NodeHost _s_nodeHost;
         private static ManualResetEvent _s_stopRequested;
@@ -28,6 +30,7 @@ namespace NWheels.Hosts.Console
         static int Main(string[] args)
         {
             CrashLog.RegisterUnhandledExceptionHandler();
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
             _s_log = NLogBasedPlainLog.Instance;
             _s_log.ConfigureConsoleOutput();
@@ -73,11 +76,11 @@ namespace NWheels.Hosts.Console
 
         private static void LoadBootConfig(string[] programArgs)
         {
-            var configFilePath = PathUtility.HostBinPath(programArgs.Length > 0 ? programArgs[0] : BootConfiguration.DefaultBootConfigFileName);
+            _s_bootConfigFilePath = PathUtility.HostBinPath(programArgs.Length > 0 ? programArgs[0] : BootConfiguration.DefaultBootConfigFileName);
 
-            _s_log.Debug("Loading configuration from: {0}", configFilePath);
+            _s_log.Debug("Loading configuration from: {0}", _s_bootConfigFilePath);
 
-            _s_bootConfig = BootConfiguration.LoadFromFile(configFilePath);
+            _s_bootConfig = BootConfiguration.LoadFromFile(_s_bootConfigFilePath);
             _s_bootConfig.Validate();
 
             _s_log.Debug("> Application Name   - {0}", _s_bootConfig.ApplicationName);
@@ -154,6 +157,27 @@ namespace NWheels.Hosts.Console
         {
             e.Cancel = true;
             _s_stopRequested.Set();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            var assemblyName = new AssemblyName(args.Name);
+            var assemblyProbePaths = new List<string>();
+
+            assemblyProbePaths.Add(Path.Combine(Path.GetDirectoryName(_s_bootConfigFilePath), assemblyName.Name + ".dll"));
+            assemblyProbePaths.Add(PathUtility.HostBinPath(assemblyName.Name + ".dll"));
+
+            foreach ( var probePath in assemblyProbePaths )
+            {
+                if ( File.Exists(probePath) )
+                {
+                    return Assembly.LoadFrom(probePath);
+                }
+            }
+
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
