@@ -15,6 +15,7 @@ using System.Reflection;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using Hapil;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NWheels.Entities.Factories;
@@ -184,6 +185,7 @@ namespace NWheels.UI
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
 
+            settings.Converters.Add(new StringEnumConverter());
             settings.Converters.Add(new DomainObjectConverter(this));
             settings.Converters.Add(new ViewModelObjectConverter(this, _viewModelFactory));
 
@@ -998,12 +1000,17 @@ namespace NWheels.UI
 
             private JsonProperty CreateReplacementForeignKeyCollectionProperty(IPropertyMetadata metaProperty, JsonProperty originalJsonProperty)
             {
-                var replacingJsonProperty = new JsonProperty
-                {
-                    PropertyType = typeof(string),
+                var valueProviderClosedType = 
+                    typeof(ForeignKeyCollectionValueProvider<>).MakeGenericType(metaProperty.Relation.RelatedPartyType.ContractType);
+                
+                var valueProviderInstance = 
+                    (IValueProvider)Activator.CreateInstance(valueProviderClosedType, _ownerService, metaProperty, originalJsonProperty);
+
+                var replacingJsonProperty = new JsonProperty {
+                    PropertyType = typeof(string[]),
                     DeclaringType = metaProperty.ContractPropertyInfo.DeclaringType,
                     PropertyName = metaProperty.Name,
-                    ValueProvider = new ForeignKeyValueProvider(_ownerService, metaProperty, originalJsonProperty),
+                    ValueProvider = valueProviderInstance,
                     Readable = true,
                     Writable = true
                 };
@@ -1254,6 +1261,76 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public class ForeignKeyCollectionValueProvider<TEntity> : IValueProvider
+            where TEntity : class
+        {
+            private readonly ApplicationEntityService _ownerService;
+            private readonly JsonProperty _relationProperty;
+            private readonly ITypeMetadata _relatedMetaType;
+            private readonly EntityHandler _relatedEntityHandler;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ForeignKeyCollectionValueProvider(ApplicationEntityService ownerService, IPropertyMetadata metaProperty, JsonProperty relationProperty)
+            {
+                _ownerService = ownerService;
+                _relationProperty = relationProperty;
+                _relatedMetaType = metaProperty.Relation.RelatedPartyType;
+                _relatedEntityHandler = _ownerService._handlerByEntityName[_relatedMetaType.QualifiedName];
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void SetValue(object target, object value)
+            {
+                var collection = (ICollection<TEntity>)_relationProperty.ValueProvider.GetValue(target);
+                var entityIdSet = new HashSet<string>((string[])value);
+                var itemsToRemove = new List<TEntity>();
+
+                foreach ( var item in collection )
+                {
+                    var itemEntityId = item.As<IPersistableObject>().As<IEntityObject>().GetId().Value.ToString();
+
+                    if ( entityIdSet.Contains(itemEntityId) )
+                    {
+                        entityIdSet.Remove(itemEntityId);
+                    }
+                    else
+                    {
+                        itemsToRemove.Add(item);
+                    }
+                }
+
+                foreach ( var item in itemsToRemove )
+                {
+                    collection.Remove(item);
+                }
+
+                foreach ( var id in entityIdSet )
+                {
+                    collection.Add((TEntity)_relatedEntityHandler.GetById(id));
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public object GetValue(object target)
+            {
+                var collection = (ICollection<TEntity>)_relationProperty.ValueProvider.GetValue(target);
+
+                if ( collection == null )
+                {
+                    return null;
+                }
+
+                var entityIds = collection.Select(obj => obj.As<IPersistableObject>().As<IEntityObject>().GetId().Value.ToStringOrDefault()).ToArray();
+
+                return entityIds;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class EmbeddedCollectionValueProvider : IValueProvider
         {
             private readonly IValueProvider _innerProvider;
@@ -1394,7 +1471,6 @@ namespace NWheels.UI
             private readonly ITypeMetadata _relatedMetaType;
             private readonly EntityHandler _relatedEntityHandler;
             
-
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public EmbeddedDomainObjectCollectionConverter(ApplicationEntityService ownerService, IPropertyMetadata metaProperty)

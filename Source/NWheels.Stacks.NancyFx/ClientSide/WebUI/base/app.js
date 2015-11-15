@@ -329,10 +329,14 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             console.log('run-behavior > navigate', behavior.targetType, behavior.targetQualifiedName);
             switch (behavior.targetType) {
                 case 'Screen':
+                    var oldScreen = $rootScope.currentScreen;
                     var screen = m_index.screens[behavior.targetQualifiedName];
                     $rootScope.currentScreen = screen;
                     location.hash = screen.qualifiedName;
-                    $timeout(function() {
+                    $timeout(function () {
+                        //if (oldScreen) {
+                        //    $rootScope.$broadcast(oldScreen.qualifiedName + ':NavigatingAway', input);
+                        //}
                         $rootScope.$broadcast(screen.qualifiedName + ':NavigatedHere', input);
                     });
                     break;
@@ -477,12 +481,16 @@ function ($q, $http, $rootScope, $timeout, commandService) {
         implement: function (scope) {
             scope.$on(scope.uidl.qualifiedName + ':NavReq', function (event, data) {
                 console.log('screenPartContainer::on-NavReq', scope.uidl.qualifiedName, '->', data.screenPart.qualifiedName);
+                var oldScreenPart = scope.currentScreenPart;
                 scope.currentScreenPart = data.screenPart;
                 location.hash = data.screenPart.qualifiedName;
                 $timeout(function() {
                     scope.$broadcast(data.screenPart.qualifiedName + ':NavigatedHere', data.input);
                     scope.$broadcast(data.screenPart.contentRoot.qualifiedName + ':NavigatedHere', data.input);
                     $rootScope.$broadcast(scope.uidl.qualifiedName + ':ScreenPartLoaded', scope.currentScreenPart);
+                    //if (oldScreenPart) {
+                    //    $rootScope.$broadcast(oldScreenPart.qualifiedName + ':NavigatingAway', data.input);
+                    //}
                 });
             });
             if (scope.uidl.initalScreenPartQualifiedName) {
@@ -851,7 +859,22 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.queryLookupRecords();
             };
 
-            scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
+            scope.updateCheckboxModel = function (rowIndex, isChecked) {
+                var entityId = scope.lookupRecords[rowIndex]['$id'];
+                var model = scope.model;
+
+                for (var i = model.length - 1; i >= 0; i--) {
+                    if (model[i] === entityId) {
+                        model.splice(i, 1);
+                    }
+                }
+
+                if (isChecked) {
+                    model.push(entityId);
+                }
+            };
+
+            scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function (event, data) {
                 scope.model = data;
                 scope.queryLookupRecords();
             });
@@ -1030,6 +1053,9 @@ theApp.directive('uidlScreen', ['uidlService', 'entityService', function (uidlSe
                 console.log('uidlScreen::watch(uidl)', oldValue.qualifiedName, '->', $scope.uidl.qualifiedName);
                 uidlService.implementController($scope);
             });
+            //$scope.$on($scope.uidl.qualifiedName + ':NavigatingAway', function () {
+            //    $scope.$destroy();
+            //});
         }
     };
 }]);
@@ -1057,6 +1083,9 @@ theApp.directive('uidlScreenPart', ['uidlService', 'entityService', function (ui
                 console.log('uidlScreenPart::watch(uidl)', oldValue.qualifiedName, '->', $scope.uidl.qualifiedName);
                 uidlService.implementController($scope);
             });
+            //$scope.$on($scope.uidl.qualifiedName + ':NavigatingAway', function () {
+            //    $scope.$destroy();
+            //});
         }
     };
 }]);

@@ -535,6 +535,16 @@ HEAD, JS/CSS LINKS
 
                     var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
                     thegrid[0].addJSONData(data);
+
+                    var rows = thegrid[0].rows;
+                    var rowCount = rows.length;
+                    for (var i = 1; i < rowCount; i++) {
+                        $(rows[i].cells[0]).click(function (e) {
+                            var id = $(e.target).closest('tr')[0].id;
+                            var isChecked = $(e.target).is(':checked');
+                            $scope.updateCheckboxModel(id - 1, isChecked);
+                        });
+                    }
                 });
             });
         }
