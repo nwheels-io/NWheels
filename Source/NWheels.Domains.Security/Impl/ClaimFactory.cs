@@ -10,9 +10,6 @@ namespace NWheels.Domains.Security.Impl
     public class ClaimFactory
     {
         private readonly IFramework _framework;
-        private Dictionary<string, IUserRoleEntity> _allRoles;
-        private Dictionary<string, IOperationPermissionEntity> _allPermissions;
-        private Dictionary<string, IEntityAccessRuleEntity> _allDataRules;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -29,7 +26,6 @@ namespace NWheels.Domains.Security.Impl
 
             using ( var context = _framework.NewUnitOfWork<IUserAccountDataRepository>() )
             {
-                RefreshCache(context); //TODO: use real caching of all defined claims
                 ListClaimsFromContainer(claimsContainer, expandedClaims);
             }
 
@@ -38,20 +34,11 @@ namespace NWheels.Domains.Security.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void RefreshCache(IUserAccountDataRepository context)
-        {
-            _allRoles = context.UserRoles.ToDictionary(r => r.ClaimValue);
-            _allPermissions = context.OperationPermissions.ToDictionary(p => p.ClaimValue);
-            _allDataRules = context.EntityAccessRules.ToDictionary(r => r.ClaimValue);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         private void ListClaimsFromContainer(IEntityPartClaimsContainer claimsContainer, List<Claim> expandedClaims)
         {
             if ( claimsContainer.AssociatedRoles != null )
             {
-                foreach ( var role in claimsContainer.AssociatedRoles.Select(s => _allRoles[s]) )
+                foreach ( var role in claimsContainer.AssociatedRoles )
                 {
                     expandedClaims.Add(new UserAccountRoleClaim(this, role));
                     ListClaimsFromContainer(role, expandedClaims);
@@ -60,15 +47,15 @@ namespace NWheels.Domains.Security.Impl
 
             if ( claimsContainer.AssociatedPermissions != null )
             {
-                foreach ( var permission in claimsContainer.AssociatedPermissions.Select(s => _allPermissions[s]) )
+                foreach ( var permission in claimsContainer.AssociatedPermissions )
                 {
                     expandedClaims.Add(new OperationPermissionClaim(permission.ClaimValue));
                 }
             }
 
-            if ( claimsContainer.AssociatedDataRules != null )
+            if ( claimsContainer.AssociatedEntityAccessRules != null )
             {
-                foreach ( var dataRule in claimsContainer.AssociatedDataRules.Select(s => _allDataRules[s]) )
+                foreach ( var dataRule in claimsContainer.AssociatedEntityAccessRules )
                 {
                     expandedClaims.Add(new EntityAccessRuleClaim(dataRule, dataRule.ClaimValue));
                 }

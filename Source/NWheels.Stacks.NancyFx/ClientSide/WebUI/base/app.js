@@ -1286,3 +1286,12 @@ theApp.filter('reverse', function () {
         return items.slice().reverse();
     };
 });
+
+//---------------------------------------------------------------------------------------------------------------------
+
+theApp.filter('translated', ['uidlService', function(uidlService) {
+    return function(s) {
+        return uidlService.translate(s);
+    };
+}]);
+

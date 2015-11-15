@@ -157,9 +157,9 @@ namespace NWheels.Domains.Security.Core
 
         #region Implementation of IEntityPartClaimsContainer
 
-        public abstract string[] AssociatedRoles { get; set; }
-        public abstract string[] AssociatedPermissions { get; set; }
-        public abstract string[] AssociatedDataRules { get; set; }
+        public abstract ICollection<IUserRoleEntity> AssociatedRoles { get; set; }
+        public abstract ICollection<IOperationPermissionEntity> AssociatedPermissions { get; set; }
+        public abstract ICollection<IEntityAccessRuleEntity> AssociatedEntityAccessRules { get; set; }
 
         #endregion
 

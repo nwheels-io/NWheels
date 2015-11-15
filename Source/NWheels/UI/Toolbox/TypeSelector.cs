@@ -47,6 +47,13 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IEnumerable<TWidget> WidgetsOfType<TWidget>()
+        {
+            return Selections.Select(s => s.Widget).OfType<TWidget>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public string BaseTypeName { get; set; }
         [DataMember, ManuallyAssigned]

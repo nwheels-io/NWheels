@@ -32,7 +32,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
             IPropertyMetadata metaProperty)
-            : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty, storageType: GetArrayOfIdsType(metaType))
+            : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty, storageType: GetArrayOfIdsType(metaProperty))
         {
         }
 
@@ -46,7 +46,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             base.MetaProperty.ClrType.IsCollectionType(out _itemContractType);
             _itemImplementationType = FindImplementationType(_itemContractType);
-            _documentIdType = MetaType.PrimaryKey.Properties[0].ClrType;
+            _documentIdType = MetaProperty.Relation.RelatedPartyType.EntityIdProperty.ClrType;
             _concreteCollectionType = HelpGetConcreteCollectionType(MetaProperty.ClrType, _itemContractType);
 
             _componentsField = writer.DependencyField<IComponentContext>("$components");
@@ -161,9 +161,9 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        private static Type GetArrayOfIdsType(ITypeMetadata metaType)
+        private static Type GetArrayOfIdsType(IPropertyMetadata metaProperty)
         {
-            var idType = metaType.PrimaryKey.Properties[0].ClrType;
+            var idType = metaProperty.Relation.RelatedPartyType.EntityIdProperty.ClrType;
             return idType.MakeArrayType();
         }
     }

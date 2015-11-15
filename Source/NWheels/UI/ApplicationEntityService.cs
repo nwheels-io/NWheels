@@ -1511,7 +1511,7 @@ namespace NWheels.UI
                     if ( _relatedMetaType.IsEntity )
                     {
                         var idString = jo["$id"].Value<string>();
-                        itemToPopulate = existingCollection.FirstOrDefault(obj => obj.As<IEntityObject>().GetId().Value.ToString() == idString);
+                        itemToPopulate = existingCollection.FirstOrDefault(obj => obj.As<IPersistableObject>().As<IEntityObject>().GetId().Value.ToString() == idString);
                     }
                     else
                     {

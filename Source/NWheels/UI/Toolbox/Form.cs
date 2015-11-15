@@ -154,6 +154,30 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        void IUidlForm.ShowFields(params string[] propertyNames)
+        {
+            _visibleFields.AddRange(propertyNames);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IUidlForm.HideFields(params string[] propertyNames)
+        {
+            _hiddenFields.AddRange(propertyNames);
+
+            foreach ( var propertyName in propertyNames )
+            {
+                var field = this.Fields.FirstOrDefault(f => f.PropertyName == propertyName);
+                
+                if ( field != null )
+                {
+                    this.Fields.Remove(field);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void BuildFields(UidlBuilder builder)
         {
             var metaType = builder.MetadataCache.GetTypeMetadata(typeof(TEntity));
@@ -466,6 +490,8 @@ namespace NWheels.UI.Toolbox
     
     public interface IUidlForm
     {
+        void ShowFields(params string[] propertyNames);
+        void HideFields(params string[] propertyNames);
         bool UsePascalCase { get; set; }
         List<UidlCommand> Commands { get; }
     }

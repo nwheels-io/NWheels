@@ -710,7 +710,7 @@ HEAD, JS/CSS LINKS
             <div class="form-group" style="margin-top:20px; margin-bottom:0px;">
                 <label class="col-lg-2 control-label">Type</label>
                 <div class="col-lg-4">
-                    <select ng-options="s.typeName as s.text for s in uidl.selections" ng-model="selectedType" ng-change="selectedTypeChanged(selectedType)" class="form-control m-b"></select>
+                    <select ng-options="s.typeName as (s.text | translated) for s in uidl.selections" ng-model="selectedType" ng-change="selectedTypeChanged(selectedType)" class="form-control m-b"></select>
                 </div>
             </div>
         </form>

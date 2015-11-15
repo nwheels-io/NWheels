@@ -8,6 +8,16 @@ namespace NWheels.Extensions
 {
     public static class CollectionExtensions
     {
+        public static void AddIf<T>(this ICollection<T> collection, T item) where T : class
+        {
+            if ( item != null )
+            {
+                collection.Add(item);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static void AddIf<T>(this ICollection<T> collection, bool condition, T item)
         {
             if ( condition )

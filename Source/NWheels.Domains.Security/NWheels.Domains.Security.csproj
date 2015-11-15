@@ -62,6 +62,7 @@
     <Compile Include="Core\UserAccountPrincipal.cs" />
     <Compile Include="IdentityInfoExtensions.cs" />
     <Compile Include="LoggedInUserInfo.cs" />
+    <Compile Include="UI\UserAccountCrudScreenPart.cs" />
     <Compile Include="UserLoginTransactionScript.cs" />
     <Compile Include="Entities.cs" />
     <Compile Include="Enums.cs" />
