@@ -9,6 +9,7 @@ using NWheels.Core;
 using NWheels.DataObjects.Core;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
+using NWheels.Globalization;
 using NWheels.TypeModel.Core;
 
 namespace NWheels.Entities.Factories
@@ -185,18 +186,17 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static StringBuilder AppendNonDefaultPropertyValue<T>(StringBuilder text, string propertyName, T propertyValue)
+        public static StringBuilder AppendNonDefaultPropertyValue<T>(
+            ILocale locale, 
+            StringBuilder text, 
+            string propertyName, 
+            T propertyValue)
         {
             object valueAsObject = propertyValue;
 
             if ( valueAsObject != null && !propertyValue.Equals(default(T)) )
             {
-                if ( text.Length > 0 )
-                {
-                    text.Append(", ");
-                }
-
-                text.Append(propertyName + " = " + propertyValue.ToString());
+                locale.AppendListItem(text, locale.MakeKeyValuePair(locale.Translate(propertyName), propertyValue.ToString()));
             }
 
             return text;

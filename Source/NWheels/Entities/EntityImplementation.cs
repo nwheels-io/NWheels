@@ -54,6 +54,11 @@ namespace NWheels.Entities
         }
 
         [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+        public class CalculatedPropertyAttribute : Attribute
+        {
+        }
+
+        [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
         public class EntityStatePropertyAttribute : Attribute
         {
         }

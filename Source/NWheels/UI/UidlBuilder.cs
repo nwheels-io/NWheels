@@ -343,7 +343,7 @@ namespace NWheels.UI
             var builder = new UidlBuilder(metadataCache, components.Resolve<IDomainObjectFactory>(), components.Resolve<IEntityObjectFactory>());
             builder.AddApplication(application);
 
-            var localStrings = localizationProvider.GetLocalStrings(builder.GetTranslatables(), CultureInfo.CurrentUICulture);
+            var localStrings = localizationProvider.GetCurrentLocale().GetAllLocalStrings(builder.GetTranslatables());
             builder.AddLocale(CultureInfo.CurrentUICulture, localStrings);
 
             return builder.GetDocument();
