@@ -52,6 +52,36 @@ HEAD, JS/CSS LINKS
                 float: right;
             }
         }
+        .btn-md.btn-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 23px;
+        }
+        .ibox-title.nested {
+            border: none;
+            padding: 15px 20px 0px 20px;
+        }
+        .ibox-content.standalone {
+            border-top: 0;
+            padding-top: 5px;
+        }
+        .ibox-content.nested {
+            border: none;
+            padding: 20px 20px 10px 20px;
+        }
+        .ibox-content.nested .ibox-title {
+            border: 0;
+            padding: 0;
+        }
+        .ibox-content.nested .ibox-content {
+            border: 0;
+            padding: 0;
+        }
+        .ibox-content .tabs-container {
+            padding: 10px;
+            background-color: #EEEEEE;
+            border-radius: 5px;            
+        }
     </style>
 </head>
 
@@ -377,21 +407,21 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="uidl-element-template/Crud">
         <div class="row">
             <div ng-hide="uiShowCrudForm" class="col-lg-12">
-                <div class="ibox-title">
-                    <button class="btn btn-primary btn-circle btn-lg btn-outline" style="margin-right:5px" type="button" ng-click="newEntity();" title="Add New">
+                <div class="ibox-title" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
+                    <button class="btn btn-primary btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="newEntity();" title="Add New">
                         <i class="fa fa-plus"></i>
                     </button>
-                    <button class="btn btn-success btn-circle btn-lg btn-outline" style="margin-right:5px" type="button" ng-click="editEntity(selectedEntity)" title="Edit Selected">
+                    <button class="btn btn-success btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="editEntity(selectedEntity)" title="Edit Selected">
                         <i class="fa fa-edit"></i>
                     </button>
-                    <!--button class="btn btn-danger btn-circle btn-lg btn-outline" style="margin-right:5px" type="button" ng-click="deleteEntity(selectedEntity)" title="Delete Selected">
+                    <!--button class="btn btn-danger btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="deleteEntity(selectedEntity)" title="Delete Selected">
                         <i class="fa fa-times"></i>
                     </button-->
-                    <button class="btn btn-default btn-circle btn-lg btn-outline" style="margin-right:5px" type="button" ng-click="refresh()" title="Refresh">
+                    <button class="btn btn-default btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="refresh()" title="Refresh">
                         <i class="fa fa-refresh"></i>
                     </button>
                 </div>
-                <div class="ibox-content">
+                <div class="ibox-content" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
                     <uidl-widget uidl="uidl.grid" parent-model="model"></uidl-widget>
                 </div>
             </div>
@@ -406,6 +436,17 @@ HEAD, JS/CSS LINKS
                 <div class="ibox-content">
                     <uidl-widget ng-if="uidl.form" uidl="uidl.form"></uidl-widget>
                     <uidl-widget ng-if="uidl.formTypeSelector" uidl="uidl.formTypeSelector" parent-model="model"></uidl-widget>
+                </div>
+                <div class="ibox-content" style="padding-top:15px;">
+                    <button 
+                        ng-repeat="command in uidl.commands"
+                        type="button"
+                        class="btn btn-rounded"
+                        style="margin-right:5px;"
+                        ng-disabled="commandInProgress"
+                        ng-click="invokeCommand(command.qualifiedName)"
+                        ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
+                    ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                 </div>
             </div>
         </div>
@@ -422,7 +463,7 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="uidl-element-template/DataGrid">
         <div class="jqGrid_wrapper">
             <table id="rdt_{{uniqueWidgetId}}"></table>
-            <div id="rdtpager_{{uniqueWidgetId}}"></div>
+            <!--div id="rdtpager_{{uniqueWidgetId}}"></div-->
         </div>
     </script>
     <script type="text/javascript">
@@ -451,13 +492,13 @@ HEAD, JS/CSS LINKS
 
                     $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
                         datatype: 'local',
-                        height: 250,
+                        height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
                         shrinkToFit: false,
                         width: null,
-                        rowNum: 10,
-                        rowList: [10, 20, 30],
+                        rowNum: 1000,
+                        //rowList: [10, 20, 30],
                         colModel: columnsModel,
-                        pager: "#rdtpager_" + $scope.uniqueWidgetId,
+                        //pager: "#rdtpager_" + $scope.uniqueWidgetId,
                         viewrecords: true,
                         add: false,
                         edit: false,
@@ -484,7 +525,7 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="uidl-element-template/LookupGrid">
         <div class="jqGrid_wrapper">
             <table id="rdt_{{uniqueWidgetId}}"></table>
-            <div id="rdtpager_{{uniqueWidgetId}}"></div>
+            <!--div id="rdtpager_{{uniqueWidgetId}}"></div-->
         </div>
     </script>
     <script type="text/javascript">
@@ -523,10 +564,10 @@ HEAD, JS/CSS LINKS
                         height: 150,
                         shrinkToFit: false,
                         width: null,
-                        rowNum: 10,
-                        rowList: [10, 20, 30],
+                        //rowNum: 10,
+                        //rowList: [10, 20, 30],
                         colModel: columnsModel,
-                        pager: "#rdtpager_" + $scope.uniqueWidgetId,
+                        //pager: "#rdtpager_" + $scope.uniqueWidgetId,
                         viewrecords: true,
                         add: false,
                         edit: false,
@@ -553,12 +594,24 @@ HEAD, JS/CSS LINKS
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <script type="text/ng-template" id="uidl-element-template/Form">
+<script type="text/ng-template" id="uidl-element-template/Form">
         <form class="form-horizontal">
-            <div class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields">
+            <div ng-if="plainFields.length <= 6" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields">
                 <label class="col-lg-2 control-label">{{::translate(field.propertyName)}}</label>
-                <div class="col-lg-4">
+                <div class="col-lg-3">
                     <uidl-form-field uidl="field" entity="model.data.entity" />
+                    <!--span class="help-block m-b-none">Example block-level help text here.</span-->
+                </div>
+            </div>
+            <div ng-if="plainFields.length > 6" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields | twoColumnRows">
+                <label class="col-lg-2 control-label">{{::translate(field.propertyName)}}</label>
+                <div class="col-lg-3">
+                    <uidl-form-field uidl="field" entity="model.data.entity" />
+                    <!--span class="help-block m-b-none">Example block-level help text here.</span-->
+                </div>
+                <label ng-if="field['$nextCol']" class="col-lg-2 control-label">{{::translate(field['$nextCol'].propertyName)}}</label>
+                <div ng-if="field['$nextCol']" class="col-lg-3">
+                    <uidl-form-field uidl="field['$nextCol']" entity="model.data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
             </div>
@@ -568,13 +621,14 @@ HEAD, JS/CSS LINKS
                 </ul>
                 <div class="tab-content">
                     <div ng-repeat="field in tabSetFields" ng-class="{'tab-pane': true, active: $index == tabSetIndex}" ng-show="$index == tabSetIndex">
-                        <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="model.data.entity"></uidl-widget>
+                        <div class="ibox-content nested">
+                            <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="model.data.entity"></uidl-widget>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="col-lg-2 control-label"></label>
-                <div class="col-lg-4 clearfix">
+            <div ng-if="uidl.commands.length" class="form-group">
+                <div class="col-lg-5 clearfix">
                     <button ng-repeat="command in uidl.commands | reverse"
                             type="button"
                             class="btn btn-rounded btn-lg pull-right"
@@ -707,9 +761,9 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/TypeSelector">
         <form class="form-horizontal">
-            <div class="form-group" style="margin-top:20px; margin-bottom:0px;">
+            <div class="form-group">
                 <label class="col-lg-2 control-label">Type</label>
-                <div class="col-lg-4">
+                <div class="col-lg-3">
                     <select ng-options="s.typeName as (s.text | translated) for s in uidl.selections" ng-model="selectedType" ng-change="selectedTypeChanged(selectedType)" class="form-control m-b"></select>
                 </div>
             </div>

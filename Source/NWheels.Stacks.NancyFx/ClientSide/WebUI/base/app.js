@@ -581,16 +581,10 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
             var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
             scope.metaType = metaType;
-            
-            if (!scope.uidl.displayColumns || !scope.uidl.displayColumns.length) {
-                scope.uidl.displayColumns = scope.uidl.defaultDisplayColumns;
-            }
-            
-            //scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
-            //    return metaType.properties[toCamelCase(name)];
-            //}).ToArray();
+            scope.commandInProgress = false;
 
             scope.refresh = function () {
+                scope.commandInProgress = true;
                 scope.queryEntities();
                 scope.uiShowCrudForm = false;
             };
@@ -602,11 +596,13 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                         var receivedResultSet = data.ResultSet;
                         $timeout(function () {
                             scope.resultSet = receivedResultSet;
+                            scope.commandInProgress = false;
                             scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', receivedResultSet);
                         });
                     });
                 } else {
                     $timeout(function() {
+                        scope.commandInProgress = false;
                         scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
                     });
                 }
@@ -662,7 +658,11 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.newEntityCreated = function(newObj) {
                 scope.model.entity = newObj;
                 scope.model.isNew = true;
-                scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelSetter', scope.model.entity);
+                if (scope.uidl.form) {
+                    scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelSetter', scope.model.entity);
+                } else if (scope.uidl.formTypeSelector) {
+                    scope.$broadcast(scope.uidl.formTypeSelector.qualifiedName + ':ModelSetter', scope.model.entity);
+                }
 
                 $timeout(function () {
                     scope.uiShowCrudForm = true;
@@ -700,10 +700,17 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.rejectChanges = function (entity) {
+                scope.commandInProgress = false;
                 scope.refresh();
             };
 
-            scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
+            scope.invokeCommand = function (commandQualifiedName) {
+                scope.commandInProgress = true;
+                scope.$emit(commandQualifiedName + ':Executing');
+            }
+
+            scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function (event, data) {
+                scope.commandInProgress = false;
                 scope.resetCrudState();
                 scope.resultSet = data;
                 scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
@@ -778,28 +785,11 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
             scope.commandInProgress = false;
 
-            //scope.saveChanges = function () {
-            //    scope.$emit(scope.uidl.qualifiedName + ':Saving');
-            //};
-
-            //scope.rejectChanges = function () {
-            //    scope.$emit(scope.uidl.qualifiedName + ':Rejecting');
-            //};
-			
 			if (scope.uidl.mode === 'StandaloneCreate') {
 				scope.parentModel = {
 				    entity: scope.entityService.newDomainObject(scope.metaType.name)
 				};
 			}
-			
-			//scope.executeSearch = function () {
-			//	scope.entityService.queryEntity(scope.uidl.entityName, function(query) {
-			//		// build query
-			//		return query;
-			//	}).then(function (data) {
-			//		scope.$emit(scope.uidl.qualifiedName + ':SearchResultsReceived', data);	
-            //    });
-			//};
 
             scope.selectTab = function(index) {
                 scope.tabSetIndex = index;
@@ -1294,14 +1284,12 @@ theApp.filter('reverse', function () {
 theApp.filter('twoColumnRows', function () {
     return function (items) {
         var rows = [];
-        var rowCount = items.length / 2 + (items.length % 2);
+        var rowCount = Math.floor(items.length / 2) + (items.length % 2);
         for (var i = 0; i < rowCount; i++) {
-            var row = [];
-            row.push(items[i]);
+            rows.push(items[i]);
             if (rowCount + i < items.length) {
-                row.push(items[rowCount + i]);
+                items[i]['$nextCol'] = items[rowCount + i];
             }
-            rows.push(row);
         }
         return rows;
     };

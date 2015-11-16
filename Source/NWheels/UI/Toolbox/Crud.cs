@@ -80,7 +80,7 @@ namespace NWheels.UI.Toolbox
 
             var metaType = builder.MetadataCache.GetTypeMetadata(typeof(TEntity));
 
-            AddFormCommands();
+            //AddFormCommands();
 
             builder.BuildManuallyInstantiatedNodes(Form, FormTypeSelector);
         }
