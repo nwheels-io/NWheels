@@ -592,7 +592,11 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.queryEntities = function () {
                 if (scope.uidl.mode !== 'Inline') {
                     scope.resultSet = null;
-                    scope.entityService.queryEntity(scope.uidl.grid.entityName).then(function (data) {
+                    scope.entityService.queryEntity(scope.uidl.grid.entityName, function(query) {
+                        if (scope.uidl.entityTypeFilter) {
+                            query.ofType(scope.uidl.entityTypeFilter);
+                        }
+                    }).then(function (data) {
                         var receivedResultSet = data.ResultSet;
                         $timeout(function () {
                             scope.resultSet = receivedResultSet;

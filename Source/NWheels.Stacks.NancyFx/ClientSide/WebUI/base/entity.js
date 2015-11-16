@@ -112,10 +112,18 @@ function EntityQueryBuilder(entityName) {
     //-----------------------------------------------------------------------------------------------------------------
 
     this._entityName = entityName;
-    this._equalityFilter = { };
+    this._entityTypeFilter = null;
+    this._equalityFilter = {};
     this._orderBy = [];
     this._maxCount = null;
     this._isCountOnly = false;
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    this.ofType = function (typeName) {
+        me._entityTypeFilter = typeName;
+        return me;
+    };
 
     //-----------------------------------------------------------------------------------------------------------------
 
@@ -132,18 +140,21 @@ function EntityQueryBuilder(entityName) {
             ascending: (ascending === undefined ? true : ascending === true)
         };
         me._orderBy.push(item);
+        return me;
     };
 
     //-----------------------------------------------------------------------------------------------------------------
 
     this.top = function(value) {
         me._maxCount = value;
+        return me;
     };
 
     //-----------------------------------------------------------------------------------------------------------------
 
     this.count = function () {
         me._isCountOnly = true;
+        return me;
     };
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -151,6 +162,11 @@ function EntityQueryBuilder(entityName) {
     this.getQueryUrl = function () {
         var url = 'entity/query/' + me._entityName;
         var delimiter = '?';
+
+        if (me._entityTypeFilter) {
+            url = url + delimiter + '$type=' + me._entityTypeFilter;
+            delimiter = '&';
+        }
 
         for (var property in me._equalityFilter) {
             if (me._equalityFilter.hasOwnProperty(property)) {

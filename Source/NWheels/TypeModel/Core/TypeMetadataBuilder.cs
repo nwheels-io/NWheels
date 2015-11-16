@@ -2,8 +2,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using NWheels.Conventions.Core;
+using NWheels.Entities;
+using NWheels.Extensions;
 
 namespace NWheels.DataObjects.Core
 {
@@ -63,6 +66,13 @@ namespace NWheels.DataObjects.Core
         public IEnumerable<KeyValuePair<Type, Type>> GetAllImplementations()
         {
             return _implementationTypeByFactoryType.ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IQueryable<TBase> MakeOfType<TBase>(IQueryable<TBase> query)
+        {
+            return GetExpressionFactory(this.ContractType).OfType<TBase>(query);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -452,6 +462,48 @@ namespace NWheels.DataObjects.Core
             //        }
             //    }
             //}
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly ConcurrentDictionary<Type, ExpressionFactory> _s_expressionFactoryByPropertyType =
+            new ConcurrentDictionary<Type, ExpressionFactory>();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static ExpressionFactory GetExpressionFactory(Type contractType)
+        {
+            return _s_expressionFactoryByPropertyType.GetOrAdd(contractType, ExpressionFactory.Create);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private abstract class ExpressionFactory
+        {
+            public abstract IQueryable<TBase> OfType<TBase>(IQueryable source);
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static ExpressionFactory Create(Type contractType)
+            {
+                var expressionFactoryType = typeof(ExpressionFactory<>).MakeGenericType(contractType);
+                var expressionFactory = (ExpressionFactory)Activator.CreateInstance(expressionFactoryType);
+                return expressionFactory;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class ExpressionFactory<TEntity> : ExpressionFactory
+        {
+            #region Overrides of ExpressionFactory
+
+            public override IQueryable<TBase> OfType<TBase>(IQueryable source)
+            {
+                return (IQueryable<TBase>)source.OfType<TEntity>();
+            }
+
+            #endregion
         }
     }
 }

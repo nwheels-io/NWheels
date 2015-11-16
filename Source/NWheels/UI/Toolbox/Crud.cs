@@ -44,8 +44,22 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void FilterByType<TDerived>() where TDerived : TEntity
+        {
+            this.EntityTypeFilter = MetadataCache.GetTypeMetadata(typeof(TDerived)).QualifiedName;
+
+            if ( FormTypeSelector != null )
+            {
+                FormTypeSelector.FilterByType(typeof(TDerived));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public string EntityName { get; set; }
+        [DataMember]
+        public string EntityTypeFilter { get; set; }
         [DataMember]
         public DataGridMode Mode { get; set; }
         [DataMember]

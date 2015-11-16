@@ -268,6 +268,7 @@ namespace NWheels.UI
 
         public class QueryOptions
         {
+            public const string TypeParameterKey = "$type";
             public const string SelectParameterKey = "$select";
             public const string IncludeParameterKey = "$include";
             public const string PropertyAliasModifier = ":as:";
@@ -324,6 +325,10 @@ namespace NWheels.UI
                     {
                         Take = Int32.Parse(parameter.Value);
                     }
+                    else if ( parameter.Key.EqualsIgnoreCase(TypeParameterKey) )
+                    {
+                        OfType = parameter.Value;
+                    }
                     else if ( parameter.Key.EqualsIgnoreCase(OrderByParameterKey) )
                     {
                         AddOrderByItem(parameter);
@@ -347,6 +352,7 @@ namespace NWheels.UI
             public IList<QueryOrderByItem> InMemoryOrderBy { get; private set; }
             public int? Skip { get; private set; }
             public int? Take { get; private set; }
+            public string OfType { get; private set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -815,6 +821,11 @@ namespace NWheels.UI
 
             private IQueryable<TEntity> HandleFilter(QueryOptions options, IQueryable<TEntity> dbQuery)
             {
+                if ( !string.IsNullOrEmpty(options.OfType) )
+                {
+                    dbQuery = ApplyOfTypeFilter(dbQuery, options.OfType);
+                }
+
                 for ( int i = 0 ; i < options.Filter.Count ; )
                 {
                     var filterItem = options.Filter[i];
@@ -834,6 +845,22 @@ namespace NWheels.UI
                 }
 
                 return dbQuery;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IQueryable<TEntity> ApplyOfTypeFilter(IQueryable<TEntity> dbQuery, string typeString)
+            {
+                var filterMetaType = MetaType.DerivedTypes.FirstOrDefault(t => t.QualifiedName.EqualsIgnoreCase(typeString));
+
+                if ( filterMetaType == null )
+                {
+                    throw new ArgumentException(string.Format(
+                        "Specified entity type '{0}' is not compatible with entity '{1}'.",
+                        typeString, MetaType.QualifiedName));
+                }
+
+                return filterMetaType.MakeOfType(dbQuery);
             }
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------

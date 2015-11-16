@@ -54,6 +54,19 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void FilterByType(Type ancestor)
+        {
+            for ( var i = Selections.Count - 1 ; i >= 0 ; i-- )
+            {
+                if ( !ancestor.IsAssignableFrom(Selections[i].MetaType.ContractType) )
+                {
+                    Selections.RemoveAt(i);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public string BaseTypeName { get; set; }
         [DataMember, ManuallyAssigned]

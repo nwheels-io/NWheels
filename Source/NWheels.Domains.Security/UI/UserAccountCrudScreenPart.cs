@@ -23,6 +23,7 @@ namespace NWheels.Domains.Security.UI
         protected override void DescribePresenter(PresenterBuilder<CrudScreenPart<IUserAccountEntity>, Empty.Data, Empty.State> presenter)
         {
             base.DescribePresenter(presenter);
+            this.GridColumns(x => x.LoginName, x => x.FullName, x => x.AssociatedRoles, x => x.LastLoginAtUtc, x => x.IsLockedOut);
 
             if ( Crud.Form != null )
             {
