@@ -370,14 +370,14 @@ namespace NWheels.UI.Toolbox
             {
                 case FormFieldType.LookupMany:
                     widgetClosedType = typeof(LookupGrid<,>).MakeGenericType(nestedMetaType.EntityIdProperty.ClrType, nestedMetaType.ContractType);
-                    widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName, parent);
+                    widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName + "Grid", parent);
                     break;
                 case FormFieldType.InlineGrid:
                     widgetClosedType = typeof(Crud<>).MakeGenericType(nestedMetaType.ContractType);
-                    widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName, parent, DataGridMode.Inline);
+                    widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName + "Crud", parent, DataGridMode.Inline);
                     break;
                 case FormFieldType.InlineForm:
-                    widgetInstance = UidlUtility.CreateFormOrTypeSelector(nestedMetaType, "Form", parent, isInline: true);
+                    widgetInstance = UidlUtility.CreateFormOrTypeSelector(nestedMetaType, "Nested" + this.PropertyName + "Form", parent, isInline: true);
                     break;
             }
 

@@ -596,8 +596,8 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.queryEntities = function () {
-                scope.resultSet = null;
                 if (scope.uidl.mode !== 'Inline') {
+                    scope.resultSet = null;
                     scope.entityService.queryEntity(scope.uidl.grid.entityName).then(function (data) {
                         var receivedResultSet = data.ResultSet;
                         $timeout(function () {
@@ -662,7 +662,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.newEntityCreated = function(newObj) {
                 scope.model.entity = newObj;
                 scope.model.isNew = true;
-                scope.$broadcast(scope.uidl.qualifiedName + ':Form:ModelSetter', scope.model.entity);
+                scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelSetter', scope.model.entity);
 
                 $timeout(function () {
                     scope.uiShowCrudForm = true;
@@ -1263,6 +1263,7 @@ theApp.directive('uidlReportLookup', ['entityService', function(entityService) {
 		}
 	}
 }]);
+
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.filter('localized', ['$scope', function ($scope) {
@@ -1285,6 +1286,24 @@ theApp.filter('reverse', function () {
             return items;
         }
         return items.slice().reverse();
+    };
+});
+
+//---------------------------------------------------------------------------------------------------------------------
+
+theApp.filter('twoColumnRows', function () {
+    return function (items) {
+        var rows = [];
+        var rowCount = items.length / 2 + (items.length % 2);
+        for (var i = 0; i < rowCount; i++) {
+            var row = [];
+            row.push(items[i]);
+            if (rowCount + i < items.length) {
+                row.push(items[rowCount + i]);
+            }
+            rows.push(row);
+        }
+        return rows;
     };
 });
 
