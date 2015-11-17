@@ -486,7 +486,9 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 location.hash = data.screenPart.qualifiedName;
                 $timeout(function() {
                     scope.$broadcast(data.screenPart.qualifiedName + ':NavigatedHere', data.input);
-                    scope.$broadcast(data.screenPart.contentRoot.qualifiedName + ':NavigatedHere', data.input);
+                    if (data.screenPart.contentRoot) {
+                        scope.$broadcast(data.screenPart.contentRoot.qualifiedName + ':NavigatedHere', data.input);
+                    }
                     $rootScope.$broadcast(scope.uidl.qualifiedName + ':ScreenPartLoaded', scope.currentScreenPart);
                     //if (oldScreenPart) {
                     //    $rootScope.$broadcast(oldScreenPart.qualifiedName + ':NavigatingAway', data.input);
@@ -1148,29 +1150,28 @@ theApp.directive('uidlGridField', ['uidlService', 'entityService', function (uid
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uidlService, entityService) {
-    var uniqueFieldId = 1;
-
     return {
         scope: {
+            parentUidl: '=',
             uidl: '=',
             entity: '='
         },
         restrict: 'E',
         replace: true,
         link: function (scope, elem, attrs) {
-            scope.uniqueFieldId = 'uidlFormField' + uniqueFieldId++;
         },
         templateUrl: 'uidl-element-template/FormField', 
         controller: function ($scope) {
             $scope.uidlService = uidlService;
             $scope.entityService = entityService;
+            $scope.uniqueFieldId = $scope.parentUidl.elementName + '_' + $scope.uidl.propertyName;
             
             if ($scope.uidl.fieldType==='Lookup') {
                 if ($scope.uidl.lookupEntityName) {
                     var metaType = uidlService.getMetaType($scope.uidl.lookupEntityName);
 
                     $scope.lookupMetaType = metaType;
-                    $scope.lookupValueProperty = ($scope.uidl.lookupValueProperty ? $scope.uidl.lookupValueProperty : metaType.primaryKey.propertyNames[0]);
+                    $scope.lookupValueProperty = ($scope.uidl.lookupValueProperty ? $scope.uidl.lookupValueProperty : '$id');
                     $scope.lookupTextProperty = ($scope.uidl.lookupDisplayProperty ? $scope.uidl.lookupDisplayProperty : metaType.defaultDisplayPropertyNames[0]);
                     $scope.lookupForeignKeyProperty = $scope.uidl.propertyName; // + '_FK';
 

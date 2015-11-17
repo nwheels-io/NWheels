@@ -594,27 +594,34 @@ HEAD, JS/CSS LINKS
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-<script type="text/ng-template" id="uidl-element-template/Form">
-        <form class="form-horizontal">
+    <script type="text/ng-template" id="uidl-element-template/Form">
+        <form class="form-horizontal" id="{{::uidl.elementName}}">
+            <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
             <div ng-if="plainFields.length <= 6" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields">
-                <label class="col-lg-2 control-label">{{::translate(field.propertyName)}}</label>
+                <label class="col-lg-2 control-label" 
+                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.propertyName)}}</label>
                 <div class="col-lg-3">
-                    <uidl-form-field uidl="field" entity="model.data.entity" />
+                    <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
             </div>
+            <!-- PLAIN FIELDS TWO-COLUMN LAYOUT -->
             <div ng-if="plainFields.length > 6" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields | twoColumnRows">
-                <label class="col-lg-2 control-label">{{::translate(field.propertyName)}}</label>
+                <label class="col-lg-2 control-label"
+                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.propertyName)}}</label>
                 <div class="col-lg-3">
-                    <uidl-form-field uidl="field" entity="model.data.entity" />
+                    <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
-                <label ng-if="field['$nextCol']" class="col-lg-2 control-label">{{::translate(field['$nextCol'].propertyName)}}</label>
+                <label ng-if="field['$nextCol']"
+                       class="col-lg-2 control-label"
+                       for="{{::uidl.elementName + '_' + field['$nextCol'].propertyName}}">{{::translate(field['$nextCol'].propertyName)}}</label>
                 <div ng-if="field['$nextCol']" class="col-lg-3">
-                    <uidl-form-field uidl="field['$nextCol']" entity="model.data.entity" />
+                    <uidl-form-field parent-uidl="uidl" uidl="field['$nextCol']" entity="model.data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
             </div>
+            <!-- TABS -->
             <div ng-if="tabSetFields.length" class="tabs-container" style="margin-top:20px;">
                 <ul class="nav nav-tabs">
                     <li ng-class="{active: $index == tabSetIndex}" ng-repeat="field in tabSetFields"><a ng-click="selectTab($index)">{{translate(field.propertyName)}}</a></li>
@@ -627,6 +634,7 @@ HEAD, JS/CSS LINKS
                     </div>
                 </div>
             </div>
+            <!-- COMMAND BUTTONS -->
             <div ng-if="uidl.commands.length" class="form-group">
                 <div class="col-lg-5 clearfix">
                     <button ng-repeat="command in uidl.commands | reverse"
@@ -640,26 +648,60 @@ HEAD, JS/CSS LINKS
             </div>
         </form>
     </script>
-    
+    <script type="text/javascript">
+        function initWidget_Form($scope) {
+            $('#' + $scope.uidl.elementName).validate();
+            $scope.$on(':global:FormValidating', function(event, data) {
+                var form = $('#' + $scope.uidl.elementName);
+                if (!form.valid()) {
+                    data.isValid = false;
+                }
+            });
+        }
+    </script>
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - FORM FIELD
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/FormField">
         <div>
             <!-- LABEL -->
-            <input ng-if="uidl.fieldType==='Label'" disabled="" class="form-control m-b" type="text" ng-model="entity[uidl.propertyName]">
+            <input ng-if="uidl.fieldType==='Label'" 
+                   disabled="" 
+                   class="form-control m-b" 
+                   type="text" 
+                   ng-model="entity[uidl.propertyName]" 
+                   id="{{::uniqueFieldId}}" 
+                   name="{{::uniqueFieldId}}">
             <!-- CHECKBOX -->
             <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'" class="onoffswitch">
-                <input type="checkbox" class="onoffswitch-checkbox" ng-model="entity[uidl.propertyName]" id="{{::uniqueFieldId}}">
-                <label class="onoffswitch-label" for="{{::uniqueFieldId}}" style="margin: 5px 0px 5px 0px;">
+                <input type="checkbox" 
+                       class="onoffswitch-checkbox" 
+                       ng-model="entity[uidl.propertyName]" 
+                       id="{{::uniqueFieldId}}"
+                       name="{{::uniqueFieldId}}">
+                <label class="onoffswitch-label" 
+                       for="{{::uniqueFieldId}}" 
+                       style="margin: 5px 0px 5px 0px;">
                     <span class="onoffswitch-inner"></span>
                     <span class="onoffswitch-switch"></span>
                 </label>
             </div>
             <!-- TEXT -->
-            <input ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='None'" class="form-control m-b" type="text" ng-model="entity[uidl.propertyName]"></input>
+            <input ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='None'"
+                   class="form-control m-b"
+                   type="text"
+                   ng-model="entity[uidl.propertyName]"
+                   id="{{::uniqueFieldId}}"
+                   name="{{::uniqueFieldId}}"
+                   required>
             <!-- DROP DOWN -->
-            <select ng-if="uidl.fieldType==='Lookup'" class="form-control m-b" ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet" ng-model="entity[lookupForeignKeyProperty]">
+            <select ng-if="uidl.fieldType==='Lookup'"
+                    class="form-control m-b"
+                    ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
+                    ng-model="entity[lookupForeignKeyProperty]"
+                    id="{{::uniqueFieldId}}"
+                    name="{{::uniqueFieldId}}">
                 <!--option value="">All</option-->
             </select>
         </div>
@@ -1099,12 +1141,15 @@ HEAD, JS/CSS LINKS
 
     <!-- Gritter -->
     <link href="skin/assets/js/plugins/gritter/jquery.gritter.css" rel="stylesheet">
-    
+
+    <!-- Jquery Validate -->
+    <script src="skin/assets/js/plugins/validate/jquery.validate.min.js"></script>
+
     <!-- Data Tables -->
-    <script src="skin/assets/js/plugins/dataTables/jquery.dataTables.js"></script>
+    <!--script src="skin/assets/js/plugins/dataTables/jquery.dataTables.js"></script>
     <script src="skin/assets/js/plugins/dataTables/dataTables.bootstrap.js"></script>
     <script src="skin/assets/js/plugins/dataTables/dataTables.responsive.js"></script>
-    <script src="skin/assets/js/plugins/dataTables/dataTables.tableTools.min.js"></script>
+    <script src="skin/assets/js/plugins/dataTables/dataTables.tableTools.min.js"></script-->
     
     <script src="skin/assets/app/angular-1.3.16/angular.min.js"></script>
     <script src="skin/assets/js/plugins/chartJs/Chart.min.js"></script>
