@@ -50,7 +50,8 @@ namespace NWheels.Stacks.MongoDb.Factories
                 new ObjectIdGeneratorConvention(propertyMap, metaType), 
                 new BsonIgnoreConvention(MetadataCache, metaType),
                 new BsonDiscriminatorConvention(context, MetadataCache, metaType),
-                new BsonIgnoreExtraElementsConvention()
+                new BsonIgnoreExtraElementsConvention(),
+                new BsonIdAttributeConvention(metaType)
                 //new LazyLoadDomainObjectConvention(metaType)
             };
         }
