@@ -10,9 +10,11 @@ namespace NWheels.Stacks.MongoDb
         IEnumerable<TEntityContract> GetByIdList<TEntityContract>(System.Collections.IEnumerable idList);
         void CommitInsert(IEntityObject entity);
         void CommitUpdate(IEntityObject entity);
+        void CommitSave(IEntityObject entity);
         void CommitDelete(IEntityObject entity);
         void CommitInsert(IEnumerable<IEntityObject> entities);
         void CommitUpdate(IEnumerable<IEntityObject> entities);
+        void CommitSave(IEnumerable<IEntityObject> entities);
         void CommitDelete(IEnumerable<IEntityObject> entities);
         MongoCollection GetMongoCollection();
         IEnumerable<TContract> TrackMongoCursor<TContract, TImpl>(MongoCursor<TImpl> cursor);

@@ -73,7 +73,7 @@ namespace NWheels.Stacks.MongoDb
             	var actualEnumerator = _ownerRepo.AuthorizeQuery(_mongoCollection.AsQueryable()).GetEnumerator();
                 var transformingEnumerator = new DelegatingTransformingEnumerator<TEntityImpl, TEntityContract>(
                     actualEnumerator,
-                    InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>);
+                    entity => InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>(entity));
                 var loggingEnumerator = new ResultLoggingEnumerator<TEntityContract>(transformingEnumerator, _logger, queryLog);
                 return loggingEnumerator;
             }
@@ -311,7 +311,7 @@ namespace NWheels.Stacks.MongoDb
 
         void IMongoEntityRepository.CommitInsert(IEntityObject entity)
         {
-            using ( var activity = _logger.ExecutingInsert(_metadata.Name, 1) )
+            using ( var activity = _logger.ExecutingInsert(_metadata.Name) )
             {
                 try
                 {
@@ -330,7 +330,7 @@ namespace NWheels.Stacks.MongoDb
         
         void IMongoEntityRepository.CommitUpdate(IEntityObject entity)
         {
-            using ( var activity = _logger.ExecutingUpdate(_metadata.Name, 1) )
+            using ( var activity = _logger.ExecutingSave(_metadata.Name) )
             {
                 try
                 {
@@ -347,9 +347,28 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void CommitSave(IEntityObject entity)
+        {
+            using ( var activity = _logger.ExecutingSave(_metadata.Name) )
+            {
+                try
+                {
+                    var result = _mongoCollection.Save<TEntityImpl>((TEntityImpl)entity);
+                    //_logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
+                }
+                catch (Exception e)
+                {
+                    LogMongoDbErrors(e, activity);
+                    throw;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         void IMongoEntityRepository.CommitDelete(IEntityObject entity)
         {
-            using ( var activity = _logger.ExecutingDelete(_metadata.Name, 1) )
+            using ( var activity = _logger.ExecutingDelete(_metadata.Name) )
             {
                 try
                 {
@@ -370,7 +389,7 @@ namespace NWheels.Stacks.MongoDb
 
         void IMongoEntityRepository.CommitInsert(IEnumerable<IEntityObject> entities)
         {
-            using ( var activity = _logger.ExecutingInsert(_metadata.Name, entities.Count()) )
+            using ( var activity = _logger.ExecutingInsert(_metadata.Name) )
             {
                 try
                 {
@@ -393,15 +412,32 @@ namespace NWheels.Stacks.MongoDb
         
         void IMongoEntityRepository.CommitUpdate(IEnumerable<IEntityObject> entities)
         {
-            using ( var activity = _logger.ExecutingUpdate(_metadata.Name, entities.Count()) )
+            CommitSave(entities);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void CommitSave(IEnumerable<IEntityObject> entities)
+        {
+            using ( var activity = _logger.ExecutingSave(_metadata.Name) )
             {
                 try
                 {
+                    var writeOperation = _mongoCollection.InitializeOrderedBulkOperation();
+                    int count = 0;
+
                     foreach ( var entity in entities )
                     {
-                        var result = _mongoCollection.Save<TEntityImpl>((TEntityImpl)entity);
-                        //_logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
+                        writeOperation
+                            .Find(Query<TEntityImpl>.EQ(_keyPropertyExpression, entity.GetId().Value))
+                            .Upsert()
+                            .UpdateOne(Update<TEntityImpl>.Replace((TEntityImpl)entity));
+
+                        count++;
                     }
+
+                    _logger.WritingEntityBatch(size: count);
+                    writeOperation.Execute();
                 }
                 catch ( Exception e )
                 {
@@ -409,24 +445,27 @@ namespace NWheels.Stacks.MongoDb
                     throw;
                 }
             }
-
-       }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void IMongoEntityRepository.CommitDelete(IEnumerable<IEntityObject> entities)
         {
-            using ( var activity = _logger.ExecutingDelete(_metadata.Name, entities.Count()) )
+            using ( var activity = _logger.ExecutingDelete(_metadata.Name) )
             {
                 try
                 {
+                    var writeOperation = _mongoCollection.InitializeOrderedBulkOperation();
+                    int count = 0;
+
                     foreach ( var entity in entities )
                     {
-                        var query = Query<TEntityImpl>.EQ(_keyPropertyExpression, entity.GetId().Value);
-                        var result =_mongoCollection.Remove(query);
-                        
-                        //_logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
+                        writeOperation.Find(Query<TEntityImpl>.EQ(_keyPropertyExpression, entity.GetId().Value)).Remove();
+                        count++;
                     }
+
+                    _logger.WritingEntityBatch(size: count);
+                    writeOperation.Execute();
                 }
                 catch ( Exception e )
                 {
@@ -453,7 +492,7 @@ namespace NWheels.Stacks.MongoDb
             _ownerRepo.AuthorizeNew<TEntityContract>();
 
             var persistableObject = _objectFactory.NewEntity<TEntityContract>();
-            return InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>((TEntityImpl)persistableObject);
+            return InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>((TEntityImpl)persistableObject, shouldTrack: false);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -464,7 +503,7 @@ namespace NWheels.Stacks.MongoDb
             _ownerRepo.AuthorizeNew<TConcreteEntity>();
 
             var persistableObject = _objectFactory.NewEntity<TConcreteEntity>();
-            return InjectDependenciesAndTrackAndWrapInDomainObject<TConcreteEntity>((TEntityImpl)(object)persistableObject);
+            return InjectDependenciesAndTrackAndWrapInDomainObject<TConcreteEntity>((TEntityImpl)(object)persistableObject, shouldTrack: false);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -475,7 +514,7 @@ namespace NWheels.Stacks.MongoDb
             _ownerRepo.AuthorizeNew<TEntityContract>();
             
             var persistableObject = _objectFactory.NewEntity(concreteContract);
-            return InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>((TEntityImpl)persistableObject);
+            return InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>((TEntityImpl)persistableObject, shouldTrack: false);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -490,23 +529,16 @@ namespace NWheels.Stacks.MongoDb
 
         public void Save(TEntityContract entity)
         {
-            var entityState = entity.As<IDomainObject>().State;
+            _ownerRepo.ValidateOperationalState();
 
+            var entityState = entity.As<IDomainObject>().State;
             if ( entityState.IsNew() )
             {
                 _ownerRepo.AuthorizeInsert<TEntityContract>(entity);
             }
 
-            if ( entityState.IsRetrieved() )
-            {
-                _ownerRepo.AuthorizeUpdate<TEntityContract>(entity);
-            }
-
-            if ( entityState != EntityState.RetrievedPristine )
-            {
-                _ownerRepo.ValidateOperationalState();
-                _ownerRepo.NotifyEntityState((IEntityObject)entity.As<IPersistableObject>(), entityState);
-            }
+            _ownerRepo.AuthorizeUpdate<TEntityContract>(entity);
+            _ownerRepo.SaveEntity((IEntityObject)entity.As<IPersistableObject>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -578,12 +610,16 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private TConcreteContract InjectDependenciesAndTrackAndWrapInDomainObject<TConcreteContract>(TEntityImpl persistableImpl)
+        private TConcreteContract InjectDependenciesAndTrackAndWrapInDomainObject<TConcreteContract>(TEntityImpl persistableImpl, bool shouldTrack = true)
         {
             TConcreteContract persistableContract = (TConcreteContract)(object)persistableImpl;
             
             ObjectUtility.InjectDependenciesToObject(persistableContract, _ownerRepo.Components);
-            _ownerRepo.TrackEntity(ref persistableContract, EntityState.RetrievedPristine);
+
+            if ( shouldTrack )
+            {
+                _ownerRepo.TrackEntity(ref persistableContract, EntityState.RetrievedPristine);
+            }
 
             var existingDomainObject = persistableContract.AsOrNull<IDomainObject>();
 

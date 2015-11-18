@@ -8,6 +8,7 @@ using MongoDB.Driver.Builders;
 using NWheels.Concurrency;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.Stacks.MongoDb.Factories;
@@ -127,19 +128,24 @@ namespace NWheels.Stacks.MongoDb
 
         protected override void OnCommitChanges()
         {
-            foreach ( var entityToInsert in base.InsertBatch )
+            foreach ( var entityGroup in base.InsertBatch.GroupBy(x => x.As<IObject>().ContractType) )
             {
-                ((IMongoEntityRepository)base.GetEntityRepository(entityToInsert)).CommitInsert(entityToInsert);
-            }
-            
-            foreach ( var entityToUpdate in base.UpdateBatch )
-            {
-                ((IMongoEntityRepository)base.GetEntityRepository(entityToUpdate)).CommitUpdate(entityToUpdate);
+                ((IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key)).CommitInsert(entityGroup);
             }
 
-            foreach ( var entityToDelete in base.DeleteBatch )
+            foreach ( var entityGroup in base.UpdateBatch.GroupBy(x => x.As<IObject>().ContractType) )
             {
-                ((IMongoEntityRepository)base.GetEntityRepository(entityToDelete)).CommitDelete(entityToDelete);
+                ((IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key)).CommitUpdate(entityGroup);
+            }
+
+            foreach ( var entityGroup in base.SaveBatch.GroupBy(x => x.As<IObject>().ContractType) )
+            {
+                ((IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key)).CommitSave(entityGroup);
+            }
+
+            foreach ( var entityGroup in base.DeleteBatch.GroupBy(x => x.As<IObject>().ContractType) )
+            {
+                ((IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key)).CommitDelete(entityGroup);
             }
         }
 

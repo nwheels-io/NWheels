@@ -27,13 +27,19 @@ namespace NWheels.Stacks.MongoDb
         void DisposingQueryResultEnumerator();
 
         [LogActivity]
-        ILogActivity ExecutingInsert(string entityType, int entityCount);
+        ILogActivity ExecutingInsert(string entityType);
 
         [LogActivity]
-        ILogActivity ExecutingUpdate(string entityType, int entityCount);
+        ILogActivity ExecutingSave(string entityType);
 
         [LogActivity]
-        ILogActivity ExecutingDelete(string entityType, int entityCount);
+        ILogActivity ExecutingUpdate(string entityType);
+
+        [LogActivity]
+        ILogActivity ExecutingDelete(string entityType);
+
+        [LogVerbose]
+        void WritingEntityBatch(int size);
 
         [LogError]
         void MongoDbWriteError(string message);

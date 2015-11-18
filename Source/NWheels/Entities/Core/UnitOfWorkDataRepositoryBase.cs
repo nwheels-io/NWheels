@@ -13,6 +13,7 @@ namespace NWheels.Entities.Core
         private readonly Dictionary<IEntityId, IEntityObject> _entityCache;
         private readonly HashSet<IEntityObject> _insertBatch;
         private readonly HashSet<IEntityObject> _updateBatch;
+        private readonly HashSet<IEntityObject> _saveBatch;
         private readonly HashSet<IEntityObject> _deleteBatch;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -23,6 +24,7 @@ namespace NWheels.Entities.Core
             _entityCache = new Dictionary<IEntityId, IEntityObject>();
             _insertBatch = new HashSet<IEntityObject>();
             _updateBatch = new HashSet<IEntityObject>();
+            _saveBatch = new HashSet<IEntityObject>();
             _deleteBatch = new HashSet<IEntityObject>();
 
             BeginLifetimeScope();
@@ -85,6 +87,13 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void SaveEntity(IEntityObject entity)
+        {
+            _saveBatch.Add(entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public bool TryGetFromCache<TEntityContract, TIdValue>(TIdValue idValue, out TEntityContract entity)
         {
             var key = new EntityId<TEntityContract, TIdValue>(idValue);
@@ -106,7 +115,7 @@ namespace NWheels.Entities.Core
 
         protected override IEnumerable<IEntityObject> GetCurrentChangeSet()
         {
-            return _insertBatch.Concat(_updateBatch).Concat(_deleteBatch);
+            return _insertBatch.Concat(_updateBatch).Concat(_saveBatch).Concat(_deleteBatch);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -121,6 +130,13 @@ namespace NWheels.Entities.Core
         protected HashSet<IEntityObject> UpdateBatch
         {
             get { return _updateBatch; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected HashSet<IEntityObject> SaveBatch
+        {
+            get { return _saveBatch; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
