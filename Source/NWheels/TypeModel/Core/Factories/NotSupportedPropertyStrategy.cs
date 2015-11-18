@@ -39,7 +39,8 @@ namespace NWheels.TypeModel.Core.Factories
             writer.Property(MetaProperty.ContractPropertyInfo).Implement(
                 getter: p =>
                     canRead
-                    ? p.Get(m => m.Throw<NotSupportedException>("Property is not supported"))
+                    ? p.Get(m => m.Return(m.Default<TT.TProperty>()))
+                    //? p.Get(m => m.Throw<NotSupportedException>("Property is not supported"))
                     : null,
                 setter: p =>
                     canWrite
