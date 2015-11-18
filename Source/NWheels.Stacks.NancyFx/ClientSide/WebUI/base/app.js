@@ -693,6 +693,8 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.saveChanges = function (entity) {
+                //scope.$broadcast(':global:FormValidating', { isValud: true });
+
                 if (scope.uidl.mode !== 'Inline') {
                     scope.entityService.storeEntity(entity).then(function() {
                         scope.refresh();
@@ -702,6 +704,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                         scope.resultSet.push(entity);
                     }
                 }
+
                 scope.refresh();
             };
 
@@ -805,6 +808,23 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.commandInProgress = true;
                 scope.$emit(commandQualifiedName + ':Executing');
             }
+
+            scope.validate = function(deferred) {
+                var result = true;
+
+                var validateFuncName = 'validateWidget_Form';
+                var validateFunc = window[validateFuncName];
+                if (typeof validateFunc === 'function') {
+                    result = validateFunc($scope);
+                }
+
+                for (var i = 0; i < scope.uidl.fields.length; i++) {
+                    if (scope.uidl.fields[i].nestedWidget) {
+                        
+                    }
+                }
+
+            };
 
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
                 scope.model.data.entity = data;
@@ -1166,6 +1186,10 @@ theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uid
             $scope.entityService = entityService;
             $scope.uniqueFieldId = $scope.parentUidl.elementName + '_' + $scope.uidl.propertyName;
             
+            if ($scope.parentUidl.usePascalCase === false) {
+                $scope.uidl.propertyName = toCamelCase($scope.uidl.propertyName);
+            }
+
             if ($scope.uidl.fieldType==='Lookup') {
                 if ($scope.uidl.lookupEntityName) {
                     var metaType = uidlService.getMetaType($scope.uidl.lookupEntityName);

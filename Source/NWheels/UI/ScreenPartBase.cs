@@ -12,6 +12,9 @@ namespace NWheels.UI
         protected ScreenPartBase(string idName, UidlApplication parent)
             : base(idName, parent)
         {
+            NavigatedHere = new UidlNotification<TInput>("NavigatedHere", this);
+            Notifications.Add(this.NavigatedHere);
+            base.NavigatedHere = this.NavigatedHere;
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -40,5 +43,9 @@ namespace NWheels.UI
         protected virtual void DescribePresenter(PresenterBuilder<TScreenPart, TData, TState> presenter)
         {
         }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public new UidlNotification<TInput> NavigatedHere { get; set; }
     }
 }

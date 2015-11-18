@@ -20,6 +20,23 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static string ShortName(this Type type)
+        {
+            var name = type.Name;
+            var genericIndex = name.IndexOf("`");
+
+            if ( genericIndex < 0 )
+            {
+                return name;
+            }
+            else
+            {
+                return name.Substring(0, genericIndex);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static string AssemblyQualifiedNameNonVersioned(this Type type)
         {
             //TODO: recurse to handle generic type parameters as well!

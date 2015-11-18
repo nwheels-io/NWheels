@@ -15,6 +15,16 @@ namespace NWheels.Processing
     public interface ITransactionScript<TContext, TInput, TOutput> : ITransactionScript
     {
         TInput InitializeInput(TContext context);
+        TOutput Preview(TInput input);
         TOutput Execute(TInput input);
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+    public class TransactionScriptAttribute : Attribute
+    {
+        public bool SupportsInitializeInput { get; set; }
+        public bool SupportsPreview { get; set; }
     }
 }

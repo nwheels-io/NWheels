@@ -922,6 +922,7 @@ namespace NWheels.UI
         {
             private readonly ITypeMetadataCache _metadataCache;
             private readonly ApplicationEntityService _ownerService;
+            private readonly CamelCasePropertyNamesContractResolver _camelCaseContractResolver;
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -929,6 +930,7 @@ namespace NWheels.UI
             {
                 _metadataCache = metadataCache;
                 _ownerService = ownerService;
+                _camelCaseContractResolver = new CamelCasePropertyNamesContractResolver();
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -943,13 +945,17 @@ namespace NWheels.UI
                 if ( contractTypes.Length > 0 )
                 {
                     var metaTypes = contractTypes.Select(t => _metadataCache.GetTypeMetadata(t)).ToArray();
-                    
+
                     properties = ReplaceRelationPropertiesWithForeignKeys(metaTypes, properties);
                     ConfigureEmbeddedCollectionProperties(metaTypes, properties);
-                }
 
-                properties.Insert(0, CreateObjectTypeProperty());
-                properties.Insert(1, CreateEntityIdProperty());
+                    properties.Insert(0, CreateObjectTypeProperty());
+                    properties.Insert(1, CreateEntityIdProperty());
+                }
+                else
+                {
+                    ;
+                }
                 
                 return properties;
             }

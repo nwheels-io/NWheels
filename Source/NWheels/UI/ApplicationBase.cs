@@ -34,6 +34,9 @@ namespace NWheels.UI
                 base.Version = this.GetType().Assembly.GetName().Version.ToString();
             }
 
+            NavigatedHere = new UidlNotification<TInput>("NavigatedHere", this);
+            Notifications.Add(this.NavigatedHere);
+            base.NavigatedHere = this.NavigatedHere;
             base.InputParameterType = builder.RegisterMetaType(typeof(TInput));
                 
             var memberNodes = builder.GetDeclaredMemberNodes(this);
@@ -52,6 +55,10 @@ namespace NWheels.UI
             builder.DescribeNodePresenters(base.ScreenParts.Cast<AbstractUidlNode>().ToArray());
             builder.DescribeNodePresenters(base.Screens.Cast<AbstractUidlNode>().ToArray());
         }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public new UidlNotification<TInput> NavigatedHere { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

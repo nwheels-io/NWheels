@@ -139,7 +139,7 @@ namespace NWheels.Stacks.AspNet
         [Route("command/requestReply/{target}/{contractName}/{operationName}")]
         public IHttpActionResult ExecuteCommand(string target, string contractName, string operationName)
         {
-            var command = CreateCommandMessage(target, contractName, synchronous: true);
+            var command = CreateCommandMessage(target, contractName, operationName, synchronous: true);
 
             _serviceBus.DispatchMessageOnCurrentThread(command);
 
@@ -149,7 +149,7 @@ namespace NWheels.Stacks.AspNet
                 HttpContext.Current.Session[sessionIdKey] = command.Result.NewSessionId;
             }
 
-            return Json(command.Result.TakeSerializableSnapshot(), _jsonSettings);
+            return Json(command.Result.TakeSerializableSnapshot(), _context.EntityService.CreateSerializerSettings());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -158,7 +158,7 @@ namespace NWheels.Stacks.AspNet
         [Route("command/oneWay/{target}/{contractName}/{operationName}")]
         public IHttpActionResult EnqueueCommand(string target, string contractName, string operationName)
         {
-            var command = CreateCommandMessage(target, contractName, synchronous: false);
+            var command = CreateCommandMessage(target, contractName, operationName, synchronous: false);
 
             _serviceBus.EnqueueMessage(command);
 
@@ -166,7 +166,7 @@ namespace NWheels.Stacks.AspNet
                 new {
                     CommandMessageId = command.MessageId
                 },
-                _jsonSettings);
+                _context.EntityService.CreateSerializerSettings());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -191,7 +191,7 @@ namespace NWheels.Stacks.AspNet
                 }
             }
 
-            return Json(results, _jsonSettings);
+            return Json(results, _context.EntityService.CreateSerializerSettings());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -313,7 +313,7 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private AbstractCommandMessage CreateCommandMessage(string target, string contractName, bool synchronous)
+        private AbstractCommandMessage CreateCommandMessage(string target, string contractName, string operationName, bool synchronous)
         {
             AbstractCommandMessage command;
             var targetType = ParseUtility.Parse<ApiCallTargetType>(target);
@@ -321,7 +321,7 @@ namespace NWheels.Stacks.AspNet
             switch ( targetType )
             {
                 case ApiCallTargetType.TransactionScript:
-                    command = CreateTransactionScriptCommand(contractName, synchronous);
+                    command = CreateTransactionScriptCommand(contractName, operationName, synchronous);
                     break;
                 default:
                     throw new NotSupportedException("Command target '" + target + "' is not supported.");
@@ -332,10 +332,10 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private AbstractCommandMessage CreateTransactionScriptCommand(string contractName, bool synchronous)
+        private AbstractCommandMessage CreateTransactionScriptCommand(string contractName, string operationName, bool synchronous)
         {
             var scriptEntry = _transactionScriptByName[contractName];
-            var call = _callFactory.NewMessageCallObject(scriptEntry.ExecuteMethodInfo);
+            var call = _callFactory.NewMessageCallObject(scriptEntry.MethodInfoByName[operationName]);
 
             var jsonString = Request.Content.ReadAsStringAsync().Result;
             var serializerSettings = _context.EntityService.CreateSerializerSettings();
@@ -367,7 +367,8 @@ namespace NWheels.Stacks.AspNet
         private static JsonSerializerSettings CreateJsonSerializerSettings()
         {
             var jsonSettings = new JsonSerializerSettings {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                DateFormatString = "yyyy-MM-dd HH:mm:ss",
             };
 
             jsonSettings.Converters.Add(new StringEnumConverter());
@@ -404,13 +405,13 @@ namespace NWheels.Stacks.AspNet
             public TransactionScriptEntry(Type transactionScriptType)
             {
                 this.TransactionScriptType = transactionScriptType;
-                this.ExecuteMethodInfo = transactionScriptType.GetMethod("Execute");
+                this.MethodInfoByName = transactionScriptType.GetMethods().ToDictionary(m => m.Name, m => m, StringComparer.InvariantCultureIgnoreCase);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public Type TransactionScriptType { get; private set; }
-            public MethodInfo ExecuteMethodInfo { get; private set; }
+            public IReadOnlyDictionary<string, MethodInfo> MethodInfoByName { get; private set; }
         }
     }
 }

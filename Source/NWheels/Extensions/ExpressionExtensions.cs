@@ -36,8 +36,9 @@ namespace NWheels.Extensions
 
         public static MethodInfo GetMethodInfo(this LambdaExpression lambda, out object[] callArgumentValues)
         {
+            Expression callTarget;
             Expression[] callArguments;
-            var method = GetMethodInfo(lambda, out callArguments);
+            var method = GetMethodInfo(lambda, out callTarget, out callArguments);
             
             callArgumentValues = callArguments.Cast<ConstantExpression>().Select(arg => arg.Value).ToArray();
             return method;
@@ -46,6 +47,14 @@ namespace NWheels.Extensions
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static MethodInfo GetMethodInfo(this LambdaExpression lambda, out Expression[] callArguments)
+        {
+            Expression callTarget;
+            return GetMethodInfo(lambda, out callTarget, out callArguments);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static MethodInfo GetMethodInfo(this LambdaExpression lambda, out Expression callTarget, out Expression[] callArguments)
         {
             MethodCallExpression callExpression = null;
 
@@ -62,7 +71,9 @@ namespace NWheels.Extensions
                 throw new NotSupportedException("Specified lambda expression cannot be converted into method declaration.");
             }
 
+            callTarget = callExpression.Object;
             callArguments = callExpression.Arguments.ToArray();
+            
             return callExpression.Method;
         }
 

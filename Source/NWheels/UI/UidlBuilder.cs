@@ -172,7 +172,7 @@ namespace NWheels.UI
                 }
                 else if ( typeof(UidlScreenPart).IsAssignableFrom(property.PropertyType) )
                 {
-                    property.SetValue(parent, GetOrCreateScreenPartInstance(property.PropertyType));
+                    property.SetValue(parent, GetOrCreateScreenPartInstance(property));
                 }
                 else
                 {
@@ -314,16 +314,18 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private UidlScreenPart GetOrCreateScreenPartInstance(Type screenPartType)
+        private UidlScreenPart GetOrCreateScreenPartInstance(PropertyInfo declaration)
         {
-            var existingInstance = _applicationBeingAdded.ScreenParts.FirstOrDefault(s => s.GetType() == screenPartType);
+            var screenPartType = declaration.PropertyType;
+            
+            //var existingInstance = _applicationBeingAdded.ScreenParts.FirstOrDefault(s => s.GetType() == screenPartType);
 
-            if ( existingInstance != null )
-            {
-                return existingInstance;
-            }
+            //if ( existingInstance != null )
+            //{
+            //    return existingInstance;
+            //}
 
-            var newInstance = (UidlScreenPart)Activator.CreateInstance(screenPartType, screenPartType.FriendlyName(), _applicationBeingAdded);
+            var newInstance = (UidlScreenPart)Activator.CreateInstance(screenPartType, declaration.Name + screenPartType.ShortName(), _applicationBeingAdded);
             newInstance.MetadataCache = _metadataCache;
             _applicationBeingAdded.ScreenParts.Add(newInstance);
             

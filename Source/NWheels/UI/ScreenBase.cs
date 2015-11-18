@@ -11,6 +11,9 @@ namespace NWheels.UI
         protected ScreenBase(string idName, UidlApplication parent)
             : base(idName, parent)
         {
+            NavigatedHere = new UidlNotification<TInput>("NavigatedHere", this);
+            Notifications.Add(this.NavigatedHere);
+            base.NavigatedHere = this.NavigatedHere;
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,5 +38,9 @@ namespace NWheels.UI
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected abstract void DescribePresenter(PresenterBuilder<TScreen, TData, TState> presenter);
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public new UidlNotification<TInput> NavigatedHere { get; set; }
     }
 }

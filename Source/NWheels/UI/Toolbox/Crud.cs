@@ -94,7 +94,7 @@ namespace NWheels.UI.Toolbox
 
             var metaType = builder.MetadataCache.GetTypeMetadata(typeof(TEntity));
 
-            //AddFormCommands();
+            ConfigureForms();
 
             builder.BuildManuallyInstantiatedNodes(Form, FormTypeSelector);
         }
@@ -115,7 +115,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void AddFormCommands()
+        private void ConfigureForms()
         {
             if ( Form != null )
             {
@@ -137,11 +137,11 @@ namespace NWheels.UI.Toolbox
         {
             form.UsePascalCase = true;
 
-            if ( form.Commands.Count == 0 )
-            {
-                form.Commands.Add(Save);
-                form.Commands.Add(Cancel);
-            }
+            //if ( form.Commands.Count == 0 )
+            //{
+            //    form.Commands.Add(Save);
+            //    form.Commands.Add(Cancel);
+            //}
         }
     }
 

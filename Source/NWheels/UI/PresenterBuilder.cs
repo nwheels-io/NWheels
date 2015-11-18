@@ -376,10 +376,11 @@ namespace NWheels.UI
 
             private void ParseMethodCall(LambdaExpression methodCall)
             {
+                Expression callTarget;
                 Expression[] callArguments;
-                var method = methodCall.GetMethodInfo(out callArguments);
+                var method = methodCall.GetMethodInfo(out callTarget, out callArguments);
 
-                _behavior.ContractName = method.DeclaringType.SimpleQualifiedName();
+                _behavior.ContractName = callTarget.Type.SimpleQualifiedName();
                 _behavior.OperationName = method.Name;
                 _behavior.ParameterNames = method.GetParameters().Select(p => p.Name).ToArray();
                 _behavior.ParameterExpressions = callArguments.Select(x => x.ToString().ToCamelCaseExpression()).ToArray();

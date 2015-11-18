@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.UI.Core;
 
 namespace NWheels.UI.Uidl
 {
@@ -13,8 +14,6 @@ namespace NWheels.UI.Uidl
         protected NavigationTargetUidlNode(UidlNodeType nodeType, string idName, ControlledUidlNode parent)
             : base(nodeType, idName, parent)
         {
-            this.NavigatedHere = new UidlNotification("NavigatedHere", this);
-            base.Notifications.Add(this.NavigatedHere);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -24,6 +23,7 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UidlNotification NavigatedHere { get; private set; }
+        [ManuallyAssigned]
+        public UidlNotification NavigatedHere { get; protected set; }
     }
 }

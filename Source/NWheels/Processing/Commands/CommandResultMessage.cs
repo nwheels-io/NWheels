@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using NWheels.Authorization;
 using NWheels.Extensions;
 using NWheels.Processing.Messages;
@@ -67,12 +68,25 @@ namespace NWheels.Processing.Commands
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            [JsonProperty(PropertyName = "type")]
             public string Type { get; private set; }
+
+            [JsonProperty(PropertyName = "commandMessageId")]
             public Guid CommandMessageId { get; private set; }
+
+            [JsonProperty(PropertyName = "result")]
             public object Result { get; private set; }
+
+            [JsonProperty(PropertyName = "success")]
             public bool Success { get; private set; }
+
+            [JsonProperty(PropertyName = "faultCode")]
             public string FaultCode { get; private set; }
+
+            [JsonProperty(PropertyName = "faultSubCode")]
             public string FaultSubCode { get; private set; }
+
+            [JsonProperty(PropertyName = "faultReason")]
             public string FaultReason { get; private set; }
         }
     }
