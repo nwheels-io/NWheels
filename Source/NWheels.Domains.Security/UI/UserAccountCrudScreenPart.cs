@@ -18,6 +18,13 @@ namespace NWheels.Domains.Security.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void LimitToAccountsOfType<T>() where T : IUserAccountEntity
+        {
+            this.Crud.FilterByType<T>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Overrides of CrudScreenPart<IUserAccountEntity>
 
         protected override void DescribePresenter(PresenterBuilder<CrudScreenPart<IUserAccountEntity>, Empty.Data, Empty.State> presenter)

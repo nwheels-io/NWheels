@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects.Core;
@@ -13,6 +14,7 @@ namespace NWheels.DataObjects
         IPropertyMetadata GetPropertyByDeclaration(PropertyInfo declarationInContract);
         bool TryGetPropertyByName(string name, out IPropertyMetadata property);
         bool TryGetPropertyByDeclaration(PropertyInfo declarationInContract, out IPropertyMetadata property);
+        LambdaExpression MakePropertyExpression(IPropertyMetadata property);
         IQueryable<TBase> MakeOfType<TBase>(IQueryable<TBase> query);
         string Name { get; }
         string NamespaceQualifier { get; }

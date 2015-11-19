@@ -743,19 +743,25 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
     m_controllerImplementations['DataGrid'] = {
         implement: function (scope) {
-            var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
-
-            scope.metaType = metaType;
+            scope.metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
 
             //var dataQuery = scope.uidl.dataQuery;
 
-            if (!scope.uidl.displayColumns || !scope.uidl.displayColumns.length) {
-                scope.uidl.displayColumns = scope.uidl.defaultDisplayColumns;
+            if (scope.uidl.displayColumns && scope.uidl.displayColumns.length) {
+                scope.gridColumns = scope.uidl.displayColumns;
+            } else {
+                scope.gridColumns = scope.uidl.defaultDisplayColumns;
             }
 
-            scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
-                return metaType.properties[toCamelCase(name)];
-            }).ToArray();
+            //for (var i = 0; i < scope.gridColumns.length; i++) {
+            //    var column = scope.gridColumns[i];
+            //    column.metaType = scope.uidlService.getMetaType(column.declaringTypeName);
+            //    column.metaProperty = column.metaType.properties[toCamelCase(column.navigations[column.navigations.length - 1])];
+            //}
+
+            //scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
+            //    return metaType.properties[toCamelCase(name)];
+            //}).ToArray();
 
             //scope.refresh = function () {
             //    scope.queryEntities();
@@ -839,6 +845,11 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                         });
                 });
             });
+
+            scope.$on(scope.uidl.qualifiedName + ':StateResetter', function (event, data) {
+                scope.commandInProgress = false;
+                scope.tabSetIndex = 0;
+            });
         }
     };
 
@@ -849,13 +860,11 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
             scope.metaType = metaType;
 
-            if (!scope.uidl.displayColumns || !scope.uidl.displayColumns.length) {
-                scope.uidl.displayColumns = scope.uidl.defaultDisplayColumns;
+            if (scope.uidl.displayColumns && scope.uidl.displayColumns.length) {
+                scope.gridColumns = scope.uidl.displayColumns;
+            } else {
+                scope.gridColumns = scope.uidl.defaultDisplayColumns;
             }
-
-            scope.displayProperties = Enumerable.From(scope.uidl.displayColumns).Select(function (name) {
-                return metaType.properties[toCamelCase(name)];
-            }).ToArray();
 
             scope.queryLookupRecords = function () {
                 scope.lookupRecords = null;

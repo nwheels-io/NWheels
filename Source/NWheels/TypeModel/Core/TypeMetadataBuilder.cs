@@ -70,6 +70,13 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public LambdaExpression MakePropertyExpression(IPropertyMetadata property)
+        {
+            return GetExpressionFactory(property.ContractPropertyInfo.DeclaringType).MakePropertyExpression(property);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IQueryable<TBase> MakeOfType<TBase>(IQueryable<TBase> query)
         {
             return GetExpressionFactory(this.ContractType).OfType<TBase>(query);
@@ -480,6 +487,10 @@ namespace NWheels.DataObjects.Core
 
         private abstract class ExpressionFactory
         {
+            public abstract LambdaExpression MakePropertyExpression(IPropertyMetadata property);
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public abstract IQueryable<TBase> OfType<TBase>(IQueryable source);
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -497,6 +508,13 @@ namespace NWheels.DataObjects.Core
         private class ExpressionFactory<TEntity> : ExpressionFactory
         {
             #region Overrides of ExpressionFactory
+
+            public override LambdaExpression MakePropertyExpression(IPropertyMetadata property)
+            {
+                return property.MakePropertyExpression<TEntity>();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override IQueryable<TBase> OfType<TBase>(IQueryable source)
             {

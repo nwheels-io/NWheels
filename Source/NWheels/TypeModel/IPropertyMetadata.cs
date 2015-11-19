@@ -19,6 +19,7 @@ namespace NWheels.DataObjects
         IEnumerable<KeyValuePair<Type, PropertyInfo>> GetAllImplementations();
         bool TryGetDefaultValueOperand(MethodWriterBase writer, out IOperand<TypeTemplate.TProperty> valueOperand);
         object ParseStringValue(string s);
+        LambdaExpression MakePropertyExpression<TEntity>();
         Expression<Func<TEntity, bool>> MakeBinaryExpression<TEntity>(object value, Func<Expression, Expression, Expression> binaryFactory);
         Expression<Func<TEntity, bool>> MakeBinaryExpression<TEntity>(string valueString, Func<Expression, Expression, Expression> binaryFactory);
         Expression<Func<TEntity, bool>> MakeForeignKeyBinaryExpression<TEntity>(object value, Func<Expression, Expression, Expression> binaryFactory);

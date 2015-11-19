@@ -43,6 +43,7 @@ namespace NWheels.UI.Toolbox
         {
             CriteriaForm.UsePascalCase = true;
             CriteriaForm.Commands.Add(ShowReport);
+            ResultTable.UsePascalCase = true;
 
             var attribute = typeof(TScript).GetCustomAttribute<TransactionScriptAttribute>();
 
@@ -58,7 +59,8 @@ namespace NWheels.UI.Toolbox
             presenter.On(ShowReport)
                 .InvokeTransactionScript<TScript>()
                 .WaitForReply((script, data, state, input) => script.Execute(state.Criteria))
-                .Then(b => b.Broadcast(ResultTable.DataReceived).WithPayload(m => m.Input).TunnelDown());
+                .Then(b => b.Broadcast(ResultTable.DataReceived).WithPayload(m => m.Input).TunnelDown()
+                .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown()));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

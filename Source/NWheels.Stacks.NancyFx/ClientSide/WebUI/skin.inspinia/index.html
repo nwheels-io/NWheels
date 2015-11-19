@@ -477,15 +477,14 @@ HEAD, JS/CSS LINKS
 
                     var columnsModel = [];
 
-                    $scope.displayProperties.forEach(function (displayPropery, idx) {
-                        var jsonPropertyName = ($scope.uidl.usePascalCase === true ? displayPropery.name : toCamelCase(displayPropery.name));
+                    $scope.gridColumns.forEach(function (metaColumn, idx) {
                         columnsModel.push({
-                            name: jsonPropertyName,
-                            label: $scope.translate(displayPropery.name),
-                            index: displayPropery.name,
+                            name: metaColumn.expression,
+                            label: $scope.translate(metaColumn.title),
+                            index: metaColumn.expression,
                             editable: false,
                             width: 180,
-                            sorttype: displayPropery.dataType,
+                            //sorttype: column.dataType,
                             search: true
                         });
                     });
@@ -546,15 +545,14 @@ HEAD, JS/CSS LINKS
                         width: 80
                     });
 
-                    $scope.displayProperties.forEach(function (displayPropery, idx) {
-                        var jsonPropertyName = ($scope.uidl.usePascalCase === true ? displayPropery.name : toCamelCase(displayPropery.name));
+                    $scope.gridColumns.forEach(function (metaColumn, idx) {
                         columnsModel.push({
-                            name: jsonPropertyName,
-                            label: $scope.translate(displayPropery.name),
-                            index: displayPropery.name,
+                            name: metaColumn.expression,
+                            label: $scope.translate(metaColumn.title),
+                            index: metaColumn.expression,
                             editable: false,
                             width: 180,
-                            sorttype: displayPropery.dataType,
+                            //sorttype: metaColumn.dataType,
                             search: true
                         });
                     });
