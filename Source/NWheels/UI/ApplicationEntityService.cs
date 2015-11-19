@@ -952,10 +952,6 @@ namespace NWheels.UI
                     properties.Insert(0, CreateObjectTypeProperty());
                     properties.Insert(1, CreateEntityIdProperty());
                 }
-                else
-                {
-                    ;
-                }
                 
                 return properties;
             }

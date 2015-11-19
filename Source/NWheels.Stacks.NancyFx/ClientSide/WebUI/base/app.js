@@ -1178,7 +1178,9 @@ theApp.directive('uidlGridField', ['uidlService', 'entityService', function (uid
 
 //---------------------------------------------------------------------------------------------------------------------
 
-theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uidlService, entityService) {
+theApp.directive('uidlFormField',
+['$timeout', 'uidlService', 'entityService',
+function ($timeout, uidlService, entityService) {
     return {
         scope: {
             parentUidl: '=',
@@ -1230,6 +1232,14 @@ theApp.directive('uidlFormField', ['uidlService', 'entityService', function (uid
                     }
                 }
             }
+
+            $timeout(function () {
+                var initFuncName = 'initWidget_FormField';
+                var initFunc = window[initFuncName];
+                if (typeof initFunc === 'function') {
+                    initFunc($scope);
+                }
+            });
         }
     };
 }]);

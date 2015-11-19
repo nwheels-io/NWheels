@@ -430,6 +430,10 @@ namespace NWheels.UI.Toolbox
                     {
                         return FormFieldModifiers.Checkbox;
                     }
+                    else if ( MetaProperty.ClrType == typeof(DateTime) )
+                    {
+                        return FormFieldModifiers.DateTimePicker;
+                    }
                     return FormFieldModifiers.None;
                 case FormFieldType.Lookup:
                     return FormFieldModifiers.DropDown;
@@ -536,6 +540,7 @@ namespace NWheels.UI.Toolbox
         Section = 0x10,
         Tab = 0x20,
         Checkbox = 0x40,
+        DateTimePicker = 0x80,
         System = 0x200
     }
 

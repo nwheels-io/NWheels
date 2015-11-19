@@ -13,6 +13,7 @@ HEAD, JS/CSS LINKS
     <link href="skin/assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="skin/assets/font-awesome/css/font-awesome.css" rel="stylesheet">
     <link href="skin/assets/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+    <link href="skin/assets/css/plugins/datetimepicker/bootstrap-datetimepicker.min.css" rel="stylesheet">
     <link href="skin/assets/css/plugins/daterangepicker/daterangepicker-bs3.css" rel="stylesheet">
 
     <!-- Toastr style -->
@@ -649,7 +650,7 @@ HEAD, JS/CSS LINKS
     <script type="text/javascript">
         function initWidget_Form($scope) {
             $('#' + $scope.uidl.elementName).validate();
-            $scope.$on(':global:FormValidating', function(event, data) {
+            $scope.$on(':global:FormValidating', function (event, data) {
                 var form = $('#' + $scope.uidl.elementName);
                 if (!form.valid()) {
                     data.isValid = false;
@@ -693,6 +694,18 @@ HEAD, JS/CSS LINKS
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}"
                    required>
+            <!-- DATE-TIME PICKER -->
+            <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='DateTimePicker'"
+                 class="input-group date m-b">
+                <input type="text"
+                       class="form-control"
+                       ng-model="entity[uidl.propertyName]"
+                       id="{{::uniqueFieldId}}"
+                       name="{{::uniqueFieldId}}">
+                <div class="input-group-addon">
+                    <span class="glyphicon glyphicon-th"></span>
+                </div>
+            </div>
             <!-- DROP DOWN -->
             <select ng-if="uidl.fieldType==='Lookup'"
                     class="form-control m-b"
@@ -703,6 +716,16 @@ HEAD, JS/CSS LINKS
                 <!--option value="">All</option-->
             </select>
         </div>
+    </script>
+    <script type="text/javascript">
+    function initWidget_FormField($scope) {
+        if ($scope.uidl.modifiers === 'DateTimePicker') {
+            $('#' + $scope.uniqueFieldId).datetimepicker({
+                format: 'YYYY-MM-DD HH:mm:ss',
+                allowInputToggle: true
+            });
+        }
+    }
     </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1087,24 +1110,23 @@ HEAD, JS/CSS LINKS
     <script src="skin/assets/js/plugins/pace/pace.min.js"></script>
     <script src="skin/assets/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
 
-    
     <!-- Chosen -->
     <script src="skin/assets/js/plugins/chosen/chosen.jquery.js"></script>
 
-   <!-- JSKnob -->
-   <script src="skin/assets/js/plugins/jsKnob/jquery.knob.js"></script>
+    <!-- JSKnob -->
+    <script src="skin/assets/js/plugins/jsKnob/jquery.knob.js"></script>
 
-   <!-- Input Mask-->
+    <!-- Input Mask-->
     <script src="skin/assets/js/plugins/jasny/jasny-bootstrap.min.js"></script>
 
-   <!-- Data picker -->
-   <script src="skin/assets/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+    <!-- Data picker -->
+    <script src="skin/assets/js/plugins/datapicker/bootstrap-datepicker.js"></script>
 
-   <!-- NouSlider -->
-   <script src="skin/assets/js/plugins/nouslider/jquery.nouislider.min.js"></script>
+    <!-- NouSlider -->
+    <script src="skin/assets/js/plugins/nouslider/jquery.nouislider.min.js"></script>
 
-   <!-- Switchery -->
-   <script src="skin/assets/js/plugins/switchery/switchery.js"></script>
+    <!-- Switchery -->
+    <script src="skin/assets/js/plugins/switchery/switchery.js"></script>
 
     <!-- IonRangeSlider -->
     <script src="skin/assets/js/plugins/ionRangeSlider/ion.rangeSlider.min.js"></script>
@@ -1129,6 +1151,9 @@ HEAD, JS/CSS LINKS
 
     <!-- Date range picker -->
     <script src="skin/assets/js/plugins/daterangepicker/daterangepicker.js"></script>
+
+    <!-- Date/time picker -->
+    <script src="skin/assets/js/plugins/datetimepicker/bootstrap-datetimepicker.min.js"></script>
 
     <!-- Select2 -->
     <script src="skin/assets/js/plugins/select2/select2.full.min.js"></script>
