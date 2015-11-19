@@ -325,7 +325,7 @@ namespace NWheels.UI
             //    return existingInstance;
             //}
 
-            var newInstance = (UidlScreenPart)Activator.CreateInstance(screenPartType, declaration.Name + screenPartType.ShortName(), _applicationBeingAdded);
+            var newInstance = (UidlScreenPart)Activator.CreateInstance(screenPartType, declaration.Name, _applicationBeingAdded);
             newInstance.MetadataCache = _metadataCache;
             _applicationBeingAdded.ScreenParts.Add(newInstance);
             

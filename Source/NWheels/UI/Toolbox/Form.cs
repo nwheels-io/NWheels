@@ -36,6 +36,7 @@ namespace NWheels.UI.Toolbox
             this.TemplateName = "Form";
             this.EntityName = MetadataCache.GetTypeMetadata(typeof(TEntity)).QualifiedName;
             this.Fields = new List<FormField>();
+            this.UsePascalCase = true;
 
             _visibleFields = new List<string>();
             _hiddenFields = new List<string>();
@@ -494,6 +495,7 @@ namespace NWheels.UI.Toolbox
         void ShowFields(params string[] propertyNames);
         void HideFields(params string[] propertyNames);
         bool UsePascalCase { get; set; }
+        List<FormField> Fields { get; }
         List<UidlCommand> Commands { get; }
     }
 

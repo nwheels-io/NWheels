@@ -137,6 +137,16 @@ namespace NWheels.UI.Toolbox
         {
             form.UsePascalCase = true;
 
+            foreach ( var field in form.Fields )
+            {
+                var nestedForm = field.NestedWidget as IUidlForm;
+
+                if ( nestedForm != null )
+                {
+                    ConfigureForm(nestedForm);
+                }
+            }
+
             //if ( form.Commands.Count == 0 )
             //{
             //    form.Commands.Add(Save);
