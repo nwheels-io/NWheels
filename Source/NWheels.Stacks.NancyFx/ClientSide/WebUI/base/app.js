@@ -329,15 +329,17 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             console.log('run-behavior > navigate', behavior.targetType, behavior.targetQualifiedName);
             switch (behavior.targetType) {
                 case 'Screen':
-                    var oldScreen = $rootScope.currentScreen;
                     var screen = m_index.screens[behavior.targetQualifiedName];
-                    $rootScope.currentScreen = screen;
-                    location.hash = screen.qualifiedName;
-                    $timeout(function () {
-                        //if (oldScreen) {
-                        //    $rootScope.$broadcast(oldScreen.qualifiedName + ':NavigatingAway', input);
-                        //}
-                        $rootScope.$broadcast(screen.qualifiedName + ':NavigatedHere', input);
+                    $rootScope.currentScreen = null;
+                    $timeout(function() {
+                        $rootScope.currentScreen = screen;
+                        location.hash = screen.qualifiedName;
+                        $timeout(function() {
+                            //if (oldScreen) {
+                            //    $rootScope.$broadcast(oldScreen.qualifiedName + ':NavigatingAway', input);
+                            //}
+                            $rootScope.$broadcast(screen.qualifiedName + ':NavigatedHere', input);
+                        });
                     });
                     break;
                 case 'ScreenPart':
@@ -481,18 +483,20 @@ function ($q, $http, $rootScope, $timeout, commandService) {
         implement: function (scope) {
             scope.$on(scope.uidl.qualifiedName + ':NavReq', function (event, data) {
                 console.log('screenPartContainer::on-NavReq', scope.uidl.qualifiedName, '->', data.screenPart.qualifiedName);
-                var oldScreenPart = scope.currentScreenPart;
-                scope.currentScreenPart = data.screenPart;
-                location.hash = data.screenPart.qualifiedName;
+                scope.currentScreenPart = null;
                 $timeout(function() {
-                    scope.$broadcast(data.screenPart.qualifiedName + ':NavigatedHere', data.input);
-                    if (data.screenPart.contentRoot) {
-                        scope.$broadcast(data.screenPart.contentRoot.qualifiedName + ':NavigatedHere', data.input);
-                    }
-                    $rootScope.$broadcast(scope.uidl.qualifiedName + ':ScreenPartLoaded', scope.currentScreenPart);
-                    //if (oldScreenPart) {
-                    //    $rootScope.$broadcast(oldScreenPart.qualifiedName + ':NavigatingAway', data.input);
-                    //}
+                    scope.currentScreenPart = data.screenPart;
+                    location.hash = data.screenPart.qualifiedName;
+                    $timeout(function() {
+                        scope.$broadcast(data.screenPart.qualifiedName + ':NavigatedHere', data.input);
+                        if (data.screenPart.contentRoot) {
+                            scope.$broadcast(data.screenPart.contentRoot.qualifiedName + ':NavigatedHere', data.input);
+                        }
+                        $rootScope.$broadcast(scope.uidl.qualifiedName + ':ScreenPartLoaded', scope.currentScreenPart);
+                        //if (oldScreenPart) {
+                        //    $rootScope.$broadcast(oldScreenPart.qualifiedName + ':NavigatingAway', data.input);
+                        //}
+                    });
                 });
             });
             if (scope.uidl.initalScreenPartQualifiedName) {
@@ -586,12 +590,13 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.commandInProgress = false;
 
             scope.refresh = function () {
-                scope.commandInProgress = true;
+                scope.resetCrudState();
                 scope.queryEntities();
-                scope.uiShowCrudForm = false;
             };
 
             scope.queryEntities = function () {
+                scope.selectedEntity = null;
+                scope.commandInProgress = true;
                 if (scope.uidl.mode !== 'Inline') {
                     scope.resultSet = null;
                     scope.entityService.queryEntity(scope.uidl.grid.entityName, function(query) {
@@ -616,27 +621,38 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
             scope.resetCrudState = function() {
                 scope.uiShowCrudForm = false;
+                scope.selectedEntity = null;
                 scope.entity = null;
-                scope.resultSet = null;
+                scope.commandInProgress = false;
             };
 
             scope.$on(scope.uidl.qualifiedName + ':NavigatedHere', function (event) {
-                scope.resetCrudState();
+                scope.refresh();
             });
 
-            scope.$on(scope.uidl.qualifiedName + ':Grid:ObjectSelected', function (event, data) {
-                scope.selectedEntity = data;
+            scope.$on(scope.uidl.qualifiedName + ':Grid:ObjectSelected', function(event, data) {
+                scope.$apply(function() {
+                    scope.selectedEntity = data;
+                });
             });
 
             scope.$on(scope.uidl.qualifiedName + ':Grid:ObjectSelectedById', function (event, id) {
-                scope.selectedEntity = Enumerable.From(scope.resultSet).Where("$.Id == '" + id + "'").First();
+                scope.$apply(function() {
+                    scope.selectedEntity = Enumerable.From(scope.resultSet).Where("$.Id == '" + id + "'").First();
+                });
             });
 
             scope.$on(scope.uidl.qualifiedName + ':Grid:ObjectSelectedByIndex', function (event, index) {
-                scope.selectedEntity = scope.resultSet[index];
+                scope.$apply(function() {
+                    scope.selectedEntity = scope.resultSet[index];
+                });
             });
 
             scope.editEntity = function (entity) {
+                if (!entity) {
+                    return;
+                }
+
                 scope.model.entity = entity;
                 scope.model.isNew = false;
 
@@ -652,6 +668,8 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.newEntity = function () {
+                scope.selectedEntity = null;
+
                 if (scope.uidl.formTypeSelector) {
                     scope.newEntityCreated({});
                 } else {
@@ -676,6 +694,10 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
 
             scope.deleteEntity = function (entity) {
+                if (!entity) {
+                    return;
+                }
+
                 if (scope.uidl.mode !== 'Inline') {
                     scope.entityService.deleteEntity(entity).then(function(result) {
                         scope.queryEntities();
@@ -722,6 +744,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.commandInProgress = false;
                 scope.resetCrudState();
                 scope.resultSet = data;
+                scope.selectedEntity = null;
                 scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
             });
 
@@ -734,8 +757,6 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.$on(scope.uidl.qualifiedName + ':Delete:Executing', function (event) {
                 scope.deleteEntity(scope.model.entity);
             });
-
-            scope.queryEntities();
         }
     };
 
@@ -1154,6 +1175,11 @@ theApp.directive('uidlWidget', ['uidlService', 'entityService', '$timeout', func
                     });
                 }
             });
+            if ($scope.controllerInitCount) {
+                $scope.controllerInitCount = $scope.controllerInitCount+1;
+            } else {
+                $scope.controllerInitCount = 1;
+            }
         }
     };
 }]);

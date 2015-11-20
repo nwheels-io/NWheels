@@ -405,20 +405,23 @@ HEAD, JS/CSS LINKS
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - CRUD
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <script type="text/ng-template" id="uidl-element-template/Crud">
+        <script type="text/ng-template" id="uidl-element-template/Crud">
         <div class="row">
+            <div class="col-lg-12">
+                INIT COUNT = [{{controllerInitCount}}]
+            </div>
             <div ng-hide="uiShowCrudForm" class="col-lg-12">
                 <div class="ibox-title" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
-                    <button class="btn btn-primary btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="newEntity();" title="Add New">
+                    <button class="btn btn-primary btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="newEntity();" ng-disabled="commandInProgress" title="Add New">
                         <i class="fa fa-plus"></i>
                     </button>
-                    <button class="btn btn-success btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="editEntity(selectedEntity)" title="Edit Selected">
+                    <button class="btn btn-success btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="editEntity(selectedEntity)" ng-disabled="!selectedEntity" title="Edit Selected">
                         <i class="fa fa-edit"></i>
                     </button>
                     <!--button class="btn btn-danger btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="deleteEntity(selectedEntity)" title="Delete Selected">
                         <i class="fa fa-times"></i>
                     </button-->
-                    <button class="btn btn-default btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="refresh()" title="Refresh">
+                    <button class="btn btn-default btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="refresh()" ng-disabled="commandInProgress" title="Refresh">
                         <i class="fa fa-refresh"></i>
                     </button>
                 </div>
@@ -718,18 +721,18 @@ HEAD, JS/CSS LINKS
         </div>
     </script>
     <script type="text/javascript">
-    function initWidget_FormField($scope) {
-        var dateTimePickerValueChanged = function(e) {
-            $scope.entity[$scope.uidl.propertyName] = e.date.format('YYYY-MM-DD HH:mm:ss');
-        };
-        if ($scope.uidl.modifiers === 'DateTimePicker') {
-            $('#' + $scope.uniqueFieldId).datetimepicker({
-                format: 'YYYY-MM-DD HH:mm:ss',
-                allowInputToggle: true
-            })
-            .on('dp.change', dateTimePickerValueChanged);
+        function initWidget_FormField($scope) {
+            var dateTimePickerValueChanged = function(e) {
+                $scope.entity[$scope.uidl.propertyName] = e.date.format('YYYY-MM-DD HH:mm:ss');
+            };
+            if ($scope.uidl.modifiers === 'DateTimePicker') {
+                $('#' + $scope.uniqueFieldId).datetimepicker({
+                    format: 'YYYY-MM-DD HH:mm:ss',
+                    allowInputToggle: true
+                })
+                .on('dp.change', dateTimePickerValueChanged);
+            }
         }
-    }
     </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
