@@ -719,11 +719,15 @@ HEAD, JS/CSS LINKS
     </script>
     <script type="text/javascript">
     function initWidget_FormField($scope) {
+        var dateTimePickerValueChanged = function(e) {
+            $scope.entity[$scope.uidl.propertyName] = e.date.format('YYYY-MM-DD HH:mm:ss');
+        };
         if ($scope.uidl.modifiers === 'DateTimePicker') {
             $('#' + $scope.uniqueFieldId).datetimepicker({
                 format: 'YYYY-MM-DD HH:mm:ss',
                 allowInputToggle: true
-            });
+            })
+            .on('dp.change', dateTimePickerValueChanged);
         }
     }
     </script>
