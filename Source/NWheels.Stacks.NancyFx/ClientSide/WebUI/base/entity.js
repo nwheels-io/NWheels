@@ -7,7 +7,7 @@ var theApp = angular.module('theApp');
 //-----------------------------------------------------------------------------------------------------------------
 
 theApp.service('entityService',
-['$http', '$q', '$timeout', 
+['$http', '$q', '$timeout',
 function ($http, $q, $timeout) {
 
     var service = {
@@ -77,6 +77,7 @@ function ($http, $q, $timeout) {
                 return response.data;
             },
             function (response) {
+                
                 return response;
             }
         );

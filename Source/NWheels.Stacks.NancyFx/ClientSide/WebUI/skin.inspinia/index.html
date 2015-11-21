@@ -484,9 +484,6 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
         <script type="text/ng-template" id="uidl-element-template/Crud">
         <div class="row">
-            <div class="col-lg-12">
-                INIT COUNT = [{{controllerInitCount}}]
-            </div>
             <div ng-hide="uiShowCrudForm" class="col-lg-12">
                 <div class="ibox-title" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
                     <button class="btn btn-primary btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="newEntity();" ng-disabled="commandInProgress" title="Add New">
@@ -1142,27 +1139,30 @@ HEAD, JS/CSS LINKS
                 showMethod: 'slideDown',
                 timeOut: 4000
             };
-            
-            angular.module('inspinia', []).run(['$rootScope', 'uidlService', 
-            function($rootScope, uidlService) {
-                $rootScope.showPopupAlert = function(alertHandle) {
-                    switch (alertHandle.uidl.type) {
-                        case 'Info':
-                            toastr.info(uidlService.translate(alertHandle.uidl.text));
-                            break;
-                        case 'Success':
-                            toastr.success(uidlService.translate(alertHandle.uidl.text));
-                            break;
-                        case 'Warning':
-                            toastr.warning(uidlService.translate(alertHandle.uidl.text));
-                            break;
-                        case 'Error':
-                            toastr.error(uidlService.translate(alertHandle.uidl.text));
-                            break;
-                    }
-                };
-            }]);
         });
+        
+        angular.module('theApp').run(['$rootScope', 'uidlService', 
+        function($rootScope, uidlService) {
+            $rootScope.showPopupAlert = function(alertHandle) {
+                switch (alertHandle.uidl.type) {
+                    case 'Info':
+                        toastr.info(uidlService.translate(alertHandle.uidl.text));
+                        break;
+                    case 'Success':
+                        toastr.success(uidlService.translate(alertHandle.uidl.text), null, { timeOut: 2000 });
+                        break;
+                    case 'Warning':
+                        toastr.warning(uidlService.translate(alertHandle.uidl.text));
+                        break;
+                    case 'Error':
+                        toastr.error(
+                            '<a data-toggle="modal" data-target="#divModalTechnicalInfo"><i class="fa fa-xs fa-angle-double-right"></i>&nbsp;technical info</a>', 
+                            uidlService.translate(alertHandle.uidl.text),
+                            { timeOut: 5000 });
+                        break;
+                }
+            };
+        }]);
     </script>
 </body>
 </html>

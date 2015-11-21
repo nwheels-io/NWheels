@@ -11,8 +11,8 @@ function toCamelCase(s) {
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.service('commandService',
-['$http', '$q', '$interval', '$timeout',
-function ($http, $q, $interval, $timeout) {
+['$http', '$q', '$interval', '$timeout', '$rootScope',
+function ($http, $q, $interval, $timeout, $rootScope) {
 
     var m_pendingCommands = {};
     var m_pollTimer = null;
@@ -37,16 +37,8 @@ function ($http, $q, $interval, $timeout) {
                 }
             },
             function (response) {
-                commandCompletion.reject({
-                    success: false,
-                    Success: false,
-                    faultCode: response.status,
-                    FaultCode: response.status,
-                    faultReason: response.statusText,
-                    FaultReason: response.statusText,
-                    technicalInfo: response.data,
-                    TechnicalInfo: response.data
-                });
+                var faultInfo = createFaultInfo(response);
+                commandCompletion.reject(faultInfo);
             }
         );
 
@@ -98,12 +90,32 @@ function ($http, $q, $interval, $timeout) {
     }
 
     //-----------------------------------------------------------------------------------------------------------------
+    
+    function createFaultInfo(httpResponse) {
+        if (httpResponse.data.faultCode) {
+            return httpResponse.data;
+        }
+        var faultInfo = {
+            success: false,
+            Success: false,
+            faultCode: httpResponse.status,
+            FaultCode: httpResponse.status,
+            faultReason: httpResponse.statusText,
+            FaultReason: httpResponse.statusText,
+            technicalInfo: httpResponse.data,
+            TechnicalInfo: httpResponse.data
+        };
+        return faultInfo;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
 
     return {
         sendCommand: sendCommand,
         receiveMessages: receiveMessages,
         startPollingMessages: startPollingMessages,
-        stopPollingMessages: stopPollingMessages
+        stopPollingMessages: stopPollingMessages,
+        createFaultInfo: createFaultInfo
     };
 }]);
 
@@ -472,13 +484,17 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                     scope.inlineUserAlert.current = alertHandle;
                     break;
                 case 'Popup':
-                    scope.showPopupAlert(alertHandle);
+                    $rootScope.showPopupAlert(alertHandle);
                     break;
                 case 'Modal':
-                    scope.showModalAlert(alertHandle);
+                    $rootScope.showModalAlert(alertHandle);
                     break;
             }
-            return deferred.promise;
+            if (uidlAlert.resultChoices.length) {
+                return deferred.promise;
+            } else {
+                return $q.when(true);
+            }
         }
     };
 
@@ -637,14 +653,19 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                         if (scope.uidl.entityTypeFilter) {
                             query.ofType(scope.uidl.entityTypeFilter);
                         }
-                    }).then(function (data) {
-                        var receivedResultSet = data.ResultSet;
-                        $timeout(function () {
-                            scope.resultSet = receivedResultSet;
-                            scope.commandInProgress = false;
-                            scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', receivedResultSet);
-                        });
-                    });
+                    }).then(
+                        function (data) {
+                            var receivedResultSet = data.ResultSet;
+                            $timeout(function () {
+                                scope.resultSet = receivedResultSet;
+                                scope.commandInProgress = false;
+                                scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', receivedResultSet);
+                            });
+                        },
+                        function (fault) {
+                            scope.$emit(scope.uidl.qualifiedName + ':QueryEntityFailed', commandService.createFaultInfo(fault));
+                        }
+                    );
                 } else {
                     $timeout(function() {
                         scope.commandInProgress = false;
@@ -707,9 +728,14 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 if (scope.uidl.formTypeSelector) {
                     scope.newEntityCreated({});
                 } else {
-                    scope.entityService.newDomainObject(metaType.name).then(function (newObj) {
-                        scope.newEntityCreated(newObj);
-                    });
+                    scope.entityService.newDomainObject(metaType.name).then(
+                        function (newObj) {
+                            scope.newEntityCreated(newObj);
+                        },
+                        function (fault) {
+                            scope.$emit(scope.uidl.qualifiedName + ':NewDomainObjectFailed', commandService.createFaultInfo(fault));
+                        }
+                    );
                 }
             };
 
@@ -733,10 +759,16 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 }
 
                 if (scope.uidl.mode !== 'Inline') {
-                    scope.entityService.deleteEntity(entity).then(function(result) {
-                        scope.queryEntities();
-                        scope.uiShowCrudForm = false;
-                    });
+                    scope.entityService.deleteEntity(entity).then(
+                        function(result) {
+                            scope.queryEntities();
+                            scope.uiShowCrudForm = false;
+                            scope.$emit(scope.uidl.qualifiedName + ':DeleteEntityCompleted');
+                        },
+                        function (fault) {
+                            scope.$emit(scope.uidl.qualifiedName + ':DeleteEntityFailed', commandService.createFaultInfo(fault));
+                        }
+                    );
                 } else {
                     for (var i = 0; i < scope.resultSet.length; i++) {
                         if(scope.resultSet[i] === entity) {
@@ -752,9 +784,15 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 //scope.$broadcast(':global:FormValidating', { isValud: true });
 
                 if (scope.uidl.mode !== 'Inline') {
-                    scope.entityService.storeEntity(entity).then(function() {
-                        scope.refresh();
-                    });
+                    scope.entityService.storeEntity(entity).then(
+                        function() {
+                            scope.$emit(scope.uidl.qualifiedName + ':StoreEntityCompleted');
+                            scope.refresh();
+                        },
+                        function (fault) {
+                            scope.$emit(scope.uidl.qualifiedName + ':StoreEntityFailed', commandService.createFaultInfo(fault));
+                        }
+                    );
                 } else {
                     if (scope.model.isNew) {
                         scope.resultSet.push(entity);

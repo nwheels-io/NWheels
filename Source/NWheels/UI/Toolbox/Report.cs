@@ -59,8 +59,14 @@ namespace NWheels.UI.Toolbox
             presenter.On(ShowReport)
                 .InvokeTransactionScript<TScript>()
                 .WaitForReply((script, data, state, input) => script.Execute(state.Criteria))
-                .Then(b => b.Broadcast(ResultTable.DataReceived).WithPayload(m => m.Input).TunnelDown()
-                .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown()));
+                .Then(
+                    onSuccess: 
+                        b => b.Broadcast(ResultTable.DataReceived).WithPayload(m => m.Input).TunnelDown()
+                        .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown()
+                        .Then(bbb => bbb.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady()))),
+                    onFailure:
+                        b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input)
+                        .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown()));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -81,5 +87,16 @@ namespace NWheels.UI.Toolbox
         {
             TCriteria Criteria { get; set; }
         }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface IReportUserAlerts : IUserAlertRepository
+    {
+        [SuccessAlert]
+        UidlUserAlert ReportIsReady();
+
+        [ErrorAlert]
+        UidlUserAlert FailedToPrepareReport();
     }
 }

@@ -76,6 +76,15 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public UidlNotification<IPromiseFailureInfo> QueryEntityFailed { get; set; }
+        public UidlNotification<IPromiseFailureInfo> NewDomainObjectFailed { get; set; }
+        public UidlNotification DeleteEntityCompleted { get; set; }
+        public UidlNotification<IPromiseFailureInfo> DeleteEntityFailed { get; set; }
+        public UidlNotification StoreEntityCompleted { get; set; }
+        public UidlNotification<IPromiseFailureInfo> StoreEntityFailed { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void DescribePresenter(PresenterBuilder<Crud<TEntity>, Empty.Data, ICrudViewState<TEntity>> presenter)
         {
             this.Grid.UsePascalCase = true;
@@ -84,6 +93,13 @@ namespace NWheels.UI.Toolbox
             this.Save.Severity = CommandSeverity.Change;
             this.Cancel.Icon = "times";
             this.Cancel.Severity = CommandSeverity.Loose;
+
+            presenter.On(QueryEntityFailed).UserAlertFrom<ICrudUserAlerts>().ShowPopup((x, vm) => x.FailedToQueryDataFromServer(), faultInfo: vm => vm.Input);
+            presenter.On(NewDomainObjectFailed).UserAlertFrom<ICrudUserAlerts>().ShowPopup((x, vm) => x.FailedToRetrieveDefaultValues(), faultInfo: vm => vm.Input);
+            presenter.On(DeleteEntityCompleted).UserAlertFrom<ICrudUserAlerts>().ShowPopup((x, vm) => x.DeleteOperationCompleted());
+            presenter.On(DeleteEntityFailed).UserAlertFrom<ICrudUserAlerts>().ShowPopup((x, vm) => x.DeleteOperationFailed(), faultInfo: vm => vm.Input);
+            presenter.On(StoreEntityCompleted).UserAlertFrom<ICrudUserAlerts>().ShowPopup((x, vm) => x.DataSuccessfullySaved());
+            presenter.On(StoreEntityFailed).UserAlertFrom<ICrudUserAlerts>().ShowPopup((x, vm) => x.FailedToSaveData(), faultInfo: vm => vm.Input);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -181,5 +197,28 @@ namespace NWheels.UI.Toolbox
     {
         TEntity CurrentEntity { get; set; }
         ICollection<ICrudNavigatedEntity> NavigatedEntities { get; set; }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface ICrudUserAlerts : IUserAlertRepository
+    {
+        [ErrorAlert]
+        UidlUserAlert FailedToQueryDataFromServer();
+
+        [ErrorAlert]
+        UidlUserAlert FailedToRetrieveDefaultValues();
+
+        [SuccessAlert]
+        UidlUserAlert DeleteOperationCompleted();
+
+        [ErrorAlert]
+        UidlUserAlert DeleteOperationFailed();
+
+        [SuccessAlert]
+        UidlUserAlert DataSuccessfullySaved();
+
+        [ErrorAlert]
+        UidlUserAlert FailedToSaveData();
     }
 }
