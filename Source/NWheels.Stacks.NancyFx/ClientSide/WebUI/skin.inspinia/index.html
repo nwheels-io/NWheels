@@ -94,6 +94,10 @@ HEAD, JS/CSS LINKS
         .alert button {
             margin: 10px 5px 0 0;
         }
+        .alert-dismissable .close {
+            top: -10px;
+            right: -30px;
+        }    
     </style>
 </head>
 
@@ -123,35 +127,35 @@ HEAD, JS/CSS LINKS
     UIDL USER ALERT - INLINE
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-user-alert-inline">
-        <div ng-if="alert"
+        <div ng-if="alert.current"
              class="alert alert-dismissable"
              ng-class="{
-                'alert-info':alert.uidl.type==='Info',
-                'alert-success':alert.uidl.type==='Success',
-                'alert-warning':alert.uidl.type==='Warning',
-                'alert-danger':alert.uidl.type==='Error'
+                'alert-info':alert.current.uidl.type==='Info',
+                'alert-success':alert.current.uidl.type==='Success',
+                'alert-warning':alert.current.uidl.type==='Warning',
+                'alert-danger':alert.current.uidl.type==='Error'
              }"
              style="text-align:left;">
-            <button ng-if="!alert.uidl.resultChoices.length" aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+            <button ng-if="!alert.current.uidl.resultChoices.length" aria-hidden="true" class="close" type="button" ng-click="answerAlert('None')">×</button>
             <i class="fa fa-lg glyphicon"
                ng-class="{
-                   'fa-info':alert.uidl.type==='Info',
-                   'fa-check-square':alert.uidl.type==='Success',
-                   'fa-exclamation-triangle':alert.uidl.type==='Warning',
-                   'fa-times-circle':alert.uidl.type==='Error'
+                   'fa-info':alert.current.uidl.type==='Info',
+                   'fa-check-square':alert.current.uidl.type==='Success',
+                   'fa-exclamation-triangle':alert.current.uidl.type==='Warning',
+                   'fa-times-circle':alert.current.uidl.type==='Error'
                }"></i>
             <span>
-                {{translate(alert.uidl.text)}}
-                <br ng-if="alert.uidl.resultChoices.length" />
-                <button ng-repeat="choice in alert.uidl.resultChoices"
+                {{translate(alert.current.uidl.text)}}
+                <br ng-if="alert.current.uidl.resultChoices.length" />
+                <button ng-repeat="choice in alert.current.uidl.resultChoices"
                         class="btn btn-xs btn-primary"
                         ng-class="{
-                            'btn-info':alert.uidl.type==='Info',
-                            'btn-success':alert.uidl.type==='Success',
-                            'btn-warning':alert.uidl.type==='Warning',
-                            'btn-danger':alert.uidl.type==='Error'
+                            'btn-info':alert.current.uidl.type==='Info',
+                            'btn-success':alert.current.uidl.type==='Success',
+                            'btn-warning':alert.current.uidl.type==='Warning',
+                            'btn-danger':alert.current.uidl.type==='Error'
                         }"
-                        ng-click="alert.answer(choice);alert=null">
+                        ng-click="answerAlert(choice);">
                     {{::translate(choice)}}
                 </button>
             </span>

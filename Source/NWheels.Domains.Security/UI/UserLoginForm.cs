@@ -65,16 +65,16 @@ namespace NWheels.Domains.Security.UI
 
         public interface IAlerts : IUserAlertRepository
         {
-            [ErrorAlert(UserAlertResult.OK)]
+            [ErrorAlert]
             UidlUserAlert LoginHasFailed(string reason);
             
-            [WarningAlert(UserAlertResult.OK)]
+            [WarningAlert]
             UidlUserAlert UserWasNotLoggedOut(string reason);
 
-            [InfoAlert(UserAlertResult.OK)]
+            [InfoAlert]
             UidlUserAlert PasswordSuccessfullyChanged();
 
-            [ErrorAlert(UserAlertResult.OK)]
+            [ErrorAlert]
             UidlUserAlert FailedToChangePassword(string reason);
         }
 

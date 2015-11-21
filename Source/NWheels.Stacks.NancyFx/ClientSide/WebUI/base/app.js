@@ -445,7 +445,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             };
             switch (behavior.displayMode) {
                 case 'Inline':
-                    scope.inlineUserAlert = alertHandle;
+                    scope.inlineUserAlert.current = alertHandle;
                     break;
                 case 'Popup':
                     scope.showPopupAlert(alertHandle);
@@ -1167,6 +1167,7 @@ theApp.directive('uidlWidget', ['uidlService', 'entityService', '$timeout', func
         controller: function ($scope) {
             $scope.uidlService = uidlService;
             $scope.entityService = entityService;
+            $scope.inlineUserAlert = { current: null };
             $scope.$timeout = $timeout;
             //console.log('uidlWidget::controller', $scope.uidl.qualifiedName);
             //uidlService.implementController($scope);
@@ -1299,6 +1300,10 @@ theApp.directive('uidlUserAlertInline', ['uidlService', 'entityService', functio
             $scope.entityService = entityService;
             //console.log('uidlUserAlertInline::controller');
             uidlService.implementController($scope);
+            $scope.answerAlert = function(choice) {
+                $scope.alert.current.answer(choice);
+                $scope.alert.current = null;
+            }
         },
     }
 }]);
