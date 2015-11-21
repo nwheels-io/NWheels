@@ -463,6 +463,9 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             }
             if (behavior.faultInfoExpression) {
                 alertHandle.faultInfo = contextAsEnumerable.Select('ctx=>ctx.' + behavior.faultInfoExpression).Single();
+                $rootScope.userAlertTechnicalInfo = JSON.stringify(alertHandle.faultInfo, null, 4);
+            } else {
+                $rootScope.userAlertTechnicalInfo = null;
             }
             switch (behavior.displayMode) {
                 case 'Inline':

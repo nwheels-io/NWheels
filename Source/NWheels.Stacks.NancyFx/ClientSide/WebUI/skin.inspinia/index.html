@@ -94,8 +94,13 @@ HEAD, JS/CSS LINKS
         .alert span.moreInfo {
             padding:0;
             margin:0;
-            font-weight:bold;
             display: inline;
+        }
+        .alert span.techInfo {
+            display: block;
+            margin-top: 10px;
+            padding: 0;
+            font-size: 9pt;
         }
         .alert button {
             margin: 10px 5px 0 0;
@@ -167,10 +172,34 @@ HEAD, JS/CSS LINKS
                         ng-click="answerAlert(choice);">
                     {{::translate(choice)}}
                 </button>
+                <span ng-if="alert.current.faultInfo" class="techInfo">
+                    <a class="alert-link" data-toggle="modal" data-target="#divModalTechnicalInfo"><i class="fa fa-xs fa-angle-double-right"></i>&nbsp;technical info</a>
+                </span>
             </span>
         </div>
     </script>
-
+    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL USER ALERT - TECHNICAL INFO POPUP
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <div class="modal inmodal" id="divModalTechnicalInfo" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <i class="fa fa-bug modal-icon"></i>
+                    <h4 class="modal-title">technical info</h4>
+                </div>
+                <div class="modal-body">
+                    <pre style="height:500px;word-wrap:normal;">{{userAlertTechnicalInfo}}</pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - SPLASH
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -1019,144 +1048,8 @@ HEAD, JS/CSS LINKS
             </div>
         </div>
     </script>
-
-
-
-    <!--script>
-        $(document).ready(function() {
-            setTimeout(function() {
-                toastr.options = {
-                    closeButton: true,
-                    progressBar: true,
-                    showMethod: 'slideDown',
-                    timeOut: 4000
-                };
-                toastr.success('Responsive Admin Theme', 'Welcome to INSPINIA');
-
-            }, 1300);
-
-
-            var data1 = [
-                [0,4],[1,8],[2,5],[3,10],[4,4],[5,16],[6,5],[7,11],[8,6],[9,11],[10,30],[11,10],[12,13],[13,4],[14,3],[15,3],[16,6]
-            ];
-            var data2 = [
-                [0,1],[1,0],[2,2],[3,0],[4,1],[5,3],[6,1],[7,5],[8,2],[9,3],[10,2],[11,1],[12,0],[13,2],[14,8],[15,0],[16,0]
-            ];
-            $("#flot-dashboard-chart").length && $.plot($("#flot-dashboard-chart"), [
-                data1, data2
-            ],
-                    {
-                        series: {
-                            lines: {
-                                show: false,
-                                fill: true
-                            },
-                            splines: {
-                                show: true,
-                                tension: 0.4,
-                                lineWidth: 1,
-                                fill: 0.4
-                            },
-                            points: {
-                                radius: 0,
-                                show: true
-                            },
-                            shadowSize: 2
-                        },
-                        grid: {
-                            hoverable: true,
-                            clickable: true,
-                            tickColor: "#d5d5d5",
-                            borderWidth: 1,
-                            color: '#d5d5d5'
-                        },
-                        colors: ["#1ab394", "#1C84C6"],
-                        xaxis:{
-                        },
-                        yaxis: {
-                            ticks: 4
-                        },
-                        tooltip: false
-                    }
-            );
-
-            var doughnutData = [
-                {
-                    value: 300,
-                    color: "#a3e1d4",
-                    highlight: "#1ab394",
-                    label: "App"
-                },
-                {
-                    value: 50,
-                    color: "#dedede",
-                    highlight: "#1ab394",
-                    label: "Software"
-                },
-                {
-                    value: 100,
-                    color: "#A4CEE8",
-                    highlight: "#1ab394",
-                    label: "Laptop"
-                }
-            ];
-
-            var doughnutOptions = {
-                segmentShowStroke: true,
-                segmentStrokeColor: "#fff",
-                segmentStrokeWidth: 2,
-                percentageInnerCutout: 45, // This is 0 for Pie charts
-                animationSteps: 100,
-                animationEasing: "easeOutBounce",
-                animateRotate: true,
-                animateScale: false
-            };
-
-            var ctx = document.getElementById("doughnutChart").getContext("2d");
-            var DoughnutChart = new Chart(ctx).Doughnut(doughnutData, doughnutOptions);
-
-            var polarData = [
-                {
-                    value: 300,
-                    color: "#a3e1d4",
-                    highlight: "#1ab394",
-                    label: "App"
-                },
-                {
-                    value: 140,
-                    color: "#dedede",
-                    highlight: "#1ab394",
-                    label: "Software"
-                },
-                {
-                    value: 200,
-                    color: "#A4CEE8",
-                    highlight: "#1ab394",
-                    label: "Laptop"
-                }
-            ];
-
-            var polarOptions = {
-                scaleShowLabelBackdrop: true,
-                scaleBackdropColor: "rgba(255,255,255,0.75)",
-                scaleBeginAtZero: true,
-                scaleBackdropPaddingY: 1,
-                scaleBackdropPaddingX: 1,
-                scaleShowLine: true,
-                segmentShowStroke: true,
-                segmentStrokeColor: "#fff",
-                segmentStrokeWidth: 2,
-                animationSteps: 100,
-                animationEasing: "easeOutBounce",
-                animateRotate: true,
-                animateScale: false
-            };
-            var ctx = document.getElementById("polarChart").getContext("2d");
-            var Polarchart = new Chart(ctx).PolarArea(polarData, polarOptions);
-
-        });
-    </script-->
     
+    <!-- Javascript frameworks -->
     <script src="skin/assets/js/jquery-2.1.1.js"></script>
     <script src="skin/assets/js/bootstrap.js"></script>
 
@@ -1232,14 +1125,44 @@ HEAD, JS/CSS LINKS
     <script src="skin/assets/app/angular-1.3.16/angular.min.js"></script>
     <script src="skin/assets/js/plugins/chartJs/Chart.min.js"></script>
     <script src="skin/assets/app/linqjs-2.2.0.2/linq.min.js"></script>
-    <script src="skin/assets/app/breeze/breeze.debug.js"></script>
-    <script src="skin/assets/app/breeze/breeze.bridge.angular.js"></script>
+    <!--script src="skin/assets/app/breeze/breeze.debug.js"></script>
+    <script src="skin/assets/app/breeze/breeze.bridge.angular.js"></script-->
     <script src="skin/assets/app/toastr/toastr.js"></script>
-    <script src="skin/assets/app/breeze/breeze.savequeuing.js"></script>
+    <!--script src="skin/assets/app/breeze/breeze.savequeuing.js"></script-->
 
     <script src="base/app.js"></script>
     <script src="base/entity.js"></script>
     <script src="skin/assets/app/chartjs/chart.js"></script>
 
+    <script>
+        $(document).ready(function() {
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                showMethod: 'slideDown',
+                timeOut: 4000
+            };
+            
+            angular.module('inspinia', []).run(['$rootScope', 'uidlService', 
+            function($rootScope, uidlService) {
+                $rootScope.showPopupAlert = function(alertHandle) {
+                    switch (alertHandle.uidl.type) {
+                        case 'Info':
+                            toastr.info(uidlService.translate(alertHandle.uidl.text));
+                            break;
+                        case 'Success':
+                            toastr.success(uidlService.translate(alertHandle.uidl.text));
+                            break;
+                        case 'Warning':
+                            toastr.warning(uidlService.translate(alertHandle.uidl.text));
+                            break;
+                        case 'Error':
+                            toastr.error(uidlService.translate(alertHandle.uidl.text));
+                            break;
+                    }
+                };
+            }]);
+        });
+    </script>
 </body>
 </html>
