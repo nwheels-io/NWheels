@@ -117,6 +117,31 @@ namespace NWheels.Extensions
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static void ParseNormalizedMethodAndParameters(
+            this LambdaExpression expression, 
+            out MethodInfo method, 
+            out string[] parameterExpressions, 
+            params string[] formalParameterNames)
+        {
+            if ( expression.Body is UnaryExpression && expression.Body.NodeType == ExpressionType.Convert )
+            {
+                expression = Expression.Lambda(((UnaryExpression)expression.Body).Operand, expression.Parameters);
+            }
+
+            for ( int i = 0; i < formalParameterNames.Length; i++ )
+            {
+                EnsureParameterName(expression.Parameters[i], formalParameterNames[i]);
+            }
+
+            Expression callTarget;
+            Expression[] callArguments;
+            method = expression.GetMethodInfo(out callTarget, out callArguments);
+
+            parameterExpressions = callArguments.Where(arg => arg != callTarget).Select(arg => arg.ToString()).ToArray();
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static void EnsureParameterName(ParameterExpression parameter, string name)
         {
             if ( parameter.Name != name )

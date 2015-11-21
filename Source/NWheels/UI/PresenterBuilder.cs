@@ -677,9 +677,13 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<UserAlertResult> ShowInline(Expression<Func<TRepo, UidlUserAlert>> alertCall)
+            public PromiseBuilder<UserAlertResult> ShowInline(
+                Expression<Func<TRepo, ViewModel<TData, TState, TInput>, UidlUserAlert>> alertCall,
+                Expression<Func<ViewModel<TData, TState, TInput>, IPromiseFailureInfo>> faultInfo = null)
             {
                 ParseAlertCall(alertCall);
+                ParseFaultInfoParameter(faultInfo);
+
                 _behavior.DisplayMode = UserAlertDisplayMode.Inline;
 
                 return new PromiseBuilder<UserAlertResult>(_ownerNode, _behavior, _uidl);
@@ -687,19 +691,13 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<UserAlertResult> ShowInline(Expression<Func<TRepo, TData, TState, TInput, UidlUserAlert>> alertCall)
+            public PromiseBuilder<UserAlertResult> ShowPopup(
+                Expression<Func<TRepo, ViewModel<TData, TState, TInput>, UidlUserAlert>> alertCall,
+                Expression<Func<ViewModel<TData, TState, TInput>, IPromiseFailureInfo>> faultInfo = null)
             {
                 ParseAlertCall(alertCall);
-                _behavior.DisplayMode = UserAlertDisplayMode.Inline;
+                ParseFaultInfoParameter(faultInfo);
 
-                return new PromiseBuilder<UserAlertResult>(_ownerNode, _behavior, _uidl);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public PromiseBuilder<UserAlertResult> ShowPopup(Expression<Func<TRepo, UidlUserAlert>> alertCall)
-            {
-                ParseAlertCall(alertCall);
                 _behavior.DisplayMode = UserAlertDisplayMode.Popup;
 
                 return new PromiseBuilder<UserAlertResult>(_ownerNode, _behavior, _uidl);
@@ -707,19 +705,13 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<UserAlertResult> ShowPopup(Expression<Func<TRepo, TData, TState, TInput, UidlUserAlert>> alertCall)
+            public PromiseBuilder<UserAlertResult> ShowModal(
+                Expression<Func<TRepo, ViewModel<TData, TState, TInput>, UidlUserAlert>> alertCall,
+                Expression<Func<ViewModel<TData, TState, TInput>, IPromiseFailureInfo>> faultInfo = null)
             {
                 ParseAlertCall(alertCall);
-                _behavior.DisplayMode = UserAlertDisplayMode.Popup;
+                ParseFaultInfoParameter(faultInfo);
 
-                return new PromiseBuilder<UserAlertResult>(_ownerNode, _behavior, _uidl);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public PromiseBuilder<UserAlertResult> ShowModal(Expression<Func<TRepo, UidlUserAlert>> alertCall)
-            {
-                ParseAlertCall(alertCall);
                 _behavior.DisplayMode = UserAlertDisplayMode.Modal;
 
                 return new PromiseBuilder<UserAlertResult>(_ownerNode, _behavior, _uidl);
@@ -727,23 +719,36 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<UserAlertResult> ShowModal(Expression<Func<TRepo, TData, TState, TInput, UidlUserAlert>> alertCall)
-            {
-                ParseAlertCall(alertCall);
-                _behavior.DisplayMode = UserAlertDisplayMode.Modal;
+            //private void ParseAlertCall(LambdaExpression alertCall)
+            //{
+            //    Expression[] callArguments;
+            //    var method = alertCall.GetMethodInfo(out callArguments);
 
-                return new PromiseBuilder<UserAlertResult>(_ownerNode, _behavior, _uidl);
+            //    _behavior.AlertQualifiedName = _uidl.RegisterUserAlert(method);
+            //    _behavior.ParameterExpressions = callArguments.Select(x => x.ToString()).ToArray();
+            //}
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ParseFaultInfoParameter(Expression<Func<ViewModel<TData, TState, TInput>, IPromiseFailureInfo>> parameter)
+            {
+                if ( parameter != null )
+                {
+                    _behavior.FaultInfoExpression = parameter.ToNormalizedNavigationString(false, "model");
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void ParseAlertCall(LambdaExpression alertCall)
+            private void ParseAlertCall(LambdaExpression call)
             {
-                Expression[] callArguments;
-                var method = alertCall.GetMethodInfo(out callArguments);
+                MethodInfo method;
+                string[] parameterExpressions;
+
+                call.ParseNormalizedMethodAndParameters(out method, out parameterExpressions, "$repo", "model");
 
                 _behavior.AlertQualifiedName = _uidl.RegisterUserAlert(method);
-                _behavior.ParameterExpressions = callArguments.Select(x => x.ToString()).ToArray();
+                _behavior.ParameterExpressions = parameterExpressions;
             }
         }
 

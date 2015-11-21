@@ -22,7 +22,8 @@ namespace NWheels.Processing.Commands
             string newSessionId = null,
             string faultCode = null, 
             string faultSubCode = null, 
-            string faultReason = null)
+            string faultReason = null, 
+            string technicalInfo = null)
             : base(framework, toSession)
         {
             this.CommandMessageId = commandMessageId;
@@ -32,6 +33,7 @@ namespace NWheels.Processing.Commands
             this.FaultCode = faultCode;
             this.FaultSubCode = faultSubCode;
             this.FaultReason = faultReason;
+            this.TechnicalInfo = technicalInfo;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,6 +52,7 @@ namespace NWheels.Processing.Commands
         public string FaultCode { get; private set; }
         public string FaultSubCode { get; private set; }
         public string FaultReason { get; private set; }
+        public string TechnicalInfo { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -64,6 +67,7 @@ namespace NWheels.Processing.Commands
                 this.FaultCode = source.FaultCode;
                 this.FaultSubCode = source.FaultSubCode;
                 this.FaultReason = source.FaultReason;
+                this.TechnicalInfo = source.TechnicalInfo;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -74,20 +78,35 @@ namespace NWheels.Processing.Commands
             [JsonProperty(PropertyName = "commandMessageId")]
             public Guid CommandMessageId { get; private set; }
 
-            [JsonProperty(PropertyName = "result")]
             public object Result { get; private set; }
 
-            [JsonProperty(PropertyName = "success")]
             public bool Success { get; private set; }
 
-            [JsonProperty(PropertyName = "faultCode")]
             public string FaultCode { get; private set; }
 
-            [JsonProperty(PropertyName = "faultSubCode")]
             public string FaultSubCode { get; private set; }
 
-            [JsonProperty(PropertyName = "faultReason")]
             public string FaultReason { get; private set; }
+
+            public string TechnicalInfo { get; private set; }
+            
+            [JsonProperty(PropertyName = "result")]
+            public object ResultLowercase { get { return this.Result;  } }
+
+            [JsonProperty(PropertyName = "success")]
+            public bool SuccessLowercase { get { return this.Success; } }
+
+            [JsonProperty(PropertyName = "faultCode")]
+            public string FaultCodeLowercase { get { return this.FaultCode; } }
+
+            [JsonProperty(PropertyName = "faultSubCode")]
+            public string FaultSubCodeLowercase { get { return this.FaultSubCode; } }
+
+            [JsonProperty(PropertyName = "faultReason")]
+            public string FaultReasonLowercase { get { return this.FaultReason; } }
+
+            [JsonProperty(PropertyName = "technicalInfo")]
+            public string TechnicalInfoLowercase { get { return this.TechnicalInfo; } }
         }
     }
 }

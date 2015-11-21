@@ -14,5 +14,6 @@ namespace NWheels.UI
         string FaultCode { get; }
         string FaultSubCode { get; }
         string FaultReason { get; }
+        string TechnicalInfo { get; }
     }
 }

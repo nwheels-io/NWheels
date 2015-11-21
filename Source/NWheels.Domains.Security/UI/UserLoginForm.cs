@@ -41,16 +41,20 @@ namespace NWheels.Domains.Security.UI
                     onSuccess: b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.User))
                         .Then(bb => bb.Broadcast(UserLoggedIn).WithPayload(m => m.Input).BubbleUp()),
                     onFailure: b => b.AlterModel(alt => alt.Copy(m => m.Input.FaultCode).To(m => m.State.LoginFault))
-                        .Then(bb => bb.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.LoginHasFailed(failure.FaultReason))));
+                        .Then(bb => bb.UserAlertFrom<IAlerts>().ShowInline(
+                            (x, vm) => x.LoginHasFailed(vm.Input.FaultReason),
+                            faultInfo: vm => vm.Input)));
 
             presenter.On(ChangePassword)
                 .InvokeTransactionScript<ChangePasswordTransactionScript>()
                 .WaitForCompletion((x, data, state, input) => x.Execute(data.LoginName, data.Password, data.NewPassword))
                 .Then(
                     onSuccess: b => b.AlterModel(alt => alt.Copy(m => (string)null).To(m => m.State.LoginFault))
-                        .Then(bb => bb.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.PasswordSuccessfullyChanged())),
+                        .Then(bb => bb.UserAlertFrom<IAlerts>().ShowInline((x, vm) => x.PasswordSuccessfullyChanged())),
                     onFailure: b => b.AlterModel(alt => alt.Copy(m => m.Input.FaultCode).To(m => m.State.LoginFault))
-                        .Then(bb => bb.UserAlertFrom<IAlerts>().ShowInline((r, d, s, failure) => r.FailedToChangePassword(failure.FaultReason))));
+                        .Then(bb => bb.UserAlertFrom<IAlerts>().ShowInline(
+                            (x, vm) => x.FailedToChangePassword(vm.Input.FaultReason), 
+                            faultInfo: vm => vm.Input)));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

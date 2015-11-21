@@ -39,8 +39,13 @@ function ($http, $q, $interval, $timeout) {
             function (response) {
                 commandCompletion.reject({
                     success: false,
+                    Success: false,
                     faultCode: response.status,
-                    faultReason: response.statusText
+                    FaultCode: response.status,
+                    faultReason: response.statusText,
+                    FaultReason: response.statusText,
+                    technicalInfo: response.data,
+                    TechnicalInfo: response.data
                 });
             }
         );
@@ -439,10 +444,26 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             var deferred = $q.defer(); 
             var alertHandle = {
                 uidl: uidlAlert,
+                parameters: { },
+                faultInfo: null,
                 answer: function(choice) {
                     return deferred.resolve(choice);
                 }
             };
+            var context = {
+                model: {
+                    Input: input,
+                    Data: scope.model.data,
+                    State: scope.model.state
+                }
+            };
+            var contextAsEnumerable = Enumerable.Return(context);
+            for (var i = 0; i < behavior.parameterExpressions.length ; i++) {
+                alertHandle.parameters[uidlAlert.parameterNames[i]] = contextAsEnumerable.Select('ctx=>ctx.' + behavior.parameterExpressions[i]).Single();
+            }
+            if (behavior.faultInfoExpression) {
+                alertHandle.faultInfo = contextAsEnumerable.Select('ctx=>ctx.' + behavior.faultInfoExpression).Single();
+            }
             switch (behavior.displayMode) {
                 case 'Inline':
                     scope.inlineUserAlert.current = alertHandle;

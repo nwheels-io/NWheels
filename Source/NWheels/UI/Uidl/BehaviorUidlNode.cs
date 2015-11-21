@@ -124,6 +124,8 @@ namespace NWheels.UI.Uidl
         public UserAlertDisplayMode DisplayMode { get; set; }
         [DataMember]
         public string[] ParameterExpressions { get; set; }
+        [DataMember]
+        public string FaultInfoExpression { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

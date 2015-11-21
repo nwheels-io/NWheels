@@ -148,7 +148,7 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static ItemAction AlertUserPopup<TRepo>(Expression<Func<TRepo, UidlUserAlert>> alertCall)
+            public static ItemAction AlertUserPopup<TRepo>(Expression<Func<TRepo, ViewModel<Empty.Data, Empty.State, Empty.Payload>, UidlUserAlert>> alertCall)
                 where TRepo : IUserAlertRepository
             {
                 return Describe(b => b.UserAlertFrom<TRepo>().ShowPopup(alertCall));
@@ -156,7 +156,7 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static ItemAction AlertUserInline<TRepo>(Expression<Func<TRepo, UidlUserAlert>> alertCall)
+            public static ItemAction AlertUserInline<TRepo>(Expression<Func<TRepo, ViewModel<Empty.Data, Empty.State, Empty.Payload>, UidlUserAlert>> alertCall)
                 where TRepo : IUserAlertRepository
             {
                 return Describe(b => b.UserAlertFrom<TRepo>().ShowInline(alertCall));
@@ -164,7 +164,7 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static ItemAction AlertUserModal<TRepo>(Expression<Func<TRepo, UidlUserAlert>> alertCall)
+            public static ItemAction AlertUserModal<TRepo>(Expression<Func<TRepo, ViewModel<Empty.Data, Empty.State, Empty.Payload>, UidlUserAlert>> alertCall)
                 where TRepo : IUserAlertRepository
             {
                 return Describe(b => b.UserAlertFrom<TRepo>().ShowModal(alertCall));
