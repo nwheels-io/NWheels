@@ -717,6 +717,26 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public PromiseBuilder<UserAlertResult> ShowModal(Expression<Func<TRepo, UidlUserAlert>> alertCall)
+            {
+                ParseAlertCall(alertCall);
+                _behavior.DisplayMode = UserAlertDisplayMode.Modal;
+
+                return new PromiseBuilder<UserAlertResult>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<UserAlertResult> ShowModal(Expression<Func<TRepo, TData, TState, TInput, UidlUserAlert>> alertCall)
+            {
+                ParseAlertCall(alertCall);
+                _behavior.DisplayMode = UserAlertDisplayMode.Modal;
+
+                return new PromiseBuilder<UserAlertResult>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private void ParseAlertCall(LambdaExpression alertCall)
             {
                 Expression[] callArguments;

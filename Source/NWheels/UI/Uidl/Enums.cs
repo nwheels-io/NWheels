@@ -124,6 +124,7 @@ namespace NWheels.UI.Uidl
     public enum UserAlertDisplayMode
     {
         Inline,
-        Popup
+        Popup,
+        Modal
     }
 }

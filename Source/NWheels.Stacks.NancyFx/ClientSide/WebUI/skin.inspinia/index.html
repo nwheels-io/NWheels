@@ -83,6 +83,17 @@ HEAD, JS/CSS LINKS
             background-color: #EEEEEE;
             border-radius: 5px;            
         }
+        .alert .glyphicon{
+            display:table-cell;
+        }
+        .alert div,
+        .alert span{
+            padding-left: 10px;
+            display:table-cell;
+        }
+        .alert button {
+            margin: 10px 5px 0 0;
+        }
     </style>
 </head>
 
@@ -112,15 +123,38 @@ HEAD, JS/CSS LINKS
     UIDL USER ALERT - INLINE
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-user-alert-inline">
-        <div ng-show="alert" class="inline-alert clearfix">
-            {{translate(alert.uidl.type)}} : {{translate(alert.uidl.text)}}
-            <button ng-click="alert.answer('Cancel')" style="float:right;">x</button>
-            <div ng-show="alert.uidl.resutChoices.length">
+        <div ng-if="alert"
+             class="alert alert-dismissable"
+             ng-class="{
+                'alert-info':alert.uidl.type==='Info',
+                'alert-success':alert.uidl.type==='Success',
+                'alert-warning':alert.uidl.type==='Warning',
+                'alert-danger':alert.uidl.type==='Error'
+             }"
+             style="text-align:left;">
+            <button ng-if="!alert.uidl.resultChoices.length" aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+            <i class="fa fa-lg glyphicon"
+               ng-class="{
+                   'fa-info':alert.uidl.type==='Info',
+                   'fa-check-square':alert.uidl.type==='Success',
+                   'fa-exclamation-triangle':alert.uidl.type==='Warning',
+                   'fa-times-circle':alert.uidl.type==='Error'
+               }"></i>
+            <span>
+                {{translate(alert.uidl.text)}}
+                <br ng-if="alert.uidl.resultChoices.length" />
                 <button ng-repeat="choice in alert.uidl.resultChoices"
-                        ng-click="alert.answer(choice)">
-                    {{choice}}
+                        class="btn btn-xs btn-primary"
+                        ng-class="{
+                            'btn-info':alert.uidl.type==='Info',
+                            'btn-success':alert.uidl.type==='Success',
+                            'btn-warning':alert.uidl.type==='Warning',
+                            'btn-danger':alert.uidl.type==='Error'
+                        }"
+                        ng-click="alert.answer(choice);alert=null">
+                    {{::translate(choice)}}
                 </button>
-            </div>
+            </span>
         </div>
     </script>
 
@@ -135,7 +169,7 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - USER LOGIN FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/UserLoginForm">
-        <div class="middle-box text-center loginscreen   animated fadeInDown">
+        <div class="middle-box text-center loginscreen animated fadeInDown">
             <div>
                 <div>
                     <h1 class="logo-name">AFP</h1>
@@ -165,7 +199,8 @@ HEAD, JS/CSS LINKS
                     <button class="btn btn-primary block full-width m-b" ng-click="$emit(uidl.qualifiedName + ':ChangePassword:Executing')">Change Password</button>
                 </form>
                 <p class="m-t"> <small>Powered by BitWize</small> </p>
-            </div>
+            </div>                
+            <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
         </div>
     </script>
     

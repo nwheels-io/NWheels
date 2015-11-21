@@ -164,6 +164,14 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public static ItemAction AlertUserModal<TRepo>(Expression<Func<TRepo, UidlUserAlert>> alertCall)
+                where TRepo : IUserAlertRepository
+            {
+                return Describe(b => b.UserAlertFrom<TRepo>().ShowModal(alertCall));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public static ItemAction Notify(UidlNotification notification, BroadcastDirection direction = BroadcastDirection.BubbleUp)
             {
                 return Describe(b => b.Broadcast(notification).Direction(direction));

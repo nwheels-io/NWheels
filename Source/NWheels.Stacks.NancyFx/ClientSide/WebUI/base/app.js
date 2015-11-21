@@ -435,17 +435,27 @@ function ($q, $http, $rootScope, $timeout, commandService) {
         returnsPromise: true,
         execute: function (scope, behavior, input) {
             console.log('run-behavior > alertUser');
-            return $q(function (resolve, reject) {
-                var uidlAlert = m_app.userAlerts[toCamelCase(behavior.alertQualifiedName)];
-                scope.userAlert = {
-                    uidl: uidlAlert,
-                    answer: function (choice) {
-                        resolve(choice);
-                        scope.userAlert = null;
-                    }
-                };
-            });
-        },
+            var uidlAlert = m_app.userAlerts[toCamelCase(behavior.alertQualifiedName)];
+            var deferred = $q.defer(); 
+            var alertHandle = {
+                uidl: uidlAlert,
+                answer: function(choice) {
+                    return deferred.resolve(choice);
+                }
+            };
+            switch (behavior.displayMode) {
+                case 'Inline':
+                    scope.inlineUserAlert = alertHandle;
+                    break;
+                case 'Popup':
+                    scope.showPopupAlert(alertHandle);
+                    break;
+                case 'Modal':
+                    scope.showModalAlert(alertHandle);
+                    break;
+            }
+            return deferred.promise;
+        }
     };
 
     //-----------------------------------------------------------------------------------------------------------------
