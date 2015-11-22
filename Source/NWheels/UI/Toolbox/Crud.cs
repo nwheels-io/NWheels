@@ -91,8 +91,10 @@ namespace NWheels.UI.Toolbox
             this.Grid.Mode = this.Mode;
             this.Save.Icon = "check";
             this.Save.Severity = CommandSeverity.Change;
+            this.Save.Kind = CommandKind.Submit;
             this.Cancel.Icon = "times";
             this.Cancel.Severity = CommandSeverity.Loose;
+            this.Cancel.Kind = CommandKind.Reject;
 
             presenter.On(QueryEntityFailed).UserAlertFrom<ICrudUserAlerts>().ShowPopup((x, vm) => x.FailedToQueryDataFromServer(), faultInfo: vm => vm.Input);
             presenter.On(NewDomainObjectFailed).UserAlertFrom<ICrudUserAlerts>().ShowPopup((x, vm) => x.FailedToRetrieveDefaultValues(), faultInfo: vm => vm.Input);

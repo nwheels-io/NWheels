@@ -482,7 +482,7 @@ HEAD, JS/CSS LINKS
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - CRUD
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-        <script type="text/ng-template" id="uidl-element-template/Crud">
+    <script type="text/ng-template" id="uidl-element-template/Crud">
         <div class="row">
             <div ng-hide="uiShowCrudForm" class="col-lg-12">
                 <div class="ibox-title" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
@@ -522,7 +522,7 @@ HEAD, JS/CSS LINKS
                         class="btn btn-rounded"
                         style="margin-right:5px;"
                         ng-disabled="commandInProgress"
-                        ng-click="invokeCommand(command.qualifiedName)"
+                        ng-click="invokeCommand(command)"
                         ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
                     ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                 </div>
@@ -719,18 +719,32 @@ HEAD, JS/CSS LINKS
                             style="margin-right:5px;"
                             ng-disabled="commandInProgress"
                             ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy'}"
-                            ng-click="invokeCommand(command.qualifiedName)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                            ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                 </div>
             </div>
         </form>
     </script>
     <script type="text/javascript">
         function initWidget_Form($scope) {
-            $('#' + $scope.uidl.elementName).validate();
+            $scope.jqueryFormValidator = $('#' + $scope.uidl.elementName).validate();
             $scope.$on(':global:FormValidating', function (event, data) {
                 var form = $('#' + $scope.uidl.elementName);
                 if (!form.valid()) {
                     data.isValid = false;
+                }
+            });
+            $scope.$on($scope.uidl.qualifiedName + ':StateResetter', function () {
+                if ($scope.jqueryFormValidator) {
+                    $scope.jqueryFormValidator.resetForm();
+                    var form = $('#' + $scope.uidl.elementName);
+                    form.find('.error').removeClass("error");
+                }
+            });
+            $scope.$on($scope.uidl.qualifiedName + ':ModelSetter', function () {
+                if ($scope.jqueryFormValidator) {
+                    $scope.jqueryFormValidator.resetForm();
+                    var form = $('#' + $scope.uidl.elementName);
+                    form.find('.error').removeClass("error");
                 }
             });
         }
@@ -770,7 +784,7 @@ HEAD, JS/CSS LINKS
                    ng-model="entity[uidl.propertyName]"
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}"
-                   required>
+                   required="">
             <!-- DATE-TIME PICKER -->
             <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='DateTimePicker'"
                  class="input-group date m-b">
@@ -778,7 +792,8 @@ HEAD, JS/CSS LINKS
                        class="form-control"
                        ng-model="entity[uidl.propertyName]"
                        id="{{::uniqueFieldId}}"
-                       name="{{::uniqueFieldId}}">
+                       name="{{::uniqueFieldId}}"
+                       required="">
                 <div class="input-group-addon">
                     <span class="glyphicon glyphicon-th"></span>
                 </div>
@@ -789,7 +804,8 @@ HEAD, JS/CSS LINKS
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
                     id="{{::uniqueFieldId}}"
-                    name="{{::uniqueFieldId}}">
+                    name="{{::uniqueFieldId}}"
+                    required="">
                 <!--option value="">All</option-->
             </select>
         </div>
@@ -797,7 +813,11 @@ HEAD, JS/CSS LINKS
     <script type="text/javascript">
         function initWidget_FormField($scope) {
             var dateTimePickerValueChanged = function(e) {
-                $scope.entity[$scope.uidl.propertyName] = e.date.format('YYYY-MM-DD HH:mm:ss');
+                if (e.date===false) {
+                    $scope.entity[$scope.uidl.propertyName] = null;
+                } else {
+                    $scope.entity[$scope.uidl.propertyName] = e.date.format('YYYY-MM-DD HH:mm:ss');
+                }
             };
             if ($scope.uidl.modifiers === 'DateTimePicker') {
                 $('#' + $scope.uniqueFieldId).datetimepicker({

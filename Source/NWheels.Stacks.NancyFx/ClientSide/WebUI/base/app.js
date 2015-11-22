@@ -807,9 +807,21 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.refresh();
             };
 
-            scope.invokeCommand = function (commandQualifiedName) {
+            scope.invokeCommand = function (command) {
                 scope.commandInProgress = true;
-                scope.$emit(commandQualifiedName + ':Executing');
+                if (command.kind==='Submit') {
+                    var validationResult = { isValid: true };
+                    scope.$broadcast(':global:FormValidating', validationResult);
+                    $timeout(function() {
+                        if (validationResult.isValid===true) {
+                            scope.$emit(command.qualifiedName + ':Executing');
+                        } else {
+                            scope.commandInProgress = false;
+                        }
+                    });
+                } else {
+                    scope.$emit(command.qualifiedName + ':Executing');
+                }
             }
 
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function (event, data) {
@@ -903,9 +915,21 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.tabSetIndex = index;
             };
 
-            scope.invokeCommand = function (commandQualifiedName) {
+            scope.invokeCommand = function (command) {
                 scope.commandInProgress = true;
-                scope.$emit(commandQualifiedName + ':Executing');
+                if (command.kind==='Submit') {
+                    var validationResult = { isValid: true };
+                    scope.$broadcast(':global:FormValidating', validationResult);
+                    $timeout(function() {
+                        if (validationResult.isValid===true) {
+                            scope.$emit(command.qualifiedName + ':Executing');
+                        } else {
+                            scope.commandInProgress = false;
+                        }
+                    });
+                } else {
+                    scope.$emit(command.qualifiedName + ':Executing');
+                }
             }
 
             scope.validate = function(deferred) {

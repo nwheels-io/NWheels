@@ -44,6 +44,7 @@ namespace NWheels.UI.Toolbox
             CriteriaForm.UsePascalCase = true;
             CriteriaForm.Commands.Add(ShowReport);
             ResultTable.UsePascalCase = true;
+            ShowReport.Kind = CommandKind.Submit;
 
             var attribute = typeof(TScript).GetCustomAttribute<TransactionScriptAttribute>();
 
