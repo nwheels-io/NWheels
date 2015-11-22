@@ -59,6 +59,10 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public UidlNotification<object> RequestPrepared { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override IEnumerable<string> GetTranslatables()
         {
             return base.GetTranslatables().Concat(DisplayColumns.Select(c => c.Title));

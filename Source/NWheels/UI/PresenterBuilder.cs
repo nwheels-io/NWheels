@@ -160,20 +160,22 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public SendServerCommandBehaviorBuilder<TInput, TScript> InvokeTransactionScript<TScript>()
+            public SendServerCommandBehaviorBuilder<TInput, TScript> InvokeTransactionScript<TScript>(bool asEntityQuery = false)
                 where TScript : ITransactionScript
             {
                 var behavior = new UidlCallApiBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                behavior.ExecuteAsEntityQuery = asEntityQuery;
                 SetAndSubscribeBehavior(behavior);
                 return new SendServerCommandBehaviorBuilder<TInput, TScript>(_ownerNode, behavior, _uidl, ApiCallTargetType.TransactionScript);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public SendServerCommandBehaviorBuilder<TInput, TScript> InvokeServiceMethod<TScript>()
+            public SendServerCommandBehaviorBuilder<TInput, TScript> InvokeServiceMethod<TScript>(bool asEntityQuery = false)
                 where TScript : ITransactionScript
             {
                 var behavior = new UidlCallApiBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                behavior.ExecuteAsEntityQuery = asEntityQuery;
                 SetAndSubscribeBehavior(behavior);
                 return new SendServerCommandBehaviorBuilder<TInput, TScript>(_ownerNode, behavior, _uidl, ApiCallTargetType.ServiceMethod);
             }
@@ -370,6 +372,16 @@ namespace NWheels.UI
                 ParseMethodCall(call);
                 _behavior.CallType = ApiCallType.RequestReply;
                 return new PromiseBuilder<TReply>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<object> PrepareWaitForReply<TReply>(Expression<Func<TContract, TData, TState, TInput, TReply>> call)
+            {
+                _behavior.PrepareOnly = true;
+                _behavior.CallType = ApiCallType.RequestReply;
+                ParseMethodCall(call);
+                return new PromiseBuilder<object>(_ownerNode, _behavior, _uidl);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

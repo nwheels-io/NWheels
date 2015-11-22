@@ -541,55 +541,103 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="uidl-element-template/DataGrid">
         <div class="jqGrid_wrapper">
             <table id="rdt_{{uniqueWidgetId}}"></table>
-            <!--div id="rdtpager_{{uniqueWidgetId}}"></div-->
+            <div id="rdtpager_{{uniqueWidgetId}}"></div>
         </div>
     </script>
     <script type="text/javascript">
-        // Examle data for jqGrid
-
         function initWidget_DataGrid($scope) {
+            var columnsModel = [];
+            $scope.gridColumns.forEach(function (metaColumn, idx) {
+                columnsModel.push({
+                    name: metaColumn.expression,
+                    label: $scope.translate(metaColumn.title),
+                    index: metaColumn.expression,
+                    editable: false,
+                    width: 180,
+                    //sorttype: column.dataType,
+                    search: true
+                });
+            });
             $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
                 $scope.ResultSet = data;
                 $scope.$timeout(function () {
                     $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
-
-                    var columnsModel = [];
-
-                    $scope.gridColumns.forEach(function (metaColumn, idx) {
-                        columnsModel.push({
-                            name: metaColumn.expression,
-                            label: $scope.translate(metaColumn.title),
-                            index: metaColumn.expression,
-                            editable: false,
-                            width: 180,
-                            //sorttype: column.dataType,
-                            search: true
-                        });
-                    });
-
                     $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
                         datatype: 'local',
                         height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
                         shrinkToFit: false,
                         width: null,
-                        rowNum: 1000,
-                        //rowList: [10, 20, 30],
+                        rowNum: 10,
+                        rowList: [10, 20, 30],
                         colModel: columnsModel,
-                        //pager: "#rdtpager_" + $scope.uniqueWidgetId,
+                        pager: "#rdtpager_" + $scope.uniqueWidgetId,
                         viewrecords: true,
                         add: false,
                         edit: false,
                         hidegrid: false,
                         onSelectRow: function (rowId) {
                             $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
-                            //var grid = $(this);
-                            //var rowData = grid.jqGrid('getRowData', rowId);
-                            //$scope.$emit($scope.uidl.qualifiedName + ':EntitySelectedById', rowData.Id);
                         }
                     });
-
                     var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
                     thegrid[0].addJSONData(data);
+                });
+            });
+            $scope.$on($scope.uidl.qualifiedName + ':RequestPrepared', function (event, request) {
+                $scope.preparedRequest = request;
+                $scope.$timeout(function () {
+                    $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
+                    $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
+                        datatype: function(postData) {
+                            var queryBuilder = $scope.entityService.newQueryBuilder();
+                            queryBuilder.take(10);
+                            queryBuilder.page(postData.page);
+                            var requestUrl = $scope.preparedRequest.url + queryBuilder.getQueryString();
+                            $scope.$http.post(
+                                //'http://localhost:9411/command/query/AffiliatePerformance/TransactionScript/TransactionScripts.AffiliatePerformanceReportTx/Execute',
+                                //{"input":{"Product":"7","Affiliate":"3","From":"2015-10-22 00:00:00","To":"2015-11-23 00:00:00","Grouping":"Monthly"}}
+                                requestUrl,
+                                $scope.preparedRequest.data
+                            ).then(
+                                function(response){
+                                    /*
+                                    var gridData = {
+                                        page: postData.page,
+                                        records: 1000,
+                                        total: 100,
+                                        root: response.data.ResultSet
+                                    };
+                                    */
+                                    var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
+                                    thegrid[0].addJSONData(response.data);//response.data.ResultSet);
+                                },
+                                function(faultResponse){
+                                }
+                            );
+                        },
+                        jsonReader: {
+                            page: "PageNumber",
+                            records: "PageSize",
+                            total: "ResultCount",
+                            root: "ResultSet",
+                            id: "$id",
+                            repeatitems: true
+                        },
+                        height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
+                        shrinkToFit: false,
+                        width: null,
+                        rowNum: 10,
+                        rowList: [10, 20, 30],
+                        colModel: columnsModel,
+                        pager: "#rdtpager_" + $scope.uniqueWidgetId,
+                        viewrecords: true,
+                        add: false,
+                        edit: false,
+                        hidegrid: false,
+                        onSelectRow: function (rowId) {
+                            $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
+                        }
+                    });
                 });
             });
         }

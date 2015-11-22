@@ -415,11 +415,19 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 requestData[behavior.parameterNames[i]] = parameterValue;
             }
             var requestPath = 
-                'command/' + behavior.callType + 
+                'command/' + 
+                (behavior.executeAsEntityQuery ? 'query/AffiliatePerformance' : behavior.callType) + 
                 '/' + behavior.callTargetType + 
                 '/' + behavior.contractName + 
                 '/' + behavior.operationName;
             
+            if (behavior.prepareOnly===true) {
+                return $q.when({
+                    url: requestPath,
+                    data: requestData
+                });
+            }
+             
             return commandService.sendCommand(behavior.callType, requestPath, requestData);
             /*            
                         var commandCompletion = $q.defer();
@@ -1235,7 +1243,9 @@ theApp.directive('uidlScreenPart', ['uidlService', 'entityService', function (ui
 
 //---------------------------------------------------------------------------------------------------------------------
 
-theApp.directive('uidlWidget', ['uidlService', 'entityService', '$timeout', function (uidlService, entityService, $timeout) {
+theApp.directive('uidlWidget', 
+['uidlService', 'entityService', '$timeout', '$http',
+function (uidlService, entityService, $timeout, $http) {
     var uniqueWidgetId = 1;
 
     return {
@@ -1255,6 +1265,7 @@ theApp.directive('uidlWidget', ['uidlService', 'entityService', '$timeout', func
             $scope.entityService = entityService;
             $scope.inlineUserAlert = { current: null };
             $scope.$timeout = $timeout;
+            $scope.$http = $http;
             //console.log('uidlWidget::controller', $scope.uidl.qualifiedName);
             //uidlService.implementController($scope);
             $scope.$watch('uidl', function (newValue, oldValue) {

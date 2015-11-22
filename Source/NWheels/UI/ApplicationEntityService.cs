@@ -92,17 +92,23 @@ namespace NWheels.UI
 
             using ( handler.NewUnitOfWork() )
             {
-                IDomainObject[] resultSet;
-                long resultCount;
-                bool moreAvailable;
-                handler.Query(options, out resultSet, out resultCount, out moreAvailable);
+                var results = handler.Query(options);
+                json = JsonConvert.SerializeObject(results, _serializerSettings);
+            }
 
-                var results = new QueryResults() {
-                    ResultSet = resultSet,
-                    ResultCount = resultCount,
-                    MoreAvailable = moreAvailable
-                };
+            return json;
+        }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string QueryEntityJson(string entityName, IQueryable query, QueryOptions options)
+        {
+            var handler = _handlerByEntityName[entityName];
+            string json;
+
+            using ( handler.NewUnitOfWork() )
+            {
+                var results = handler.Query(options, query);
                 json = JsonConvert.SerializeObject(results, _serializerSettings);
             }
 
@@ -259,9 +265,35 @@ namespace NWheels.UI
 
         public class QueryResults
         {
+            public int? PageNumber { get; set; }
+            public int? PageSize { get; set; }
+            public long? ResultCount { get; set; }
+            public bool? MoreAvailable { get; set; }
             public IDomainObject[] ResultSet { get; set; }
-            public long ResultCount { get; set; }
-            public bool MoreAvailable { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public int? PageCount
+            {
+                get
+                {
+                    if ( ResultCount.HasValue && PageSize.HasValue )
+                    {
+                        var count = (int)(ResultCount.Value / PageSize.Value);
+
+                        if ( (ResultCount.Value % PageSize.Value) != 0 )
+                        {
+                            count++;
+                        }
+
+                        return count;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -275,6 +307,7 @@ namespace NWheels.UI
             public const string CountParameterKey = "$count";
             public const string SkipParameterKey = "$skip";
             public const string TakeParameterKey = "$take";
+            public const string PageNumberParameterKey = "$page";
             public const string OrderByParameterKey = "$orderby";
             public const string AscendingParameterModifier = ":asc";
             public const string DescendingParameterModifier = ":desc";
@@ -307,11 +340,11 @@ namespace NWheels.UI
                 {
                     if ( parameter.Key.EqualsIgnoreCase(SelectParameterKey) )
                     {
-                        this.SelectPropertyNames = ParsePropertyList(parameter.Value);
+                        SelectPropertyNames = ParsePropertyList(parameter.Value);
                     }
                     else if ( parameter.Key.EqualsIgnoreCase(IncludeParameterKey) )
                     {
-                        this.IncludePropertyNames = ParsePropertyList(parameter.Value);
+                        IncludePropertyNames = ParsePropertyList(parameter.Value);
                     }
                     else if ( parameter.Key.EqualsIgnoreCase(CountParameterKey) )
                     {
@@ -324,6 +357,10 @@ namespace NWheels.UI
                     else if ( parameter.Key.EqualsIgnoreCase(TakeParameterKey) )
                     {
                         Take = Int32.Parse(parameter.Value);
+                    }
+                    else if ( parameter.Key.EqualsIgnoreCase(PageNumberParameterKey) )
+                    {
+                        Page = Int32.Parse(parameter.Value);
                     }
                     else if ( parameter.Key.EqualsIgnoreCase(TypeParameterKey) )
                     {
@@ -338,8 +375,12 @@ namespace NWheels.UI
                         AddFilterItem(parameter);
                     }
                 }
-            }
 
+                if ( Page.HasValue && Take.HasValue && !Skip.HasValue )
+                {
+                    Skip = (Page.Value - 1) * Take.Value;
+                }
+            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -352,6 +393,7 @@ namespace NWheels.UI
             public IList<QueryOrderByItem> InMemoryOrderBy { get; private set; }
             public int? Skip { get; private set; }
             public int? Take { get; private set; }
+            public int? Page { get; private set; }
             public string OfType { get; private set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -361,6 +403,16 @@ namespace NWheels.UI
                 get
                 {
                     return (InMemoryFilter.Count > 0 || InMemoryOrderBy.Count > 0);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool NeedCountOperation
+            {
+                get
+                {
+                    return (IsCountOnly || Page.HasValue);
                 }
             }
 
@@ -570,7 +622,7 @@ namespace NWheels.UI
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public abstract IUnitOfWork NewUnitOfWork();
-            public abstract void Query(QueryOptions options, out IDomainObject[] resultSet, out long resultCount, out bool moreAvailable);
+            public abstract QueryResults Query(QueryOptions options, IQueryable query = null);
             public abstract IDomainObject GetById(string id);
             public abstract IDomainObject CreateNew();
             public abstract void Insert(IDomainObject entity);
@@ -630,55 +682,64 @@ namespace NWheels.UI
 
                 return Framework.NewUnitOfWork<TContext>();
             }
-            
+
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override void Query(QueryOptions options, out IDomainObject[] resultSet, out long resultCount, out bool moreAvailable)
+            public override QueryResults Query(QueryOptions options, IQueryable query = null)
             {
-                resultSet = null;
-                moreAvailable = false;
+                var results = new QueryResults();
 
                 using ( var context = Framework.NewUnitOfWork<TContext>() )
                 {
                     var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
-                    IQueryable<TEntity> dbQuery = repository;
+                    IQueryable<TEntity> dbQuery = (IQueryable<TEntity>)query ?? repository;
 
                     dbQuery = HandleFilter(options, dbQuery);
-                    dbQuery = HandleOrderBy(options, dbQuery);
-                    dbQuery = HandlePaging(options, dbQuery);
 
-                    if ( options.IsCountOnly && !options.NeedInMemoryOperations )
+                    if ( options.NeedCountOperation )
                     {
-                        resultCount = dbQuery.Count();
-                        return;
+                        results.ResultCount = dbQuery.Count();
                     }
 
-                    IEnumerable<TEntity> queryResults = new QueryResultEnumerable<TEntity>(dbQuery);
-
-                    if ( options.NeedInMemoryOperations )
+                    if ( !options.IsCountOnly || options.NeedInMemoryOperations )
                     {
-                        queryResults = HandleInMemoryOperations(options, queryResults);
-                    }
+                        dbQuery = HandleOrderBy(options, dbQuery);
+                        dbQuery = HandlePaging(options, dbQuery);
 
-                    if ( options.IsCountOnly )
-                    {
-                        resultCount = queryResults.Count();
-                        return;
-                    }
+                        IEnumerable<TEntity> queryResults = new QueryResultEnumerable<TEntity>(dbQuery);
 
-                    if ( options.Take.HasValue )
-                    {
-                        var buffer = queryResults.ToList();
-                        moreAvailable = (buffer.Count > options.Take.Value);
-                        resultSet = buffer.Take(options.Take.Value).Cast<IDomainObject>().ToArray();
-                    }
-                    else
-                    {
-                        resultSet = queryResults.Cast<IDomainObject>().ToArray();
-                    }
+                        if ( options.NeedInMemoryOperations )
+                        {
+                            queryResults = HandleInMemoryOperations(options, queryResults);
+                        }
 
-                    resultCount = resultSet.Length;
+                        if ( options.IsCountOnly )
+                        {
+                            results.ResultCount = queryResults.Count();
+                        }
+                        else
+                        {
+                            if ( options.Take.HasValue )
+                            {
+                                var buffer = queryResults.ToList();
+                                results.MoreAvailable = (buffer.Count > options.Take.Value);
+                                results.ResultSet = buffer.Take(options.Take.Value).Cast<IDomainObject>().ToArray();
+                            }
+                            else
+                            {
+                                results.ResultSet = queryResults.Cast<IDomainObject>().ToArray();
+                            }
+                        }
+                    }
                 }
+
+                if ( options.Page.HasValue && options.Take.HasValue )
+                {
+                    results.PageNumber = options.Page;
+                    results.PageSize = options.Take;
+                }
+
+                return results;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

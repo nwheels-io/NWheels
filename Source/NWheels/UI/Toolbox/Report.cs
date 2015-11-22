@@ -36,6 +36,8 @@ namespace NWheels.UI.Toolbox
 
         public UidlCommand ShowReport { get; set; }
         public UidlNotification<TContext> ContextSetter { get; set; }
+        public UidlNotification ReportReady { get; set; }
+        public UidlNotification<IPromiseFailureInfo> ReportFailed { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -58,16 +60,25 @@ namespace NWheels.UI.Toolbox
             }
 
             presenter.On(ShowReport)
-                .InvokeTransactionScript<TScript>()
-                .WaitForReply((script, data, state, input) => script.Execute(state.Criteria))
-                .Then(
-                    onSuccess: 
-                        b => b.Broadcast(ResultTable.DataReceived).WithPayload(m => m.Input).TunnelDown()
-                        .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown()
-                        .Then(bbb => bbb.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady()))),
-                    onFailure:
-                        b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input)
-                        .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown()));
+                .InvokeTransactionScript<TScript>(asEntityQuery: true)
+                .PrepareWaitForReply((script, data, state, input) => script.Execute(state.Criteria))
+                .Then(b => b.Broadcast(ResultTable.RequestPrepared).WithPayload(vm => vm.Input).TunnelDown());
+
+            presenter.On(ReportReady)
+                .Broadcast(CriteriaForm.StateResetter).TunnelDown()
+                .Then(b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady()));
+
+            presenter.On(ReportFailed)
+                .Broadcast(CriteriaForm.StateResetter).TunnelDown()
+                .Then(b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input));
+
+            //onSuccess: 
+            //    b => b.Broadcast(ResultTable.DataReceived).WithPayload(m => m.Input).TunnelDown()
+            //    .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown()
+            //    .Then(bbb => bbb.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady()))),
+            //onFailure:
+            //    b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input)
+            //    .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown()));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

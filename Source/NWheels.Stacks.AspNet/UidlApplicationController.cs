@@ -155,6 +155,31 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
+        [Route("command/query/{entityName}/{target}/{contractName}/{operationName}")]
+        public IHttpActionResult ExecuteCommandAsQuery(string entityName, string target, string contractName, string operationName)
+        {
+            if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
+
+            var queryParameters = this.Request.GetQueryString();
+            var options = _context.EntityService.ParseQueryOptions(queryParameters);
+            var command = CreateCommandMessage(target, contractName, operationName, synchronous: true);
+
+            _serviceBus.DispatchMessageOnCurrentThread(command);
+
+            var query = (IQueryable)command.Result.Result;
+            var json = _context.EntityService.QueryEntityJson(entityName, query, options);
+
+            return ResponseMessage(new HttpResponseMessage() {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpPost]
         [Route("command/oneWay/{target}/{contractName}/{operationName}")]
         public IHttpActionResult EnqueueCommand(string target, string contractName, string operationName)
         {

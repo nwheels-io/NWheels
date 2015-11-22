@@ -12,6 +12,7 @@ function ($http, $q, $timeout) {
 
     var service = {
         newDomainObject: newDomainObject,
+        newQueryBuilder: newQueryBuilder,
         queryEntity: queryEntity,
         storeEntity: storeEntity,
         deleteEntity: deleteEntity
@@ -58,6 +59,13 @@ function ($http, $q, $timeout) {
                 return response;
             }
         );
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function newQueryBuilder(typeName) {
+        var queryBuilder = new EntityQueryBuilder(typeName);
+        return queryBuilder;
     }
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -116,7 +124,9 @@ function EntityQueryBuilder(entityName) {
     this._entityTypeFilter = null;
     this._equalityFilter = {};
     this._orderBy = [];
-    this._maxCount = null;
+    this._take = null;
+    this._skip = null;
+    this._page = null;
     this._isCountOnly = false;
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -146,8 +156,22 @@ function EntityQueryBuilder(entityName) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    this.top = function(value) {
-        me._maxCount = value;
+    this.take = function(value) {
+        me._take = value;
+        return me;
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    this.skip = function(value) {
+        me._skip = value;
+        return me;
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    this.page = function(value) {
+        me._page = value;
         return me;
     };
 
@@ -157,22 +181,22 @@ function EntityQueryBuilder(entityName) {
         me._isCountOnly = true;
         return me;
     };
-
+    
     //-----------------------------------------------------------------------------------------------------------------
 
-    this.getQueryUrl = function () {
-        var url = 'entity/query/' + me._entityName;
+    this.getQueryString = function () {
+        var queryString = '';
         var delimiter = '?';
 
         if (me._entityTypeFilter) {
-            url = url + delimiter + '$type=' + me._entityTypeFilter;
+            queryString = queryString + delimiter + '$type=' + me._entityTypeFilter;
             delimiter = '&';
         }
 
         for (var property in me._equalityFilter) {
             if (me._equalityFilter.hasOwnProperty(property)) {
                 var value = me._equalityFilter[property];
-                url = url + delimiter + encodeURIComponent(property) + '=' + encodeURIComponent(value);
+                queryString = queryString + delimiter + encodeURIComponent(property) + '=' + encodeURIComponent(value);
                 delimiter = '&';
             }
         }
@@ -180,20 +204,37 @@ function EntityQueryBuilder(entityName) {
         for (var i = 0; i < me._orderBy.length; i++) {
             var item = me._orderBy[i];
             var direction = (item.ascending ? ':asc' : ':desc');
-            url = url + delimiter + '$orderby=' + encodeURIComponent(item.propertyName + direction);
+            queryString = queryString + delimiter + '$orderby=' + encodeURIComponent(item.propertyName + direction);
             delimiter = '&';
         }
 
-        if (me._maxCount) {
-            url = url + delimiter + '$top=' + me._maxCount;
+        if (me._skip) {
+            queryString = queryString + delimiter + '$skip=' + me._skip;
+            delimiter = '&';
+        }
+
+        if (me._take) {
+            queryString = queryString + delimiter + '$take=' + me._take;
+            delimiter = '&';
+        }
+
+        if (me._page) {
+            queryString = queryString + delimiter + '$page=' + me._page;
             delimiter = '&';
         }
 
         if (me._isCountOnly) {
-            url = url + delimiter + '$count';
+            queryString = queryString + delimiter + '$count';
             delimiter = '&';
         }
 
-        return url;
+        return queryString;
     };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    this.getQueryUrl = function () {
+        var url = 'entity/query/' + me._entityName + me.getQueryString();
+        return url;
+    }
 };
