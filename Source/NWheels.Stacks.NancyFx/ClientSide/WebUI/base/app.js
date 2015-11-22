@@ -151,7 +151,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             m_index.screenParts[m_app.screenParts[i].qualifiedName] = m_app.screenParts[i];
         }
 
-        m_currentScreen = m_index.screens[m_app.defaultInitialScreenQualifiedName];
+        m_currentScreen = m_index.screens[m_app.initialScreenQualifiedName];
     }
 
     //-----------------------------------------------------------------------------------------------------------------

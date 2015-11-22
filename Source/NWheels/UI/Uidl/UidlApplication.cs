@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NWheels.UI.Uidl
@@ -46,8 +47,6 @@ namespace NWheels.UI.Uidl
         [DataMember]
         public Dictionary<string, UidlUserAlert> UserAlerts { get; set; }
         [DataMember]
-        public string DefaultInitialScreenQualifiedName { get; set; }
-        [DataMember]
         public string DefaultSkin { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,6 +57,34 @@ namespace NWheels.UI.Uidl
 
         public List<Type> RequiredDomainApis { get; private set; }
         public List<Type> RequiredDomainContexts { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public string InitialScreenQualifiedName
+        {
+            get
+            {
+                var isAuthenticated = Thread.CurrentPrincipal.Identity.IsAuthenticated;
+
+                if ( isAuthenticated && InitialScreenIfAuthenticated != null )
+                {
+                    return InitialScreenIfAuthenticated.QualifiedName;
+                }
+
+                if ( !isAuthenticated && InitialScreenIfNotAuthenticated != null )
+                {
+                    return InitialScreenIfNotAuthenticated.QualifiedName;
+                }
+
+                return Screens.First().QualifiedName;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal protected UidlScreen InitialScreenIfAuthenticated { get; protected set; }
+        internal protected UidlScreen InitialScreenIfNotAuthenticated { get; protected set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -66,9 +66,10 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected void SetDefaultInitialScreen(UidlScreen screen)
+        protected void SetInitialScreen(UidlScreen ifNotAuthenticated, UidlScreen ifAuthenticated)
         {
-            base.DefaultInitialScreenQualifiedName = screen.QualifiedName;
+            base.InitialScreenIfNotAuthenticated = ifNotAuthenticated;
+            base.InitialScreenIfAuthenticated = ifAuthenticated;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
