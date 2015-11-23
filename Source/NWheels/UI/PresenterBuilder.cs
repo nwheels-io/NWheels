@@ -160,24 +160,22 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public SendServerCommandBehaviorBuilder<TInput, TScript> InvokeTransactionScript<TScript>(bool asEntityQuery = false)
+            public SendServerCommandBehaviorBuilder<TInput, TScript> InvokeTransactionScript<TScript>(Type queryAsEntityType = null)
                 where TScript : ITransactionScript
             {
                 var behavior = new UidlCallApiBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
-                behavior.ExecuteAsEntityQuery = asEntityQuery;
                 SetAndSubscribeBehavior(behavior);
-                return new SendServerCommandBehaviorBuilder<TInput, TScript>(_ownerNode, behavior, _uidl, ApiCallTargetType.TransactionScript);
+                return new SendServerCommandBehaviorBuilder<TInput, TScript>(_ownerNode, behavior, _uidl, ApiCallTargetType.TransactionScript, queryAsEntityType);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public SendServerCommandBehaviorBuilder<TInput, TScript> InvokeServiceMethod<TScript>(bool asEntityQuery = false)
+            public SendServerCommandBehaviorBuilder<TInput, TScript> InvokeServiceMethod<TScript>(Type queryAsEntityType = null)
                 where TScript : ITransactionScript
             {
                 var behavior = new UidlCallApiBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
-                behavior.ExecuteAsEntityQuery = asEntityQuery;
                 SetAndSubscribeBehavior(behavior);
-                return new SendServerCommandBehaviorBuilder<TInput, TScript>(_ownerNode, behavior, _uidl, ApiCallTargetType.ServiceMethod);
+                return new SendServerCommandBehaviorBuilder<TInput, TScript>(_ownerNode, behavior, _uidl, ApiCallTargetType.ServiceMethod, queryAsEntityType);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -339,11 +337,18 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public SendServerCommandBehaviorBuilder(ControlledUidlNode ownerNode, UidlCallApiBehavior behavior, UidlBuilder uidl, ApiCallTargetType targetType)
+            public SendServerCommandBehaviorBuilder(
+                ControlledUidlNode ownerNode, 
+                UidlCallApiBehavior behavior, 
+                UidlBuilder uidl, 
+                ApiCallTargetType targetType,
+                Type queryAsEntityType)
             {
                 _ownerNode = ownerNode;
                 _behavior = behavior;
                 _behavior.CallTargetType = targetType;
+                _behavior.CallResultType = (queryAsEntityType != null ? ApiCallResultType.EntityQuery : ApiCallResultType.Command);
+                _behavior.QueryEntityName = (queryAsEntityType != null ? uidl.MetadataCache.GetTypeMetadata(queryAsEntityType).QualifiedName : null);
                 _uidl = uidl;
             }
 

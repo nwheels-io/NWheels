@@ -79,9 +79,11 @@ namespace NWheels.UI.Uidl
         [DataMember]
         public ApiCallTargetType CallTargetType { get; set; }
         [DataMember]
+        public ApiCallResultType CallResultType { get; set; }
+        [DataMember]
         public bool PrepareOnly { get; set; }
         [DataMember]
-        public bool ExecuteAsEntityQuery { get; set; }
+        public string QueryEntityName { get; set; }
         [DataMember]
         public string ContractName { get; set; }
         [DataMember]

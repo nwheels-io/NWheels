@@ -57,6 +57,9 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public DataGridMode Mode { get; set; }
 
+        [DataMember]
+        public bool EnablePaging { get; set; }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlNotification<object> RequestPrepared { get; set; }
@@ -179,6 +182,8 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlNotification<IEnumerable<TDataRow>> DataReceived { get; set; }
+        public UidlNotification<IEnumerable<TDataRow>> QueryCompleted { get; set; }
+        public UidlNotification<IPromiseFailureInfo> QueryFailed { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         

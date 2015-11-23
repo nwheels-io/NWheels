@@ -574,13 +574,11 @@ HEAD, JS/CSS LINKS
                     $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
                     $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
                         datatype: 'local',
-                        height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
+                        //height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
                         shrinkToFit: false,
                         width: null,
-                        rowNum: 10,
-                        rowList: [10, 20, 30],
+                        rowNum: 8,
                         colModel: columnsModel,
-                        pager: "#rdtpager_" + $scope.uniqueWidgetId,
                         viewrecords: true,
                         add: false,
                         edit: false,
@@ -600,7 +598,7 @@ HEAD, JS/CSS LINKS
                     $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
                         datatype: function(postData) {
                             var queryBuilder = $scope.entityService.newQueryBuilder();
-                            queryBuilder.take(10);
+                            queryBuilder.take(postData.rows);
                             queryBuilder.page(postData.page);
                             var requestUrl = $scope.preparedRequest.url + queryBuilder.getQueryString();
                             $scope.$http.post(
@@ -619,24 +617,25 @@ HEAD, JS/CSS LINKS
                                     };
                                     */
                                     var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
-                                    thegrid[0].addJSONData(response.data);//response.data.ResultSet);
+                                    thegrid[0].addJSONData(response.data);
+                                    $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data.ResultSet);
                                 },
                                 function(faultResponse){
+                                    var faultInfo = $scope.commandService.createFaultInfo(faultResponse);
+                                    $scope.$emit($scope.uidl.qualifiedName + ':QueryFailed', faultInfo);
                                 }
                             );
                         },
                         jsonReader: {
-                            page: "PageNumber",
-                            records: "PageSize",
-                            total: "ResultCount",
-                            root: "ResultSet",
-                            id: "$id",
-                            repeatitems: true
+                            total: 'PageCount',
+                            page: 'PageNumber',
+                            records: 'ResultCount',
+                            root: 'ResultSet'
                         },
-                        height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
+                        //height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
                         shrinkToFit: false,
                         width: null,
-                        rowNum: 10,
+                        rowNum: ($scope.uidl.mode === 'Standalone' ? 10 : 5),
                         rowList: [10, 20, 30],
                         colModel: columnsModel,
                         pager: "#rdtpager_" + $scope.uniqueWidgetId,

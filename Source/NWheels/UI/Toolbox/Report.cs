@@ -46,6 +46,7 @@ namespace NWheels.UI.Toolbox
             CriteriaForm.UsePascalCase = true;
             CriteriaForm.Commands.Add(ShowReport);
             ResultTable.UsePascalCase = true;
+            ResultTable.EnablePaging = true;
             ShowReport.Kind = CommandKind.Submit;
 
             var attribute = typeof(TScript).GetCustomAttribute<TransactionScriptAttribute>();
@@ -60,7 +61,7 @@ namespace NWheels.UI.Toolbox
             }
 
             presenter.On(ShowReport)
-                .InvokeTransactionScript<TScript>(asEntityQuery: true)
+                .InvokeTransactionScript<TScript>(queryAsEntityType: typeof(TResultRow))
                 .PrepareWaitForReply((script, data, state, input) => script.Execute(state.Criteria))
                 .Then(b => b.Broadcast(ResultTable.RequestPrepared).WithPayload(vm => vm.Input).TunnelDown());
 
@@ -68,7 +69,7 @@ namespace NWheels.UI.Toolbox
                 .Broadcast(CriteriaForm.StateResetter).TunnelDown()
                 .Then(b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady()));
 
-            presenter.On(ReportFailed)
+            presenter.On(ResultTable.QueryFailed)
                 .Broadcast(CriteriaForm.StateResetter).TunnelDown()
                 .Then(b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input));
 

@@ -414,9 +414,10 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 var parameterValue = Enumerable.Return(parameterContext).Select('ctx=>ctx.' + behavior.parameterExpressions[i]).Single();
                 requestData[behavior.parameterNames[i]] = parameterValue;
             }
+            var callType = (behavior.callResultType==='EntityQuery' ? 'query/' + behavior.queryEntityName : behavior.callType);
             var requestPath = 
-                'command/' + 
-                (behavior.executeAsEntityQuery ? 'query/AffiliatePerformance' : behavior.callType) + 
+                'command' + 
+                '/' + callType +
                 '/' + behavior.callTargetType + 
                 '/' + behavior.contractName + 
                 '/' + behavior.operationName;
@@ -601,9 +602,26 @@ function ($q, $http, $rootScope, $timeout, commandService) {
     m_controllerImplementations['Report'] = {
         implement: function (scope) {
             scope.model.state.criteria = {};
-
+            scope.model.state.reportInProgress = false;
+            
             $timeout(function() {
                 scope.$broadcast(scope.uidl.qualifiedName + ':CriteriaForm:ModelSetter', scope.model.state.criteria);
+            });
+
+            scope.$on(scope.uidl.qualifiedName + ':ShowReport:Executing', function(event, data) {
+                scope.model.state.reportInProgress = true;
+            });
+            scope.$on(scope.uidl.resultTable.qualifiedName + ':QueryCompleted', function(event, data) {
+                if (scope.model.state.reportInProgress===true) {
+                    scope.model.state.reportInProgress = false;
+                    scope.$emit(scope.uidl.qualifiedName + ':ReportReady', data);
+                }
+            });
+            scope.$on(scope.uidl.resultTable.qualifiedName + ':QueryFailed', function(event, data) {
+                if (scope.model.state.reportInProgress===true) {
+                    scope.$emit(scope.uidl.qualifiedName + ':ReportFailed', data);
+                }
+                scope.model.state.reportInProgress = false;
             });
         }
     };
@@ -1244,8 +1262,8 @@ theApp.directive('uidlScreenPart', ['uidlService', 'entityService', function (ui
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.directive('uidlWidget', 
-['uidlService', 'entityService', '$timeout', '$http',
-function (uidlService, entityService, $timeout, $http) {
+['uidlService', 'entityService', 'commandService', '$timeout', '$http',
+function (uidlService, entityService, commandService, $timeout, $http) {
     var uniqueWidgetId = 1;
 
     return {
@@ -1263,6 +1281,7 @@ function (uidlService, entityService, $timeout, $http) {
         controller: function ($scope) {
             $scope.uidlService = uidlService;
             $scope.entityService = entityService;
+            $scope.commandService = commandService;
             $scope.inlineUserAlert = { current: null };
             $scope.$timeout = $timeout;
             $scope.$http = $http;
