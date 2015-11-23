@@ -577,7 +577,8 @@ HEAD, JS/CSS LINKS
                         //height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
                         shrinkToFit: false,
                         width: null,
-                        rowNum: 8,
+                        height: '100%',
+                        rowNum: 5,
                         colModel: columnsModel,
                         viewrecords: true,
                         add: false,
@@ -587,15 +588,16 @@ HEAD, JS/CSS LINKS
                             $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
                         }
                     });
-                    var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
-                    thegrid[0].addJSONData(data);
+                    var grid = $("#rdt_" + $scope.uniqueWidgetId);
+                    grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
+                    grid[0].addJSONData(data);
                 });
             });
             $scope.$on($scope.uidl.qualifiedName + ':RequestPrepared', function (event, request) {
                 $scope.preparedRequest = request;
                 $scope.$timeout(function () {
                     $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
-                    $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
+                    var gridOptions = {
                         datatype: function(postData) {
                             var queryBuilder = $scope.entityService.newQueryBuilder();
                             queryBuilder.take(postData.rows);
@@ -635,6 +637,7 @@ HEAD, JS/CSS LINKS
                         //height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
                         shrinkToFit: false,
                         width: null,
+                        height: '100%',
                         rowNum: ($scope.uidl.mode === 'Standalone' ? 10 : 5),
                         rowList: [10, 20, 30],
                         colModel: columnsModel,
@@ -646,7 +649,10 @@ HEAD, JS/CSS LINKS
                         onSelectRow: function (rowId) {
                             $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
                         }
-                    });
+                    };
+                    var grid = $("#rdt_" + $scope.uniqueWidgetId);
+                    grid.jqGrid(gridOptions);
+                    grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
                 });
             });
         }
