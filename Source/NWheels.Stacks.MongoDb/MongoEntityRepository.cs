@@ -70,11 +70,19 @@ namespace NWheels.Stacks.MongoDb
 
             try
             {
-            	var actualEnumerator = _ownerRepo.AuthorizeQuery(_mongoCollection.AsQueryable()).GetEnumerator();
+                var underlyingQuery = _mongoCollection.AsQueryable();
+
+                if ( _metadata.BaseType != null )
+                {
+                    underlyingQuery = underlyingQuery.OfType<TEntityImpl>();
+                }
+
+            	var actualEnumerator = _ownerRepo.AuthorizeQuery(underlyingQuery).GetEnumerator();
                 var transformingEnumerator = new DelegatingTransformingEnumerator<TEntityImpl, TEntityContract>(
                     actualEnumerator,
                     entity => InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>(entity));
                 var loggingEnumerator = new ResultLoggingEnumerator<TEntityContract>(transformingEnumerator, _logger, queryLog);
+
                 return loggingEnumerator;
             }
             catch ( Exception e )
@@ -110,7 +118,15 @@ namespace NWheels.Stacks.MongoDb
             get
             {
                 _ownerRepo.ValidateOperationalState();
-                return _mongoCollection.AsQueryable().Expression;
+                
+                if ( _metadata.BaseType != null )
+                {
+                    return _mongoCollection.AsQueryable().OfType<TEntityImpl>().Expression;
+                }
+                else
+                {
+                    return _mongoCollection.AsQueryable().Expression;
+                }
             }
         }
 
