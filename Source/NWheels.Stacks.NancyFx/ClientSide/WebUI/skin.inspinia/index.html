@@ -218,17 +218,17 @@ HEAD, JS/CSS LINKS
                 </div>
                 <h2>Sign In</h2>
                 <p ng-if="model.state.loginFault!='PasswordExpired'">Log in to your account.</p>
-                <form class="m-t" role="form" ng-if="model.state.loginFault!='PasswordExpired'">
+                <form class="m-t" role="form" ng-if="model.state.loginFault!='PasswordExpired'" id="{{::uidl.elementName}}" novalidate>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.data.loginName" >
+                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.data.loginName" name="loginName" id="{{::uidl.elementName}}_name">
                     </div>
                     <div class="form-group">
-                        <input type="password" class="form-control" placeholder="Password" required="" ng-model="model.data.password" >
+                        <input type="password" class="form-control" placeholder="Password" required="" ng-model="model.data.password" name="password" id="{{::uidl.elementName}}_password">
                     </div>
-                    <button class="btn btn-primary block full-width m-b" ng-click="$emit(uidl.qualifiedName + ':LogIn:Executing')">{{translate('Login')}}</button>
+                    <button class="btn btn-primary block full-width m-b" ng-click="invokeCommand('LogIn')">{{translate('Login')}}</button>
                 </form>
                 <p ng-if="model.state.loginFault=='PasswordExpired'">Please change your password.</p>
-                <form class="m-t" role="form" ng-if="model.state.loginFault=='PasswordExpired'">
+                <form class="m-t" role="form" ng-if="model.state.loginFault=='PasswordExpired'" novalidate>
                     <div class="form-group">
                         <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.data.loginName" >
                     </div>
@@ -238,12 +238,22 @@ HEAD, JS/CSS LINKS
                     <div class="form-group">
                         <input type="password" class="form-control" placeholder="New Password" required="" ng-model="model.data.newPassword" >
                     </div>
-                    <button class="btn btn-primary block full-width m-b" ng-click="$emit(uidl.qualifiedName + ':ChangePassword:Executing')">Change Password</button>
+                    <button class="btn btn-primary block full-width m-b" ng-click="invokeCommand('ChangePassword')">Change Password</button>
                 </form>
                 <p class="m-t"> <small>Powered by BitWize</small> </p>
             </div>                
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
         </div>
+    </script>
+    <script type="text/javascript">
+        function initWidget_UserLoginForm($scope) {
+            $('#' + $scope.uidl.elementName).validate();
+            $scope.invokeCommand = function(commandName) {
+                if ($('#' + $scope.uidl.elementName).valid()===true) {
+                    $scope.$emit($scope.uidl.qualifiedName + ':' + commandName + ':Executing');
+                }
+            };
+        }
     </script>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -641,7 +651,6 @@ HEAD, JS/CSS LINKS
                 });
             });
         }
-
     </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
