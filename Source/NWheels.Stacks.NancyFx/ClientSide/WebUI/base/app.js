@@ -653,6 +653,16 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    m_controllerImplementations['Gauge'] = {
+        implement: function (scope) {
+            scope.$on(scope.uidl.updateSourceQualifiedName, function(event, data) {
+                scope.model.state.data = data;
+            });
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     m_controllerImplementations['Crud'] = {
         implement: function (scope) {
             if (scope.uidl.formTypeSelector !== null && scope.uidl.formTypeSelector.selections.length === 1) {

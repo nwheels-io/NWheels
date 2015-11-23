@@ -2,7 +2,7 @@ theApp.controller('chartJsController',
 ['$http', '$scope', '$rootScope', 'uidlService', '$timeout',
 function ($http, $scope, $rootScope, uidlService, $timeout) {
 	
-	$scope.$on($scope.uidl.qualifiedName + ':DataReady', function (event, newValue) {
+	$scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, newValue) {
 		var chartStyles = [
 			{
 				fillColor: "rgba(220,220,220,0.5)",
@@ -23,20 +23,20 @@ function ($http, $scope, $rootScope, uidlService, $timeout) {
 		];
 		
 		var chartData = {
-			labels: newValue.labels,
+			labels: newValue.Labels,
 			datasets: [],
 			summaries: []
 		};
 		
-		for (var i=0; i<newValue.series.length; i++){
+		for (var i=0; i<newValue.Series.length; i++){
 			chartData.datasets.push(chartStyles[i]);
-			chartData.datasets[i].label = newValue.series[i].label;
-			chartData.datasets[i].data = newValue.series[i].values;
+			chartData.datasets[i].label = newValue.Series[i].Label;
+			chartData.datasets[i].data = newValue.Series[i].Values;
 			
 		}
 
-		for (var i=0; i<newValue.summaries.length; i++){
-			chartData.summaries.push(newValue.summaries[i]);
+		for (var i=0; i<newValue.Summaries.length; i++){
+			chartData.summaries.push(newValue.Summaries[i]);
 		}
 
 		

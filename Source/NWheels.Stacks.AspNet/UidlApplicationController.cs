@@ -106,9 +106,7 @@ namespace NWheels.Stacks.AspNet
         [Route("uidl-element-template/{templateName}")]
         public IHttpActionResult GetApplicationTemplate(string templateName)
         {
-            var filePath = PathUtility.ModuleBinPath(
-                _context.Application.GetType().Assembly,
-                Path.Combine("WebUI", _context.Application.IdName, templateName + ".html"));
+            var filePath = HttpContext.Current.Server.MapPath("~/UI/Web/Templates/" + templateName + ".html");
 
             if ( File.Exists(filePath) )
             {

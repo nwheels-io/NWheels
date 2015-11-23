@@ -15,6 +15,10 @@ namespace NWheels.UI.Toolbox
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
     public class Gauge : WidgetBase<Gauge, Empty.Data, Gauge.IGaugeState>
     {
+        private UidlNotification _updateSource;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Gauge(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
@@ -44,11 +48,23 @@ namespace NWheels.UI.Toolbox
         public string ValueDataProperty { get; set; }
         [DataMember]
         public string OldValueDataProperty { get; set; }
+        [DataMember]
+        public string UpdateSourceQualifiedName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ManuallyAssigned]
-        public UidlNotification UpdateSource { get; set; }
+        public UidlNotification UpdateSource {
+            get
+            {
+                return _updateSource;
+            }
+            set
+            {
+                _updateSource = value;
+                UpdateSourceQualifiedName = (value != null ? value.QualifiedName : null);
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -112,8 +128,8 @@ namespace NWheels.UI.Toolbox
             Expression<Func<TPayload, int>> oldValueProperty = null)
         {
             gauge.UpdateSource = updateSource;
-            gauge.ValueDataProperty = valueProperty.ToNormalizedNavigationString("input").TrimLead("input.");
-            gauge.OldValueDataProperty = (oldValueProperty != null ? oldValueProperty.ToNormalizedNavigationString("input").TrimLead("input.") : null);
+            gauge.ValueDataProperty = valueProperty.ToNormalizedNavigationString(false, "input").TrimLead("input.");
+            gauge.OldValueDataProperty = (oldValueProperty != null ? oldValueProperty.ToNormalizedNavigationString(false, "input").TrimLead("input.") : null);
             
             return gauge;
         }
