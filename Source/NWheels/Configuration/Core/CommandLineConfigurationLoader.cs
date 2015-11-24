@@ -75,7 +75,7 @@ namespace NWheels.Configuration.Core
             }
 
             var body = arg.Substring(1 + ConfigurationArgumentName.Length);
-            var equalsIndex = arg.IndexOf('=');
+            var equalsIndex = body.IndexOf('=');
 
             if ( equalsIndex < 1 )
             {

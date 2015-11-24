@@ -134,6 +134,7 @@
     <Compile Include="Processing\TransientStateMachineTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\ObjectUtilityTests.cs" />
+    <Compile Include="Utilities\ParseUtilityTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
