@@ -9,6 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Autofac;
+using NWheels.Configuration.Core;
+using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Hosting.Core;
 using NWheels.Logging.Core;
@@ -19,11 +21,16 @@ namespace NWheels.Hosts.Console
 {
     class Program
     {
+        public const string BatchJobModeArgumentName = "batchjob";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static string _s_bootConfigFilePath;
         private static BootConfiguration _s_bootConfig;
         private static NodeHost _s_nodeHost;
         private static ManualResetEvent _s_stopRequested;
         private static IPlainLog _s_log;
+        private static bool _s_isBatchJobMode;
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -34,8 +41,14 @@ namespace NWheels.Hosts.Console
 
             _s_log = NLogBasedPlainLog.Instance;
             _s_log.ConfigureConsoleOutput();
-            
             _s_log.Info("NWheels Console Host version {0}", typeof(Program).Assembly.GetName().Version);
+
+            _s_isBatchJobMode = args.Any(IsBatchJobModeArgument);
+
+            if ( _s_isBatchJobMode )
+            {
+                _s_log.Info("Running in batch job mode.");
+            }
 
             try
             {
@@ -58,7 +71,14 @@ namespace NWheels.Hosts.Console
                 return 2;
             }
 
-            BlockUntilStopRequested();
+            if ( _s_isBatchJobMode )
+            {
+                _s_log.Info("DONE - IN BATCH JOB MODE");
+            }
+            else
+            {
+                BlockUntilStopRequested();
+            }
 
             try
             {
@@ -74,9 +94,19 @@ namespace NWheels.Hosts.Console
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static bool IsBatchJobModeArgument(string arg)
+        {
+            return (
+                (arg[0] == '/' || arg[0] == '-') && 
+                arg.Substring(1).EqualsIgnoreCase(BatchJobModeArgumentName));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static void LoadBootConfig(string[] programArgs)
         {
-            _s_bootConfigFilePath = PathUtility.HostBinPath(programArgs.Length > 0 ? programArgs[0] : BootConfiguration.DefaultBootConfigFileName);
+            var hasBootConfigArgument = (programArgs.Length > 0 && !programArgs[0].StartsWith("-") && !programArgs[0].StartsWith("/"));
+            _s_bootConfigFilePath = PathUtility.HostBinPath(hasBootConfigArgument ? programArgs[0] : BootConfiguration.DefaultBootConfigFileName);
 
             _s_log.Debug("Loading configuration from: {0}", _s_bootConfigFilePath);
 
@@ -113,6 +143,7 @@ namespace NWheels.Hosts.Console
         private static void RegisterHostComponents(ContainerBuilder builder)
         {
             builder.RegisterModule<NWheels.Stacks.Nlog.ModuleLoader>();
+            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<CommandLineConfigurationLoader>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

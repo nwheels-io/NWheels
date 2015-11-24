@@ -11,6 +11,7 @@ namespace NWheels.Configuration
         Unknown,
         Code,
         Deployment,
+        StartupArgument,
         Operation
     }
 }

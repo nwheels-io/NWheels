@@ -8,7 +8,7 @@ using NWheels.Hosting;
 
 namespace NWheels.Configuration.Core
 {
-    internal class XmlConfigurationLoader
+    public class XmlConfigurationLoader
     {
         public const string ConfigurationElementName = "Configuration";
         public const string AlwaysElementName = "Always";
