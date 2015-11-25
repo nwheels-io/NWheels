@@ -411,10 +411,10 @@ namespace NWheels.Stacks.MongoDb
                 {
                     var results = _mongoCollection.InsertBatch<TEntityImpl>(entities.Cast<TEntityImpl>());
 
-                    foreach ( var result in results )
-                    {
-                        //_logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
-                    }
+                    //foreach ( var result in results )
+                    //{
+                    //    _logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
+                    //}
                 }
                 catch ( Exception e )
                 {
@@ -452,8 +452,16 @@ namespace NWheels.Stacks.MongoDb
                         count++;
                     }
 
-                    _logger.WritingEntityBatch(size: count);
-                    writeOperation.Execute();
+                    _logger.WritingEntityBatch(entity: typeof(TEntityContract).Name, operation: "Upsert", size: count);
+                    var result = writeOperation.Execute();
+                    _logger.BulkWriteResult(
+                        entity: typeof(TEntityContract).Name, 
+                        operation: "Upsert", 
+                        size: count, 
+                        inserted: result.InsertedCount,
+                        deleted: result.DeletedCount,
+                        modified: result.ModifiedCount,
+                        matched: result.MatchedCount);
                 }
                 catch ( Exception e )
                 {
@@ -480,8 +488,18 @@ namespace NWheels.Stacks.MongoDb
                         count++;
                     }
 
-                    _logger.WritingEntityBatch(size: count);
-                    writeOperation.Execute();
+                    _logger.WritingEntityBatch(entity: typeof(TEntityContract).Name, operation: "Upsert", size: count);
+                    
+                    var result = writeOperation.Execute();
+
+                    _logger.BulkWriteResult(
+                        entity: typeof(TEntityContract).Name,
+                        operation: "Delete",
+                        size: count,
+                        inserted: result.InsertedCount,
+                        deleted: result.DeletedCount,
+                        modified: result.ModifiedCount,
+                        matched: result.MatchedCount);
                 }
                 catch ( Exception e )
                 {

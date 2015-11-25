@@ -39,12 +39,15 @@ namespace NWheels.Stacks.MongoDb
         ILogActivity ExecutingDelete(string entityType);
 
         [LogVerbose]
-        void WritingEntityBatch(int size);
+        void WritingEntityBatch(string entity, string operation, int size);
 
         [LogError]
         void MongoDbWriteError(string message);
 
         [LogDebug]
         void MongoDbWriteResult(long documentsAffected, BsonValue upserted, bool updatedExisting);
+
+        [LogDebug]
+        void BulkWriteResult(string entity, string operation, int size, long inserted, long deleted, long modified, long matched);
     }
 }
