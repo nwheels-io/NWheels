@@ -28,8 +28,8 @@ function ($http, $q, $timeout) {
                 response.data['$state'] = 'NewModified';
                 return response.data;
             },
-            function(response) {
-                return response;
+            function(fault) {
+                return $q.reject(fault);
             }
         );
     }
@@ -55,8 +55,8 @@ function ($http, $q, $timeout) {
                 }
                 return response.data;
             },
-            function (response) {
-                return response;
+            function (fault) {
+                return $q.reject(fault);
             }
         );
     }
@@ -84,9 +84,8 @@ function ($http, $q, $timeout) {
             function (response) {
                 return response.data;
             },
-            function (response) {
-                
-                return response;
+            function (fault) {
+                return $q.reject(fault);
             }
         );
     }
@@ -105,8 +104,8 @@ function ($http, $q, $timeout) {
             function (response) {
                 return response.data;
             },
-            function (response) {
-                return response;
+            function (fault) {
+                return $q.reject(fault);
             }
         );
     }

@@ -92,7 +92,7 @@ function ($http, $q, $interval, $timeout, $rootScope) {
     //-----------------------------------------------------------------------------------------------------------------
     
     function createFaultInfo(httpResponse) {
-        if (httpResponse.data.faultCode) {
+        if (httpResponse.data && httpResponse.data.faultCode) {
             return httpResponse.data;
         }
         var faultInfo = {
