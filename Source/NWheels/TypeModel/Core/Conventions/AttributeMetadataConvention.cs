@@ -126,11 +126,6 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private void InitializeDefaultAttributes()
         {
-            //AddPropertyAttribute<PropertyContract.KeyAttribute>((attr, prop) => {
-            //    prop.Role = PropertyRole.Key;
-            //    prop.Kind = PropertyKind.Scalar;
-            //    prop.Validation.IsRequired = true;
-            //});
             AddPropertyAttribute<PropertyContract.VersionAttribute>((attr, prop) => {
                 prop.Role = PropertyRole.Version;
                 prop.Kind = PropertyKind.Scalar;

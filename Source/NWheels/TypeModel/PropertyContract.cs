@@ -24,7 +24,6 @@ namespace NWheels.DataObjects
                 key.Properties.Add(property);
                 ConfigureKey(key, property, cache);
                 property.DeclaringContract.AllKeys.Add(key);
-                property.DeclaringContract.PrimaryKey = key;
             }
             public KeyKind Kind { get; private set; }
             protected abstract void ConfigureKey(KeyMetadataBuilder key, PropertyMetadataBuilder property, TypeMetadataCache cache);
@@ -61,6 +60,7 @@ namespace NWheels.DataObjects
             protected override void ConfigureKey(KeyMetadataBuilder key, PropertyMetadataBuilder property, TypeMetadataCache cache)
             {
                 key.Name = "PK_" + property.DeclaringContract.Name;
+                property.DeclaringContract.PrimaryKey = key;
             }
         }
 
