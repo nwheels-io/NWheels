@@ -578,7 +578,7 @@ HEAD, JS/CSS LINKS
                     editable: false,
                     width: 180,
                     //sorttype: column.dataType,
-                    search: true
+                    //search: true
                 });
             });
             $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
@@ -587,23 +587,32 @@ HEAD, JS/CSS LINKS
                     $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
                     $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
                         datatype: 'local',
+                        data: data,
+                        loadonce: true,
                         //height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
+                        rownumWidth: 45,
                         shrinkToFit: false,
                         width: null,
                         height: '100%',
-                        rowNum: 5,
+                        //rowNum: 5,
                         colModel: columnsModel,
+                        gridview: true,
                         viewrecords: true,
                         add: false,
                         edit: false,
+                        rownumbers: true,
                         hidegrid: false,
+                        ignoreCase: true,
                         onSelectRow: function (rowId) {
                             $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
                         }
                     });
                     var grid = $("#rdt_" + $scope.uniqueWidgetId);
                     grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
-                    grid[0].addJSONData(data);
+                    if ($scope.uidl.mode === 'Standalone') {
+                        grid.jqGrid('filterToolbar',{ searchOnEnter: false, defaultSearch: "cn" });
+                    }
+                    //grid[0].addJSONData(data);
                 });
             });
             $scope.$on($scope.uidl.qualifiedName + ':RequestPrepared', function (event, request) {
@@ -651,20 +660,24 @@ HEAD, JS/CSS LINKS
                         shrinkToFit: false,
                         width: null,
                         height: '100%',
+                        rownumWidth: 45,
                         rowNum: ($scope.uidl.mode === 'Standalone' ? 10 : 5),
                         rowList: [10, 20, 30],
                         colModel: columnsModel,
                         pager: "#rdtpager_" + $scope.uniqueWidgetId,
                         viewrecords: true,
+                        rownumbers: true,
                         add: false,
                         edit: false,
                         hidegrid: false,
+                        ignoreCase: true,
                         onSelectRow: function (rowId) {
                             $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
                         }
                     };
                     var grid = $("#rdt_" + $scope.uniqueWidgetId);
                     grid.jqGrid(gridOptions);
+                    grid.jqGrid('filterToolbar',{ stringResult: true, searchOnEnter: false, defaultSearch: "cn" });
                     grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
                 });
             });
@@ -712,21 +725,24 @@ HEAD, JS/CSS LINKS
 
                     $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
                         datatype: 'local',
+                        data: data,
                         height: 150,
                         shrinkToFit: false,
+                        rownumWidth: 45,
                         width: null,
                         //rowNum: 10,
                         //rowList: [10, 20, 30],
                         colModel: columnsModel,
                         //pager: "#rdtpager_" + $scope.uniqueWidgetId,
                         viewrecords: true,
+                        rownumbers: true,
                         add: false,
                         edit: false,
                         hidegrid: false,
                     });
 
-                    var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
-                    thegrid[0].addJSONData(data);
+                    //var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
+                    //thegrid[0].addJSONData(data);
 
                     var rows = thegrid[0].rows;
                     var rowCount = rows.length;
