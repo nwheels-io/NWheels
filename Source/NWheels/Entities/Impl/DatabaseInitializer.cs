@@ -41,24 +41,24 @@ namespace NWheels.Entities.Impl
 
         public override void NodeConfigured(List<ILifecycleEventListener> additionalComponentsToHost)
         {
-            if ( _configuration.ConnectionString == null )
+            var anyStorageSchemaMissing = false;
+            CheckIfStorachSchemaExists(_configuration.ConnectionString, ref anyStorageSchemaMissing);
+
+            foreach ( var context in _configuration.Contexts )
+            {
+                CheckIfStorachSchemaExists(context.ConnectionString, ref anyStorageSchemaMissing);
+            }
+
+            if ( !anyStorageSchemaMissing )
             {
                 return;
             }
-
-            if ( _initializer.StorageSchemaExists(_configuration.ConnectionString) )
-            {
-                _logger.FoundDatabase(_configuration.ConnectionString);
-                return;
-            }
-
-            _logger.DatabaseNotFound(_configuration.ConnectionString);
 
             using ( _logger.InitializingNewDatabase() )
             {
                 try
                 {
-                    InitializeNewDatabase();
+                    InitializeNewDatabases();
                 }
                 catch ( Exception e )
                 {
@@ -66,15 +66,41 @@ namespace NWheels.Entities.Impl
                     throw;
                 }
             }
-
-            _logger.NewDatabaseInitialized(_configuration.ConnectionString);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void InitializeNewDatabase()
+        private void CheckIfStorachSchemaExists(string connectionString, ref bool anySchemaMissing)
         {
-            _initializer.CreateStorageSchema(_configuration.ConnectionString);
+            if ( !string.IsNullOrEmpty(connectionString) )
+            {
+                if ( _initializer.StorageSchemaExists(connectionString) )
+                {
+                    _logger.FoundDatabase(connectionString);
+                }
+                else
+                {
+                    _logger.DatabaseNotFound(connectionString);
+                    anySchemaMissing = true;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void InitializeNewDatabases()
+        {
+            if ( _configuration.ConnectionString != null )
+            {
+                _initializer.CreateStorageSchema(_configuration.ConnectionString);
+                _logger.NewDatabaseInitialized(_configuration.ConnectionString);
+            }
+
+            foreach ( var context in _configuration.Contexts )
+            {
+                _initializer.CreateStorageSchema(context.ConnectionString);
+                _logger.NewDatabaseInitialized(context.ConnectionString);
+            }
 
             using ( _sessionManager.JoinGlobalSystem() )
             {
