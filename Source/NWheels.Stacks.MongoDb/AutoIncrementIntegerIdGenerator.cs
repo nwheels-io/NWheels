@@ -14,27 +14,59 @@ namespace NWheels.Stacks.MongoDb
 {
     public class AutoIncrementIntegerIdGenerator : IPropertyValueGenerator<int>
     {
+        private class BulkInfo
+        {
+            internal int LastGiven { get; set; }
+            internal int MaxInBulk { get; set; }
+        }
+
         private IFramework _framework;
+        private int _bulkSize;
+        Dictionary<string, BulkInfo> _bulkInfoMap = new Dictionary<string, BulkInfo>();
+
+
         public AutoIncrementIntegerIdGenerator(IFramework framework)
         {
             _framework = framework;
+            _bulkSize = 50;
         }
 
         public int GenerateValue(string qualifiedPropertyName)
         {
+            BulkInfo bulkInfo;
+            if (_bulkInfoMap.TryGetValue(qualifiedPropertyName, out bulkInfo))
+            {
+                if (bulkInfo.LastGiven < bulkInfo.MaxInBulk)
+                {
+                    bulkInfo.LastGiven++;
+                    return bulkInfo.LastGiven;
+                }
+            }
+
+            //note - if reach here need new bulk
+
             using (var db = _framework.NewUnitOfWork<IAutoIncrementIdDataRepository>())
             {
                 AutoIncrementHandler handler = new AutoIncrementHandler();
                 handler.QualifiedPropertyName = qualifiedPropertyName;
+                handler.BulkSize = _bulkSize;
                 db.InvokeGenericOperation(typeof(IAutoIncrementIdEntity), handler);
-                return handler.Record.Value;
+                bulkInfo = new BulkInfo()
+                {
+                    LastGiven = handler.NewMaxInBulk - _bulkSize + 1,
+                    MaxInBulk = handler.NewMaxInBulk
+                };
+                _bulkInfoMap[qualifiedPropertyName] = bulkInfo;
+                return bulkInfo.LastGiven;
             }
+
         }
 
         private class AutoIncrementHandler : IDataRepositoryCallback<IAutoIncrementIdEntity>
         {
             internal string QualifiedPropertyName;
-            internal IAutoIncrementIdEntity Record;
+            internal int NewMaxInBulk;
+            internal int BulkSize;
 
 
             public void Invoke<TEntityImpl>(IEntityRepository<IAutoIncrementIdEntity> repo) where TEntityImpl : IAutoIncrementIdEntity
@@ -44,12 +76,12 @@ namespace NWheels.Stacks.MongoDb
                 FindAndModifyArgs args = new FindAndModifyArgs
                 {
                     Query = Query<TEntityImpl>.Where(x => x.Id == QualifiedPropertyName),
-                    Update = Update<TEntityImpl>.Inc(x => x.Value, 1), //todo: bucketSize
+                    Update = Update<TEntityImpl>.Inc(x => x.Value, BulkSize), //todo: bucketSize
                     Upsert = true,
                     VersionReturned = FindAndModifyDocumentVersion.Modified,
                 };
                 FindAndModifyResult result = collection.FindAndModify(args);
-                Record = result.GetModifiedDocumentAs<TEntityImpl>();
+                NewMaxInBulk = result.GetModifiedDocumentAs<TEntityImpl>().Value;
             }
 
         }
@@ -72,4 +104,4 @@ namespace NWheels.Stacks.MongoDb
         IEntityRepository<IAutoIncrementIdEntity> AutoIncrementId { get; }
     }
 
- }
+}
