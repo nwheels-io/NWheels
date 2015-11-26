@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.DataObjects;
 using NWheels.UI;
 using NWheels.UI.Toolbox;
 using NWheels.UI.Uidl;
@@ -26,6 +28,7 @@ namespace NWheels.Domains.Security.UI
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlCommand ChangePassword { get; set; }
+        public EntityMethodForm<IUserAccountEntity, IChangePasswordInput> ChangePasswordForm { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -49,10 +52,22 @@ namespace NWheels.Domains.Security.UI
                 }
             }
 
+            presenter.On(ChangePassword).PopupEntityMethodForm(
+                ChangePasswordForm, 
+                onExecute: (user, data, state, payload) => user.SetPassword(state.Input.Password));
+
             Crud.AddEntityCommands(ChangePassword);
-            //presenter.On(ChangePassword).
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ViewModelContract]
+        public interface IChangePasswordInput
+        {
+            [PropertyContract.Semantic.Password, PropertyContract.Security.Sensitive]
+            SecureString Password { get; set; }
+        }
     }
 }

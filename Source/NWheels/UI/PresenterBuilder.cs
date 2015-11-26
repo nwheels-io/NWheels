@@ -180,7 +180,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public SendServerCommandBehaviorBuilder<TInput, TEntity> InvokeEntityeMethod<TEntity>(Type queryAsEntityType = null)
+            public SendServerCommandBehaviorBuilder<TInput, TEntity> InvokeEntityMethod<TEntity>(Type queryAsEntityType = null)
                 where TEntity : class
             {
                 var behavior = new UidlCallApiBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
@@ -250,6 +250,31 @@ namespace NWheels.UI
                 var behavior = new UidlBranchByRuleBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
                 SetAndSubscribeBehavior(behavior);
                 return new WhenOtherwiseBehaviorBuilder<TInput>(_ownerNode, behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<TInput> PopupEntityMethodForm<TEntity, TMethodIn, TMethodOut>(
+                EntityMethodForm<TEntity, TMethodIn, TMethodOut> form,
+                Expression<Func<TEntity, Empty.Data, EntityMethodForm<TEntity, TMethodIn, TMethodOut>.IState, Empty.Payload, TMethodOut>> onExecute)
+                where TEntity : class
+                where TMethodIn : class
+                where TMethodOut : class
+            {
+                form.OnExecute(onExecute);
+                return Broadcast(form.ShowModal).TunnelDown();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<TInput> PopupEntityMethodForm<TEntity, TMethodIn>(
+                EntityMethodForm<TEntity, TMethodIn> form,
+                Expression<Action<TEntity, Empty.Data, EntityMethodForm<TEntity, TMethodIn>.IState, Empty.Payload>> onExecute)
+                where TEntity : class
+                where TMethodIn : class
+            {
+                form.OnExecute(onExecute);
+                return Broadcast(form.ShowModal).TunnelDown();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -383,6 +408,15 @@ namespace NWheels.UI
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public PromiseBuilder<TReply> WaitForReply<TReply>(Expression<Func<TContract, TData, TState, TInput, TReply>> call)
+            {
+                ParseMethodCall(call);
+                _behavior.CallType = ApiCallType.RequestReply;
+                return new PromiseBuilder<TReply>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<TReply> WaitForReplyOrCompletion<TReply>(LambdaExpression call)
             {
                 ParseMethodCall(call);
                 _behavior.CallType = ApiCallType.RequestReply;

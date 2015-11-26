@@ -857,6 +857,10 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.refresh();
             };
 
+            scope.invokeEntityCommand = function (command) {
+                scope.$emit(command.qualifiedName + ':Executing');
+            }
+
             scope.invokeCommand = function (command) {
                 scope.commandInProgress = true;
                 if (command.kind==='Submit') {
@@ -1020,6 +1024,19 @@ function ($q, $http, $rootScope, $timeout, commandService) {
         }
     };
 
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_controllerImplementations['EntityMethodForm'] = {
+        implement: function (scope) {
+            scope.$on(scope.uidl.qualifiedName + ':ShowModal', function(event, data) {
+                scope.state.input = { 
+                    '$entityId' : data.entityId
+                };
+                scope.$broadcast($scope.uidl.inputForm.qualifiedName + ':ModelSetter', scope.state.input);
+            });
+        }
+    };
+    
     //-----------------------------------------------------------------------------------------------------------------
 
     m_controllerImplementations['LookupGrid'] = {

@@ -132,6 +132,7 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-screen-part">
         <uidl-widget uidl="uidl.contentRoot"></uidl-widget>
+        <uidl-widget ng-repeat="popup in uidl.popupContents" uidl="popup"></uidl-widget>
     </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -522,12 +523,12 @@ HEAD, JS/CSS LINKS
                         <i class="fa fa-refresh"></i>
                     </button>
                     <button 
-                        ng-repeat="command in uidl.commands"
+                        ng-repeat="command in uidl.entityCommands"
                         type="button"
                         class="btn btn-rounded"
                         style="margin-right:5px;"
-                        ng-disabled="commandInProgress"
-                        ng-click="invokeCommand(command)"
+                        ng-disabled="commandInProgress || !selectedEntity"
+                        ng-click="invokeEntityCommand(command)"
                         ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
                     ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                 </div>
@@ -767,6 +768,36 @@ HEAD, JS/CSS LINKS
         }
     </script>
 
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - ENTITY METHOD FORM
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="uidl-element-template/EntityMethodForm">
+        <div class="modal inmodal fade" id="divModal_{{uidl.elementName}}" tabindex="-1" role="dialog"  aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title">{{translate(uidl.text)}}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <uidl-widget ng-if="uidl.form" uidl="uidl.form"></uidl-widget>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/javascript">
+        function initWidget_EntityMethodForm($scope) {
+            $scope.$on($scope.uidl.qualifiedName + ':ShowModal', function () {
+                $("#divModal_" + $scope.uidl.elementName).modal('show');
+            });
+        }
+    </script>
+    
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

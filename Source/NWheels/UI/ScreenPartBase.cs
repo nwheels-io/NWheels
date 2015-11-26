@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using NWheels.Extensions;
 using NWheels.UI.Uidl;
@@ -25,7 +26,10 @@ namespace NWheels.UI
             base.ModelDataType = builder.RegisterMetaType(typeof(TData));
             base.ModelStateType = builder.RegisterMetaType(typeof(TState));
 
-            builder.BuildNodes(builder.GetDeclaredMemberNodes(this));
+            var declaredMemberNodes = builder.GetDeclaredMemberNodes(this);
+
+            base.PopupContents.AddRange(declaredMemberNodes.OfType<WidgetUidlNode>().Where(widget => widget.IsPopupContent));
+            builder.BuildNodes(declaredMemberNodes);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -36,6 +40,13 @@ namespace NWheels.UI
             builder.DescribeNodePresenters(this.ContentRoot);
 
             this.Text = this.Text.TrimTail("ScreenPart");
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override IEnumerable<string> GetTranslatables()
+        {
+            return base.GetTranslatables().Concat(base.PopupContents.SelectMany(popup => popup.GetTranslatables()));
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

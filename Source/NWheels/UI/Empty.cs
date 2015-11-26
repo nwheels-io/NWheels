@@ -14,6 +14,9 @@ namespace NWheels.UI
         public class Input
         {
         }
+        public class Output
+        {
+        }
         public class Payload
         {
         }

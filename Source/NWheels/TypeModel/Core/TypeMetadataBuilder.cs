@@ -29,6 +29,7 @@ namespace NWheels.DataObjects.Core
             this.DerivedTypes = new List<TypeMetadataBuilder>();
             this.MixinContractTypes = new List<Type>();
             this.Properties = new List<PropertyMetadataBuilder>();
+            this.Methods = new List<MethodInfo>();
             this.AllKeys = new List<KeyMetadataBuilder>();
             this.DefaultDisplayProperties = new List<PropertyMetadataBuilder>();
             this.DefaultSortProperties = new List<PropertyMetadataBuilder>();

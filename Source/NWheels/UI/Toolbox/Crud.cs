@@ -130,6 +130,17 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of RootContentUidlNode
+
+        public override IEnumerable<string> GetTranslatables()
+        {
+            return base.GetTranslatables().Concat(EntityCommands.Select(cmd => cmd.Text));
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal ITypeMetadata MetaType { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

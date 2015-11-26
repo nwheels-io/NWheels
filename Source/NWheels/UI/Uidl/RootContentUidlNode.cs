@@ -16,6 +16,7 @@ namespace NWheels.UI.Uidl
         protected RootContentUidlNode(UidlNodeType nodeType, string idName, UidlApplication parent)
             : base(nodeType, idName, parent)
         {
+            this.PopupContents = new List<WidgetUidlNode>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -36,6 +37,8 @@ namespace NWheels.UI.Uidl
 
         [DataMember, ManuallyAssigned]
         public WidgetUidlNode ContentRoot { get; set; }
+        [DataMember, ManuallyAssigned]
+        public List<WidgetUidlNode> PopupContents { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
