@@ -331,6 +331,7 @@ namespace NWheels.Stacks.MongoDb
             {
                 try
                 {
+                    entity.As<IDomainObject>().BeforeCommit();
                     var result = _mongoCollection.Insert<TEntityImpl>((TEntityImpl)entity);
                     //_logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
                 }
@@ -350,6 +351,7 @@ namespace NWheels.Stacks.MongoDb
             {
                 try
                 {
+                    entity.As<IDomainObject>().BeforeCommit();
                     var result = _mongoCollection.Save<TEntityImpl>((TEntityImpl)entity);
                     //_logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
                 }
@@ -369,6 +371,7 @@ namespace NWheels.Stacks.MongoDb
             {
                 try
                 {
+                    entity.As<IDomainObject>().BeforeCommit();
                     var result = _mongoCollection.Save<TEntityImpl>((TEntityImpl)entity);
                     //_logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
                 }
@@ -388,6 +391,7 @@ namespace NWheels.Stacks.MongoDb
             {
                 try
                 {
+                    entity.As<IDomainObject>().BeforeCommit();
                     var query = Query<TEntityImpl>.EQ(_keyPropertyExpression, entity.GetId().Value);
                     var result = _mongoCollection.Remove(query);
 
@@ -409,6 +413,11 @@ namespace NWheels.Stacks.MongoDb
             {
                 try
                 {
+                    foreach ( var entity in entities )
+                    {
+                        entity.As<IDomainObject>().BeforeCommit();
+                    }
+
                     var results = _mongoCollection.InsertBatch<TEntityImpl>(entities.Cast<TEntityImpl>());
 
                     //foreach ( var result in results )
@@ -444,6 +453,8 @@ namespace NWheels.Stacks.MongoDb
 
                     foreach ( var entity in entities )
                     {
+                        entity.As<IDomainObject>().BeforeCommit();
+
                         writeOperation
                             .Find(Query<TEntityImpl>.EQ(_keyPropertyExpression, entity.GetId().Value))
                             .Upsert()
@@ -484,6 +495,7 @@ namespace NWheels.Stacks.MongoDb
 
                     foreach ( var entity in entities )
                     {
+                        entity.As<IDomainObject>().BeforeCommit();
                         writeOperation.Find(Query<TEntityImpl>.EQ(_keyPropertyExpression, entity.GetId().Value)).Remove();
                         count++;
                     }

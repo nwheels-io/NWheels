@@ -57,6 +57,13 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool HasClaim(string claimValue)
+        {
+            return _claims.Any(c => c.Value == claimValue);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Overrides of Object
 
         public override string ToString()

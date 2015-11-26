@@ -674,12 +674,26 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             var metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
             scope.metaType = metaType;
             scope.commandInProgress = false;
+            scope.entityAuth = null;
 
             scope.refresh = function () {
                 scope.resetCrudState();
+                scope.requestAuthorization();
                 scope.queryEntities();
             };
 
+            scope.requestAuthorization = function () {
+                scope.entityService.checkAuthorization(scope.uidl.grid.entityName).then(
+                    function(response) {
+                        scope.entityAuth = response;
+                    },
+                    function(fault) {
+                        scope.entityAuth = null;
+                        scope.$emit(scope.uidl.qualifiedName + ':QueryEntityFailed', commandService.createFaultInfo(fault));
+                    }
+                );
+            }
+            
             scope.queryEntities = function () {
                 scope.selectedEntity = null;
                 scope.commandInProgress = true;

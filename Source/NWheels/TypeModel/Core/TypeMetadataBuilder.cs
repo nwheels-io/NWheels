@@ -134,6 +134,13 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        IReadOnlyCollection<MethodInfo> ITypeMetadata.Methods
+        {
+            get { return this.Methods; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         IKeyMetadata ITypeMetadata.PrimaryKey
         {
             get { return this.PrimaryKey; }
@@ -190,6 +197,7 @@ namespace NWheels.DataObjects.Core
         public int InheritanceDepth { get; set; }
         public List<Type> MixinContractTypes { get; private set; }
         public List<PropertyMetadataBuilder> Properties { get; private set; }
+        public List<MethodInfo> Methods { get; private set; }
         public KeyMetadataBuilder PrimaryKey { get; set; }
         public List<KeyMetadataBuilder> AllKeys { get; private set; }
         public PropertyMetadataBuilder PartitionProperty { get; set; }

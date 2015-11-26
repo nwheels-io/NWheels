@@ -296,6 +296,7 @@ namespace NWheels.Entities.Core
         public IQueryable<TEntity> AuthorizeQuery<TEntity>(IQueryable<TEntity> source)
         {
             var accessControl = GetEntityAccessControl<TEntity>();
+            accessControl.AuthorizeRetrieve(this);
             return (IQueryable<TEntity>)accessControl.AuthorizeQuery(this, source);
         }
 

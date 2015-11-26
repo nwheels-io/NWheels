@@ -30,7 +30,6 @@ namespace NWheels.Authorization.Impl
 
         public virtual IQueryable AuthorizeQuery(IAccessControlContext context, IQueryable source)
         {
-            AuthorizeRetrieve(context);
             return source;
         }
 

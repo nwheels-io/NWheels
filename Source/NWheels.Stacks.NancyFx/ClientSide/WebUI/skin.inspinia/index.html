@@ -509,18 +509,27 @@ HEAD, JS/CSS LINKS
         <div class="row">
             <div ng-hide="uiShowCrudForm" class="col-lg-12">
                 <div class="ibox-title" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
-                    <button class="btn btn-primary btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="newEntity();" ng-disabled="commandInProgress" title="Add New">
+                    <button class="btn btn-primary btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="newEntity();" ng-disabled="commandInProgress" ng-show="entityAuth.create" title="Add New">
                         <i class="fa fa-plus"></i>
                     </button>
-                    <button class="btn btn-success btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="editEntity(selectedEntity)" ng-disabled="!selectedEntity" title="Edit Selected">
+                    <button class="btn btn-success btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="editEntity(selectedEntity)" ng-disabled="commandInProgress || !selectedEntity" ng-show="entityAuth.update" title="Edit Selected">
                         <i class="fa fa-edit"></i>
                     </button>
-                    <!--button class="btn btn-danger btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="deleteEntity(selectedEntity)" title="Delete Selected">
+                    <button class="btn btn-danger btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="deleteEntity(selectedEntity)" ng-disabled="commandInProgress || !selectedEntity" ng-show="entityAuth.delete" title="Delete Selected">
                         <i class="fa fa-times"></i>
-                    </button-->
+                    </button>
                     <button class="btn btn-default btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="refresh()" ng-disabled="commandInProgress" title="Refresh">
                         <i class="fa fa-refresh"></i>
                     </button>
+                    <button 
+                        ng-repeat="command in uidl.commands"
+                        type="button"
+                        class="btn btn-rounded"
+                        style="margin-right:5px;"
+                        ng-disabled="commandInProgress"
+                        ng-click="invokeCommand(command)"
+                        ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
+                    ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                 </div>
                 <div class="ibox-content" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
                     <uidl-widget uidl="uidl.grid" parent-model="model"></uidl-widget>
@@ -576,7 +585,7 @@ HEAD, JS/CSS LINKS
                     label: $scope.translate(metaColumn.title),
                     index: metaColumn.expression,
                     editable: false,
-                    width: 180,
+                    width: (metaColumn.size==='Large' ? 360 : (metaColumn.size==='Small' ? 90 : 180)),
                     //sorttype: column.dataType,
                     //search: true
                 });
@@ -1274,6 +1283,41 @@ HEAD, JS/CSS LINKS
                 }
             };
         }]);
+        
+        /*
+        angular.module('theApp').service('skinService', ['$rootScope', '$q', 'uidlService', 
+        function($rootScope, $q, uidlService) {
+            
+            function showPopupAlert(alertHandle) {
+                switch (alertHandle.uidl.type) {
+                    case 'Info':
+                        toastr.info(uidlService.translate(alertHandle.uidl.text));
+                        break;
+                    case 'Success':
+                        toastr.success(uidlService.translate(alertHandle.uidl.text), null, { timeOut: 2000 });
+                        break;
+                    case 'Warning':
+                        toastr.warning(uidlService.translate(alertHandle.uidl.text));
+                        break;
+                    case 'Error':
+                        toastr.error(
+                            '<a data-toggle="modal" data-target="#divModalTechnicalInfo"><i class="fa fa-xs fa-angle-double-right"></i>&nbsp;technical info</a>', 
+                            uidlService.translate(alertHandle.uidl.text),
+                            { timeOut: 5000 });
+                        break;
+                }
+            };
+
+            function showModalAlert(alertHandle) {
+                return $q.reject('Not implemented');
+            };
+            
+            return {
+                showPopupAlert: showPopupAlert
+                showModalAlert: showModalAlert
+            };
+        }]);
+        */
     </script>
 </body>
 </html>

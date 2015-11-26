@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,6 +32,7 @@ namespace NWheels.UI.Toolbox
             this.MetaType = this.MetadataCache.GetTypeMetadata(typeof(TEntity));
             this.EntityName = MetaType.QualifiedName;
             this.Mode = mode;
+            this.EntityCommands = new List<UidlCommand>();
 
             CreateForm();
         }
@@ -56,6 +58,13 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void AddEntityCommands(params UidlCommand[] entityCommands)
+        {
+            EntityCommands.AddRange(entityCommands);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public string EntityName { get; set; }
         [DataMember]
@@ -68,6 +77,8 @@ namespace NWheels.UI.Toolbox
         public Form<TEntity> Form { get; set; }
         [DataMember, ManuallyAssigned]
         public TypeSelector FormTypeSelector { get; set; }
+        [DataMember, ManuallyAssigned]
+        public List<UidlCommand> EntityCommands { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

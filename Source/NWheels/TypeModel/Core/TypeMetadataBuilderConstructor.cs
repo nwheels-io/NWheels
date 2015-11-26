@@ -50,6 +50,7 @@ namespace NWheels.DataObjects.Core
             ApplyObjectContractAttribute();
             RegisterTypeInheritance();
             ConstructProperties();
+            FindMethods();
 
             if ( builder.MixinContractTypes.Count == initialMixinContractCount )
             {
@@ -151,6 +152,19 @@ namespace NWheels.DataObjects.Core
             }
 
             return result;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void FindMethods()
+        {
+            if ( _thisType.BaseType != null )
+            {
+                _thisType.Methods.AddRange(_thisType.BaseType.Methods);
+            }
+
+            var thisTypeMethods = TypeMemberCache.Of(_primaryContract).SelectAllMethods(where: m => m.DeclaringType == _primaryContract).ToArray();
+            _thisType.Methods.AddRange(thisTypeMethods);
         }
     }
 }

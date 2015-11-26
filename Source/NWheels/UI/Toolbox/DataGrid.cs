@@ -87,7 +87,7 @@ namespace NWheels.UI.Toolbox
         [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "Crud")]
         public class GridColumn
         {
-            public GridColumn(ITypeMetadata metaType, LambdaExpression propertyNavigation, string title = null, FieldSize size = FieldSize.Small, string format = null)
+            public GridColumn(ITypeMetadata metaType, LambdaExpression propertyNavigation, string title = null, FieldSize size = FieldSize.Medium, string format = null)
             {
                 var expressionString = propertyNavigation.ToNormalizedNavigationString(convertToCamelCase: false);
 
@@ -173,7 +173,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DataGrid<TDataRow> Column<T>(Expression<Func<TDataRow, T>> propertySelector, string title = null, FieldSize size = FieldSize.Small)
+        public DataGrid<TDataRow> Column<T>(Expression<Func<TDataRow, T>> propertySelector, string title = null, FieldSize size = FieldSize.Medium)
         {
             this.DisplayColumns.Add(new GridColumn(MetaType, propertySelector, title, size));
             return this;
@@ -198,7 +198,7 @@ namespace NWheels.UI.Toolbox
 
             base.DefaultDisplayColumns = MetaType.Properties
                 .Where(ShouldDisplayPropertyByDefault)
-                .Select(p => new GridColumn(MetaType, MetaType.MakePropertyExpression(p)))
+                .Select(p => new GridColumn(MetaType, MetaType.MakePropertyExpression(p), size: FieldSize.Medium))
                 .ToList();
         }
 

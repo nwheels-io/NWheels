@@ -121,6 +121,11 @@ namespace NWheels.Domains.Security
 
         [PropertyContract.Required(AllowEmpty = false)]
         string ClaimValue { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Validation.MaxLength(256)]
+        string Description { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -165,8 +170,29 @@ namespace NWheels.Domains.Security
     public abstract class EntityAccessRuleEntity : IEntityAccessRuleEntity
     {
         public abstract void BuildAccessControl(IEntityAccessControlBuilder builder);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public abstract string Name { get; set; }
         public abstract string ClaimValue { get; set; }
+        public abstract string Description { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected abstract void InitializeProperties();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [EntityImplementation.TriggerOnNew]
+        protected void EntityTriggerAfterNew()
+        {
+            InitializeProperties();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [EntityImplementation.DependencyProperty]
+        protected IFramework Framework { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

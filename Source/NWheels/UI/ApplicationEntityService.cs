@@ -18,6 +18,7 @@ using Hapil;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using NWheels.Authorization;
 using NWheels.Entities.Factories;
 using NWheels.TypeModel;
 using NWheels.UI.Factories;
@@ -58,6 +59,15 @@ namespace NWheels.UI
         public bool IsEntityNameRegistered(string entityName)
         {
             return _handlerByEntityName.ContainsKey(entityName);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public AuthorizationCheckResults CheckEntityAuthorization(string entityName)
+        {
+            var handler = _handlerByEntityName[entityName];
+            var checkResults = handler.CheckAuthorization();
+            return checkResults;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -259,6 +269,16 @@ namespace NWheels.UI
             contracts.AddRange(type.GetInterfaces().Where(intf => intf.IsEntityContract() || intf.IsEntityPartContract()));
 
             return contracts.ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class AuthorizationCheckResults
+        {
+            public bool CanRetrieve { get; set; }
+            public bool CanCreate { get; set; }
+            public bool CanUpdate { get; set; }
+            public bool CanDelete { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -631,6 +651,27 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public AuthorizationCheckResults CheckAuthorization()
+            {
+                var accessControl = Framework.CurrentIdentity.GetAccessControlList().GetEntityAccessControl(MetaType.ContractType);
+
+                using ( var domainContext = NewUnitOfWork() )
+                {
+                    var authorizationContext = (IAccessControlContext)domainContext;
+
+                    var checkResults = new AuthorizationCheckResults() {
+                        CanRetrieve = accessControl.CanRetrieve(authorizationContext).GetValueOrDefault(false),
+                        CanCreate = accessControl.CanInsert(authorizationContext).GetValueOrDefault(false),
+                        CanUpdate = accessControl.CanUpdate(authorizationContext).GetValueOrDefault(false),
+                        CanDelete = accessControl.CanDelete(authorizationContext).GetValueOrDefault(false),
+                    };
+
+                    return checkResults;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public ApplicationEntityService Owner { get; private set; }
             public ITypeMetadata MetaType { get; private set; }
             public Type DomainContextType { get; private set; }
@@ -682,6 +723,8 @@ namespace NWheels.UI
 
                 return Framework.NewUnitOfWork<TContext>();
             }
+
+
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 

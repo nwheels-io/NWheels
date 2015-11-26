@@ -8,5 +8,6 @@ namespace NWheels.Authorization.Core
     {
         IEntityAccessControl GetEntityAccessControl(Type entityContractType);
         IReadOnlyCollection<Claim> GetClaims();
+        bool HasClaim(string claimValue);
     }
 }

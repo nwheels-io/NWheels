@@ -9,7 +9,7 @@ namespace NWheels.Exceptions
 {
     public class DomainFaultException<TFaultCode> : Exception, IFaultException
     {
-        public DomainFaultException(TFaultCode faultCode)
+        public DomainFaultException(TFaultCode faultCode) : base(faultCode.ToString())
         {
             this.FaultCode = faultCode;
             this.FaultReason = faultCode.ToString();
@@ -54,6 +54,7 @@ namespace NWheels.Exceptions
     public class DomainFaultException<TFaultCode, TFaultSubCode> : Exception, IFaultException
     {
         public DomainFaultException(TFaultCode faultCode, TFaultSubCode faultSubCode)
+            : base(faultCode + "." + faultSubCode)
         {
             this.FaultCode = faultCode;
             this.FaultSubCode = faultSubCode;

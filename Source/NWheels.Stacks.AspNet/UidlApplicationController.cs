@@ -220,6 +220,21 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
+        [Route("entity/checkAuth/{entityName}")]
+        public IHttpActionResult CheckEntityAuthorization(string entityName)
+        {
+            if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
+
+            var checkResults = _context.EntityService.CheckEntityAuthorization(entityName);
+            return Json(checkResults, _context.EntityService.CreateSerializerSettings());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpGet]
         [Route("entity/new/{entityName}")]
         public IHttpActionResult NewEntity(string entityName)
         {

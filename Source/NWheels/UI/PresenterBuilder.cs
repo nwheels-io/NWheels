@@ -179,6 +179,16 @@ namespace NWheels.UI
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public SendServerCommandBehaviorBuilder<TInput, TEntity> InvokeEntityeMethod<TEntity>(Type queryAsEntityType = null)
+                where TEntity : class
+            {
+                var behavior = new UidlCallApiBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                SetAndSubscribeBehavior(behavior);
+                return new SendServerCommandBehaviorBuilder<TInput, TEntity>(_ownerNode, behavior, _uidl, ApiCallTargetType.EntityMethod, queryAsEntityType);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
             
             public NavigateBehaviorBuilder<TInput> Navigate()
             {

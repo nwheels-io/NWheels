@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Authorization.Core;
@@ -39,40 +40,28 @@ namespace NWheels.Authorization.Impl
 
         public void AuthorizeRetrieve(IAccessControlContext context)
         {
-            for ( int i = 0; i < _sinks.Length; i++ )
-            {
-                _sinks[i].AuthorizeRetrieve(context);
-            }
+            ValidateOrThrow("Retrieve", CanRetrieve(context));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AuthorizeInsert(IAccessControlContext context, object entity)
         {
-            for ( int i = 0; i < _sinks.Length; i++ )
-            {
-                _sinks[i].AuthorizeInsert(context, entity);
-            }
+            ValidateOrThrow("Insert", CanInsert(context));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AuthorizeUpdate(IAccessControlContext context, object entity)
         {
-            for ( int i = 0; i < _sinks.Length; i++ )
-            {
-                _sinks[i].AuthorizeUpdate(context, entity);
-            }
+            ValidateOrThrow("Update", CanUpdate(context));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AuthorizeDelete(IAccessControlContext context, object entity)
         {
-            for ( int i = 0; i < _sinks.Length; i++ )
-            {
-                _sinks[i].AuthorizeDelete(context, entity);
-            }
+            ValidateOrThrow("Delete", CanDelete(context));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -232,6 +221,16 @@ namespace NWheels.Authorization.Impl
             }
 
             return true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void ValidateOrThrow(string operation, bool? evaluatedAuthorizarion)
+        {
+            if ( !evaluatedAuthorizarion.GetValueOrDefault(false) )
+            {
+                throw new SecurityException(string.Format("User is not authorized to perform the requested '{0}' operation.", operation));
+            }
         }
     }
 }

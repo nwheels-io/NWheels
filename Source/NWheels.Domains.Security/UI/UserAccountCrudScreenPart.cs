@@ -25,6 +25,10 @@ namespace NWheels.Domains.Security.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public UidlCommand ChangePassword { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Overrides of CrudScreenPart<IUserAccountEntity>
 
         protected override void DescribePresenter(PresenterBuilder<CrudScreenPart<IUserAccountEntity>, Empty.Data, Empty.State> presenter)
@@ -44,6 +48,9 @@ namespace NWheels.Domains.Security.UI
                     form.HideFields("Passwords");
                 }
             }
+
+            Crud.AddEntityCommands(ChangePassword);
+            //presenter.On(ChangePassword).
         }
 
         #endregion

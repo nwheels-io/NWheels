@@ -13,6 +13,7 @@ function ($http, $q, $timeout) {
     var service = {
         newDomainObject: newDomainObject,
         newQueryBuilder: newQueryBuilder,
+        checkAuthorization: checkAuthorization,
         queryEntity: queryEntity,
         storeEntity: storeEntity,
         deleteEntity: deleteEntity
@@ -27,6 +28,24 @@ function ($http, $q, $timeout) {
             function (response) {
                 response.data['$state'] = 'NewModified';
                 return response.data;
+            },
+            function(fault) {
+                return $q.reject(fault);
+            }
+        );
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function checkAuthorization(typeName) {
+        return $http.get('entity/checkAuth/' + typeName).then(
+            function (response) {
+                return {
+                    create: response.data.CanCreate,
+                    retrieve: response.data.CanRetrieve,
+                    update: response.data.CanUpdate,
+                    'delete': response.data.CanDelete,
+                };
             },
             function(fault) {
                 return $q.reject(fault);

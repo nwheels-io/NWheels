@@ -32,6 +32,7 @@ namespace NWheels.DataObjects
         IReadOnlyList<ITypeMetadata> DerivedTypes { get; }
         int InheritanceDepth { get; }
         IReadOnlyList<IPropertyMetadata> Properties { get; }
+        IReadOnlyCollection<MethodInfo> Methods { get; }
         IKeyMetadata PrimaryKey { get; }
         IReadOnlyList<IKeyMetadata> AllKeys { get; }
         IPropertyMetadata EntityIdProperty { get; }

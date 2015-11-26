@@ -14,23 +14,18 @@ namespace NWheels.Domains.Security.Core
     }
     public abstract class AllowAllEntityAccessRuleEntity : EntityAccessRuleEntity, IAllowAllEntityAccessRuleEntity
     {
-        public const string ClaimValueString = "System.AllowAll";
+        public const string ClaimValueString = "System.EntityRule.AllowAll";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        #region Overrides of EntityAccessRuleEntity
 
         public override void BuildAccessControl(IEntityAccessControlBuilder builder)
         {
             builder.ToAllEntities().IsDefinedHard(canRetrieve: true, canInsert: true, canUpdate: true, canDelete: true);
         }
 
-        #endregion
-
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [EntityImplementation.TriggerOnNew]
-        protected void EntityTriggerAfterNew()
+        protected override void InitializeProperties()
         {
             this.Name = "Allow All";
             this.ClaimValue = ClaimValueString;
