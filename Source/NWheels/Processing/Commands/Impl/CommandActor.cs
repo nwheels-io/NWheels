@@ -126,7 +126,7 @@ namespace NWheels.Processing.Commands.Impl
         {
             var entityContract = command.EntityId.ContractType;
 
-            using ( var context = _framework.As<ICoreFramework>().NewUnitOfWorkForEntity(entityContract) )
+            using ( var context = _framework.As<ICoreFramework>().NewUnitOfWork(command.DomainContextContract) )
             {
                 _logger.LookingUpEntity(id: command.EntityId);
 

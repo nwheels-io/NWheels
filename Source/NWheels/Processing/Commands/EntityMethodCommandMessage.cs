@@ -14,14 +14,22 @@ namespace NWheels.Processing.Commands
     public class EntityMethodCommandMessage : AbstractCommandMessage
     {
         private readonly IEntityId _entityId;
+        private readonly Type _domainContextContract;
         private readonly IMethodCallObject _call;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EntityMethodCommandMessage(IFramework framework, ISession session, IEntityId entityId, IMethodCallObject call, bool synchronous)
+        public EntityMethodCommandMessage(
+            IFramework framework, 
+            ISession session, 
+            IEntityId entityId, 
+            Type domainContextContract,
+            IMethodCallObject call, 
+            bool synchronous)
             : base(framework, session, synchronous)
         {
             _entityId = entityId;
+            _domainContextContract = domainContextContract;
             _call = call;
         }
 
@@ -34,13 +42,22 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Type DomainContextContract
+        {
+            get
+            {
+                return _domainContextContract;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Type EntityContract
         {
             get
             {
                 return _entityId.ContractType;
             }
-            
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

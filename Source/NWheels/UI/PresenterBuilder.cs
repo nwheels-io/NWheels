@@ -185,7 +185,14 @@ namespace NWheels.UI
             {
                 var behavior = new UidlCallApiBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
                 SetAndSubscribeBehavior(behavior);
-                return new SendServerCommandBehaviorBuilder<TInput, TEntity>(_ownerNode, behavior, _uidl, ApiCallTargetType.EntityMethod, queryAsEntityType);
+                behavior.ContractName = behavior.MetadataCache.GetTypeMetadata(typeof(TEntity)).QualifiedName;
+                return new SendServerCommandBehaviorBuilder<TInput, TEntity>(
+                    _ownerNode, 
+                    behavior, 
+                    _uidl, 
+                    ApiCallTargetType.EntityMethod, 
+                    queryAsEntityType,
+                    usePascalCase: true);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -369,6 +376,7 @@ namespace NWheels.UI
             private readonly ControlledUidlNode _ownerNode;
             private readonly UidlCallApiBehavior _behavior;
             private readonly UidlBuilder _uidl;
+            private readonly bool _usePascalCase;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -377,7 +385,8 @@ namespace NWheels.UI
                 UidlCallApiBehavior behavior, 
                 UidlBuilder uidl, 
                 ApiCallTargetType targetType,
-                Type queryAsEntityType)
+                Type queryAsEntityType,
+                bool usePascalCase = false)
             {
                 _ownerNode = ownerNode;
                 _behavior = behavior;
@@ -385,6 +394,7 @@ namespace NWheels.UI
                 _behavior.CallResultType = (queryAsEntityType != null ? ApiCallResultType.EntityQuery : ApiCallResultType.Command);
                 _behavior.QueryEntityName = (queryAsEntityType != null ? uidl.MetadataCache.GetTypeMetadata(queryAsEntityType).QualifiedName : null);
                 _uidl = uidl;
+                _usePascalCase = usePascalCase;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -441,10 +451,28 @@ namespace NWheels.UI
                 Expression[] callArguments;
                 var method = methodCall.GetMethodInfo(out callTarget, out callArguments);
 
-                _behavior.ContractName = callTarget.Type.SimpleQualifiedName();
+                if ( _behavior.CallTargetType != ApiCallTargetType.EntityMethod )
+                {
+                    _behavior.ContractName = callTarget.Type.SimpleQualifiedName();
+                }
+
                 _behavior.OperationName = method.Name;
                 _behavior.ParameterNames = method.GetParameters().Select(p => p.Name).ToArray();
-                _behavior.ParameterExpressions = callArguments.Select(x => x.ToString().ToCamelCaseExpression()).ToArray();
+                _behavior.ParameterExpressions = callArguments.Select(ToParameterExpressionString).ToArray();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private string ToParameterExpressionString(Expression parameter)
+            {
+                if ( _usePascalCase )
+                {
+                    return parameter.ToString();
+                }
+                else
+                {
+                    return parameter.ToString().ToCamelCaseExpression();
+                }
             }
         }
 

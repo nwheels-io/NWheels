@@ -52,6 +52,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\mongocsharpdriver.1.10.0\lib\net35\MongoDB.Driver.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Remotion.Linq">
       <HintPath>..\packages\Remotion.Linq.1.15.15.0\lib\portable-net45+wp80+wpa81+win\Remotion.Linq.dll</HintPath>
     </Reference>
@@ -78,6 +82,7 @@
     <Compile Include="IMongoEntityRepository.cs" />
     <Compile Include="Factories\MongoDatabaseInitializer.cs" />
     <Compile Include="Factories\MongoDataRepositoryFactory.cs" />
+    <Compile Include="JsonSerializationExtension.cs" />
     <Compile Include="MongoDataRepositoryBase.cs" />
     <Compile Include="Factories\MongoEntityObjectFactory.cs" />
     <Compile Include="Factories\MongoEntityObjectFactory.Old.cs" />

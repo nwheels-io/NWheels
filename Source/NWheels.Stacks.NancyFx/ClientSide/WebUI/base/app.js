@@ -422,6 +422,10 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 '/' + behavior.contractName + 
                 '/' + behavior.operationName;
             
+            if (behavior.callTargetType === 'EntityMethod') {
+                requestPath += '?$entityId=' + encodeURIComponent(scope.model.state.entity['$id']);
+            }
+            
             if (behavior.prepareOnly===true) {
                 return $q.when({
                     url: requestPath,
@@ -430,28 +434,6 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             }
              
             return commandService.sendCommand(behavior.callType, requestPath, requestData);
-            /*            
-                        var commandCompletion = $q.defer();
-                        
-                        $http.post(requestPath, requestData).then(
-                            function(response) {
-                                if (behavior.callType==='OneWay') {
-                                    commandCompletion.resolve({ success: true });
-                                } else {
-                                    m_pendingCommands[response.data.commandMessageId] = commandCompletion;
-                                }
-                            },
-                            function(response) {
-                                commandCompletion.reject({
-                                    success: false,
-                                    faultCode: response.status,
-                                    faultReason: 'Error: ' + response.statusText  
-                                });
-                            }
-                        );
-                        
-                        return commandCompletion.promise;
-            */
         },
     };
 
@@ -1037,6 +1019,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                     scope.model.state.input = { 
                         '$entityId' : scope.model.state.entity['$id']
                     };
+                    scope.model.state.Input = scope.model.state.input; 
                     scope.$broadcast(scope.uidl.inputForm.qualifiedName + ':ModelSetter', scope.model.state.input);
                 } else {
                     scope.$emit(scope.uidl.qualifiedName + ':NoEntityWasSelected');
@@ -1049,7 +1032,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                     var validationResult = { isValid: true };
                     scope.$broadcast(':global:FormValidating', validationResult);
                     $timeout(function() {
-                        if (validationResult.isValid===true) {
+                        if (validationResult.isValid===true) {  
                             scope.$emit(command.qualifiedName + ':Executing');
                             scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
                         } else {

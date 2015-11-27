@@ -15,6 +15,7 @@ using NWheels.Entities.Core;
 using NWheels.Globalization;
 using NWheels.Hosting;
 using NWheels.UI;
+using NWheels.UI.Core;
 using NWheels.UI.Factories;
 using NWheels.UI.Uidl;
 using NWheels.Utilities;
@@ -69,6 +70,7 @@ namespace NWheels.Stacks.NancyFx
                 components.Resolve<IFramework>(), 
                 components.Resolve<ITypeMetadataCache>(),
                 components.Resolve<IViewModelObjectFactory>(),
+                components.Resolve<IEnumerable<IJsonSerializationExtension>>(),
                 components.Resolve<IDomainContextLogger>(), 
                 _application.RequiredDomainContexts);
             

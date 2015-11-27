@@ -21,6 +21,7 @@ using Newtonsoft.Json.Serialization;
 using NWheels.Authorization;
 using NWheels.Entities.Factories;
 using NWheels.TypeModel;
+using NWheels.UI.Core;
 using NWheels.UI.Factories;
 
 namespace NWheels.UI
@@ -32,6 +33,7 @@ namespace NWheels.UI
         private readonly IViewModelObjectFactory _viewModelFactory;
         private readonly IDomainContextLogger _domainContextLogger;
         private readonly Dictionary<string, EntityHandler> _handlerByEntityName;
+        private readonly IJsonSerializationExtension[] _jsonExtensions;
         private readonly JsonSerializerSettings _serializerSettings;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -40,6 +42,7 @@ namespace NWheels.UI
             IFramework framework, 
             ITypeMetadataCache metadataCache,
             IViewModelObjectFactory viewModelFactory,
+            IEnumerable<IJsonSerializationExtension> jsonExtensions,
             IDomainContextLogger domainContextLogger, 
             IEnumerable<Type> domainContextTypes)
         {
@@ -48,6 +51,7 @@ namespace NWheels.UI
             _viewModelFactory = viewModelFactory;
             _domainContextLogger = domainContextLogger;
             _handlerByEntityName = new Dictionary<string, EntityHandler>(StringComparer.InvariantCultureIgnoreCase);
+            _jsonExtensions = jsonExtensions.ToArray();
 
             RegisterDomainObjects(domainContextTypes);
 
@@ -127,6 +131,23 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IEntityId ParseEntityId(string entityName, string entityId, out Type domainContextType)
+        {
+            var handler = _handlerByEntityName[entityName];
+            domainContextType = handler.DomainContextType;
+            return handler.ParseEntityId(entityId);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IDomainObject GetEntityObjectById(string entityName, string entityId)
+        {
+            var handler = _handlerByEntityName[entityName];
+            return handler.GetById(entityId);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string StoreEntityJson(string entityName, EntityState entityState, string entityId, string json)
         {
             var handler = _handlerByEntityName[entityName];
@@ -185,6 +206,14 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ITypeMetadata GetEntityMetadata(string entityName)
+        {
+            var handler = _handlerByEntityName[entityName];
+            return handler.MetaType;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void StoreEntityBatchJson(string json)
         {
             throw new NotImplementedException();
@@ -204,6 +233,11 @@ namespace NWheels.UI
             settings.Converters.Add(new StringEnumConverter());
             settings.Converters.Add(new DomainObjectConverter(this));
             settings.Converters.Add(new ViewModelObjectConverter(this, _viewModelFactory));
+
+            foreach ( var extension in _jsonExtensions )
+            {
+                extension.ApplyTo(settings);
+            }
 
             return settings;
         }
@@ -643,6 +677,7 @@ namespace NWheels.UI
 
             public abstract IUnitOfWork NewUnitOfWork();
             public abstract QueryResults Query(QueryOptions options, IQueryable query = null);
+            public abstract IEntityId ParseEntityId(string id);
             public abstract IDomainObject GetById(string id);
             public abstract IDomainObject CreateNew();
             public abstract void Insert(IDomainObject entity);
@@ -812,6 +847,18 @@ namespace NWheels.UI
                 }
 
                 return inMemoryQuery;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override IEntityId ParseEntityId(string id)
+            {
+                var entityIdProperty = MetaType.EntityIdProperty;
+                var entityIdValue = entityIdProperty.ParseStringValue(id);
+                var entityIdClosedType = typeof(EntityId<,>).MakeGenericType(MetaType.ContractType, entityIdProperty.ClrType);
+                var entityIdInstance = Activator.CreateInstance(entityIdClosedType, entityIdValue);
+
+                return (IEntityId)entityIdInstance;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

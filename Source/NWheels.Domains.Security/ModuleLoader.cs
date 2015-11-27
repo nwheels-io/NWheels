@@ -9,6 +9,7 @@ using NWheels.Domains.Security.Core;
 using NWheels.Domains.Security.Impl;
 using NWheels.Domains.Security.UI;
 using NWheels.Extensions;
+using NWheels.UI.Core;
 
 namespace NWheels.Domains.Security
 {
@@ -27,6 +28,7 @@ namespace NWheels.Domains.Security
             builder.RegisterType<UserLogoutTransactionScript>().SingleInstance();
             builder.RegisterType<ChangePasswordTransactionScript>().SingleInstance();
             builder.RegisterType<SecurityDomainApi>().As<ISecurityDomainApi>().SingleInstance();
+            builder.RegisterType<JsonSerializationExtension>().As<IJsonSerializationExtension>();
 
             builder.RegisterType<UserAccountPolicySet>();
 

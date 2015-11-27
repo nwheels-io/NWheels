@@ -137,7 +137,12 @@ namespace NWheels.Stacks.AspNet
         [Route("command/requestReply/{target}/{contractName}/{operationName}")]
         public IHttpActionResult ExecuteCommand(string target, string contractName, string operationName)
         {
-            var command = CreateCommandMessage(target, contractName, operationName, synchronous: true);
+            var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: true);
+
+            if ( command == null )
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
 
             _serviceBus.DispatchMessageOnCurrentThread(command);
 
@@ -163,7 +168,12 @@ namespace NWheels.Stacks.AspNet
 
             var queryParameters = this.Request.GetQueryString();
             var options = _context.EntityService.ParseQueryOptions(queryParameters);
-            var command = CreateCommandMessage(target, contractName, operationName, synchronous: true);
+            var command = TryCreateCommandMessage(target, contractName, operationName, queryParameters, synchronous: true);
+
+            if ( command == null )
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
 
             _serviceBus.DispatchMessageOnCurrentThread(command);
 
@@ -181,7 +191,12 @@ namespace NWheels.Stacks.AspNet
         [Route("command/oneWay/{target}/{contractName}/{operationName}")]
         public IHttpActionResult EnqueueCommand(string target, string contractName, string operationName)
         {
-            var command = CreateCommandMessage(target, contractName, operationName, synchronous: false);
+            var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: false);
+
+            if ( command == null )
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
 
             _serviceBus.EnqueueMessage(command);
 
@@ -351,7 +366,12 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private AbstractCommandMessage CreateCommandMessage(string target, string contractName, string operationName, bool synchronous)
+        private AbstractCommandMessage TryCreateCommandMessage(
+            string target, 
+            string contractName, 
+            string operationName, 
+            Dictionary<string, string> queryString, 
+            bool synchronous)
         {
             AbstractCommandMessage command;
             var targetType = ParseUtility.Parse<ApiCallTargetType>(target);
@@ -360,6 +380,9 @@ namespace NWheels.Stacks.AspNet
             {
                 case ApiCallTargetType.TransactionScript:
                     command = CreateTransactionScriptCommand(contractName, operationName, synchronous);
+                    break;
+                case ApiCallTargetType.EntityMethod:
+                    command = CreateEntityMethodCommand(contractName, operationName, queryString, synchronous);
                     break;
                 default:
                     throw new NotSupportedException("Command target '" + target + "' is not supported.");
@@ -380,6 +403,51 @@ namespace NWheels.Stacks.AspNet
             JsonConvert.PopulateObject(jsonString, call, serializerSettings);
 
             return new TransactionScriptCommandMessage(_framework, _sessionManager.CurrentSession, scriptEntry.TransactionScriptType, call, synchronous);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private AbstractCommandMessage CreateEntityMethodCommand(
+            string contractName, 
+            string operationName, 
+            Dictionary<string, string> queryString, 
+            bool synchronous)
+        {
+            string entityIdString;
+
+            if ( !_context.EntityService.IsEntityNameRegistered(contractName) )
+            {
+                return null;
+            }
+
+            if ( !queryString.TryGetValue("$entityId", out entityIdString) )
+            {
+                return null;
+            }
+
+            var metaType = _context.EntityService.GetEntityMetadata(contractName);
+            var method = metaType.Methods.FirstOrDefault(m => m.Name.EqualsIgnoreCase(operationName));
+
+            if ( method == null )
+            {
+                return null;
+            }
+
+            Type domainContextType;;
+            var parsedEntityId = _context.EntityService.ParseEntityId(contractName, entityIdString, out domainContextType);
+            var call = _callFactory.NewMessageCallObject(method);
+            var jsonString = Request.Content.ReadAsStringAsync().Result;
+            var serializerSettings = _context.EntityService.CreateSerializerSettings();
+            
+            JsonConvert.PopulateObject(jsonString, call, serializerSettings);
+            
+            return new EntityMethodCommandMessage(
+                _framework, 
+                _sessionManager.CurrentSession, 
+                parsedEntityId, 
+                domainContextType, 
+                call, 
+                synchronous);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -67,6 +67,6 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal ITypeMetadataCache MetadataCache { get; set; }
+        internal protected ITypeMetadataCache MetadataCache { get; set; }
     }
 }
