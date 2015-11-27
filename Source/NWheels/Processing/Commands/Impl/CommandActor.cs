@@ -135,6 +135,7 @@ namespace NWheels.Processing.Commands.Impl
                 if ( entityInstance != null )
                 {
                     command.Call.ExecuteOn(entityInstance);
+                    context.CommitChanges();
                     return command.Call.Result;
                 }
                 else

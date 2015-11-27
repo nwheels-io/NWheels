@@ -21,14 +21,14 @@ namespace NWheels.Domains.Security.Core
 
             DeactivateCurrentPassword();
 
-            var password = Framework.NewDomainObject<IPasswordEntity>();
+            var password = Framework.NewDomainObject<IPasswordEntityPart>();
                 
             password.User = this;
             password.Hash = CryptoProvider.CalculateHash(passwordString);
             password.ExpiresAtUtc = Framework.UtcNow.AddDays(policy.PasswordExpiryDays);
-            password.As<IActiveRecord>().Save();
 
             this.Passwords.Add(password);
+            this.Save();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,7 +39,7 @@ namespace NWheels.Domains.Security.Core
 
             DeactivateCurrentPassword();
 
-            var password = Framework.NewDomainObject<IPasswordEntity>();
+            var password = Framework.NewDomainObject<IPasswordEntityPart>();
             var passwordLength = new Random().Next(policy.PasswordMinLength, policy.PasswordMaxLength);
             var clearText = GenerateTemporaryPassword(passwordLength);
 
@@ -48,9 +48,9 @@ namespace NWheels.Domains.Security.Core
             password.ExpiresAtUtc = Framework.UtcNow.AddDays(policy.TemporaryPasswordExpiryDays);
             password.MustChange = true;
 
-            password.As<IActiveRecord>().Save();
-
             this.Passwords.Add(password);
+            this.Save();
+
             return clearText;
         }
 
@@ -171,7 +171,7 @@ namespace NWheels.Domains.Security.Core
         public abstract string FullName { get; set; }
         public abstract string EmailAddress { get; set; }
         public abstract DateTime? EmailVerifiedAtUtc { get; set; }
-        public abstract ICollection<IPasswordEntity> Passwords { get; protected set; }
+        public abstract ICollection<IPasswordEntityPart> Passwords { get; protected set; }
         public abstract DateTime? LastLoginAtUtc { get; set; }
         public abstract int FailedLoginCount { get; set; }
         public abstract bool IsLockedOut { get; set; }
@@ -191,7 +191,6 @@ namespace NWheels.Domains.Security.Core
                     if ( !oldPassword.IsExpired(now) )
                     {
                         oldPassword.ExpiresAtUtc = now.Date;
-                        oldPassword.As<IActiveRecord>().Save();
                     }
                 }
             }
@@ -210,7 +209,7 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IPasswordEntity ValidatePasswordExpiry()
+        private IPasswordEntityPart ValidatePasswordExpiry()
         {
             var activePassword = Passwords.FirstOrDefault(p => !p.IsExpired(Framework.UtcNow));
 
@@ -225,7 +224,7 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        private void ValidatePasswordMatch(SecureString password, IPasswordEntity activePassword, UserAccountPolicy policy)
+        private void ValidatePasswordMatch(SecureString password, IPasswordEntityPart activePassword, UserAccountPolicy policy)
         {
             if ( !CryptoProvider.MatchHash(activePassword.Hash, password) )
             {
@@ -242,7 +241,7 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ValidatePasswordMustChange(IPasswordEntity activePassword)
+        private void ValidatePasswordMustChange(IPasswordEntityPart activePassword)
         {
             if ( activePassword.MustChange )
             {

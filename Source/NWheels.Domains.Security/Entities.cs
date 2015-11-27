@@ -18,8 +18,7 @@ namespace NWheels.Domains.Security
         IEntityRepository<IUserRoleEntity> UserRoles { get; }
         IEntityRepository<IOperationPermissionEntity> OperationPermissions { get; }
         IEntityRepository<IEntityAccessRuleEntity> EntityAccessRules { get; }
-        IEntityRepository<IPasswordEntity> Passwords { get; }
-        IPasswordEntity NewPassword(string clearText);
+        IPasswordEntityPart NewPassword(string clearText);
 
         IAllowAllEntityAccessRuleEntity NewAllowAllEntityAccessRule();
     }
@@ -51,7 +50,7 @@ namespace NWheels.Domains.Security
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [PropertyContract.Required, PropertyContract.Relation.Composition]
-        ICollection<IPasswordEntity> Passwords { get; }
+        ICollection<IPasswordEntityPart> Passwords { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -69,8 +68,8 @@ namespace NWheels.Domains.Security
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [EntityContract(UseCodeNamespace = true)]
-    public interface IPasswordEntity
+    [EntityPartContract]
+    public interface IPasswordEntityPart
     {
         [PropertyContract.Required, PropertyContract.Relation.CompositionParent]
         IUserAccountEntity User { get; set; }
@@ -98,7 +97,7 @@ namespace NWheels.Domains.Security
     
     public static partial class EntityExtensions
     {
-        public static bool IsExpired(this IPasswordEntity password, DateTime utcNow)
+        public static bool IsExpired(this IPasswordEntityPart password, DateTime utcNow)
         {
             if ( !password.ExpiresAtUtc.HasValue )
             {
