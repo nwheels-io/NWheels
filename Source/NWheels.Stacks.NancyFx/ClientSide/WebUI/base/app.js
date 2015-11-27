@@ -1015,6 +1015,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
     m_controllerImplementations['EntityMethodForm'] = {
         implement: function (scope) {
             scope.$on(scope.uidl.qualifiedName + ':ShowModal', function(event, data) {
+                scope.commandInProgress = false;
                 if (scope.model.state.entity) {
                     scope.model.state.input = { 
                         '$entityId' : scope.model.state.entity['$id']
@@ -1436,6 +1437,11 @@ function ($timeout, uidlService, entityService) {
                 }
             }
 
+            $scope.hiddenValues = { };
+            $scope.$on($scope.parentUidl.qualifiedName + ':ModelSetter', function(event, data) {
+                $scope.hiddenValues = { };
+            });
+            
             $timeout(function () {
                 var initFuncName = 'initWidget_FormField';
                 var initFunc = window[initFuncName];

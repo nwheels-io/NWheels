@@ -436,6 +436,10 @@ namespace NWheels.UI.Toolbox
                     {
                         return FormFieldModifiers.DateTimePicker;
                     }
+                    else if ( MetaProperty.IsSensitive )
+                    {
+                        return FormFieldModifiers.Password;
+                    }
                     return FormFieldModifiers.None;
                 case FormFieldType.Lookup:
                     return FormFieldModifiers.DropDown;
@@ -543,7 +547,8 @@ namespace NWheels.UI.Toolbox
         Tab = 0x20,
         Checkbox = 0x40,
         DateTimePicker = 0x80,
-        System = 0x200
+        Password = 0x100,
+        System = 0x2000
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

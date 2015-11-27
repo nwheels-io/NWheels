@@ -777,8 +777,8 @@ HEAD, JS/CSS LINKS
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        <i class="fa modal-icon fa-{{::uidl.icon}} pull-left"></i>
-                        <h6 class="modal-title">
+                        <i class="fa modal-icon fa-{{::uidl.icon}} pull-left" style="margin-top:-20px;"></i>
+                        <h6 class="modal-title" style="padding-right:50px;">
                             {{translate(uidl.text)}}
                         </h6>
                     </div>
@@ -871,7 +871,19 @@ HEAD, JS/CSS LINKS
     </script>
     <script type="text/javascript">
         function initWidget_Form($scope) {
-            $scope.jqueryFormValidator = $('#' + $scope.uidl.elementName).validate();
+            var validationRules = { };
+            for (var i = 0; i < $scope.plainFields.length ; i++) {
+                var field = $scope.plainFields[i];
+                if (field.modifiers === 'Password') {
+                    validationRules[$scope.uidl.elementName + '_' + field.propertyName + '__confirm'] = {
+                        equalTo: '#' + $scope.uidl.elementName + '_' + field.propertyName
+                    };
+                }
+            }
+            $('#' + $scope.uidl.elementName).trigger("reset");
+            $scope.jqueryFormValidator = $('#' + $scope.uidl.elementName).validate({
+                rules: validationRules
+            });
             $scope.$on(':global:FormValidating', function (event, data) {
                 var form = $('#' + $scope.uidl.elementName);
                 if (!form.valid()) {
@@ -930,6 +942,28 @@ HEAD, JS/CSS LINKS
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}"
                    required="">
+            <!-- PASSWORD -->
+            <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Password'" class="m-b">
+                <div>
+                    <input class="form-control"
+                           type="password"
+                           ng-model="entity[uidl.propertyName]"
+                           id="{{::uniqueFieldId}}"
+                           name="{{::uniqueFieldId}}"
+                           required="">
+                </div>
+                <div>
+                    <label style="margin:3px 0 3px 0;font-weight:normal;">Confirm:</label>
+                </div>
+                <div>
+                    <input ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Password'"
+                           class="form-control"
+                           type="password"
+                           ng-model="hiddenValues[uidl.propertyName]"
+                           id="{{::uniqueFieldId + '__confirm'}}"
+                           name="{{::uniqueFieldId + '__confirm'}}">
+                 </div>
+            </div>
             <!-- DATE-TIME PICKER -->
             <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='DateTimePicker'"
                  class="input-group date m-b">

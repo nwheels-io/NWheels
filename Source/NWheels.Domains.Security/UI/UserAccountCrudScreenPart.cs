@@ -54,7 +54,7 @@ namespace NWheels.Domains.Security.UI
 
             presenter.On(ChangePassword).PopupEntityMethodForm(
                 ChangePasswordForm, 
-                onExecute: (user, data, state, payload) => user.SetPassword(state.Input.Password));
+                onExecute: (user, data, state, payload) => user.SetPassword(state.Input.NewPassword));
 
             Crud.AddEntityCommands(ChangePassword);
         }
@@ -67,7 +67,7 @@ namespace NWheels.Domains.Security.UI
         public interface IChangePasswordInput
         {
             [PropertyContract.Semantic.Password, PropertyContract.Security.Sensitive]
-            SecureString Password { get; set; }
+            SecureString NewPassword { get; set; }
         }
     }
 }

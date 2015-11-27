@@ -193,7 +193,16 @@ namespace NWheels.DataObjects
                     //TODO: implement apply
                 }
             }
-            
+
+            public class PasswordAttribute : DataTypeAttribute
+            {
+                public PasswordAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { }
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+                {
+                    base.ApplyTo(property, cache);
+                    property.IsSensitive = true;
+                }
+            }
 
             public class PhoneNumberAttribute : DataTypeAttribute { public PhoneNumberAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class CurrencyAttribute : DataTypeAttribute { public CurrencyAttribute() : base(typeof(SemanticType.DefaultOf<decimal>)) { } }
@@ -201,7 +210,6 @@ namespace NWheels.DataObjects
             public class EmailAddressAttribute : DataTypeAttribute { public EmailAddressAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class LoginNameAttribute : DataTypeAttribute { public LoginNameAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class LocalFilePathAttribute : DataTypeAttribute { public LocalFilePathAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class PasswordAttribute : DataTypeAttribute { public PasswordAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class UrlAttribute : DataTypeAttribute { public UrlAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class IPAddressAttribute : DataTypeAttribute { public IPAddressAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class ImageUrlAttribute : DataTypeAttribute { public ImageUrlAttribute() : base(typeof(SemanticType.DefaultOf<byte[]>)) { } }
