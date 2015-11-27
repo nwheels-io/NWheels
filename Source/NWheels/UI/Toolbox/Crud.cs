@@ -93,6 +93,7 @@ namespace NWheels.UI.Toolbox
         public UidlNotification<IPromiseFailureInfo> DeleteEntityFailed { get; set; }
         public UidlNotification StoreEntityCompleted { get; set; }
         public UidlNotification<IPromiseFailureInfo> StoreEntityFailed { get; set; }
+        public UidlNotification<TEntity> SelectedEntityChanged { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

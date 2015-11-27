@@ -895,6 +895,10 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.$on(scope.uidl.qualifiedName + ':Delete:Executing', function (event) {
                 scope.deleteEntity(scope.model.entity);
             });
+            
+            scope.$watch('selectedEntity', function(newValue, oldValue) {
+                scope.$emit(scope.uidl.qualifiedName + ':SelectedEntityChanged', newValue);
+            });
         }
     };
 
@@ -1029,11 +1033,33 @@ function ($q, $http, $rootScope, $timeout, commandService) {
     m_controllerImplementations['EntityMethodForm'] = {
         implement: function (scope) {
             scope.$on(scope.uidl.qualifiedName + ':ShowModal', function(event, data) {
-                scope.state.input = { 
-                    '$entityId' : data.entityId
-                };
-                scope.$broadcast($scope.uidl.inputForm.qualifiedName + ':ModelSetter', scope.state.input);
+                if (scope.model.state.entity) {
+                    scope.model.state.input = { 
+                        '$entityId' : scope.model.state.entity['$id']
+                    };
+                    scope.$broadcast(scope.uidl.inputForm.qualifiedName + ':ModelSetter', scope.model.state.input);
+                } else {
+                    scope.$emit(scope.uidl.qualifiedName + ':NoEntityWasSelected');
+                }
             });
+            
+            scope.invokeCommand = function (command) {
+                if (command.kind==='Submit') {
+                    scope.commandInProgress = true;
+                    var validationResult = { isValid: true };
+                    scope.$broadcast(':global:FormValidating', validationResult);
+                    $timeout(function() {
+                        if (validationResult.isValid===true) {
+                            scope.$emit(command.qualifiedName + ':Executing');
+                            scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
+                        } else {
+                            scope.commandInProgress = false;
+                        }
+                    });
+                } else {
+                    scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
+                }
+            };
         }
     };
     

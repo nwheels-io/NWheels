@@ -773,18 +773,28 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/EntityMethodForm">
         <div class="modal inmodal fade" id="divModal_{{uidl.elementName}}" tabindex="-1" role="dialog"  aria-hidden="true">
-            <div class="modal-dialog modal-sm">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        <h4 class="modal-title">{{translate(uidl.text)}}</h4>
+                        <i class="fa modal-icon fa-{{::uidl.icon}} pull-left"></i>
+                        <h6 class="modal-title">
+                            {{translate(uidl.text)}}
+                        </h6>
                     </div>
                     <div class="modal-body">
-                        <uidl-widget ng-if="uidl.form" uidl="uidl.form"></uidl-widget>
+                        <uidl-widget uidl="uidl.inputForm"></uidl-widget>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
+                        <button 
+                            ng-repeat="command in uidl.commands"
+                            type="button"
+                            class="btn btn-w-m"
+                            style="margin-left:5px;"
+                            ng-disabled="commandInProgress"
+                            ng-click="invokeCommand(command)"
+                            ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
+                        ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                     </div>
                 </div>
             </div>
@@ -794,6 +804,9 @@ HEAD, JS/CSS LINKS
         function initWidget_EntityMethodForm($scope) {
             $scope.$on($scope.uidl.qualifiedName + ':ShowModal', function () {
                 $("#divModal_" + $scope.uidl.elementName).modal('show');
+            });
+            $scope.$on($scope.uidl.qualifiedName + ':HideModal', function () {
+                $("#divModal_" + $scope.uidl.elementName).modal('hide');
             });
         }
     </script>
@@ -805,9 +818,10 @@ HEAD, JS/CSS LINKS
         <form class="form-horizontal" id="{{::uidl.elementName}}">
             <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
             <div ng-if="plainFields.length <= 6" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields">
-                <label class="col-lg-2 control-label" 
+                <label class="control-label"
+                       ng-class="{'col-lg-2':!uidl.isModalPopup, 'col-lg-4':uidl.isModalPopup}"
                        for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.propertyName)}}</label>
-                <div class="col-lg-3">
+                <div ng-class="{'col-lg-3':!uidl.isModalPopup, 'col-lg-6':uidl.isModalPopup}">
                     <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>

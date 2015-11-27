@@ -126,6 +126,8 @@ namespace NWheels.UI.Toolbox
         public List<FormField> Fields { get; set; }
         [DataMember]
         public bool UsePascalCase { get; set; }
+        [DataMember]
+        public bool IsModalPopup { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

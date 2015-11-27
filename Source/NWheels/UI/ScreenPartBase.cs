@@ -38,6 +38,7 @@ namespace NWheels.UI
         {
             DescribePresenter(new PresenterBuilder<TScreenPart, TData, TState>(builder, this));
             builder.DescribeNodePresenters(this.ContentRoot);
+            builder.DescribeNodePresenters(this.PopupContents.Cast<AbstractUidlNode>().ToArray());
 
             this.Text = this.Text.TrimTail("ScreenPart");
         }

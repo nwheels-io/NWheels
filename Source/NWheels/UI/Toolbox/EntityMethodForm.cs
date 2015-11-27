@@ -50,6 +50,40 @@ namespace NWheels.UI.Toolbox
         public UidlNotification OperationStarting { get; set; }
         public UidlNotification<TOutput> OperationCompleted { get; set; }
         public UidlNotification<IPromiseFailureInfo> OperationFailed { get; set; }
+        public UidlNotification<TEntity> EntitySetter { get; set; }
+        public UidlNotification NoEntityWasSelected { get; set; }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void AttachTo<TController, TControllerData, TControllerState>(
+            PresenterBuilder<TController, TControllerData, TControllerState> controller, 
+            UidlCommand command,
+            Expression<Action<TEntity, Empty.Data, IState, Empty.Payload>> onExecute)
+            where TController : ControlledUidlNode
+            where TControllerData : class 
+            where TControllerState : class
+        {
+            this.Text = command.Text;
+            this.Icon = command.Icon;
+            _methodCallExpression = onExecute;
+            controller.On(command).Broadcast(this.ShowModal).TunnelDown();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void AttachTo<TController, TControllerData, TControllerState, TMethodOut>(
+            PresenterBuilder<TController, TControllerData, TControllerState> controller,
+            UidlCommand command,
+            Expression<Func<TEntity, Empty.Data, IState, Empty.Payload, TMethodOut>> onExecute)
+            where TController : ControlledUidlNode
+            where TControllerData : class
+            where TControllerState : class
+        {
+            this.Text = command.Text;
+            this.Icon = command.Icon;
+            _methodCallExpression = onExecute;
+            controller.On(command).Broadcast(this.ShowModal).TunnelDown();
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -69,18 +103,18 @@ namespace NWheels.UI.Toolbox
 
         protected override void DescribePresenter(PresenterBuilder<EntityMethodForm<TContext, TEntity, TInput, TOutput>, Empty.Data, IState> presenter)
         {
-            InputForm.Commands.Add(OK);
-            InputForm.Commands.Add(Cancel);
             InputForm.UsePascalCase = true;
+            InputForm.IsModalPopup = true;
 
             OK.Kind = CommandKind.Submit;
             OK.Severity = CommandSeverity.Change;
             OK.Icon = "check";
             Cancel.Kind = CommandKind.Reject;
-            Cancel.Severity = CommandSeverity.Read;
+            Cancel.Severity = CommandSeverity.Loose;
             Cancel.Icon = "times";
 
             presenter.On(ContextSetter).AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Context));
+            presenter.On(EntitySetter).AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Entity));
             presenter.On(OK)
                 .Broadcast(OperationStarting).BubbleUp()
                 .Then(b => b.InvokeEntityMethod<TEntity>(TryGetQueryAsEntityType()).WaitForReplyOrCompletion<TOutput>(_methodCallExpression)
@@ -92,6 +126,8 @@ namespace NWheels.UI.Toolbox
                         bb => bb.Broadcast(OperationFailed).WithPayload(vm => vm.Input).BubbleUp()
                         .Then(bbb => bbb.UserAlertFrom<IEntityMethodUserAlerts>().ShowPopup((alerts, vm) => alerts.RequestedOperationHasFailed(), faultInfo: vm => vm.Input))
                 ));
+
+            presenter.On(NoEntityWasSelected).UserAlertFrom<IEntityMethodUserAlerts>().ShowPopup((alerts, vm) => alerts.NoEntityWasSelected());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -111,6 +147,7 @@ namespace NWheels.UI.Toolbox
         public interface IState
         {
             TContext Context { get; set; }
+            TEntity Entity { get; set; }
             TInput Input { get; set; }
             TOutput Output { get; set; }
         }
@@ -174,5 +211,8 @@ namespace NWheels.UI.Toolbox
         
         [ErrorAlert]
         UidlUserAlert RequestedOperationHasFailed();
+
+        [InfoAlert()]
+        UidlUserAlert NoEntityWasSelected();
     }
 }
