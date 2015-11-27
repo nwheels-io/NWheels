@@ -177,7 +177,7 @@ namespace NWheels.Authorization.Impl
 
         public override bool? CanRetrieve(IAccessControlContext context, object entity)
         {
-            if ( !base.CanRetrieve(context, entity).GetValueOrDefault(false) )
+            if ( base.CanRetrieve(context, entity) == false )
             {
                 return false;
             }
@@ -194,7 +194,7 @@ namespace NWheels.Authorization.Impl
 
         public override bool? CanInsert(IAccessControlContext context, object entity)
         {
-            if ( !base.CanInsert(context, entity).GetValueOrDefault(false) )
+            if ( base.CanInsert(context, entity) == false )
             {
                 return false;
             }
@@ -211,7 +211,7 @@ namespace NWheels.Authorization.Impl
 
         public override bool? CanUpdate(IAccessControlContext context, object entity)
         {
-            if ( !base.CanUpdate(context, entity).GetValueOrDefault(false) )
+            if ( base.CanUpdate(context, entity) == false )
             {
                 return false;
             }
@@ -228,7 +228,7 @@ namespace NWheels.Authorization.Impl
 
         public override bool? CanDelete(IAccessControlContext context, object entity)
         {
-            if ( !base.CanDelete(context, entity).GetValueOrDefault(false) )
+            if ( base.CanDelete(context, entity) == false )
             {
                 return false;
             }
