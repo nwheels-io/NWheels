@@ -1079,8 +1079,8 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.queryLookupRecords();
             };
 
-            scope.updateCheckboxModel = function (rowIndex, isChecked) {
-                var entityId = scope.lookupRecords[rowIndex]['$id'];
+            scope.updateCheckboxModel = function (entityId, isChecked) {
+                //var entityId = scope.lookupRecords[rowIndex]['$id'];
                 var model = scope.model;
 
                 for (var i = model.length - 1; i >= 0; i--) {
