@@ -597,6 +597,9 @@ HEAD, JS/CSS LINKS
                     $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
                     $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
                         datatype: 'local',
+                        localReader: {
+                           id: "$id",
+                        },
                         data: data,
                         loadonce: true,
                         //height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
@@ -604,7 +607,9 @@ HEAD, JS/CSS LINKS
                         shrinkToFit: false,
                         width: null,
                         height: '100%',
-                        //rowNum: 5,
+                        rowNum: 20,
+                        rowList: [10, 20, 50, 100],
+                        pager: "#rdtpager_" + $scope.uniqueWidgetId,
                         colModel: columnsModel,
                         gridview: true,
                         viewrecords: true,
@@ -614,7 +619,8 @@ HEAD, JS/CSS LINKS
                         hidegrid: false,
                         ignoreCase: true,
                         onSelectRow: function (rowId) {
-                            $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
+                            var rowObject = $(this).getLocalRow(rowId);
+                            $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelected', rowObject);
                         }
                     });
                     var grid = $("#rdt_" + $scope.uniqueWidgetId);

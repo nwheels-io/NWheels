@@ -8,7 +8,7 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
 {
-    public class CrudScreenPart<TEntity> : ScreenPartBase<CrudScreenPart<TEntity>, Empty.Input, Empty.Data, Empty.State>
+    public class CrudScreenPart<TEntity> : ScreenPartBase<CrudScreenPart<TEntity>, Empty.Input, Empty.Data, CrudScreenPart<TEntity>.IState>
         where TEntity : class
     {
         public CrudScreenPart(string idName, UidlApplication parent)
@@ -28,16 +28,26 @@ namespace NWheels.UI.Toolbox
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<CrudScreenPart<TEntity>, Empty.Data, Empty.State> presenter)
+        protected override void DescribePresenter(PresenterBuilder<CrudScreenPart<TEntity>, Empty.Data, IState> presenter)
         {
             ContentRoot = Crud;
 
             var metaType = base.MetadataCache.GetTypeMetadata(typeof(TEntity));
             this.Text = metaType.Name + "Management";
+
+            presenter.On(Crud.SelectedEntityChanged).AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Entity));
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Crud<TEntity> Crud { get; set; }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ViewModelContract]
+        public interface IState
+        {
+            TEntity Entity { get; set; }
+        }
     }
 }

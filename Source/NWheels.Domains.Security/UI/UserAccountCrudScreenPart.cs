@@ -34,7 +34,7 @@ namespace NWheels.Domains.Security.UI
 
         #region Overrides of CrudScreenPart<IUserAccountEntity>
 
-        protected override void DescribePresenter(PresenterBuilder<CrudScreenPart<IUserAccountEntity>, Empty.Data, Empty.State> presenter)
+        protected override void DescribePresenter(PresenterBuilder<CrudScreenPart<IUserAccountEntity>, Empty.Data, IState> presenter)
         {
             base.DescribePresenter(presenter);
             this.GridColumns(x => x.LoginName, x => x.FullName, x => x.AssociatedRoles, x => x.LastLoginAtUtc, x => x.IsLockedOut);
