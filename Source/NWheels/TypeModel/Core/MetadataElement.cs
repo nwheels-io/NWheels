@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace NWheels.DataObjects.Core
 {
@@ -11,6 +12,7 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [JsonIgnore]
         public virtual Type ElementType
         {
             get
@@ -21,6 +23,7 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [JsonIgnore]
         public abstract string ReferenceName { get; }
 
         #endregion

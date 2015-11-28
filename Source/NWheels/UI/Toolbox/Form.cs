@@ -283,6 +283,8 @@ namespace NWheels.UI.Toolbox
         public bool StandardValuesMultiple { get; set; }
         [DataMember, ManuallyAssigned]
         public WidgetUidlNode NestedWidget { get; set; }
+        [DataMember, ManuallyAssigned]
+        public IPropertyValidationMetadata Validation { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -295,6 +297,7 @@ namespace NWheels.UI.Toolbox
         internal void Build(UidlBuilder builder, ControlledUidlNode parent, ITypeMetadata metaType)
         {
             this.MetaProperty = metaType.GetPropertyByName(this.PropertyName);
+            this.Validation = this.MetaProperty.Validation;
 
             if ( this.FieldType == FormFieldType.Default )
             {

@@ -706,7 +706,7 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="uidl-element-template/LookupGrid">
         <div class="jqGrid_wrapper">
             <table id="rdt_{{uniqueWidgetId}}"></table>
-            <!--div id="rdtpager_{{uniqueWidgetId}}"></div-->
+            <div id="rdtpager_{{uniqueWidgetId}}"></div>
         </div>
     </script>
     <script type="text/javascript">
@@ -742,17 +742,17 @@ HEAD, JS/CSS LINKS
                     $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
                         datatype: 'local',
                         localReader: {
-                           id: "$id",
+                           id: '$id',
                         },
                         data: data,
                         height: 150,
                         shrinkToFit: false,
                         rownumWidth: 45,
                         width: null,
-                        //rowNum: 10,
-                        //rowList: [10, 20, 30],
+                        rowNum: 5,
+                        rowList: [5, 10, 20],
                         colModel: columnsModel,
-                        //pager: "#rdtpager_" + $scope.uniqueWidgetId,
+                        pager: "#rdtpager_" + $scope.uniqueWidgetId,
                         viewrecords: true,
                         rownumbers: true,
                         add: false,
@@ -770,20 +770,6 @@ HEAD, JS/CSS LINKS
                             }
                         }
                     });
-
-                    //var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
-                    //thegrid[0].addJSONData(data);
-                    /*
-                    var rows = thegrid[0].rows;
-                    var rowCount = rows.length;
-                    for (var i = 1; i < rowCount; i++) {
-                        $(rows[i].cells[1]).click(function (e) {
-                            var id = $(e.target).closest('tr')[0].id;
-                            var isChecked = $(e.target).is(':checked');
-                            $scope.updateCheckboxModel(id, isChecked);
-                        });
-                    }
-                    */
                 });
             });
         }
@@ -895,9 +881,15 @@ HEAD, JS/CSS LINKS
             var validationRules = { };
             for (var i = 0; i < $scope.plainFields.length ; i++) {
                 var field = $scope.plainFields[i];
+                var fieldElementId = $scope.uidl.elementName + '_' + field.propertyName;
+                var fieldRules = { };
+                if (field.validation.required) {
+                    fieldRules.required = true;
+                }
+                validationRules[fieldElementId] = fieldRules;
                 if (field.modifiers === 'Password') {
-                    validationRules[$scope.uidl.elementName + '_' + field.propertyName + '__confirm'] = {
-                        equalTo: '#' + $scope.uidl.elementName + '_' + field.propertyName
+                    validationRules[fieldElementId + '__confirm'] = {
+                        equalTo: '#' + fieldElementId
                     };
                 }
             }
@@ -960,8 +952,7 @@ HEAD, JS/CSS LINKS
                    type="text"
                    ng-model="entity[uidl.propertyName]"
                    id="{{::uniqueFieldId}}"
-                   name="{{::uniqueFieldId}}"
-                   required="">
+                   name="{{::uniqueFieldId}}">
             <!-- PASSWORD -->
             <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Password'" class="m-b">
                 <div>
@@ -969,8 +960,7 @@ HEAD, JS/CSS LINKS
                            type="password"
                            ng-model="entity[uidl.propertyName]"
                            id="{{::uniqueFieldId}}"
-                           name="{{::uniqueFieldId}}"
-                           required="">
+                           name="{{::uniqueFieldId}}">
                 </div>
                 <div>
                     <label style="margin:3px 0 3px 0;font-weight:normal;">Confirm:</label>
@@ -991,8 +981,7 @@ HEAD, JS/CSS LINKS
                        class="form-control"
                        ng-model="entity[uidl.propertyName]"
                        id="{{::uniqueFieldId}}"
-                       name="{{::uniqueFieldId}}"
-                       required="">
+                       name="{{::uniqueFieldId}}">
                 <div class="input-group-addon">
                     <span class="glyphicon glyphicon-th"></span>
                 </div>
@@ -1003,8 +992,7 @@ HEAD, JS/CSS LINKS
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
                     id="{{::uniqueFieldId}}"
-                    name="{{::uniqueFieldId}}"
-                    required="">
+                    name="{{::uniqueFieldId}}">
                 <!--option value="">All</option-->
             </select>
         </div>
