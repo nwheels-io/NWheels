@@ -19,24 +19,28 @@ using System.Web.SessionState;
 using Autofac;
 using Autofac.Integration.WebApi;
 using NWheels.Authorization;
+using NWheels.Endpoints.Core;
 using NWheels.Hosting;
 using NWheels.Hosting.Core;
 using NWheels.Logging;
 using NWheels.Logging.Core;
 using NWheels.Stacks.Nlog;
+using NWheels.UI.Core;
+using NWheels.UI.Uidl;
 using NWheels.Utilities;
 
 namespace NWheels.Stacks.AspNet
 {
-    public class HttpApiEndpointApplication : HttpApplication
+    public class HttpApiEndpointApplication : HttpApplication, IUidlApplicationEndpoint
     {
         public const string BootConfigAppSettingsKey = "boot.config";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static readonly object _s_nodeHostSyncRoot = new object();
         private static readonly IPlainLog _s_log;
+        private static NodeHost _s_nodeHost;
         private static string _s_bootConfigFilePath;
-        private NodeHost _nodeHost;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -45,6 +49,42 @@ namespace NWheels.Stacks.AspNet
             CrashLog.RegisterUnhandledExceptionHandler();
             _s_log = NLogBasedPlainLog.Instance;
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void IEndpoint.PushMessage(ISession session, Processing.Messages.IMessageObject message)
+        {
+            throw new NotSupportedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        string IEndpoint.Name
+        {
+            get
+            {
+                return "HttpApiEndpoint";
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        bool IEndpoint.IsPushSupprted
+        {
+            get { return false; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        UidlApplication IUidlApplicationEndpoint.UidlApplication
+        {
+            get
+            {
+                UidlApplication app;
+                TryGetUidlApplication(out app);
+                return app;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -59,6 +99,20 @@ namespace NWheels.Stacks.AspNet
             var sessionModule = (SessionStateModule)base.Modules["Session"];
             sessionModule.Start += SessionModule_OnStart;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool TryGetUidlApplication(out UidlApplication application)
+        {
+            if ( _s_nodeHost != null )
+            {
+                return _s_nodeHost.Components.TryResolve<UidlApplication>(out application);
+            }
+
+            throw new InvalidOperationException("Node host is not started.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private void SessionModule_OnStart(object sender, EventArgs eventArgs)
         {
@@ -132,32 +186,20 @@ namespace NWheels.Stacks.AspNet
                 var globalWebAppConfig = GlobalConfiguration.Configuration;
 
                 var bootConfig = BuildBootConfiguration();
-
-                _nodeHost = new NodeHost(
-                    bootConfig,
-                    registerHostComponents: builder => {
-                        builder.RegisterInstance(this);
-                        builder.RegisterModule<NWheels.Stacks.Nlog.ModuleLoader>();
-                        //builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
-                        builder.RegisterType<AspNetRegistrationComponent>().AsImplementedInterfaces().SingleInstance();
-                        builder.RegisterType<RequestLoggerComponent>().AsImplementedInterfaces().SingleInstance();
-                        builder.RegisterWebApiFilterProvider(globalWebAppConfig);
-                    });
-
-                _nodeHost.LoadAndActivate();
+                EnsureNodeHostStarted(bootConfig, globalWebAppConfig);
 
                 GlobalConfiguration.Configure(
                     config => {
-                        config.Services.Replace(typeof(IHttpControllerTypeResolver), _nodeHost.Components.Resolve<DynamicControllerTypeResolver>());
+                        config.Services.Replace(typeof(IHttpControllerTypeResolver), _s_nodeHost.Components.Resolve<DynamicControllerTypeResolver>());
                         //config.Services.Replace(typeof(IHttpControllerSelector), _nodeHost.Components.Resolve<DynamicControllerSelector>());
                         //config.Routes.MapHttpRoute(
                         //    name: "DefaultApi",
                         //    routeTemplate: "{controller}/{action}");
-                        config.DependencyResolver = new AutofacWebApiDependencyResolver(_nodeHost.Components);
+                        config.DependencyResolver = new AutofacWebApiDependencyResolver(_s_nodeHost.Components);
                         config.MapHttpAttributeRoutes();
                         config.MessageHandlers.Add(new LoggingAndSessionHandler(
-                            _nodeHost.Components.Resolve<ISessionManager>(),
-                            _nodeHost.Components.Resolve<IWebApplicationLogger>()));
+                            _s_nodeHost.Components.Resolve<ISessionManager>(),
+                            _s_nodeHost.Components.Resolve<IWebApplicationLogger>()));
                     });
 
                 _s_log.Info("Application_Start: SUCCESS");
@@ -166,6 +208,39 @@ namespace NWheels.Stacks.AspNet
             {
                 _s_log.Critical("Application_Start: FAILURE! {0}", e.ToString());
                 throw;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void EnsureNodeHostStarted(BootConfiguration bootConfig, HttpConfiguration globalWebAppConfig)
+        {
+            if ( !Monitor.TryEnter(_s_nodeHostSyncRoot, 60000) )
+            {
+                throw new TimeoutException("Timed out waiting for Node Host initialization to complete on a different thread.");
+            }
+
+            try
+            {
+                if ( _s_nodeHost == null )
+                {
+                    _s_nodeHost = new NodeHost(
+                        bootConfig,
+                        registerHostComponents: builder => {
+                            builder.RegisterInstance(this);
+                            builder.RegisterModule<NWheels.Stacks.Nlog.ModuleLoader>();
+                            //builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
+                            builder.RegisterType<AspNetRegistrationComponent>().AsImplementedInterfaces().SingleInstance();
+                            builder.RegisterType<RequestLoggerComponent>().AsImplementedInterfaces().SingleInstance();
+                            builder.RegisterWebApiFilterProvider(globalWebAppConfig);
+                        });
+
+                    _s_nodeHost.LoadAndActivate();
+                }
+            }
+            finally
+            {
+                Monitor.Exit(_s_nodeHostSyncRoot);
             }
         }
 

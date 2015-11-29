@@ -13,6 +13,7 @@ namespace NWheels.Authorization.Core
         ISession OpenSession(IPrincipal userPrincipal, IEndpoint originatorEndpoint);
         ISession AuthorieSession(IPrincipal userPrincipal);
         ISession[] GetOpenSessions();
+        ISession GetOpenSession(string sessionId);
         void CloseCurrentSession();
         void DropSession(string sessionId);
         byte[] EncryptSessionId(string clearSessionId);

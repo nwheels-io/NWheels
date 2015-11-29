@@ -156,6 +156,13 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ISession GetOpenSession(string sessionId)
+        {
+            return _sessionById[sessionId];
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void CloseCurrentSession()
         {
             var session = this.CurrentSession;

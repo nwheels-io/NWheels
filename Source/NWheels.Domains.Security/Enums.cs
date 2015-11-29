@@ -10,7 +10,8 @@ namespace NWheels.Domains.Security
     {
         LoginIncorrect,
         PasswordExpired,
-        AccountLockedOut
+        AccountLockedOut,
+        NotAuthorized
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.SessionState;
 using NWheels.Authorization;
 using NWheels.Authorization.Core;
+using NWheels.Endpoints.Core;
 using NWheels.Extensions;
 
 namespace NWheels.Stacks.AspNet
@@ -47,7 +48,7 @@ namespace NWheels.Stacks.AspNet
                     }
                     else
                     {
-                        _sessionManager.JoinGlobalAnonymous();
+                        _sessionManager.OpenAnonymous(HttpContext.Current.ApplicationInstance as IEndpoint);
                     }
 
                     //_sessionManager.JoinSessionOrOpenAnonymous(sessionId, null); //TODO: bring back the using 

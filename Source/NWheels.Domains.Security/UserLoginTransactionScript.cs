@@ -6,8 +6,11 @@ using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Domains.Security.Core;
 using NWheels.Entities.Core;
+using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Processing;
+using NWheels.UI.Core;
+using NWheels.UI.Uidl;
 using NWheels.Utilities;
 
 namespace NWheels.Domains.Security
@@ -27,11 +30,7 @@ namespace NWheels.Domains.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Result Execute(
-            [PropertyContract.Semantic.LoginName] 
-            string loginName,
-            [PropertyContract.Semantic.Password] 
-            string password)
+        public Result Execute(string loginName, string password)
         {
             IUserAccountEntity userAccount;
             UserAccountPrincipal principal;
@@ -41,6 +40,16 @@ namespace NWheels.Domains.Security
             using ( _sessionManager.JoinGlobalSystem() )
             {
                 principal = _authenticationProvider.Authenticate(loginName, SecureStringUtility.ClearToSecure(password), out userAccount);
+            }
+
+            var uidlEndpoint = currentSession.Endpoint as IUidlApplicationEndpoint;
+
+            if ( uidlEndpoint != null )
+            {
+                if ( !uidlEndpoint.UidlApplication.Authorization.TryValidateUser(principal.Identity) )
+                {
+                    throw new DomainFaultException<LoginFault>(LoginFault.NotAuthorized);
+                }
             }
 
             if ( currentSession.IsGlobalImmutable )
