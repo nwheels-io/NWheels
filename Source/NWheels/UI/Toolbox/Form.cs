@@ -19,6 +19,7 @@ namespace NWheels.UI.Toolbox
     {
         private readonly List<string> _visibleFields;
         private readonly List<string> _hiddenFields;
+        private UidlBuilder _uidlBuilder;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -139,13 +140,14 @@ namespace NWheels.UI.Toolbox
         protected override void DescribePresenter(PresenterBuilder<Form<TEntity>, IFormData, Empty.State> presenter)
         {
             //presenter.On(ModelSetter).AlterModel((alt => alt.Copy(vm => vm.Input).To(vm => vm.Data.Entity)));
+            BuildFields(_uidlBuilder);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void OnBuild(UidlBuilder builder)
         {
-            BuildFields(builder);
+            _uidlBuilder = builder;
             builder.RegisterMetaType(typeof(TEntity));
         }
 
@@ -206,7 +208,11 @@ namespace NWheels.UI.Toolbox
                 field.Build(builder, this, metaType);
             }
 
-            Fields.Sort((x, y) => y.OrderIndex.CompareTo(x.OrderIndex));
+            if ( _visibleFields.Count == 0 )
+            {
+                Fields.Sort((x, y) => y.OrderIndex.CompareTo(x.OrderIndex));
+            }
+
             builder.BuildNodes(this.Fields.SelectMany(f => f.GetNestedWidgets()).Cast<AbstractUidlNode>().ToArray());
             builder.BuildNodes(this.Commands.Cast<AbstractUidlNode>().ToArray());
         }
@@ -398,9 +404,12 @@ namespace NWheels.UI.Toolbox
             switch ( this.MetaProperty.Kind )
             {
                 case PropertyKind.Scalar:
-                    if ( MetaProperty.Role.IsIn(PropertyRole.Key, PropertyRole.Version) || MetaProperty.IsCalculated )
+                    if ( MetaProperty.Role.IsIn(PropertyRole.Key, PropertyRole.Version) || MetaProperty.IsCalculated || 
+                        !MetaProperty.Access.HasFlag(PropertyAccess.Write) )
                     {
-                        return (MetaProperty.ContractPropertyInfo.CanWrite ? FormFieldType.Edit : FormFieldType.Label);
+                        return (MetaProperty.ContractPropertyInfo.CanWrite && MetaProperty.Access.HasFlag(PropertyAccess.Write) 
+                            ? FormFieldType.Edit 
+                            : FormFieldType.Label);
                     }
                     else
                     {

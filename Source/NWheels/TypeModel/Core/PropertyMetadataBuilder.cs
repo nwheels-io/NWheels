@@ -41,6 +41,7 @@ namespace NWheels.DataObjects.Core
             this.DeclaringContract = declaringContract;
             this.ContractPropertyInfo = declaration;
             this.PropertyIndex = propertyIndex;
+            this.Access = PropertyAccess.ReadWrite;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

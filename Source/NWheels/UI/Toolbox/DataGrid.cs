@@ -97,7 +97,13 @@ namespace NWheels.UI.Toolbox
                 this.Title = title ?? this.Navigations.Last();
                 this.Size = size;
                 this.Format = format;
-                this.DeclaringTypeName = FindDeclaringMetaType(metaType).QualifiedName;
+
+                ITypeMetadata destinationMetaType;
+                IPropertyMetadata destinationMetaProperty;
+                FindDeclaringMetaType(metaType, out destinationMetaType, out destinationMetaProperty);
+                    
+                this.DeclaringTypeName = destinationMetaType.QualifiedName;
+                this.MetaProperty = destinationMetaProperty;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -114,21 +120,25 @@ namespace NWheels.UI.Toolbox
             public string[] Navigations { get; set; }
             [DataMember]
             public string DeclaringTypeName { get; set; }
+            
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal protected IPropertyMetadata MetaProperty { get; private set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
             
-            private ITypeMetadata FindDeclaringMetaType(ITypeMetadata metaType)
+            private void FindDeclaringMetaType(ITypeMetadata metaType, out ITypeMetadata destinationMetaType, out IPropertyMetadata destinationMetaProperty)
             {
-                var destinationMetaType = metaType;
+                destinationMetaType = metaType;
 
                 for ( int i = 0; i < Navigations.Length - 1; i++ )
                 {
-                    var destinationMetaProperty = destinationMetaType.GetPropertyByName(Navigations[i]);
+                    var navigationMetaProperty = destinationMetaType.GetPropertyByName(Navigations[i]);
 
-                    if ( (destinationMetaProperty.Kind == PropertyKind.Part || destinationMetaProperty.Kind == PropertyKind.Relation) &&
-                        destinationMetaProperty.Relation != null )
+                    if ( (navigationMetaProperty.Kind == PropertyKind.Part || navigationMetaProperty.Kind == PropertyKind.Relation) &&
+                        navigationMetaProperty.Relation != null )
                     {
-                        destinationMetaType = destinationMetaProperty.Relation.RelatedPartyType;
+                        destinationMetaType = navigationMetaProperty.Relation.RelatedPartyType;
                     }
                     else
                     {
@@ -136,7 +146,7 @@ namespace NWheels.UI.Toolbox
                     }
                 }
 
-                return destinationMetaType;
+                destinationMetaProperty = destinationMetaType.GetPropertyByName(Navigations.Last());
             }
         }
     }
@@ -199,6 +209,7 @@ namespace NWheels.UI.Toolbox
             base.DefaultDisplayColumns = MetaType.Properties
                 .Where(ShouldDisplayPropertyByDefault)
                 .Select(p => new GridColumn(MetaType, MetaType.MakePropertyExpression(p), size: FieldSize.Medium))
+                .OrderByDescending(c => GetColumnPropertyDefaultOrder(c.MetaProperty))
                 .ToList();
         }
 
@@ -220,6 +231,34 @@ namespace NWheels.UI.Toolbox
                 metaProperty.ClrType.IsIntegralType() || 
                 metaProperty.ClrType == typeof(DateTime) || 
                 metaProperty.ClrType == typeof(TimeSpan));
+        }
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private int GetColumnPropertyDefaultOrder(IPropertyMetadata metaProperty)
+        {
+            var value = 0;
+
+            if ( metaProperty.Role == PropertyRole.Key )
+            {
+                value += 100;
+            }
+
+            if ( metaProperty.DeclaringContract.DefaultDisplayProperties.Contains(metaProperty) )
+            {
+                value += 90;
+            }
+
+            if ( metaProperty.Kind == PropertyKind.Relation )
+            {
+                value += 80;
+            }
+
+            if ( metaProperty.DeclaringContract == MetaType )
+            {
+                value += 1000;
+            }
+
+            return value;
         }
     }
 
