@@ -183,13 +183,20 @@ namespace NWheels.Stacks.Nlog
 
         private void ConfigureTextFileOutput(LoggingConfiguration config)
         {
+            var logFolder = PathUtility.HostBinPath("..\\Logs\\PlainLog");
+
+            if ( !Directory.Exists(logFolder) )
+            {
+                Directory.CreateDirectory(logFolder);
+            }
+
             var target = new FileTarget() {
                 Name = PlainTextFileTargetName,
-                FileName = PathUtility.HostBinPath("..\\Logs\\PlainLog", @"${machinename}.plain.log"),
+                FileName = Path.Combine(logFolder, @"${machinename}.plain.log"),
                 CreateDirs = true,
                 ArchiveEvery = FileArchivePeriod.Hour,
                 ArchiveNumbering = ArchiveNumberingMode.Sequence,
-                ArchiveFileName = PathUtility.HostBinPath("..\\Logs\\PlainLog", @"${machinename}-${date:universalTime=True:format=yyyyMMdd}-{####}.plain.log"),
+                ArchiveFileName = Path.Combine(logFolder, @"${machinename}-${date:universalTime=True:format=yyyyMMdd}-{####}.plain.log"),
                 MaxArchiveFiles = 10,
                 EnableFileDelete = true,
                 ConcurrentWrites = false,
