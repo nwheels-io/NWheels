@@ -267,7 +267,7 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [HttpGet]
+        [HttpGet, HttpPost]
         [Route("entity/query/{entityName}")]
         public IHttpActionResult QueryEntity(string entityName)
         {

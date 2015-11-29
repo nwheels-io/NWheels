@@ -109,6 +109,7 @@ namespace NWheels.UI.Toolbox
             this.Cancel.Kind = CommandKind.Reject;
 
             presenter.On(QueryEntityFailed).UserAlertFrom<ICrudUserAlerts>().ShowPopup((x, vm) => x.FailedToQueryDataFromServer(), faultInfo: vm => vm.Input);
+            presenter.On(Grid.QueryFailed).UserAlertFrom<ICrudUserAlerts>().ShowPopup((x, vm) => x.FailedToQueryDataFromServer(), faultInfo: vm => vm.Input);
             presenter.On(NewDomainObjectFailed).UserAlertFrom<ICrudUserAlerts>().ShowPopup((x, vm) => x.FailedToRetrieveDefaultValues(), faultInfo: vm => vm.Input);
             presenter.On(DeleteEntityCompleted).UserAlertFrom<ICrudUserAlerts>().ShowPopup((x, vm) => x.DeleteOperationCompleted());
             presenter.On(DeleteEntityFailed).UserAlertFrom<ICrudUserAlerts>().ShowPopup((x, vm) => x.DeleteOperationFailed(), faultInfo: vm => vm.Input);

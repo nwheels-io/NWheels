@@ -679,25 +679,21 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             scope.queryEntities = function () {
                 scope.selectedEntity = null;
                 scope.commandInProgress = true;
+                
                 if (scope.uidl.mode !== 'Inline') {
                     scope.resultSet = null;
-                    scope.entityService.queryEntity(scope.uidl.grid.entityName, function(query) {
-                        if (scope.uidl.entityTypeFilter) {
-                            query.ofType(scope.uidl.entityTypeFilter);
-                        }
-                    }).then(
-                        function (data) {
-                            var receivedResultSet = data.ResultSet;
-                            $timeout(function () {
-                                scope.resultSet = receivedResultSet;
-                                scope.commandInProgress = false;
-                                scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', receivedResultSet);
-                            });
-                        },
-                        function (fault) {
-                            scope.$emit(scope.uidl.qualifiedName + ':QueryEntityFailed', commandService.createFaultInfo(fault));
-                        }
-                    );
+                    var query = scope.entityService.newQueryBuilder(scope.uidl.entityName);
+                    
+                    if (scope.uidl.entityTypeFilter) {
+                        query.ofType(scope.uidl.entityTypeFilter);
+                    }
+                    
+                    var preparedRequest = {
+                        url: query.getQueryUrl(),
+                        data: { }
+                    };
+                    
+                    scope.$broadcast(scope.uidl.grid.qualifiedName + ':RequestPrepared', preparedRequest);
                 } else {
                     $timeout(function() {
                         scope.commandInProgress = false;
@@ -713,6 +709,11 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.commandInProgress = false;
             };
 
+            scope.$on(scope.uidl.grid.qualifiedName + ':QueryCompleted', function (event, data) {
+                scope.resultSet = data;
+                scope.commandInProgress = false;
+            });
+
             scope.$on(scope.uidl.qualifiedName + ':NavigatedHere', function (event) {
                 scope.refresh();
             });
@@ -725,7 +726,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 
             scope.$on(scope.uidl.qualifiedName + ':Grid:ObjectSelectedById', function (event, id) {
                 scope.$apply(function() {
-                    scope.selectedEntity = Enumerable.From(scope.resultSet).Where("$.Id == '" + id + "'").First();
+                    scope.selectedEntity = Enumerable.From(scope.resultSet).Where("$.$id == '" + id + "'").First();
                 });
             });
 

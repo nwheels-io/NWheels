@@ -638,6 +638,16 @@ HEAD, JS/CSS LINKS
                     var gridOptions = {
                         datatype: function(postData) {
                             var queryBuilder = $scope.entityService.newQueryBuilder();
+                            if (postData.sidx) {
+                                queryBuilder.orderBy(postData.sidx, postData.sord==='asc');
+                            }
+                            if (postData._search === true) {
+                                var filterObject = JSON.parse(postData.filters);
+                                for (var i = 0; i < filterObject.rules.length; i++) {
+                                    var rule = filterObject.rules[i];
+                                    queryBuilder.where(rule.field, rule.data, rule.op);
+                                }
+                            }
                             queryBuilder.take(postData.rows);
                             queryBuilder.page(postData.page);
                             var requestUrl = $scope.preparedRequest.url + queryBuilder.getQueryString();
@@ -648,14 +658,6 @@ HEAD, JS/CSS LINKS
                                 $scope.preparedRequest.data
                             ).then(
                                 function(response){
-                                    /*
-                                    var gridData = {
-                                        page: postData.page,
-                                        records: 1000,
-                                        total: 100,
-                                        root: response.data.ResultSet
-                                    };
-                                    */
                                     var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
                                     thegrid[0].addJSONData(response.data);
                                     $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data.ResultSet);

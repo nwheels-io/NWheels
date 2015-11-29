@@ -140,7 +140,7 @@ function EntityQueryBuilder(entityName) {
 
     this._entityName = entityName;
     this._entityTypeFilter = null;
-    this._equalityFilter = {};
+    this._filter = [];
     this._orderBy = [];
     this._take = null;
     this._skip = null;
@@ -156,8 +156,12 @@ function EntityQueryBuilder(entityName) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    this.whereEquals = function (property, value) {
-        me._equalityFilter[property] = value;
+    this.where = function (property, value, operator) {
+        me._filter.push({ 
+            property: property,
+            value: value,
+            operator: operator || ':eq'
+        });
         return me;
     };
 
@@ -211,12 +215,13 @@ function EntityQueryBuilder(entityName) {
             delimiter = '&';
         }
 
-        for (var property in me._equalityFilter) {
-            if (me._equalityFilter.hasOwnProperty(property)) {
-                var value = me._equalityFilter[property];
-                queryString = queryString + delimiter + encodeURIComponent(property) + '=' + encodeURIComponent(value);
-                delimiter = '&';
-            }
+        for (var i = 0; i < me._filter.length; i++) {
+            var filterItem = me._filter[i];
+            queryString = 
+                queryString + 
+                delimiter + 
+                encodeURIComponent(filterItem.property) + ':' + filterItem.operator + '=' + encodeURIComponent(filterItem.value);
+            delimiter = '&';
         }
 
         for (var i = 0; i < me._orderBy.length; i++) {

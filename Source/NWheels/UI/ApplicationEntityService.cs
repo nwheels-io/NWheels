@@ -23,6 +23,7 @@ using NWheels.Entities.Factories;
 using NWheels.TypeModel;
 using NWheels.UI.Core;
 using NWheels.UI.Factories;
+using NWheels.Utilities;
 
 namespace NWheels.UI
 {
@@ -365,15 +366,25 @@ namespace NWheels.UI
             public const string OrderByParameterKey = "$orderby";
             public const string AscendingParameterModifier = ":asc";
             public const string DescendingParameterModifier = ":desc";
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public const string EqualOperator = ":eq";
-            public const string NotEqualOperator = ":neq";
+            public const string NotEqualOperator = ":ne";
             public const string GreaterThanOperator = ":gt";
-            public const string GreaterThanOrEqualOperator = ":gte";
+            public const string GreaterThanOrEqualOperator = ":ge";
             public const string LessThanOperator = ":lt";
-            public const string LessThanOrEqualOperator = ":lte";
-            public const string StringContainsOperator = ":strc";
-            public const string StringStartsWithOperator = ":strsw";
-            public const string StringEndsWithOperator = ":strew";
+            public const string LessThanOrEqualOperator = ":le";
+            public const string StringStartsWithOperator = ":bw";
+            public const string StringDoesNotStartWithOperator = ":bn";
+            public const string StringEndsWithOperator = ":ew";
+            public const string StringDoesNotEndWithOperator = ":en";
+            public const string StringContainsOperator = ":cn";
+            public const string StringDoesNotContainOperator = ":nc";
+            public const string IsInOperator = ":in";
+            public const string IsNotInOperator = ":ni";
+            public const string IsNull = ":nu";
+            public const string IsNotNull = ":nn";
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -603,10 +614,21 @@ namespace NWheels.UI
                     { QueryOptions.GreaterThanOrEqualOperator, Expression.GreaterThanOrEqual },
                     { QueryOptions.LessThanOperator, Expression.LessThan },
                     { QueryOptions.LessThanOrEqualOperator, Expression.LessThanOrEqual },
-                    //{ QueryOptions.StringContainsOperator, (left, right) => Expression.Invoke() },
-                    //{ QueryOptions.StringStartsWithOperator, Expression.Equal },
-                    //{ QueryOptions.StringEndsWithOperator, Expression.Equal },
+                    { QueryOptions.StringContainsOperator, (left, right) => Expression.Call(left, _s_stringContainsMethod, right) },
+                    { QueryOptions.StringStartsWithOperator, (left, right) => Expression.Call(left, _s_stringStartsWithMethod, right) },
+                    { QueryOptions.StringEndsWithOperator, (left, right) => Expression.Call(left, _s_stringEndsWithMethod, right) },
                 };
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static readonly MethodInfo _s_stringStartsWithMethod =
+                ExpressionUtility.GetMethodInfo<Expression<Func<string, string, bool>>>((s, value) => s.StartsWith(value));
+
+            private static readonly MethodInfo _s_stringEndsWithMethod =
+                ExpressionUtility.GetMethodInfo<Expression<Func<string, string, bool>>>((s, value) => s.EndsWith(value));
+
+            private static readonly MethodInfo _s_stringContainsMethod =
+                ExpressionUtility.GetMethodInfo<Expression<Func<string, string, bool>>>((s, value) => s.Contains(value));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1022,7 +1044,7 @@ namespace NWheels.UI
                 {
                     if ( options.Skip.HasValue )
                     {
-                        dbQuery = dbQuery.Skip(options.Skip.Value + 1);
+                        dbQuery = dbQuery.Skip(options.Skip.Value);
                     }
 
                     if ( options.Take.HasValue )
