@@ -132,13 +132,14 @@ function ($http, $q, $timeout) {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-function EntityQueryBuilder(entityName) {
+function EntityQueryBuilder(entityName, commandUrl) {
 
     var me = this;
 
     //-----------------------------------------------------------------------------------------------------------------
 
     this._entityName = entityName;
+    this._commandUrl = commandUrl || null;
     this._entityTypeFilter = null;
     this._filter = [];
     this._orderBy = [];
@@ -227,7 +228,7 @@ function EntityQueryBuilder(entityName) {
         for (var i = 0; i < me._orderBy.length; i++) {
             var item = me._orderBy[i];
             var direction = (item.ascending ? ':asc' : ':desc');
-            queryString = queryString + delimiter + '$orderby=' + encodeURIComponent(item.propertyName + direction);
+            queryString = queryString + delimiter + '$orderby=' + encodeURIComponent(item.propertyName) + direction;
             delimiter = '&';
         }
 
@@ -257,7 +258,43 @@ function EntityQueryBuilder(entityName) {
     //-----------------------------------------------------------------------------------------------------------------
 
     this.getQueryUrl = function () {
-        var url = 'entity/query/' + me._entityName + me.getQueryString();
+        var url = '';
+        if (me._commandUrl) {
+            url = me._commandUrl + me.getQueryString();
+        } else {
+            url = 'entity/query/' + me._entityName + me.getQueryString();
+        }
         return url;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    this.clone = function () {
+        var cloned = new EntityQueryBuilder(me._entityName, me._commandUrl);
+
+        cloned._entityTypeFilter = me._entityTypeFilter;
+        cloned._take = me._take;
+        cloned._skip = me._skip;
+        cloned._page = me._page;
+        cloned._isCountOnly = me._isCountOnly;
+
+        cloned._filter = [];
+        for (var i = 0; i < me._filter.length; i++) {
+            cloned._filter.push({
+                property: me._filter[i].property,
+                value: me._filter[i].value,
+                operator: me._filter[i].operator
+            });
+        }
+
+        cloned._orderBy = [];
+        for (var i = 0; i < me._orderBy.length; i++) {
+            cloned._orderBy.push({
+                propertyName: me._orderBy[i].propertyName,
+                ascending: me._orderBy[i].ascending
+            });
+        }
+
+        return cloned;
     }
 };

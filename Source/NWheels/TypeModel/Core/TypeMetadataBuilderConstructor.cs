@@ -42,6 +42,7 @@ namespace NWheels.DataObjects.Core
             _allProperties = UnionPropertiesInAllContracts(primaryContract, mixinContracts);
 
             builder.Name = (primaryContract.IsGenericType ? primaryContract.FriendlyName() : primaryContract.Name).TrimPrefix("I");
+            builder.DisplayName = builder.Name;
             builder.ContractType = primaryContract;
             builder.MixinContractTypes.AddRange(mixinContracts);
 

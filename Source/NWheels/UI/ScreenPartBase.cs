@@ -30,6 +30,8 @@ namespace NWheels.UI
 
             base.PopupContents.AddRange(declaredMemberNodes.OfType<WidgetUidlNode>().Where(widget => widget.IsPopupContent));
             builder.BuildNodes(declaredMemberNodes);
+
+            OnBuild(builder);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -53,6 +55,12 @@ namespace NWheels.UI
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected virtual void DescribePresenter(PresenterBuilder<TScreenPart, TData, TState> presenter)
+        {
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void OnBuild(UidlBuilder builder)
         {
         }
 

@@ -60,6 +60,9 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public bool EnablePaging { get; set; }
 
+        [DataMember]
+        public bool AutonomousQuery { get; set; }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlNotification<object> RequestPrepared { get; set; }
@@ -269,6 +272,6 @@ namespace NWheels.UI.Toolbox
         Standalone,
         Inline,
         LookupOne,
-        LookupMany,
+        LookupMany
     }
 }

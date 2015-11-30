@@ -206,6 +206,7 @@ namespace NWheels.DataObjects
 
             public class PhoneNumberAttribute : DataTypeAttribute { public PhoneNumberAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class CurrencyAttribute : DataTypeAttribute { public CurrencyAttribute() : base(typeof(SemanticType.DefaultOf<decimal>)) { } }
+            public class CultureAttribute : DataTypeAttribute { public CultureAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class MultilineTextAttribute : DataTypeAttribute { public MultilineTextAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class EmailAddressAttribute : DataTypeAttribute { public EmailAddressAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
             public class LoginNameAttribute : DataTypeAttribute { public LoginNameAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }

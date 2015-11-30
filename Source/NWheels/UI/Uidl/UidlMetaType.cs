@@ -87,7 +87,7 @@ namespace NWheels.UI.Uidl
             this.Properties = metadata.Properties.ToDictionary(p => p.Name, p => new UidlMetaProperty(p, relatedTypes));
             this.PrimaryKey = metadata.PrimaryKey != null ? new MetaKey(metadata.PrimaryKey) : null;
             this.AllKeys = metadata.AllKeys.ToDictionary(k => k.Name, k => new MetaKey(k));
-            this.DefaultDisplayFormat = metadata.DefaultDisplayFormat;
+            this.DisplayName = metadata.DisplayName;
             this.DefaultDisplayPropertyNames = metadata.DefaultDisplayProperties.Select(p => p.Name).ToList();
             this.DefaultSortPropertyNames = metadata.DefaultSortProperties.Select(p => p.Name).ToList();
 
@@ -118,7 +118,7 @@ namespace NWheels.UI.Uidl
         [DataMember]
         public Dictionary<string, MetaKey> AllKeys { get; set; }
         [DataMember]
-        public string DefaultDisplayFormat { get; set; }
+        public string DisplayName { get; set; }
         [DataMember]
         public List<string> DefaultDisplayPropertyNames { get; set; }
         [DataMember]

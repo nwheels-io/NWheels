@@ -105,6 +105,18 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void BuildManuallyInstantiatedNodes(params AbstractUidlNode[] nodes)
+        {
+            foreach ( var node in nodes.Where(n => n != null) )
+            {
+                InstantiateDeclaredMemberNodes(node);
+            }
+
+            BuildNodes(nodes);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IEnumerable<string> GetTranslatables()
         {
             var translatables = new HashSet<string>();
@@ -143,18 +155,6 @@ namespace NWheels.UI
         internal void DescribeNodePresenters(params AbstractUidlNode[] nodes)
         {
             nodes.OfType<IBuildableUidlNode>().ForEach(node => node.DescribePresenter(this));
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal void BuildManuallyInstantiatedNodes(params AbstractUidlNode[] nodes)
-        {
-            foreach ( var node in nodes.Where(n => n != null) )
-            {
-                InstantiateDeclaredMemberNodes(node);
-            }
-            
-            BuildNodes(nodes);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

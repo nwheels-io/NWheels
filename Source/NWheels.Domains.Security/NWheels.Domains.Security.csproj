@@ -68,6 +68,7 @@
     <Compile Include="LoggedInUserInfo.cs" />
     <Compile Include="UI\JsonSerializationExtension.cs" />
     <Compile Include="UI\UserAccountCrudScreenPart.cs" />
+    <Compile Include="UI\ViewModels.cs" />
     <Compile Include="UserLoginTransactionScript.cs" />
     <Compile Include="Entities.cs" />
     <Compile Include="Enums.cs" />
@@ -77,13 +78,11 @@
     <Compile Include="Core\ICryptoProvider.cs" />
     <Compile Include="Core\ISecurityDomainLogger.cs" />
     <Compile Include="Impl\PrivateAuthenticationProvider.cs" />
-    <Compile Include="Impl\SecurityDomainApi.cs" />
     <Compile Include="Core\UserAccountIdentity.cs" />
     <Compile Include="Impl\UserAccountRoleClaim.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\CurrentLoggedInUser.cs" />
-    <Compile Include="ISecurityDomainApi.cs" />
     <Compile Include="UI\UserLoginForm.cs" />
     <Compile Include="UserLogoutTransactionScript.cs" />
   </ItemGroup>

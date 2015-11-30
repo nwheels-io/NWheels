@@ -431,8 +431,10 @@ HEAD, JS/CSS LINKS
         <uidl-user-alert-inline alert="userAlert"></uidl-user-alert-inline>
     </script>
     <script type="text/javascript">
-        function initWidget_ManagementConsole(){
-            $('#side-menu').metisMenu();
+        function initWidget_ManagementConsole($scope){
+            $scope.$timeout(function() {
+                $('#side-menu').metisMenu();
+            });
         }
     </script>
 
@@ -591,7 +593,8 @@ HEAD, JS/CSS LINKS
                     //search: true
                 });
             });
-            $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
+            
+            $scope.onDataReceived = function (event, data) {
                 $scope.ResultSet = data;
                 $scope.$timeout(function () {
                     $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
@@ -630,14 +633,16 @@ HEAD, JS/CSS LINKS
                     }
                     //grid[0].addJSONData(data);
                 });
-            });
-            $scope.$on($scope.uidl.qualifiedName + ':RequestPrepared', function (event, request) {
+            };
+            $scope.$on($scope.uidl.qualifiedName + ':DataReceived', $scope.onDataReceived);
+
+            $scope.onRequestPrepared = function (event, request) {
                 $scope.preparedRequest = request;
                 $scope.$timeout(function () {
                     $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
                     var gridOptions = {
                         datatype: function(postData) {
-                            var queryBuilder = $scope.entityService.newQueryBuilder();
+                            var queryBuilder = (request.query ? request.query.clone() : new EntityQueryBuilder($scope.uidl.entityName, request.url));
                             if (postData.sidx) {
                                 queryBuilder.orderBy(postData.sidx, postData.sord==='asc');
                             }
@@ -650,7 +655,7 @@ HEAD, JS/CSS LINKS
                             }
                             queryBuilder.take(postData.rows);
                             queryBuilder.page(postData.page);
-                            var requestUrl = $scope.preparedRequest.url + queryBuilder.getQueryString();
+                            var requestUrl = queryBuilder.getQueryUrl();
                             $scope.$http.post(
                                 //'http://localhost:9411/command/query/AffiliatePerformance/TransactionScript/TransactionScripts.AffiliatePerformanceReportTx/Execute',
                                 //{"input":{"Product":"7","Affiliate":"3","From":"2015-10-22 00:00:00","To":"2015-11-23 00:00:00","Grouping":"Monthly"}}
@@ -698,7 +703,8 @@ HEAD, JS/CSS LINKS
                     grid.jqGrid('filterToolbar',{ stringResult: true, searchOnEnter: false, defaultSearch: "cn" });
                     grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
                 });
-            });
+            };
+            $scope.$on($scope.uidl.qualifiedName + ':RequestPrepared', $scope.onRequestPrepared);
         }
     </script>
 
@@ -1128,22 +1134,20 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - TYPE SELECTOR WITH TABS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/TypeSelectorWithTabs">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="tabs-container">
-                    <ul class="nav nav-tabs">
-                        <li ng-class="{active: $index == 0}" ng-repeat="selection in uidl.selections"><a data-toggle="tab" href="#tab-{{ $index }}">{{ selection.text }}</a></li>
-                    </ul>
-                    <div class="tab-content">
-                        <div ng-repeat="selection in uidl.selections" id="tab-{{ $index }}" ng-class="{'tab-pane': true, active: $index == 0}">
-                            <uidl-widget uidl="selection.widget"></uidl-widget>
-                        </div>
+        <div class="tabs-container">
+            <ul class="nav nav-tabs">
+                <li ng-class="{active: selectedTabIndex===$index}" ng-repeat="selection in uidl.selections"><a ng-click="selectTabByIndex($index)">{{translate(selection.text)}}</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane" ng-repeat="selection in uidl.selections" ng-class="{active: selectedTabIndex===$index}">
+                    <div class="panel-body">
+                        <uidl-widget ng-if="selectedTabIndex===$index" uidl="selection.widget"></uidl-widget>
                     </div>
                 </div>
             </div>
         </div>
     </script>	
-
+    
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - FILTER FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

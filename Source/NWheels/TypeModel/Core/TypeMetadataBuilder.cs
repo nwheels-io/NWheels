@@ -93,6 +93,7 @@ namespace NWheels.DataObjects.Core
         public bool IsEntity { get; set; }
         public bool IsEntityPart { get; set; }
         public bool IsViewModel { get; set; }
+        public string DisplayName { get; set; }
         public string DefaultDisplayFormat { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -235,6 +236,7 @@ namespace NWheels.DataObjects.Core
             PrimaryKey = visitor.VisitElementReference<IKeyMetadata, KeyMetadataBuilder>("PrimaryKey", PrimaryKey);
             PartitionProperty = visitor.VisitElementReference<IPropertyMetadata, PropertyMetadataBuilder>("PartitionProperty", PartitionProperty);
 
+            DisplayName = visitor.VisitAttribute("DisplayName", DisplayName);
             DefaultDisplayFormat = visitor.VisitAttribute("DefaultDisplayFormat", DefaultDisplayFormat);
 
             visitor.VisitElementList<IPropertyMetadata, PropertyMetadataBuilder>("DefaultDisplayProperties", DefaultDisplayProperties);

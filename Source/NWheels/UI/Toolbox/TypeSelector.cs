@@ -39,6 +39,15 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TWidget GetWidget<TContract, TWidget>()
+            where TContract : class
+            where TWidget : WidgetUidlNode
+        {
+            return this.Selections.Where(s => s.MetaType.ContractType == typeof(TContract)).Select(s => s.Widget).Cast<TWidget>().First();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void SetWidget(Type contract, WidgetUidlNode widget)
         {
             var selection = this.Selections.First(s => s.MetaType.ContractType == contract);
@@ -67,10 +76,24 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void UseTabStyle()
+        {
+            this.TemplateName = "TypeSelectorWithTabs";
+
+            if ( Selections.Count > 0 )
+            {
+                this.DefaultTypeName = Selections.First().TypeName;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public string BaseTypeName { get; set; }
         [DataMember, ManuallyAssigned]
         public List<Selection> Selections { get; set; }
+        [DataMember]
+        public string DefaultTypeName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -83,6 +106,11 @@ namespace NWheels.UI.Toolbox
         protected override void OnBuild(UidlBuilder builder)
         {
             builder.BuildManuallyInstantiatedNodes(Selections.Select(s => s.Widget).Cast<AbstractUidlNode>().ToArray());
+
+            foreach ( var concreteType in Selections.Select(s => s.MetaType) )
+            {
+                builder.RegisterMetaType(concreteType.ContractType);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

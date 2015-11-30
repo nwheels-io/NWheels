@@ -30,7 +30,8 @@ namespace NWheels.Entities
                 type.BaseType = cache.FindTypeMetadataAllowIncomplete(BaseEntity);
             }
 
-            type.Name = type.Name.TrimSuffix("Entity");
+            type.Name = this.Name ?? type.Name.TrimSuffix("Entity");
+            type.DisplayName = this.DisplayName ?? type.Name;
             type.NamespaceQualifier = GetNamespaceQualifier(type);
         }
 
@@ -40,7 +41,9 @@ namespace NWheels.Entities
 
         public bool IsAbstract { get; set; }
         public Type BaseEntity { get; set; }
+        public string Name { get; set; }
         public string Namespace { get; set; }
+        public string DisplayName { get; set; }
         public bool UseCodeNamespace { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

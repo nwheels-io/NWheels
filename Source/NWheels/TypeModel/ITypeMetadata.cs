@@ -37,6 +37,7 @@ namespace NWheels.DataObjects
         IReadOnlyList<IKeyMetadata> AllKeys { get; }
         IPropertyMetadata EntityIdProperty { get; }
         IPropertyMetadata PartitionProperty { get; }
+        string DisplayName { get; }
         string DefaultDisplayFormat { get; }
         IReadOnlyList<IPropertyMetadata> DefaultDisplayProperties { get; }
         IReadOnlyList<IPropertyMetadata> DefaultSortProperties { get; }

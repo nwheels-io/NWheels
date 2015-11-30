@@ -689,7 +689,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                     }
                     
                     var preparedRequest = {
-                        url: query.getQueryUrl(),
+                        query: query,
                         data: { }
                     };
                     
@@ -897,6 +897,18 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.gridColumns = scope.uidl.displayColumns;
             } else {
                 scope.gridColumns = scope.uidl.defaultDisplayColumns;
+            }
+            
+            if (scope.uidl.autonomousQuery) {
+                $timeout(function() {
+                    var query = scope.entityService.newQueryBuilder(scope.uidl.entityName);
+                    var preparedRequest = {
+                        query: query,
+                        data: { }
+                    };
+                    //scope.onRequestPrepared(null, preparedRequest);
+                    scope.$broadcast(scope.uidl.qualifiedName + ':RequestPrepared', preparedRequest);
+                });
             }
 
             //for (var i = 0; i < scope.gridColumns.length; i++) {
@@ -1139,7 +1151,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 if (scope.parentUidl) {
                     // parent is FORM FIELD
                     scope.model.entity = scope.parentModel[scope.parentUidl.propertyName];
-                } else {
+                } else if (scope.parentModel) {
                     // parent is CRUD
                     scope.model.entity = scope.parentModel.entity;
                 }
@@ -1148,6 +1160,11 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                     scope.selectedType = scope.model.entity['$type'];
                 }
             };
+            
+            scope.selectTabByIndex = function(index) {
+                scope.selectedTabIndex = index;
+                scope.$emit(scope.uidl.qualifiedName + ':SelectionChanged', scope.uidl.selections[index]);
+            }
 
             scope.model = {
                 entity: null
@@ -1162,7 +1179,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                     if (scope.parentUidl) {
                         // parent is FORM FIELD
                         scope.parentModel[scope.parentUidl.propertyName] = data;
-                    } else {
+                    } else if (scope.parentModel) {
                         // parent is CRUD
                         scope.parentModel.entity = data;
                     }
@@ -1174,6 +1191,9 @@ function ($q, $http, $rootScope, $timeout, commandService) {
             if (scope.model.entity) {
                 scope.selectedType = scope.model.entity['$type'];
                 scope.sendModelToSelectedWidget();
+            } else if (scope.uidl.defaultTypeName) {
+                var initialTabIndex = Enumerable.From(scope.uidl.selections).Select('sel=>sel.typeName').IndexOf(scope.uidl.defaultTypeName);
+                scope.selectTabByIndex(initialTabIndex >= 0 ? initialTabIndex : 0);
             }
         }
     };
@@ -1345,13 +1365,13 @@ function (uidlService, entityService, commandService, $timeout, $http) {
                 if ($scope.uidl) {
                     uidlService.implementController($scope);
 
-                    $timeout(function() {
+                    //$timeout(function() {
                         var initFuncName = 'initWidget_' + $scope.uidl.widgetType;
                         var initFunc = window[initFuncName];
                         if (typeof initFunc === 'function') {
                             initFunc($scope);
                         }
-                    });
+                    //});
                 }
             });
             if ($scope.controllerInitCount) {
