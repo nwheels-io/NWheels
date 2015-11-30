@@ -24,10 +24,6 @@ namespace NWheels.UI.Toolbox
 
         protected override void DescribePresenter(PresenterBuilder<DataGrid, Empty.Data, Empty.State> presenter)
         {
-            if ( RowTemplate == null )
-            {
-                RowTemplate = DefaultRowTemplate;
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -41,12 +37,6 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public List<GridColumn> DefaultDisplayColumns { get; set; }
         
-        [DataMember, ManuallyAssigned]
-        public WidgetUidlNode RowTemplate { get; set; }
-
-        [DataMember]
-        public DataGridDefaultRow DefaultRowTemplate { get; set; }
-
         [DataMember]
         public bool UsePascalCase { get; set; }
 
@@ -62,14 +52,17 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public bool EnableDetailPane { get; set; }
 
-        [DataMember]
-        public bool DetailPaneExpandedOnLoad { get; set; }
+        [DataMember, ManuallyAssigned]
+        public WidgetUidlNode DetailPaneWidget { get; set; }
 
         [DataMember]
-        public string DetailPaneStaticTemplateName { get; set; }
+        public bool DetailPaneExpanded { get; set; }
 
-        [DataMember]
-        public string DetailPaneTemplateNameProperty { get; set; }
+        //[DataMember]
+        //public string DetailPaneStaticTemplateName { get; set; }
+
+        //[DataMember]
+        //public string DetailPaneTemplateNameProperty { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -88,7 +81,10 @@ namespace NWheels.UI.Toolbox
 
         protected override void OnBuild(UidlBuilder builder)
         {
-            builder.BuildManuallyInstantiatedNodes(RowTemplate);
+            //if ( DetailPaneWidget != null )
+            //{
+            //    builder.BuildManuallyInstantiatedNodes(DetailPaneWidget);
+            //}
         }
 
         #endregion
@@ -202,21 +198,37 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DataGrid<TDataRow> UseDetailPane(string staticTemplateName, bool expandOnLoad)
-        {
-            this.EnableDetailPane = true;
-            this.DetailPaneStaticTemplateName = staticTemplateName;
-            this.DetailPaneExpandedOnLoad = expandOnLoad;
-            return this;
-        }
+        //public DataGrid<TDataRow> UseDetailPane(string staticTemplateName, bool expandOnLoad)
+        //{
+        //    this.EnableDetailPane = true;
+        //    this.DetailPaneWidget = null;
+        //    this.DetailPaneStaticTemplateName = staticTemplateName;
+        //    this.DetailPaneTemplateNameProperty = null;
+        //    this.DetailPaneExpandedOnLoad = expandOnLoad;
+        //    return this;
+        //}
+
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //public DataGrid<TDataRow> UseDetailPane(Expression<Func<TDataRow, string>> dynamicTemplateProperty, bool expandOnLoad)
+        //{
+        //    this.EnableDetailPane = true;
+        //    this.DetailPaneWidget = null;
+        //    this.DetailPaneStaticTemplateName = null;
+        //    this.DetailPaneTemplateNameProperty = dynamicTemplateProperty.GetPropertyInfo().Name;
+        //    this.DetailPaneExpandedOnLoad = expandOnLoad;
+        //    return this;
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DataGrid<TDataRow> UseDetailPane(Expression<Func<TDataRow, string>> dynamicTemplateProperty, bool expandOnLoad)
+        public DataGrid<TDataRow> UseDetailPane(WidgetUidlNode widget, bool expanded)
         {
             this.EnableDetailPane = true;
-            this.DetailPaneTemplateNameProperty = dynamicTemplateProperty.GetPropertyInfo().Name;
-            this.DetailPaneExpandedOnLoad = expandOnLoad;
+            this.DetailPaneWidget = widget;
+            //this.DetailPaneStaticTemplateName = null;
+            //this.DetailPaneTemplateNameProperty = null;
+            this.DetailPaneExpanded = expanded;
             return this;
         }
 

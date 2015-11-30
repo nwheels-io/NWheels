@@ -663,11 +663,13 @@ HEAD, JS/CSS LINKS
                                 $scope.preparedRequest.data
                             ).then(
                                 function(response){
+                                    $scope.ResultSet = response.data.ResultSet;
                                     var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
                                     thegrid[0].addJSONData(response.data);
                                     $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data.ResultSet);
                                 },
                                 function(faultResponse){
+                                    $scope.ResultSet = null;
                                     var faultInfo = $scope.commandService.createFaultInfo(faultResponse);
                                     $scope.$emit($scope.uidl.qualifiedName + ':QueryFailed', faultInfo);
                                 }
@@ -698,13 +700,42 @@ HEAD, JS/CSS LINKS
                             $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
                         },
                         subGrid: $scope.uidl.enableDetailPane,
-                        subGridOptions: { expandOnLoad: true },
+                        subGridOptions: { expandOnLoad: $scope.uidl.detailPaneExpanded },
                         subGridRowExpanded: function(subgrid_id, row_id) {
-                            var html = "<img src='http://www.micpublishing.co.id/wp-content/uploads/2014/08/promo-agustus2014-banner-ads-3.jpg' width='500' height='200' style='margin:20px;' />";
-                            $("#" + subgrid_id).append(html);
+                            var rowData = $scope.ResultSet[row_id - 1];
+                            var element = $("#" + subgrid_id);
+                            var childScope = $scope.$rootScope.$new(true, $scope);
+                            childScope.uidl = $scope.uidl.detailPaneWidget;
+                            childScope.data = rowData;
+                            //rowData.$detailPaneScope = childScope;
+                            var template = '<uidl-widget uidl="uidl" parent-model="data"></uidl-widget>';
+                            var compiledDom = $scope.$compile(template)(childScope);
+                            element.html(compiledDom);
+                            //console.log(element.scope());
+                            //element.html(template);
+                            //$scope.$compile(element.contents())(childScope);
+
+                            /*
+                            $scope.uidlService.loadTemplateById($scope.uidl.detailPaneWidget.templateName).then(
+                                function(template) {
+                                    var childScope = $scope.$rootScope.$new(true, $scope);
+                                    childScope.rowData = rowData;
+                                    element.html(template);
+                                    $scope.$compile(element.contents())(childScope);
+                                },
+                                function(error) {
+                                    element.html("<span style='color:red'>Failed to load</span>");
+                                }
+                            );
+                            */
+                        },
+                        subGridRowColapsed: function(subgrid_id, row_id) {
+                            //var rowData = $scope.ResultSet[row_id - 1];
+                            //var childScope = rowData.$detailPaneScope = childScope;
+                            return false;
                         },
                         gridComplete: function () {
-                            if ($scope.uidl.enableDetailPane && $scope.uidl.detailPaneExpandedOnLoad) {
+                            if ($scope.uidl.enableDetailPane && $scope.uidl.detailPaneExpanded) {
                                 var rowIds = $('#rdt_' + $scope.uniqueWidgetId).getDataIDs();
                                 $.each(rowIds, function (index, rowId) {
                                     $('#rdt_' + $scope.uniqueWidgetId).expandSubGridRow(rowId); 

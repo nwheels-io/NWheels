@@ -122,8 +122,8 @@ function ($http, $q, $interval, $timeout, $rootScope) {
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.service('uidlService',
-['$q', '$http', '$rootScope', '$timeout', 'commandService',
-function ($q, $http, $rootScope, $timeout, commandService) {
+['$q', '$http', '$rootScope', '$timeout', '$templateCache', 'commandService',
+function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     var m_uidl = null;
     var m_app = null;
@@ -309,7 +309,30 @@ function ($q, $http, $rootScope, $timeout, commandService) {
 			return null;
 		}
 	};
-	
+
+    function loadTemplateById(templateId) {
+        var fullTemplateId = 'uidl-element-template/' + templateId;
+        var template = $templateCache.get(fullTemplateId);
+
+        if (template) {
+            return $q.when(template);
+        } else {
+            var deferred = $q.defer();
+
+            $http.get(fullTemplateId, { cache: true }).then(
+                function (response) {
+                    $templateCache.put(fullTemplateId, response.data);
+                    deferred.resolve(response.data);
+                },
+                function (error) {
+                    deferred.reject(error);
+                }
+            );
+
+            return deferred.promise;
+        }
+    }
+
     //-----------------------------------------------------------------------------------------------------------------
     /*
         function takeMessagesFromServer() {
@@ -1209,7 +1232,8 @@ function ($q, $http, $rootScope, $timeout, commandService) {
         getRelatedMetaType: getRelatedMetaType,
         //takeMessagesFromServer: takeMessagesFromServer,
         implementController: implementController,
-        translate: translate
+        translate: translate,
+        loadTemplateById: loadTemplateById
     };
 
 }]);
@@ -1334,8 +1358,8 @@ theApp.directive('uidlScreenPart', ['uidlService', 'entityService', function (ui
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.directive('uidlWidget', 
-['uidlService', 'entityService', 'commandService', '$timeout', '$http',
-function (uidlService, entityService, commandService, $timeout, $http) {
+['uidlService', 'entityService', 'commandService', '$timeout', '$http', '$compile', '$rootScope',
+function (uidlService, entityService, commandService, $timeout, $http, $compile, $rootScope) {
     var uniqueWidgetId = 1;
 
     return {
@@ -1351,12 +1375,14 @@ function (uidlService, entityService, commandService, $timeout, $http) {
         },
         template: '<ng-include src="\'uidl-element-template/\' + uidl.templateName"></ng-include>',
         controller: function ($scope) {
+            $scope.$timeout = $timeout;
+            $scope.$http = $http;
+            $scope.$compile = $compile;
+            $scope.$rootScope = $rootScope;
             $scope.uidlService = uidlService;
             $scope.entityService = entityService;
             $scope.commandService = commandService;
             $scope.inlineUserAlert = { current: null };
-            $scope.$timeout = $timeout;
-            $scope.$http = $http;
             //console.log('uidlWidget::controller', $scope.uidl.qualifiedName);
             //uidlService.implementController($scope);
             $scope.$watch('uidl', function (newValue, oldValue) {
@@ -1365,13 +1391,11 @@ function (uidlService, entityService, commandService, $timeout, $http) {
                 if ($scope.uidl) {
                     uidlService.implementController($scope);
 
-                    //$timeout(function() {
-                        var initFuncName = 'initWidget_' + $scope.uidl.widgetType;
-                        var initFunc = window[initFuncName];
-                        if (typeof initFunc === 'function') {
-                            initFunc($scope);
-                        }
-                    //});
+                    var initFuncName = 'initWidget_' + $scope.uidl.widgetType;
+                    var initFunc = window[initFuncName];
+                    if (typeof initFunc === 'function') {
+                        initFunc($scope);
+                    }
                 }
             });
             if ($scope.controllerInitCount) {
@@ -1379,6 +1403,10 @@ function (uidlService, entityService, commandService, $timeout, $http) {
             } else {
                 $scope.controllerInitCount = 1;
             }
+            
+            $scope.$on("$destroy", function() {
+                console.log('uidlWidget::$destroy() - ', $scope.uidl.qualifiedName);
+            });            
         }
     };
 }]);
