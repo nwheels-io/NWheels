@@ -77,17 +77,20 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        #region Overrides of WidgetBase<DataGrid,Data,State>
+        public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
+        {
+            return base.GetNestedWidgets().ConcatIf(this.DetailPaneWidget);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void OnBuild(UidlBuilder builder)
         {
-            //if ( DetailPaneWidget != null )
-            //{
-            //    builder.BuildManuallyInstantiatedNodes(DetailPaneWidget);
-            //}
+            if ( DetailPaneWidget != null )
+            {
+                builder.BuildNodes(DetailPaneWidget);
+            }
         }
-
-        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -709,8 +709,10 @@ HEAD, JS/CSS LINKS
                             childScope.data = rowData;
                             //rowData.$detailPaneScope = childScope;
                             var template = '<uidl-widget uidl="uidl" parent-model="data"></uidl-widget>';
-                            var compiledDom = $scope.$compile(template)(childScope);
-                            element.html(compiledDom);
+                            element.html(template);
+                            $scope.$compile(element.contents())(childScope);
+                            //var compiledDom = $scope.$compile(template)(childScope);
+                            //element.html(compiledDom);
                             //console.log(element.scope());
                             //element.html(template);
                             //$scope.$compile(element.contents())(childScope);
@@ -1389,6 +1391,8 @@ HEAD, JS/CSS LINKS
     <script src="base/entity.js"></script>
     <script src="skin/assets/app/chartjs/chart.js"></script>
 
+    <script src="Application.js"></script>
+    
     <script>
         $(document).ready(function() {
             toastr.options = {

@@ -83,6 +83,28 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
+        [Route("Application.js")]
+        public IHttpActionResult GetApplicationJavaScript()
+        {
+            var filePath = HttpContext.Current.Server.MapPath("~/UI/Web/Scripts/" + _context.Application.IdName + ".js");
+
+            if ( File.Exists(filePath) )
+            {
+                var fileContents = File.ReadAllText(filePath);
+
+                return ResponseMessage(new HttpResponseMessage() {
+                    Content = new StringContent(fileContents, Encoding.UTF8, "application/javascript")
+                });
+            }
+            else
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpGet]
         [Route("skin/{*path}")]
         public HttpResponseMessage GetSkinStaticContent(string path)
         {
