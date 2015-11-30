@@ -899,7 +899,7 @@ function ($q, $http, $rootScope, $timeout, commandService) {
                 scope.gridColumns = scope.uidl.defaultDisplayColumns;
             }
             
-            if (scope.uidl.autonomousQuery) {
+            if (scope.uidl.enableAutonomousQuery) {
                 $timeout(function() {
                     var query = scope.entityService.newQueryBuilder(scope.uidl.entityName);
                     var preparedRequest = {

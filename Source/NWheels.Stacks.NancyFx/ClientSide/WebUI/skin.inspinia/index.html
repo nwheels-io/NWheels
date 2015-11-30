@@ -696,6 +696,20 @@ HEAD, JS/CSS LINKS
                         ignoreCase: true,
                         onSelectRow: function (rowId) {
                             $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
+                        },
+                        subGrid: $scope.uidl.enableDetailPane,
+                        subGridOptions: { expandOnLoad: true },
+                        subGridRowExpanded: function(subgrid_id, row_id) {
+                            var html = "<img src='http://www.micpublishing.co.id/wp-content/uploads/2014/08/promo-agustus2014-banner-ads-3.jpg' width='500' height='200' style='margin:20px;' />";
+                            $("#" + subgrid_id).append(html);
+                        },
+                        gridComplete: function () {
+                            if ($scope.uidl.enableDetailPane && $scope.uidl.detailPaneExpandedOnLoad) {
+                                var rowIds = $('#rdt_' + $scope.uniqueWidgetId).getDataIDs();
+                                $.each(rowIds, function (index, rowId) {
+                                    $('#rdt_' + $scope.uniqueWidgetId).expandSubGridRow(rowId); 
+                                });
+                            }
                         }
                     };
                     var grid = $("#rdt_" + $scope.uniqueWidgetId);

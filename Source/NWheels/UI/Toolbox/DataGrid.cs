@@ -35,10 +35,6 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string EntityName { get; set; }
         
-        //TODO: allow uniform query for both entities and transacrion script results
-        //[DataMember]
-        //public string DataQuery { get; set; }
-        
         [DataMember]
         public List<GridColumn> DisplayColumns { get; set; }
         
@@ -61,7 +57,19 @@ namespace NWheels.UI.Toolbox
         public bool EnablePaging { get; set; }
 
         [DataMember]
-        public bool AutonomousQuery { get; set; }
+        public bool EnableAutonomousQuery { get; set; }
+
+        [DataMember]
+        public bool EnableDetailPane { get; set; }
+
+        [DataMember]
+        public bool DetailPaneExpandedOnLoad { get; set; }
+
+        [DataMember]
+        public string DetailPaneStaticTemplateName { get; set; }
+
+        [DataMember]
+        public string DetailPaneTemplateNameProperty { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -189,6 +197,26 @@ namespace NWheels.UI.Toolbox
         public DataGrid<TDataRow> Column<T>(Expression<Func<TDataRow, T>> propertySelector, string title = null, FieldSize size = FieldSize.Medium)
         {
             this.DisplayColumns.Add(new GridColumn(MetaType, propertySelector, title, size));
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DataGrid<TDataRow> UseDetailPane(string staticTemplateName, bool expandOnLoad)
+        {
+            this.EnableDetailPane = true;
+            this.DetailPaneStaticTemplateName = staticTemplateName;
+            this.DetailPaneExpandedOnLoad = expandOnLoad;
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DataGrid<TDataRow> UseDetailPane(Expression<Func<TDataRow, string>> dynamicTemplateProperty, bool expandOnLoad)
+        {
+            this.EnableDetailPane = true;
+            this.DetailPaneTemplateNameProperty = dynamicTemplateProperty.GetPropertyInfo().Name;
+            this.DetailPaneExpandedOnLoad = expandOnLoad;
             return this;
         }
 
