@@ -28,6 +28,7 @@ namespace NWheels.Authorization.Impl
             if ( _entityQuery == null )
             {
                 _entityQuery = canRetrieveWhere;
+                BuildLog.AppendLine("IsFilteredByQuery(...)");
             }
             else
             {
@@ -45,6 +46,13 @@ namespace NWheels.Authorization.Impl
             Func<IAccessControlContext, TEntity, bool> canUpdate, 
             Func<IAccessControlContext, TEntity, bool> canDelete)
         {
+            BuildLog.AppendFormat(
+                "IsDefinedHard(C={0},R={1},U={2},D={3})",
+                canInsert != null ? "f(...)" : "null",
+                canRetrieve != null ? "f(...)" : "null",
+                canUpdate != null ? "f(...)" : "null",
+                canDelete != null ? "f(...)" : "null");
+
             if ( canRetrieve != null )
             {
                 CombineAnd(ref _entityRetrieve, canRetrieve);

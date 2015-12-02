@@ -16,6 +16,7 @@ namespace NWheels.Authorization.Impl
         private Func<IAccessControlContext, bool> _globalInsert = null;
         private Func<IAccessControlContext, bool> _globalUpdate = null;
         private Func<IAccessControlContext, bool> _globalDelete = null;
+        private readonly StringBuilder _buildLog = new StringBuilder();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -143,10 +144,13 @@ namespace NWheels.Authorization.Impl
 
         INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsDenied()
         {
+            _buildLog.AppendLine("IsDenied");
+
             _globalRetrieve = _s_globalFalse;
             _globalInsert = _s_globalFalse;
             _globalUpdate = _s_globalFalse;
             _globalDelete = _s_globalFalse;
+
             return this;
         }
 
@@ -154,10 +158,13 @@ namespace NWheels.Authorization.Impl
 
         INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsReadOnly()
         {
+            _buildLog.AppendLine("IsReadOnly");
+
             _globalRetrieve = _s_globalTrue;
             _globalInsert = _s_globalFalse;
             _globalUpdate = _s_globalFalse;
             _globalDelete = _s_globalFalse;
+
             return this;
         }
 
@@ -165,10 +172,13 @@ namespace NWheels.Authorization.Impl
 
         INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsDeniedIf(Func<IAccessControlContext, bool> condition)
         {
+            _buildLog.AppendLine("IsDeniedIf(...)");
+
             CombineAndNot(ref _globalRetrieve, condition);
             CombineAndNot(ref _globalInsert, condition);
             CombineAndNot(ref _globalUpdate, condition);
             CombineAndNot(ref _globalDelete, condition);
+
             return this;
         }
 
@@ -176,10 +186,13 @@ namespace NWheels.Authorization.Impl
 
         INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsReadOnlyIf(Func<IAccessControlContext, bool> condition)
         {
+            _buildLog.AppendLine("IsReadOnlyIf(...)");
+
             CombineOr(ref _globalRetrieve, condition);
             CombineAndNot(ref _globalInsert, condition);
             CombineAndNot(ref _globalUpdate, condition);
             CombineAndNot(ref _globalDelete, condition);
+            
             return this;
         }
 
@@ -187,10 +200,13 @@ namespace NWheels.Authorization.Impl
 
         INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsDeniedUnless(Func<IAccessControlContext, bool> condition)
         {
+            _buildLog.AppendLine("IsDeniedUnless(...)");
+
             CombineAnd(ref _globalRetrieve, condition);
             CombineAnd(ref _globalInsert, condition);
             CombineAnd(ref _globalUpdate, condition);
             CombineAnd(ref _globalDelete, condition);
+
             return this;
         }
 
@@ -198,10 +214,13 @@ namespace NWheels.Authorization.Impl
 
         INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsReadOnlyUnless(Func<IAccessControlContext, bool> condition)
         {
+            _buildLog.AppendLine("IsDeniedUnless(...)");
+
             _globalRetrieve = _s_globalTrue;
             CombineAndNot(ref _globalInsert, condition);
             CombineAndNot(ref _globalUpdate, condition);
             CombineAndNot(ref _globalDelete, condition);
+
             return this;
         }
 
@@ -209,6 +228,15 @@ namespace NWheels.Authorization.Impl
 
         INonTypedEntityAccessControlBuilder INonTypedEntityAccessControlBuilder.IsDefinedHard(bool? canRetrieve, bool? canInsert, bool? canUpdate, bool? canDelete)
         {
+            _buildLog.AppendFormat(
+                "IsDefinedHard(C={0},R={1},U={2},D={3})",
+                canInsert != null ? canInsert.ToString() : "null",
+                canRetrieve != null ? canRetrieve.ToString() : "null",
+                canUpdate != null ? canUpdate.ToString() : "null",
+                canDelete != null ? canDelete.ToString() : "null");
+
+            _buildLog.AppendFormat("IsDefinedHard(C={0},R={1},U={2},D={3})", canInsert, canRetrieve, canUpdate, canDelete);
+
             if ( canRetrieve.HasValue )
             {
                 _globalRetrieve = (canRetrieve.Value ? _s_globalTrue : _s_globalFalse);
@@ -240,6 +268,13 @@ namespace NWheels.Authorization.Impl
             Func<IAccessControlContext, bool> canUpdate,
             Func<IAccessControlContext, bool> canDelete)
         {
+            _buildLog.AppendFormat(
+                "IsDefinedByContext(C={0},R={1},U={2},D={3})", 
+                canInsert != null ? "f(...)" : "null",
+                canRetrieve != null ? "f(...)" : "null",
+                canUpdate != null ? "f(...)" : "null",
+                canDelete != null ? "f(...)" : "null");
+
             if ( canRetrieve != null )
             {
                 CombineAnd(ref _globalRetrieve, canRetrieve);
@@ -318,6 +353,17 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of Object
+
+        public override string ToString()
+        {
+            return _buildLog.ToString();
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected void ValidateOrThrow(string operation, bool? evaluatedAuthorizarion)
         {
             if ( !evaluatedAuthorizarion.GetValueOrDefault(false) )
@@ -328,8 +374,16 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected StringBuilder BuildLog
+        {
+            get { return _buildLog; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected static readonly Func<IAccessControlContext, bool> _s_globalTrue = context => true;
         protected static readonly Func<IAccessControlContext, bool> _s_globalFalse = context => false;
+
         #if false
         private static readonly Func<IAccessControlContext, TEntity, bool> _s_entityTrue = (context, entity) => true;
         private static readonly Func<IAccessControlContext, TEntity, bool> _s_entityFalse = (context, entity) => false;
