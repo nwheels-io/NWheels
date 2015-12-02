@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Serialization;
+using NWheels.DataObjects;
 using NWheels.Extensions;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
@@ -23,12 +24,27 @@ namespace NWheels.UI.Toolbox
         {
             base.WidgetType = "TransactionForm";
             base.TemplateName = "TransactionForm";
+
+            this.InputMetaType = MetadataCache.GetTypeMetadata(typeof(TInput));
+
+            var formOrTypeSelector = UidlUtility.CreateFormOrTypeSelector(InputMetaType, "InputFormTypeSelector", this, isInline: false);
+            this.InputForm = formOrTypeSelector as Form<TInput>;
+            this.InputFormTypeSelector = formOrTypeSelector as TypeSelector;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [DataMember]
+        public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
+        {
+            return base.GetNestedWidgets().ConcatOneIf(InputForm).ConcatOneIf(InputFormTypeSelector);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember, ManuallyAssigned]
         public Form<TInput> InputForm { get; set; }
+        [DataMember, ManuallyAssigned]
+        public TypeSelector InputFormTypeSelector { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -40,16 +56,35 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected internal ITypeMetadata InputMetaType { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnBuild(UidlBuilder builder)
+        {
+            base.OnBuild(builder);
+            builder.BuildManuallyInstantiatedNodes(InputForm, InputFormTypeSelector);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void DescribePresenter(PresenterBuilder<TransactionForm<TContext, TInput, TScript, TOutput>, Empty.Data, ITransactionFormState> presenter)
         {
             Icon = "edit";
-            InputForm.UsePascalCase = true;
-            InputForm.Commands.Add(Execute);
-            InputForm.Commands.Add(Reset);
             Execute.Kind = CommandKind.Submit;
             Execute.Severity = CommandSeverity.Change;
             Reset.Kind = CommandKind.Reject;
             Reset.Severity = CommandSeverity.None;
+
+            if ( InputForm != null )
+            {
+                ConfigureInputForm(InputForm);
+            }
+            else
+            {
+                InputFormTypeSelector.ParentModelProperty = "Input";
+                InputFormTypeSelector.ForEachWidgetOfType<IUidlForm>(ConfigureInputForm);
+            }
 
             var attribute = typeof(TScript).GetCustomAttribute<TransactionScriptAttribute>();
 
@@ -59,7 +94,7 @@ namespace NWheels.UI.Toolbox
                     .InvokeTransactionScript<TScript>()
                     .WaitForReply((script, data, state, context) => script.InitializeInput(null))
                     .Then(b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Input))
-                    .Then(bb => bb.Broadcast(InputForm.ModelSetter).WithPayload(m => m.Input).TunnelDown()));
+                    .Then(InvokeFormModelSetter));
             }
 
             presenter.On(Execute)
@@ -69,27 +104,61 @@ namespace NWheels.UI.Toolbox
                     onSuccess: b => b
                         .AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Output))
                         .Then(bb => bb.Broadcast(OutputReady).WithPayload(vm => vm.Input).BubbleUp()
-                        .Then(bbb => bbb.Broadcast(InputForm.StateResetter).TunnelDown()
+                        .Then(bbb => InvokeFormStateResetter(bbb)
                         .Then(bbbb => bbbb.UserAlertFrom<ITransactionUserAlerts>().ShowPopup((alerts, vm) => alerts.SuccessfullyCompleted())))),
                     onFailure: b => b
                         .Broadcast(OperationFailed).WithPayload(vm => vm.Input).BubbleUp()
                         .Then(bb => bb.UserAlertFrom<ITransactionUserAlerts>().ShowPopup((alerts, vm) => alerts.FailedToCompleteRequestedAction(), faultInfo: vm => vm.Input))
                 );
 
-            presenter.On(Reset)
-                .Broadcast(InputForm.StateResetter).TunnelDown();
+            if ( InputForm != null )
+            {
+                presenter.On(Reset).Broadcast(InputForm.StateResetter).TunnelDown();
+            }
+            else
+            {
+                presenter.On(Reset).Broadcast(InputFormTypeSelector.StateResetter).TunnelDown();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        #region Overrides of WidgetUidlNode
-
-        public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
+        private void ConfigureInputForm(IUidlForm form)
         {
-            return base.GetNestedWidgets().Concat(new WidgetUidlNode[] { InputForm });
+            form.UsePascalCase = true;
+            form.Commands.Add(Execute);
+            form.Commands.Add(Reset);
         }
 
-        #endregion
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void InvokeFormModelSetter(
+            PresenterBuilder<TransactionForm<TContext, TInput, TScript, TOutput>, Empty.Data, ITransactionFormState>.BehaviorBuilder<TInput> behaviorBuilder)
+        {
+            if ( InputForm != null )
+            {
+                behaviorBuilder.Broadcast(InputForm.ModelSetter).WithPayload(m => m.Input).TunnelDown();
+            }
+            else
+            {
+                behaviorBuilder.Broadcast(InputFormTypeSelector.ModelSetter).TunnelDown();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private PresenterBuilder<TransactionForm<TContext, TInput, TScript, TOutput>, Empty.Data, ITransactionFormState>.PromiseBuilder<TOutput> InvokeFormStateResetter(
+            PresenterBuilder<TransactionForm<TContext, TInput, TScript, TOutput>, Empty.Data, ITransactionFormState>.BehaviorBuilder<TOutput> behaviorBuilder)
+        {
+            if ( InputForm != null )
+            {
+                return behaviorBuilder.Broadcast(InputForm.StateResetter).TunnelDown();
+            }
+            else
+            {
+                return behaviorBuilder.Broadcast(InputFormTypeSelector.StateResetter).TunnelDown();
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

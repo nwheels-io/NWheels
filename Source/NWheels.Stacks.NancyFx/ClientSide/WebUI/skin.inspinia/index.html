@@ -882,7 +882,8 @@ HEAD, JS/CSS LINKS
                 <i ng-if="uidl.icon" class="fa fa-{{::uidl.icon}}"></i> {{::translate(uidl.text)}}
             </div>
             <div class="panel-body">
-                <uidl-widget uidl="uidl.inputForm" parent-model="model.state.input"></uidl-widget>
+                <uidl-widget ng-if="uidl.inputForm" uidl="uidl.inputForm" parent-model="model.state.input"></uidl-widget>
+                <uidl-widget ng-if="uidl.inputFormTypeSelector" uidl="uidl.inputFormTypeSelector" parent-model="model.state"></uidl-widget>
             </div>
         </div>
     </script>
@@ -1234,6 +1235,24 @@ HEAD, JS/CSS LINKS
         <div class="tabs-container">
             <ul class="nav nav-tabs">
                 <li ng-class="{active: selectedTabIndex===$index}" ng-repeat="selection in uidl.selections"><a ng-click="selectTabByIndex($index)">{{translate(selection.text)}}</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane" ng-repeat="selection in uidl.selections" ng-class="{active: selectedTabIndex===$index}">
+                    <div class="panel-body">
+                        <uidl-widget ng-if="selectedTabIndex===$index" uidl="selection.widget"></uidl-widget>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>	
+    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - TYPE SELECTOR WITH ACCORDION
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="uidl-element-template/TypeSelectorWithAccordion">
+        <div class="tabs-container">
+            <ul class="nav nav-tabs">
+                <li ng-class="{active: selectedTabIndex===$index}" ng-repeat="selection in uidl.selections"><a ng-click="selectTabByIndex($index);selectedTypeChanged(selection.typeName);">{{translate(selection.text)}}</a></li>
             </ul>
             <div class="tab-content">
                 <div class="tab-pane" ng-repeat="selection in uidl.selections" ng-class="{active: selectedTabIndex===$index}">

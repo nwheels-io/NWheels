@@ -1146,6 +1146,8 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     m_controllerImplementations['TypeSelector'] = {
         implement: function (scope) {
+            scope.parentModelProperty = toCamelCase(scope.uidl.parentModelProperty);
+            
             scope.selectedTypeChanged = function (type) {
                 scope.entityService.newDomainObject(type).then(function (newObj) {
                     scope.model = {
@@ -1160,7 +1162,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
                             scope.parentModel[scope.parentUidl.propertyName] = newObj;
                         } else {
                             // parent is CRUD
-                            scope.parentModel.entity = newObj;
+                            scope.parentModel[scope.parentModelProperty] = newObj;
                         }
                         scope.sendModelToSelectedWidget();
                     }
@@ -1181,7 +1183,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
                     scope.model.entity = scope.parentModel[scope.parentUidl.propertyName];
                 } else if (scope.parentModel) {
                     // parent is CRUD
-                    scope.model.entity = scope.parentModel.entity;
+                    scope.model.entity = scope.parentModel[scope.parentModelProperty];
                 }
 
                 if (scope.model.entity) {
@@ -1209,7 +1211,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
                         scope.parentModel[scope.parentUidl.propertyName] = data;
                     } else if (scope.parentModel) {
                         // parent is CRUD
-                        scope.parentModel.entity = data;
+                        scope.parentModel[scope.parentModelProperty] = data;
                     }
                     scope.parentModelReceived();
                     scope.sendModelToSelectedWidget();

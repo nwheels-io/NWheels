@@ -21,6 +21,7 @@ namespace NWheels.UI.Toolbox
             this.BaseMetaType = baseMetaType;
             this.BaseTypeName = baseMetaType.Name;
             this.Selections = availableConcreteTypes.Select(t => new Selection(t)).ToList();
+            this.ParentModelProperty = "Entity";
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -63,6 +64,26 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void ForEachWidget(Action<WidgetUidlNode> action)
+        {
+            foreach ( var widget in Selections.Select(s => s.Widget) )
+            {
+                action(widget);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void ForEachWidgetOfType<TWidget>(Action<TWidget> action)
+        {
+            foreach ( var widget in Selections.Select(s => s.Widget).OfType<TWidget>() )
+            {
+                action(widget);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void FilterByType(Type ancestor)
         {
             for ( var i = Selections.Count - 1 ; i >= 0 ; i-- )
@@ -88,12 +109,31 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void UseAccordionStyle()
+        {
+            this.TemplateName = "TypeSelectorWithAccordion";
+
+            if ( Selections.Count > 0 )
+            {
+                this.DefaultTypeName = Selections.First().TypeName;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public string BaseTypeName { get; set; }
         [DataMember, ManuallyAssigned]
         public List<Selection> Selections { get; set; }
         [DataMember]
         public string DefaultTypeName { get; set; }
+        [DataMember]
+        public string ParentModelProperty { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UidlNotification ModelSetter { get; set; }
+        public UidlNotification StateResetter { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

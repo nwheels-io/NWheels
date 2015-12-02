@@ -12,29 +12,51 @@ namespace NWheels.UI.Uidl
     {
         public static WidgetUidlNode CreateFormOrTypeSelector(ITypeMetadata metaType, string idName, ControlledUidlNode parent, bool isInline)
         {
-            var availableConcreteTypes = new[] { metaType }.Concat(metaType.DerivedTypes).Where(t => !t.IsAbstract).ToArray();
+            var availableConcreteTypes = GetAvailableConcreteTypes(metaType);
 
-            if ( availableConcreteTypes.Length == 1 && availableConcreteTypes[0] == metaType )
-            {
-                return CreateCrudForm(metaType, idName, parent, isInline);
-            }
-            else
+            if ( ShouldCreateFormTypeSelector(metaType, availableConcreteTypes) )
             {
                 return TypeSelector.Create(
                     idName + "Type",
                     parent,
                     metaType,
                     availableConcreteTypes,
-                    concreteType => CreateCrudForm(concreteType, idName, parent, isInline));
+                    concreteType => CreateForm(concreteType, idName, parent, isInline));
+            }
+            else
+            {
+                return CreateForm(metaType, idName, parent, isInline);
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static WidgetUidlNode CreateCrudForm(ITypeMetadata metaType, string idName, ControlledUidlNode parent, bool isInline)
+        public static bool ShouldCreateFormTypeSelector(ITypeMetadata metaType)
+        {
+            var availableConcreteTypes = GetAvailableConcreteTypes(metaType);
+            return ShouldCreateFormTypeSelector(metaType, availableConcreteTypes);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static WidgetUidlNode CreateForm(ITypeMetadata metaType, string idName, ControlledUidlNode parent, bool isInline)
         {
             var closedType = typeof(Form<>).MakeGenericType(metaType.ContractType);
             return (WidgetUidlNode)Activator.CreateInstance(closedType, idName + "<" + metaType.Name + ">", parent, isInline);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static ITypeMetadata[] GetAvailableConcreteTypes(ITypeMetadata metaType)
+        {
+            return new[] { metaType }.Concat(metaType.DerivedTypes).Where(t => !t.IsAbstract).ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static bool ShouldCreateFormTypeSelector(ITypeMetadata metaType, ITypeMetadata[] availableConcreteTypes)
+        {
+            return (availableConcreteTypes.Length != 1 || availableConcreteTypes[0] != metaType);
         }
     }
 }
