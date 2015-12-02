@@ -47,21 +47,21 @@ namespace NWheels.Authorization.Impl
 
         public void AuthorizeInsert(IAccessControlContext context, object entity)
         {
-            ValidateOrThrow("Insert", CanInsert(context));
+            ValidateOrThrow("Insert", CanInsert(context, entity));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AuthorizeUpdate(IAccessControlContext context, object entity)
         {
-            ValidateOrThrow("Update", CanUpdate(context));
+            ValidateOrThrow("Update", CanUpdate(context, entity));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void AuthorizeDelete(IAccessControlContext context, object entity)
         {
-            ValidateOrThrow("Delete", CanDelete(context));
+            ValidateOrThrow("Delete", CanDelete(context, entity));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -203,6 +203,17 @@ namespace NWheels.Authorization.Impl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ITypeMetadata MetaType { get; private set; }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of Object
+
+        public override string ToString()
+        {
+            return string.Join(System.Environment.NewLine, _sinks.Select(s => s.ToString()));
+        }
 
         #endregion
 
