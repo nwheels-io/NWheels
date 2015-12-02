@@ -25,6 +25,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using NWheels.Authorization.Core;
+using NWheels.Entities.Core;
 
 namespace NWheels.Stacks.AspNet
 {
@@ -306,6 +307,34 @@ namespace NWheels.Stacks.AspNet
             return ResponseMessage(new HttpResponseMessage() {
                 Content = new StringContent(json, Encoding.UTF8, "application/json")
             });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpGet, HttpPost]
+        [Route("entity/queryImage/{entityName}/{entityId}/{imageTypeProperty}/{imageContentProperty}")]
+        public IHttpActionResult QueryImage(string entityName, string entityId, string imageTypeProperty, string imageContentProperty)
+        {
+            if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
+
+            IDomainObject entity;
+            if ( !_context.EntityService.TryGetEntityObjectById(entityName, entityId, out entity) )
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
+
+            var imageType = (string)entity.GetType().GetProperty(imageTypeProperty).GetValue(entity);
+            var imageContents = (byte[])entity.GetType().GetProperty(imageContentProperty).GetValue(entity);
+
+            var response = new HttpResponseMessage() {
+                Content = new ByteArrayContent(imageContents)
+            };
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue("image/" + imageType);
+
+            return ResponseMessage(response);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

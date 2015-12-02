@@ -149,6 +149,14 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool TryGetEntityObjectById(string entityName, string entityId, out IDomainObject entity)
+        {
+            var handler = _handlerByEntityName[entityName];
+            return handler.TryGetById(entityId, out entity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string StoreEntityJson(string entityName, EntityState entityState, string entityId, string json)
         {
             var handler = _handlerByEntityName[entityName];
@@ -296,12 +304,12 @@ namespace NWheels.UI
         {
             var contracts = new List<Type>();  
 
-            if ( type.IsEntityContract() || type.IsEntityPartContract() || type.IsViewModelContract() )
+            if ( type.IsInterface && (type.IsEntityContract() || type.IsEntityPartContract() || type.IsViewModelContract()) )
             {
                 contracts.Add(type);
             }
 
-            contracts.AddRange(type.GetInterfaces().Where(intf => intf.IsEntityContract() || intf.IsEntityPartContract()));
+            contracts.AddRange(type.GetInterfaces().Where(intf => intf.IsEntityContract() || intf.IsEntityPartContract() || intf.IsViewModelContract()));
 
             return contracts.ToArray();
         }
@@ -701,6 +709,7 @@ namespace NWheels.UI
             public abstract QueryResults Query(QueryOptions options, IQueryable query = null);
             public abstract IEntityId ParseEntityId(string id);
             public abstract IDomainObject GetById(string id);
+            public abstract bool TryGetById(string id, out IDomainObject entity);
             public abstract IDomainObject CreateNew();
             public abstract void Insert(IDomainObject entity);
             public abstract void Update(IDomainObject entity);
@@ -887,22 +896,32 @@ namespace NWheels.UI
 
             public override IDomainObject GetById(string id)
             {
+                IDomainObject entity;
+
+                if ( TryGetById(id, out entity) )
+                {
+                    return entity;
+                }
+                
+                throw new ArgumentException("Specified entity does not exist.");
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool TryGetById(string id, out IDomainObject entity)
+            {
                 using ( var context = Framework.NewUnitOfWork<TContext>() )
                 {
                     var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
                     var idProperty = MetaType.PrimaryKey.Properties[0];
                     IQueryable<TEntity> query = repository.Where(idProperty.MakeBinaryExpression<TEntity>(
-                        valueString: id, 
+                        valueString: id,
                         binaryFactory: Expression.Equal));
-                    
+
                     var result = query.FirstOrDefault();
-
-                    if ( result == null )
-                    {
-                        throw new ArgumentException("Specified entity does not exist.");
-                    }
-
-                    return result as IDomainObject;
+                    
+                    entity = result as IDomainObject;
+                    return (entity != null);
                 }
             }
 
