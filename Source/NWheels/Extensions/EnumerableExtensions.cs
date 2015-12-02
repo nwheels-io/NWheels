@@ -24,6 +24,13 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static IEnumerable<T> Concat<T>(this IEnumerable<T> first, params T[] second)
+        {
+            return first.Concat((IEnumerable<T>)second);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static IEnumerable<T> ConcatOne<T>(this IEnumerable<T> first, T second)
         {
             return first.Concat(new T[] { second });

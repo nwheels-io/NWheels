@@ -48,12 +48,18 @@ namespace NWheels.UI.Toolbox
         public Form<TEntity> Field(
             Expression<Func<TEntity, object>> propertySelector,
             FormFieldType type = FormFieldType.Default,
-            FormFieldModifiers modifiers = FormFieldModifiers.None)
+            FormFieldModifiers modifiers = FormFieldModifiers.None,
+            Action<FormField> setup = null)
         {
             var field = new FormField(propertySelector.GetPropertyInfo().Name) {
                 FieldType = type,
                 Modifiers = modifiers
             };
+
+            if ( setup != null )
+            {
+                setup(field);
+            }
 
             Fields.Add(field);
             return this;
@@ -199,9 +205,11 @@ namespace NWheels.UI.Toolbox
             }
 
             fieldsToAdd = fieldsToAdd.Where(f => !_hiddenFields.Contains(f)).ToList();
-            fieldsToAdd = fieldsToAdd.Where(f => !Fields.Select(p => p.PropertyName).Contains(f)).ToList();
 
-            Fields.AddRange(fieldsToAdd.Select(f => new FormField(f)));
+            var preConfiguredFields = Fields;
+            Fields = new List<FormField>();
+            Fields.AddRange(fieldsToAdd.Select(f => preConfiguredFields.FirstOrDefault(pf => pf.PropertyName == f) ?? new FormField(f)));
+            Fields.AddRange(preConfiguredFields.Where(pf => !Fields.Any(f => f.PropertyName == pf.PropertyName)));
 
             foreach ( var field in Fields )
             {
@@ -279,6 +287,10 @@ namespace NWheels.UI.Toolbox
         public string LookupValueProperty { get; set; }
         [DataMember]
         public string LookupDisplayProperty { get; set; }
+        [DataMember]
+        public string ImageTypeProperty { get; set; }
+        [DataMember]
+        public string ImageContentProperty { get; set; }
         [DataMember]
         public bool ApplyDistinctToLookup { get; set; }
         [DataMember]
@@ -539,6 +551,7 @@ namespace NWheels.UI.Toolbox
         Default,
         Label,
         Edit,
+        ImageUpload,
         Lookup,
         LookupMany,
         InlineGrid,

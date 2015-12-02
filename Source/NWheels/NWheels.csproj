@@ -127,6 +127,7 @@
     <Compile Include="Core\ICoreFramework.cs" />
     <Compile Include="Core\UnitOfWorkFactory.cs" />
     <Compile Include="Endpoints\Core\IEndpoint.cs" />
+    <Compile Include="Endpoints\FrameworkSoapNames.cs" />
     <Compile Include="Entities\Core\IDomainContextLogger.cs" />
     <Compile Include="Endpoints\INetworkEndpointTransport.cs" />
     <Compile Include="Endpoints\IAbstractNetwrokTransportConfig.cs" />
@@ -143,6 +144,7 @@
     <Compile Include="Entities\Core\SuppressedEntityDefaultIdRegistration.cs" />
     <Compile Include="Extensions\UriExtensions.cs" />
     <Compile Include="Hosting\EnvironmentConfiguration.cs" />
+    <Compile Include="Logging\Core\IApplicationEventExplorerService.cs" />
     <Compile Include="Logging\Impl\ThreadCpuTimeUtility.cs" />
     <Compile Include="Processing\Commands\CommandResultMessage.cs" />
     <Compile Include="Processing\Commands\Factories\IMethodCallObjectFactory.cs" />
@@ -310,6 +312,7 @@
     <Compile Include="UI\Toolbox\LookupGrid.cs" />
     <Compile Include="UI\Toolbox\Report.cs" />
     <Compile Include="UI\Toolbox\ReportSelector.cs" />
+    <Compile Include="UI\Toolbox\TransactionForm.cs" />
     <Compile Include="UI\Toolbox\WidgetScreenPart.cs" />
     <Compile Include="UI\Toolbox\CrudScreenPart.cs" />
     <Compile Include="UI\Toolbox\Dashboard.cs" />

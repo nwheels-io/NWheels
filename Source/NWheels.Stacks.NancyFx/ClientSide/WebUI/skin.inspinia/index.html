@@ -874,6 +874,20 @@ HEAD, JS/CSS LINKS
     </script>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - TRANSACTION FORM
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="uidl-element-template/TransactionForm">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <i ng-if="uidl.icon" class="fa fa-{{::uidl.icon}}"></i> {{::translate(uidl.text)}}
+            </div>
+            <div class="panel-body">
+                <uidl-widget uidl="uidl.inputForm" parent-model="model.state.input"></uidl-widget>
+            </div>
+        </div>
+    </script>
+    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Form">
@@ -926,6 +940,29 @@ HEAD, JS/CSS LINKS
                             style="margin-right:5px;"
                             ng-disabled="commandInProgress"
                             ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy'}"
+                            ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                </div>
+            </div>
+        </form>
+    </script>
+    <script type="text/ng-template" id="uidl-element-template/FormBigFrontEnd">
+        <form class="form-horizontal" id="{{::uidl.elementName}}">
+            <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
+            <div class="form-group" ng-repeat-start="field in plainFields" style="margin-bottom:0">
+                <label class="control-label col-sm-4"
+                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.propertyName, { upperCase: true })}}</label>
+                <div class="col-sm-8"><uidl-form-field parent-uidl="uidl" uidl="field" entity="model.data.entity" /></div>
+            </div>
+            <div ng-repeat-end ng-show="!$last" class="hr-line-dashed"></div>
+            <!-- COMMAND BUTTONS -->
+            <div ng-if="uidl.commands.length" class="form-group">
+                <div class="col-sm-8 col-sm-offset-4">
+                    <button ng-repeat="command in uidl.commands"
+                            type="button"
+                            class="btn"
+                            style="margin-right: 5px;"
+                            ng-disabled="commandInProgress"
+                            ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy', 'btn-white':command.severity=='None'}"
                             ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                 </div>
             </div>

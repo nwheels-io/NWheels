@@ -152,7 +152,18 @@ namespace NWheels.Extensions
 
         public static bool IsViewModelContract(this Type contract)
         {
-            return (contract.IsInterface && contract.HasAttribute<ViewModelContractAttribute>());
+            if ( contract.IsInterface )
+            {
+                return contract.HasAttribute<ViewModelContractAttribute>();
+            }
+            else if ( contract.IsClass )
+            {
+                return contract.GetInterfaces().Any(IsViewModelContract);
+            }
+            else
+            {
+                return false;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

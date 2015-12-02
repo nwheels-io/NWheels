@@ -682,7 +682,7 @@ namespace NWheels.UI
 
             public BroadcastBehaviorBuilder4<TInput> WithPayload(Expression<Func<ViewModel<TData, TState, TInput>, TPayload>> payloadSelector)
             {
-                _behavior.PayloadExpression = payloadSelector.ToString();
+                _behavior.PayloadExpression = (payloadSelector != null ? payloadSelector.ToString() : "null");
                 return new BroadcastBehaviorBuilder4<TInput>(_ownerNode, _behavior, _uidl);
             }
         }

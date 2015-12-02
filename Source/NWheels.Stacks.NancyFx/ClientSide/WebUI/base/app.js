@@ -156,15 +156,20 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    function translate(stringId) {
+    function translate(stringId, options) {
         if (!stringId) {
             return '';
         }
-        var localizedString = getCurrentLocale().translations[toCamelCase(stringId)];
-        if (localizedString) {
-            return localizedString;
+        var localizedString = getCurrentLocale().translations[toCamelCase(stringId)] || stringId;
+        //if (localizedString) {
+        //    return localizedString;
+        //}
+        
+        if (options && options.upperCase === true) {
+            localizedString = localizedString.toUpperCase();
         }
-        return stringId;
+        
+        return localizedString;
     }
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -1396,6 +1401,8 @@ function (uidlService, entityService, commandService, $timeout, $http, $compile,
                     if (typeof initFunc === 'function') {
                         initFunc($scope);
                     }
+            
+                    $scope.$emit($scope.uidl.qualifiedName + ':Loaded');
                 }
             });
             if ($scope.controllerInitCount) {
