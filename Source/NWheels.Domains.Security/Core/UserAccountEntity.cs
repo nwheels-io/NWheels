@@ -172,11 +172,20 @@ namespace NWheels.Domains.Security.Core
         public abstract string EmailAddress { get; set; }
         public abstract DateTime? EmailVerifiedAtUtc { get; set; }
         public abstract ICollection<IPasswordEntityPart> Passwords { get; protected set; }
+        public abstract DateTime CreatedAtUtc { get; set; }
         public abstract DateTime? LastLoginAtUtc { get; set; }
         public abstract int FailedLoginCount { get; set; }
         public abstract bool IsLockedOut { get; set; }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [EntityImplementation.TriggerOnNew]
+        protected virtual void EntityTriggerAfterNew()
+        {
+            this.CreatedAtUtc = Framework.UtcNow;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

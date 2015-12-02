@@ -18,8 +18,9 @@ namespace NWheels.Domains.Security
         IEntityRepository<IUserRoleEntity> UserRoles { get; }
         IEntityRepository<IOperationPermissionEntity> OperationPermissions { get; }
         IEntityRepository<IEntityAccessRuleEntity> EntityAccessRules { get; }
-        IPasswordEntityPart NewPassword(string clearText);
+        IEntityRepository<IProfilePhotoEntity> ProfilePhotos { get; }
 
+        IPasswordEntityPart NewPassword(string clearText);
         IAllowAllEntityAccessRuleEntity NewAllowAllEntityAccessRule();
     }
 
@@ -40,6 +41,8 @@ namespace NWheels.Domains.Security
         [PropertyContract.Required, PropertyContract.Validation.Length(min: 2, max: 100)]
         string FullName { get; set; }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [/*PropertyContract.Required, */PropertyContract.Semantic.EmailAddress]
         string EmailAddress { get; set; }
 
@@ -52,6 +55,11 @@ namespace NWheels.Domains.Security
 
         [PropertyContract.Required, PropertyContract.Relation.Composition]
         ICollection<IPasswordEntityPart> Passwords { get; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.ReadOnly]
+        DateTime CreatedAtUtc { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -270,5 +278,26 @@ namespace NWheels.Domains.Security
 
         [PropertyContract.Required]
         IUserAccountEntity ModifiedBy { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityPartContract]
+    public interface IEntityPartUserAccountProfilePhoto
+    {
+        [PropertyContract.Relation.Composition, PropertyContract.Storage.EmbeddedInParent(false)]
+        IProfilePhotoEntity ProfilePhoto { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityContract]
+    public interface IProfilePhotoEntity
+    {
+        [PropertyContract.Semantic.Upload]
+        byte[] ImageContents { get; set; }
+        string ImageType { get; set; }
+        int PixelWidth { get; set; }
+        int PixelHeight { get; set; }
     }
 }
