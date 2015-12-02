@@ -108,10 +108,10 @@ namespace NWheels.Utilities
             {
                 return defaultValue;
             }
-            T val;
-            if (TryParse<T>(s, out val))
+            T parsedValue;
+            if (TryParse<T>(s, out parsedValue))
             {
-                return val;
+                return parsedValue;
             }
             return defaultValue;
         }
