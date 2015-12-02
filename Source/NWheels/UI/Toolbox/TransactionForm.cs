@@ -63,12 +63,18 @@ namespace NWheels.UI.Toolbox
             }
 
             presenter.On(Execute)
-                .InvokeTransactionScript<TScript>(queryAsEntityType: typeof(TOutput))
+                .InvokeTransactionScript<TScript>()
                 .WaitForReply((script, data, state, input) => script.Execute(state.Input))
-                .Then(b => b.AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Output))
-                .Then(bb => bb.Broadcast(OutputReady).WithPayload(vm => vm.Input).BubbleUp()
-                .Then(bbb => bbb.Broadcast(InputForm.StateResetter).TunnelDown()
-                .Then(bbbb => bbbb.UserAlertFrom<ITransactionUserAlerts>().ShowPopup((alerts, vm) => alerts.SuccessfullyCompleted())))));
+                .Then(
+                    onSuccess: b => b
+                        .AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Output))
+                        .Then(bb => bb.Broadcast(OutputReady).WithPayload(vm => vm.Input).BubbleUp()
+                        .Then(bbb => bbb.Broadcast(InputForm.StateResetter).TunnelDown()
+                        .Then(bbbb => bbbb.UserAlertFrom<ITransactionUserAlerts>().ShowPopup((alerts, vm) => alerts.SuccessfullyCompleted())))),
+                    onFailure: b => b
+                        .Broadcast(OperationFailed).WithPayload(vm => vm.Input).BubbleUp()
+                        .Then(bb => bb.UserAlertFrom<ITransactionUserAlerts>().ShowPopup((alerts, vm) => alerts.FailedToCompleteRequestedAction(), faultInfo: vm => vm.Input))
+                );
 
             presenter.On(Reset)
                 .Broadcast(InputForm.StateResetter).TunnelDown();
