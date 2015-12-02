@@ -473,7 +473,7 @@ HEAD, JS/CSS LINKS
         </table>
     </script>
 
-        <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - SCREEN PART CONTAINER
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/ScreenPartContainer">
@@ -1087,6 +1087,19 @@ HEAD, JS/CSS LINKS
                     name="{{::uniqueFieldId}}">
                 <!--option value="">All</option-->
             </select>
+            <!-- IMAGE UPLOAD -->
+            <div ng-if="uidl.fieldType==='ImageUpload'" class="col-sm-3">
+                <img ng-src="entity/queryImage/ProfilePhoto/{{::entity[uidl.propertyName]}}/ImageType/ImageContents" class="img-circle circle-border m-b-md" alt="profile">                
+            </div>
+            <div ng-if="uidl.fieldType==='ImageUpload'" class="col-sm-5">
+                <div class="dropzone-previews"></div>
+                <div class="dz-default dz-message">
+                    <span>Drop photo image file here to upload</span>
+                </div>
+            </div>
+            <div ng-if="uidl.fieldType==='ImageUpload'" class="col-sm-5">
+                <button type="submit" class="btn btn-primary pull-right" disabled="">Use New Photo</button>
+            </div>
         </div>
     </script>
     <script type="text/javascript">
