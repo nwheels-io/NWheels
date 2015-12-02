@@ -58,21 +58,21 @@ namespace NWheels.Utilities
 
         public static T Parse<T>(string s)
         {
-            if ( typeof(T).IsEnum )
+            if (typeof(T).IsEnum)
             {
                 return (T)Enum.Parse(typeof(T), s, ignoreCase: true);
             }
 
             Delegate parser;
 
-            if ( s_ParsersByType.TryGetValue(typeof(T), out parser) )
+            if (s_ParsersByType.TryGetValue(typeof(T), out parser))
             {
                 return ((Func<string, T>)parser)(s);
             }
 
-            if ( typeof(T).IsNullableValueType() )
+            if (typeof(T).IsNullableValueType())
             {
-                if ( string.IsNullOrEmpty(s) )
+                if (string.IsNullOrEmpty(s))
                 {
                     return default(T);
                 }
@@ -94,20 +94,35 @@ namespace NWheels.Utilities
                 value = Parse<T>(s);
                 return true;
             }
-            catch ( Exception )
+            catch (Exception)
             {
                 value = default(T);
                 return false;
             }
+        }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static T ParseOrDefault<T>(string s, T defaultValue = default(T))
+        {
+            if ( string.IsNullOrEmpty(s) )
+            {
+                return defaultValue;
+            }
+            T val;
+            if (TryParse<T>(s, out val))
+            {
+                return val;
+            }
+            return defaultValue;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static object Parse(string s, Type asType)
         {
-            if ( asType.IsNullableValueType() )
+            if (asType.IsNullableValueType())
             {
-                if ( string.IsNullOrEmpty(s) )
+                if (string.IsNullOrEmpty(s))
                 {
                     return GetNullableNullValue(asType);
                 }
@@ -117,7 +132,7 @@ namespace NWheels.Utilities
                 }
             }
 
-            if ( asType.IsEnum )
+            if (asType.IsEnum)
             {
                 return Enum.Parse(asType, s, ignoreCase: true);
             }
@@ -138,7 +153,7 @@ namespace NWheels.Utilities
                 value = Parse(s, asType);
                 return true;
             }
-            catch ( Exception )
+            catch (Exception)
             {
                 return false;
             }
@@ -148,14 +163,14 @@ namespace NWheels.Utilities
 
         public static DateTime TryParse(string s, DateTime defaultValue)
         {
-            if ( string.IsNullOrEmpty(s) )
+            if (string.IsNullOrEmpty(s))
             {
                 return defaultValue;
             }
 
             DateTime value;
-            
-            if ( DateTime.TryParse(s, out value) )
+
+            if (DateTime.TryParse(s, out value))
             {
                 return value;
             }
@@ -166,12 +181,12 @@ namespace NWheels.Utilities
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
+
         private static object GetNullableNullValue(Type asType)
         {
             object nullValue;
 
-            if ( s_NullableNullValues.TryGetValue(asType.UnderlyingSystemType, out nullValue) )
+            if (s_NullableNullValues.TryGetValue(asType.UnderlyingSystemType, out nullValue))
             {
                 return nullValue;
             }
