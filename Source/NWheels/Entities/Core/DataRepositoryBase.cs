@@ -295,7 +295,7 @@ namespace NWheels.Entities.Core
 
         public IQueryable<TEntity> AuthorizeQuery<TEntity>(IQueryable<TEntity> source)
         {
-            var accessControl = GetEntityAccessControl<TEntity>();
+            var accessControl = GetEntityAccessControl(typeof(TEntity));
             accessControl.AuthorizeRetrieve(this);
             return (IQueryable<TEntity>)accessControl.AuthorizeQuery(this, source);
         }
@@ -304,7 +304,7 @@ namespace NWheels.Entities.Core
 
         public bool CanRetrieve<TEntity>(object entity)
         {
-            var accessControl = GetEntityAccessControl<TEntity>();
+            var accessControl = GetEntityAccessControl<TEntity>(entity);
             var authorized = accessControl.CanRetrieve(this, entity);
             return (authorized == true);
         }
@@ -313,7 +313,7 @@ namespace NWheels.Entities.Core
 
         public void AuthorizeNew<TEntity>()
         {
-            var accessControl = GetEntityAccessControl<TEntity>();
+            var accessControl = GetEntityAccessControl(typeof(TEntity));
             
             if ( accessControl.CanInsert(this) != true )
             {
@@ -326,7 +326,7 @@ namespace NWheels.Entities.Core
 
         public void AuthorizeInsert<TEntity>(object entity)
         {
-            var accessControl = GetEntityAccessControl<TEntity>();
+            var accessControl = GetEntityAccessControl<TEntity>(entity);
             accessControl.AuthorizeInsert(this, entity);
         }
 
@@ -334,7 +334,7 @@ namespace NWheels.Entities.Core
 
         public void AuthorizeUpdate<TEntity>(object entity)
         {
-            var accessControl = GetEntityAccessControl<TEntity>();
+            var accessControl = GetEntityAccessControl<TEntity>(entity);
             accessControl.AuthorizeUpdate(this, entity);
         }
 
@@ -342,13 +342,32 @@ namespace NWheels.Entities.Core
 
         public void AuthorizeDelete<TEntity>(object entity)
         {
-            var accessControl = GetEntityAccessControl<TEntity>();
+            var accessControl = GetEntityAccessControl<TEntity>(entity);
             accessControl.AuthorizeDelete(this, entity);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEntityAccessControl GetEntityAccessControl<TEntity>()
+        public IEntityAccessControl GetEntityAccessControl<TEntity>(object entity)
+        {
+            var asIObject = entity as IObject;
+            IEntityAccessControl accessControl;
+
+            if ( asIObject != null )
+            {
+                accessControl = GetEntityAccessControl(asIObject.ContractType);
+            }
+            else
+            {
+                accessControl = GetEntityAccessControl(typeof(TEntity));
+            }
+
+            return accessControl;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEntityAccessControl GetEntityAccessControl(Type entityContract)
         {
             var identityInfo = (Thread.CurrentPrincipal.Identity as IIdentityInfo);
 
@@ -364,11 +383,11 @@ namespace NWheels.Entities.Core
                 throw new SecurityException("No access controls defined for current user.");
             }
 
-            var entityAccessControl = accessControlList.GetEntityAccessControl(typeof(TEntity));
+            var entityAccessControl = accessControlList.GetEntityAccessControl(entityContract);
 
             if ( entityAccessControl == null )
             {
-                throw new SecurityException("No access controls defined for entity type: " + typeof(TEntity).FullName);
+                throw new SecurityException("No access controls defined for entity type: " + entityContract.FullName);
             }
 
             return entityAccessControl;
