@@ -21,7 +21,18 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UidlNotification<ChartData> DataReceived { get; set; }
+        public void BindToModelSetter<TModel>(UidlNotification<TModel> modelSetter, Expression<Func<TModel, ChartData>> dataProperty)
+        {
+            ModelSetterQualifiedName = modelSetter.QualifiedName;
+            DataExpression = dataProperty.ToNormalizedNavigationString(false, "input").TrimLead("input.");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public string DataExpression { get; set; }
+        [DataMember]
+        public string ModelSetterQualifiedName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -70,6 +81,9 @@ namespace NWheels.UI.Toolbox
 
             [DataMember]
             public string Value { get; set; }
+
+            [DataMember]
+            public int? Percent { get; set; }
         }
     }
 }

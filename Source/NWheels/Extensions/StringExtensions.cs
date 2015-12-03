@@ -113,7 +113,7 @@ namespace NWheels.Extensions
 
             for ( int i = 0 ; i < s.Length ; i++ )
             {
-                if ( i > 0 && char.IsUpper(s[i]) )
+                if ( i > 0 && (char.IsUpper(s[i]) || char.IsDigit(s[i]) != char.IsDigit(s[i-1])) )
                 {
                     output.Append(delimiter);
                     output.Append(char.ToLower(s[i]));

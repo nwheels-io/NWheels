@@ -109,6 +109,13 @@ HEAD, JS/CSS LINKS
             top: -10px;
             right: -30px;
         }    
+        .ibox-title h2 {
+            display: inline-block;
+            margin: 0 0 7px;
+            padding: 0;
+            text-overflow: ellipsis;
+            float: left;
+        }
     </style>
 </head>
 
@@ -241,8 +248,8 @@ HEAD, JS/CSS LINKS
                     </div>
                     <button class="btn btn-primary block full-width m-b" ng-click="invokeCommand('ChangePassword')">Change Password</button>
                 </form>
-                <p class="m-t"> <small>Powered by BitWize</small> </p>
             </div>                
+                <p class="m-t"> <small>Powered by BitWize</small> </p>
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
         </div>
     </script>
@@ -493,15 +500,28 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Gauge">
         <div class="ibox float-e-margins">
-            <div class="ibox-title">
-                <span class="label label-success pull-right">{{translate(uidl.badgeText)}}</span>
-                <h5>{{translate(uidl.text)}}</h5>
+            <div class="ibox-title" style="border-color: #1C84C6;">
+                <span class="label label-success pull-right"></span>
+                <h3>{{::translate(uidl.text)}}</h3>
             </div>
-            <div class="ibox-content">
-                <h1 class="no-margins">{{model.state.data[uidl.valueDataProperty] | number}}</h1>
-                <!--div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div-->
-                <small>{{translate(uidl.values[0].label)}}</small>
+            <div ng-repeat="value in model.state.values" class="ibox-content text-right">
+                <h3 ng-if="$first" class="pull-left">
+                    <!--span class="label label-success">{{::translate(value.title)}}</span-->
+                    <span ng-if="value.alertType" class="label label-warning"><i class="fa fa-warning"></i>&nbsp;{{::translate(value.alertText)}}</span>
+                </h3>
+                <h1 ng-if="$first" class="no-margins">{{::value.value}}</h1>
+                <!--span ng-if="!$first" class="label label-success pull-left">{{::translate(value.title)}}</span-->
+                <h3 ng-if="!$first" class="no-margins">{{::value.value}}</h3>
+                <small>{{::translate(value.title)}}</small>
             </div>
+            <!--div class="ibox-content text-right">
+                <span class="label label-success pull-left">Last 7 days</span>
+                <h3 class="no-margins">234,567</h3>
+            </div>
+            <div class="ibox-content text-right">
+                <span class="label label-success pull-left">This month</span>
+                <h3 class="no-margins">1,234,567</h3>
+            </div-->
         </div>
     </script>
     
@@ -1138,28 +1158,34 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Chart">
         <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <h2>
+                    {{::translate(uidl.text)}}
+                </h2>
+                <div class="ibox-tools">
+                    <div class="btn-group">
+                        <button ng-repeat="command in uidl.commands" ng-click="$emit(command.qualifiedName + ':Executing')" class="btn btn-primary" type="button">{{::translate(command.text)}}</button>
+                    </div>                
+                    <a class="collapse-link">
+                        <i class="fa fa-chevron-up"></i>
+                    </a>
+                </div>                
+            </div>
             <div class="ibox-content">
-                <div>
-                    <h3 class="font-bold no-margins">
-                        Current Revenue
-                    </h3>
-                    <small>Sales marketing.</small>
-                </div>
-
                 <div class="m-t-sm">
                     <div class="row" ng-controller="chartJsController">
-                        <div class="col-md-8">
+                        <div class="col-md-10">
                             <div>
-                                <canvas id="{{uidl.qualifiedName}}_context" height="114"></canvas>
+                                <canvas id="{{uidl.qualifiedName}}_context" width="1000" "height="200"></canvas>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-2">
                             <ul class="stat-list m-t-lg">
                                 <li ng-repeat="sum in lineData.summaries">
-                                    <h2 class="no-margins">{{ sum.value | currency}}</h2>
-                                    <small>{{ sum.label }}</small>
-                                    <div class="progress progress-mini">
-                                        <div class="progress-bar" style="width: 48%;"></div>
+                                    <h1 class="no-margins">{{::sum.Value}}</h1>
+                                    <small>{{::translate(sum.Label)}}</small>
+                                    <div ng-if="sum.Percent" class="progress progress-mini">
+                                        <div class="progress-bar" style="width: {{::sum.Percent}}%;"></div>
                                     </div>
                                 </li>
                                 <li>
@@ -1171,7 +1197,7 @@ HEAD, JS/CSS LINKS
                                                         <div style="width:4px;height:0;border:5px solid {{ legend.fillColor }};overflow:hidden"></div>
                                                     </div>
                                                 </td>
-                                                <td class="legendLabel">{{ legend.label }}</td>
+                                                <td class="legendLabel">{{::translate(legend.label)}}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -1180,17 +1206,15 @@ HEAD, JS/CSS LINKS
                         </div>
                     </div>
                 </div>
-
-                <div class="m-t-md">
+                <!--div class="m-t-md">
                     <small class="pull-right">
                         <i class="fa fa-clock-o"> </i>
-                        <!--Update on 16.07.2015-->
+                        Update on 16.07.2015
                     </small>
                     <small>
-                        <!--<strong>Analysis of sales:</strong> The value has been changed over time, and last month reached a level over $50,000.-->
+                        <strong>Analysis of sales:</strong> The value has been changed over time, and last month reached a level over $50,000.
                     </small>
-                </div>
-
+                </div-->
             </div>
         </div>
     </script>
@@ -1267,19 +1291,6 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
         </div>
-
-        <!--div class="tabs-container">
-            <ul class="nav nav-tabs">
-                <li ng-class="{active: selectedTabIndex===$index}" ng-repeat="selection in uidl.selections"><a ng-click="selectTabByIndex($index);selectedTypeChanged(selection.typeName);">{{translate(selection.text)}}</a></li>
-            </ul>
-            <div class="tab-content">
-                <div class="tab-pane" ng-repeat="selection in uidl.selections" ng-class="{active: selectedTabIndex===$index}">
-                    <div class="panel-body">
-                        <uidl-widget ng-if="selectedTabIndex===$index" uidl="selection.widget"></uidl-widget>
-                    </div>
-                </div>
-            </div>
-        </div-->
     </script>	
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1334,18 +1345,10 @@ HEAD, JS/CSS LINKS
                 <uidl-widget uidl="widget"></uidl-widget>
             </div>
         </div>
-        <div class="row">
-            <div class="col-lg-8" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType=='Chart'" style="vertical-align:top;">
+        <div class="row" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType=='Chart'">
+            <div class="col-lg-12" style="vertical-align:top;">
                 <uidl-widget uidl="widget"></uidl-widget>
             </div>
-            <div class="col-lg-4" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType=='Chat'" style="vertical-align:top;">
-                <uidl-widget uidl="widget"></uidl-widget>
-            </div>
-        </div>
-        <div class="row">
-            <!--div class="col-lg-12" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType=='Report'" style="vertical-align:top;">
-                <uidl-widget uidl="widget"></uidl-widget>
-            </div-->
         </div>
     </script>
     

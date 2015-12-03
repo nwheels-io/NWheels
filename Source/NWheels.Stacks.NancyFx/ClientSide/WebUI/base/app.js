@@ -293,15 +293,26 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
     function getApp() {
         return m_app;
     }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     function getCurrentScreen() {
         return m_currentScreen;
     }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     function getCurrentLocale() {
         return m_uidl.locales['en-US'];
     }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     function getMetaType(name) {
         return m_uidl.metaTypes[toCamelCase(name)];
     }
+
+    //-----------------------------------------------------------------------------------------------------------------
 
 	function getRelatedMetaType(entityName, propertyName) {
         var fromMetaType = m_uidl.metaTypes[toCamelCase(entityName)];
@@ -314,6 +325,8 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 			return null;
 		}
 	};
+
+    //-----------------------------------------------------------------------------------------------------------------
 
     function loadTemplateById(templateId) {
         var fullTemplateId = 'uidl-element-template/' + templateId;
@@ -339,6 +352,13 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
     }
 
     //-----------------------------------------------------------------------------------------------------------------
+
+    function selectValue(context, expression) {
+        return Enumerable.Return(context).Select('ctx=>ctx.' + expression).Single();
+    };
+    
+    //-----------------------------------------------------------------------------------------------------------------
+    
     /*
         function takeMessagesFromServer() {
             $http.post('takeMessages').then(
@@ -652,11 +672,8 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
 	m_controllerImplementations['Chart'] = {
         implement: function(scope) {
-			$timeout(function() {
-				scope.$emit(scope.uidl.qualifiedName + ':RequestingData');
-			});
-			scope.$on(scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
-			    scope.model.state.data = data;
+			scope.$on(scope.uidl.modelSetterQualifiedName, function (event, data) {
+			    scope.model.state.data = scope.uidlService.selectValue(data, scope.uidl.dataExpression);
 			});
         }
     };
@@ -665,6 +682,25 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     m_controllerImplementations['Gauge'] = {
         implement: function (scope) {
+			scope.$on(scope.uidl.modelSetterQualifiedName, function (event, data) {
+                var valueContext = {
+                    input: data
+                };
+                var gaugeValues = [];
+                
+                for(var i = 0; i < scope.uidl.values.length; i++) {
+                    var valueUidl = scope.uidl.values[i];
+                    gaugeValues.push({
+                        title: valueUidl.title,
+                        value: scope.uidlService.selectValue(valueContext, valueUidl.valueProperty),
+                        alertType: valueUidl.alertType,
+                        alertText: valueUidl.alertText
+                    });
+                }
+                
+                scope.model.state.values = gaugeValues;
+			});
+
             scope.$on(scope.uidl.updateSourceQualifiedName, function(event, data) {
                 scope.model.state.data = data;
             });
@@ -1249,7 +1285,8 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
         //takeMessagesFromServer: takeMessagesFromServer,
         implementController: implementController,
         translate: translate,
-        loadTemplateById: loadTemplateById
+        loadTemplateById: loadTemplateById,
+        selectValue: selectValue
     };
 
 }]);

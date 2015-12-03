@@ -2,7 +2,11 @@ theApp.controller('chartJsController',
 ['$http', '$scope', '$rootScope', 'uidlService', '$timeout',
 function ($http, $scope, $rootScope, uidlService, $timeout) {
 	
-	$scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, newValue) {
+	$scope.$watch('model.state.data', function (newValue, oldValue) {
+        if (!newValue) {
+            return;
+        }
+        
 		var chartStyles = [
 			{
 				fillColor: "rgba(220,220,220,0.5)",
@@ -32,16 +36,15 @@ function ($http, $scope, $rootScope, uidlService, $timeout) {
 			chartData.datasets.push(chartStyles[i]);
 			chartData.datasets[i].label = newValue.Series[i].Label;
 			chartData.datasets[i].data = newValue.Series[i].Values;
-			
 		}
 
-		for (var i=0; i<newValue.Summaries.length; i++){
-			chartData.summaries.push(newValue.Summaries[i]);
-		}
+        if (newValue.Summaries) {
+            for (var i=0; i<newValue.Summaries.length; i++){
+                chartData.summaries.push(newValue.Summaries[i]);
+            }
+        }
 
-		
 		$scope.lineData = chartData;
-	
 			
 		$scope.lineOptions = {
 			scaleShowGridLines: true,
@@ -68,7 +71,4 @@ function ($http, $scope, $rootScope, uidlService, $timeout) {
 
         $scope.drawChart();
 	});
-
-
-			
 }]);

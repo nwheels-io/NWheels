@@ -23,6 +23,13 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void AddCommands(params UidlCommand[] commands)
+        {
+            this.Commands.AddRange(commands);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public List<UidlCommand> Commands { get; set; } 
         [DataMember]

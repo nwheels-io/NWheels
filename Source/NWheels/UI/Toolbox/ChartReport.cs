@@ -43,17 +43,19 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlCommand ShowReport { get; set; }
+        public UidlNotification<ChartData> DataReceived { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void DescribePresenter(PresenterBuilder<ChartReport<TCriteria, TScript>, Empty.Data, IReportState> presenter)
         {
             CriteriaForm.Commands.Add(ShowReport);
+            ResultChart.BindToModelSetter(DataReceived, x => x);
 
             presenter.On(ShowReport)
                 .InvokeTransactionScript<TScript>()
                 .WaitForReply(_onExecuteCall)
-                .Then(b => b.Broadcast(ResultChart.DataReceived).WithPayload(m => m.Input).TunnelDown());
+                .Then(b => b.Broadcast(DataReceived).WithPayload(m => m.Input).TunnelDown());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
