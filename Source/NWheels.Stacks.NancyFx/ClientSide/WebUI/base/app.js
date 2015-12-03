@@ -1155,6 +1155,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
                     };
 
                     scope.selectedType = newObj['$type'];
+                    scope.selectTabByType(scope.selectedType);
 
                     if (scope.parentModel) {
                         if (scope.parentUidl) {
@@ -1188,14 +1189,22 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
                 if (scope.model.entity) {
                     scope.selectedType = scope.model.entity['$type'];
+                    scope.selectTabByType(scope.selectedType);
                 }
             };
             
             scope.selectTabByIndex = function(index) {
-                scope.selectedTabIndex = index;
-                scope.$emit(scope.uidl.qualifiedName + ':SelectionChanged', scope.uidl.selections[index]);
+                if (index !== scope.selectedTabIndex) {
+                    scope.selectedTabIndex = index;
+                    scope.$emit(scope.uidl.qualifiedName + ':SelectionChanged', scope.uidl.selections[index]);
+                }
             }
 
+            scope.selectTabByType = function(typeName) {
+                var newTabIndex = Enumerable.From(scope.uidl.selections).Select('sel=>sel.typeName').IndexOf(typeName);
+                scope.selectTabByIndex(newTabIndex >= 0 ? newTabIndex : 0);
+            }
+            
             scope.model = {
                 entity: null
             };
@@ -1220,10 +1229,10 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
             if (scope.model.entity) {
                 scope.selectedType = scope.model.entity['$type'];
+                scope.selectTabByType(scope.selectedType);
                 scope.sendModelToSelectedWidget();
             } else if (scope.uidl.defaultTypeName) {
-                var initialTabIndex = Enumerable.From(scope.uidl.selections).Select('sel=>sel.typeName').IndexOf(scope.uidl.defaultTypeName);
-                scope.selectTabByIndex(initialTabIndex >= 0 ? initialTabIndex : 0);
+                scope.selectTabByType(scope.uidl.defaultTypeName);
             }
         }
     };
