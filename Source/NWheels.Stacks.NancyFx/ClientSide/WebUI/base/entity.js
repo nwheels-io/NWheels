@@ -16,7 +16,8 @@ function ($http, $q, $timeout) {
         checkAuthorization: checkAuthorization,
         queryEntity: queryEntity,
         storeEntity: storeEntity,
-        deleteEntity: deleteEntity
+        deleteEntity: deleteEntity,
+        trackRetrievedEntities: trackRetrievedEntities,
     };
 
     return service;
@@ -67,10 +68,11 @@ function ($http, $q, $timeout) {
         return $http.get(url).then(
             function (response) {
                 if (response.data.ResultSet) {
-                    for (var i = 0; i < response.data.ResultSet.length; i++) {
-                        var entity = response.data.ResultSet[i];
-                        entity['$state'] = 'RetrievedModified';
-                    }
+                    trackRetrievedEntities(response.data.ResultSet);
+                    // for (var i = 0; i < response.data.ResultSet.length; i++) {
+                        // var entity = response.data.ResultSet[i];
+                        // entity['$state'] = 'RetrievedModified';
+                    // }
                 }
                 return response.data;
             },
@@ -127,6 +129,15 @@ function ($http, $q, $timeout) {
                 return $q.reject(fault);
             }
         );
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+    
+    function trackRetrievedEntities(resultSet) {
+        for (var i = 0; i < resultSet.length; i++) {
+            var entity = resultSet[i];
+            entity['$state'] = 'RetrievedModified';
+        }
     }
 }]);
 

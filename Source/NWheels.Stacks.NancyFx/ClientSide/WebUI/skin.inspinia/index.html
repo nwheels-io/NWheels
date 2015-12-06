@@ -684,6 +684,7 @@ HEAD, JS/CSS LINKS
                             ).then(
                                 function(response){
                                     $scope.ResultSet = response.data.ResultSet;
+                                    $scope.entityService.trackRetrievedEntities(response.data.ResultSet);
                                     var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
                                     thegrid[0].addJSONData(response.data);
                                     $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data.ResultSet);
