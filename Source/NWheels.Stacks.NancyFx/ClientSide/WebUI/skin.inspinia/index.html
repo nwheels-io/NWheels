@@ -1163,8 +1163,13 @@ HEAD, JS/CSS LINKS
                     {{::translate(uidl.text)}}
                 </h2>
                 <div class="ibox-tools">
-                    <div class="btn-group">
-                        <button ng-repeat="command in uidl.commands" ng-click="$emit(command.qualifiedName + ':Executing')" class="btn btn-primary" type="button">{{::translate(command.text)}}</button>
+                    <div class="btn-group" ng-repeat="command in uidl.commands" ng-if="command.nodeType==='CommandGroup'">
+                        <button 
+                            ng-repeat="item in command.items" 
+                            ng-click="invokeCommand(command, item)" 
+                            ng-class="{'btn-primary':item.isChecked===true, 'btn-white':item.isChecked!==true}"
+                            class="btn" 
+                            type="button">{{::translate(item.text)}}</button>
                     </div>                
                     <a class="collapse-link">
                         <i class="fa fa-chevron-up"></i>

@@ -329,6 +329,7 @@
     <Compile Include="UI\Toolbox\Text.cs" />
     <Compile Include="UI\Uidl\RequireDomainContext.cs" />
     <Compile Include="UI\Uidl\UidlAuthorization.cs" />
+    <Compile Include="UI\Uidl\UidlCommandGroup.cs" />
     <Compile Include="UI\Uidl\UidlUtility.cs" />
     <Compile Include="UI\ViewModel.cs" />
     <Compile Include="Utilities\AssemblyUtility.cs" />

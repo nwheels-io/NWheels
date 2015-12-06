@@ -14,6 +14,7 @@ namespace NWheels.UI.Uidl
         Widget,
         UserAlert,
         Command,
+        CommandGroup,
         DataBinding,
         Behavior,
         Notification

@@ -672,6 +672,23 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
 	m_controllerImplementations['Chart'] = {
         implement: function(scope) {
+            scope.invokeCommand = function(command, item) {
+                for (var i = 0; i < command.items.length; i++) {
+                    command.items[i].isChecked = (command.items[i].value === item.value);
+                }
+                scope.$emit(command.qualifiedName + ':Executing', item.value);
+                $rootScope.$broadcast(':global:CommandCheckChanged', command);
+            }
+
+			scope.$on(':global:CommandCheckChanged', function (event, data) {
+			    var command = Enumerable.From(scope.uidl.commands).FirstOrDefault('c=>c.qualifiedName=="' + data.qualifiedName + '"');
+                if (command) {
+                    for (var i = 0; i < command.items.length; i++) {
+                        command.items[i].isChecked = data.items[i].isChecked;
+                    }
+                }
+			});
+
 			scope.$on(scope.uidl.modelSetterQualifiedName, function (event, data) {
 			    scope.model.state.data = scope.uidlService.selectValue(data, scope.uidl.dataExpression);
 			});

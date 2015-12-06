@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Extensions;
 
 namespace NWheels.UI.Uidl
 {
@@ -11,7 +10,14 @@ namespace NWheels.UI.Uidl
     public class UidlCommand : InteractiveUidlNode
     {
         public UidlCommand(string idName, AbstractUidlNode parent)
-            : base(UidlNodeType.Command, idName, parent)
+            : this(UidlNodeType.Command, idName, parent)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected UidlCommand(UidlNodeType nodeType, string idName, AbstractUidlNode parent)
+            : base(nodeType, idName, parent)
         {
             this.Executing = new UidlNotification("Executing", this);
             this.Updating = new UidlNotification("Updating", this);

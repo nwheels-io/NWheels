@@ -47,6 +47,13 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override IEnumerable<string> GetTranslatables()
+        {
+            return base.GetTranslatables().Concat(Commands.SelectMany(c => c.GetTranslatables()));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal string GetUniqueBehaviorId()
         {
             int index = 1;

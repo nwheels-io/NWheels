@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Extensions;
+using NWheels.TypeModel;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
@@ -33,6 +34,10 @@ namespace NWheels.UI.Toolbox
         public string DataExpression { get; set; }
         [DataMember]
         public string ModelSetterQualifiedName { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UidlNotification<string> ModeChanged { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

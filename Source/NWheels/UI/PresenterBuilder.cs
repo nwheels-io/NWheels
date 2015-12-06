@@ -68,6 +68,13 @@ namespace NWheels.UI
             return new BehaviorBuilder<Empty.Payload>(_ownerNode, command.Executing, _uidl);
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public BehaviorBuilder<TItem> On<TItem>(UidlCommandGroup<TItem> commandGroup)
+        {
+            return new BehaviorBuilder<TItem>(_ownerNode, commandGroup.Executing, _uidl);
+        }
+
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         //TElement New<TElement>() where TElement : IUIElement;
