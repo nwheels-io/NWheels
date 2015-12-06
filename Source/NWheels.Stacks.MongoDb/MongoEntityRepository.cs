@@ -751,7 +751,7 @@ namespace NWheels.Stacks.MongoDb
                 var specializedExpression = _expressionSpecializer.Specialize(expression);
                 var query = _actualQueryProvider.CreateQuery<TElement>(specializedExpression);
                 var authorizedQuery = _ownerRepo._ownerRepo.AuthorizeQuery<TElement>(query);
-                return new InterceptingQuery<TElement>(_ownerRepo, authorizedQuery, _ownerRepo._logger);
+                return new InterceptingQuery<TElement>(_ownerRepo, query /*authorizedQuery*/, _ownerRepo._logger);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

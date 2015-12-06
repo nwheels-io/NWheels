@@ -175,8 +175,9 @@ namespace NWheels.Stacks.MongoDb
                                     contractPropertyInfo.Name));
                             }
                         }
-                        
-                        var replaced = Expression.MakeMemberAccess(_ownerSpecializer.Specialize(node.Expression), implementationPropertyInfo);
+
+                        var replacedTarget = _ownerSpecializer.Specialize(node.Expression);
+                        var replaced = Expression.MakeMemberAccess(replacedTarget, implementationPropertyInfo);
                         return replaced;
                     }
                 }

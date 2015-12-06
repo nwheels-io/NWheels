@@ -1,8 +1,23 @@
 theApp.controller('chartJsController',
 ['$http', '$scope', '$rootScope', 'uidlService', '$timeout',
 function ($http, $scope, $rootScope, uidlService, $timeout) {
-	
+
+    $scope.drawChart = function() {
+        $timeout(function() {
+            var ctx = document.getElementById($scope.uidl.qualifiedName + "_context").getContext("2d");
+            $scope.chartJsObject = new Chart(ctx).Line($scope.lineData, $scope.lineOptions);
+        });
+    };
+
+    $scope.$on("$destroy", function() {
+    });            
+
 	$scope.$watch('model.state.data', function (newValue, oldValue) {
+        if ($scope.chartJsObject) {
+            $scope.chartJsObject.destroy();
+            $scope.chartJsObject = null;
+        }
+
         if (!newValue) {
             return;
         }
@@ -62,13 +77,6 @@ function ($http, $scope, $rootScope, uidlService, $timeout) {
 			responsive: true,
 		};
 			
-		$scope.drawChart = function() {
-			$timeout(function() {
-				var ctx = document.getElementById($scope.uidl.qualifiedName + "_context").getContext("2d");
-				var myNewChart = new Chart(ctx).Line($scope.lineData, $scope.lineOptions);
-			});
-		};
-
         $scope.drawChart();
 	});
 }]);
