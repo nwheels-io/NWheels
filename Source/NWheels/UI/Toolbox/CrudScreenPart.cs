@@ -22,7 +22,7 @@ namespace NWheels.UI.Toolbox
         {
             foreach ( var property in propertySelectors )
             {
-                Crud.Grid.Column(property);
+                Crud.Grid.Column<object>(property);
             }
         }
 

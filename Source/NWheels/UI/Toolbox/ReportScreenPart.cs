@@ -28,7 +28,18 @@ namespace NWheels.UI.Toolbox
         {
             foreach ( var property in propertySelectors )
             {
-                Report.ResultTable.Column(property);
+                Report.ResultTable.Column<object>(property);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void ShowColumns<TDerivedResultRow>(params Expression<Func<TDerivedResultRow, object>>[] propertySelectors)
+            where TDerivedResultRow : TResultRow
+        {
+            foreach ( var property in propertySelectors )
+            {
+                Report.ResultTable.Column<TDerivedResultRow, object>(property);
             }
         }
 

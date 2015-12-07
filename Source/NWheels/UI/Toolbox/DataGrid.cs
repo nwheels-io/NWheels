@@ -201,6 +201,17 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public DataGrid<TDataRow> Column<TDerivedDataRow, T>(
+            Expression<Func<TDerivedDataRow, T>> propertySelector, string title = null, FieldSize size = FieldSize.Medium)
+            where TDerivedDataRow : TDataRow
+        {
+            var derivedMetaType = MetadataCache.GetTypeMetadata(typeof(TDerivedDataRow));
+            this.DisplayColumns.Add(new GridColumn(derivedMetaType, propertySelector, title, size));
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         //public DataGrid<TDataRow> UseDetailPane(string staticTemplateName, bool expandOnLoad)
         //{
         //    this.EnableDetailPane = true;
