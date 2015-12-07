@@ -314,13 +314,14 @@ namespace NWheels.UI.Toolbox
 
         internal void Build(UidlBuilder builder, ControlledUidlNode parent, ITypeMetadata metaType)
         {
+            var shouldSetDefaults = (this.FieldType == FormFieldType.Default);
+
             this.MetaProperty = metaType.GetPropertyByName(this.PropertyName);
             this.Validation = this.MetaProperty.Validation;
 
-            if ( this.FieldType == FormFieldType.Default )
+            if ( shouldSetDefaults )
             {
                 this.FieldType = GetDefaultFieldType();
-                this.Modifiers = GetDefaultModifiers(this.FieldType);
             }
 
             if ( MetaProperty.Relation != null && MetaProperty.Relation.RelatedPartyType != null )
@@ -340,6 +341,11 @@ namespace NWheels.UI.Toolbox
                 builder.RegisterMetaType(this.MetaProperty.ClrType);
                 this.StandardValues = Enum.GetNames(this.MetaProperty.ClrType).ToList();
                 this.StandardValuesExclusive = true;
+            }
+
+            if ( shouldSetDefaults )
+            {
+                this.Modifiers = GetDefaultModifiers(this.FieldType);
             }
 
             this.OrderIndex = GetOrderIndex();
@@ -466,7 +472,7 @@ namespace NWheels.UI.Toolbox
                     }
                     return FormFieldModifiers.None;
                 case FormFieldType.Lookup:
-                    return FormFieldModifiers.DropDown;
+                    return FormFieldModifiers.DropDown;//(StandardValues != null && StandardValues.Count > 0 ? FormFieldModifiers.DropDown : FormFieldModifiers.TypeAhead);
                 case FormFieldType.LookupMany:
                     return FormFieldModifiers.Tab;
                 case FormFieldType.InlineForm:

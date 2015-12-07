@@ -52,8 +52,8 @@ namespace NWheels.UI
         void UidlBuilder.IBuildableUidlNode.DescribePresenter(UidlBuilder builder)
         {
             DescribePresenter(new PresenterBuilder<TApp, TData, TState>(builder, this));
-            builder.DescribeNodePresenters(base.ScreenParts.Cast<AbstractUidlNode>().ToArray());
             builder.DescribeNodePresenters(base.Screens.Cast<AbstractUidlNode>().ToArray());
+            builder.DescribeNodePresenters(base.ScreenParts.Cast<AbstractUidlNode>().ToArray());
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
