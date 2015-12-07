@@ -87,24 +87,6 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void SetCookie(this HttpResponseHeaders headers, Cookie cookie)
-        {
-            var cookieBuilder = new StringBuilder(WebUtility.UrlEncode(cookie.Name) + "=" + WebUtility.UrlEncode(cookie.Value));
-
-            if (cookie.HttpOnly)
-            {
-                cookieBuilder.Append("; HttpOnly");
-            }
-
-            if (cookie.Secure)
-            {
-                cookieBuilder.Append("; Secure");
-            }
-
-            headers.Add("Set-Cookie", cookieBuilder.ToString());
-        }
-
-
         private const string HttpContext = "MS_HttpContext";
         private const string RemoteEndpointMessage = "System.ServiceModel.Channels.RemoteEndpointMessageProperty";
 
