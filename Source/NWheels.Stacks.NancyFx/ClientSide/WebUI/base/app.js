@@ -1535,13 +1535,43 @@ function ($timeout, uidlService, entityService) {
                     $scope.lookupTextProperty = ($scope.uidl.lookupDisplayProperty ? $scope.uidl.lookupDisplayProperty : metaType.defaultDisplayPropertyNames[0]);
                     $scope.lookupForeignKeyProperty = $scope.uidl.propertyName; // + '_FK';
 
-                    $scope.entityService.queryEntity($scope.uidl.lookupEntityName).then(function(data) {
-                        $scope.lookupResultSet = data.ResultSet;
+                    $scope.isLoadingTypeAhead = false;
+                    $scope.isTypeAheadResultSetEmpty = true;
 
-                        if ($scope.uidl.applyDistinctToLookup) {
-                            $scope.lookupResultSet = Enumerable.From($scope.lookupResultSet).Distinct('$.' + $scope.lookupTextProperty).ToArray();
-                        }
-                    });
+                    $scope.loadTypeAhead = function(prefix) {
+                        $scope.isLoadingTypeAhead = true;
+                        $scope.entityService.queryEntity($scope.uidl.lookupEntityName, function(query) {
+                            query.where($scope.lookupTextProperty, prefix, ':cn');
+                        }).then(
+                            function(data) {
+                                $scope.lookupResultSet = data.ResultSet;
+                                if ($scope.uidl.applyDistinctToLookup) {
+                                    $scope.lookupResultSet = Enumerable.From($scope.lookupResultSet).Distinct('$.' + $scope.lookupTextProperty).ToArray();
+                                }
+                                $scope.isLoadingTypeAhead = false;
+                                $scope.isTypeAheadResultSetEmpty = ($scope.lookupResultSet.length===0);
+                                return $scope.lookupResultSet;
+                            },
+                            function(faultResponse) {
+                                $scope.isLoadingTypeAhead = false;
+                                $scope.isTypeAheadResultSetEmpty = true;
+                            }
+                        );
+                    }
+                    
+                    $scope.formatTypeAheadItem = function(model) {
+                        return model[$scope.lookupTextProperty];
+                    }
+                    
+                    if ($scope.uidl.modifiers==='DropDown') {
+                        $scope.entityService.queryEntity($scope.uidl.lookupEntityName).then(function(data) {
+                            $scope.lookupResultSet = data.ResultSet;
+
+                            if ($scope.uidl.applyDistinctToLookup) {
+                                $scope.lookupResultSet = Enumerable.From($scope.lookupResultSet).Distinct('$.' + $scope.lookupTextProperty).ToArray();
+                            }
+                        });
+                    }
                 } else if ($scope.uidl.standardValues) {
                     $scope.lookupValueProperty = 'id';
                     $scope.lookupTextProperty = 'text';

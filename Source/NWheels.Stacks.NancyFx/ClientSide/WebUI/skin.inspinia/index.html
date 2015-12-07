@@ -1101,7 +1101,7 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
             <!-- DROP DOWN -->
-            <select ng-if="uidl.fieldType==='Lookup'"
+            <select ng-if="uidl.fieldType==='Lookup' && uidl.modifiers==='DropDown'"
                     class="form-control m-b"
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
@@ -1109,6 +1109,19 @@ HEAD, JS/CSS LINKS
                     name="{{::uniqueFieldId}}">
                 <!--option value="">All</option-->
             </select>
+            <!-- TYPEAHEAD -->
+            <input ng-if="uidl.fieldType==='Lookup' && uidl.modifiers==='TypeAhead'"
+                type="text" 
+                ng-model="entity[lookupForeignKeyProperty]" 
+                placeholder="None Selected" 
+                typeahead="item as item for item in loadTypeAhead($viewValue)" 
+                typeahead-input-formatter="formatTypeAheadItem($model)"
+                typeahead-loading="isLoadingTypeAhead" 
+                typeahead-no-results="isTypeAheadResultSetEmpty" 
+                typeahead-on-select="entity[lookupForeignKeyProperty]=$item['$id']"
+                class="form-control m-b"
+                id="{{::uniqueFieldId}}"
+                name="{{::uniqueFieldId}}">
             <!-- IMAGE UPLOAD -->
             <div ng-if="uidl.fieldType==='ImageUpload'" class="col-sm-3">
                 <img ng-src="entity/queryImage/ProfilePhoto/{{::entity[uidl.propertyName]}}/ImageType/ImageContents" class="img-circle circle-border m-b-md" alt="profile">                
@@ -1477,12 +1490,10 @@ HEAD, JS/CSS LINKS
     
     <script src="skin/assets/app/angular-1.3.16/angular.min.js"></script>
     <script src="skin/assets/js/plugins/chartJs/Chart.min.js"></script>
-    <script src="skin/assets/app/linqjs-2.2.0.2/linq.min.js"></script>
-    <!--script src="skin/assets/app/breeze/breeze.debug.js"></script>
-    <script src="skin/assets/app/breeze/breeze.bridge.angular.js"></script-->
-    <script src="skin/assets/app/toastr/toastr.js"></script>
-    <!--script src="skin/assets/app/breeze/breeze.savequeuing.js"></script-->
+    <script src="skin/assets/js/plugins/ui-bootstrap-tpls-0.14.3.min.js"></script>
 
+    <script src="skin/assets/app/linqjs-2.2.0.2/linq.min.js"></script>
+    <script src="skin/assets/app/toastr/toastr.js"></script>
     <script src="base/app.js"></script>
     <script src="base/entity.js"></script>
     <script src="skin/assets/app/chartjs/chart.js"></script>
