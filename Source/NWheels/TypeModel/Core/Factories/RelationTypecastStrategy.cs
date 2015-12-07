@@ -19,6 +19,7 @@ namespace NWheels.TypeModel.Core.Factories
     {
         private Type _storageType;
         private Field<TT.TValue> _storageField;
+        private Field<IComponentContext> _componentsField;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -38,6 +39,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnBeforeImplementation(ImplementationClassWriter<TT.TInterface> writer)
         {
+            _componentsField = writer.DependencyField<IComponentContext>("$components");
             _storageType = FindImplementationType(contractType: base.MetaProperty.ContractPropertyInfo.PropertyType);
 
             using ( TT.CreateScope<TT.TValue>(_storageType) )
@@ -76,7 +78,6 @@ namespace NWheels.TypeModel.Core.Factories
                 WriteComplementContractAccessorMethods(writer, canRead, canWrite);
             }
         }
-
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -122,6 +123,21 @@ namespace NWheels.TypeModel.Core.Factories
                 using ( TT.CreateScope<TT.TValue>(_storageType) )
                 {
                     _storageField.Assign(writer.New<TT.TValue>(components));
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnWritingDeserializedCallback(MethodWriterBase writer)
+        {
+            if ( MetaProperty.ClrType.IsEntityPartContract() )
+            {
+                using ( TT.CreateScope<TT.TValue>(_storageType) )
+                {
+                    writer.If(_storageField.IsNull()).Then(() => {
+                        _storageField.Assign(writer.New<TT.TValue>(_componentsField));
+                    });
                 }
             }
         }

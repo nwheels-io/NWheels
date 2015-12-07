@@ -103,6 +103,11 @@ namespace NWheels.TypeModel.Core.Factories
                         action: strategy => strategy.WriteResolveDependencies(writer, m, components));
 
                     CallBaseInjectDependenciesMethod(m, components);
+
+                    _propertyStrategyMap.InvokeStrategies(
+                        strategy => {
+                            strategy.WriteDeserializedCallback(m);
+                        });
                 });
             }
 

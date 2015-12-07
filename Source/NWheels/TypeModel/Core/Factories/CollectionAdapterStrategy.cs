@@ -52,7 +52,6 @@ namespace NWheels.TypeModel.Core.Factories
             _storageCollectionType = HelpGetConcreteCollectionType(MetaProperty.ClrType, _itemStorageType);
             _collectionAdapterType = HelpGetCollectionAdapterType(MetaProperty.ClrType, _itemContractType, _itemStorageType, out _isOrderedCollection); 
 
-
             using ( TT.CreateScope<TT.TContract, TT.TImpl, TT.TConcreteCollection<TT.TImpl>, TT.TAbstractCollection<TT.TContract>>(
                 _itemContractType, _itemStorageType, _storageCollectionType, _collectionAdapterType) )
             {
@@ -100,15 +99,24 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
+            OnWritingDeserializedCallback(writer);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnWritingDeserializedCallback(MethodWriterBase writer)
+        {
             using ( TT.CreateScope<TT.TContract, TT.TImpl, TT.TConcreteCollection<TT.TImpl>, TT.TAbstractCollection<TT.TContract>>(
                 _itemContractType, _itemStorageType, _storageCollectionType, _collectionAdapterType) )
             {
-                _storageField.Assign(writer.New<TT.TConcreteCollection<TT.TImpl>>());
-                _contractField.Assign(
-                    Static.Func<object, bool, object>(RuntimeTypeModelHelpers.CreateCollectionAdapter<TT.TImpl, TT.TContract>,
-                        _storageField,
-                        writer.Const(_isOrderedCollection))
-                    .CastTo<TT.TAbstractCollection<TT.TContract>>());
+                writer.If(_storageField.IsNull()).Then(() => {
+                    _storageField.Assign(writer.New<TT.TConcreteCollection<TT.TImpl>>());
+                    _contractField.Assign(
+                        Static.Func<object, bool, object>(
+                            RuntimeTypeModelHelpers.CreateCollectionAdapter<TT.TImpl, TT.TContract>,
+                            _storageField,
+                            writer.Const(_isOrderedCollection)).CastTo<TT.TAbstractCollection<TT.TContract>>());
+                });
             }
         }
 
