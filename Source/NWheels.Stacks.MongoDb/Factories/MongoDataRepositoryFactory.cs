@@ -47,12 +47,18 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IApplicationDataRepository NewUnitOfWork(IResourceConsumerScopeHandle consumerScope, Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
+        public override IApplicationDataRepository NewUnitOfWork(
+            IResourceConsumerScopeHandle consumerScope, 
+            Type repositoryType, 
+            bool autoCommit, 
+            IsolationLevel? isolationLevel = null,
+            string databaseName = null)
         {
             var connectionString = new MongoConnectionStringBuilder(_config.GetContextConnectionString(domainContextType: repositoryType));
             var client = new MongoClient(connectionString.ConnectionString);
             var server = client.GetServer();
-            var database = server.GetDatabase(connectionString.DatabaseName);
+            var effectiveDatabaseName = (string.IsNullOrEmpty(databaseName) ? connectionString.DatabaseName : databaseName);
+            var database = server.GetDatabase(effectiveDatabaseName);
 
             return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(
                 consumerScope,

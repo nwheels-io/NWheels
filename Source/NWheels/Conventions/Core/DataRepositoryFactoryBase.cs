@@ -46,7 +46,12 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public abstract IApplicationDataRepository NewUnitOfWork(IResourceConsumerScopeHandle consumerScope, Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null);
+        public abstract IApplicationDataRepository NewUnitOfWork(
+            IResourceConsumerScopeHandle consumerScope, 
+            Type repositoryType, 
+            bool autoCommit, 
+            IsolationLevel? isolationLevel = null,
+            string databaseName = null);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

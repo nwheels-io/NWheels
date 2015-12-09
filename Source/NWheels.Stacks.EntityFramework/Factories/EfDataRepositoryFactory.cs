@@ -51,10 +51,16 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IApplicationDataRepository NewUnitOfWork(IResourceConsumerScopeHandle consumerScope, Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
+        public override IApplicationDataRepository NewUnitOfWork(
+            IResourceConsumerScopeHandle consumerScope, 
+            Type repositoryType, 
+            bool autoCommit, 
+            IsolationLevel? isolationLevel = null,
+            string databaseName = null)
         {
             var connection = _dbProvider.CreateConnection();
             connection.ConnectionString = _config.ConnectionString;
+            //TODO: replace database name if databaseName parameter is specified
             connection.Open();
 
             return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(consumerScope, _components, _entityFactory, _metadataCache, connection, autoCommit);

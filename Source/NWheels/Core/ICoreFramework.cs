@@ -11,8 +11,18 @@ namespace NWheels.Core
 {
     public interface ICoreFramework
     {
-        IApplicationDataRepository NewUnitOfWork(Type domainContextType, bool autoCommit = true, IsolationLevel? isolationLevel = null);
-        IApplicationDataRepository NewUnitOfWorkForEntity(Type entityContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null);
+        IApplicationDataRepository NewUnitOfWork(
+            Type domainContextType, 
+            bool autoCommit = true, 
+            IsolationLevel? isolationLevel = null, 
+            string databaseName = null);
+        
+        IApplicationDataRepository NewUnitOfWorkForEntity(
+            Type entityContractType, 
+            bool autoCommit = true, 
+            IsolationLevel? isolationLevel = null, 
+            string databaseName = null);
+        
         IComponentContext Components { get; }
     }
 }

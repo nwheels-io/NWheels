@@ -33,9 +33,19 @@ namespace NWheels.Testing.Entities.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override IApplicationDataRepository NewUnitOfWork(IResourceConsumerScopeHandle consumerScope, Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
+        public override IApplicationDataRepository NewUnitOfWork(
+            IResourceConsumerScopeHandle consumerScope, 
+            Type repositoryType, 
+            bool autoCommit, 
+            IsolationLevel? isolationLevel = null, 
+            string databaseName = null)
         {
-            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(consumerScope, _components, _entityFactory, autoCommit);
+            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(
+                consumerScope, 
+                _components, 
+                _entityFactory, 
+                autoCommit, 
+                databaseName);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

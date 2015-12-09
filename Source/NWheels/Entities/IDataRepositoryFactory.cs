@@ -11,7 +11,13 @@ namespace NWheels.Entities
 {
     public interface IDataRepositoryFactory : IAutoObjectFactory
     {
-        IApplicationDataRepository NewUnitOfWork(IResourceConsumerScopeHandle consumerScope, Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null);
+        IApplicationDataRepository NewUnitOfWork(
+            IResourceConsumerScopeHandle consumerScope, 
+            Type repositoryType, 
+            bool autoCommit, 
+            IsolationLevel? isolationLevel = null,
+            string databaseName = null);
+
         Type GetDataRepositoryContract(Type entityContractType);
     }
 }

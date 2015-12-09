@@ -9,7 +9,12 @@ namespace NWheels.Entities.Impl
 {
     public class VoidDataRepositoryFactory : IDataRepositoryFactory
     {
-        public IApplicationDataRepository NewUnitOfWork(IResourceConsumerScopeHandle consumerScope, Type repositoryType, bool autoCommit, System.Data.IsolationLevel? isolationLevel = null)
+        public IApplicationDataRepository NewUnitOfWork(
+            IResourceConsumerScopeHandle consumerScope, 
+            Type repositoryType, 
+            bool autoCommit, 
+            System.Data.IsolationLevel? isolationLevel = null,
+            string databaseName = null)
         {
             throw new NotSupportedException();
         }

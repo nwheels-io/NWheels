@@ -30,7 +30,8 @@ namespace NWheels.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TRepository NewUnitOfWork<TRepository>(bool autoCommit, IsolationLevel? isolationLevel = null) where TRepository : class, IApplicationDataRepository
+        public TRepository NewUnitOfWork<TRepository>(bool autoCommit, IsolationLevel? isolationLevel = null, string databaseName = null) 
+            where TRepository : class, IApplicationDataRepository
         {
             var concretized = _metadataCache.Concretize(typeof(TRepository));
 
@@ -40,13 +41,13 @@ namespace NWheels.Core
                     concretized,
                     key => FactoryByContract.Create(key, this));
 
-                return (TRepository)factoryByContract.NewUnitOfWork(autoCommit, isolationLevel);
+                return (TRepository)factoryByContract.NewUnitOfWork(autoCommit, isolationLevel, databaseName);
             }
 
             var consumerScope = new ThreadStaticResourceConsumerScope<TRepository>(
                 resourceFactory: scope => {
                     var factory = _components.Resolve<IDataRepositoryFactory>();
-                    var repositoryInstance = factory.NewUnitOfWork(scope, typeof(TRepository), autoCommit, isolationLevel);
+                    var repositoryInstance = factory.NewUnitOfWork(scope, typeof(TRepository), autoCommit, isolationLevel, databaseName);
                     return (TRepository)repositoryInstance;
                 },
                 externallyOwned: true);
@@ -61,7 +62,8 @@ namespace NWheels.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IApplicationDataRepository NewUnitOfWork(Type repositoryContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null)
+        public IApplicationDataRepository NewUnitOfWork(
+            Type repositoryContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null, string databaseName = null)
         {
             var factoryByContract = _unitOfWorkFactoryPerRepositoryContract.GetOrAdd(
                 repositoryContractType, 
@@ -89,7 +91,7 @@ namespace NWheels.Core
 
         private abstract class FactoryByContract
         {
-            public abstract IApplicationDataRepository NewUnitOfWork(bool autoCommit = true, IsolationLevel? isolationLevel = null);
+            public abstract IApplicationDataRepository NewUnitOfWork(bool autoCommit = true, IsolationLevel? isolationLevel = null, string databaseName = null);
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -118,9 +120,9 @@ namespace NWheels.Core
 
             #region Overrides of FactoryByContract
 
-            public override IApplicationDataRepository NewUnitOfWork(bool autoCommit = true, IsolationLevel? isolationLevel = null)
+            public override IApplicationDataRepository NewUnitOfWork(bool autoCommit = true, IsolationLevel? isolationLevel = null, string databaseName = null)
             {
-                return _ownerFactory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel);
+                return _ownerFactory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel, databaseName);
             }
 
             #endregion

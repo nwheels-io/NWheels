@@ -89,17 +89,31 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, IsolationLevel? isolationLevel = null) 
+        public TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, IsolationLevel? isolationLevel = null, string databaseName = null) 
             where TRepository : class, IApplicationDataRepository
         {
-            return _unitOfWorkFactory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel);
+            return _unitOfWorkFactory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel, databaseName);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IApplicationDataRepository ICoreFramework.NewUnitOfWork(Type repositoryContractType, bool autoCommit, IsolationLevel? isolationLevel)
+        IApplicationDataRepository ICoreFramework.NewUnitOfWork(Type repositoryContractType, bool autoCommit, IsolationLevel? isolationLevel, string databaseName)
         {
-            return _unitOfWorkFactory.NewUnitOfWork(repositoryContractType, autoCommit, isolationLevel);
+            return _unitOfWorkFactory.NewUnitOfWork(repositoryContractType, autoCommit, isolationLevel, databaseName);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IApplicationDataRepository NewUnitOfWorkForEntity(
+            Type entityContractType, 
+            bool autoCommit = true, 
+            IsolationLevel? isolationLevel = null, 
+            string databaseName = null)
+        {
+            var dataRepositoryFactory = _components.Resolve<IDataRepositoryFactory>();
+            var dataRepositoryContract = dataRepositoryFactory.GetDataRepositoryContract(entityContractType);
+
+            return _unitOfWorkFactory.NewUnitOfWork(dataRepositoryContract, autoCommit, isolationLevel);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -219,16 +233,6 @@ namespace NWheels.Testing
             {
                 PresetUtcNow = value;
             }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public IApplicationDataRepository NewUnitOfWorkForEntity(Type entityContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null)
-        {
-            var dataRepositoryFactory = _components.Resolve<IDataRepositoryFactory>();
-            var dataRepositoryContract = dataRepositoryFactory.GetDataRepositoryContract(entityContractType);
-
-            return _unitOfWorkFactory.NewUnitOfWork(dataRepositoryContract, autoCommit, isolationLevel);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

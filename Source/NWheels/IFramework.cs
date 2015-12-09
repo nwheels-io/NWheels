@@ -17,7 +17,8 @@ namespace NWheels
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, IsolationLevel? isolationLevel = null) where TRepository : class, IApplicationDataRepository;
+        TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, IsolationLevel? isolationLevel = null, string databaseName = null) 
+            where TRepository : class, IApplicationDataRepository;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
