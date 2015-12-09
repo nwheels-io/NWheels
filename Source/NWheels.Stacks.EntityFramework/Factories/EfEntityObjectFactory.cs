@@ -41,7 +41,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
                 new EntityObjectStateConvention(), 
                 new ImplementIEntityObjectConvention(metaType, propertyMap), 
                 new ImplementIEntityPartObjectConvention(metaType), 
-                new EnsureDomainObjectConvention(metaType), 
+                //new EnsureDomainObjectConvention(metaType), 
                 new DependencyInjectionConvention(metaType, propertyMap, forceApply: true), 
                 new NestedObjectsConvention(propertyMap),
                 new InverseManyToManyCollectionConvention(context, MetadataCache, metaType),

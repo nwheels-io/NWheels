@@ -18,6 +18,7 @@ namespace NWheels.Testing.Entities.Impl
     public class TestDataRepositoryFactory : DataRepositoryFactoryBase
     {
         private readonly IComponentContext _components;
+        private readonly IDomainObjectFactory _domainObjectFactory;
         private readonly EntityObjectFactory _entityFactory;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,6 +33,7 @@ namespace NWheels.Testing.Entities.Impl
             : base(module, metadataCache, new TestFramework.VoidStorageInitializer(), dbConfiguration, databaseNameResolvers)
         {
             _components = components;
+            _domainObjectFactory = components.Resolve<IDomainObjectFactory>();
             _entityFactory = entityFactory;
         }
 
@@ -56,7 +58,7 @@ namespace NWheels.Testing.Entities.Impl
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
             return new IObjectFactoryConvention[] {
-                new TestDataRepositoryConvention(base.MetadataCache, _entityFactory)
+                new TestDataRepositoryConvention(base.MetadataCache, _domainObjectFactory, _entityFactory)
             };
         }
 
@@ -64,8 +66,8 @@ namespace NWheels.Testing.Entities.Impl
 
         public class TestDataRepositoryConvention : DataRepositoryConvention
         {
-            public TestDataRepositoryConvention(TypeMetadataCache metadataCache, EntityObjectFactory entityFactory)
-                : base(metadataCache, entityFactory)
+            public TestDataRepositoryConvention(TypeMetadataCache metadataCache, IDomainObjectFactory domainObjectFactory, EntityObjectFactory entityFactory)
+                : base(metadataCache, domainObjectFactory, entityFactory)
             {
                 base.RepositoryBaseType = typeof(TestDataRepositoryBase);
             }

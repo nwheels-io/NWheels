@@ -89,6 +89,20 @@ namespace NWheels.TypeModel.Core.Factories
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public void WriteExportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector)
+        {
+            _target.WriteExportStorageValue(methodWriter, valueVector);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void WriteImportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector)
+        {
+            _target.WriteImportStorageValue(methodWriter, valueVector);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public virtual ObjectFactoryContext FactoryContext
         {

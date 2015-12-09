@@ -16,6 +16,7 @@ using NWheels.DataObjects.Core.Factories;
 using NWheels.Entities.Core;
 using NWheels.Exceptions;
 using NWheels.Extensions;
+using NWheels.TypeModel;
 using NWheels.TypeModel.Core;
 using NWheels.TypeModel.Core.Factories;
 using TT = Hapil.TypeTemplate;
@@ -26,7 +27,7 @@ namespace NWheels.Entities.Factories
     {
         private readonly IComponentContext _components;
         private readonly ITypeMetadataCache _metadataCache;
-        private readonly ConcurrentDictionary<Type, PolymorphicActivator> _polymorphicActivatorByConcreteContract;
+        //private readonly ConcurrentDictionary<Type, PolymorphicActivator> _polymorphicActivatorByConcreteContract;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -35,54 +36,84 @@ namespace NWheels.Entities.Factories
         {
             _components = components;
             _metadataCache = metadataCache;
-            _polymorphicActivatorByConcreteContract = new ConcurrentDictionary<Type, PolymorphicActivator>();
+            //_polymorphicActivatorByConcreteContract = new ConcurrentDictionary<Type, PolymorphicActivator>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Type GetOrBuildDomainObjectType(Type contractType)
+        {
+            var typeEntry = GetOrBuildDomainObjectTypeEntry(contractType);
+            return typeEntry.DynamicType;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TEntityContract CreateDomainObjectInstance<TEntityContract>()
+        {
+            var typeEntry = GetOrBuildDomainObjectTypeEntry(typeof(TEntityContract));
+            var domainObjectInstance = typeEntry.CreateInstance<TEntityContract, IComponentContext>(0, _components);
+            return domainObjectInstance;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IDomainObject CreateDomainObjectInstance(Type contractType)
+        {
+            var typeEntry = GetOrBuildDomainObjectTypeEntry(contractType);
+            var constructorDelegate = (Func<IComponentContext, object>)typeEntry.FactoryMethods[0];
+            var domainObjectInstance = (IDomainObject)constructorDelegate(_components);
+            return domainObjectInstance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Type GetOrBuildDomainObjectType(Type contractType, Type persistableFactoryType)
         {
-            var typeEntry = GetOrBuildDomainObjectTypeEntry(contractType, persistableFactoryType);
-            return typeEntry.DynamicType;
+            throw new NotSupportedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TEntityContract CreateDomainObjectInstance<TEntityContract>(TEntityContract underlyingPersistableObject)
         {
-            var persistableContractType = ((IObject)underlyingPersistableObject).ContractType;
-            var persistableFactoryType = ((IObject)underlyingPersistableObject).FactoryType;
+            throw new NotSupportedException();
 
-            var typeEntry = GetOrBuildDomainObjectTypeEntry(persistableContractType, persistableFactoryType);
-            TEntityContract domainObjectInstance;
+            //var persistableContractType = ((IObject)underlyingPersistableObject).ContractType;
+            //var persistableFactoryType = ((IObject)underlyingPersistableObject).FactoryType;
 
-            if ( typeof(TEntityContract) == persistableContractType )
-            {
-                domainObjectInstance = typeEntry
-                    .CreateInstance<TEntityContract, TEntityContract, IComponentContext>(0, underlyingPersistableObject, _components);
-            }
-            else
-            {
-                domainObjectInstance = GetOrAddPolymorphicActivator(persistableContractType)
-                    .CreateConcreteInstance<TEntityContract>(typeEntry, 0, underlyingPersistableObject, _components);
-            }
+            //var typeEntry = GetOrBuildDomainObjectTypeEntry(persistableContractType, persistableFactoryType);
+            //TEntityContract domainObjectInstance;
 
-            return domainObjectInstance;
+            //if ( typeof(TEntityContract) == persistableContractType )
+            //{
+            //    domainObjectInstance = typeEntry
+            //        .CreateInstance<TEntityContract, TEntityContract, IComponentContext>(0, underlyingPersistableObject, _components);
+            //}
+            //else
+            //{
+            //    domainObjectInstance = GetOrAddPolymorphicActivator(persistableContractType)
+            //        .CreateConcreteInstance<TEntityContract>(typeEntry, 0, underlyingPersistableObject, _components);
+            //}
+
+            //return domainObjectInstance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IDomainObject CreateDomainObjectInstance(IPersistableObject underlyingPersistableObject)
         {
-            var persistableContractType = ((IObject)underlyingPersistableObject).ContractType;
-            var persistableFactoryType = ((IObject)underlyingPersistableObject).FactoryType;
+            throw new NotSupportedException();
 
-            var typeEntry = GetOrBuildDomainObjectTypeEntry(persistableContractType, persistableFactoryType);
-            IDomainObject domainObjectInstance;
+            //var persistableContractType = ((IObject)underlyingPersistableObject).ContractType;
+            //var persistableFactoryType = ((IObject)underlyingPersistableObject).FactoryType;
 
-            domainObjectInstance = GetOrAddPolymorphicActivator(persistableContractType).CreateInstance(typeEntry, 0, underlyingPersistableObject, _components);
+            //var typeEntry = GetOrBuildDomainObjectTypeEntry(persistableContractType);
+            //IDomainObject domainObjectInstance;
 
-            return domainObjectInstance;
+            //domainObjectInstance = GetOrAddPolymorphicActivator(persistableContractType).CreateInstance(typeEntry, 0, underlyingPersistableObject, _components);
+
+            //return domainObjectInstance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -92,16 +123,13 @@ namespace NWheels.Entities.Factories
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
             var metaType = _metadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
-            var persistableObjectFactoryType = context.TypeKey.SecondaryInterfaces[0];
-
             var propertyMapBuilder = new PropertyImplementationStrategyMap.Builder(useDomainObjectAsBaseType: true);
             
             propertyMapBuilder.MapBeingBuilt.NeedImplementationTypeKey += (sender, args) => {
-                args.TypeKeyToUse = CreateImplementationTypeKey(args.ContractType, persistableObjectFactoryType: context.TypeKey.SecondaryInterfaces[0]);
+                args.TypeKeyToUse = CreateImplementationTypeKey(args.ContractType);
             };
 
-            var domainFactoryContext =
-                new DomainObjectFactoryContext(context, _metadataCache, metaType, persistableObjectFactoryType, propertyMapBuilder.MapBeingBuilt);
+            var domainFactoryContext = new DomainObjectFactoryContext(context, _metadataCache, metaType, propertyMapBuilder.MapBeingBuilt);
 
             BuildPropertyStrategyMap(propertyMapBuilder, domainFactoryContext);
 
@@ -130,22 +158,20 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected TypeKey CreateImplementationTypeKey(Type entityInterfaceType, Type persistableObjectFactoryType)
+        protected TypeKey CreateImplementationTypeKey(Type entityInterfaceType)
         {
             return new TypeKey(
                 primaryInterface: entityInterfaceType,
-                secondaryInterfaces: new[] { persistableObjectFactoryType },
                 baseType: DomainObjectBaseTypeConvention.GetBaseType(
                     this,
-                    _metadataCache.GetTypeMetadata(entityInterfaceType),
-                    persistableObjectFactoryType));            
+                    _metadataCache.GetTypeMetadata(entityInterfaceType)));            
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private TypeEntry GetOrBuildDomainObjectTypeEntry(Type contractType, Type persistableFactoryType)
+        private TypeEntry GetOrBuildDomainObjectTypeEntry(Type contractType)
         {
-            var typeKey = CreateImplementationTypeKey(contractType, persistableFactoryType);
+            var typeKey = CreateImplementationTypeKey(contractType);
             var typeEntry = GetOrBuildType(typeKey);
             
             return typeEntry;
@@ -157,33 +183,62 @@ namespace NWheels.Entities.Factories
             PropertyImplementationStrategyMap.Builder builder, 
             DomainObjectFactoryContext context)
         {
-            Type collectionItemType;
+            //Type collectionItemType;
 
             builder.AddRule(
                 p => p.IsCalculated,
                 p => null); // do not implement calculated properties
 
             builder.AddRule(
-                p => p.ClrType.IsEntityContract() || p.ClrType.IsEntityPartContract(),
-                p => new DomainPersistableObjectCastStrategy(builder.MapBeingBuilt, context, p));
+                p => p.Kind == PropertyKind.Scalar,
+                p => new PropertyStrategies.ScalarPropertyStrategy(builder.MapBeingBuilt, context, p));
 
             builder.AddRule(
-                p => p.ClrType.IsCollectionType(out collectionItemType) && (collectionItemType.IsEntityContract() || collectionItemType.IsEntityPartContract()),
-                p => new DomainPersistableCollectionCastStrategy(builder.MapBeingBuilt, context, p));
+                p => p.Kind == PropertyKind.Part && !p.IsCollection,
+                p => new PropertyStrategies.EmbeddedObjectPropertyStrategy(builder.MapBeingBuilt, context, p));
 
             builder.AddRule(
-                p => true,
-                p => new DomainPersistableDelegationStrategy(builder.MapBeingBuilt, context, p));
+                p => p.Kind == PropertyKind.Part && p.IsCollection,
+                p => new PropertyStrategies.EmbeddedObjectCollectionPropertyStrategy(builder.MapBeingBuilt, context, p));
+
+            builder.AddRule(
+                p => p.Kind == PropertyKind.Relation && !p.IsCollection && p.RelationalMapping.StorageStyle.IsEmbeddedInParent(),
+                p => new PropertyStrategies.EmbeddedObjectPropertyStrategy(builder.MapBeingBuilt, context, p));
+
+            builder.AddRule(
+                p => p.Kind == PropertyKind.Relation && p.IsCollection && p.RelationalMapping.StorageStyle.IsEmbeddedInParent(),
+                p => new PropertyStrategies.EmbeddedObjectCollectionPropertyStrategy(builder.MapBeingBuilt, context, p));
+
+            builder.AddRule(
+                p => p.Kind == PropertyKind.Relation && !p.IsCollection && !p.RelationalMapping.StorageStyle.IsEmbeddedInParent(),
+                p => new PropertyStrategies.LazyObjectPropertyStrategy(builder.MapBeingBuilt, context, p));
+
+            builder.AddRule(
+                p => p.Kind == PropertyKind.Relation && p.IsCollection && !p.RelationalMapping.StorageStyle.IsEmbeddedInParent(),
+                p => new PropertyStrategies.LazyObjectCollectionPropertyStrategy(builder.MapBeingBuilt, context, p));
+
+
+            //builder.AddRule(
+            //    p => p.ClrType.IsEntityContract() || p.ClrType.IsEntityPartContract(),
+            //    p => new DomainPersistableObjectCastStrategy(builder.MapBeingBuilt, context, p));
+
+            //builder.AddRule(
+            //    p => p.ClrType.IsCollectionType(out collectionItemType) && (collectionItemType.IsEntityContract() || collectionItemType.IsEntityPartContract()),
+            //    p => new DomainPersistableCollectionCastStrategy(builder.MapBeingBuilt, context, p));
+
+            //builder.AddRule(
+            //    p => true,
+            //    p => new DomainPersistableDelegationStrategy(builder.MapBeingBuilt, context, p));
 
             builder.Build(context.MetadataCache, context.MetaType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private PolymorphicActivator GetOrAddPolymorphicActivator(Type concreteContract)
-        {
-            return _polymorphicActivatorByConcreteContract.GetOrAdd(concreteContract, key => PolymorphicActivator.Create(concreteContract));
-        }
+        //private PolymorphicActivator GetOrAddPolymorphicActivator(Type concreteContract)
+        //{
+        //    return _polymorphicActivatorByConcreteContract.GetOrAdd(concreteContract, key => PolymorphicActivator.Create(concreteContract));
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -204,6 +259,8 @@ namespace NWheels.Entities.Factories
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #if false
 
         private abstract class PolymorphicActivator
         {
@@ -261,5 +318,7 @@ namespace NWheels.Entities.Factories
                     components);
             }
         }
+
+        #endif
     }
 }

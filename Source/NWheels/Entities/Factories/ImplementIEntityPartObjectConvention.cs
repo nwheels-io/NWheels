@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Autofac;
 using Hapil;
 using Hapil.Writers;
@@ -38,12 +39,15 @@ namespace NWheels.Entities.Factories
             var domainObjectField = writer.Field<IDomainObject>("$domainObject");
 
             writer.ImplementInterfaceExplicitly<IEntityPartObject>()
-                .Method<IDomainObject>(x => x.SetContainerObject).Implement((m, domainObject) => {
-                    domainObjectField.Assign(domainObject);
-                })
-                .Method<IDomainObject>(x => x.GetContainerObject).Implement(m => {
-                    m.Return(domainObjectField);
-                });
+                .Method<object[]>(intf => intf.ExportValues).Throw<NotImplementedException>()
+                .Method<object[]>(intf => intf.ImportValues).Throw<NotImplementedException>();
+
+                //.Method<IDomainObject>(x => x.SetContainerObject).Implement((m, domainObject) => {
+                //    domainObjectField.Assign(domainObject);
+                //})
+                //.Method<IDomainObject>(x => x.GetContainerObject).Implement(m => {
+                //    m.Return(domainObjectField);
+                //});
 
             ImplementToString(writer);
         }

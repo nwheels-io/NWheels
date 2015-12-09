@@ -17,6 +17,8 @@ namespace NWheels.DataObjects.Core.Factories
         void WriteDeserializedCallback(MethodWriterBase callbackMethodWriter);
         void WriteReturnTrueIfModified(FunctionMethodWriter<bool> functionWriter);
         void WriteValidation(MethodWriterBase writer);
+        void WriteExportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector);
+        void WriteImportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector);
         ObjectFactoryContext FactoryContext { get; }
         ITypeMetadataCache MetadataCache { get; }
         ITypeMetadata MetaType { get; }

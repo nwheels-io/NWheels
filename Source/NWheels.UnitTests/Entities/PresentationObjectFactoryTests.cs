@@ -632,7 +632,7 @@ namespace NWheels.UnitTests.Entities
             {
                 if (_domainObject == null)
                 {
-                    RuntimeEntityModelHelpers.EnsureContainerDomainObject<IContractEntity>(this, _components);
+                    //RuntimeEntityModelHelpers.EnsureContainerDomainObject<IContractEntity>(this, _components);
                 }
             }
 
@@ -641,6 +641,20 @@ namespace NWheels.UnitTests.Entities
             #region Implementation of IEntityObjectBase
 
             public EntityState State { get; set; }
+
+            #endregion
+
+            #region Implementation of IPersistableObject
+
+            public object[] ExportValues()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void ImportValues(object[] values)
+            {
+                throw new NotImplementedException();
+            }
 
             #endregion
         }
@@ -662,9 +676,19 @@ namespace NWheels.UnitTests.Entities
 
             #region Implementation of IDomainObjectFactory
 
+            public Type GetOrBuildDomainObjectType(Type contractType)
+            {
+                throw new NotImplementedException();
+            }
+
             public Type GetOrBuildDomainObjectType(Type contractType, Type persistableFactoryType)
             {
                 return typeof(HardCodedDomainObject_ContractEntity);
+            }
+
+            public TEntityContract CreateDomainObjectInstance<TEntityContract>()
+            {
+                throw new NotImplementedException();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

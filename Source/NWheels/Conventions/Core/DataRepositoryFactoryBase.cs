@@ -182,6 +182,7 @@ namespace NWheels.Conventions.Core
             private readonly TypeMetadataCache _metadataCache;
             private readonly List<EntityInRepository> _entitiesInRepository;
             private readonly HashSet<Type> _entityContractsInRepository;
+            private readonly IDomainObjectFactory _domainObjectFactory;
             private readonly EntityObjectFactory _entityFactory;
             private readonly List<Action<ConstructorWriter>> _initializers;
             private readonly Dictionary<Type, Field<IEntityRepository<TT.TContract>>> _repositoryFieldByContract;
@@ -191,10 +192,11 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected DataRepositoryConvention(TypeMetadataCache metadataCache, EntityObjectFactory entityFactory)
+            protected DataRepositoryConvention(TypeMetadataCache metadataCache, IDomainObjectFactory domainObjectFactory, EntityObjectFactory entityFactory)
                 : base(Will.InspectDeclaration | Will.ImplementPrimaryInterface)
             {
                 _metadataCache = metadataCache;
+                _domainObjectFactory = domainObjectFactory;
                 _entityFactory = entityFactory;
                 _entitiesInRepository = new List<EntityInRepository>();
                 _repositoryFieldByContract = new Dictionary<Type, Field<IEntityRepository<TypeTemplate.TContract>>>();
@@ -240,6 +242,13 @@ namespace NWheels.Conventions.Core
             public EntityObjectFactory EntityFactory
             {
                 get { return _entityFactory; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IDomainObjectFactory DomainObjectFactory
+            {
+                get { return _domainObjectFactory; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -649,8 +658,11 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected ConnectedModelDataRepositoryConvention(EntityObjectFactory entityFactory, TypeMetadataCache metadataCache)
-                : base(metadataCache, entityFactory)
+            protected ConnectedModelDataRepositoryConvention(
+                IDomainObjectFactory domainObjectFactory, 
+                EntityObjectFactory entityFactory, 
+                TypeMetadataCache metadataCache)
+                : base(metadataCache, domainObjectFactory, entityFactory)
             {
             }
 
@@ -811,6 +823,8 @@ namespace NWheels.Conventions.Core
                     _implementationType = _ownerConvention.EntityFactory.FindImplementationType(_contractType);
                     ((TypeMetadataBuilder)this.Metadata).UpdateImplementation(_ownerConvention.EntityFactory, _implementationType);
                 }
+
+                _ownerConvention.DomainObjectFactory.GetOrBuildDomainObjectType(_contractType);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

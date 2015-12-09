@@ -8,12 +8,13 @@ using NWheels.DataObjects.Core;
 
 namespace NWheels.Entities.Core
 {
-    public interface IDomainObject : IObject, IContain<IPersistableObject>
+    public interface IDomainObject : IObject //, IContain<IPersistableObject>
     {
-        //string ConcatValues();
         void Validate();
         void BeforeCommit();
         void AfterCommit();
+        object[] ExportValues();
+        void ImportValues(object[] values);
         EntityState State { get; }
         object TemporaryKey { get; set; }
     }

@@ -156,6 +156,20 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IPropertyValueGenerator GetPropertyValueGeneratorInstance(Type valueGeneratorType)
+        {
+            return (IPropertyValueGenerator)_components.Resolve(valueGeneratorType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IPropertyValueGenerator<T> GetPropertyValueGeneratorInstance<T>(Type valueGeneratorType)
+        {
+            return (IPropertyValueGenerator<T>)_components.Resolve(valueGeneratorType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void AcceptVisitor(ITypeMetadataVisitor visitor, Func<TypeMetadataBuilder, bool> predicate = null)
         {
             AcceptVisitor(() => visitor, predicate);

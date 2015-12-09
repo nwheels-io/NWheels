@@ -143,6 +143,11 @@
     <Compile Include="Entities\DomainContextPopulatorBase.cs" />
     <Compile Include="Entities\EntityChangeMessage.cs" />
     <Compile Include="Entities\Factories\ImplementIPartitionedObjectConvention.cs" />
+    <Compile Include="Entities\Factories\PropertyStrategies\EmbeddedObjectCollectionPropertyStrategy.cs" />
+    <Compile Include="Entities\Factories\PropertyStrategies\EmbeddedObjectPropertyStrategy.cs" />
+    <Compile Include="Entities\Factories\PropertyStrategies\LazyObjectCollectionPropertyStrategy.cs" />
+    <Compile Include="Entities\Factories\PropertyStrategies\LazyObjectPropertyStrategy.cs" />
+    <Compile Include="Entities\Factories\PropertyStrategies\ScalarPropertyStrategy.cs" />
     <Compile Include="Entities\Impl\PartitionedRepository.cs" />
     <Compile Include="Entities\IPartitionedRepository.cs" />
     <Compile Include="Exceptions\IFaultException.cs" />

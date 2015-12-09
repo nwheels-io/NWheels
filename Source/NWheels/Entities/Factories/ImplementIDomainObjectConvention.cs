@@ -5,9 +5,11 @@ using Hapil;
 using Hapil.Members;
 using Hapil.Writers;
 using NWheels.DataObjects.Core;
+using NWheels.DataObjects.Core.Factories;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.TypeModel.Core;
+using NWheels.Utilities;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Entities.Factories
@@ -58,12 +60,16 @@ namespace NWheels.Entities.Factories
             ImplementIsModified(writer);
 
             var domainObjectImplementation = writer.ImplementInterfaceExplicitly<IDomainObject>();
+
             ImplementState(domainObjectImplementation);
             ImplementBeforeCommit(domainObjectImplementation);
             ImplementAfterCommit(domainObjectImplementation);
             ImplementValidate(domainObjectImplementation);
-            
-            ImplementGetContainedObject(writer);
+
+            ImplementExportValues(domainObjectImplementation);
+            ImplementImportValues(domainObjectImplementation);
+
+            //ImplementGetContainedObject(writer);
             ImplementToString(writer);
             ImplementTemporaryKey(domainObjectImplementation);
         }
@@ -158,6 +164,35 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private void ImplementImportValues(ImplementationClassWriter<IDomainObject> writer)
+        {
+            writer.Method<object[]>(x => x.ImportValues).Implement((w, values) => {
+                _context.PropertyMap.InvokeStrategies(
+                    strategy => {
+                        strategy.WriteImportStorageValue(w, values);
+                    });
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementExportValues(ImplementationClassWriter<IDomainObject> writer)
+        {
+            writer.Method<object[]>(x => x.ExportValues).Implement(w => {
+                var values = w.Local<object[]>();
+                values.Assign(w.NewArray<object>(w.Const(_context.MetaType.Properties.Count)));
+                
+                _context.PropertyMap.InvokeStrategies(
+                    strategy => {
+                        strategy.WriteExportStorageValue(w, values);
+                    });
+
+                w.Return(values);
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private bool HaveTriggerMethods(MethodInfo[] methods)
         {
             return (methods != null && methods.Length > 0);
@@ -199,15 +234,15 @@ namespace NWheels.Entities.Factories
             });
         }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ImplementGetContainedObject(ImplementationClassWriter<TT.TBase> writer)
-        {
-            writer.ImplementInterfaceExplicitly<IContain<IPersistableObject>>()
-                .Method<IPersistableObject>(intf => intf.GetContainedObject).Implement(w =>
-                    w.Return(_context.PersistableObjectField.CastTo<IPersistableObject>())
-                );
-        }
+        //private void ImplementGetContainedObject(ImplementationClassWriter<TT.TBase> writer)
+        //{
+        //    writer.ImplementInterfaceExplicitly<IContain<IPersistableObject>>()
+        //        .Method<IPersistableObject>(intf => intf.GetContainedObject).Implement(w =>
+        //            w.Return(_context.PersistableObjectField.CastTo<IPersistableObject>())
+        //        );
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -240,14 +275,23 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ImplementToString(ImplementationClassWriter<TT.TBase> writer)
+        private void ImplementToString(ImplementationClassWriter<TypeTemplate.TBase> writer)
         {
-            if ( _context.MetaType.BaseType == null )
+            var keyProperty = (_context.MetaType.PrimaryKey != null ? _context.MetaType.PrimaryKey.Properties.FirstOrDefault() : null);
+            var displayProperty = _context.MetaType.DefaultDisplayProperties.FirstOrDefault();
+
+            if ( keyProperty == null )
             {
-                writer.Method<string>(x => x.ToString).Implement(w => {
-                    w.Return(_context.PersistableObjectField.FuncToString());
-                });
+                return;
             }
+
+            writer.Method<string>(x => x.ToString).Implement(w => {
+                w.Return(
+                    w.Const(_context.MetaType.Name + "[") +
+                    TypeFactoryUtility.GetPropertyStringValueOperand(w, keyProperty) +
+                    (displayProperty != null ? "|" : "") +
+                    TypeFactoryUtility.GetPropertyStringValueOperand(w, displayProperty) + "]");
+            });
         }
     }
 }

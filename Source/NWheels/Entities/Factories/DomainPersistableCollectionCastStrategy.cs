@@ -73,24 +73,24 @@ namespace NWheels.Entities.Factories
 
         protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
-            if ( TT.Resolve<TT.TProperty>().GetGenericTypeDefinition() == typeof(IList<>) )
-            {
-                _adapterBackingField.Assign(
-                    Static.Func(RuntimeEntityModelHelpers.CreateContainmentListAdapter<IPersistableObject, IDomainObject, TT2.TPersistableItem, TT2.TDomainItem>,
-                        args[0].CastTo<TT.TContract>().Prop<IList<TT2.TPersistableItem>>(MetaProperty.ContractPropertyInfo),
-                        _context.DomainObjectFactoryField
-                    )
-                    .CastTo<TT.TProperty>());
-            }
-            else
-            {
-                _adapterBackingField.Assign(
-                    Static.Func(RuntimeEntityModelHelpers.CreateContainmentCollectionAdapter<IPersistableObject, IDomainObject, TT2.TPersistableItem, TT2.TDomainItem>,
-                        args[0].CastTo<TT.TContract>().Prop<ICollection<TT2.TPersistableItem>>(MetaProperty.ContractPropertyInfo),
-                        _context.DomainObjectFactoryField
-                    )
-                    .CastTo<TT.TProperty>());
-            }
+            //if ( TT.Resolve<TT.TProperty>().GetGenericTypeDefinition() == typeof(IList<>) )
+            //{
+            //    _adapterBackingField.Assign(
+            //        Static.Func(RuntimeEntityModelHelpers.CreateContainmentListAdapter<IPersistableObject, IDomainObject, TT2.TPersistableItem, TT2.TDomainItem>,
+            //            args[0].CastTo<TT.TContract>().Prop<IList<TT2.TPersistableItem>>(MetaProperty.ContractPropertyInfo),
+            //            _context.DomainObjectFactoryField
+            //        )
+            //        .CastTo<TT.TProperty>());
+            //}
+            //else
+            //{
+            //    _adapterBackingField.Assign(
+            //        Static.Func(RuntimeEntityModelHelpers.CreateContainmentCollectionAdapter<IPersistableObject, IDomainObject, TT2.TPersistableItem, TT2.TDomainItem>,
+            //            args[0].CastTo<TT.TContract>().Prop<ICollection<TT2.TPersistableItem>>(MetaProperty.ContractPropertyInfo),
+            //            _context.DomainObjectFactoryField
+            //        )
+            //        .CastTo<TT.TProperty>());
+            //}
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

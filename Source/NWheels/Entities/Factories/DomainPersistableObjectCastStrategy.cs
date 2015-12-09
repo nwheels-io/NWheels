@@ -40,34 +40,34 @@ namespace NWheels.Entities.Factories
 
         protected override void OnImplementContractProperty(ImplementationClassWriter<TypeTemplate.TInterface> writer)
         {
-            var baseProperty = _context.GetBasePropertyToImplement(MetaProperty);
+            //var baseProperty = _context.GetBasePropertyToImplement(MetaProperty);
             
-            writer.Property(baseProperty).Implement( 
-                p => baseProperty.CanRead
-                    ? p.Get(gw => {
-                        base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+            //writer.Property(baseProperty).Implement( 
+            //    p => baseProperty.CanRead
+            //        ? p.Get(gw => {
+            //            base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
 
-                        var persistableObjectLocal = gw.Local<object>();
-                        persistableObjectLocal.Assign(
-                            _context.PersistableObjectField
-                            .Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo));
+            //            var persistableObjectLocal = gw.Local<object>();
+            //            persistableObjectLocal.Assign(
+            //                _context.PersistableObjectField
+            //                .Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo));
 
-                        gw.Return(Static.GenericFunc((o, f) => RuntimeEntityModelHelpers.GetNestedDomainObject<TT.TProperty>(o, f), 
-                            persistableObjectLocal, 
-                            _context.DomainObjectFactoryField));
-                    })
-                    : null,
-                p => baseProperty.CanWrite
-                    ? p.Set((sw, value) => {
-                        base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
-                        _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(
-                            value
-                            .CastTo<IContain<IPersistableObject>>()
-                            .Func<IPersistableObject>(x => x.GetContainedObject)
-                            .CastTo<TT.TProperty>());
-                    })
-                    : null
-            );
+            //            gw.Return(Static.GenericFunc((o, f) => RuntimeEntityModelHelpers.GetNestedDomainObject<TT.TProperty>(o, f), 
+            //                persistableObjectLocal, 
+            //                _context.DomainObjectFactoryField));
+            //        })
+            //        : null,
+            //    p => baseProperty.CanWrite
+            //        ? p.Set((sw, value) => {
+            //            base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+            //            _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(
+            //                value
+            //                .CastTo<IContain<IPersistableObject>>()
+            //                .Func<IPersistableObject>(x => x.GetContainedObject)
+            //                .CastTo<TT.TProperty>());
+            //        })
+            //        : null
+            //);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

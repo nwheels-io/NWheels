@@ -243,6 +243,7 @@ namespace NWheels.Stacks.MongoDb
 
                 var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)persistableObject);
 
+
                 if ( _ownerRepo.CanRetrieve<TEntityContract>(domainObject) )
                 {
                     return domainObject;
@@ -579,8 +580,10 @@ namespace NWheels.Stacks.MongoDb
             _ownerRepo.ValidateOperationalState();
             _ownerRepo.AuthorizeNew<TEntityContract>();
 
-            var persistableObject = _objectFactory.NewEntity<TEntityContract>();
-            return InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>((TEntityImpl)persistableObject, shouldTrack: false);
+            return _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>();
+
+            //var persistableObject = _objectFactory.NewEntity<TEntityContract>();
+            //return InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>((TEntityImpl)persistableObject, shouldTrack: false);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -730,7 +733,7 @@ namespace NWheels.Stacks.MongoDb
                 ObjectUtility.InjectDependenciesToObject(entity, _ownerRepo.Components);
                 _ownerRepo.TrackEntity(ref entity, EntityState.RetrievedPristine);
 
-                ((IPersistableObject)entity).EnsureDomainObject();
+                //((IPersistableObject)entity).EnsureDomainObject();
                 //if ( entity.AsOrNull<IDomainObject>() == null )
                 //{
                 //    _domainObjectFactory.CreateDomainObjectInstance<TConcreteContract>((TConcreteContract)(object)entity);

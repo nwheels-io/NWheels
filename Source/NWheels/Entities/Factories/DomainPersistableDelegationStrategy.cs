@@ -35,47 +35,47 @@ namespace NWheels.Entities.Factories
 
         protected override void OnImplementContractProperty(ImplementationClassWriter<TypeTemplate.TInterface> writer)
         {
-            var baseProperty = _context.GetBasePropertyToImplement(MetaProperty);
-            ClassWriterBase effectiveClassWriter = (
-                baseProperty.DeclaringType != null && baseProperty.DeclaringType.IsInterface 
-                ? (ClassWriterBase)writer.ImplementInterfaceVirtual(baseProperty.DeclaringType) 
-                : (ClassWriterBase)writer);
+            //var baseProperty = _context.GetBasePropertyToImplement(MetaProperty);
+            //ClassWriterBase effectiveClassWriter = (
+            //    baseProperty.DeclaringType != null && baseProperty.DeclaringType.IsInterface 
+            //    ? (ClassWriterBase)writer.ImplementInterfaceVirtual(baseProperty.DeclaringType) 
+            //    : (ClassWriterBase)writer);
 
-            using ( TT.CreateScope<TT.TInterface>(MetaType.ContractType) )
-            {
-                writer.Property(baseProperty).Implement(
-                    p => baseProperty.GetMethod != null ? 
-                        p.Get(gw => {
-                            this.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+            //using ( TT.CreateScope<TT.TInterface>(MetaType.ContractType) )
+            //{
+            //    writer.Property(baseProperty).Implement(
+            //        p => baseProperty.GetMethod != null ? 
+            //            p.Get(gw => {
+            //                this.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
 
-                            if ( MetaProperty.ContractPropertyInfo.CanRead )
-                            {
-                                gw.Return(_context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo));
-                            }
-                            else
-                            {
-                                var readerMethodInfo = _context.PersistableObjectMembers.Methods.First(m => m.Name == GetReadAccessorMethodName(MetaProperty));
-                                gw.Return(_context.PersistableObjectField.Func<TT.TProperty>(readerMethodInfo));
-                            }
-                        }) : 
-                        null,
-                    p => baseProperty.SetMethod != null ? 
-                        p.Set((sw, value) => {
-                            this.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
+            //                if ( MetaProperty.ContractPropertyInfo.CanRead )
+            //                {
+            //                    gw.Return(_context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo));
+            //                }
+            //                else
+            //                {
+            //                    var readerMethodInfo = _context.PersistableObjectMembers.Methods.First(m => m.Name == GetReadAccessorMethodName(MetaProperty));
+            //                    gw.Return(_context.PersistableObjectField.Func<TT.TProperty>(readerMethodInfo));
+            //                }
+            //            }) : 
+            //            null,
+            //        p => baseProperty.SetMethod != null ? 
+            //            p.Set((sw, value) => {
+            //                this.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
 
-                            if (MetaProperty.ContractPropertyInfo.CanWrite)
-                            {
-                                _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(value);
-                            }
-                            else
-                            {
-                                var writerMethodInfo = _context.PersistableObjectMembers.Methods.First(m => m.Name == GetWriteAccessorMethodName(MetaProperty));
-                                _context.PersistableObjectField.Void(writerMethodInfo, value);
-                            }
-                        }) :
-                        null
-                );
-            }
+            //                if (MetaProperty.ContractPropertyInfo.CanWrite)
+            //                {
+            //                    _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(value);
+            //                }
+            //                else
+            //                {
+            //                    var writerMethodInfo = _context.PersistableObjectMembers.Methods.First(m => m.Name == GetWriteAccessorMethodName(MetaProperty));
+            //                    _context.PersistableObjectField.Void(writerMethodInfo, value);
+            //                }
+            //            }) :
+            //            null
+            //    );
+            //}
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -19,16 +19,12 @@ namespace NWheels.Entities.Factories
             ObjectFactoryContext baseContext, 
             ITypeMetadataCache metadataCache, 
             ITypeMetadata metaType, 
-            Type persistableFactoryType,
             PropertyImplementationStrategyMap propertyMap)
         {
             this.BaseContext = baseContext;
             this.MetadataCache = metadataCache;
             this.MetaType = metaType;
-            this.PersistableFactoryType = persistableFactoryType;
-            this.PersistableObjectType = metaType.GetImplementationBy(persistableFactoryType);
             this.DomainObjectMembers = TypeMemberCache.Of(metaType.DomainObjectType ?? typeof(object));
-            this.PersistableObjectMembers = TypeMemberCache.Of(this.PersistableObjectType);
             this.PropertyMap = propertyMap;
         }
 
@@ -78,15 +74,15 @@ namespace NWheels.Entities.Factories
         public ObjectFactoryContext BaseContext { get; private set; }
         public ITypeMetadataCache MetadataCache { get; private set; }
         public ITypeMetadata MetaType { get; private set; }
-        public Type PersistableFactoryType { get; private set; }
-        public Type PersistableObjectType { get; private set; }
-        public Field<TT2.TPersistable> PersistableObjectField { get; set; }
+        //public Type PersistableFactoryType { get; private set; }
+        //public Type PersistableObjectType { get; private set; }
+        //public Field<TT2.TPersistable> PersistableObjectField { get; set; }
         public Field<IDomainObjectFactory> DomainObjectFactoryField { get; set; }
         public Field<IFramework> FrameworkField { get; set; }
         public Field<EntityState> EntityStateField { get; set; }
         public BitVectorField ModifiedVector { get; set; }
         public TypeMemberCache DomainObjectMembers { get; private set; }
-        public TypeMemberCache PersistableObjectMembers { get; private set; }
+        //public TypeMemberCache PersistableObjectMembers { get; private set; }
         public PropertyImplementationStrategyMap PropertyMap { get; private set; }
         public Action<ConstructorWriter> OnWriteOnNewTriggerCalls { get; set; }
 

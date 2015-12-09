@@ -29,9 +29,7 @@ namespace NWheels.Entities.Factories
             }
             else if ( _context.MetaType.BaseType != null )
             {
-                context.BaseType = ((IDomainObjectFactory)_context.BaseContext.Factory).GetOrBuildDomainObjectType(
-                    _context.MetaType.BaseType.ContractType,
-                    _context.PersistableFactoryType);
+                context.BaseType = ((IDomainObjectFactory)_context.BaseContext.Factory).GetOrBuildDomainObjectType(_context.MetaType.BaseType.ContractType);
             }
         }
 
@@ -39,7 +37,7 @@ namespace NWheels.Entities.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static Type GetBaseType(ObjectFactoryBase factory, ITypeMetadata metaType, Type persistableObjectFactoryType)
+        public static Type GetBaseType(ObjectFactoryBase factory, ITypeMetadata metaType)
         {
             if ( metaType.DomainObjectType != null )
             {
@@ -47,9 +45,7 @@ namespace NWheels.Entities.Factories
             }
             else if ( metaType.BaseType != null )
             {
-                return ((IDomainObjectFactory)factory).GetOrBuildDomainObjectType(
-                    metaType.BaseType.ContractType, 
-                    persistableObjectFactoryType);
+                return ((IDomainObjectFactory)factory).GetOrBuildDomainObjectType(metaType.BaseType.ContractType);
             }
             else
             {

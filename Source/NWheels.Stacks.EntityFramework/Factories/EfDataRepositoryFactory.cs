@@ -76,7 +76,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
             return new IObjectFactoryConvention[] {
-                new EfDataRepositoryConvention(_entityFactory, base.MetadataCache)
+                new EfDataRepositoryConvention(_components.Resolve<IDomainObjectFactory>(), _entityFactory, base.MetadataCache)
             };
         }
 
@@ -84,8 +84,8 @@ namespace NWheels.Stacks.EntityFramework.Factories
 
         public class EfDataRepositoryConvention : ConnectedModelDataRepositoryConvention<DbConnection, DbCompiledModel>
         {
-            public EfDataRepositoryConvention(EntityObjectFactory entityFactory, TypeMetadataCache metadataCache)
-                : base(entityFactory, metadataCache)
+            public EfDataRepositoryConvention(IDomainObjectFactory domainObjectFactory, EntityObjectFactory entityFactory, TypeMetadataCache metadataCache)
+                : base(domainObjectFactory, entityFactory, metadataCache)
             {
                 this.RepositoryBaseType = typeof(EfDataRepositoryBase);
             }

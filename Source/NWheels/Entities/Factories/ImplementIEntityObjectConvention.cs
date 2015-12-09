@@ -61,12 +61,14 @@ namespace NWheels.Entities.Factories
                         keyBackingField.AsOperand<TT.TKey>().Assign(value.CastTo<TT.TKey>());
                     }
                 })
-                .Method<IDomainObject>(x => x.SetContainerObject).Implement((m, domainObject) => {
-                    domainObjectField.Assign(domainObject);
-                })
-                .Method<IDomainObject>(x => x.GetContainerObject).Implement(m => {
-                    m.Return(domainObjectField);
-                });
+                .Method<object[]>(intf => intf.ExportValues).Throw<NotImplementedException>()
+                .Method<object[]>(intf => intf.ImportValues).Throw<NotImplementedException>();
+                //.Method<IDomainObject>(x => x.SetContainerObject).Implement((m, domainObject) => {
+                //    domainObjectField.Assign(domainObject);
+                //})
+                //.Method<IDomainObject>(x => x.GetContainerObject).Implement(m => {
+                //    m.Return(domainObjectField);
+                //});
 
             ImplementToString(writer);
         }

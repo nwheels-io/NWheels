@@ -31,23 +31,23 @@ namespace NWheels.Entities.Factories
 
         protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
         {
-            if ( _context.MetaType.DomainObjectType != null )
-            {
-                using ( TT.CreateScope<TT.TInterface, TT2.TDomain, TT2.TPersistable>(
-                    writer.OwnerClass.BaseType, writer.OwnerClass.BaseType, _context.PersistableObjectType) )
-                {
-                    var propertyWriter = writer.ImplementBase<TT.TInterface>();
+            //if ( _context.MetaType.DomainObjectType != null )
+            //{
+            //    using ( TT.CreateScope<TT.TInterface, TT2.TDomain, TT2.TPersistable>(
+            //        writer.OwnerClass.BaseType, writer.OwnerClass.BaseType, _context.PersistableObjectType) )
+            //    {
+            //        var propertyWriter = writer.ImplementBase<TT.TInterface>();
 
-                    PropertyImplementationStrategyMap.InvokeStrategies(
-                        _context.PropertyMap.Strategies,
-                        strategy => {
-                            using ( _context.CreatePropertyTypeTemplateScope(strategy.MetaProperty) )
-                            {
-                                strategy.WritePropertyImplementation(propertyWriter);
-                            }
-                        });
-                }
-            }
+            //        PropertyImplementationStrategyMap.InvokeStrategies(
+            //            _context.PropertyMap.Strategies,
+            //            strategy => {
+            //                using ( _context.CreatePropertyTypeTemplateScope(strategy.MetaProperty) )
+            //                {
+            //                    strategy.WritePropertyImplementation(propertyWriter);
+            //                }
+            //            });
+            //    }
+            //}
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

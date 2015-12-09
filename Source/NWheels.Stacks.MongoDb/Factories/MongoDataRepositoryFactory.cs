@@ -31,6 +31,7 @@ namespace NWheels.Stacks.MongoDb.Factories
         private readonly IComponentContext _components;
         private readonly IFrameworkDatabaseConfig _dbConfiguration;
         private readonly ITypeMetadataCache _metadataCache;
+        private readonly IDomainObjectFactory _domainObjectFactory;
         private readonly MongoEntityObjectFactory _entityFactory;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,6 +48,7 @@ namespace NWheels.Stacks.MongoDb.Factories
         {
             _components = components;
             _entityFactory = entityFactory;
+            _domainObjectFactory = components.Resolve<IDomainObjectFactory>();
             _dbConfiguration = dbConfiguration;
             _metadataCache = metadataCache;
         }
@@ -81,7 +83,7 @@ namespace NWheels.Stacks.MongoDb.Factories
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
             return new IObjectFactoryConvention[] {
-                new MongoDataRepositoryConvention(_entityFactory, base.MetadataCache)
+                new MongoDataRepositoryConvention(_domainObjectFactory, _entityFactory, base.MetadataCache)
             };
         }
 
@@ -89,8 +91,8 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         public class MongoDataRepositoryConvention : ConnectedModelDataRepositoryConvention<MongoDatabase, object>
         {
-            public MongoDataRepositoryConvention(EntityObjectFactory entityFactory, TypeMetadataCache metadataCache)
-                : base(entityFactory, metadataCache)
+            public MongoDataRepositoryConvention(IDomainObjectFactory domainObjectFactory, EntityObjectFactory entityFactory, TypeMetadataCache metadataCache)
+                : base(domainObjectFactory, entityFactory, metadataCache)
             {
                 this.RepositoryBaseType = typeof(MongoDataRepositoryBase);
             }

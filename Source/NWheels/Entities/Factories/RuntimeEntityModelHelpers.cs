@@ -71,44 +71,44 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void InjectContainerDomainObject(IComponentContext components, IDomainObject domainObject, IPersistableObject persistableObject)
-        {
-            persistableObject.SetContainerObject(domainObject);
+        //public static void InjectContainerDomainObject(IComponentContext components, IDomainObject domainObject, IPersistableObject persistableObject)
+        //{
+        //    persistableObject.SetContainerObject(domainObject);
 
-            var hasNestedObjects = (persistableObject as IHaveNestedObjects);
+        //    var hasNestedObjects = (persistableObject as IHaveNestedObjects);
 
-            if ( hasNestedObjects != null )
-            {
-                var domainObjectFactory = components.Resolve<IDomainObjectFactory>();
-                var nestedObjects = new HashSet<object>();
-                hasNestedObjects.DeepListNestedObjects(nestedObjects);
+        //    if ( hasNestedObjects != null )
+        //    {
+        //        var domainObjectFactory = components.Resolve<IDomainObjectFactory>();
+        //        var nestedObjects = new HashSet<object>();
+        //        hasNestedObjects.DeepListNestedObjects(nestedObjects);
 
-                foreach ( var nested in nestedObjects.OfType<IPersistableObject>() )
-                {
-                    if ( nested.GetContainerObject() == null )
-                    {
-                        domainObjectFactory.CreateDomainObjectInstance(nested);
-                    }
-                }
-            }
-        }
+        //        foreach ( var nested in nestedObjects.OfType<IPersistableObject>() )
+        //        {
+        //            if ( nested.GetContainerObject() == null )
+        //            {
+        //                domainObjectFactory.CreateDomainObjectInstance(nested);
+        //            }
+        //        }
+        //    }
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static IDomainObject EnsureContainerDomainObject<TEntityContract>(IPersistableObject persistableObject, IComponentContext components)
-        {
-            var existingDomainObject = persistableObject.GetContainerObject();
+        //public static IDomainObject EnsureContainerDomainObject<TEntityContract>(IPersistableObject persistableObject, IComponentContext components)
+        //{
+        //    var existingDomainObject = persistableObject.GetContainerObject();
 
-            if ( existingDomainObject != null )
-            {
-                return existingDomainObject;
-            }
+        //    if ( existingDomainObject != null )
+        //    {
+        //        return existingDomainObject;
+        //    }
 
-            var factory = components.Resolve<IDomainObjectFactory>();
-            var newDomainObject = factory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)persistableObject);
+        //    var factory = components.Resolve<IDomainObjectFactory>();
+        //    var newDomainObject = factory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)persistableObject);
 
-            return (IDomainObject)newDomainObject;
-        }
+        //    return (IDomainObject)newDomainObject;
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -147,29 +147,28 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static TContract GetNestedDomainObject<TContract>(object nestedPersistableObject, IDomainObjectFactory domainObjectFactory)
-            where TContract : class
-        {
-            if ( nestedPersistableObject == null )
-            {
-                return null;
-            }
+        //public static TContract GetNestedDomainObject<TContract>(object nestedPersistableObject, IDomainObjectFactory domainObjectFactory)
+        //    where TContract : class
+        //{
+        //    if ( nestedPersistableObject == null )
+        //    {
+        //        return null;
+        //    }
 
-            var containedObject = (TContract)nestedPersistableObject;
-            var containerObject = (TContract)((IPersistableObject)nestedPersistableObject).GetContainerObject();
+        //    var containedObject = (TContract)nestedPersistableObject;
+        //    var containerObject = (TContract)((IPersistableObject)nestedPersistableObject).GetContainerObject();
             
-            if ( containerObject != null )
-            {
-                return containerObject;
-            }
+        //    if ( containerObject != null )
+        //    {
+        //        return containerObject;
+        //    }
 
-            return domainObjectFactory.CreateDomainObjectInstance<TContract>(containedObject);
-        }
+        //    return domainObjectFactory.CreateDomainObjectInstance<TContract>(containedObject);
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static bool InitializeDomainObjectConstructor<TEntity>(out IComponentContext components, out TEntity persistableObject)
-            where TEntity : class
+        public static bool InitializeDomainObjectConstructor(out IComponentContext components)
         {
             var domainContext = CurrentDomainContext;
 
@@ -179,7 +178,7 @@ namespace NWheels.Entities.Factories
             }
 
             components = domainContext.Components;
-            persistableObject = domainContext.PersistableObjectFactory.NewEntity<TEntity>();
+            //persistableObject = domainContext.PersistableObjectFactory.NewEntity<TEntity>();
 
             return true;
         }

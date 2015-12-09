@@ -124,6 +124,20 @@ namespace NWheels.DataObjects.Core.Factories
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public void WriteExportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector)
+        {
+            OnWritingExportStorageValue(methodWriter, valueVector);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void WriteImportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector)
+        {
+            OnWritingImportStorageValue(methodWriter, valueVector);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ObjectFactoryContext FactoryContext
         {
@@ -291,6 +305,18 @@ namespace NWheels.DataObjects.Core.Factories
         {
         }
 
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void OnWritingExportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector)
+        {
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void OnWritingImportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector)
+        {
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected void HelpInitializeDefaultValue(MethodWriterBase constructorWriter, Operand<IComponentContext> components)
@@ -303,6 +329,13 @@ namespace NWheels.DataObjects.Core.Factories
             {
                 WriteInitializeWithGeneratedValue(constructorWriter, components);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected Field<TypeTemplate.TProperty> HelpGetPropertyBackingField(MethodWriterBase writer)
+        {
+            return writer.OwnerClass.GetPropertyBackingField(MetaProperty.ContractPropertyInfo).AsOperand<TT.TProperty>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -333,14 +366,26 @@ namespace NWheels.DataObjects.Core.Factories
         private void WriteInitializeWithGeneratedValue(MethodWriterBase constructorWriter, Operand<IComponentContext> components)
         {
             var cw = constructorWriter;
+            var generator = MetadataCache.As<TypeMetadataCache>().GetPropertyValueGeneratorInstance(MetaProperty.DefaultValueGeneratorType);
+            var generatorWriter = (generator as IPropertyValueGeneratorWriter);
 
-            using ( TT.CreateScope<TT.TService>(MetaProperty.DefaultValueGeneratorType) )
+            var backingField = cw.OwnerClass.GetPropertyBackingField(MetaProperty.ContractPropertyInfo).AsOperand<TT.TProperty>();
+
+            if ( generatorWriter != null )
             {
-                var backingField = cw.OwnerClass.GetPropertyBackingField(MetaProperty.ContractPropertyInfo).AsOperand<TT.TProperty>();
-                backingField.Assign(
-                    Static.Func(ResolutionExtensions.Resolve<TT.TService>, components)
-                    .CastTo<IPropertyValueGenerator<TT.TProperty>>()
-                    .Func<string, TT.TProperty>(x => x.GenerateValue, cw.Const(MetaProperty.ContractQualifiedName)));
+                // inline value generation code for better performance
+                generatorWriter.WriteGenerateValue(MetaProperty.ContractQualifiedName, constructorWriter, backingField);
+            }
+            else 
+            {
+                // fall back to resolving generator object from container at runtime, and calling its GenerateValue method
+                using ( TT.CreateScope<TT.TService>(MetaProperty.DefaultValueGeneratorType) )
+                {
+                    backingField.Assign(
+                        Static.Func(ResolutionExtensions.Resolve<TT.TService>, components)
+                        .CastTo<IPropertyValueGenerator<TT.TProperty>>()
+                        .Func<string, TT.TProperty>(x => x.GenerateValue, cw.Const(MetaProperty.ContractQualifiedName)));
+                }
             }
         }
 

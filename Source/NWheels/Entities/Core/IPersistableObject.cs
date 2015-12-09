@@ -7,9 +7,12 @@ using NWheels.TypeModel.Core;
 
 namespace NWheels.Entities.Core
 {
-    public interface IPersistableObject : IContainedIn<IDomainObject>
+    public interface IPersistableObject //: IContainedIn<IDomainObject>
     {
-        void SetContainerObject(IDomainObject container);
-        void EnsureDomainObject();
+        //void SetContainerObject(IDomainObject container);
+        //void EnsureDomainObject();
+
+        object[] ExportValues();
+        void ImportValues(object[] values);
     }
 }
