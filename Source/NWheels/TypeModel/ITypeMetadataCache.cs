@@ -12,8 +12,10 @@ namespace NWheels.DataObjects
     {
         ITypeMetadata GetTypeMetadata(Type contract);
         ITypeMetadata GetTypeMetadata(string qualifiedName);
+        ITypeMetadata GetMetaTypeByImplementation(Type implementationType);
         bool ContainsTypeMetadata(Type contract);
         bool TryGetTypeMetadata(Type contract, out ITypeMetadata metadata);
+        bool TryGetMetaTypeByImplementation(Type implementationType, out ITypeMetadata metadata);
         IEnumerable<IPropertyMetadata> GetIncomingRelations(ITypeMetadata targetType, Func<IPropertyMetadata, bool> sourcePredicate = null);
         void EnsureRelationalMapping(ITypeMetadata type);
         Type Concretize(Type contract);

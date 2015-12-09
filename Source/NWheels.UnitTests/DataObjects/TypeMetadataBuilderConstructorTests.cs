@@ -79,7 +79,7 @@ namespace NWheels.UnitTests.DataObjects
         {
             TypeMetadataCache metadataCache;
             var metadataConstructor = CreateMetadataConstructor(out metadataCache);
-            var typeMetadata = new TypeMetadataBuilder();
+            var typeMetadata = new TypeMetadataBuilder(metadataCache);
 
             Type[] addedMixinContracts;
 

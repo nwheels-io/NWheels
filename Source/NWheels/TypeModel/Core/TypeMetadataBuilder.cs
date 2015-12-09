@@ -13,6 +13,7 @@ namespace NWheels.DataObjects.Core
     public class TypeMetadataBuilder : MetadataElement<ITypeMetadata>, ITypeMetadata
     {
         private readonly object _relationalMappingSyncRoot = new object();
+        private readonly TypeMetadataCache _ownerMetadataCache;
         private readonly ConcreteToAbstractListAdapter<TypeMetadataBuilder, ITypeMetadata> _derivedTypesAdapter;
         private readonly ConcreteToAbstractListAdapter<PropertyMetadataBuilder, IPropertyMetadata> _propertiesAdapter;
         private readonly ConcreteToAbstractListAdapter<KeyMetadataBuilder, IKeyMetadata> _allKeysAdapter;
@@ -26,6 +27,15 @@ namespace NWheels.DataObjects.Core
 
         public TypeMetadataBuilder()
         {
+            throw new NotSupportedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TypeMetadataBuilder(TypeMetadataCache ownerMetadataCache)
+        {
+            _ownerMetadataCache = ownerMetadataCache;
+
             this.DerivedTypes = new List<TypeMetadataBuilder>();
             this.MixinContractTypes = new List<Type>();
             this.Properties = new List<PropertyMetadataBuilder>();
@@ -349,6 +359,8 @@ namespace NWheels.DataObjects.Core
             {
                 property.UpdateImplementation(factoryType, implementationProperties[property.Name]);
             }
+
+            _ownerMetadataCache.UpdateMetaTypeImplementation(this, implementationType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

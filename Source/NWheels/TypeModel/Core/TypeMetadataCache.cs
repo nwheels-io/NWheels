@@ -11,6 +11,7 @@ namespace NWheels.DataObjects.Core
         private readonly IComponentContext _components;
         private readonly ConcurrentDictionary<Type, TypeMetadataBuilder> _metadataByContractType = new ConcurrentDictionary<Type, TypeMetadataBuilder>();
         private readonly ConcurrentDictionary<string, TypeMetadataBuilder> _metadataByQualifiedName = new ConcurrentDictionary<string, TypeMetadataBuilder>();
+        private readonly ConcurrentDictionary<Type, TypeMetadataBuilder> _metadataByImplementationType = new ConcurrentDictionary<Type, TypeMetadataBuilder>();
         private readonly ConcurrentDictionary<Type, ISemanticDataType> _semanticDataTypes;
         private readonly ConcurrentDictionary<Type, IStorageDataType> _storageDataTypes;
         private MetadataConventionSet _conventions;
@@ -30,6 +31,20 @@ namespace NWheels.DataObjects.Core
             _storageDataTypes = new ConcurrentDictionary<Type, IStorageDataType>();
 
             EnsureExtensibilityRegistrations();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ITypeMetadata GetMetaTypeByImplementation(Type implementationType)
+        {
+            ITypeMetadata metaType;
+
+            if ( TryGetMetaTypeByImplementation(implementationType, out metaType) )
+            {
+                return metaType;
+            }
+
+            throw new KeyNotFoundException(string.Format("Implementation type '{0}' is not registered in the metadata cache.", implementationType.FullName));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -61,6 +76,24 @@ namespace NWheels.DataObjects.Core
             var result = _metadataByContractType.TryGetValue(primaryContract, out metadataBuilder);
             metadata = metadataBuilder;
             return result;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool TryGetMetaTypeByImplementation(Type implementationType, out ITypeMetadata metadata)
+        {
+            TypeMetadataBuilder metaTypeBuilder;
+
+            if ( _metadataByImplementationType.TryGetValue(implementationType, out metaTypeBuilder) )
+            {
+                metadata = metaTypeBuilder;
+                return true;
+            }
+            else
+            {
+                metadata = null;
+                return false;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -182,6 +215,13 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal void UpdateMetaTypeImplementation(TypeMetadataBuilder metaType, Type implementationType)
+        {
+            _metadataByImplementationType.TryAdd(implementationType, metaType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void EnsureExtensibilityRegistrations()
         {
             if ( _mixinsByPrimaryContract == null || _concretizationsByPrimaryContract == null )
@@ -245,7 +285,7 @@ namespace NWheels.DataObjects.Core
 
             try
             {
-                var builder = new TypeMetadataBuilder();
+                var builder = new TypeMetadataBuilder(this);
                 newEntryInserted = !entriesBeingBuilt.ContainsKey(primaryContract);
                 entriesBeingBuilt[primaryContract] = builder;
 
