@@ -24,7 +24,7 @@ namespace NWheels.Domains.Security
             builder.RegisterType<PrivateAuthenticationProvider>().As<IAuthenticationProvider>().SingleInstance();
             builder.RegisterType<ClaimFactory>().SingleInstance();
 
-            builder.RegisterType<UserLoginTransactionScript>().SingleInstance();
+            builder.RegisterType<UserLoginTransactionScript>().InstancePerDependency();
             builder.RegisterType<UserLogoutTransactionScript>().SingleInstance();
             builder.RegisterType<ChangePasswordTransactionScript>().SingleInstance();
             builder.RegisterType<JsonSerializationExtension>().As<IJsonSerializationExtension>();

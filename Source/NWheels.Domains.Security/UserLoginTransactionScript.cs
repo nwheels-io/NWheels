@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NWheels.Authorization;
 using NWheels.Authorization.Core;
@@ -12,6 +13,7 @@ using NWheels.Processing;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 using NWheels.Utilities;
+using System.Security.Claims;
 
 namespace NWheels.Domains.Security
 {
@@ -42,6 +44,8 @@ namespace NWheels.Domains.Security
                 principal = _authenticationProvider.Authenticate(loginName, SecureStringUtility.ClearToSecure(password), out userAccount);
             }
 
+            AttachExtendedClaims(principal);
+
             var uidlEndpoint = currentSession.Endpoint as IUidlApplicationEndpoint;
 
             if ( uidlEndpoint != null )
@@ -63,6 +67,36 @@ namespace NWheels.Domains.Security
             return result;
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public event EventHandler<ExtendedClaimsEventArgs> AttachingExtendedClaims;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void AttachExtendedClaims(UserAccountPrincipal principal)
+        {
+            if ( AttachingExtendedClaims != null )
+            {
+                var args = new ExtendedClaimsEventArgs();
+                AttachingExtendedClaims(this, args);
+                principal.Identity.ExtendClaims(args.ExtendedClaims);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ExtendedClaimsEventArgs : EventArgs
+        {
+            public ExtendedClaimsEventArgs()
+            {
+                ExtendedClaims = new List<Claim>();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public List<Claim> ExtendedClaims { get; private set; }
+        }
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class Result

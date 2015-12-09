@@ -24,6 +24,7 @@ namespace NWheels.Domains.Security.Core
         
         private readonly IUserAccountEntity _userAccount;
         private readonly IAccessControlList _accessControlList;
+        private readonly List<Claim> _extendedClaims;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -32,6 +33,7 @@ namespace NWheels.Domains.Security.Core
         {
             _userAccount = userAccount;
             _accessControlList = accessControlList;
+            _extendedClaims = new List<Claim>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -92,6 +94,20 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public T GetClaimOfType<T>() where T : Claim
+        {
+            return Claims.OfType<T>().FirstOrDefault();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public T GetExtendedClaimOfType<T>() where T : Claim
+        {
+            return _extendedClaims.OfType<T>().FirstOrDefault();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         string IIdentityInfo.UserId
         {
             get
@@ -143,6 +159,33 @@ namespace NWheels.Domains.Security.Core
         public bool IsGlobalAnonymous 
         {
             get { return true; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override IEnumerable<Claim> Claims 
+        {
+            get
+            {
+                return base.Claims.Concat(_extendedClaims);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEnumerable<Claim> ExtendedClaims
+        {
+            get
+            {
+                return _extendedClaims;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal void ExtendClaims(IEnumerable<Claim> extendedClaims)
+        {
+            _extendedClaims.AddRange(extendedClaims);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

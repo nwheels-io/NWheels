@@ -13,6 +13,8 @@ namespace NWheels.Domains.Security.Core
     {
         private readonly IIdentityInfo _identityInfo;
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public UserAccountPrincipal(UserAccountIdentity identity)
             : base(identity)
         {
