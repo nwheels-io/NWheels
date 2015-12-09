@@ -9,6 +9,7 @@ using NWheels.Authorization;
 using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Conventions.Core;
+using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities.Factories;
 using NWheels.Extensions;
@@ -24,6 +25,7 @@ namespace NWheels.Entities.Core
         private readonly Dictionary<Type, IPartitionedRepository> _partitionedRepositoryByContractType;
         private readonly Dictionary<Type, Action<IDataRepositoryCallback>> _genericCallbacksByContractType;
         private readonly IComponentContext _components;
+        private readonly ITypeMetadataCache _metadataCache;
         private readonly IDomainObjectFactory _domainObjectFactory;
         private readonly IServiceBus _serviceBus;
         private readonly IDomainContextLogger _logger;
@@ -45,6 +47,7 @@ namespace NWheels.Entities.Core
             _genericCallbacksByContractType = new Dictionary<Type, Action<IDataRepositoryCallback>>();
             _autoCommit = autoCommit;
             _components = components;
+            _metadataCache = components.Resolve<ITypeMetadataCache>();
             _domainObjectFactory = components.Resolve<IDomainObjectFactory>();
             _serviceBus = components.Resolve<IServiceBus>();
             _logger = components.Resolve<IDomainContextLogger>();
@@ -378,7 +381,7 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEntityAccessControl GetEntityAccessControl(Type entityContract)
+        public IEntityAccessControl GetEntityAccessControl(Type entityType)
         {
             var identityInfo = (Thread.CurrentPrincipal.Identity as IIdentityInfo);
 
@@ -394,6 +397,7 @@ namespace NWheels.Entities.Core
                 throw new SecurityException("No access controls defined for current user.");
             }
 
+            var entityContract = (entityType.IsInterface ? entityType : _metadataCache.GetMetaTypeByImplementation(entityType).ContractType);
             var entityAccessControl = accessControlList.GetEntityAccessControl(entityContract);
 
             if ( entityAccessControl == null )

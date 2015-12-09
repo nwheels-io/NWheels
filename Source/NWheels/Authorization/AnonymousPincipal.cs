@@ -15,6 +15,24 @@ namespace NWheels.Authorization
 {
     public class AnonymousPrincipal : IPrincipal, IIdentity, IIdentityInfo
     {
+        private readonly IAccessControlList _accessControlList;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public AnonymousPrincipal(ITypeMetadataCache metadataCache, IAuthorizationLogger logger, Pipeline<AnonymousEntityAccessRule> entityAccessRules)
+        {
+            if ( entityAccessRules.Count > 0 )
+            {
+                _accessControlList = new AccessControlList(metadataCache, logger, entityAccessRules, claimSetKey: null);
+            }
+            else
+            {
+                _accessControlList = new AnonymousAccessControlList();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Implementation of IPrincipal
 
         public bool IsOfType(Type accountEntityType)
@@ -40,7 +58,7 @@ namespace NWheels.Authorization
 
         public IAccessControlList GetAccessControlList()
         {
-            return new AnonymousAccessControlList();
+            return _accessControlList;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -136,7 +154,6 @@ namespace NWheels.Authorization
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static readonly string AnonymousRole = "anonymous";
-        public static readonly AnonymousPrincipal Instance = new AnonymousPrincipal();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -23,14 +23,18 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public LocalTransientSessionManager(IFramework framework, ISessionEventLogger logger)
+        public LocalTransientSessionManager(
+            IFramework framework, 
+            AnonymousPrincipal anonymousPrincipal, 
+            SystemPrincipal systemPrincipal,
+            ISessionEventLogger logger)
         {
             _framework = framework;
             _logger = logger;
             _sessionById = new ConcurrentDictionary<string, Session>();
             
-            _anonymousSession = new Session(framework, AnonymousPrincipal.Instance, originatorEndpoint: null, slidingExpiration: null, absoluteExpiration: null);
-            _systemSession = new Session(framework, SystemPrincipal.Instance, originatorEndpoint: null, slidingExpiration: null, absoluteExpiration: null);
+            _anonymousSession = new Session(framework, anonymousPrincipal, originatorEndpoint: null, slidingExpiration: null, absoluteExpiration: null);
+            _systemSession = new Session(framework, systemPrincipal, originatorEndpoint: null, slidingExpiration: null, absoluteExpiration: null);
 
             // we do not add System session ID to the map, because joining System session from the web would be a security hole
             _sessionById.AddOrUpdate(_anonymousSession.Id, _anonymousSession, (k, v) => _anonymousSession);

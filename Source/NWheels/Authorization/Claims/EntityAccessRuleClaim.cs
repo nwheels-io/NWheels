@@ -7,22 +7,22 @@ namespace NWheels.Authorization.Claims
         public static readonly string EntityAccessRuleClaimTypeString = "EntityAccessRule";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        private readonly IEntityAccessRule _rule;
+
+        public EntityAccessRuleClaim(string claimValue)
+            : base(EntityAccessRuleClaimTypeString, claimValue)
+        {
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public EntityAccessRuleClaim(IEntityAccessRule rule, string claimValue)
             : base(EntityAccessRuleClaimTypeString, claimValue)
         {
-            _rule = rule;
+            this.Rule = rule;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IEntityAccessRule Rule
-        {
-            get { return _rule; }
-        }
+        public IEntityAccessRule Rule { get; protected set; }
     }
 }

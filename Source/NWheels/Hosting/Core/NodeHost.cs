@@ -286,6 +286,9 @@ namespace NWheels.Hosting.Core
 
             builder.RegisterType<AccessControlListCache>().SingleInstance();
             builder.RegisterType<LocalTransientSessionManager>().As<ISessionManager, ICoreSessionManager>().SingleInstance();
+            builder.RegisterPipeline<AnonymousEntityAccessRule>();
+            builder.RegisterType<AnonymousPrincipal>().SingleInstance();
+            builder.RegisterType<SystemPrincipal>().SingleInstance();
             builder.NWheelsFeatures().Logging().RegisterLogger<IAuthorizationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<ISessionEventLogger>();
             

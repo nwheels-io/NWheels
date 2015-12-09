@@ -85,6 +85,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authorization\AnonymousEntityAccessRule.cs" />
     <Compile Include="Authorization\Claims\AnonymousAccessPermission.cs" />
     <Compile Include="Authorization\Claims\UserIdentityClaimPermission.cs" />
     <Compile Include="Authorization\Claims\IImplyMoreClaims.cs" />
