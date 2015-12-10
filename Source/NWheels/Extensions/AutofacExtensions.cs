@@ -9,9 +9,11 @@ using Autofac.Builder;
 using Autofac.Core;
 using Autofac.Core.Activators.Reflection;
 using Autofac.Core.Lifetime;
+using NWheels.Authorization;
 using NWheels.Configuration;
 using NWheels.Conventions;
 using NWheels.Conventions.Core;
+using NWheels.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
@@ -103,6 +105,13 @@ namespace NWheels.Extensions
         public static ObjectContractFeature ObjectContracts(this NWheelsFeatureRegistrations features)
         {
             return new ObjectContractFeature(((IHaveContainerBuilder)features).Builder);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static AuthorizationFeature Authorizarion(this NWheelsFeatureRegistrations features)
+        {
+            return new AuthorizationFeature(((IHaveContainerBuilder)features).Builder);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -469,6 +478,36 @@ namespace NWheels.Extensions
             {
                 _builder.NWheelsFeatures().Logging().RegisterLogger<DatabaseInitializer.ILogger>();
                 _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>().FirstInPipeline();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RegisterDatabaseNameResolver<TResolver>()
+                where TResolver : class, IDatabaseNameResolver
+            {
+                _builder.RegisterType<TResolver>().As<IDatabaseNameResolver>().SingleInstance();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class AuthorizationFeature
+        {
+            private readonly ContainerBuilder _builder;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public AuthorizationFeature(ContainerBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IRegistrationBuilder<TRule, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterAnonymousEntityAccessRule<TRule>()
+                where TRule : AnonymousEntityAccessRule
+            {
+                return _builder.RegisterType<TRule>().As<AnonymousEntityAccessRule>();
             }
         }
 
