@@ -47,6 +47,7 @@ namespace NWheels.UI.Uidl
         AlertUser,
         Broadcast,
         InvokeCommand,
+        QueryModel,
         AlterModel,
         BranchByRule
     }

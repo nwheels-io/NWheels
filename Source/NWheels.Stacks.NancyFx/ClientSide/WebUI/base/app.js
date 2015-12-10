@@ -568,6 +568,23 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    m_behaviorImplementations['QueryModel'] = {
+        returnsPromise: true,
+        execute: function (scope, behavior, input) {
+            scope.model.input = input;
+            var context = {
+                model: scope.model
+            };
+            var value = (
+                behavior.sourceExpression==='null' || !behavior.sourceExpression
+                ? null
+                : Enumerable.Return(context).Select('ctx=>ctx.' + behavior.sourceExpression).Single());
+            return $q.when(value);
+        },
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     m_controllerImplementations['ScreenPartContainer'] = {
         implement: function (scope) {
             scope.$on(scope.uidl.qualifiedName + ':NavReq', function (event, data) {
@@ -1106,6 +1123,14 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    m_controllerImplementations['TransactionForm'] = {
+        implement: function (scope) {
+            scope.model.state.input = { };
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     m_controllerImplementations['EntityMethodForm'] = {
         implement: function (scope) {
             scope.$on(scope.uidl.qualifiedName + ':ShowModal', function(event, data) {
@@ -1467,7 +1492,9 @@ function (uidlService, entityService, commandService, $timeout, $http, $compile,
                         initFunc($scope);
                     }
             
-                    $scope.$emit($scope.uidl.qualifiedName + ':Loaded');
+                    $timeout(function() {
+                        $scope.$emit($scope.uidl.qualifiedName + ':Loaded');
+                    });
                 }
             });
             if ($scope.controllerInitCount) {

@@ -226,4 +226,19 @@ namespace NWheels.UI.Uidl
             RemoveMany
         }
     }
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [DataContract(Name = "QueryModelBehavior", Namespace = UidlDocument.DataContractNamespace)]
+    public class UidlQueryModelBehavior : BehaviorUidlNode
+    {
+        public UidlQueryModelBehavior(string idName, ControlledUidlNode parent)
+            : base(idName, BehaviorType.QueryModel, parent)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public string SourceExpression { get; set; }
+    }
 }

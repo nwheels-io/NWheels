@@ -27,7 +27,7 @@ namespace NWheels.UI.Toolbox
 
             this.InputMetaType = MetadataCache.GetTypeMetadata(typeof(TInput));
 
-            var formOrTypeSelector = UidlUtility.CreateFormOrTypeSelector(InputMetaType, "InputFormTypeSelector", this, isInline: false);
+            var formOrTypeSelector = UidlUtility.CreateFormOrTypeSelector(InputMetaType, "InputForm", this, isInline: false);
             this.InputForm = formOrTypeSelector as Form<TInput>;
             this.InputFormTypeSelector = formOrTypeSelector as TypeSelector;
         }
@@ -95,6 +95,12 @@ namespace NWheels.UI.Toolbox
                     .WaitForReply((script, data, state, context) => script.InitializeInput(null))
                     .Then(b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Input))
                     .Then(InvokeFormModelSetter));
+            }
+            else
+            {
+                presenter.On(Loaded)
+                    .QueryModel(vm => vm.State.Input)
+                    .Then(InvokeFormModelSetter);
             }
 
             presenter.On(Execute)
