@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using Autofac;
 using Hapil;
@@ -6,6 +7,7 @@ using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.Concurrency;
 using NWheels.Conventions.Core;
+using NWheels.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
@@ -24,8 +26,9 @@ namespace NWheels.Testing.Entities.Impl
             IComponentContext components, 
             DynamicModule module, 
             TypeMetadataCache metadataCache, 
+            IEnumerable<IDatabaseNameResolver> databaseNameResolvers,
             TestEntityObjectFactory entityFactory)
-            : base(module, metadataCache)
+            : base(module, metadataCache, databaseNameResolvers)
         {
             _components = components;
             _entityFactory = entityFactory;
@@ -44,8 +47,7 @@ namespace NWheels.Testing.Entities.Impl
                 consumerScope, 
                 _components, 
                 _entityFactory, 
-                autoCommit, 
-                databaseName);
+                autoCommit);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

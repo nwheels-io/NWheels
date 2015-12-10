@@ -19,10 +19,13 @@ using NWheels.Conventions;
 using NWheels.DataObjects.Core;
 using System.Data;
 using System.Linq.Expressions;
+using NWheels.Authorization.Core;
 using NWheels.Concurrency;
+using NWheels.Core;
 using NWheels.Entities.Core;
 using NWheels.Entities.Impl;
 using TT = Hapil.TypeTemplate;
+using NWheels.Authorization;
 
 // ReSharper disable ConvertToLambdaExpression
 
@@ -32,16 +35,19 @@ namespace NWheels.Conventions.Core
     {
         private readonly TypeMetadataCache _metadataCache;
         private readonly Dictionary<Type, Type> _repositoryContractByEntityContract;
+        private readonly Dictionary<Type, IDatabaseNameResolver> _databaseNameResolverByContractType;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected DataRepositoryFactoryBase(
             DynamicModule module,
-            TypeMetadataCache metadataCache)
+            TypeMetadataCache metadataCache,
+            IEnumerable<IDatabaseNameResolver> databaseNameResolvers)
             : base(module)
         {
             _metadataCache = metadataCache;
             _repositoryContractByEntityContract = new Dictionary<Type, Type>();
+            _databaseNameResolverByContractType = databaseNameResolvers.ToDictionary(resolver => resolver.DomainContextType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -73,6 +79,22 @@ namespace NWheels.Conventions.Core
                 key => new RegistrationMissingException(string.Format(
                     "Entity contract '{0}' could not be found in any of registered repositories.",
                     key.FullName)));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string ResolveDatabaseName(string configuredName, Type domainContextType)
+        {
+            IDatabaseNameResolver resolver;
+
+            if ( _databaseNameResolverByContractType.TryGetValue(domainContextType, out resolver) )
+            {
+                return resolver.ResolveDatabaseName(configuredName, context: (IAccessControlContext)Session.Current);
+            }
+            else
+            {
+                return configuredName;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -7,6 +7,7 @@ using Autofac;
 using Hapil;
 using NUnit.Framework;
 using NWheels.Conventions.Core;
+using NWheels.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
@@ -51,6 +52,7 @@ namespace NWheels.Testing.UnitTests.Entities.Impl
                 Framework.Components,
                 base.DyamicModule,
                 _metadataCache,
+                new IDatabaseNameResolver[0],
                 entityObjectFactory);
 
             Framework.UpdateComponents(

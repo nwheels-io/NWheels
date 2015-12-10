@@ -5,6 +5,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using NUnit.Framework;
 using NWheels.Conventions.Core;
+using NWheels.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
@@ -114,7 +115,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
             updater.Update(Framework.Components.ComponentRegistry);
 
             var entityFactory = new MongoEntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
-            var repoFactory = new MongoDataRepositoryFactory(Framework.Components, _dyamicModule, entityFactory, metadataCache, configAuto.Instance);
+            var repoFactory = new MongoDataRepositoryFactory(Framework.Components, _dyamicModule, entityFactory, metadataCache, new IDatabaseNameResolver[0], configAuto.Instance);
 
             Framework.UpdateComponents(
                 builder => {

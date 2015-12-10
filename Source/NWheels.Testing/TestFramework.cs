@@ -379,6 +379,9 @@ namespace NWheels.Testing
             builder.RegisterType<LocalTransientSessionManager>().As<ISessionManager, ICoreSessionManager>().SingleInstance();
             builder.NWheelsFeatures().Logging().RegisterLogger<IAuthorizationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<ISessionEventLogger>();
+            builder.RegisterPipeline<AnonymousEntityAccessRule>();
+            builder.RegisterType<AnonymousPrincipal>().SingleInstance();
+            builder.RegisterType<SystemPrincipal>().SingleInstance();
             
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IDomainContextLogger>();

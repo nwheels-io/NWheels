@@ -10,6 +10,7 @@ using Hapil;
 using MySql.Data.MySqlClient;
 using NUnit.Framework;
 using NWheels.Conventions.Core;
+using NWheels.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
@@ -252,6 +253,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
                 _dynamicModule,
                 new EfEntityObjectFactory(Framework.Components, _dynamicModule, (TypeMetadataCache)Framework.MetadataCache),
                 (TypeMetadataCache)Framework.MetadataCache,
+                new IDatabaseNameResolver[0],
                 dbProviderFactory,
                 Auto.Of(dbConfig));
         }

@@ -13,7 +13,7 @@ using NWheels.Stacks.EntityFramework.Factories;
 
 namespace NWheels.Stacks.EntityFramework.Tests.Unit
 {
-    [TestFixture]
+    [TestFixture, Ignore]
     public class EfEntityObjectFactoryTests : DynamicTypeUnitTestBase
     {
         [Test]

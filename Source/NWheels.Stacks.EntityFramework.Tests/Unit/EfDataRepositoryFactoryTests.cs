@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using NWheels.Conventions.Core;
+using NWheels.Core;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
 using NWheels.Stacks.EntityFramework.Factories;
@@ -15,7 +16,7 @@ using NWheels.Testing.Entities.Stacks;
 
 namespace NWheels.Stacks.EntityFramework.Tests.Unit
 {
-    [TestFixture]
+    [TestFixture, Ignore]
     public class EfDataRepositoryFactoryTests : DynamicTypeUnitTestBase
     {
         [Test]
@@ -39,6 +40,7 @@ namespace NWheels.Stacks.EntityFramework.Tests.Unit
                 base.DyamicModule,
                 new EfEntityObjectFactory(Framework.Components, base.DyamicModule, (TypeMetadataCache)Framework.MetadataCache),
                 (TypeMetadataCache)Framework.MetadataCache,
+                new IDatabaseNameResolver[0],
                 dbProviderFactory,
                 Auto.Of(dbConfig));
         }

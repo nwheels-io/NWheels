@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
@@ -12,6 +13,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using NWheels.Concurrency;
 using NWheels.Conventions.Core;
+using NWheels.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
@@ -36,8 +38,9 @@ namespace NWheels.Stacks.MongoDb.Factories
             DynamicModule module,
             MongoEntityObjectFactory entityFactory,
             TypeMetadataCache metadataCache,
+            IEnumerable<IDatabaseNameResolver> databaseNameResolvers,
             IFrameworkDatabaseConfig config = null)
-            : base(module, metadataCache)
+            : base(module, metadataCache, databaseNameResolvers)
         {
             _components = components;
             _entityFactory = entityFactory;

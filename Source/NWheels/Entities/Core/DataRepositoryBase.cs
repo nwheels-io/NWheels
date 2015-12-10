@@ -9,6 +9,7 @@ using NWheels.Authorization;
 using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Conventions.Core;
+using NWheels.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities.Factories;
