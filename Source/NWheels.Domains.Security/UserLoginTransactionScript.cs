@@ -79,8 +79,10 @@ namespace NWheels.Domains.Security
             {
                 var args = new ExtendedClaimsEventArgs();
                 AttachingExtendedClaims(this, args);
-                principal.Identity.ExtendClaims(args.ExtendedClaims);
+                principal.Identity.ExtendClaimsOnce(args.ExtendedClaims);
             }
+
+            principal.Identity.DoneExtendingClaims();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -24,7 +24,7 @@ namespace NWheels.Domains.Security.Core
         
         private readonly IUserAccountEntity _userAccount;
         private readonly IAccessControlList _accessControlList;
-        private readonly List<Claim> _extendedClaims;
+        private IReadOnlyDictionary<Type, Claim> _extendedClaimByType;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -33,7 +33,6 @@ namespace NWheels.Domains.Security.Core
         {
             _userAccount = userAccount;
             _accessControlList = accessControlList;
-            _extendedClaims = new List<Claim>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -101,9 +100,9 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public T GetExtendedClaimOfType<T>() where T : Claim
+        public T GetExtendedClaimByType<T>() where T : Claim
         {
-            return _extendedClaims.OfType<T>().FirstOrDefault();
+            return (T)_extendedClaimByType[typeof(T)];
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -167,7 +166,7 @@ namespace NWheels.Domains.Security.Core
         {
             get
             {
-                return base.Claims.Concat(_extendedClaims);
+                return base.Claims.Concat(_extendedClaimByType.Values);
             }
         }
 
@@ -177,15 +176,30 @@ namespace NWheels.Domains.Security.Core
         {
             get
             {
-                return _extendedClaims;
+                return _extendedClaimByType.Values;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal void ExtendClaims(IEnumerable<Claim> extendedClaims)
+        internal void ExtendClaimsOnce(IEnumerable<Claim> extendedClaims)
         {
-            _extendedClaims.AddRange(extendedClaims);
+            if ( _extendedClaimByType != null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            _extendedClaimByType = extendedClaims.ToDictionary(claim => claim.GetType());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal void DoneExtendingClaims()
+        {
+            if ( _extendedClaimByType == null )
+            {
+                _extendedClaimByType = new Dictionary<Type, Claim>();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
