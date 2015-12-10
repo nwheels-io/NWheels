@@ -1543,11 +1543,16 @@ function ($timeout, uidlService, entityService) {
         replace: true,
         link: function (scope, elem, attrs) {
         },
-        templateUrl: 'uidl-element-template/FormField', 
+        templateUrl: function(elem, attrs) {
+            return 'uidl-element-template/' + (attrs.templateName || 'FormField');
+        },
+        //templateUrl: 'uidl-element-template/' + parentUidl.fieldsTemplateName, 
+        //template: '<ng-include src="\'uidl-element-template/\' + parentUidl.fieldsTemplateName"></ng-include>',
         controller: function ($scope) {
             $scope.uidlService = uidlService;
             $scope.entityService = entityService;
             $scope.uniqueFieldId = $scope.parentUidl.elementName + '_' + $scope.uidl.propertyName;
+            $scope.translate = $scope.uidlService.translate;
             
             if ($scope.parentUidl.usePascalCase === false) {
                 $scope.uidl.propertyName = toCamelCase($scope.uidl.propertyName);

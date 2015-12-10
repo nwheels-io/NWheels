@@ -132,8 +132,7 @@ namespace NWheels.UI.Toolbox
         private void ConfigureInputForm(IUidlForm form)
         {
             form.UsePascalCase = true;
-            form.Commands.Add(Execute);
-            form.Commands.Add(Reset);
+            form.Commands.AddRange(this.Commands);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
