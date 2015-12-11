@@ -575,9 +575,10 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
             var context = {
                 model: scope.model
             };
+            
             var value = (
                 behavior.sourceExpression==='null' || !behavior.sourceExpression
-                ? null
+                ? behavior.constantValue
                 : Enumerable.Return(context).Select('ctx=>ctx.' + behavior.sourceExpression).Single());
             return $q.when(value);
         },

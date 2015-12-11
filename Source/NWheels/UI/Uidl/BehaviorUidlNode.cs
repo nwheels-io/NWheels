@@ -240,5 +240,10 @@ namespace NWheels.UI.Uidl
 
         [DataMember]
         public string SourceExpression { get; set; }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public object ConstantValue { get; set; }
     }
 }

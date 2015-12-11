@@ -252,6 +252,16 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public PromiseBuilder<TValue> QueryModelConstant<TValue>(TValue constantValue = default(TValue))
+            {
+                var behavior = new UidlQueryModelBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                SetAndSubscribeBehavior(behavior);
+                behavior.ConstantValue = constantValue;
+                return new PromiseBuilder<TValue>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public PromiseBuilder<TInput> AlterModel(params Action<AlterModelBehaviorBuilder<TInput>>[] alterations)
             {
                 var behavior = new UidlAlterModelBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
@@ -783,16 +793,26 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<UserAlertResult> ShowInline(
+            public PromiseBuilder<TOutput> Show<TOutput>(
+                UserAlertDisplayMode displayMode,
                 Expression<Func<TRepo, ViewModel<TData, TState, TInput>, UidlUserAlert>> alertCall,
                 Expression<Func<ViewModel<TData, TState, TInput>, IPromiseFailureInfo>> faultInfo = null)
             {
                 ParseAlertCall(alertCall);
                 ParseFaultInfoParameter(faultInfo);
 
-                _behavior.DisplayMode = UserAlertDisplayMode.Inline;
+                _behavior.DisplayMode = displayMode;
 
-                return new PromiseBuilder<UserAlertResult>(_ownerNode, _behavior, _uidl);
+                return new PromiseBuilder<TOutput>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<UserAlertResult> ShowInline(
+                Expression<Func<TRepo, ViewModel<TData, TState, TInput>, UidlUserAlert>> alertCall,
+                Expression<Func<ViewModel<TData, TState, TInput>, IPromiseFailureInfo>> faultInfo = null)
+            {
+                return Show<UserAlertResult>(UserAlertDisplayMode.Inline, alertCall, faultInfo);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -801,12 +821,7 @@ namespace NWheels.UI
                 Expression<Func<TRepo, ViewModel<TData, TState, TInput>, UidlUserAlert>> alertCall,
                 Expression<Func<ViewModel<TData, TState, TInput>, IPromiseFailureInfo>> faultInfo = null)
             {
-                ParseAlertCall(alertCall);
-                ParseFaultInfoParameter(faultInfo);
-
-                _behavior.DisplayMode = UserAlertDisplayMode.Popup;
-
-                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+                return Show<TInput>(UserAlertDisplayMode.Popup, alertCall, faultInfo);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -815,12 +830,7 @@ namespace NWheels.UI
                 Expression<Func<TRepo, ViewModel<TData, TState, TInput>, UidlUserAlert>> alertCall,
                 Expression<Func<ViewModel<TData, TState, TInput>, IPromiseFailureInfo>> faultInfo = null)
             {
-                ParseAlertCall(alertCall);
-                ParseFaultInfoParameter(faultInfo);
-
-                _behavior.DisplayMode = UserAlertDisplayMode.Modal;
-
-                return new PromiseBuilder<UserAlertResult>(_ownerNode, _behavior, _uidl);
+                return Show<UserAlertResult>(UserAlertDisplayMode.Modal, alertCall, faultInfo);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
