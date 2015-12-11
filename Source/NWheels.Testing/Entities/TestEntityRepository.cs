@@ -7,6 +7,7 @@ using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
+using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Testing.Entities.Impl;
 using NWheels.Utilities;
@@ -52,6 +53,42 @@ namespace NWheels.Testing.Entities
         object IEntityRepository.TryGetById(IEntityId id)
         {
             return TryGetById(id);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TEntity TryGetById<TId>(TId id)
+        {
+            IEntityId entityId = new EntityId<TEntity, TId>(id);
+            return TryGetById(entityId);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TEntity GetById(IEntityId id)
+        {
+            var entity = TryGetById(id);
+
+            if ( entity != null )
+            {
+                return entity;
+            }
+
+            throw new EntityNotFoundException(typeof(TEntity), id.Value);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TEntity GetById<TId>(TId id)
+        {
+            var entity = TryGetById(id);
+
+            if ( entity != null )
+            {
+                return entity;
+            }
+
+            throw new EntityNotFoundException(typeof(TEntity), id);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

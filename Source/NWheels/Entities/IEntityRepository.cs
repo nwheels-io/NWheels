@@ -33,6 +33,9 @@ namespace NWheels.Entities
         TEntity New();
         TEntity New(Type concreteContract);
         TEntity TryGetById(IEntityId id);
+        TEntity TryGetById<TId>(TId id);
+        TEntity GetById(IEntityId id);
+        TEntity GetById<TId>(TId id);
         IEntityId MakeEntityId(object value);
         TConcreteEntity New<TConcreteEntity>() where TConcreteEntity : class, TEntity;
         IQueryable<TEntity> Include(params Expression<Func<TEntity, object>>[] properties);

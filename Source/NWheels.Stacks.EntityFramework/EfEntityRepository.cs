@@ -10,6 +10,7 @@ using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
+using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Stacks.EntityFramework.Factories;
 using NWheels.TypeModel.Core.Factories;
@@ -121,6 +122,42 @@ namespace NWheels.Stacks.EntityFramework
         object IEntityRepository.TryGetById(IEntityId id)
         {
             return TryGetById(id);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TEntityContract TryGetById<TId>(TId id)
+        {
+            IEntityId entityId = new EntityId<TEntityContract, TId>(id);
+            return TryGetById(entityId);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public TEntityContract GetById(IEntityId id)
+        {
+            var entity = TryGetById(id);
+
+            if ( entity != null )
+            {
+                return entity;
+            }
+
+            throw new EntityNotFoundException(typeof(TEntityContract), id.Value);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public TEntityContract GetById<TId>(TId id)
+        {
+            var entity = TryGetById(id);
+
+            if ( entity != null )
+            {
+                return entity;
+            }
+
+            throw new EntityNotFoundException(typeof(TEntityContract), id);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

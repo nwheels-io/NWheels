@@ -12,5 +12,12 @@ namespace NWheels.Exceptions
             : base(message)
         {
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public EntityNotFoundException(Type contract, object id)
+            : base(string.Format("Entity not found: {0}[{1}]", contract.FullName, id))
+        {
+        }
     }
 }
