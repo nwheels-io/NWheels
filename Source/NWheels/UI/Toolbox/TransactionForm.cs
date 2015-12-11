@@ -24,6 +24,7 @@ namespace NWheels.UI.Toolbox
         {
             base.WidgetType = "TransactionForm";
             base.TemplateName = "TransactionForm";
+            this.UserAlertDisplayMode = UserAlertDisplayMode.Popup;
 
             this.InputMetaType = MetadataCache.GetTypeMetadata(typeof(TInput));
 
@@ -45,6 +46,8 @@ namespace NWheels.UI.Toolbox
         public Form<TInput> InputForm { get; set; }
         [DataMember, ManuallyAssigned]
         public TypeSelector InputFormTypeSelector { get; set; }
+        [DataMember]
+        public UserAlertDisplayMode UserAlertDisplayMode { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -111,12 +114,11 @@ namespace NWheels.UI.Toolbox
                         .AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Output))
                         .Then(bb => bb.Broadcast(OutputReady).WithPayload(vm => vm.Input).BubbleUp()
                         .Then(bbb => InvokeFormStateResetter(bbb)
-                        .Then(bbbb => bbbb.UserAlertFrom<ITransactionUserAlerts>().ShowPopup((alerts, vm) => alerts.SuccessfullyCompleted())))),
+                        .Then(bbbb => bbbb.UserAlertFrom<ITransactionUserAlerts>().Show<Empty.Payload>(UserAlertDisplayMode, (alerts, vm) => alerts.SuccessfullyCompleted())))),
                     onFailure: b => b
                         .Broadcast(OperationFailed).WithPayload(vm => vm.Input).BubbleUp()
-                        .Then(bb => bb.UserAlertFrom<ITransactionUserAlerts>().ShowPopup((alerts, vm) => alerts.FailedToCompleteRequestedAction(), faultInfo: vm => vm.Input)
-                        .Then(bbb => bbb.QueryModelConstant<TOutput>()
-                        .Then(bbbb => InvokeFormStateResetter(bbbb))))
+                        .Then(bb => bb.UserAlertFrom<ITransactionUserAlerts>().Show<TOutput>(UserAlertDisplayMode, (alerts, vm) => alerts.FailedToCompleteRequestedAction(), faultInfo: vm => vm.Input)
+                        .Then(bbb => InvokeFormStateResetter(bbb)))
                 );
 
             if ( InputForm != null )
