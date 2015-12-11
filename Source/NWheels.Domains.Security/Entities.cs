@@ -82,11 +82,6 @@ namespace NWheels.Domains.Security
     [EntityPartContract]
     public interface IPasswordEntityPart
     {
-        [PropertyContract.Required, PropertyContract.Relation.CompositionParent]
-        IUserAccountEntity User { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         [/*PropertyContract.Required, */PropertyContract.WriteOnly, PropertyContract.Security.Sensitive]
         string ClearText { get; set; }
 

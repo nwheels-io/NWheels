@@ -27,25 +27,22 @@ namespace NWheels.Domains.Security.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UserAccountPrincipal Authenticate(string loginName, SecureString password, out IUserAccountEntity userAccount)
+        public UserAccountPrincipal Authenticate(
+            IQueryable<IUserAccountEntity> userAccounts, 
+            string loginName, 
+            SecureString password, 
+            out IUserAccountEntity userAccount)
         {
-            using ( var data = _framework.NewUnitOfWork<IUserAccountDataRepository>() )
+            userAccount = userAccounts.FirstOrDefault(u => u.LoginName == loginName);
+
+            if ( userAccount == null )
             {
-                userAccount = data.AllUsers.Include(u => u.Passwords).FirstOrDefault(u => u.LoginName == loginName);
-
-                if ( userAccount == null )
-                {
-                    _logger.UserNotFound(loginName);
-                    throw new DomainFaultException<LoginFault>(LoginFault.LoginIncorrect);
-                }
-
-                var principal = userAccount.As<UserAccountEntity>().Authenticate(password);
-
-                data.AllUsers.Update(userAccount);
-                data.CommitChanges();
-                
-                return principal;
+                _logger.UserNotFound(loginName);
+                throw new DomainFaultException<LoginFault>(LoginFault.LoginIncorrect);
             }
+
+            var principal = userAccount.As<UserAccountEntity>().Authenticate(password);
+            return principal;
         }
     }
 }

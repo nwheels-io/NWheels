@@ -14,18 +14,21 @@ using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 using NWheels.Utilities;
 using System.Security.Claims;
+using NWheels.Entities;
 
 namespace NWheels.Domains.Security
 {
     public class UserLoginTransactionScript : ITransactionScript
     {
+        private readonly IFramework _framework;
         private readonly IAuthenticationProvider _authenticationProvider;
         private readonly ISessionManager _sessionManager;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UserLoginTransactionScript(IAuthenticationProvider authenticationProvider, ISessionManager sessionManager)
+        public UserLoginTransactionScript(IFramework framework, IAuthenticationProvider authenticationProvider, ISessionManager sessionManager)
         {
+            _framework = framework;
             _authenticationProvider = authenticationProvider;
             _sessionManager = sessionManager;
         }
@@ -34,18 +37,59 @@ namespace NWheels.Domains.Security
 
         public Result Execute(string loginName, string password)
         {
-            IUserAccountEntity userAccount;
-            UserAccountPrincipal principal;
+            IApplicationDataRepository authenticationContext;
+            IQueryable<IUserAccountEntity> userAccountQuery;
+            OpenAuthenticationContext(out authenticationContext, out userAccountQuery);
 
-            var currentSession = _sessionManager.CurrentSession;
-
-            using ( _sessionManager.JoinGlobalSystem() )
+            using ( authenticationContext )
             {
-                principal = _authenticationProvider.Authenticate(loginName, SecureStringUtility.ClearToSecure(password), out userAccount);
+                IUserAccountEntity userAccount;
+                UserAccountPrincipal principal;
+
+                var currentSession = _sessionManager.CurrentSession;
+
+                using ( _sessionManager.JoinGlobalSystem() )
+                {
+                    principal = _authenticationProvider.Authenticate(userAccountQuery, loginName, SecureStringUtility.ClearToSecure(password), out userAccount);
+                }
+
+                ExtendUserClaims(principal);
+                principal.Identity.DoneExtendingClaims();
+
+                ValidateUidlEndpointLogin(currentSession, principal);
+
+                if ( currentSession.IsGlobalImmutable )
+                {
+                    _sessionManager.OpenAnonymous(currentSession.Endpoint);
+                }
+
+                _sessionManager.As<ICoreSessionManager>().AuthorieSession(principal);
+
+                var result = new Result(principal);
+                return result;
             }
+        }
 
-            AttachExtendedClaims(principal);
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected virtual void OpenAuthenticationContext(out IApplicationDataRepository context, out IQueryable<IUserAccountEntity> userAccounts)
+        {
+            var userAccountsContext = _framework.NewUnitOfWork<IUserAccountDataRepository>();
+
+            context = userAccountsContext;
+            userAccounts = userAccountsContext.AllUsers;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void ExtendUserClaims(UserAccountPrincipal principal)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void ValidateUidlEndpointLogin(ISession currentSession, UserAccountPrincipal principal)
+        {
             var uidlEndpoint = currentSession.Endpoint as IUidlApplicationEndpoint;
 
             if ( uidlEndpoint != null )
@@ -55,55 +99,13 @@ namespace NWheels.Domains.Security
                     throw new DomainFaultException<LoginFault>(LoginFault.NotAuthorized);
                 }
             }
-
-            if ( currentSession.IsGlobalImmutable )
-            {
-                _sessionManager.OpenAnonymous(currentSession.Endpoint);
-            }
-            
-            _sessionManager.As<ICoreSessionManager>().AuthorieSession(principal);
-
-            var result = new Result(principal);
-            return result;
         }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public event EventHandler<ExtendedClaimsEventArgs> AttachingExtendedClaims;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void AttachExtendedClaims(UserAccountPrincipal principal)
-        {
-            if ( AttachingExtendedClaims != null )
-            {
-                var args = new ExtendedClaimsEventArgs();
-                AttachingExtendedClaims(this, args);
-                principal.Identity.ExtendClaimsOnce(args.ExtendedClaims);
-            }
-
-            principal.Identity.DoneExtendingClaims();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class ExtendedClaimsEventArgs : EventArgs
-        {
-            public ExtendedClaimsEventArgs()
-            {
-                ExtendedClaims = new List<Claim>();
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public List<Claim> ExtendedClaims { get; private set; }
-        }
-        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class Result
         {
-            internal Result(UserAccountPrincipal principal)
+            internal protected Result(UserAccountPrincipal principal)
             {
                 var account = principal.Identity.GetUserAccount();
 

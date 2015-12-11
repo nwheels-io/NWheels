@@ -107,6 +107,24 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool TryGetExtendedClaimByType<T>(out T claim) where T : Claim
+        {
+            Claim nonTypedClaim;
+
+            if ( _extendedClaimByType.TryGetValue(typeof(T), out nonTypedClaim) )
+            {
+                claim = (T)nonTypedClaim;
+                return true;
+            }
+            else
+            {
+                claim = null;
+                return false;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         string IIdentityInfo.UserId
         {
             get
@@ -182,7 +200,7 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal void ExtendClaimsOnce(IEnumerable<Claim> extendedClaims)
+        public void ExtendClaimsOnce(IEnumerable<Claim> extendedClaims)
         {
             if ( _extendedClaimByType != null )
             {

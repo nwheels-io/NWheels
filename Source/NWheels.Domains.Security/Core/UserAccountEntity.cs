@@ -23,7 +23,6 @@ namespace NWheels.Domains.Security.Core
 
             var password = Framework.NewDomainObject<IPasswordEntityPart>();
                 
-            password.User = this;
             password.Hash = CryptoProvider.CalculateHash(passwordString);
             password.ExpiresAtUtc = Framework.UtcNow.AddDays(policy.PasswordExpiryDays);
 
@@ -43,7 +42,6 @@ namespace NWheels.Domains.Security.Core
             var passwordLength = new Random().Next(policy.PasswordMinLength, policy.PasswordMaxLength);
             var clearText = GenerateTemporaryPassword(passwordLength);
 
-            password.User = this;
             password.Hash = CryptoProvider.CalculateHash(SecureStringUtility.ClearToSecure(clearText));
             password.ExpiresAtUtc = Framework.UtcNow.AddDays(policy.TemporaryPasswordExpiryDays);
             password.MustChange = true;

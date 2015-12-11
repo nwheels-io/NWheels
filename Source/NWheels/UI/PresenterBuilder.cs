@@ -797,7 +797,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<UserAlertResult> ShowPopup(
+            public PromiseBuilder<TInput> ShowPopup(
                 Expression<Func<TRepo, ViewModel<TData, TState, TInput>, UidlUserAlert>> alertCall,
                 Expression<Func<ViewModel<TData, TState, TInput>, IPromiseFailureInfo>> faultInfo = null)
             {
@@ -806,7 +806,7 @@ namespace NWheels.UI
 
                 _behavior.DisplayMode = UserAlertDisplayMode.Popup;
 
-                return new PromiseBuilder<UserAlertResult>(_ownerNode, _behavior, _uidl);
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

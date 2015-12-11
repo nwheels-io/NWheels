@@ -83,11 +83,15 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string ResolveDatabaseName(string configuredName, Type domainContextType)
+        public string ResolveDatabaseName(string configuredName, string overridingName, Type domainContextType)
         {
             IDatabaseNameResolver resolver;
 
-            if ( _databaseNameResolverByContractType.TryGetValue(domainContextType, out resolver) )
+            if ( !string.IsNullOrEmpty(overridingName) )
+            {
+                return overridingName;
+            }
+            else if ( _databaseNameResolverByContractType.TryGetValue(domainContextType, out resolver) )
             {
                 return resolver.ResolveDatabaseName(configuredName, context: (IAccessControlContext)Session.Current);
             }

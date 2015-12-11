@@ -60,8 +60,8 @@ namespace NWheels.Stacks.MongoDb.Factories
             var connectionString = new MongoConnectionStringBuilder(_config.GetContextConnectionString(domainContextType: repositoryType));
             var client = new MongoClient(connectionString.ConnectionString);
             var server = client.GetServer();
-            var effectiveDatabaseName = (string.IsNullOrEmpty(databaseName) ? connectionString.DatabaseName : databaseName);
-            var database = server.GetDatabase(effectiveDatabaseName);
+            var resolvedDatabaseName = base.ResolveDatabaseName(connectionString.DatabaseName, databaseName, repositoryType);
+            var database = server.GetDatabase(resolvedDatabaseName);
 
             return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(
                 consumerScope,

@@ -7,6 +7,7 @@ using NWheels.Authorization.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Domains.Security.Core;
+using NWheels.Entities;
 using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Processing;
@@ -37,13 +38,17 @@ namespace NWheels.Domains.Security
             [PropertyContract.Semantic.Password] 
             string newPassword)
         {
-            using ( var context = _framework.NewUnitOfWork<IUserAccountDataRepository>() )
+            IApplicationDataRepository authenticationContext;
+            IQueryable<IUserAccountEntity> userAccountQuery;
+            OpenAuthenticationContext(out authenticationContext, out userAccountQuery);
+
+            using ( authenticationContext )
             {
                 IUserAccountEntity userAccount = null;
 
                 try
                 {
-                    _authenticationProvider.Authenticate(loginName, SecureStringUtility.ClearToSecure(oldPassword), out userAccount);
+                    _authenticationProvider.Authenticate(userAccountQuery, loginName, SecureStringUtility.ClearToSecure(oldPassword), out userAccount);
                 }
                 catch ( DomainFaultException<LoginFault> error )
                 {
@@ -54,10 +59,27 @@ namespace NWheels.Domains.Security
                 }
 
                 userAccount.As<UserAccountEntity>().SetPassword(SecureStringUtility.ClearToSecure(newPassword));
-                context.AllUsers.Update(userAccount);
+                UpdateUserAccount(authenticationContext, userAccount);
 
-                context.CommitChanges();
+                authenticationContext.CommitChanges();
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void OpenAuthenticationContext(out IApplicationDataRepository context, out IQueryable<IUserAccountEntity> userAccounts)
+        {
+            var userAccountsContext = _framework.NewUnitOfWork<IUserAccountDataRepository>();
+
+            context = userAccountsContext;
+            userAccounts = userAccountsContext.AllUsers;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void UpdateUserAccount(IApplicationDataRepository context, IUserAccountEntity userAccount)
+        {
+            ((IUserAccountDataRepository)context).AllUsers.Update(userAccount);
         }
     }
 }
