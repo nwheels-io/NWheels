@@ -114,7 +114,9 @@ namespace NWheels.UI.Toolbox
                         .Then(bbbb => bbbb.UserAlertFrom<ITransactionUserAlerts>().ShowPopup((alerts, vm) => alerts.SuccessfullyCompleted())))),
                     onFailure: b => b
                         .Broadcast(OperationFailed).WithPayload(vm => vm.Input).BubbleUp()
-                        .Then(bb => bb.UserAlertFrom<ITransactionUserAlerts>().ShowPopup((alerts, vm) => alerts.FailedToCompleteRequestedAction(), faultInfo: vm => vm.Input))
+                        .Then(bb => bb.UserAlertFrom<ITransactionUserAlerts>().ShowPopup((alerts, vm) => alerts.FailedToCompleteRequestedAction(), faultInfo: vm => vm.Input)
+                        .Then(bbb => bbb.QueryModelConstant<TOutput>()
+                        .Then(bbbb => InvokeFormStateResetter(bbbb))))
                 );
 
             if ( InputForm != null )
