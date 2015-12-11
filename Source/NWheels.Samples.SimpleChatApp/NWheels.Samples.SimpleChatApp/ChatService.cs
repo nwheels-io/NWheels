@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NWheels.Domains.Security;
 using NWheels.Domains.Security.Core;
@@ -14,15 +15,15 @@ namespace NWheels.Samples.SimpleChatApp
     internal class ChatService : IChatService
     {
         private readonly IChatServiceLogger _logger;
-        private readonly IAuthenticationProvider _authenticationProvider;
         //private AbstractNetConnectorsManager _connectorsManager;
         private readonly Dictionary<long, object> _connectedUsers;
         private readonly Dictionary<long, ChatSession> _chatSessions;
+        private readonly UserLoginTransactionScript _loginTx;
 
-        public ChatService(IChatServiceLogger logger, IAuthenticationProvider authenticationProvider)
+        public ChatService(UserLoginTransactionScript loginTx, IChatServiceLogger logger)
         {
+            _loginTx = loginTx;
             _logger = logger;
-            _authenticationProvider = authenticationProvider;
             _connectedUsers = new Dictionary<long, object>();
             _chatSessions = new Dictionary<long, ChatSession>();
         }
@@ -45,7 +46,8 @@ namespace NWheels.Samples.SimpleChatApp
             try
             {
                 IUserAccountEntity userAccount;
-                UserAccountPrincipal accountPrincipal = _authenticationProvider.Authenticate(loginParams.Username, loginParams.Password.ClearToSecure(), out userAccount);
+                _loginTx.Execute(loginParams.Username, loginParams.Password);
+                UserAccountPrincipal accountPrincipal = (UserAccountPrincipal)Thread.CurrentPrincipal;
                 response.Result = LoginErrorCode.Success;
             }
             catch (Exception ex)
