@@ -1027,7 +1027,7 @@ HEAD, JS/CSS LINKS
                 var field = $scope.plainFields[i];
                 var fieldElementId = $scope.uidl.elementName + '_' + field.propertyName;
                 var fieldRules = { };
-                if (field.validation.required) {
+                if (field.validation.isRequired) {
                     fieldRules.required = true;
                 }
                 validationRules[fieldElementId] = fieldRules;
@@ -1037,9 +1037,6 @@ HEAD, JS/CSS LINKS
                     };
                 }
             }
-            $scope.jqueryFormValidator = $('#' + $scope.uidl.elementName).validate({
-                rules: validationRules
-            });
             $scope.$on(':global:FormValidating', function (event, data) {
                 var form = $('#' + $scope.uidl.elementName);
                 if (form.length && !form.valid()) {
@@ -1059,6 +1056,11 @@ HEAD, JS/CSS LINKS
                     var form = $('#' + $scope.uidl.elementName);
                     form.find('.error').removeClass("error");
                 }
+            });
+            $scope.$timeout(function() {
+                $scope.jqueryFormValidator = $('#' + $scope.uidl.elementName).validate({
+                    rules: validationRules
+                });
             });
         }
     </script>
