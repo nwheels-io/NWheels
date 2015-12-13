@@ -45,9 +45,9 @@ namespace NWheels.Samples.SimpleChatApp
 
             try
             {
-                IUserAccountEntity userAccount;
+                //IUserAccountEntity userAccount;
                 _loginTx.Execute(loginParams.Username, loginParams.Password);
-                UserAccountPrincipal accountPrincipal = (UserAccountPrincipal)Thread.CurrentPrincipal;
+                //UserAccountPrincipal accountPrincipal = (UserAccountPrincipal)Thread.CurrentPrincipal;
                 response.Result = LoginErrorCode.Success;
             }
             catch (Exception ex)
