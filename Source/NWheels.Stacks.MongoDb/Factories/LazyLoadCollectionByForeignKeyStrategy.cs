@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Autofac;
 using Hapil;
 using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core.Factories;
 using NWheels.DataObjects.Core.StorageTypes;
-
+using NWheels.Entities.Core;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Stacks.MongoDb.Factories
@@ -41,7 +42,10 @@ namespace NWheels.Stacks.MongoDb.Factories
                             var enumerableLocal = m.Local<IEnumerable<TT.TContract2>>();
                             
                             enumerableLocal.Assign(
-                                Static.Func(MongoDataRepositoryBase.ResolveFrom, ComponentsField)
+                                Static.Func(MongoDataRepositoryBase.ResolveFrom, 
+                                    ComponentsField,
+                                    Static.Func(ResolutionExtensions.Resolve<DataRepositoryBase>, ComponentsField).Func<Type>(x => x.GetType)
+                                )
                                 .Func<string, TT.TKey, IEnumerable<TT.TContract2>>(x => x.LazyLoadManyByForeignKey<TT.TContract2, TT.TImpl2, TT.TKey>,
                                     m.Const(ForeignKeyProperty.Name),
                                     m.This<TT.TBase>().Prop<TT.TKey>(ThisKeyProperty.ContractPropertyInfo)));

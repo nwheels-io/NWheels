@@ -102,8 +102,14 @@ namespace NWheels.Stacks.MongoDb.Factories
             IOperand<TT.TValue> storageValue)
         {
             contractValue.Assign(
-                Static.Func(MongoDataRepositoryBase.ResolveFrom, _componentsField)
-                    .Func<TT.TValue, TT.TProperty>(x => x.LazyLoadById<TT.TProperty, TT.TValue>, storageValue));
+                Static.Func(MongoDataRepositoryBase.ResolveFrom, 
+                    _componentsField,
+                    Static.Func(ResolutionExtensions.Resolve<DataRepositoryBase>, _componentsField).Func<Type>(x => x.GetType)
+                )
+                .Func<TT.TValue, TT.TProperty>(
+                    x => x.LazyLoadById<TT.TProperty, TT.TValue>, storageValue
+                )
+            );
         }
 
         #endregion

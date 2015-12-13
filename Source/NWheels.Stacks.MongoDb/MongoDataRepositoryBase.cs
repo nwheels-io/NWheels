@@ -40,14 +40,14 @@ namespace NWheels.Stacks.MongoDb
         protected override void BeginLifetimeScope()
         {
             base.BeginLifetimeScope();
-            _s_anchor.Current = this;
+            ThreadStaticRepositoryStack.Push(this);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void EndLifetimeScope()
         {
-            _s_anchor.Current = null;
+            ThreadStaticRepositoryStack.Pop(this);
             base.EndLifetimeScope();
         }
 
@@ -194,13 +194,14 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static readonly LogicalCallContextAnchor<MongoDataRepositoryBase> _s_anchor = new LogicalCallContextAnchor<MongoDataRepositoryBase>();
+        //private static readonly LogicalCallContextAnchor<Dictionary<Type, Stack<MongoDataRepositoryBase>>> _s_anchor = 
+        //    new LogicalCallContextAnchor<Dictionary<Type, Stack<MongoDataRepositoryBase>>>();
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static MongoDataRepositoryBase ResolveFrom(IComponentContext components)
+        public static MongoDataRepositoryBase ResolveFrom(IComponentContext components, Type implType)
         {
-            var instance = _s_anchor.Current;
+            var instance = ThreadStaticRepositoryStack.Peek(implType);// _s_anchor.Current;
 
             if ( instance == null )
             {
@@ -213,13 +214,13 @@ namespace NWheels.Stacks.MongoDb
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static MongoDataRepositoryBase Current
-        {
-            get
-            {
-                return _s_anchor.Current;
-            }
-        }
+        //public static MongoDataRepositoryBase Current
+        //{
+        //    get
+        //    {
+        //        return _s_anchor.Current;
+        //    }
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -241,6 +242,65 @@ namespace NWheels.Stacks.MongoDb
             var partitionSuffix = (partitionValue != null ? "_" + partitionValue.ToString() : "");
 
             return baseName + partitionSuffix;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static class ThreadStaticRepositoryStack
+        {
+            [ThreadStatic]
+            private static Dictionary<Type, Stack<MongoDataRepositoryBase>> _s_stackByImplType;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static void Push(MongoDataRepositoryBase instance)
+            {
+                if ( _s_stackByImplType == null )
+                {
+                    _s_stackByImplType = new Dictionary<Type, Stack<MongoDataRepositoryBase>>();
+                }
+
+                var stack = GetOrAddStack(instance.GetType());
+                stack.Push(instance);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static MongoDataRepositoryBase Peek(Type implType)
+            {
+                if ( _s_stackByImplType == null )
+                {
+                    throw new InvalidOperationException("ThreadStaticRepositoryStack is empty.");
+                }
+
+                var stack = GetOrAddStack(implType);
+                return stack.Peek();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static void Pop(MongoDataRepositoryBase instance)
+            {
+                var stack = GetOrAddStack(instance.GetType());
+                var popped = stack.Pop();
+
+                if ( !_s_stackByImplType.Values.Any(s => s.Count > 0) )
+                {
+                    _s_stackByImplType = null;
+                }
+
+                if ( popped != instance )
+                {
+                    throw new InvalidOperationException("ThreadStaticRepositoryStack Push/Pop mismatch.");
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static Stack<MongoDataRepositoryBase> GetOrAddStack(Type implType)
+            {
+                return _s_stackByImplType.GetOrAdd(implType, t => new Stack<MongoDataRepositoryBase>());
+            }
         }
     }
 }

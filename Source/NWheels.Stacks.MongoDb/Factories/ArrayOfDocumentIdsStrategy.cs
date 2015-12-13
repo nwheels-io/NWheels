@@ -148,7 +148,10 @@ namespace NWheels.Stacks.MongoDb.Factories
             var lazyLoadQueryLocal = m.Local<IEnumerable<TT.TItem>>();
                 
             lazyLoadQueryLocal.Assign(
-                Static.Func(MongoDataRepositoryBase.ResolveFrom, _componentsField)
+                Static.Func(MongoDataRepositoryBase.ResolveFrom, 
+                    _componentsField, 
+                    Static.Func(ResolutionExtensions.Resolve<DataRepositoryBase>, _componentsField).Func<Type>(x => x.GetType)
+                )
                 .Func<IEnumerable<TT.TKey>, IEnumerable<TT.TItem>>(x => x.LazyLoadByIdList<TT.TItem, TT.TKey>, 
                     storageValue.CastTo<IEnumerable<TT.TKey>>()
                 )                    

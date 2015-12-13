@@ -9,6 +9,7 @@ using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core.Factories;
 using NWheels.DataObjects.Core.StorageTypes;
+using NWheels.Entities.Core;
 using NWheels.Exceptions;
 using TT = Hapil.TypeTemplate;
 using NWheels.TypeModel.Core.Factories;
@@ -41,7 +42,10 @@ namespace NWheels.Stacks.MongoDb.Factories
 
                         m.If(StateField != DualValueStates.Contract).Then(() => {
                             ValueField.Assign(
-                                Static.Func(MongoDataRepositoryBase.ResolveFrom, ComponentsField)
+                                Static.Func(
+                                    MongoDataRepositoryBase.ResolveFrom,
+                                    ComponentsField, Static.Func(ResolutionExtensions.Resolve<DataRepositoryBase>, ComponentsField).Func<Type>(x => x.GetType)
+                                )
                                 .Func<string, TT.TKey, TT.TContract2>(
                                     x => x.LazyLoadOneByForeignKey<TT.TContract2, TT.TImpl2, TT.TKey>, 
                                     m.Const(ForeignKeyProperty.Name),
