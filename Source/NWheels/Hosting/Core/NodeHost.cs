@@ -310,6 +310,9 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<TypeMetadataCache>().As<ITypeMetadataCache, TypeMetadataCache>().SingleInstance();
             builder.RegisterType<UnitOfWorkFactory>().SingleInstance();
 
+            builder.NWheelsFeatures().Logging().RegisterLogger<DatabaseInitializer.ILogger>();
+            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>().FirstInPipeline();
+
             builder.RegisterType<VoidLocalizationProvider>().As<ILocalizationProvider>().SingleInstance();
 
             if ( registerHostComponents != null )

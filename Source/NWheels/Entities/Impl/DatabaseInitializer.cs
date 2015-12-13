@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels;
 using NWheels.Authorization;
+using NWheels.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
@@ -15,25 +17,31 @@ namespace NWheels.Entities.Impl
 {
     public class DatabaseInitializer : LifecycleEventListenerBase
     {
-        private readonly IStorageInitializer _initializer;
+        private readonly IStorageInitializer _storageInitializer;
+        private readonly IEnumerable<DataRepositoryRegistration> _contextRegistrations;
         private readonly Pipeline<IDomainContextPopulator> _populators;
         private readonly IFrameworkDatabaseConfig _configuration;
-        private readonly ILogger _logger;
         private readonly ISessionManager _sessionManager;
+        private readonly UnitOfWorkFactory _unitOfWorkFactory;
+        private readonly ILogger _logger;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public DatabaseInitializer(
-            IStorageInitializer initializer, 
+            IStorageInitializer storageInitializer,
+            IEnumerable<DataRepositoryRegistration> contextRegistrations,
             Pipeline<IDomainContextPopulator> populators, 
             Auto<IFrameworkDatabaseConfig> configuration, 
             ISessionManager sessionManager,
+            UnitOfWorkFactory unitOfWorkFactory,
             ILogger logger)
         {
-            _sessionManager = sessionManager;
-            _initializer = initializer;
+            _storageInitializer = storageInitializer;
+            _contextRegistrations = contextRegistrations;
             _populators = populators;
             _configuration = configuration.Instance;
+            _sessionManager = sessionManager;
+            _unitOfWorkFactory = unitOfWorkFactory;
             _logger = logger;
         }
 
@@ -41,76 +49,78 @@ namespace NWheels.Entities.Impl
 
         public override void NodeConfigured(List<ILifecycleEventListener> additionalComponentsToHost)
         {
-            var anyStorageSchemaMissing = false;
-            CheckIfStorachSchemaExists(_configuration.ConnectionString, ref anyStorageSchemaMissing);
-
-            foreach ( var context in _configuration.Contexts )
+            foreach ( var registration in _contextRegistrations )
             {
-                CheckIfStorachSchemaExists(context.ConnectionString, ref anyStorageSchemaMissing);
-            }
-
-            if ( !anyStorageSchemaMissing )
-            {
-                return;
-            }
-
-            using ( _logger.InitializingNewDatabase() )
-            {
-                try
+                if ( registration.ShouldInitializeStorageOnStartup )
                 {
-                    InitializeNewDatabases();
-                }
-                catch ( Exception e )
-                {
-                    _logger.DatabaseInitializationFailed(_configuration.ConnectionString, e);
-                    throw;
-                }
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void CheckIfStorachSchemaExists(string connectionString, ref bool anySchemaMissing)
-        {
-            if ( !string.IsNullOrEmpty(connectionString) )
-            {
-                if ( _initializer.StorageSchemaExists(connectionString) )
-                {
-                    _logger.FoundDatabase(connectionString);
+                    _logger.RunningStorageInitializationCheck(contextType: registration.DataRepositoryType);
+                    RunStorageInitializationCheck(registration.DataRepositoryType);
                 }
                 else
                 {
-                    _logger.DatabaseNotFound(connectionString);
-                    anySchemaMissing = true;
+                    _logger.StorageInitializationTurnedOffSkipping(contextType: registration.DataRepositoryType);
                 }
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void InitializeNewDatabases()
+        private void RunStorageInitializationCheck(Type contextType)
         {
-            if ( _configuration.ConnectionString != null )
+            var connectionString = _configuration.GetContextConnectionString(contextType);
+
+            if ( string.IsNullOrEmpty(connectionString) )
             {
-                _initializer.CreateStorageSchema(_configuration.ConnectionString);
-                _logger.NewDatabaseInitialized(_configuration.ConnectionString);
+                throw _logger.ConnectionStringNotConfigured(contextType);
             }
 
-            foreach ( var context in _configuration.Contexts )
+            if ( _storageInitializer.StorageSchemaExists(connectionString) )
             {
-                _initializer.CreateStorageSchema(context.ConnectionString);
-                _logger.NewDatabaseInitialized(context.ConnectionString);
+                _logger.FoundDatabase(contextType, connectionString);
+                return;
             }
+
+            _logger.DatabaseNotFound(contextType, connectionString);
+
+            using ( var dbActivity = _logger.InitializingNewDatabase(contextType, connectionString) )
+            {
+                try
+                {
+                    InitializeNewDatabase(contextType, connectionString, databaseNameOverride: null);
+                    _logger.NewDatabaseInitialized(contextType, connectionString);
+                }
+                catch ( Exception e )
+                {
+                    dbActivity.Fail(e);
+                    throw _logger.DatabaseInitializationFailed(contextType, connectionString, e);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void InitializeNewDatabase(Type contextType, string connectionString, string databaseNameOverride)
+        {
+            _storageInitializer.CreateStorageSchema(_configuration.ConnectionString);
+            _logger.DatabaseSchemaCreated(_configuration.ConnectionString);
 
             using ( _sessionManager.JoinGlobalSystem() )
             {
-                foreach ( var populator in _populators )
+                foreach ( var populator in _populators.Where(p => p.ContextType.IsAssignableFrom(contextType)) )
                 {
-                    using ( var populatorActivity = _logger.InvokingContextPopulator(type: populator.GetType().FullName) )
+                    using ( var populatorActivity = _logger.InvokingContextPopulator(contextType, populator.GetType()) )
                     {
                         try
                         {
-                            //populator.Populate();
+                            using ( var context = _unitOfWorkFactory.NewUnitOfWork(contextType, databaseName: databaseNameOverride) )
+                            {
+                                populator.Populate(context);
+
+                                if ( context.UnitOfWorkState != UnitOfWorkState.Committed )
+                                {
+                                    context.CommitChanges();
+                                }
+                            }
                         }
                         catch ( Exception e )
                         {
@@ -127,22 +137,34 @@ namespace NWheels.Entities.Impl
         public interface ILogger : IApplicationEventLogger
         {
             [LogInfo]
-            void FoundDatabase(string connectionString);
+            void RunningStorageInitializationCheck(Type contextType);
+
+            [LogVerbose]
+            void StorageInitializationTurnedOffSkipping(Type contextType);
+
+            [LogError]
+            ConfigurationErrorsException ConnectionStringNotConfigured(Type contextType);
+
+            [LogInfo]
+            void FoundDatabase(Type contextType, string connectionString);
             
             [LogWarning]
-            void DatabaseNotFound(string connectionString);
-            
+            void DatabaseNotFound(Type contextType, string connectionString);
+
+            [LogVerbose]
+            void DatabaseSchemaCreated(string connectionString);
+
             [LogInfo]
-            void NewDatabaseInitialized(string connectionString);
+            void NewDatabaseInitialized(Type contextType, string connectionString);
             
-            [LogError]
-            void DatabaseInitializationFailed(string connectionString, Exception error);
+            [LogCritical]
+            Exception DatabaseInitializationFailed(Type contextType, string connectionString, Exception error);
 
             [LogActivity]
-            ILogActivity InitializingNewDatabase();
+            ILogActivity InitializingNewDatabase(Type contextType, string connectionString);
 
             [LogActivity]
-            ILogActivity InvokingContextPopulator(string type);
+            ILogActivity InvokingContextPopulator(Type contextType, Type populatorType);
         }
     }
 }

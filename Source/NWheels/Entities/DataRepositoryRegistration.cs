@@ -12,6 +12,7 @@ namespace NWheels.Entities
     public abstract class DataRepositoryRegistration
     {
         public abstract Type DataRepositoryType { get; }
+        public abstract bool ShouldInitializeStorageOnStartup { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -20,6 +21,7 @@ namespace NWheels.Entities
         where TRepo : class, IApplicationDataRepository
     {
         private readonly ContainerBuilder _builder;
+        private bool _shouldInitializeStorageOnStartup;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -39,8 +41,7 @@ namespace NWheels.Entities
 
         public DataRepositoryRegistration<TRepo> WithInitializeStorageOnStartup()
         {
-            _builder.NWheelsFeatures().Logging().RegisterLogger<DatabaseInitializer.ILogger>();
-            _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>().FirstInPipeline();
+            _shouldInitializeStorageOnStartup = true;
             return this;
         }
 
@@ -48,7 +49,20 @@ namespace NWheels.Entities
 
         public override Type DataRepositoryType
         {
-            get { return typeof(TRepo); }
+            get
+            {
+                return typeof(TRepo);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override bool ShouldInitializeStorageOnStartup 
+        {
+            get
+            {
+                return _shouldInitializeStorageOnStartup;
+            }
         }
     }
 }
