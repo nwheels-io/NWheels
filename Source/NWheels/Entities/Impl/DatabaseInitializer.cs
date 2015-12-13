@@ -16,7 +16,7 @@ namespace NWheels.Entities.Impl
     public class DatabaseInitializer : LifecycleEventListenerBase
     {
         private readonly IStorageInitializer _initializer;
-        private readonly Pipeline<IDataRepositoryPopulator> _populators;
+        private readonly Pipeline<IDomainContextPopulator> _populators;
         private readonly IFrameworkDatabaseConfig _configuration;
         private readonly ILogger _logger;
         private readonly ISessionManager _sessionManager;
@@ -25,7 +25,7 @@ namespace NWheels.Entities.Impl
 
         public DatabaseInitializer(
             IStorageInitializer initializer, 
-            Pipeline<IDataRepositoryPopulator> populators, 
+            Pipeline<IDomainContextPopulator> populators, 
             Auto<IFrameworkDatabaseConfig> configuration, 
             ISessionManager sessionManager,
             ILogger logger)
@@ -106,11 +106,11 @@ namespace NWheels.Entities.Impl
             {
                 foreach ( var populator in _populators )
                 {
-                    using ( var populatorActivity = _logger.InvokingDataPopulator(type: populator.GetType().FullName) )
+                    using ( var populatorActivity = _logger.InvokingContextPopulator(type: populator.GetType().FullName) )
                     {
                         try
                         {
-                            populator.Populate();
+                            //populator.Populate();
                         }
                         catch ( Exception e )
                         {
@@ -142,7 +142,7 @@ namespace NWheels.Entities.Impl
             ILogActivity InitializingNewDatabase();
 
             [LogActivity]
-            ILogActivity InvokingDataPopulator(string type);
+            ILogActivity InvokingContextPopulator(string type);
         }
     }
 }

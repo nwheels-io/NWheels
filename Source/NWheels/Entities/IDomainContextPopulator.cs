@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace NWheels.Entities
 {
-    public interface IDataRepositoryPopulator
+    public interface IDomainContextPopulator
     {
-        void Populate();
+        void Populate(IApplicationDataRepository context);
+        Type ContextType { get; }
     }
 }

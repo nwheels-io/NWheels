@@ -400,9 +400,9 @@ namespace NWheels.Extensions
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public IRegistrationBuilder<TPopulator, ConcreteReflectionActivatorData, SingleRegistrationStyle> 
-                RegisterDataPopulator<TPopulator>() where TPopulator : IDataRepositoryPopulator
+                RegisterDataPopulator<TPopulator>() where TPopulator : IDomainContextPopulator
             {
-                return _builder.RegisterType<TPopulator>().As<IDataRepositoryPopulator>().SingleInstance();
+                return _builder.RegisterType<TPopulator>().As<IDomainContextPopulator>().SingleInstance();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -441,7 +441,7 @@ namespace NWheels.Extensions
                 _builder.RegisterType<HiloGeneratorMetadataConvention>().As<IMetadataConvention>().LastInPipeline();
                 _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<HiloIntegerIdGenerator>()
                     .WithParameter(TypedParameter.From(loDigits))
-                    .As<HiloIntegerIdGenerator, IPropertyValueGenerator, IDataRepositoryPopulator>()
+                    .As<HiloIntegerIdGenerator, IPropertyValueGenerator, IDomainContextPopulator>()
                     .FirstInPipeline()
                     .SingleInstance();
             }

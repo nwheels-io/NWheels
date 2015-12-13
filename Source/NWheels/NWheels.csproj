@@ -136,6 +136,7 @@
     <Compile Include="Endpoints\INetworkProtocolConfigContainer.cs" />
     <Compile Include="Entities\Core\IPartitionedObject.cs" />
     <Compile Include="Entities\Core\SchemaMigrationCollection.cs" />
+    <Compile Include="Entities\DomainContextPopulatorBase.cs" />
     <Compile Include="Entities\EntityChangeMessage.cs" />
     <Compile Include="Entities\Factories\ImplementIPartitionedObjectConvention.cs" />
     <Compile Include="Entities\Impl\PartitionedRepository.cs" />
@@ -284,7 +285,7 @@
     <Compile Include="Entities\Core\HiloGeneratorMetadataConvention.cs" />
     <Compile Include="Entities\Core\HiloIntegerIdGenerator.cs" />
     <Compile Include="Entities\Core\UnitOfWorkDataRepositoryBase.cs" />
-    <Compile Include="Entities\IDataRepositoryPopulator.cs" />
+    <Compile Include="Entities\IDomainContextPopulator.cs" />
     <Compile Include="Entities\Impl\DatabaseInitializer.cs" />
     <Compile Include="Extensions\AutofacExtensions.Pipeline.cs" />
     <Compile Include="Extensions\CharExtensions.cs" />

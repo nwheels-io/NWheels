@@ -8,7 +8,7 @@ using NWheels.Hosting;
 
 namespace NWheels.Entities.Core
 {
-    public class HiloIntegerIdGenerator : LifecycleEventListenerBase, IPropertyValueGenerator<int>, IDataRepositoryPopulator
+    public class HiloIntegerIdGenerator : LifecycleEventListenerBase, IPropertyValueGenerator<int>, IDomainContextPopulator
     {
         private readonly object _syncRoot = new object();
         private readonly IFramework _framework;
@@ -32,15 +32,24 @@ namespace NWheels.Entities.Core
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        void IDataRepositoryPopulator.Populate()
+        
+        void IDomainContextPopulator.Populate(IApplicationDataRepository context)
         {
-            using ( var data = _framework.NewUnitOfWork<IHiloDataRepository>() )
+            var hiloContext = (IHiloDataRepository)context;
+            
+            var hilo = hiloContext.Hilo.New();
+            hilo.Hi = 1;
+            hiloContext.Hilo.Insert(hilo);
+            hiloContext.CommitChanges();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Type IDomainContextPopulator.ContextType
+        {
+            get
             {
-                var hilo = data.Hilo.New();
-                hilo.Hi = 1;
-                data.Hilo.Insert(hilo);
-                data.CommitChanges();
+                return typeof(IHiloDataRepository);
             }
         }
 

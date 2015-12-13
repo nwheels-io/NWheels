@@ -8,11 +8,11 @@ namespace NWheels.Stacks.MongoDb.Factories
 {
     public class MongoDatabaseInitializer : IStorageInitializer
     {
-        private readonly Pipeline<IDataRepositoryPopulator> _populators;
+        private readonly Pipeline<IDomainContextPopulator> _populators;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MongoDatabaseInitializer(Pipeline<IDataRepositoryPopulator> populators)
+        public MongoDatabaseInitializer(Pipeline<IDomainContextPopulator> populators)
         {
             _populators = populators;
         }
