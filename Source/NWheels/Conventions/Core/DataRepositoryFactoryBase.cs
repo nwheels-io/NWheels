@@ -57,7 +57,7 @@ namespace NWheels.Conventions.Core
             Type repositoryType, 
             bool autoCommit, 
             IsolationLevel? isolationLevel = null,
-            string databaseName = null);
+            string connectionString = null);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -83,15 +83,11 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string ResolveDatabaseName(string configuredName, string overridingName, Type domainContextType)
+        public string ResolveDatabaseName(string configuredName, Type domainContextType)
         {
             IDatabaseNameResolver resolver;
 
-            if ( !string.IsNullOrEmpty(overridingName) )
-            {
-                return overridingName;
-            }
-            else if ( _databaseNameResolverByContractType.TryGetValue(domainContextType, out resolver) )
+            if ( _databaseNameResolverByContractType.TryGetValue(domainContextType, out resolver) )
             {
                 return resolver.ResolveDatabaseName(configuredName, context: (IAccessControlContext)Session.Current);
             }

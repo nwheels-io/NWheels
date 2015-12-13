@@ -311,7 +311,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<UnitOfWorkFactory>().SingleInstance();
 
             builder.NWheelsFeatures().Logging().RegisterLogger<DatabaseInitializer.ILogger>();
-            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>().FirstInPipeline();
+            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>().FirstInPipeline().AsSelf();
 
             builder.RegisterType<VoidLocalizationProvider>().As<ILocalizationProvider>().SingleInstance();
 
@@ -882,6 +882,14 @@ namespace NWheels.Hosting.Core
                 {
                     try
                     {
+                        var dbConfiguration = OwnerLifetime.LifetimeContainer.Resolve<IFrameworkDatabaseConfig>();
+                        var connectionString = dbConfiguration.GetContextConnectionString(registration.DataRepositoryType);
+
+                        if ( string.IsNullOrEmpty(connectionString) || connectionString.Trim().EndsWith("*") )
+                        {
+                            return;
+                        }
+
                         var unitOfWorkFactory = OwnerLifetime.LifetimeContainer.Resolve<UnitOfWorkFactory>();
                         var repoInstance = unitOfWorkFactory.NewUnitOfWork(registration.DataRepositoryType, autoCommit: false);
                         repoInstance.Dispose();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Reflection;
@@ -55,12 +56,18 @@ namespace NWheels.Stacks.MongoDb.Factories
             Type repositoryType, 
             bool autoCommit, 
             IsolationLevel? isolationLevel = null,
-            string databaseName = null)
+            string connectionString = null)
         {
-            var connectionString = new MongoConnectionStringBuilder(_config.GetContextConnectionString(domainContextType: repositoryType));
-            var client = new MongoClient(connectionString.ConnectionString);
+            var effectiveConnectionString = new MongoConnectionStringBuilder(connectionString ?? _config.GetContextConnectionString(domainContextType: repositoryType));
+
+            if ( effectiveConnectionString == null )
+            {
+                throw new ConfigurationErrorsException("No connection string configured for context type: " + repositoryType.FullName);
+            }
+
+            var client = new MongoClient(effectiveConnectionString.ConnectionString);
             var server = client.GetServer();
-            var resolvedDatabaseName = base.ResolveDatabaseName(connectionString.DatabaseName, databaseName, repositoryType);
+            var resolvedDatabaseName = base.ResolveDatabaseName(effectiveConnectionString.DatabaseName, repositoryType);
             var database = server.GetDatabase(resolvedDatabaseName);
 
             return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(

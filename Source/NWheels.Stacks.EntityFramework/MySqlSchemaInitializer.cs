@@ -31,6 +31,25 @@ namespace NWheels.Stacks.EntityFramework
 
         #region Implementation of IStorageInitializer
 
+        public string AlterConnectionString(string originalConnectionString, string newMachineName = null, string newDatabaseName = null)
+        {
+            var connectionParams = new MySqlConnectionStringBuilder(originalConnectionString);
+
+            if ( !string.IsNullOrEmpty(newMachineName) )
+            {
+                connectionParams.Server = newMachineName;
+            }
+
+            if ( !string.IsNullOrEmpty(newDatabaseName) )
+            {
+                connectionParams.Database = newDatabaseName;
+            }
+
+            return connectionParams.ToString();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public bool StorageSchemaExists(string connectionString)
         {
             var stringBuilder = new MySqlConnectionStringBuilder(connectionString);
@@ -89,6 +108,13 @@ namespace NWheels.Stacks.EntityFramework
             var sqlStatement = string.Format("drop schema if exists `{0}`", SanitizeSchemaName(stringBuilder.Database));
 
             ExecuteMasterSql(sqlStatement);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string[] ListStorageSchemas(string connectionString)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

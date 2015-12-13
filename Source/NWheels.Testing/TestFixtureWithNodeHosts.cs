@@ -370,6 +370,11 @@ namespace NWheels.Testing
         {
             #region Implementation of IStorageInitializer
 
+            public string AlterConnectionString(string originalConnectionString, string newMachineName = null, string newDatabaseName = null)
+            {
+                throw new NotSupportedException();
+            }
+
             public bool StorageSchemaExists(string connectionString)
             {
                 throw new NotSupportedException();
@@ -386,6 +391,11 @@ namespace NWheels.Testing
             }
 
             public void DropStorageSchema(string connectionString)
+            {
+                throw new NotSupportedException();
+            }
+
+            public string[] ListStorageSchemas(string connectionString)
             {
                 throw new NotSupportedException();
             }

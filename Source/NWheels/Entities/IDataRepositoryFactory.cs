@@ -16,7 +16,7 @@ namespace NWheels.Entities
             Type repositoryType, 
             bool autoCommit, 
             IsolationLevel? isolationLevel = null,
-            string databaseName = null);
+            string connectionString = null);
 
         Type GetDataRepositoryContract(Type entityContractType);
     }

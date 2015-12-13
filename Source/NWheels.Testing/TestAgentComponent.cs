@@ -43,7 +43,15 @@ namespace NWheels.Testing
 
             if ( testFixtureInstance.ShouldRebuildDatabase )
             {
-                _storageInitializer.DropStorageSchema(_dbConfig.ConnectionString);
+                if ( !string.IsNullOrEmpty(_dbConfig.ConnectionString) )
+                {
+                    _storageInitializer.DropStorageSchema(_dbConfig.ConnectionString);
+                }
+
+                foreach ( var context in _dbConfig.Contexts )
+                {
+                    _storageInitializer.DropStorageSchema(context.ConnectionString);
+                }
             }
         }
 

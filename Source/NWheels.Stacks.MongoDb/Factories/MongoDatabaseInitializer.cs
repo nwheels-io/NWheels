@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using NWheels.Entities;
@@ -20,6 +21,25 @@ namespace NWheels.Stacks.MongoDb.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Implementation of IStorageInitializer
+
+        public string AlterConnectionString(string originalConnectionString, string newMachineName = null, string newDatabaseName = null)
+        {
+            var connectionParams = new MongoConnectionStringBuilder(originalConnectionString);
+
+            if ( !string.IsNullOrEmpty(newMachineName) )
+            {
+                connectionParams.Server = new MongoServerAddress(newMachineName);
+            }
+
+            if ( !string.IsNullOrEmpty(newDatabaseName) )
+            {
+                connectionParams.DatabaseName = newDatabaseName;
+            }
+
+            return connectionParams.ToString();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public bool StorageSchemaExists(string connectionString)
         {
@@ -67,6 +87,17 @@ namespace NWheels.Stacks.MongoDb.Factories
             {
                 server.DropDatabase(connectionParams.DatabaseName);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string[] ListStorageSchemas(string connectionString)
+        {
+            var client = new MongoClient(connectionString);
+            var server = client.GetServer();
+            var allDbNames = server.GetDatabaseNames().ToArray();
+
+            return allDbNames;
         }
 
         #endregion

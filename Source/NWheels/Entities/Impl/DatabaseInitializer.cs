@@ -54,7 +54,9 @@ namespace NWheels.Entities.Impl
                 if ( registration.ShouldInitializeStorageOnStartup )
                 {
                     _logger.RunningStorageInitializationCheck(contextType: registration.DataRepositoryType);
-                    RunStorageInitializationCheck(registration.DataRepositoryType);
+
+                    bool newDatabaseCreated;
+                    RunStorageInitializationCheck(out newDatabaseCreated, registration.DataRepositoryType, connectionStringOverride: null);
                 }
                 else
                 {
@@ -65,18 +67,14 @@ namespace NWheels.Entities.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void RunStorageInitializationCheck(Type contextType)
+        public void RunStorageInitializationCheck(out bool newDatabaseCreated, Type contextType, string connectionStringOverride = null)
         {
-            var connectionString = _configuration.GetContextConnectionString(contextType);
-
-            if ( string.IsNullOrEmpty(connectionString) )
-            {
-                throw _logger.ConnectionStringNotConfigured(contextType);
-            }
+            var connectionString = connectionStringOverride ?? GetConfiguredContextConnectionString(contextType);
 
             if ( _storageInitializer.StorageSchemaExists(connectionString) )
             {
                 _logger.FoundDatabase(contextType, connectionString);
+                newDatabaseCreated = false;
                 return;
             }
 
@@ -86,7 +84,7 @@ namespace NWheels.Entities.Impl
             {
                 try
                 {
-                    InitializeNewDatabase(contextType, connectionString, databaseNameOverride: null);
+                    InitializeNewDatabase(contextType, connectionString);
                     _logger.NewDatabaseInitialized(contextType, connectionString);
                 }
                 catch ( Exception e )
@@ -95,14 +93,16 @@ namespace NWheels.Entities.Impl
                     throw _logger.DatabaseInitializationFailed(contextType, connectionString, e);
                 }
             }
+
+            newDatabaseCreated = true;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void InitializeNewDatabase(Type contextType, string connectionString, string databaseNameOverride)
+        private void InitializeNewDatabase(Type contextType, string connectionString)
         {
-            _storageInitializer.CreateStorageSchema(_configuration.ConnectionString);
-            _logger.DatabaseSchemaCreated(_configuration.ConnectionString);
+            _storageInitializer.CreateStorageSchema(connectionString);
+            _logger.DatabaseSchemaCreated(connectionString);
 
             using ( _sessionManager.JoinGlobalSystem() )
             {
@@ -112,7 +112,7 @@ namespace NWheels.Entities.Impl
                     {
                         try
                         {
-                            using ( var context = _unitOfWorkFactory.NewUnitOfWork(contextType, databaseName: databaseNameOverride) )
+                            using ( var context = _unitOfWorkFactory.NewUnitOfWork(contextType, connectionString: connectionString) )
                             {
                                 populator.Populate(context);
 
@@ -130,6 +130,20 @@ namespace NWheels.Entities.Impl
                     }
                 }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string GetConfiguredContextConnectionString(Type contextType)
+        {
+            var configuredConnectionString = _configuration.GetContextConnectionString(contextType);
+
+            if ( string.IsNullOrEmpty(configuredConnectionString) )
+            {
+                throw _logger.ConnectionStringNotConfigured(contextType);
+            }
+
+            return configuredConnectionString;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

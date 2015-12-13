@@ -27,7 +27,6 @@ namespace NWheels.Domains.Security.Core
             password.ExpiresAtUtc = Framework.UtcNow.AddDays(policy.PasswordExpiryDays);
 
             this.Passwords.Add(password);
-            this.Save();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

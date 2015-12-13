@@ -50,10 +50,10 @@ namespace NWheels.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TRepository NewUnitOfWork<TRepository>(bool autoCommit, IsolationLevel? isolationLevel = null, string databaseName = null) 
+        public TRepository NewUnitOfWork<TRepository>(bool autoCommit, IsolationLevel? isolationLevel = null, string connectionString = null) 
             where TRepository : class, IApplicationDataRepository
         {
-            return _unitOfWorkFactory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel, databaseName);
+            return _unitOfWorkFactory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel, connectionString);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -61,10 +61,10 @@ namespace NWheels.Core
         public IApplicationDataRepository NewUnitOfWork(
             Type domainContextType, 
             bool autoCommit = true, 
-            IsolationLevel? isolationLevel = null, 
-            string databaseName = null)
+            IsolationLevel? isolationLevel = null,
+            string connectionString = null)
         {
-            return _unitOfWorkFactory.NewUnitOfWork(domainContextType, autoCommit, isolationLevel, databaseName);
+            return _unitOfWorkFactory.NewUnitOfWork(domainContextType, autoCommit, isolationLevel, connectionString);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -72,13 +72,13 @@ namespace NWheels.Core
         public IApplicationDataRepository NewUnitOfWorkForEntity(
             Type entityContractType, 
             bool autoCommit = true, 
-            IsolationLevel? isolationLevel = null, 
-            string databaseName = null)
+            IsolationLevel? isolationLevel = null,
+            string connectionString = null)
         {
             var dataRepositoryFactory = _components.Resolve<IDataRepositoryFactory>();
             var dataRepositoryContract = dataRepositoryFactory.GetDataRepositoryContract(entityContractType);
-            
-            return _unitOfWorkFactory.NewUnitOfWork(dataRepositoryContract, autoCommit, isolationLevel, databaseName);
+
+            return _unitOfWorkFactory.NewUnitOfWork(dataRepositoryContract, autoCommit, isolationLevel, connectionString);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
