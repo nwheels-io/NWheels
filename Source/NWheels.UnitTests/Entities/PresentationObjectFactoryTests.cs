@@ -693,6 +693,11 @@ namespace NWheels.UnitTests.Entities
                 throw new NotImplementedException();
             }
 
+            public TEntityContract NewEntity<TEntityContract>(IComponentContext externalComponents) where TEntityContract : class
+            {
+                throw new NotImplementedException();
+            }
+
             public object NewEntity(Type entityContractType)
             {
                 throw new NotImplementedException();

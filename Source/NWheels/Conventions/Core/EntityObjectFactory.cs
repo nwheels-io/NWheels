@@ -43,6 +43,13 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TEntityContract NewEntity<TEntityContract>(IComponentContext externalComponents) where TEntityContract : class
+        {
+            return CreateInstanceOf<TEntityContract>().UsingConstructor<IComponentContext>(externalComponents, constructorIndex: 1);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public object NewEntity(Type entityContractType)
         {
             return CreateInstanceOf(entityContractType).UsingConstructor<IComponentContext>(_components, constructorIndex: 1);

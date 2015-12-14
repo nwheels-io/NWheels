@@ -434,8 +434,10 @@ namespace NWheels.Conventions.Core
                     {
                         var entityObjectLocal = m.Local<TT.TReturn>();
                         entityObjectLocal.Assign(
-                            _domainObjectFactoryField.Func<TT.TReturn, TT.TReturn>(x => x.CreateDomainObjectInstance, 
-                                _entityFactoryField.Func<TT.TReturn>(x => x.NewEntity<TT.TReturn>)
+                            _domainObjectFactoryField.Func<TT.TReturn, TT.TReturn>(x => x.CreateDomainObjectInstance,
+                                _entityFactoryField.Func<IComponentContext, TT.TReturn>(x => x.NewEntity<TT.TReturn>, 
+                                    m.This<DataRepositoryBase>().Prop(x => x.Components)
+                                )
                             )
                         );
 
