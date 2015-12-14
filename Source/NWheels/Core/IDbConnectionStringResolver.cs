@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Authorization;
+using NWheels.Entities.Core;
 
 namespace NWheels.Core
 {
-    public interface IDatabaseNameResolver
+    public interface IDbConnectionStringResolver
     {
-        string ResolveDatabaseName(string configuredDatabaseName, IAccessControlContext context);
+        string ResolveConnectionString(string configuredValue, IStorageInitializer storage, IAccessControlContext context);
         Type DomainContextType { get; }
     }
 }

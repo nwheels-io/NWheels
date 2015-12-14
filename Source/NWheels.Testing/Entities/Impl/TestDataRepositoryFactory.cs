@@ -25,10 +25,11 @@ namespace NWheels.Testing.Entities.Impl
         public TestDataRepositoryFactory(
             IComponentContext components, 
             DynamicModule module, 
-            TypeMetadataCache metadataCache, 
-            IEnumerable<IDatabaseNameResolver> databaseNameResolvers,
+            TypeMetadataCache metadataCache,
+            IFrameworkDatabaseConfig dbConfiguration,
+            IEnumerable<IDbConnectionStringResolver> databaseNameResolvers,
             TestEntityObjectFactory entityFactory)
-            : base(module, metadataCache, databaseNameResolvers)
+            : base(module, metadataCache, new TestFramework.VoidStorageInitializer(), dbConfiguration, databaseNameResolvers)
         {
             _components = components;
             _entityFactory = entityFactory;

@@ -26,6 +26,7 @@ using NWheels.Entities.Core;
 using NWheels.Entities.Impl;
 using TT = Hapil.TypeTemplate;
 using NWheels.Authorization;
+using NWheels.TypeModel;
 
 // ReSharper disable ConvertToLambdaExpression
 
@@ -34,20 +35,26 @@ namespace NWheels.Conventions.Core
     public abstract class DataRepositoryFactoryBase : ConventionObjectFactory, IDataRepositoryFactory, IAutoObjectFactory
     {
         private readonly TypeMetadataCache _metadataCache;
+        private readonly IStorageInitializer _storage;
+        private readonly IFrameworkDatabaseConfig _dbConfiguration;
         private readonly Dictionary<Type, Type> _repositoryContractByEntityContract;
-        private readonly Dictionary<Type, IDatabaseNameResolver> _databaseNameResolverByContractType;
+        private readonly Dictionary<Type, IDbConnectionStringResolver> _connectionStringResolverByContractType;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected DataRepositoryFactoryBase(
             DynamicModule module,
             TypeMetadataCache metadataCache,
-            IEnumerable<IDatabaseNameResolver> databaseNameResolvers)
+            IStorageInitializer storage,
+            IFrameworkDatabaseConfig dbConfiguration,
+            IEnumerable<IDbConnectionStringResolver> connectionStringResolvers)
             : base(module)
         {
             _metadataCache = metadataCache;
+            _storage = storage;
+            _dbConfiguration = dbConfiguration;
             _repositoryContractByEntityContract = new Dictionary<Type, Type>();
-            _databaseNameResolverByContractType = databaseNameResolvers.ToDictionary(resolver => resolver.DomainContextType);
+            _connectionStringResolverByContractType = connectionStringResolvers.ToDictionary(resolver => resolver.DomainContextType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,17 +90,34 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string ResolveDatabaseName(string configuredName, Type domainContextType)
+        public string ResolveConnectionString(string connectionStringOverride, Type domainContextType)
         {
-            IDatabaseNameResolver resolver;
-
-            if ( _databaseNameResolverByContractType.TryGetValue(domainContextType, out resolver) )
+            if ( !string.IsNullOrEmpty(connectionStringOverride) )
             {
-                return resolver.ResolveDatabaseName(configuredName, context: (IAccessControlContext)Session.Current);
+                return connectionStringOverride;
             }
-            else
+
+            var connectionConfig = _dbConfiguration.GetContextConnectionConfig(domainContextType);
+
+            if ( connectionConfig != null && !connectionConfig.IsWildcard )
             {
-                return configuredName;
+                return connectionConfig.ConnectionString;
+            }
+
+            IDbConnectionStringResolver resolver;
+
+            if ( _connectionStringResolverByContractType.TryGetValue(domainContextType, out resolver) )
+            {
+                var configuredValue = (connectionConfig != null ? connectionConfig.ConnectionString : _dbConfiguration.ConnectionString);
+    
+                return resolver.ResolveConnectionString(
+                    configuredValue, 
+                    context: (IAccessControlContext)Session.Current, 
+                    storage: _storage);
+            }
+            else 
+            {
+                return _dbConfiguration.ConnectionString;
             }
         }
 
@@ -112,6 +136,13 @@ namespace NWheels.Conventions.Core
         public TypeMetadataCache MetadataCache
         {
             get { return _metadataCache; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IStorageInitializer Storage
+        {
+            get { return _storage; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -708,7 +739,7 @@ namespace NWheels.Conventions.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class EntityInRepository
+        public class EntityInRepository : IDomainContextEntityMetadata
         {
             private readonly DataRepositoryConvention _ownerConvention;
             private readonly Type _contractType;
@@ -755,11 +786,11 @@ namespace NWheels.Conventions.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PropertyInfo FindEntityContractPropertyOrThrow(string argumentName, Type argumentType)
+            public PropertyInfo FindEntityContractPropertyOrThrow(string propertyName, Type propertyType)
             {
                 var property = this.Metadata.Properties.FirstOrDefault(p =>
-                    p.Name.EqualsIgnoreCase(argumentName) &&
-                        p.ClrType.IsAssignableFrom(argumentType));
+                    p.Name.EqualsIgnoreCase(propertyName) &&
+                        p.ClrType.IsAssignableFrom(propertyType));
 
                 if ( property != null )
                 {
@@ -769,7 +800,7 @@ namespace NWheels.Conventions.Core
                 throw new ContractConventionException(
                     _ownerConvention,
                     _contractType,
-                    String.Format("No property matches NewXXXX() method argument '{0}':{1}", argumentName, argumentType.Name));
+                    String.Format("No property matches NewXXXX() method argument '{0}':{1}", propertyName, propertyType.Name));
             }
 
 
@@ -800,6 +831,13 @@ namespace NWheels.Conventions.Core
             public PropertyInfo RepositoryProperty { get; private set; }
             public PropertyInfo PartitionedRepositoryProperty { get; private set; }
             public ITypeMetadata Metadata { get; private set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            ITypeMetadata IDomainContextEntityMetadata.MetaType
+            {
+                get { return this.Metadata; }
+            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 

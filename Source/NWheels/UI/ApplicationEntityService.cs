@@ -40,11 +40,11 @@ namespace NWheels.UI
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ApplicationEntityService(
-            IFramework framework, 
+            IFramework framework,
             ITypeMetadataCache metadataCache,
             IViewModelObjectFactory viewModelFactory,
             IEnumerable<IJsonSerializationExtension> jsonExtensions,
-            IDomainContextLogger domainContextLogger, 
+            IDomainContextLogger domainContextLogger,
             IEnumerable<Type> domainContextTypes)
         {
             _framework = framework;
@@ -177,7 +177,7 @@ namespace NWheels.UI
                     populationSerializerSettings.TraceWriter = traceWriter;
 
                     domainObject = handler.GetById(entityId);
-                    JsonConvert.PopulateObject(json, domainObject, populationSerializerSettings);//_serializerSettings);
+                    JsonConvert.PopulateObject(json, domainObject, populationSerializerSettings); //_serializerSettings);
 
                     Console.WriteLine(traceWriter.ToString());
 
@@ -257,22 +257,56 @@ namespace NWheels.UI
         {
             foreach ( var contextType in domainContextTypes )
             {
-                using ( var coontextInstance = _framework.As<ICoreFramework>().NewUnitOfWork(contextType) )
+                var contractTypes = FindDomainObjectContractsFromContextType(contextType);
+
+                foreach ( var domainObjectContract in contractTypes )
                 {
-                    RegisterDomainObjectTypesFromContext(contextType, coontextInstance);
+                    var metaType = _metadataCache.GetTypeMetadata(domainObjectContract);
+                    RegisterDomainObjectType(contextType, metaType);
                 }
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void RegisterDomainObjectTypesFromContext(Type contextType, IApplicationDataRepository contextInstance)
+        //private void RegisterDomainObjectTypesFromContext(Type contextType, IApplicationDataRepository contextInstance)
+        //{
+        //    foreach ( var entityContract in contextInstance.GetEntityContractsInRepository().Where(t => t != null) )
+        //    {
+        //        var metaType = _metadataCache.GetTypeMetadata(entityContract);
+        //        RegisterDomainObjectType(contextType, metaType);
+        //    }
+        //}
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IEnumerable<Type> FindDomainObjectContractsFromContextType(Type contextType)
         {
-            foreach ( var entityContract in contextInstance.GetEntityContractsInRepository().Where(t => t != null) )
+            var allInterfaces = new HashSet<Type>(contextType.GetInterfaces().ConcatOne(contextType));
+            var allProperties = new HashSet<PropertyInfo>();
+            var allMethods = new HashSet<MethodInfo>();
+            var allDomainObjectTypes = new HashSet<Type>();
+
+            foreach ( var intf in allInterfaces )
             {
-                var metaType = _metadataCache.GetTypeMetadata(entityContract);
-                RegisterDomainObjectType(contextType, metaType);
+                allProperties.UnionWith(intf.GetProperties());
+                allMethods.UnionWith(intf.GetMethods());
             }
+
+            allDomainObjectTypes.UnionWith(
+                allProperties.Select(p => p.PropertyType)
+                .Where(t => t.IsConstructedGenericTypeOf(typeof(IEntityRepository<>)))
+                .Select(t => t.GetGenericArguments()[0]));
+
+            allDomainObjectTypes.UnionWith(
+                allProperties.Select(p => p.PropertyType)
+                .Where(t => t.IsConstructedGenericTypeOf(typeof(IPartitionedRepository<,>)))
+                .Select(t => t.GetGenericArguments()[0]));
+
+            allDomainObjectTypes.UnionWith(
+                allMethods.Select(m => m.ReturnType).Where(t => t != null && t.IsInterface && (t.IsEntityContract() || t.IsEntityPartContract())));
+
+            return allDomainObjectTypes;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -302,7 +336,7 @@ namespace NWheels.UI
 
         private static Type[] GetContractTypes(Type type)
         {
-            var contracts = new List<Type>();  
+            var contracts = new List<Type>();
 
             if ( type.IsInterface && (type.IsEntityContract() || type.IsEntityPartContract() || type.IsViewModelContract()) )
             {
@@ -406,7 +440,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public QueryOptions(IDictionary<string, string> queryParams) 
+            public QueryOptions(IDictionary<string, string> queryParams)
                 : this()
             {
                 foreach ( var parameter in queryParams )
@@ -473,20 +507,14 @@ namespace NWheels.UI
 
             public bool NeedInMemoryOperations
             {
-                get
-                {
-                    return (InMemoryFilter.Count > 0 || InMemoryOrderBy.Count > 0);
-                }
+                get { return (InMemoryFilter.Count > 0 || InMemoryOrderBy.Count > 0); }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public bool NeedCountOperation
             {
-                get
-                {
-                    return (IsCountOnly || Page.HasValue);
-                }
+                get { return (IsCountOnly || Page.HasValue); }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -609,7 +637,7 @@ namespace NWheels.UI
             public string StringValue { get; private set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
-            
+
             public IPropertyMetadata MetaProperty { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -772,7 +800,7 @@ namespace NWheels.UI
             where TEntity : class
         {
             public EntityHandler(ApplicationEntityService owner, ITypeMetadata metaType, Type domainContextType)
-                 : base(owner, metaType, domainContextType)
+                : base(owner, metaType, domainContextType)
             {
             }
 
@@ -784,7 +812,9 @@ namespace NWheels.UI
                 PerContextResourceConsumerScope<TContext> stale;
                 if ( (stale = new ThreadStaticAnchor<PerContextResourceConsumerScope<TContext>>().Current) != null )
                 {
-                    DomainContextLogger.StaleUnitOfWorkEncountered(stale.Resource.ToString(), ((DataRepositoryBase)(object)stale.Resource).InitializerThreadText);
+                    DomainContextLogger.StaleUnitOfWorkEncountered(
+                        stale.Resource.ToString(),
+                        ((DataRepositoryBase)(object)stale.Resource).InitializerThreadText);
                 }
 
                 return Framework.NewUnitOfWork<TContext>();
@@ -902,7 +932,7 @@ namespace NWheels.UI
                 {
                     return entity;
                 }
-                
+
                 throw new ArgumentException("Specified entity does not exist.");
             }
 
@@ -914,12 +944,10 @@ namespace NWheels.UI
                 {
                     var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
                     var idProperty = MetaType.PrimaryKey.Properties[0];
-                    IQueryable<TEntity> query = repository.Where(idProperty.MakeBinaryExpression<TEntity>(
-                        valueString: id,
-                        binaryFactory: Expression.Equal));
+                    IQueryable<TEntity> query = repository.Where(idProperty.MakeBinaryExpression<TEntity>(valueString: id, binaryFactory: Expression.Equal));
 
                     var result = query.FirstOrDefault();
-                    
+
                     entity = result as IDomainObject;
                     return (entity != null);
                 }
@@ -945,7 +973,7 @@ namespace NWheels.UI
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
-            
+
             public override void Update(IDomainObject entity)
             {
                 using ( var context = Framework.NewUnitOfWork<TContext>() )
@@ -1005,7 +1033,7 @@ namespace NWheels.UI
                         i++;
                     }
                 }
-                
+
                 return dbQuery;
             }
 
@@ -1043,18 +1071,22 @@ namespace NWheels.UI
 
             private IQueryable<TEntity> ApplyOfTypeFilter(IQueryable<TEntity> dbQuery, string typeString)
             {
+                if ( MetaType.QualifiedName.EqualsIgnoreCase(typeString) )
+                {
+                    return dbQuery;
+                }
+
                 var filterMetaType = MetaType.DerivedTypes.FirstOrDefault(t => t.QualifiedName.EqualsIgnoreCase(typeString));
 
                 if ( filterMetaType == null )
                 {
-                    throw new ArgumentException(string.Format(
-                        "Specified entity type '{0}' is not compatible with entity '{1}'.",
-                        typeString, MetaType.QualifiedName));
+                    throw new ArgumentException(
+                        string.Format("Specified entity type '{0}' is not compatible with entity '{1}'.", typeString, MetaType.QualifiedName));
                 }
 
                 return filterMetaType.MakeOfType(dbQuery);
             }
-            
+
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private IQueryable<TEntity> HandlePaging(QueryOptions options, IQueryable<TEntity> dbQuery)
@@ -1144,7 +1176,7 @@ namespace NWheels.UI
                     properties.Insert(0, CreateObjectTypeProperty());
                     properties.Insert(1, CreateEntityIdProperty());
                 }
-                
+
                 return properties;
             }
 
@@ -1160,7 +1192,8 @@ namespace NWheels.UI
 
                     if ( IsEmbeddedObjectCollectionProperty(metaProperty) )
                     {
-                        var converterClosedType = typeof(EmbeddedDomainObjectCollectionConverter<>).MakeGenericType(metaProperty.Relation.RelatedPartyType.ContractType);
+                        var converterClosedType =
+                            typeof(EmbeddedDomainObjectCollectionConverter<>).MakeGenericType(metaProperty.Relation.RelatedPartyType.ContractType);
                         var converterInstance = (JsonConverter)Activator.CreateInstance(converterClosedType, _ownerService, metaProperty);
                         jsonProperty.MemberConverter = converterInstance;
 
@@ -1213,7 +1246,7 @@ namespace NWheels.UI
                     Readable = true,
                     Writable = true
                 };
-                
+
                 return replacingJsonProperty;
             }
 
@@ -1221,11 +1254,9 @@ namespace NWheels.UI
 
             private JsonProperty CreateReplacementForeignKeyCollectionProperty(IPropertyMetadata metaProperty, JsonProperty originalJsonProperty)
             {
-                var valueProviderClosedType = 
-                    typeof(ForeignKeyCollectionValueProvider<>).MakeGenericType(metaProperty.Relation.RelatedPartyType.ContractType);
-                
-                var valueProviderInstance = 
-                    (IValueProvider)Activator.CreateInstance(valueProviderClosedType, _ownerService, metaProperty, originalJsonProperty);
+                var valueProviderClosedType = typeof(ForeignKeyCollectionValueProvider<>).MakeGenericType(metaProperty.Relation.RelatedPartyType.ContractType);
+
+                var valueProviderInstance = (IValueProvider)Activator.CreateInstance(valueProviderClosedType, _ownerService, metaProperty, originalJsonProperty);
 
                 var replacingJsonProperty = new JsonProperty {
                     PropertyType = typeof(string[]),
@@ -1305,9 +1336,7 @@ namespace NWheels.UI
                     return true;
                 }
 
-                return (
-                    metaProperty.RelationalMapping != null && 
-                    metaProperty.RelationalMapping.StorageStyle == PropertyStorageStyle.InlineForeignKey);
+                return (metaProperty.RelationalMapping != null && metaProperty.RelationalMapping.StorageStyle == PropertyStorageStyle.InlineForeignKey);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1324,8 +1353,7 @@ namespace NWheels.UI
                     return true;
                 }
 
-                return (
-                    metaProperty.RelationalMapping != null &&
+                return (metaProperty.RelationalMapping != null &&
                     metaProperty.RelationalMapping.StorageStyle == PropertyStorageStyle.EmbeddedForeignKeyCollection);
             }
 
@@ -1406,7 +1434,7 @@ namespace NWheels.UI
                 if ( domainObject != null )
                 {
                     var metaType = _metadataCache.GetTypeMetadata(domainObject.ContractType);
-                
+
                     if ( metaType.IsEntity )
                     {
                         return EntityId.Of(domainObject).Value.ToStringOrDefault();
@@ -1593,7 +1621,7 @@ namespace NWheels.UI
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
-            
+
             #region Overrides of JsonConverter
 
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -1611,7 +1639,7 @@ namespace NWheels.UI
                 }
 
                 object relatedDomainObject;
-                
+
                 if ( LoadRelatedDomainObjectByForeignKey(reader, objectType, out relatedDomainObject) )
                 {
                     return relatedDomainObject;
@@ -1642,31 +1670,25 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override bool CanRead 
+            public override bool CanRead
             {
-                get
-                {
-                    return true;
-                }
+                get { return true; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override bool CanWrite
             {
-                get
-                {
-                    return false;
-                }
+                get { return false; }
             }
 
             #endregion
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
-            
+
             private bool LoadRelatedDomainObjectByForeignKey(JsonReader reader, Type objectType, out object relatedDomainObject)
             {
-                if ( reader.TokenType == JsonToken.StartObject ) 
+                if ( reader.TokenType == JsonToken.StartObject )
                 {
                     // JSON contains object contents - proceed and populate it
                     relatedDomainObject = null;
@@ -1676,7 +1698,7 @@ namespace NWheels.UI
                 var idValue = reader.Value;
                 var relatedMetaType = _ownerService._metadataCache.GetTypeMetadata(objectType);
                 var foreignKeyHandler = _ownerService._handlerByEntityName[relatedMetaType.QualifiedName];
-                    
+
                 relatedDomainObject = foreignKeyHandler.GetById(idValue.ToString());
                 return true;
             }
@@ -1691,7 +1713,7 @@ namespace NWheels.UI
             private readonly IPropertyMetadata _metaProperty;
             private readonly ITypeMetadata _relatedMetaType;
             private readonly EntityHandler _relatedEntityHandler;
-            
+
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public EmbeddedDomainObjectCollectionConverter(ApplicationEntityService ownerService, IPropertyMetadata metaProperty)
@@ -1732,7 +1754,8 @@ namespace NWheels.UI
                     if ( _relatedMetaType.IsEntity )
                     {
                         var idString = jo["$id"].Value<string>();
-                        itemToPopulate = existingCollection.FirstOrDefault(obj => obj.As<IPersistableObject>().As<IEntityObject>().GetId().Value.ToString() == idString);
+                        itemToPopulate =
+                            existingCollection.FirstOrDefault(obj => obj.As<IPersistableObject>().As<IEntityObject>().GetId().Value.ToString() == idString);
                     }
                     else
                     {
@@ -1794,30 +1817,22 @@ namespace NWheels.UI
             public override bool CanConvert(Type objectType)
             {
                 Type itemType;
-                
-                return (
-                    objectType.IsCollectionType(out itemType) && 
-                    (itemType.IsEntityContract() || itemType.IsEntityPartContract()));
+
+                return (objectType.IsCollectionType(out itemType) && (itemType.IsEntityContract() || itemType.IsEntityPartContract()));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override bool CanRead
             {
-                get
-                {
-                    return true;
-                }
+                get { return true; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override bool CanWrite
             {
-                get
-                {
-                    return false;
-                }
+                get { return false; }
             }
 
             #endregion
@@ -1901,23 +1916,17 @@ namespace NWheels.UI
 
             public override bool CanRead
             {
-                get
-                {
-                    return true;
-                }
+                get { return true; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override bool CanWrite
             {
-                get
-                {
-                    return false;
-                }
+                get { return false; }
             }
 
             #endregion
         }
     }
-}
+} ;

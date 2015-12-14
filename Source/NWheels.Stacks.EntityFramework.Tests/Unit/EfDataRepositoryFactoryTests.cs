@@ -10,6 +10,7 @@ using NWheels.Conventions.Core;
 using NWheels.Core;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
+using NWheels.Entities.Core;
 using NWheels.Stacks.EntityFramework.Factories;
 using NWheels.Testing;
 using NWheels.Testing.Entities.Stacks;
@@ -40,9 +41,10 @@ namespace NWheels.Stacks.EntityFramework.Tests.Unit
                 base.DyamicModule,
                 new EfEntityObjectFactory(Framework.Components, base.DyamicModule, (TypeMetadataCache)Framework.MetadataCache),
                 (TypeMetadataCache)Framework.MetadataCache,
-                new IDatabaseNameResolver[0],
-                dbProviderFactory,
-                Auto.Of(dbConfig));
+                Resolve<IStorageInitializer>(),
+                new IDbConnectionStringResolver[0],
+                dbConfig,
+                dbProviderFactory);
         }
     }
 }

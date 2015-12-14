@@ -17,6 +17,7 @@ using NWheels.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
+using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.Stacks.EntityFramework.EFConventions;
 using TT = Hapil.TypeTemplate;
@@ -29,7 +30,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
     {
         private readonly IComponentContext _components;
         private readonly DbProviderFactory _dbProvider;
-        private readonly IFrameworkDatabaseConfig _config;
+        private readonly IFrameworkDatabaseConfig _dbConfiguration;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly EntityObjectFactory _entityFactory;
 
@@ -40,15 +41,16 @@ namespace NWheels.Stacks.EntityFramework.Factories
             DynamicModule module,
             EfEntityObjectFactory entityFactory,
             TypeMetadataCache metadataCache,
-            IEnumerable<IDatabaseNameResolver> databaseNameResolvers,
-            DbProviderFactory dbProvider = null,
-            Auto<IFrameworkDatabaseConfig> config = null)
-            : base(module, metadataCache, databaseNameResolvers)
+            IStorageInitializer storageInitializer,
+            IEnumerable<IDbConnectionStringResolver> databaseNameResolvers,
+            IFrameworkDatabaseConfig dbConfiguration,
+            DbProviderFactory dbProvider = null)
+            : base(module, metadataCache, storageInitializer, dbConfiguration, databaseNameResolvers)
         {
             _components = components;
             _entityFactory = entityFactory;
             _dbProvider = dbProvider;
-            _config = (config != null ? config.Instance : null);
+            _dbConfiguration = dbConfiguration;
             _metadataCache = metadataCache;
         }
 
@@ -62,7 +64,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
             string databaseName = null)
         {
             var connection = _dbProvider.CreateConnection();
-            connection.ConnectionString = _config.ConnectionString;
+            connection.ConnectionString = _dbConfiguration.ConnectionString;
             //TODO: replace database name if databaseName parameter is specified
             connection.Open();
 

@@ -52,7 +52,8 @@ namespace NWheels.Testing.UnitTests.Entities.Impl
                 Framework.Components,
                 base.DyamicModule,
                 _metadataCache,
-                new IDatabaseNameResolver[0],
+                Resolve<IFrameworkDatabaseConfig>(),
+                new IDbConnectionStringResolver[0],
                 entityObjectFactory);
 
             Framework.UpdateComponents(

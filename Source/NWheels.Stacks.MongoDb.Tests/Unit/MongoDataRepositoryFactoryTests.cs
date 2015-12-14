@@ -101,8 +101,8 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
 
         private MongoDataRepositoryFactory CreateDataRepositoryFactory()
         {
-            var configAuto = ResolveAuto<IFrameworkDatabaseConfig>();
-            configAuto.Instance.ConnectionString = string.Format("server=localhost;database=TEST");
+            var dbConfiguration = Resolve<IFrameworkDatabaseConfig>();
+            dbConfiguration.ConnectionString = string.Format("server=localhost;database=TEST");
 
             var metadataCache = TestFramework.CreateMetadataCacheWithDefaultConventions(
                 Framework.Components,
@@ -115,7 +115,14 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
             updater.Update(Framework.Components.ComponentRegistry);
 
             var entityFactory = new MongoEntityObjectFactory(Framework.Components, _dyamicModule, metadataCache);
-            var repoFactory = new MongoDataRepositoryFactory(Framework.Components, _dyamicModule, entityFactory, metadataCache, new IDatabaseNameResolver[0], configAuto.Instance);
+            var repoFactory = new MongoDataRepositoryFactory(
+                Framework.Components, 
+                _dyamicModule, 
+                entityFactory, 
+                metadataCache,
+                base.Resolve<IStorageInitializer>(),
+                new IDbConnectionStringResolver[0],
+                dbConfiguration);
 
             Framework.UpdateComponents(
                 builder => {

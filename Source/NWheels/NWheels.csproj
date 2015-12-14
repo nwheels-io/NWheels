@@ -125,8 +125,11 @@
     <Compile Include="Concurrency\PerContextResourceConsumerScope.cs" />
     <Compile Include="Configuration\ConfiguredComponentAttribute.cs" />
     <Compile Include="Configuration\Core\CommandLineConfigurationLoader.cs" />
+    <Compile Include="TypeModel\Core\DomainContextMetadataBuilder.cs" />
+    <Compile Include="TypeModel\Core\DomainContextMetadataCache.cs" />
+    <Compile Include="TypeModel\IDomainContextEntityMetadata.cs" />
     <Compile Include="Core\ICoreFramework.cs" />
-    <Compile Include="Core\IDatabaseNameResolver.cs" />
+    <Compile Include="Core\IDbConnectionStringResolver.cs" />
     <Compile Include="Core\UnitOfWorkFactory.cs" />
     <Compile Include="Endpoints\Core\IEndpoint.cs" />
     <Compile Include="Endpoints\FrameworkSoapNames.cs" />
@@ -176,6 +179,8 @@
     <Compile Include="Processing\Rules\Impl\RealRuleEngine.cs" />
     <Compile Include="TypeModel\Core\Factories\NotSupportedPropertyStrategy.cs" />
     <Compile Include="TypeModel\Core\StorageTypes\MoneyStorageType.cs" />
+    <Compile Include="TypeModel\IDomainContextMetadata.cs" />
+    <Compile Include="TypeModel\IDomainContextMetadataCache.cs" />
     <Compile Include="TypeModel\ITypeLogicMetadata.cs" />
     <Compile Include="TypeModel\PropertyStorageStyle.cs" />
     <Compile Include="TypeModel\Serialization\BinarySerializer.cs" />

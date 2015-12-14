@@ -13,7 +13,7 @@ using NWheels.Testing;
 
 namespace NWheels.Stacks.ODataBreeze.SystemTests
 {
-    [TestFixture]
+    [TestFixture, Ignore]
     public class BreezeApiControllerFactoryTests : DynamicTypeUnitTestBase
     {
         [Test]

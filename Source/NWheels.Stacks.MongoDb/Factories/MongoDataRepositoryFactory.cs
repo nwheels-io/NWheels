@@ -18,6 +18,7 @@ using NWheels.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
+using NWheels.Entities.Core;
 using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
 
@@ -28,7 +29,7 @@ namespace NWheels.Stacks.MongoDb.Factories
     public class MongoDataRepositoryFactory : DataRepositoryFactoryBase
     {
         private readonly IComponentContext _components;
-        private readonly IFrameworkDatabaseConfig _config;
+        private readonly IFrameworkDatabaseConfig _dbConfiguration;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly MongoEntityObjectFactory _entityFactory;
 
@@ -39,13 +40,14 @@ namespace NWheels.Stacks.MongoDb.Factories
             DynamicModule module,
             MongoEntityObjectFactory entityFactory,
             TypeMetadataCache metadataCache,
-            IEnumerable<IDatabaseNameResolver> databaseNameResolvers,
-            IFrameworkDatabaseConfig config = null)
-            : base(module, metadataCache, databaseNameResolvers)
+            IStorageInitializer storageInitializer,
+            IEnumerable<IDbConnectionStringResolver> databaseNameResolvers,
+            IFrameworkDatabaseConfig dbConfiguration)
+            : base(module, metadataCache, storageInitializer, dbConfiguration, databaseNameResolvers)
         {
             _components = components;
             _entityFactory = entityFactory;
-            _config = config;
+            _dbConfiguration = dbConfiguration;
             _metadataCache = metadataCache;
         }
 
@@ -58,17 +60,12 @@ namespace NWheels.Stacks.MongoDb.Factories
             IsolationLevel? isolationLevel = null,
             string connectionString = null)
         {
-            var effectiveConnectionString = new MongoConnectionStringBuilder(connectionString ?? _config.GetContextConnectionString(domainContextType: repositoryType));
+            var resolvedConnectionString = ResolveConnectionString(connectionString, repositoryType);
+            var connectionStringBuilder = new MongoConnectionStringBuilder(resolvedConnectionString);
 
-            if ( effectiveConnectionString == null )
-            {
-                throw new ConfigurationErrorsException("No connection string configured for context type: " + repositoryType.FullName);
-            }
-
-            var client = new MongoClient(effectiveConnectionString.ConnectionString);
+            var client = new MongoClient(connectionStringBuilder.ConnectionString);
             var server = client.GetServer();
-            var resolvedDatabaseName = base.ResolveDatabaseName(effectiveConnectionString.DatabaseName, repositoryType);
-            var database = server.GetDatabase(resolvedDatabaseName);
+            var database = server.GetDatabase(connectionStringBuilder.DatabaseName);
 
             return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(
                 consumerScope,

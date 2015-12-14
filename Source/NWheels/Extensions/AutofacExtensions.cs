@@ -483,9 +483,9 @@ namespace NWheels.Extensions
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public void RegisterDatabaseNameResolver<TResolver>()
-                where TResolver : class, IDatabaseNameResolver
+                where TResolver : class, IDbConnectionStringResolver
             {
-                _builder.RegisterType<TResolver>().As<IDatabaseNameResolver>().SingleInstance();
+                _builder.RegisterType<TResolver>().As<IDbConnectionStringResolver>().SingleInstance();
             }
         }
 

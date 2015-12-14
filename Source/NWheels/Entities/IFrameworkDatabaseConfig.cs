@@ -65,6 +65,13 @@ namespace NWheels.Entities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static IFrameworkContextPersistenceConfig GetContextConnectionConfig(this IFrameworkDatabaseConfig configSection, Type domainContextType)
+        {
+            return configSection.Contexts.FirstOrDefault(ctx => ctx.Contract == domainContextType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static string GetMasterConnectionString(this IFrameworkDatabaseConfig configSection, Type domainContextType)
         {
             var contextSpecificConfig = configSection.Contexts.FirstOrDefault(ctx => ctx.Contract == domainContextType);

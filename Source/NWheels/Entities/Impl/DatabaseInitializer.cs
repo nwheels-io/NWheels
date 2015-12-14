@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using NWheels;
 using NWheels.Authorization;
 using NWheels.Core;
@@ -17,29 +18,30 @@ namespace NWheels.Entities.Impl
 {
     public class DatabaseInitializer : LifecycleEventListenerBase
     {
+        private readonly IComponentContext _components;
         private readonly IStorageInitializer _storageInitializer;
         private readonly IEnumerable<DataRepositoryRegistration> _contextRegistrations;
         private readonly Pipeline<IDomainContextPopulator> _populators;
-        private readonly IFrameworkDatabaseConfig _configuration;
         private readonly ISessionManager _sessionManager;
         private readonly UnitOfWorkFactory _unitOfWorkFactory;
         private readonly ILogger _logger;
+        private IFrameworkDatabaseConfig _configuration;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public DatabaseInitializer(
+            IComponentContext components,
             IStorageInitializer storageInitializer,
             IEnumerable<DataRepositoryRegistration> contextRegistrations,
             Pipeline<IDomainContextPopulator> populators, 
-            Auto<IFrameworkDatabaseConfig> configuration, 
             ISessionManager sessionManager,
             UnitOfWorkFactory unitOfWorkFactory,
             ILogger logger)
         {
+            _components = components;
             _storageInitializer = storageInitializer;
             _contextRegistrations = contextRegistrations;
             _populators = populators;
-            _configuration = configuration.Instance;
             _sessionManager = sessionManager;
             _unitOfWorkFactory = unitOfWorkFactory;
             _logger = logger;
@@ -49,6 +51,8 @@ namespace NWheels.Entities.Impl
 
         public override void NodeConfigured(List<ILifecycleEventListener> additionalComponentsToHost)
         {
+            _configuration = _components.Resolve<IFrameworkDatabaseConfig>();
+
             foreach ( var registration in _contextRegistrations )
             {
                 if ( registration.ShouldInitializeStorageOnStartup )

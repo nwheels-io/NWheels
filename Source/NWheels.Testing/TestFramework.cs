@@ -374,6 +374,8 @@ namespace NWheels.Testing
             builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
             builder.RegisterType<TestServiceBus>().As<IServiceBus>().SingleInstance();
+            builder.RegisterType<VoidStorageInitializer>().As<IStorageInitializer>();
+            builder.RegisterPipeline<IDomainContextPopulator>();
 
             builder.RegisterType<AccessControlListCache>().SingleInstance();
             builder.RegisterType<LocalTransientSessionManager>().As<ISessionManager, ICoreSessionManager>().SingleInstance();
@@ -486,6 +488,45 @@ namespace NWheels.Testing
             {
                 return _s_defaultDynamicModule;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class VoidStorageInitializer : IStorageInitializer
+        {
+            #region Implementation of IStorageInitializer
+
+            public string AlterConnectionString(string originalConnectionString, string newMachineName = null, string newDatabaseName = null)
+            {
+                throw new NotSupportedException();
+            }
+
+            public bool StorageSchemaExists(string connectionString)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void MigrateStorageSchema(string connectionString, DataRepositoryBase context, SchemaMigrationCollection migrations)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void CreateStorageSchema(string connectionString)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void DropStorageSchema(string connectionString)
+            {
+                throw new NotSupportedException();
+            }
+
+            public string[] ListStorageSchemas(string connectionString)
+            {
+                throw new NotSupportedException();
+            }
+
+            #endregion
         }
     }
 }

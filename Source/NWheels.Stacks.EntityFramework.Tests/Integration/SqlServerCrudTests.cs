@@ -191,9 +191,10 @@ namespace NWheels.Stacks.EntityFramework.Tests.Integration
                 _dynamicModule,
                 new EfEntityObjectFactory(Framework.Components, _dynamicModule, (TypeMetadataCache)Framework.MetadataCache),
                 (TypeMetadataCache)Framework.MetadataCache,
-                new IDatabaseNameResolver[0],
-                dbProviderFactory,
-                Auto.Of(dbConfig));
+                Resolve<IStorageInitializer>(),
+                new IDbConnectionStringResolver[0],
+                dbConfig,
+                dbProviderFactory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
