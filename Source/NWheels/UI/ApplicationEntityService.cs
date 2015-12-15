@@ -77,6 +77,14 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IUnitOfWork NewUnitOfWork(string entityName)
+        {
+            var handler = _handlerByEntityName[entityName];
+            return handler.NewUnitOfWork();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string NewEntityJson(string entityName)
         {
             var handler = _handlerByEntityName[entityName];

@@ -198,14 +198,17 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            _serviceBus.DispatchMessageOnCurrentThread(command);
+            using ( _context.EntityService.NewUnitOfWork(entityName) )
+            {
+                _serviceBus.DispatchMessageOnCurrentThread(command);
 
-            var query = (IQueryable)command.Result.Result;
-            var json = _context.EntityService.QueryEntityJson(entityName, query, options);
+                var query = (IQueryable)command.Result.Result;
+                var json = _context.EntityService.QueryEntityJson(entityName, query, options);
 
-            return ResponseMessage(new HttpResponseMessage() {
-                Content = new StringContent(json, Encoding.UTF8, "application/json")
-            });
+                return ResponseMessage(new HttpResponseMessage() {
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
+                });
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
