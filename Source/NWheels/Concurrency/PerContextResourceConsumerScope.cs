@@ -73,6 +73,7 @@ namespace NWheels.Concurrency
                 {
                     this.NotifyResourceActiveScopeChanged(currentScopeIsActive: false);
                     _outerScope.NotifyResourceActiveScopeChanged(currentScopeIsActive: true);
+                    DisposeResource();
                 }
             }
             else
@@ -145,6 +146,13 @@ namespace NWheels.Concurrency
             {
                 return _anchor.Current;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool ForceNewResource
+        {
+            get { return _forceNewResource; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

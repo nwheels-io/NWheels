@@ -471,7 +471,7 @@ namespace NWheels.Entities.Core
 
             try
             {
-                if ( !_disposed && (_consumerScope == null || _consumerScope.Innermost.IsOutermost) )
+                if ( !_disposed && (_consumerScope == null || _consumerScope.Innermost.IsOutermost || _consumerScope.ForceNewResource) )
                 {
                     _logger.EndOfRootUnitOfWork(this.ToString());
 
