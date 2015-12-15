@@ -457,6 +457,11 @@ namespace NWheels.Stacks.MongoDb
 
                     var results = _mongoCollection.InsertBatch<TEntityImpl>(entities.Cast<TEntityImpl>());
 
+                    foreach ( var entity in entities )
+                    {
+                        entity.As<IDomainObject>().AfterCommit();
+                    }
+
                     //foreach ( var result in results )
                     //{
                     //    _logger.MongoDbWriteResult(result.DocumentsAffected, result.Upserted, result.UpdatedExisting);
