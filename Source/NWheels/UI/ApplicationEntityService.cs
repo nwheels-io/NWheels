@@ -262,7 +262,7 @@ namespace NWheels.UI
                 foreach ( var domainObjectContract in contractTypes )
                 {
                     var metaType = _metadataCache.GetTypeMetadata(domainObjectContract);
-                    RegisterDomainObjectType(contextType, metaType);
+                    RegisterDomainObjectType(contextType, metaType, explicitlyDeclaredInContext: true);
                 }
             }
         }
@@ -311,11 +311,18 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void RegisterDomainObjectType(Type contextType, ITypeMetadata metaType)
+        private void RegisterDomainObjectType(Type contextType, ITypeMetadata metaType, bool explicitlyDeclaredInContext)
         {
             if ( _handlerByEntityName.ContainsKey(metaType.QualifiedName) )
             {
-                return;
+                if ( explicitlyDeclaredInContext )
+                {
+                    _handlerByEntityName.Remove(metaType.QualifiedName);
+                }
+                else
+                {
+                    return;
+                }
             }
 
             var handler = EntityHandler.Create(this, metaType, contextType);
@@ -323,12 +330,12 @@ namespace NWheels.UI
 
             foreach ( var property in metaType.Properties.Where(p => p.Kind.IsIn(PropertyKind.Part, PropertyKind.Relation)) )
             {
-                RegisterDomainObjectType(contextType, property.Relation.RelatedPartyType);
+                RegisterDomainObjectType(contextType, property.Relation.RelatedPartyType, explicitlyDeclaredInContext: false);
             }
 
             foreach ( var derivedType in metaType.DerivedTypes )
             {
-                RegisterDomainObjectType(contextType, derivedType);
+                RegisterDomainObjectType(contextType, derivedType, explicitlyDeclaredInContext: false);
             }
         }
 
