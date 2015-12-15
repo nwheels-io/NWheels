@@ -18,12 +18,14 @@ namespace NWheels.Stacks.MongoDb.Factories
 {
     public class DocumentIdStrategy : DualValueStrategy
     {
+        private readonly MongoEntityObjectFactory.ConventionContext _conventionContext;
         private Field<IComponentContext> _componentsField;
         private Type _implementationType;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public DocumentIdStrategy(
+            MongoEntityObjectFactory.ConventionContext conventionContext,
             PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
@@ -31,6 +33,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             IPropertyMetadata metaProperty)
             : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty, storageType: metaProperty.Relation.RelatedPartyType.PrimaryKey.Properties[0].ClrType)
         {
+            _conventionContext = conventionContext;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -104,7 +107,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             contractValue.Assign(
                 Static.Func(MongoDataRepositoryBase.ResolveFrom, 
                     _componentsField,
-                    Static.Func(ResolutionExtensions.Resolve<DataRepositoryBase>, _componentsField).Func<Type>(x => x.GetType)
+                    _conventionContext.ContextImplTypeField
                 )
                 .Func<TT.TValue, TT.TProperty>(
                     x => x.LazyLoadById<TT.TProperty, TT.TValue>, storageValue

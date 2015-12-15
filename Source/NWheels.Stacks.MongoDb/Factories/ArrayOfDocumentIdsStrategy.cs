@@ -17,6 +17,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 {
     public class ArrayOfDocumentIdsStrategy : DualValueStrategy
     {
+        private readonly MongoEntityObjectFactory.ConventionContext _conventionContext;
         private Type _itemContractType;
         private Type _itemImplementationType;
         private Type _documentIdType;
@@ -27,6 +28,7 @@ namespace NWheels.Stacks.MongoDb.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ArrayOfDocumentIdsStrategy(
+            MongoEntityObjectFactory.ConventionContext conventionContext,
             PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
@@ -34,6 +36,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             IPropertyMetadata metaProperty)
             : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty, storageType: GetArrayOfIdsType(metaProperty))
         {
+            _conventionContext = conventionContext;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -150,7 +153,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             lazyLoadQueryLocal.Assign(
                 Static.Func(MongoDataRepositoryBase.ResolveFrom, 
                     _componentsField, 
-                    Static.Func(ResolutionExtensions.Resolve<DataRepositoryBase>, _componentsField).Func<Type>(x => x.GetType)
+                    _conventionContext.ContextImplTypeField
                 )
                 .Func<IEnumerable<TT.TKey>, IEnumerable<TT.TItem>>(x => x.LazyLoadByIdList<TT.TItem, TT.TKey>, 
                     storageValue.CastTo<IEnumerable<TT.TKey>>()

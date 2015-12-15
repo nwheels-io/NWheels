@@ -57,7 +57,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             IResourceConsumerScopeHandle consumerScope, 
             Type repositoryType, 
             bool autoCommit, 
-            IsolationLevel? isolationLevel = null,
+            UnitOfWorkScopeOption? scopeOption = null,
             string connectionString = null)
         {
             var resolvedConnectionString = ResolveConnectionString(connectionString, repositoryType);
@@ -254,7 +254,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        public IApplicationDataRepository NewUnitOfWork(Type repositoryType, bool autoCommit, IsolationLevel? isolationLevel = null)
+        public IApplicationDataRepository NewUnitOfWork(Type repositoryType, bool autoCommit, UnitOfWorkScopeOption? scopeOption = null)
         {
             var connection = _dbProvider.CreateConnection();
             connection.ConnectionString = _config.ConnectionString;
@@ -265,7 +265,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TRepository NewUnitOfWork<TRepository>(bool autoCommit, IsolationLevel? isolationLevel = null) where TRepository : class, IApplicationDataRepository
+        public TRepository NewUnitOfWork<TRepository>(bool autoCommit, UnitOfWorkScopeOption? scopeOption = null) where TRepository : class, IApplicationDataRepository
         {
             var connection = _dbProvider.CreateConnection();
             connection.ConnectionString = _config.ConnectionString;

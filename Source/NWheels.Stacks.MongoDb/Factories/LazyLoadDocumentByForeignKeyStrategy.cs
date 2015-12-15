@@ -18,7 +18,12 @@ namespace NWheels.Stacks.MongoDb.Factories
 {
     public class LazyLoadDocumentByForeignKeyStrategy : LazyLoadByForeignKeyStrategyBase
     {
+        private readonly MongoEntityObjectFactory.ConventionContext _conventionContext;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public LazyLoadDocumentByForeignKeyStrategy(
+            MongoEntityObjectFactory.ConventionContext conventionContext,
             PropertyImplementationStrategyMap ownerMap,
             ObjectFactoryContext factoryContext, 
             ITypeMetadataCache metadataCache, 
@@ -26,6 +31,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             IPropertyMetadata metaProperty)
             : base(ownerMap, factoryContext, metadataCache, metaType, metaProperty)
         {
+            _conventionContext = conventionContext;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -44,7 +50,8 @@ namespace NWheels.Stacks.MongoDb.Factories
                             ValueField.Assign(
                                 Static.Func(
                                     MongoDataRepositoryBase.ResolveFrom,
-                                    ComponentsField, Static.Func(ResolutionExtensions.Resolve<DataRepositoryBase>, ComponentsField).Func<Type>(x => x.GetType)
+                                    ComponentsField, 
+                                    _conventionContext.ContextImplTypeField
                                 )
                                 .Func<string, TT.TKey, TT.TContract2>(
                                     x => x.LazyLoadOneByForeignKey<TT.TContract2, TT.TImpl2, TT.TKey>, 

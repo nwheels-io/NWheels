@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Autofac;
 using Hapil;
+using Hapil.Operands;
 using NWheels.Conventions.Core;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
@@ -24,8 +25,9 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
+            var conventionContext = new ConventionContext();
             var metaType = MetadataCache.GetTypeMetadata(context.TypeKey.PrimaryInterface);
-            var propertyMap = BuildPropertyStrategyMap(context, metaType);
+            var propertyMap = BuildPropertyStrategyMap(context, metaType, conventionContext);
 
             UpdateProperyRelationalMappings(propertyMap);
 
@@ -45,7 +47,8 @@ namespace NWheels.Stacks.MongoDb.Factories
                 new ImplementIEntityPartObjectConvention(metaType), 
                 new ImplementIPartitionedObjectConvention(metaType), 
                 new EnsureDomainObjectConvention(metaType), 
-                new DependencyInjectionConvention(metaType, propertyMap, forceApply: true), 
+                new DependencyInjectionConvention(metaType, propertyMap, forceApply: true),
+                new ContextImplTypeInjectionConvention(conventionContext),
                 new NestedObjectsConvention(propertyMap), 
                 new ObjectIdGeneratorConvention(propertyMap, metaType), 
                 new BsonIgnoreConvention(MetadataCache, metaType),
@@ -67,7 +70,10 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private PropertyImplementationStrategyMap BuildPropertyStrategyMap(ObjectFactoryContext context, ITypeMetadata metaType)
+        private PropertyImplementationStrategyMap BuildPropertyStrategyMap(
+            ObjectFactoryContext context, 
+            ITypeMetadata metaType, 
+            ConventionContext conventionContext)
         {
             var builder = new PropertyImplementationStrategyMap.Builder();
             Type collectionItemType;
@@ -96,11 +102,11 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && p.IsCollection && ShouldPersistAsArrayOfDocumentIds(p),
-                p => new ArrayOfDocumentIdsStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => new ArrayOfDocumentIdsStrategy(conventionContext, builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && p.IsCollection,
-                p => new LazyLoadCollectionByForeignKeyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => new LazyLoadCollectionByForeignKeyStrategy(conventionContext, builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             //-- entity relations - single (non-collection)
             
@@ -110,11 +116,11 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && !p.IsCollection && ShouldPersistAsDocumentId(p),
-                p => new DocumentIdStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => new DocumentIdStrategy(conventionContext, builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && !p.IsCollection,
-                p => new LazyLoadDocumentByForeignKeyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => new LazyLoadDocumentByForeignKeyStrategy(conventionContext, builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             //-- scalar properties
 
@@ -225,6 +231,13 @@ namespace NWheels.Stacks.MongoDb.Factories
                     writableMetaProperty.SafeGetRelationalMapping().StorageStyle = storageStyle;
                 }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ConventionContext
+        {
+            public Field<Type> ContextImplTypeField { get; set; }
         }
     }
 }
