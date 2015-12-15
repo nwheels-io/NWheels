@@ -267,6 +267,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<ThreadRegistry>().As<ThreadRegistry, IThreadRegistry>().SingleInstance();
             builder.RegisterType<ThreadLogAppender>().As<IThreadLogAppender>().SingleInstance();
             builder.RegisterType<StupidXmlThreadLogPersistor>().As<IThreadLogPersistor, ILifecycleEventListener>().SingleInstance();
+            builder.RegisterPipeline<ILifecycleEventListener>();
 
             builder.RegisterType<BootTimeFramework>().As<IFramework>().WithParameter(new TypedParameter(typeof(BootConfiguration), _bootConfig)).SingleInstance();
             builder.RegisterType<DefaultAssemblySearchPathProvider>().As<IAssemblySearchPathProvider>();
@@ -998,9 +999,9 @@ namespace NWheels.Hosting.Core
                 {
                     try
                     {
-                        IEnumerable<ILifecycleEventListener> foundComponents;
+                        Pipeline<ILifecycleEventListener> foundComponents;
 
-                        if ( OwnerLifetime.LifetimeContainer.TryResolve<IEnumerable<ILifecycleEventListener>>(out foundComponents) )
+                        if ( OwnerLifetime.LifetimeContainer.TryResolve<Pipeline<ILifecycleEventListener>>(out foundComponents) )
                         {
                             OwnerLifetime.LifecycleComponents.AddRange(foundComponents);
 

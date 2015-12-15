@@ -472,13 +472,13 @@ namespace NWheels.Extensions
                 _builder.RegisterInstance<RelationalMappingFineTuner<TEntity>>(fineTuner);
             }
 
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void UseStorageInitializerOnStartup()
-            {
-                _builder.NWheelsFeatures().Logging().RegisterLogger<DatabaseInitializer.ILogger>();
-                _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>().FirstInPipeline().AsSelf();
-            }
+            //public void UseStorageInitializerOnStartup()
+            //{
+            //    _builder.NWheelsFeatures().Logging().RegisterLogger<DatabaseInitializer.ILogger>();
+            //    _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>().FirstInPipeline().AsSelf();
+            //}
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
