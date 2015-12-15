@@ -14,13 +14,13 @@ namespace NWheels.Core
         IApplicationDataRepository NewUnitOfWork(
             Type domainContextType, 
             bool autoCommit = true, 
-            IsolationLevel? isolationLevel = null, 
+            UnitOfWorkScopeOption? scopeOption = null, 
             string databaseName = null);
         
         IApplicationDataRepository NewUnitOfWorkForEntity(
             Type entityContractType, 
             bool autoCommit = true, 
-            IsolationLevel? isolationLevel = null, 
+            UnitOfWorkScopeOption? scopeOption = null, 
             string databaseName = null);
         
         IComponentContext Components { get; }

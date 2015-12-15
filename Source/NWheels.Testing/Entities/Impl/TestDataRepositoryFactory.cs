@@ -41,7 +41,7 @@ namespace NWheels.Testing.Entities.Impl
             IResourceConsumerScopeHandle consumerScope, 
             Type repositoryType, 
             bool autoCommit, 
-            IsolationLevel? isolationLevel = null, 
+            UnitOfWorkScopeOption? scopeOption = null, 
             string databaseName = null)
         {
             return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(

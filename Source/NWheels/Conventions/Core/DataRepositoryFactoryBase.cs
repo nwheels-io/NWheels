@@ -63,7 +63,7 @@ namespace NWheels.Conventions.Core
             IResourceConsumerScopeHandle consumerScope, 
             Type repositoryType, 
             bool autoCommit, 
-            IsolationLevel? isolationLevel = null,
+            UnitOfWorkScopeOption? scopeOption = null,
             string connectionString = null);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -72,9 +72,7 @@ namespace NWheels.Conventions.Core
         public TService CreateService<TService>() where TService : class
         {
             const bool autoCommit = false;
-            const IsolationLevel isolationLevel = IsolationLevel.ReadCommitted;
-
-            return (TService)NewUnitOfWork(null, typeof(TService), autoCommit, isolationLevel);
+            return (TService)NewUnitOfWork(null, typeof(TService), autoCommit);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

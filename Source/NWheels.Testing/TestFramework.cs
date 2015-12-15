@@ -89,17 +89,17 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, IsolationLevel? isolationLevel = null, string connectionString = null) 
+        public TRepository NewUnitOfWork<TRepository>(bool autoCommit = true, UnitOfWorkScopeOption? scopeOption = null, string connectionString = null) 
             where TRepository : class, IApplicationDataRepository
         {
-            return _unitOfWorkFactory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel, connectionString);
+            return _unitOfWorkFactory.NewUnitOfWork<TRepository>(autoCommit, scopeOption, connectionString);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        IApplicationDataRepository ICoreFramework.NewUnitOfWork(Type repositoryContractType, bool autoCommit, IsolationLevel? isolationLevel, string connectionString)
+        IApplicationDataRepository ICoreFramework.NewUnitOfWork(Type repositoryContractType, bool autoCommit, UnitOfWorkScopeOption? scopeOption, string connectionString)
         {
-            return _unitOfWorkFactory.NewUnitOfWork(repositoryContractType, autoCommit, isolationLevel, connectionString);
+            return _unitOfWorkFactory.NewUnitOfWork(repositoryContractType, autoCommit, scopeOption, connectionString);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -107,13 +107,13 @@ namespace NWheels.Testing
         public IApplicationDataRepository NewUnitOfWorkForEntity(
             Type entityContractType, 
             bool autoCommit = true, 
-            IsolationLevel? isolationLevel = null,
+            UnitOfWorkScopeOption? scopeOption = null,
             string connectionString = null)
         {
             var dataRepositoryFactory = _components.Resolve<IDataRepositoryFactory>();
             var dataRepositoryContract = dataRepositoryFactory.GetDataRepositoryContract(entityContractType);
 
-            return _unitOfWorkFactory.NewUnitOfWork(dataRepositoryContract, autoCommit, isolationLevel, connectionString);
+            return _unitOfWorkFactory.NewUnitOfWork(dataRepositoryContract, autoCommit, scopeOption, connectionString);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -60,7 +60,7 @@ namespace NWheels.Stacks.EntityFramework.Factories
             IResourceConsumerScopeHandle consumerScope, 
             Type repositoryType, 
             bool autoCommit, 
-            IsolationLevel? isolationLevel = null,
+            UnitOfWorkScopeOption? scopeOption = null,
             string databaseName = null)
         {
             var connection = _dbProvider.CreateConnection();

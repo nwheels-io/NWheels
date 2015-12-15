@@ -30,7 +30,7 @@ namespace NWheels.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TRepository NewUnitOfWork<TRepository>(bool autoCommit, IsolationLevel? isolationLevel = null, string connectionString = null) 
+        public TRepository NewUnitOfWork<TRepository>(bool autoCommit, UnitOfWorkScopeOption? scopeOption = null, string connectionString = null) 
             where TRepository : class, IApplicationDataRepository
         {
             var concretized = _metadataCache.Concretize(typeof(TRepository));
@@ -41,16 +41,17 @@ namespace NWheels.Core
                     concretized,
                     key => FactoryByContract.Create(key, this));
 
-                return (TRepository)factoryByContract.NewUnitOfWork(autoCommit, isolationLevel, connectionString);
+                return (TRepository)factoryByContract.NewUnitOfWork(autoCommit, scopeOption, connectionString);
             }
 
             var consumerScope = new ThreadStaticResourceConsumerScope<TRepository>(
                 resourceFactory: scope => {
                     var factory = _components.Resolve<IDataRepositoryFactory>();
-                    var repositoryInstance = factory.NewUnitOfWork(scope, typeof(TRepository), autoCommit, isolationLevel, connectionString);
+                    var repositoryInstance = factory.NewUnitOfWork(scope, typeof(TRepository), autoCommit, scopeOption, connectionString);
                     return (TRepository)repositoryInstance;
                 },
-                externallyOwned: true);
+                externallyOwned: true,
+                forceNewResource: scopeOption == UnitOfWorkScopeOption.Root);
 
             if ( !consumerScope.IsOutermost )
             {
@@ -63,13 +64,13 @@ namespace NWheels.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IApplicationDataRepository NewUnitOfWork(
-            Type repositoryContractType, bool autoCommit = true, IsolationLevel? isolationLevel = null, string connectionString = null)
+            Type repositoryContractType, bool autoCommit = true, UnitOfWorkScopeOption? scopeOption = null, string connectionString = null)
         {
             var factoryByContract = _unitOfWorkFactoryPerRepositoryContract.GetOrAdd(
                 repositoryContractType, 
                 key => FactoryByContract.Create(key, this));
 
-            return factoryByContract.NewUnitOfWork(autoCommit, isolationLevel, connectionString);
+            return factoryByContract.NewUnitOfWork(autoCommit, scopeOption, connectionString);
         }
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -91,7 +92,7 @@ namespace NWheels.Core
 
         private abstract class FactoryByContract
         {
-            public abstract IApplicationDataRepository NewUnitOfWork(bool autoCommit = true, IsolationLevel? isolationLevel = null, string connectionString = null);
+            public abstract IApplicationDataRepository NewUnitOfWork(bool autoCommit = true, UnitOfWorkScopeOption? scopeOption = null, string connectionString = null);
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -120,9 +121,9 @@ namespace NWheels.Core
 
             #region Overrides of FactoryByContract
 
-            public override IApplicationDataRepository NewUnitOfWork(bool autoCommit = true, IsolationLevel? isolationLevel = null, string connectionString = null)
+            public override IApplicationDataRepository NewUnitOfWork(bool autoCommit = true, UnitOfWorkScopeOption? scopeOption = null, string connectionString = null)
             {
-                return _ownerFactory.NewUnitOfWork<TRepository>(autoCommit, isolationLevel, connectionString);
+                return _ownerFactory.NewUnitOfWork<TRepository>(autoCommit, scopeOption, connectionString);
             }
 
             #endregion

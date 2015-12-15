@@ -15,7 +15,7 @@ namespace NWheels.Entities
             IResourceConsumerScopeHandle consumerScope, 
             Type repositoryType, 
             bool autoCommit, 
-            IsolationLevel? isolationLevel = null,
+            UnitOfWorkScopeOption? scopeOption = null,
             string connectionString = null);
 
         Type GetDataRepositoryContract(Type entityContractType);

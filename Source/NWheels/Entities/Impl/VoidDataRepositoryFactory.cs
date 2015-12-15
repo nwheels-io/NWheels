@@ -13,7 +13,7 @@ namespace NWheels.Entities.Impl
             IResourceConsumerScopeHandle consumerScope, 
             Type repositoryType, 
             bool autoCommit, 
-            System.Data.IsolationLevel? isolationLevel = null,
+            UnitOfWorkScopeOption? scopeOption = null,
             string databaseName = null)
         {
             throw new NotSupportedException();
