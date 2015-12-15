@@ -328,7 +328,7 @@ namespace NWheels.Stacks.AspNet
 
         public interface ILogger : IApplicationEventLogger
         {
-            [LogThread(ThreadTaskType.IncomingRequest)]
+            [LogThread(ThreadTaskType.ApiRequest)]
             ILogActivity IncomingRequest(string verb, string path);
 
             [LogInfo]

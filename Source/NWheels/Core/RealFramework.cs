@@ -17,7 +17,9 @@ using NWheels.Logging.Core;
 using System.Collections.Concurrent;
 using NWheels.Authorization.Core;
 using NWheels.Conventions.Core;
+using NWheels.Hosting.Core;
 using NWheels.Entities.Core;
+using NWheels.Logging;
 
 namespace NWheels.Core
 {
@@ -28,6 +30,8 @@ namespace NWheels.Core
         private readonly IThreadLogAnchor _threadLogAnchor;
         private readonly UnitOfWorkFactory _unitOfWorkFactory;
         private readonly RealTimeoutManager _timeoutManager;
+        private INodeHostLogger _nodeHostLogger;
+        private IPlainLog _plainLog;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -80,6 +84,91 @@ namespace NWheels.Core
             var dataRepositoryContract = dataRepositoryFactory.GetDataRepositoryContract(entityContractType);
 
             return _unitOfWorkFactory.NewUnitOfWork(dataRepositoryContract, autoCommit, scopeOption, connectionString);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Thread CreateThread(Action threadCode, Func<ILogActivity> threadLogFactory, ThreadTaskType? taskType, string description)
+        {
+            var runner = new ThreadRunner(this, threadCode, threadLogFactory, taskType, description);
+            return runner.ThreadObject;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RunThreadCode(Action threadCode, Func<ILogActivity> threadLogFactory, ThreadTaskType? taskType, string description)
+        {
+            ThreadTaskType effectiveTaskType = taskType.GetValueOrDefault(ThreadTaskType.Unspecified);
+            string effectiveDescription = description ?? "Framework.RunThreadCode[unspecified]";
+            Exception terminatingException = null;
+
+            try
+            {
+                using ( var rootActivity = (threadLogFactory != null ? threadLogFactory() : null) )
+                {
+                    if ( threadLogFactory != null )
+                    {
+                        var threadLog = _threadLogAnchor.CurrentThreadLog;
+                        effectiveDescription = threadLog.RootActivity.SingleLineText;
+                        effectiveTaskType = threadLog.TaskType;
+                    }
+
+                    Thread.CurrentThread.Name = effectiveDescription;
+
+                    try
+                    {
+                        threadCode();
+                    }
+                    catch ( Exception e0 )
+                    {
+                        terminatingException = e0;
+
+                        if ( threadLogFactory != null )
+                        {
+                            rootActivity.Fail(terminatingException);
+                        }
+                        
+                        SafeGetComponent(ref _nodeHostLogger).ThreadTerminatedByException(
+                            taskType: effectiveTaskType,
+                            rootActivity: effectiveDescription,
+                            exception: terminatingException);
+                    }
+                }
+            }
+            catch ( Exception e1 )
+            {
+                try
+                {
+                    var plainLog = SafeGetComponent(ref _plainLog);
+
+                    if ( terminatingException != null )
+                    {
+                        plainLog.Critical("Thread [{0}] terminated by exception: {1}", effectiveDescription, terminatingException);
+                    }
+
+                    if ( e1 != terminatingException )
+                    {
+                        plainLog.Critical("Unhandled exception in thread [{0}]: {1}", effectiveDescription, e1);
+                    }
+                }
+                catch ( Exception e2 )
+                {
+                    try
+                    {
+                        if ( terminatingException != null )
+                        {
+                            CrashLog.LogUnhandledException(terminatingException, isTerminating: false);
+                        }
+
+                        CrashLog.LogUnhandledException(e1, isTerminating: false);
+                        CrashLog.LogUnhandledException(e2, isTerminating: false);
+                    }
+                    // ReSharper disable once EmptyGeneralCatchClause
+                    catch
+                    {
+                    }
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -216,6 +305,69 @@ namespace NWheels.Core
             get
             {
                 return DateTime.UtcNow;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IReadOnlyThreadLog CurrentThreadLog
+        {
+            get
+            {
+                return _threadLogAnchor.CurrentThreadLog;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private T SafeGetComponent<T>(ref T field)
+            where T : class
+        {
+            if ( field == null )
+            {
+                field = _components.Resolve<T>();
+            }
+
+            return field;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class ThreadRunner
+        {
+            private readonly RealFramework _ownerFramework;
+            private readonly Action _threadCode;
+            private readonly Func<ILogActivity> _threadLogFactory;
+            private readonly ThreadTaskType? _taskType;
+            private readonly string _description;
+            
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public readonly Thread ThreadObject;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ThreadRunner(
+                RealFramework ownerFramework, 
+                Action threadCode, 
+                Func<ILogActivity> threadLogFactory, 
+                ThreadTaskType? taskType, 
+                string description)
+            {
+                this._ownerFramework = ownerFramework;
+                this._threadCode = threadCode;
+                this._threadLogFactory = threadLogFactory;
+                this._taskType = taskType;
+                this._description = description;
+
+                this.ThreadObject = new Thread(RunThread);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void RunThread()
+            {
+                _ownerFramework.RunThreadCode(_threadCode, _threadLogFactory, _taskType, _description);
             }
         }
     }

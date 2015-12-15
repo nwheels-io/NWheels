@@ -11,9 +11,10 @@ namespace NWheels.Logging
         Unspecified,
         StartUp,
         ShutDown,
-        IncomingRequest,
+        ApiRequest,
         QueuedWorkItem,
         ScheduledJob,
+        BatchWorker,
         LogProcessing
     }
 }

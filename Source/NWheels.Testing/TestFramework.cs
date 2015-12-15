@@ -246,11 +246,50 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Thread CreateThread(Action threadCode, Func<ILogActivity> threadLogFactory, ThreadTaskType? taskType, string description)
+        {
+            return new Thread(() => RunThreadCode(threadCode, threadLogFactory, taskType, description));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RunThreadCode(Action threadCode, Func<ILogActivity> threadLogFactory, ThreadTaskType? taskType, string description)
+        {
+            using ( var rootActivity = (threadLogFactory != null ? threadLogFactory() : null) )
+            {
+                try
+                {
+                    threadCode();
+                }
+                catch ( Exception e )
+                {
+                    if ( rootActivity != null )
+                    {
+                        rootActivity.Fail(e);
+                    }
+
+                    throw;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IComponentContext Components
         {
             get
             {
                 return _components;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IReadOnlyThreadLog CurrentThreadLog
+        {
+            get
+            {
+                return _logAppender.ThreadLog;
             }
         }
 

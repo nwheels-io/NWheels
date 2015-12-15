@@ -355,7 +355,7 @@ namespace NWheels.Endpoints.Core.Wcf
             [LogInfo]
             void ServiceHostClosed(string listenUrl, string metadataUrl);
 
-            [LogThread(ThreadTaskType.IncomingRequest)]
+            [LogThread(ThreadTaskType.ApiRequest)]
             ILogActivity HandlingRequest(string action);
 
             [LogDebug]

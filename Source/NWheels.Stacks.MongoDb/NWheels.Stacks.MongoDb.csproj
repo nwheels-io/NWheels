@@ -88,6 +88,8 @@
     <Compile Include="Factories\MongoDatabaseInitializer.cs" />
     <Compile Include="Factories\MongoDataRepositoryFactory.cs" />
     <Compile Include="JsonSerializationExtension.cs" />
+    <Compile Include="Logging\LogPersistorFeatureLoader.cs" />
+    <Compile Include="Logging\MongoDbThreadLogPersistor.cs" />
     <Compile Include="MongoDataRepositoryBase.cs" />
     <Compile Include="Factories\MongoEntityObjectFactory.cs" />
     <Compile Include="Factories\MongoEntityObjectFactory.Old.cs" />

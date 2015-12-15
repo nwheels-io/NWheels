@@ -1,21 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Xml;
 using Autofac;
 using NWheels.Extensions;
+using NWheels.Hosting;
 using NWheels.Hosting.Core;
 using NWheels.Utilities;
 
 namespace NWheels.Logging.Core
 {
-    internal class ThreadRegistry : IThreadRegistry //, IInitializableHostComponent
+    internal class ThreadRegistry : LifecycleEventListenerBase, IThreadRegistry
     {
         private readonly object _syncRoot = new object();
         private readonly HashSet<ThreadLog> _runningThreads = new HashSet<ThreadLog>();
         private readonly IComponentContext _components;
-        private IEnumerable<IThreadLogPersistor> _threadLogPersistors;
+        private Pipeline<IThreadPostMortem> _threadPostMortemPipe = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -43,7 +45,7 @@ namespace NWheels.Logging.Core
                 _runningThreads.Remove(threadLog);
             }
 
-            PersistThreadLog(threadLog);
+            PerformThreadPostMortem(threadLog);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,16 +60,23 @@ namespace NWheels.Logging.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void PersistThreadLog(ThreadLog threadLog)
+        private void PerformThreadPostMortem(ThreadLog threadLog)
         {
-            if ( _threadLogPersistors == null )
+            if ( _threadPostMortemPipe == null )
             {
-                _threadLogPersistors = _components.Resolve<IEnumerable<IThreadLogPersistor>>();
+                _threadPostMortemPipe = _components.Resolve<Pipeline<IThreadPostMortem>>();
             }
 
-            foreach ( var persistor in _threadLogPersistors )
+            for ( int i = 0 ; i < _threadPostMortemPipe.Count ; i++ )
             {
-                persistor.Persist(threadLog);
+                try
+                {
+                    _threadPostMortemPipe[i].Examine(threadLog);
+                }
+                catch ( Exception e )
+                {
+                    _components.Resolve<IPlainLog>().Error(e.ToString());
+                }
             }
         }
 

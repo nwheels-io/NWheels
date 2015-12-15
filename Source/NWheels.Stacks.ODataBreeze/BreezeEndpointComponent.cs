@@ -221,7 +221,7 @@ namespace NWheels.Stacks.ODataBreeze
             [LogWarning(Audit = true)]
             void FailedToDecryptSessionCookie(CryptographicException error);
             
-            [LogThread(ThreadTaskType.IncomingRequest)]
+            [LogThread(ThreadTaskType.ApiRequest)]
             ILogActivity Request(HttpMethod verb, string path, [Detail] string query);
         }
 

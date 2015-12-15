@@ -11,7 +11,7 @@ namespace NWheels.Stacks.NancyFx
 {
     public interface IHttpApiEndpointLogger : IApplicationEventLogger
     {
-        [LogThread(ThreadTaskType.IncomingRequest)]
+        [LogThread(ThreadTaskType.ApiRequest)]
         ILogActivity Request(string verb, string path, [Detail] string query);
 
         [LogVerbose]

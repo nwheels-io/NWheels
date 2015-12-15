@@ -161,5 +161,8 @@ namespace NWheels.Hosting.Core
 
         [LogActivity]
         ILogActivity InitializingDataRepository(string type);
+
+        [LogCritical]
+        void ThreadTerminatedByException(ThreadTaskType taskType, string rootActivity, Exception exception);
     }
 }

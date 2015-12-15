@@ -123,6 +123,7 @@
     <Compile Include="Concurrency\ITimeoutHandle.cs" />
     <Compile Include="Concurrency\IResourceConsumerScopeHandle.cs" />
     <Compile Include="Concurrency\PerContextResourceConsumerScope.cs" />
+    <Compile Include="Concurrency\ShuttleService.cs" />
     <Compile Include="Configuration\ConfiguredComponentAttribute.cs" />
     <Compile Include="Configuration\Core\CommandLineConfigurationLoader.cs" />
     <Compile Include="Entities\UnitOfWorkScopeOption.cs" />
@@ -166,6 +167,7 @@
     <Compile Include="Extensions\UriExtensions.cs" />
     <Compile Include="Hosting\EnvironmentConfiguration.cs" />
     <Compile Include="Logging\Core\IApplicationEventExplorerService.cs" />
+    <Compile Include="Logging\Core\IThreadPostMortem.cs" />
     <Compile Include="Logging\Impl\ThreadCpuTimeUtility.cs" />
     <Compile Include="Processing\Commands\CommandResultMessage.cs" />
     <Compile Include="Processing\Commands\Factories\IMethodCallObjectFactory.cs" />
