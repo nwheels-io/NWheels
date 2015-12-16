@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using NWheels.Configuration;
+using NWheels.DataObjects;
 using NWheels.Processing.Messages;
 using NWheels.Utilities;
 
@@ -10,18 +12,14 @@ namespace NWheels.Testing.Processing.Messages
 {
     public class LocalFileOutgoingEmailActor : IMessageHandler<OutgoingEmailMessage>
     {
-        private readonly string _outputFolderPath;
+        private readonly IConfigSection _configSection;
+        private string _outputFolderPath;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public LocalFileOutgoingEmailActor()
+        public LocalFileOutgoingEmailActor(IConfigSection configSection)
         {
-            _outputFolderPath = PathUtility.HostBinPath("Email.Out");
-
-            if ( !Directory.Exists(_outputFolderPath) )
-            {
-                Directory.CreateDirectory(_outputFolderPath);
-            }
+            _configSection = configSection;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -45,11 +43,28 @@ namespace NWheels.Testing.Processing.Messages
 
             Thread.Sleep(10);
 
+            EnsureOutputFolder();
+
             var fileName = string.Format("{0:yyyy-MM-dd-HHmm-ssfff}.{1}.txt", DateTime.UtcNow, GetSubjectFileNamePart(subject));
             File.WriteAllText(Path.Combine(_outputFolderPath, fileName), output.ToString());
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void EnsureOutputFolder()
+        {
+            if ( _outputFolderPath == null )
+            {
+                _outputFolderPath = PathUtility.HostBinPath(_configSection.OutputFolderPath);
+
+                if ( !Directory.Exists(_outputFolderPath) )
+                {
+                    Directory.CreateDirectory(_outputFolderPath);
+                }
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -61,6 +76,15 @@ namespace NWheels.Testing.Processing.Messages
                 .ToArray();
 
             return new string(chars);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ConfigurationSection(XmlName = "Framework.Test.LocalFileOutgoingEmailActor")]
+        public interface IConfigSection : IConfigurationSection
+        {
+            [PropertyContract.Semantic.LocalFilePath, PropertyContract.DefaultValue("Email.Out")]
+            string OutputFolderPath { get; set; }
         }
     }
 }

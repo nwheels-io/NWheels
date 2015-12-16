@@ -225,7 +225,10 @@ namespace NWheels.Processing.Messages
     {
         public static void AddRecipient(this List<OutgoingEmailMessage.Recipient> recipients, string personName, string emailAddress)
         {
-            recipients.Add(new OutgoingEmailMessage.Recipient(personName, emailAddress));
+            if ( !string.IsNullOrEmpty(emailAddress) )
+            {
+                recipients.Add(new OutgoingEmailMessage.Recipient(personName, emailAddress));
+            }
         }
     }
 }

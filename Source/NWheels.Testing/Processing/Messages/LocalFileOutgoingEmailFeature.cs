@@ -15,6 +15,7 @@ namespace NWheels.Testing.Processing.Messages
         protected override void Load(ContainerBuilder builder)
         {
             builder.NWheelsFeatures().Processing().RegisterActor<LocalFileOutgoingEmailActor>().SingleInstance();
+            builder.NWheelsFeatures().Configuration().RegisterSection<LocalFileOutgoingEmailActor.IConfigSection>();
         }
 
         #endregion
