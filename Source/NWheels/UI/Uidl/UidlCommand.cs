@@ -58,6 +58,7 @@ namespace NWheels.UI.Uidl
     {
         Other,
         Submit,
-        Reject
+        Reject,
+        Navigate
     }
 }

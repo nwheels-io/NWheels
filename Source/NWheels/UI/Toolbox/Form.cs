@@ -579,6 +579,7 @@ namespace NWheels.UI.Toolbox
         Checkbox = 0x40,
         DateTimePicker = 0x80,
         Password = 0x100,
+        Confirm = 0x200,
         System = 0x2000
     }
 

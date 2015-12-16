@@ -90,6 +90,11 @@ namespace NWheels.Domains.Security
 
         private static void ValidateUidlEndpointLogin(ISession currentSession, UserAccountPrincipal principal)
         {
+            if ( currentSession == null )
+            {
+                return;
+            }
+
             var uidlEndpoint = currentSession.Endpoint as IUidlApplicationEndpoint;
 
             if ( uidlEndpoint != null )

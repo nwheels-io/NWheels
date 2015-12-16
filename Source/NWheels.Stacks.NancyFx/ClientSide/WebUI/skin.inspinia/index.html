@@ -1015,7 +1015,8 @@ HEAD, JS/CSS LINKS
                 <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.data.entity" template-name="FormFieldLoginStyle"></uidl-form-field>
             </div>
             <button ng-repeat="command in uidl.commands"
-                    class="btn btn-primary block full-width m-b"
+                    class="btn block full-width m-b"
+                    ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"                    
                     ng-disabled="commandInProgress"
                     ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
         </form>
@@ -1031,7 +1032,7 @@ HEAD, JS/CSS LINKS
                     fieldRules.required = true;
                 }
                 validationRules[fieldElementId] = fieldRules;
-                if (field.modifiers === 'Password') {
+                if (field.modifiers.indexOf('Password') > -1 && field.modifiers.indexOf('Confirm') > -1) {
                     validationRules[fieldElementId + '__confirm'] = {
                         equalTo: '#' + fieldElementId
                     };
@@ -1171,6 +1172,8 @@ HEAD, JS/CSS LINKS
     </script>
     <script type="text/ng-template" id="uidl-element-template/FormFieldLoginStyle">
         <div>
+            <!-- LABEL -->
+            <h3 ng-if="uidl.fieldType==='Label'" ng-bind="entity[uidl.propertyName]"></h3>
             <!-- TEXT -->
             <input ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='None'"
                    class="form-control"
@@ -1180,13 +1183,21 @@ HEAD, JS/CSS LINKS
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}">
             <!-- PASSWORD -->
-            <input ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Password'"
+            <input ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password')"
                    class="form-control"
                    type="password"
                    placeholder="{{::translate(uidl.propertyName)}}"
                    ng-model="entity[uidl.propertyName]"
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}">
+            <input ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password') && hasUidlModifier('Confirm')"
+                   class="form-control"
+                   style="margin-top:15px;"
+                   type="password"
+                   placeholder="Confirm password"
+                   ng-model="hiddenValues[uidl.propertyName]"
+                   id="{{::uniqueFieldId + '__confirm'}}"
+                   name="{{::uniqueFieldId + '__confirm'}}">
             <!-- DROP DOWN -->
             <select ng-if="uidl.fieldType==='Lookup' && uidl.modifiers==='DropDown'"
                     class="form-control m-b"

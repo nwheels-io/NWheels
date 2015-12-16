@@ -1554,6 +1554,9 @@ function ($timeout, uidlService, entityService) {
             $scope.entityService = entityService;
             $scope.uniqueFieldId = $scope.parentUidl.elementName + '_' + $scope.uidl.propertyName;
             $scope.translate = $scope.uidlService.translate;
+            $scope.hasUidlModifier = function (modifier) {
+                return ($scope.uidl.modifiers.indexOf(modifier) > -1);
+            };
             
             if ($scope.parentUidl.usePascalCase === false) {
                 $scope.uidl.propertyName = toCamelCase($scope.uidl.propertyName);
