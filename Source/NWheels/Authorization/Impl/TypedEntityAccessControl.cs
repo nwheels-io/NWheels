@@ -185,7 +185,9 @@ namespace NWheels.Authorization.Impl
 
         public override bool? CanRetrieve(IAccessControlContext context, object entity)
         {
-            if ( base.CanRetrieve(context, entity) == false )
+            var canRetrieveResult = base.CanRetrieve(context, entity);
+
+            if ( canRetrieveResult == false )
             {
                 return false;
             }
@@ -195,7 +197,7 @@ namespace NWheels.Authorization.Impl
                 return _entityRetrieve(context, (TEntity)entity);
             }
 
-            return null;
+            return canRetrieveResult;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
