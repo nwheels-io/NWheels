@@ -23,7 +23,7 @@ namespace NWheels.Domains.Security.Core
 
             var password = Framework.NewDomainObject<IPasswordEntityPart>();
                 
-            password.Hash = CryptoProvider.CalculateHash(passwordString);
+            password.Hash = CryptoProvider.CalculateHash(passwordString, salt: this.LoginName);
             password.ExpiresAtUtc = Framework.UtcNow.AddDays(policy.PasswordExpiryDays);
 
             this.Passwords.Add(password);
@@ -41,7 +41,7 @@ namespace NWheels.Domains.Security.Core
             var passwordLength = new Random().Next(policy.PasswordMinLength, policy.PasswordMaxLength);
             var clearText = GenerateTemporaryPassword(passwordLength);
 
-            password.Hash = CryptoProvider.CalculateHash(SecureStringUtility.ClearToSecure(clearText));
+            password.Hash = CryptoProvider.CalculateHash(SecureStringUtility.ClearToSecure(clearText), salt: this.LoginName);
             password.ExpiresAtUtc = Framework.UtcNow.AddDays(policy.TemporaryPasswordExpiryDays);
             password.MustChange = true;
 
@@ -232,7 +232,7 @@ namespace NWheels.Domains.Security.Core
         
         private void ValidatePasswordMatch(SecureString password, IPasswordEntityPart activePassword, UserAccountPolicy policy)
         {
-            if ( !CryptoProvider.MatchHash(activePassword.Hash, password) )
+            if ( !CryptoProvider.MatchHash(activePassword.Hash, password, LoginName) )
             {
                 Logger.FailedLoginAttempt(LoginFault.LoginIncorrect, LoginName);
 

@@ -20,7 +20,7 @@ namespace NWheels.Domains.Security
             builder.NWheelsFeatures().Logging().RegisterLogger<ISecurityDomainLogger>();
             builder.NWheelsFeatures().Entities().RegisterDataRepository<IUserAccountDataRepository>();
 
-            builder.RegisterType<DummyCryptoProvider>().As<ICryptoProvider>().SingleInstance();
+            builder.RegisterType<DefaultCryptoProvider>().As<ICryptoProvider>().SingleInstance();
             builder.RegisterType<PrivateAuthenticationProvider>().As<IAuthenticationProvider>().SingleInstance();
             builder.RegisterType<ClaimFactory>().SingleInstance();
 
