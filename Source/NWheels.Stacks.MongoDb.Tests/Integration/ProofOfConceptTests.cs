@@ -16,6 +16,7 @@ using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.Stacks.MongoDb.Factories;
 using NWheels.Testing;
+using NWheels.UI.Toolbox;
 using Shouldly;
 
 namespace NWheels.Stacks.MongoDb.Tests.Integration
@@ -37,6 +38,8 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
         {
             var initializer = new MongoDatabaseInitializer(new IDomainContextPopulator[0]);
             initializer.DropStorageSchema(ConnectionString);
+
+            PocQueryLog.Clear();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -154,15 +157,73 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             PocDomain.IMyPocContext context = new DomainImpl.PocMongoDomainContext(Framework.Components, ConnectionString);
             ((IPocMongoDomainContext)context).Database.SetProfilingLevel(ProfilingLevel.All);
 
-            var one = context.Ones.GetById(1);
+            var one1 = context.Ones.GetById(1);
 
-            one.ShouldNotBeNull();
-            one.IntScalar.ShouldBe(12345);
-            one.StringScalar.ShouldBe("ABCDEF");
-            one.ValueA.ShouldNotBeNull();
-            one.ValueA.DateTimeScalar.ShouldBe(new DateTime(2015, 10, 20, 17, 30, 50, 123, DateTimeKind.Utc));
-            one.ValueA.TimeSpanScalar.ShouldBe(TimeSpan.FromSeconds(47));
-            one.ValueBs.ShouldNotBeNull();
+            one1.ShouldNotBeNull();
+            one1.IntScalar.ShouldBe(12345);
+            one1.StringScalar.ShouldBe("ABCDEF");
+            one1.ValueA.ShouldNotBeNull();
+            one1.ValueA.DateTimeScalar.ShouldBe(new DateTime(2015, 10, 20, 17, 30, 50, 123, DateTimeKind.Utc));
+            one1.ValueA.TimeSpanScalar.ShouldBe(TimeSpan.FromSeconds(47));
+            one1.ValueBs.ShouldNotBeNull();
+            one1.ValueBs.Count.ShouldBe(2);
+
+            var one1Bs = one1.ValueBs.ToArray();
+            one1Bs[0].ShouldNotBeNull();
+            one1Bs[0].EnumScalar.ShouldBe(DayOfWeek.Thursday);
+            one1Bs[0].GuidScalar.ShouldBe(new Guid("410E12AA-9754-4562-A205-E08A8F1667D2"));
+            one1Bs[0].ValueCs.ShouldNotBeNull();
+            one1Bs[0].ValueCs.Count.ShouldBe(2);
+
+            var one1Bs0Cs = one1Bs[0].ValueCs.ToArray();
+            one1Bs0Cs[0].ShouldNotBeNull();
+            one1Bs0Cs[0].FlagsEnumScalar.ShouldBe(PocDomain.AFlagsEnum.None);
+            one1Bs0Cs[0].DecimalValue.ShouldBe(12345.67m);
+            
+            one1Bs0Cs[1].ShouldNotBeNull();
+            one1Bs0Cs[1].FlagsEnumScalar.ShouldBe(PocDomain.AFlagsEnum.Second | PocDomain.AFlagsEnum.Third);
+            one1Bs0Cs[1].DecimalValue.ShouldBe(67890.12m);
+
+            one1Bs[1].ShouldNotBeNull();
+            one1Bs[1].EnumScalar.ShouldBe(DayOfWeek.Wednesday);
+            one1Bs[1].GuidScalar.ShouldBe(new Guid("B547C485-342B-4EAA-A5E7-7CCACBC05F24"));
+            one1Bs[1].ValueCs.ShouldNotBeNull();
+            one1Bs[1].ValueCs.Count.ShouldBe(2);
+
+            var one1Bs1Cs = one1Bs[1].ValueCs.ToArray();
+            one1Bs1Cs[0].ShouldNotBeNull();
+            one1Bs1Cs[0].FlagsEnumScalar.ShouldBe(PocDomain.AFlagsEnum.None);
+            one1Bs1Cs[0].DecimalValue.ShouldBe(12345.67m);
+
+            one1Bs1Cs[1].ShouldNotBeNull();
+            one1Bs1Cs[1].FlagsEnumScalar.ShouldBe(PocDomain.AFlagsEnum.Second | PocDomain.AFlagsEnum.Third);
+            one1Bs1Cs[1].DecimalValue.ShouldBe(67890.12m);
+
+            PocQueryLog.TakeLog().ShouldBe(new[] { "IEntityOne[1]" });
+
+            one1.Two.ShouldNotBeNull();
+
+            PocQueryLog.Count.ShouldBe(0);
+
+            one1.Two.Id.ShouldBeOfType<ObjectId>();
+
+            PocQueryLog.TakeLog().ShouldBe(new[] { "LLFK[EntityTwo]" });
+
+            one1.Two.StringValue.ShouldBe("TWO1");
+            one1.Two.One.ShouldNotBeNull();
+            one1.Two.One.Id.ShouldBe(1);
+
+            PocQueryLog.Count.ShouldBe(0);
+
+            one1Bs0Cs[0].Fours.ShouldNotBeNull();
+            
+            PocQueryLog.TakeLog().ShouldBe(new[] { "CLLIDS[EntityFour]" });
+
+            one1Bs0Cs[0].Fours.Count.ShouldBe(2);
+            one1Bs0Cs[0].Fours.Count(f => f.Id == "F1").ShouldBe(1);
+            one1Bs0Cs[0].Fours.Count(f => f.Id == "F2").ShouldBe(1);
+
+            PocQueryLog.Count.ShouldBe(0);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -265,74 +326,70 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             public class DomainObject_EntityOne : PocDomain.IEntityOne, IPocDomainObject
             {
                 private readonly IComponentContext _components;
-                private IPersistableObjectLazyLoader _lazyLoader;
-                private IPersistableObjectCollectionLazyLoader m_ThreesLazyLoader;
+                private IPersistableObjectLazyLoader _thisLazyLoader;
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 public DomainObject_EntityOne(IComponentContext components)
                 {
                     _components = components;
-                    _lazyLoader = null;
+                    _thisLazyLoader = null;
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-                void IPocDomainObject.InitializeValues()
+                void IPocDomainObject.InitializeValues(bool idManuallyAssigned)
                 {
-                    this.Id = IntIdGenerator.TakeNextValue();
-                    this.IntScalar = 123;
-                    this.StringScalar = "ABC";
+                    m_Id = IntIdGenerator.TakeNextValue();
+                    m_IntScalar = 123;
+                    m_StringScalar = "ABC";
 
-                    this.ValueA = new DomainObject_ValueObjectA(_components);
-                    ((IPocDomainObject)ValueA).InitializeValues();
+                    m_ValueA = new DomainObject_ValueObjectA(_components);
+                    ((IPocDomainObject)m_ValueA).InitializeValues(false);
 
-                    this.ValueBs =
-                        new ConcreteToAbstractCollectionAdapter<DomainObject_ValueObjectB, PocDomain.IValueObjectB>(new List<DomainObject_ValueObjectB>());
-                    this.Two = null;
-                    this.Threes = new ConcreteToAbstractCollectionAdapter<DomainObject_EntityThree, PocDomain.IEntityThree>(
-                        new List<DomainObject_EntityThree>());
+                    m_ValueBs = new ConcreteToAbstractListAdapter<DomainObject_ValueObjectB, PocDomain.IValueObjectB>(new List<DomainObject_ValueObjectB>());
+                    m_Two = null;
+                    m_Threes = new ConcreteToAbstractListAdapter<DomainObject_EntityThree, PocDomain.IEntityThree>(new List<DomainObject_EntityThree>());
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 void IPocImportExportValues.ImportValues(IPocEntityRepo entityRepo, object[] values)
                 {
-                    this.Id = (int)values[0];
-                    this.IntScalar = (int)values[1];
-                    this.StringScalar = (string)values[2];
-                    this.ValueA = PocDomainRuntimeHelpers.ImportEmbeddedDomainObject<PocDomain.IValueObjectA, DomainObject_ValueObjectA>(
+                    m_Id = (int)values[0];
+                    m_IntScalar = (int)values[1];
+                    m_StringScalar = (string)values[2];
+                    m_ValueA = PocDomainRuntimeHelpers.ImportEmbeddedDomainObject<PocDomain.IValueObjectA, DomainObject_ValueObjectA>(
                         entityRepo,
                         values[3],
                         () => new DomainObject_ValueObjectA(_components));
-                    this.ValueBs = PocDomainRuntimeHelpers.ImportEmbeddedDomainCollection<PocDomain.IValueObjectB, DomainObject_ValueObjectB>(
+                    m_ValueBs = PocDomainRuntimeHelpers.ImportEmbeddedDomainCollection<PocDomain.IValueObjectB, DomainObject_ValueObjectB>(
                         entityRepo,
                         values[4],
                         () => new DomainObject_ValueObjectB(_components));
-                    this.Two = PocDomainRuntimeHelpers.ImportDomainLazyLoadObject<PocDomain.IEntityTwo, DomainObject_EntityTwo>(
+                    m_Two = PocDomainRuntimeHelpers.ImportDomainLazyLoadObject<PocDomain.IEntityTwo, DomainObject_EntityTwo>(
                         entityRepo,
                         values[5],
                         () => new DomainObject_EntityTwo(_components));
-                    this.Threes = PocDomainRuntimeHelpers.ImportDomainLazyLoadObjectCollection<PocDomain.IEntityThree, DomainObject_EntityThree>(
+                    m_Threes = PocDomainRuntimeHelpers.ImportDomainLazyLoadObjectCollection<PocDomain.IEntityThree, DomainObject_EntityThree>(
                         entityRepo,
                         values[6],
                         () => new DomainObject_EntityThree(_components),
-                        out m_ThreesLazyLoader);
+                        out m_Threes_LazyLoader);
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 object[] IPocImportExportValues.ExportValues(IPocEntityRepo entityRepo)
                 {
-                    return new object[] { Id, IntScalar, StringScalar, ValueA, ValueBs, Two, Threes };
+                    return new object[] { m_Id, m_IntScalar, m_StringScalar, m_ValueA, m_ValueBs, m_Two, m_Threes };
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 void IPocDomainObject.SetLazyLoader(IPersistableObjectLazyLoader lazyLoader)
                 {
-                    this.Id = (int)lazyLoader.EntityId;
-                    _lazyLoader = lazyLoader;
+                    _thisLazyLoader = lazyLoader;
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -346,24 +403,63 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 #region Implementation of IEntityOne
 
-                public int Id { get; private set; }
-                public int IntScalar { get; set; }
-                public string StringScalar { get; set; }
-                public PocDomain.IValueObjectA ValueA { get; private set; }
-                public ICollection<PocDomain.IValueObjectB> ValueBs { get; private set; }
-                public PocDomain.IEntityTwo Two { get; set; }
-                public ICollection<PocDomain.IEntityThree> Threes { get; private set; }
+                private int m_Id;
+                public int Id
+                {
+                    get { return PocDomainRuntimeHelpers.EntityIdPropertyGetter(this, ref _thisLazyLoader, ref m_Id); }
+                }
+
+                private int m_IntScalar;
+                public int IntScalar 
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_IntScalar); }
+                    set { PocDomainRuntimeHelpers.PropertySetter(this, ref _thisLazyLoader, out m_IntScalar, ref value); }
+                }
+
+                private string m_StringScalar;
+                public string StringScalar
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_StringScalar); }
+                    set { PocDomainRuntimeHelpers.PropertySetter(this, ref _thisLazyLoader, out m_StringScalar, ref value); }
+                }
+
+                private PocDomain.IValueObjectA m_ValueA;
+                public PocDomain.IValueObjectA ValueA
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_ValueA); }
+                }
+
+                private ICollection<PocDomain.IValueObjectB> m_ValueBs;
+                public ICollection<PocDomain.IValueObjectB> ValueBs
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_ValueBs); }
+                }
+
+                private PocDomain.IEntityTwo m_Two;
+                private IPersistableObjectLazyLoader m_Two_LazyLoader;
+                public PocDomain.IEntityTwo Two
+                {
+                    get { return PocDomainRuntimeHelpers.LazyLoadObjectPropertyGetter(this, ref _thisLazyLoader, ref m_Two_LazyLoader, ref m_Two); }
+                    set { PocDomainRuntimeHelpers.LazyLoadObjectPropertySetter(this, ref _thisLazyLoader, out m_Two_LazyLoader, out m_Two, ref value); }
+                }
+
+
+                private IList<PocDomain.IEntityThree> m_Threes;
+                private IPersistableObjectCollectionLazyLoader m_Threes_LazyLoader;
+                public ICollection<PocDomain.IEntityThree> Threes
+                {
+                    get { return PocDomainRuntimeHelpers.LazyLoadObjectCollectionPropertyGetter<PocDomain.IEntityThree, DomainObject_EntityThree>(this, ref _thisLazyLoader, ref m_Threes_LazyLoader, ref m_Threes); }
+                }
 
                 #endregion
             }
-
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public class DomainObject_EntityTwo : PocDomain.IEntityTwo, IPocDomainObject
             {
                 private readonly IComponentContext _components;
-                private IPersistableObjectLazyLoader _lazyLoader;
+                private IPersistableObjectLazyLoader _thisLazyLoader;
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -374,27 +470,27 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-                void IPocDomainObject.InitializeValues()
+                void IPocDomainObject.InitializeValues(bool idManuallyAssigned)
                 {
-                    this.Id = ObjectId.GenerateNewId();
-                    this.StringValue = "ABC2";
-                    this.One = null;
+                    m_Id = ObjectId.GenerateNewId();
+                    m_StringValue = "ABC2";
+                    m_One = null;
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 void IPocDomainObject.SetLazyLoader(IPersistableObjectLazyLoader lazyLoader)
                 {
-                    _lazyLoader = lazyLoader;
+                    _thisLazyLoader = lazyLoader;
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 void IPocImportExportValues.ImportValues(IPocEntityRepo entityRepo, object[] values)
                 {
-                    this.Id = (ObjectId)values[0];
-                    this.StringValue = (string)values[1];
-                    this.One = PocDomainRuntimeHelpers.ImportDomainLazyLoadObject<PocDomain.IEntityOne, DomainObject_EntityOne>(
+                    m_Id = (ObjectId)values[0];
+                    m_StringValue = (string)values[1];
+                    m_One = PocDomainRuntimeHelpers.ImportDomainLazyLoadObject<PocDomain.IEntityOne, DomainObject_EntityOne>(
                         entityRepo,
                         values[2],
                         () => new DomainObject_EntityOne(_components));
@@ -404,23 +500,40 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 object[] IPocImportExportValues.ExportValues(IPocEntityRepo entityRepo)
                 {
-                    return new object[] { this.Id, this.StringValue, this.One };
+                    return new object[] { m_Id, m_StringValue, m_One };
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 object IPocDomainObject.EntityId
                 {
-                    get { return Id; }
+                    get { return this.Id; }
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 #region Implementation of IEntityTwo
 
-                public object Id { get; private set; }
-                public string StringValue { get; set; }
-                public PocDomain.IEntityOne One { get; set; }
+                private ObjectId m_Id;
+                public object Id
+                {
+                    get { return PocDomainRuntimeHelpers.EntityIdPropertyGetter(this, ref _thisLazyLoader, ref m_Id); }
+                }
+
+                private string m_StringValue;
+                public string StringValue
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_StringValue); }
+                    set { PocDomainRuntimeHelpers.PropertySetter(this, ref _thisLazyLoader, out m_StringValue, ref value); }
+                }
+
+                private PocDomain.IEntityOne m_One;
+                private IPersistableObjectLazyLoader m_One_LazyLoader;
+                public PocDomain.IEntityOne One
+                {
+                    get { return PocDomainRuntimeHelpers.LazyLoadObjectPropertyGetter(this, ref _thisLazyLoader, ref m_One_LazyLoader, ref m_One); }
+                    set { PocDomainRuntimeHelpers.LazyLoadObjectPropertySetter(this, ref _thisLazyLoader, out m_One_LazyLoader, out m_One, ref value); }
+                }
 
                 #endregion
             }
@@ -430,7 +543,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             public class DomainObject_EntityThree : PocDomain.IEntityThree, IPocDomainObject
             {
                 private readonly IComponentContext _components;
-                private IPersistableObjectLazyLoader _lazyLoader;
+                private IPersistableObjectLazyLoader _thisLazyLoader;
                 private IPersistableObjectCollectionLazyLoader _foursLazyLoader;
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -442,20 +555,20 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-                void IPocDomainObject.InitializeValues()
+                void IPocDomainObject.InitializeValues(bool idManuallyAssigned)
                 {
-                    this.Id = ObjectId.GenerateNewId();
-                    this.StringValue = "ABC3";
-                    this.Fours = new ConcreteToAbstractCollectionAdapter<DomainObject_EntityFour, PocDomain.IEntityFour>(new List<DomainObject_EntityFour>());
+                    m_Id = ObjectId.GenerateNewId();
+                    m_StringValue = "ABC3";
+                    m_Fours = new ConcreteToAbstractListAdapter<DomainObject_EntityFour, PocDomain.IEntityFour>(new List<DomainObject_EntityFour>());
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 void IPocImportExportValues.ImportValues(IPocEntityRepo entityRepo, object[] values)
                 {
-                    this.Id = (ObjectId)values[0];
-                    this.StringValue = (string)values[1];
-                    this.Fours = PocDomainRuntimeHelpers.ImportDomainLazyLoadObjectCollection<PocDomain.IEntityFour, DomainObject_EntityFour>(
+                    m_Id = (ObjectId)values[0];
+                    m_StringValue = (string)values[1];
+                    m_Fours = PocDomainRuntimeHelpers.ImportDomainLazyLoadObjectCollection<PocDomain.IEntityFour, DomainObject_EntityFour>(
                         entityRepo,
                         values[2],
                         () => new DomainObject_EntityFour(_components),
@@ -466,7 +579,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 object[] IPocImportExportValues.ExportValues(IPocEntityRepo entityRepo)
                 {
-                    return new object[] { Id, StringValue, Fours };
+                    return new object[] {
+                        m_Id, 
+                        m_StringValue, 
+                        m_Fours
+                    };
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -480,17 +597,33 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 void IPocDomainObject.SetLazyLoader(IPersistableObjectLazyLoader lazyLoader)
                 {
-                    _lazyLoader = lazyLoader;
-                    this.Id = lazyLoader.EntityId;
+                    _thisLazyLoader = lazyLoader;
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 #region Implementation of IEntityThree
 
-                public object Id { get; private set; }
-                public string StringValue { get; set; }
-                public ICollection<PocDomain.IEntityFour> Fours { get; private set; }
+                private ObjectId m_Id;
+                public object Id
+                {
+                    get { return PocDomainRuntimeHelpers.EntityIdPropertyGetter(this, ref _thisLazyLoader, ref m_Id); }
+                }
+
+                private string m_StringValue;
+                public string StringValue
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_StringValue); }
+                    set { PocDomainRuntimeHelpers.PropertySetter(this, ref _thisLazyLoader, out m_StringValue, ref value); }
+                }
+
+
+                private IList<PocDomain.IEntityFour> m_Fours;
+                private IPersistableObjectCollectionLazyLoader m_Fours_LazyLoader;
+                public ICollection<PocDomain.IEntityFour> Fours
+                {
+                    get { return PocDomainRuntimeHelpers.LazyLoadObjectCollectionPropertyGetter<PocDomain.IEntityFour, DomainObject_EntityFour>(this, ref _thisLazyLoader, ref m_Fours_LazyLoader, ref m_Fours); }
+                }
 
                 #endregion
             }
@@ -500,7 +633,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             public class DomainObject_EntityFour : PocDomain.IEntityFour, IPocDomainObject
             {
                 private readonly IComponentContext _components;
-                private IPersistableObjectLazyLoader _lazyLoader;
+                private IPersistableObjectLazyLoader _thisLazyLoader;
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -513,28 +646,46 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 #region Implementation of IEntityFour
 
-                public string Id { get; set; }
-                public string StringValue { get; set; }
-                public PocDomain.IEntityThree Three { get; set; }
+                private string m_Id;
+                public string Id
+                {
+                    get { return PocDomainRuntimeHelpers.EntityIdPropertyGetter(this, ref _thisLazyLoader, ref m_Id); }
+                    set { PocDomainRuntimeHelpers.PropertySetter(this, ref _thisLazyLoader, out m_Id, ref value); }
+                }
+
+                private string m_StringValue;
+                public string StringValue
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_StringValue); }
+                    set { PocDomainRuntimeHelpers.PropertySetter(this, ref _thisLazyLoader, out m_StringValue, ref value); }
+                }
+
+                private PocDomain.IEntityThree m_Three;
+                private IPersistableObjectLazyLoader m_Three_LazyLoader;
+                public PocDomain.IEntityThree Three
+                {
+                    get { return PocDomainRuntimeHelpers.LazyLoadObjectPropertyGetter(this, ref _thisLazyLoader, ref m_Three_LazyLoader, ref m_Three); }
+                    set { PocDomainRuntimeHelpers.LazyLoadObjectPropertySetter(this, ref _thisLazyLoader, out m_Three_LazyLoader, out m_Three, ref value); }
+                }
 
                 #endregion
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-                void IPocDomainObject.InitializeValues()
+                void IPocDomainObject.InitializeValues(bool idManuallyAssigned)
                 {
-                    this.Id = null;
-                    this.StringValue = "ABC4";
-                    this.Three = null;
+                    m_Id = null;
+                    m_StringValue = "ABC4";
+                    m_Three = null;
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 void IPocImportExportValues.ImportValues(IPocEntityRepo entityRepo, object[] values)
                 {
-                    this.Id = (string)values[0];
-                    this.StringValue = (string)values[1];
-                    this.Three = PocDomainRuntimeHelpers.ImportDomainLazyLoadObject<PocDomain.IEntityThree, DomainObject_EntityThree>(
+                    m_Id = (string)values[0];
+                    m_StringValue = (string)values[1];
+                    m_Three = PocDomainRuntimeHelpers.ImportDomainLazyLoadObject<PocDomain.IEntityThree, DomainObject_EntityThree>(
                         entityRepo,
                         values[2],
                         () => new DomainObject_EntityThree(_components));
@@ -544,22 +695,25 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 object[] IPocImportExportValues.ExportValues(IPocEntityRepo entityRepo)
                 {
-                    return new object[] { Id, StringValue, Three };
+                    return new object[] {
+                        m_Id, 
+                        m_StringValue, 
+                        m_Three
+                    };
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 void IPocDomainObject.SetLazyLoader(IPersistableObjectLazyLoader lazyLoader)
                 {
-                    _lazyLoader = lazyLoader;
-                    this.Id = (string)lazyLoader.EntityId;
+                    _thisLazyLoader = lazyLoader;
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 object IPocDomainObject.EntityId
                 {
-                    get { return Id; }
+                    get { return this.Id; }
                 }
             }
 
@@ -568,6 +722,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             public class DomainObject_ValueObjectA : PocDomain.IValueObjectA, IPocDomainObject
             {
                 private readonly IComponentContext _components;
+                private IPersistableObjectLazyLoader _thisLazyLoader;
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -578,7 +733,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-                void IPocDomainObject.InitializeValues()
+                void IPocDomainObject.InitializeValues(bool idManuallyAssigned)
                 {
                 }
 
@@ -586,22 +741,22 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 void IPocImportExportValues.ImportValues(IPocEntityRepo entityRepo, object[] values)
                 {
-                    TimeSpanScalar = (TimeSpan)values[0];
-                    DateTimeScalar = (DateTime)values[1];
+                    m_TimeSpanScalar = (TimeSpan)values[0];
+                    m_DateTimeScalar = (DateTime)values[1];
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 void IPocDomainObject.SetLazyLoader(IPersistableObjectLazyLoader lazyLoader)
                 {
-                    throw new NotSupportedException();
+                    _thisLazyLoader = lazyLoader;
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 object[] IPocImportExportValues.ExportValues(IPocEntityRepo entityRepo)
                 {
-                    return new object[] { TimeSpanScalar, DateTimeScalar };
+                    return new object[] { m_TimeSpanScalar, m_DateTimeScalar };
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -615,8 +770,19 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 #region Implementation of IValueObjectA
 
-                public TimeSpan TimeSpanScalar { get; set; }
-                public DateTime DateTimeScalar { get; set; }
+                private TimeSpan m_TimeSpanScalar;
+                public TimeSpan TimeSpanScalar
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_TimeSpanScalar); }
+                    set { PocDomainRuntimeHelpers.PropertySetter(this, ref _thisLazyLoader, out m_TimeSpanScalar, ref value); }
+                }
+
+                private DateTime m_DateTimeScalar;
+                public DateTime DateTimeScalar
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_DateTimeScalar); }
+                    set { PocDomainRuntimeHelpers.PropertySetter(this, ref _thisLazyLoader, out m_DateTimeScalar, ref value); }
+                }
 
                 #endregion
             }
@@ -626,6 +792,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             public class DomainObject_ValueObjectB : PocDomain.IValueObjectB, IPocDomainObject
             {
                 private readonly IComponentContext _components;
+                private IPersistableObjectLazyLoader _thisLazyLoader;
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -636,18 +803,18 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-                void IPocDomainObject.InitializeValues()
+                void IPocDomainObject.InitializeValues(bool idManuallyAssigned)
                 {
-                    this.ValueCs = new ConcreteToAbstractListAdapter<DomainObject_ValueObjectC, PocDomain.IValueObjectC>(new List<DomainObject_ValueObjectC>());
+                    m_ValueCs = new ConcreteToAbstractListAdapter<DomainObject_ValueObjectC, PocDomain.IValueObjectC>(new List<DomainObject_ValueObjectC>());
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 void IPocImportExportValues.ImportValues(IPocEntityRepo entityRepo, object[] values)
                 {
-                    GuidScalar = (Guid)values[0];
-                    EnumScalar = (DayOfWeek)values[1];
-                    ValueCs = PocDomainRuntimeHelpers.ImportEmbeddedDomainCollection<PocDomain.IValueObjectC, DomainObject_ValueObjectC>(
+                    m_GuidScalar = (Guid)values[0];
+                    m_EnumScalar = (DayOfWeek)values[1];
+                    m_ValueCs = PocDomainRuntimeHelpers.ImportEmbeddedDomainCollection<PocDomain.IValueObjectC, DomainObject_ValueObjectC>(
                         entityRepo,
                         values[2],
                         () => new DomainObject_ValueObjectC(_components));
@@ -657,14 +824,14 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 object[] IPocImportExportValues.ExportValues(IPocEntityRepo entityRepo)
                 {
-                    return new object[] { GuidScalar, EnumScalar, ValueCs };
+                    return new object[] { m_GuidScalar, m_EnumScalar, m_ValueCs };
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 void IPocDomainObject.SetLazyLoader(IPersistableObjectLazyLoader lazyLoader)
                 {
-                    throw new NotSupportedException();
+                    _thisLazyLoader = lazyLoader;
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -678,9 +845,25 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 #region Implementation of IValueObjectB
 
-                public Guid GuidScalar { get; set; }
-                public DayOfWeek EnumScalar { get; set; }
-                public IList<PocDomain.IValueObjectC> ValueCs { get; private set; }
+                private Guid m_GuidScalar;
+                public Guid GuidScalar
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_GuidScalar); }
+                    set { PocDomainRuntimeHelpers.PropertySetter(this, ref _thisLazyLoader, out m_GuidScalar, ref value); }
+                }
+
+                private DayOfWeek m_EnumScalar;
+                public DayOfWeek EnumScalar
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_EnumScalar); }
+                    set { PocDomainRuntimeHelpers.PropertySetter(this, ref _thisLazyLoader, out m_EnumScalar, ref value); }
+                }
+
+                private IList<PocDomain.IValueObjectC> m_ValueCs;
+                public IList<PocDomain.IValueObjectC> ValueCs
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_ValueCs); }
+                }
 
                 #endregion
             }
@@ -690,7 +873,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             public class DomainObject_ValueObjectC : PocDomain.IValueObjectC, IPocDomainObject
             {
                 private readonly IComponentContext _components;
-                private IPersistableObjectCollectionLazyLoader _foursLazyLoader;
+                private IPersistableObjectLazyLoader _thisLazyLoader;
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -701,40 +884,45 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-                void IPocDomainObject.InitializeValues()
+                void IPocDomainObject.InitializeValues(bool idManuallyAssigned)
                 {
-                    this.Fours = new List<PocDomain.IEntityFour>();
+                    m_Fours = new List<PocDomain.IEntityFour>();
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 void IPocImportExportValues.ImportValues(IPocEntityRepo entityRepo, object[] values)
                 {
-                    FlagsEnumScalar = (PocDomain.AFlagsEnum)values[0];
-                    DecimalValue = (decimal)values[1];
-                    Three = PocDomainRuntimeHelpers.ImportDomainLazyLoadObject<PocDomain.IEntityThree, DomainObject_EntityThree>(
+                    m_FlagsEnumScalar = (PocDomain.AFlagsEnum)values[0];
+                    m_DecimalValue = (decimal)values[1];
+                    m_Three = PocDomainRuntimeHelpers.ImportDomainLazyLoadObject<PocDomain.IEntityThree, DomainObject_EntityThree>(
                         entityRepo,
                         values[2],
                         () => new DomainObject_EntityThree(_components));
-                    Fours = PocDomainRuntimeHelpers.ImportDomainLazyLoadObjectCollection<PocDomain.IEntityFour, DomainObject_EntityFour>(
+                    m_Fours = PocDomainRuntimeHelpers.ImportDomainLazyLoadObjectCollection<PocDomain.IEntityFour, DomainObject_EntityFour>(
                         entityRepo,
                         values[3],
                         () => new DomainObject_EntityFour(_components),
-                        out _foursLazyLoader);
+                        out m_Fours_LazyLoader);
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 object[] IPocImportExportValues.ExportValues(IPocEntityRepo entityRepo)
                 {
-                    return new object[] { FlagsEnumScalar, DecimalValue, Three, Fours };
+                    return new object[] {
+                        m_FlagsEnumScalar, 
+                        m_DecimalValue, 
+                        m_Three, 
+                        m_Fours
+                    };
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 void IPocDomainObject.SetLazyLoader(IPersistableObjectLazyLoader lazyLoader)
                 {
-                    throw new NotSupportedException();
+                    _thisLazyLoader = lazyLoader;
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -748,10 +936,34 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 #region Implementation of IValueObjectC
 
-                public PocDomain.AFlagsEnum FlagsEnumScalar { get; set; }
-                public decimal DecimalValue { get; set; }
-                public PocDomain.IEntityThree Three { get; set; }
-                public ICollection<PocDomain.IEntityFour> Fours { get; private set; }
+                private PocDomain.AFlagsEnum m_FlagsEnumScalar;
+                public PocDomain.AFlagsEnum FlagsEnumScalar
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_FlagsEnumScalar); }
+                    set { PocDomainRuntimeHelpers.PropertySetter(this, ref _thisLazyLoader, out m_FlagsEnumScalar, ref value); }
+                }
+
+                private decimal m_DecimalValue;
+                public decimal DecimalValue
+                {
+                    get { return PocDomainRuntimeHelpers.PropertyGetter(this, ref _thisLazyLoader, ref m_DecimalValue); }
+                    set { PocDomainRuntimeHelpers.PropertySetter(this, ref _thisLazyLoader, out m_DecimalValue, ref value); }
+                }
+
+                private PocDomain.IEntityThree m_Three;
+                private IPersistableObjectLazyLoader m_Three_LazyLoader;
+                public PocDomain.IEntityThree Three
+                {
+                    get { return PocDomainRuntimeHelpers.LazyLoadObjectPropertyGetter(this, ref _thisLazyLoader, ref m_Three_LazyLoader, ref m_Three); }
+                    set { PocDomainRuntimeHelpers.LazyLoadObjectPropertySetter(this, ref _thisLazyLoader, out m_Three_LazyLoader, out m_Three, ref value); }
+                }
+
+                private IList<PocDomain.IEntityFour> m_Fours;
+                private IPersistableObjectCollectionLazyLoader m_Fours_LazyLoader;
+                public ICollection<PocDomain.IEntityFour> Fours
+                {
+                    get { return PocDomainRuntimeHelpers.LazyLoadObjectCollectionPropertyGetter<PocDomain.IEntityFour, DomainObject_EntityFour>(this, ref _thisLazyLoader, ref m_Fours_LazyLoader, ref m_Fours); }
+                }
 
                 #endregion
             }
@@ -804,10 +1016,19 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                         () => new MongoPersistable_EntityFour());
 
 
-                    _repoByContract[typeof(PocDomain.IEntityOne)] = this.Ones;
-                    _repoByContract[typeof(PocDomain.IEntityTwo)] = this.Twos;
-                    _repoByContract[typeof(PocDomain.IEntityThree)] = this.Threes;
-                    _repoByContract[typeof(PocDomain.IEntityFour)] = this.Ones;
+                    _repoByContract[typeof(PocDomain.IEntityOne)] = (IPocEntityRepo)this.Ones;
+                    _repoByContract[typeof(PocDomain.IEntityTwo)] = (IPocEntityRepo)this.Twos;
+                    _repoByContract[typeof(PocDomain.IEntityThree)] = (IPocEntityRepo)this.Threes;
+                    _repoByContract[typeof(PocDomain.IEntityFour)] = (IPocEntityRepo)this.Fours;
+
+                    PocThreadStaticRepoStack.Push(this);
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                public void Dispose()
+                {
+                    PocThreadStaticRepoStack.Pop(this);
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -846,14 +1067,12 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 public IPocEntityRepo<PocDomain.IEntityThree> Threes { get; private set; }
                 public IPocEntityRepo<PocDomain.IEntityFour> Fours { get; private set; }
 
-
-                 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 PocDomain.IEntityFour PocDomain.IMyPocContext.NewEntityFour(string id)
                 {
                     var obj = new DomainObject_EntityFour(_components);
-                    ((IPocDomainObject)obj).InitializeValues();
+                    ((IPocDomainObject)obj).InitializeValues(idManuallyAssigned: true);
 
                     obj.Id = id;
                     return obj;
@@ -864,7 +1083,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 PocDomain.IValueObjectB PocDomain.IMyPocContext.NewValueObjectB(Guid guidScalar, DayOfWeek enumScalar, params PocDomain.IValueObjectC[] valueCs)
                 {
                     var obj = new DomainObject_ValueObjectB(_components);
-                    ((IPocDomainObject)obj).InitializeValues();
+                    ((IPocDomainObject)obj).InitializeValues(idManuallyAssigned: false);
 
                     obj.GuidScalar = guidScalar;
                     obj.EnumScalar = enumScalar;
@@ -882,7 +1101,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 PocDomain.IValueObjectC PocDomain.IMyPocContext.NewValueObjectC(PocDomain.AFlagsEnum flagsEnumScalar, decimal decimalValue, PocDomain.IEntityThree three, params PocDomain.IEntityFour[] fours)
                 {
                     var obj = new DomainObject_ValueObjectC(_components);
-                    ((IPocDomainObject)obj).InitializeValues();
+                    ((IPocDomainObject)obj).InitializeValues(idManuallyAssigned: false);
 
                     obj.FlagsEnumScalar = flagsEnumScalar;
                     obj.DecimalValue = decimalValue;
@@ -910,6 +1129,14 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                     {
                         return Id;
                     }
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                Type IPocPersistableObject.PocHintDomainImplType
+                {
+                    //get { return typeof(PocDomain.IEntityOne); }
+                    get { return typeof(DomainObject_EntityOne); }
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -971,6 +1198,14 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
+                Type IPocPersistableObject.PocHintDomainImplType
+                {
+                    //get { return typeof(PocDomain.IEntityTwo); }
+                    get { return typeof(DomainObject_EntityTwo); }
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
                 void IPocImportExportValues.ImportValues(IPocEntityRepo entityRepo, object[] values)
                 {
                     Id = (ObjectId)values[0];
@@ -1014,6 +1249,14 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
+                Type IPocPersistableObject.PocHintDomainImplType
+                {
+                    //get { return typeof(PocDomain.IEntityThree); }
+                    get { return typeof(DomainObject_EntityThree); }
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
                 void IPocImportExportValues.ImportValues(IPocEntityRepo entityRepo, object[] values)
                 {
                     Id = (ObjectId)values[0];
@@ -1052,6 +1295,14 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 object IPocPersistableObject.EntityId
                 {
                     get { return Id; }
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                Type IPocPersistableObject.PocHintDomainImplType
+                {
+                    //get { return typeof(PocDomain.IEntityFour); }
+                    get { return typeof(DomainObject_EntityFour); }
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -1099,6 +1350,14 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
+                Type IPocPersistableObject.PocHintDomainImplType
+                {
+                    //get { return typeof(PocDomain.IValueObjectA); }
+                    get { return typeof(DomainObject_ValueObjectA); }
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
                 void IPocImportExportValues.ImportValues(IPocEntityRepo entityRepo, object[] values)
                 {
                     TimeSpanScalar = (TimeSpan)values[0];
@@ -1137,6 +1396,14 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 object IPocPersistableObject.EntityId
                 {
                     get { return null; }
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                Type IPocPersistableObject.PocHintDomainImplType
+                {
+                    //get { return typeof(PocDomain.IValueObjectB); }
+                    get { return typeof(DomainObject_ValueObjectB); }
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -1185,6 +1452,14 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
+                Type IPocPersistableObject.PocHintDomainImplType
+                {
+                    //get { return typeof(PocDomain.IValueObjectC); }
+                    get { return typeof(DomainObject_ValueObjectC); }
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
                 void IPocImportExportValues.ImportValues(IPocEntityRepo entityRepo, object[] values)
                 {
                     FlagsEnumScalar = (PocDomain.AFlagsEnum)values[0];
@@ -1227,7 +1502,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
     {
         public interface IPocDomainObject : IPocImportExportValues
         {
-            void InitializeValues();
+            void InitializeValues(bool idManuallyAssigned);
             void SetLazyLoader(IPersistableObjectLazyLoader lazyLoader);
             object EntityId { get; }
         }
@@ -1237,13 +1512,14 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
         public interface IPocPersistableObject : IPocImportExportValues
         {
             object EntityId { get; }
+            Type PocHintDomainImplType { get; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public  interface IPersistableObjectLazyLoader
         {
-            IPocPersistableObject Load();
+            IPocDomainObject Load(IPocDomainObject target);
             Type EntityContractType { get; }
             Type DomainContextType { get; }
             object EntityId { get; }
@@ -1253,7 +1529,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
         public  interface IPersistableObjectCollectionLazyLoader
         {
-            IEnumerable<IPocPersistableObject> Load();
+            IEnumerable<IPocDomainObject> Load();
             Type EntityContractType { get; }
             Type DomainContextType { get; }
         }
@@ -1271,7 +1547,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
         public  interface IPocEntityRepo
         {
             IPocDomainContext GetOwnerContext();
-            //MongoCollection GetMongoCollection();
+            IPocDomainObject NewDomainObject(Type pocHintDerivedDomainImplType = null);
             bool TryGetEntityFromCache(object id, out IPocDomainObject entity);
             Type ContractType { get; }
             Type PersistableType { get; }
@@ -1280,7 +1556,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public  interface IPocEntityRepo<TEntity> : IPocEntityRepo
+        public  interface IPocEntityRepo<TEntity>
         {
             TEntity New();
             T New<T>(Type pocHintDomainImplType) where T : TEntity;
@@ -1290,7 +1566,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public  interface IPocDomainContext
+        public  interface IPocDomainContext : IDisposable
         {
             bool TryGetEntityFromCache(Type contractType, object id, out IPocDomainObject entity);
             IPocEntityRepo GetEntityRepo(Type contractType);
@@ -1321,6 +1597,19 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public static IPocDomainContext Peek(Type implType)
+            {
+                if ( _s_stackByImplType == null )
+                {
+                    throw new InvalidOperationException("ThreadStaticRepositoryStack is empty.");
+                }
+
+                var stack = GetOrAddStack(implType);
+                return (stack.Count > 0 ? stack.Peek() : null);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static IPocDomainContext PeekOrCreate(Type implType)
             {
                 if ( _s_stackByImplType == null )
                 {
@@ -1372,7 +1661,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 }
                 else
                 {
-                    ((IPocDomainObject)impl).InitializeValues();
+                    ((IPocDomainObject)impl).InitializeValues(idManuallyAssigned: false);
                 }
                 return impl;
             }
@@ -1395,7 +1684,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                         }
                         else
                         {
-                            ((IPocDomainObject)impl).InitializeValues();
+                            ((IPocDomainObject)impl).InitializeValues(idManuallyAssigned: false);
                         }
                         return impl;
                     }));
@@ -1421,7 +1710,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                 else if ( lazyLoader != null )
                 {
                     var impl = implFactory();
-                    ((IPocDomainObject)impl).SetLazyLoader(null);
+                    ((IPocDomainObject)impl).SetLazyLoader(lazyLoader);
                     return impl;
                 }
                 else
@@ -1454,7 +1743,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
                         }
                         else
                         {
-                            ((IPocDomainObject)itemImpl).InitializeValues();
+                            ((IPocDomainObject)itemImpl).InitializeValues(idManuallyAssigned: false);
                         }
                         return itemImpl;
                     }));
@@ -1515,13 +1804,124 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static void LazyLoadObject<TContract, TImpl>(IPocEntityRepo entityRepo, TImpl impl, ref IPersistableObjectLazyLoader lazyLoader)
-                where TContract : class
-                where TImpl : TContract
+            public static T EntityIdPropertyGetter<T>(
+                IPocDomainObject target,
+                ref IPersistableObjectLazyLoader targetLazyLoader,
+                ref T backingField)
             {
-                var persisted = lazyLoader.Load();
-                ((IPocDomainObject)impl).ImportValues(entityRepo, persisted.ExportValues(entityRepo));
-                lazyLoader = null;
+                if ( targetLazyLoader != null )
+                {
+                    var entityIdValue = targetLazyLoader.EntityId;
+
+                    if ( entityIdValue != null )
+                    {
+                        return (T)entityIdValue;
+                    }
+
+                    targetLazyLoader.Load(target);
+                    targetLazyLoader = null;
+                }
+
+                return backingField;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static T PropertyGetter<T>(
+                IPocDomainObject target, 
+                ref IPersistableObjectLazyLoader targetLazyLoader, 
+                ref T backingField)
+            {
+                if ( targetLazyLoader != null )
+                {
+                    targetLazyLoader.Load(target);
+                    targetLazyLoader = null;
+                }
+
+                return backingField;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static void PropertySetter<T>(
+                IPocDomainObject target,
+                ref IPersistableObjectLazyLoader targetLazyLoader,
+                out T backingField,
+                ref T value)
+            {
+                if ( targetLazyLoader != null )
+                {
+                    targetLazyLoader.Load(target);
+                    targetLazyLoader = null;
+                }
+
+                backingField = value;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static T LazyLoadObjectPropertyGetter<T>(
+                IPocDomainObject target,
+                ref IPersistableObjectLazyLoader targetLazyLoader,
+                ref IPersistableObjectLazyLoader propertyLazyLoader,
+                ref T propertyBackingField)
+            {
+                if ( targetLazyLoader != null )
+                {
+                    targetLazyLoader.Load(target);
+                    targetLazyLoader = null;
+                }
+
+                if ( propertyLazyLoader != null )
+                {
+                    propertyBackingField = (T)propertyLazyLoader.Load((IPocDomainObject)propertyBackingField);
+                    propertyLazyLoader = null;
+                }
+
+                return propertyBackingField;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static void LazyLoadObjectPropertySetter<T>(
+                IPocDomainObject target,
+                ref IPersistableObjectLazyLoader targetLazyLoader,
+                out IPersistableObjectLazyLoader propertyLazyLoader,
+                out T propertyBackingField,
+                ref T value)
+            {
+                if ( targetLazyLoader != null )
+                {
+                    targetLazyLoader.Load(target);
+                    targetLazyLoader = null;
+                }
+
+                propertyLazyLoader = null;
+                propertyBackingField = value;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static IList<TContract> LazyLoadObjectCollectionPropertyGetter<TContract, TDomainImpl>(
+                IPocDomainObject target,
+                ref IPersistableObjectLazyLoader targetLazyLoader,
+                ref IPersistableObjectCollectionLazyLoader propertyLazyLoader,
+                ref IList<TContract> propertyBackingField)
+                where TDomainImpl : TContract
+            {
+                if ( targetLazyLoader != null )
+                {
+                    targetLazyLoader.Load(target);
+                    targetLazyLoader = null;
+                }
+
+                if ( propertyLazyLoader != null )
+                {
+                    propertyBackingField = new ConcreteToAbstractListAdapter<TDomainImpl, TContract>(propertyLazyLoader.Load().Cast<TDomainImpl>().ToList());
+                    propertyLazyLoader = null;
+                }
+
+                return propertyBackingField;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1650,6 +2050,57 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static class PocQueryLog
+        {
+            private static List<string> _s_log = new List<string>();
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static void LogQuery<TEntity>(object id)
+            {
+                _s_log.Add(string.Format("{0}[{1}]", typeof(TEntity).Name, id));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static void LogQuery(string format, params object[] args)
+            {
+                _s_log.Add(string.Format(format, args));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static string[] GetLog()
+            {
+                return _s_log.ToArray();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static string[] TakeLog()
+            {
+                var log = _s_log.ToArray();
+                _s_log.Clear();
+                return log;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static void Clear()
+            {
+                _s_log.Clear();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static int Count
+            {
+                get { return _s_log.Count; }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class ObjectLazyLoaderById : IPersistableObjectLazyLoader
         {
             private readonly Type _domainContextType;
@@ -1675,10 +2126,19 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             //---------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IPocPersistableObject Load()
+            public IPocDomainObject Load(IPocDomainObject target)
             {
+                PocQueryLog.LogQuery("LLID[{0}[{1}]]", _collectionName, _documentId);
+
                 var collection = _database.GetCollection(_collectionName);
-                return (IPocPersistableObject)collection.FindOneByIdAs(_documentType, BsonValue.Create(_documentId));
+                var entityRepo = PocThreadStaticRepoStack.Peek(_domainContextType).GetEntityRepo(_entityContractType);
+                
+                var persistableObject = (IPocPersistableObject)collection.FindOneByIdAs(_documentType, BsonValue.Create(_documentId));
+                var domainObject = target ?? entityRepo.NewDomainObject(persistableObject.PocHintDomainImplType);
+                var values = persistableObject.ExportValues(entityRepo);
+                domainObject.ImportValues(entityRepo, values);
+
+                return domainObject;
             }
 
             //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -1734,11 +2194,21 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             //---------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IPocPersistableObject Load()
+            public IPocDomainObject Load(IPocDomainObject target)
             {
+                PocQueryLog.LogQuery("LLFK[{0}]", _collectionName);
+
                 var collection = _database.GetCollection(_documentType, _collectionName);
+                var entityRepo = PocThreadStaticRepoStack.Peek(_domainContextType).GetEntityRepo(_entityContractType);
+                
                 var query = Query.EQ(_keyPropertyName, BsonValue.Create(_keyPropertyValue));
-                return (IPocPersistableObject)collection.FindOneAs(_documentType, query);
+                var persistableObject = (IPocPersistableObject)collection.FindOneAs(_documentType, query);
+                
+                var domainObject = target ?? entityRepo.NewDomainObject(persistableObject.PocHintDomainImplType);
+                var values = persistableObject.ExportValues(entityRepo);
+                domainObject.ImportValues(entityRepo, values);
+
+                return domainObject;
             }
 
             //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -1790,13 +2260,22 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             //---------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IEnumerable<IPocPersistableObject> Load()
+            public IEnumerable<IPocDomainObject> Load()
             {
+                PocQueryLog.LogQuery("CLLIDS[{0}]", _collectionName);
+
                 var collection = _database.GetCollection(_documentType, _collectionName);
+                var entityRepo = PocThreadStaticRepoStack.Peek(_domainContextType).GetEntityRepo(_entityContractType);
+                
                 var query = Query.In("_id", new BsonArray(_documentIds));
                 var cursor = collection.FindAs(_documentType, query);
 
-                return cursor.Cast<IPocPersistableObject>();
+                return cursor.Cast<IPocPersistableObject>().Select(persistableObject => {
+                    var domainObject = entityRepo.NewDomainObject(persistableObject.PocHintDomainImplType);
+                    var values = persistableObject.ExportValues(entityRepo);
+                    domainObject.ImportValues(entityRepo, values);
+                    return domainObject;
+                });
             }
 
             //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -1851,13 +2330,22 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             //---------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IEnumerable<IPocPersistableObject> Load()
+            public IEnumerable<IPocDomainObject> Load()
             {
+                PocQueryLog.LogQuery("CLLFK[{0}]", _collectionName);
+
                 var collection = _database.GetCollection(_documentType, _collectionName);
+                var entityRepo = PocThreadStaticRepoStack.Peek(_domainContextType).GetEntityRepo(_entityContractType);
+
                 var query = Query.EQ(_foreignKeyPropertyName, BsonValue.Create(_foreignKeyValue));
                 var cursor = collection.FindAs(_documentType, query);
 
-                return cursor.Cast<IPocPersistableObject>();
+                return cursor.Cast<IPocPersistableObject>().Select(persistableObject => {
+                    var domainObject = entityRepo.NewDomainObject(persistableObject.PocHintDomainImplType);
+                    var values = persistableObject.ExportValues(entityRepo);
+                    domainObject.ImportValues(entityRepo, values);
+                    return domainObject;
+                });
             }
 
             //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -1904,7 +2392,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             public TContract New()
             {
                 var entity = (TContract)Activator.CreateInstance(typeof(TDomain), _ownerContext.Components);
-                ((IPocDomainObject)entity).InitializeValues();
+                ((IPocDomainObject)entity).InitializeValues(idManuallyAssigned: false);
                 return entity;
             }
 
@@ -1913,7 +2401,7 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             public T New<T>(Type pocHintDomainImplType) where T : TContract
             {
                 var entity = (T)Activator.CreateInstance(pocHintDomainImplType, _ownerContext.Components);
-                ((IPocDomainObject)entity).InitializeValues();
+                ((IPocDomainObject)entity).InitializeValues(idManuallyAssigned: false);
                 return entity;
             }
 
@@ -1931,6 +2419,8 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
 
             public TContract GetById(object id)
             {
+                PocQueryLog.LogQuery<TContract>(id);
+
                 var idBsonValue = BsonValue.Create(id);
                 var persistable = _collection.FindOneById(idBsonValue);
                 var entity = _domainFactory();
@@ -1960,6 +2450,18 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             bool IPocEntityRepo.TryGetEntityFromCache(object id, out IPocDomainObject entity)
             {
                 return _entityCacheByKey.TryGetValue(id, out entity);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            IPocDomainObject IPocEntityRepo.NewDomainObject(Type pocHintDerivedDomainImplType)
+            {
+                var domainImplType = pocHintDerivedDomainImplType ?? typeof(TDomain);
+
+                var entity = (IPocDomainObject)Activator.CreateInstance(domainImplType, _ownerContext.Components);
+                ((IPocDomainObject)entity).InitializeValues(idManuallyAssigned: false);
+                
+                return entity;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
