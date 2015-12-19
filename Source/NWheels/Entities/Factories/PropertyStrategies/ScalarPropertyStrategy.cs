@@ -74,7 +74,7 @@ namespace NWheels.Entities.Factories.PropertyStrategies
             if ( MetaProperty.ContractPropertyInfo.CanWrite )
             {
                 setter = p => p.Set((w, value) => {
-                    Static.GenericFunc((obj, lz, bkf, val) => DomainModelRuntimeHelpers.PropertySetter<TT.TProperty>(obj, ref lz, out bkf, ref val),
+                    Static.GenericVoid((obj, lz, bkf, val) => DomainModelRuntimeHelpers.PropertySetter<TT.TProperty>(obj, ref lz, out bkf, ref val),
                         w.This<IDomainObject>(),
                         _context.ThisLazyLoaderField,
                         _backingField,
@@ -96,16 +96,14 @@ namespace NWheels.Entities.Factories.PropertyStrategies
 
         protected override void OnWritingImportStorageValue(MethodWriterBase writer, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector)
         {
-            var field = writer.OwnerClass.GetPropertyBackingField(MetaProperty.ContractPropertyInfo).AsOperand<TT.TProperty>();
-            field.Assign(valueVector.ItemAt(MetaProperty.PropertyIndex).CastTo<TT.TProperty>());
+            _backingField.Assign(valueVector.ItemAt(MetaProperty.PropertyIndex).CastTo<TT.TProperty>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void OnWritingExportStorageValue(MethodWriterBase writer, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector)
         {
-            var field = writer.OwnerClass.GetPropertyBackingField(MetaProperty.ContractPropertyInfo).AsOperand<TT.TProperty>();
-            valueVector.ItemAt(MetaProperty.PropertyIndex).Assign(field.CastTo<object>());
+            valueVector.ItemAt(MetaProperty.PropertyIndex).Assign(_backingField.CastTo<object>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

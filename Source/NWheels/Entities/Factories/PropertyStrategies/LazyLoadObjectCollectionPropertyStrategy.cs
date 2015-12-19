@@ -8,22 +8,26 @@ using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Factories;
-using NWheels.Entities.Core;
 using TT = Hapil.TypeTemplate;
+using NWheels.Entities.Core;
 
 namespace NWheels.Entities.Factories.PropertyStrategies
 {
-    public class EmbeddedObjectPropertyStrategy : PropertyImplementationStrategy
+    public class LazyLoadObjectCollectionPropertyStrategy : PropertyImplementationStrategy
     {
         private readonly DomainObjectFactoryContext _context;
-        private Type _objectImplementationType;
-        private Field<TT.TProperty> _backingField;
+        private Type _itemImplementationType;
+        private Type _itemContractType;
+        private Field<IList<TT.TContract>> _backingField;
         private Field<IComponentContext> _componentsField;
+        private Field<IPersistableObjectCollectionLazyLoader> _lazyLoaderField;
+        //private bool _isOrderedCollection;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public EmbeddedObjectPropertyStrategy(
+        public LazyLoadObjectCollectionPropertyStrategy(
             PropertyImplementationStrategyMap ownerMap, 
             DomainObjectFactoryContext context, 
             IPropertyMetadata metaProperty)
@@ -38,59 +42,36 @@ namespace NWheels.Entities.Factories.PropertyStrategies
 
         protected override void OnBeforeImplementation(ImplementationClassWriter<TypeTemplate.TInterface> writer)
         {
-            _backingField = writer.Field<TT.TProperty>("m_" + MetaProperty.Name);
-            _objectImplementationType = FindImplementationType(MetaProperty.ClrType);
             _componentsField = writer.DependencyField<IComponentContext>("$components");
+            _lazyLoaderField = writer.Field < IPersistableObjectCollectionLazyLoader>("m_" + MetaProperty.Name + "$lazyLoader");
+
+            _itemContractType = MetaProperty.Relation.RelatedPartyType.ContractType;
+            _itemImplementationType = FindImplementationType(_itemContractType);
+
+            using ( TT.CreateScope<TT.TContract>(_itemContractType) )
+            {
+                _backingField = writer.Field<IList<TT.TContract>>("m_" + MetaProperty.Name);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void OnImplementContractProperty(ImplementationClassWriter<TypeTemplate.TInterface> writer)
         {
-            Func<TemplatePropertyWriter, PropertyWriterBase.IPropertyWriterGetter> getter = null;
-            Func<TemplatePropertyWriter, PropertyWriterBase.IPropertyWriterSetter> setter = null;
-
-            if ( MetaProperty.ContractPropertyInfo.CanRead )
+            using ( TT.CreateScope<TT.TContract, TT.TImpl>(_itemContractType, _itemImplementationType) )
             {
-                if ( MetaProperty == MetaType.EntityIdProperty )
-                {
-                    getter = p => p.Get(w =>
-                    {
-                        w.Return(Static.GenericFunc((obj, lz, val) => DomainModelRuntimeHelpers.EntityIdPropertyGetter<TT.TProperty>(obj, ref lz, ref val),
+                writer.Property(MetaProperty.ContractPropertyInfo).Implement(
+                    p => p.Get(w => {
+                        w.Return(Static.GenericFunc(
+                            (obj, objlz, lz, val) => DomainModelRuntimeHelpers.LazyLoadObjectCollectionPropertyGetter<TT.TContract, TT.TImpl>(obj, ref objlz, ref lz, ref val),
                             w.This<IDomainObject>(),
                             _context.ThisLazyLoaderField,
+                            _lazyLoaderField,
                             _backingField
-                        ));
-                    });
-
-                }
-                else
-                {
-                    getter = p => p.Get(w =>
-                    {
-                        w.Return(Static.GenericFunc((obj, lz, val) => DomainModelRuntimeHelpers.PropertyGetter<TT.TProperty>(obj, ref lz, ref val),
-                            w.This<IDomainObject>(),
-                            _context.ThisLazyLoaderField,
-                            _backingField
-                        ));
-                    });
-                }
+                        ).CastTo<TT.TProperty>());
+                    })
+                );
             }
-
-            if ( MetaProperty.ContractPropertyInfo.CanWrite )
-            {
-                setter = p => p.Set((w, value) =>
-                {
-                    Static.GenericVoid((obj, lz, bkf, val) => DomainModelRuntimeHelpers.PropertySetter<TT.TProperty>(obj, ref lz, out bkf, ref val),
-                        w.This<IDomainObject>(),
-                        _context.ThisLazyLoaderField,
-                        _backingField,
-                        value
-                    );
-                });
-            }
-
-            writer.Property(MetaProperty.ContractPropertyInfo).Implement(getter, setter);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -103,17 +84,17 @@ namespace NWheels.Entities.Factories.PropertyStrategies
 
         protected override void OnWritingImportStorageValue(MethodWriterBase writer, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector)
         {
-            using ( TT.CreateScope<TT.TContract, TT.TImpl>(MetaProperty.ClrType, _objectImplementationType) )
+            using ( TT.CreateScope<TT.TContract, TT.TImpl>(_itemContractType, _itemImplementationType) )
             {
                 _backingField.Assign(
-                    Static.GenericFunc((r, v, f) => DomainModelRuntimeHelpers.ImportEmbeddedDomainObject<TT.TContract, TT.TImpl>(r, v, f),
+                    Static.GenericFunc((r, v, f, lz) => DomainModelRuntimeHelpers.ImportDomainLazyLoadObjectCollection<TT.TContract, TT.TImpl>(r, v, f, out lz),
                         entityRepo,
                         valueVector.ItemAt(MetaProperty.PropertyIndex),
                         writer.Delegate<TT.TImpl>(w => {
                             w.Return(_context.DomainObjectFactoryField.Func<TT.TContract>(x => x.CreateDomainObjectInstance<TT.TContract>).CastTo<TT.TImpl>());                                    
-                        })
+                        }),
+                        _lazyLoaderField
                     )
-                    .CastTo<TT.TProperty>()
                 );
             }
         }
@@ -129,12 +110,13 @@ namespace NWheels.Entities.Factories.PropertyStrategies
 
         protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
-            if ( MetaProperty.Relation.RelatedPartyType.IsEntityPart || !MetaProperty.ContractPropertyInfo.CanWrite )
+            using ( TT.CreateScope<TT.TContract, TT.TImpl>(_itemContractType, _itemImplementationType) )
             {
-                using ( TT.CreateScope<TT.TImpl>(_objectImplementationType) )
-                {
-                    _backingField.Assign(writer.New<TT.TImpl>(components).CastTo<TT.TProperty>());
-                }
+                _backingField.Assign(
+                    writer.New<ConcreteToAbstractListAdapter<TT.TImpl, TT.TContract>>(
+                        writer.New<List<TT.TImpl>>()
+                    )
+                );
             }
         }
 

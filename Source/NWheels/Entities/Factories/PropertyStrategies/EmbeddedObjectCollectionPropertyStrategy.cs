@@ -8,19 +8,22 @@ using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Factories;
 using TT = Hapil.TypeTemplate;
+using NWheels.Entities.Core;
 
 namespace NWheels.Entities.Factories.PropertyStrategies
 {
     public class EmbeddedObjectCollectionPropertyStrategy : PropertyImplementationStrategy
     {
         private readonly DomainObjectFactoryContext _context;
-        private Type _objectImplementationType;
-        private Type _concreteCollectionType;
-        private Type _collectionAdapterType;
-        private Field<TT.TConcrete> _concreteCollectionField;
-        private bool _isOrderedCollection;
+        private Type _itemImplementationType;
+        private Type _itemContractType;
+        //private Type _collectionAdapterType;
+        private Field<TT.TProperty> _backingField;
+        private Field<IComponentContext> _componentsField;
+        //private bool _isOrderedCollection;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -39,25 +42,32 @@ namespace NWheels.Entities.Factories.PropertyStrategies
 
         protected override void OnBeforeImplementation(ImplementationClassWriter<TypeTemplate.TInterface> writer)
         {
-            _objectImplementationType = FindImplementationType(MetaProperty.Relation.RelatedPartyType.ContractType);
-            _concreteCollectionType = HelpGetConcreteCollectionType(MetaProperty.ClrType, _objectImplementationType);
-            _collectionAdapterType = HelpGetCollectionAdapterType(
-                MetaProperty.ClrType,
-                MetaProperty.Relation.RelatedPartyType.ContractType,
-                _objectImplementationType,
-                out _isOrderedCollection);
+            _componentsField = writer.DependencyField<IComponentContext>("$components");
 
-            using ( TT.CreateScope<TT.TConcrete>(_concreteCollectionType) )
-            {
-                _concreteCollectionField = writer.Field<TT.TConcrete>("m_" + MetaProperty.Name + "$concrete");
-            }
+            _itemContractType = MetaProperty.Relation.RelatedPartyType.ContractType;
+            _itemImplementationType = FindImplementationType(_itemContractType);
+            //_collectionAdapterType = HelpGetCollectionAdapterType(
+            //    MetaProperty.ClrType,
+            //    MetaProperty.Relation.RelatedPartyType.ContractType,
+            //    _itemImplementationType,
+            //    out _isOrderedCollection);
+
+            _backingField = writer.Field<TT.TProperty>("m_" + MetaProperty.Name);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void OnImplementContractProperty(ImplementationClassWriter<TypeTemplate.TInterface> writer)
         {
-            writer.Property(MetaProperty.ContractPropertyInfo).ImplementAutomatic();
+            writer.Property(MetaProperty.ContractPropertyInfo).Implement(
+                p => p.Get(w => {
+                    w.Return(Static.GenericFunc((obj, lz, val) => DomainModelRuntimeHelpers.PropertyGetter<TT.TProperty>(obj, ref lz, ref val),
+                        w.This<IDomainObject>(),
+                        _context.ThisLazyLoaderField,
+                        _backingField
+                    ));
+                })
+            );
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -70,12 +80,18 @@ namespace NWheels.Entities.Factories.PropertyStrategies
 
         protected override void OnWritingImportStorageValue(MethodWriterBase writer, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector)
         {
-            var backingField = HelpGetPropertyBackingField(writer);
-
-            using ( TT.CreateScope<TT.TAbstract, TT.TConcrete>(_collectionAdapterType, _concreteCollectionType) )
+            using ( TT.CreateScope<TT.TContract, TT.TImpl>(_itemContractType, _itemImplementationType) )
             {
-                _concreteCollectionField.Assign(valueVector.ItemAt(MetaProperty.PropertyIndex).CastTo<TT.TConcrete>());
-                backingField.Assign(writer.New<TT.TAbstract>(_concreteCollectionField).CastTo<TT.TProperty>());
+                _backingField.Assign(
+                    Static.GenericFunc((r, v, f) => DomainModelRuntimeHelpers.ImportEmbeddedDomainCollection<TT.TContract, TT.TImpl>(r, v, f),
+                        entityRepo,
+                        valueVector.ItemAt(MetaProperty.PropertyIndex),
+                        writer.Delegate<TT.TImpl>(w => {
+                            w.Return(_context.DomainObjectFactoryField.Func<TT.TContract>(x => x.CreateDomainObjectInstance<TT.TContract>).CastTo<TT.TImpl>());
+                        })
+                    )
+                    .CastTo<TT.TProperty>()
+                );
             }
         }
 
@@ -83,19 +99,21 @@ namespace NWheels.Entities.Factories.PropertyStrategies
 
         protected override void OnWritingExportStorageValue(MethodWriterBase writer, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector)
         {
-            valueVector.ItemAt(MetaProperty.PropertyIndex).Assign(_concreteCollectionField.CastTo<object>());
+            valueVector.ItemAt(MetaProperty.PropertyIndex).Assign(_backingField.CastTo<object>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
-            var backingField = HelpGetPropertyBackingField(writer);
-
-            using ( TT.CreateScope<TT.TAbstract, TT.TConcrete>(_collectionAdapterType, _concreteCollectionType) )
+            using ( TT.CreateScope<TT.TContract, TT.TImpl>(_itemContractType, _itemImplementationType) )
             {
-                _concreteCollectionField.Assign(writer.New<TT.TConcrete>());
-                backingField.Assign(writer.New<TT.TAbstract>(_concreteCollectionField).CastTo<TT.TProperty>());
+                _backingField.Assign(
+                    writer.New<ConcreteToAbstractListAdapter<TT.TImpl, TT.TContract>>(
+                        writer.New<List<TT.TImpl>>()
+                    )
+                    .CastTo<TT.TProperty>()
+                );
             }
         }
 

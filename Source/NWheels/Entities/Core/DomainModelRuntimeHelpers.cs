@@ -205,7 +205,7 @@ namespace NWheels.Entities.Core
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static T PropertySetter<T>(
+        public static void PropertySetter<T>(
             IDomainObject target,
             ref IPersistableObjectLazyLoader targetLazyLoader,
             out T backingField,
@@ -218,7 +218,6 @@ namespace NWheels.Entities.Core
             }
 
             backingField = value;
-            return value;
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -11,14 +11,14 @@ using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Entities.Factories.PropertyStrategies
 {
-    public class LazyObjectPropertyStrategy : PropertyImplementationStrategy
+    public class __LazyObjectCollectionPropertyStrategy : PropertyImplementationStrategy
     {
         private readonly DomainObjectFactoryContext _context;
         //private Field<TT.TProperty> _backingField;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public LazyObjectPropertyStrategy(
+        public __LazyObjectCollectionPropertyStrategy(
             PropertyImplementationStrategyMap ownerMap, 
             DomainObjectFactoryContext context, 
             IPropertyMetadata metaProperty)

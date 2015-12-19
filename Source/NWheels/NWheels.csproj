@@ -41,10 +41,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Autofac.Extras.Multitenant.3.1.1\lib\net40\Autofac.Extras.Multitenant.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.24.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <!--merge-solution:Hapil;<Reference Include="Hapil, Version=0.9.24.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\FelixB.Hapil.0.9.24\lib\net45\Hapil.dll</HintPath>
-    </Reference>
+    </Reference>-->
+    <ProjectReference Include="..\..\..\Hapil\Source\Hapil\Hapil.csproj">
+      <Project>{25e37cc2-7e18-4592-8102-dfbaa4ddd2a7}</Project>
+      <Name>Hapil</Name>
+    </ProjectReference>
     <Reference Include="Hapil.Applied, Version=0.9.24.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\FelixB.Hapil.0.9.24\lib\net45\Hapil.Applied.dll</HintPath>
@@ -126,6 +130,8 @@
     <Compile Include="Configuration\ConfiguredComponentAttribute.cs" />
     <Compile Include="Configuration\Core\CommandLineConfigurationLoader.cs" />
     <Compile Include="Entities\Core\DomainModelRuntimeHelpers.cs" />
+    <Compile Include="Entities\Factories\PropertyStrategies\LazyLoadObjectCollectionPropertyStrategy.cs" />
+    <Compile Include="Entities\Factories\PropertyStrategies\LazyLoadObjectPropertyStrategy.cs" />
     <Compile Include="Entities\UnitOfWorkScopeOption.cs" />
     <Compile Include="TypeModel\Core\DomainContextMetadataBuilder.cs" />
     <Compile Include="TypeModel\Core\DomainContextMetadataCache.cs" />
@@ -146,8 +152,8 @@
     <Compile Include="Entities\Factories\ImplementIPartitionedObjectConvention.cs" />
     <Compile Include="Entities\Factories\PropertyStrategies\EmbeddedObjectCollectionPropertyStrategy.cs" />
     <Compile Include="Entities\Factories\PropertyStrategies\EmbeddedObjectPropertyStrategy.cs" />
-    <Compile Include="Entities\Factories\PropertyStrategies\LazyObjectCollectionPropertyStrategy.cs" />
-    <Compile Include="Entities\Factories\PropertyStrategies\LazyObjectPropertyStrategy.cs" />
+    <Compile Include="Entities\Factories\PropertyStrategies\__LazyObjectCollectionPropertyStrategy.cs" />
+    <Compile Include="Entities\Factories\PropertyStrategies\__LazyObjectPropertyStrategy.cs" />
     <Compile Include="Entities\Factories\PropertyStrategies\ScalarPropertyStrategy.cs" />
     <Compile Include="Entities\Impl\PartitionedRepository.cs" />
     <Compile Include="Entities\IPartitionedRepository.cs" />

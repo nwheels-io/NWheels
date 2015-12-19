@@ -211,11 +211,11 @@ namespace NWheels.Entities.Factories
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && !p.IsCollection && !p.RelationalMapping.StorageStyle.IsEmbeddedInParent(),
-                p => new PropertyStrategies.LazyObjectPropertyStrategy(builder.MapBeingBuilt, context, p));
+                p => new PropertyStrategies.LazyLoadObjectPropertyStrategy(builder.MapBeingBuilt, context, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && p.IsCollection && !p.RelationalMapping.StorageStyle.IsEmbeddedInParent(),
-                p => new PropertyStrategies.LazyObjectCollectionPropertyStrategy(builder.MapBeingBuilt, context, p));
+                p => new PropertyStrategies.LazyLoadObjectCollectionPropertyStrategy(builder.MapBeingBuilt, context, p));
 
 
             //builder.AddRule(
