@@ -13,8 +13,10 @@ namespace NWheels.Entities.Core
         void Validate();
         void BeforeCommit();
         void AfterCommit();
-        object[] ExportValues();
-        void ImportValues(object[] values);
+        object[] ExportValues(IEntityRepository entityRepo);
+        void ImportValues(IEntityRepository entityRepo, object[] values);
+        void InitializeValues(bool idManuallyAssigned);
+        void SetLazyLoader(IPersistableObjectLazyLoader lazyLoader);
         EntityState State { get; }
         object TemporaryKey { get; set; }
     }

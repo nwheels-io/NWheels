@@ -55,7 +55,7 @@ namespace NWheels.Entities.Factories.PropertyStrategies
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void OnWritingImportStorageValue(MethodWriterBase writer, Operand<object[]> valueVector)
+        protected override void OnWritingImportStorageValue(MethodWriterBase writer, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector)
         {
             //_context.DomainObjectFactoryField.Func<>()
             var field = HelpGetPropertyBackingField(writer);
@@ -64,7 +64,7 @@ namespace NWheels.Entities.Factories.PropertyStrategies
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void OnWritingExportStorageValue(MethodWriterBase writer, Operand<object[]> valueVector)
+        protected override void OnWritingExportStorageValue(MethodWriterBase writer, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector)
         {
             var field = HelpGetPropertyBackingField(writer);
             valueVector.ItemAt(MetaProperty.PropertyIndex).Assign(field.CastTo<object>());

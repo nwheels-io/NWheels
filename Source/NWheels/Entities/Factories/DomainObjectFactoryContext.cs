@@ -7,6 +7,7 @@ using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core.Factories;
+using NWheels.Entities.Core;
 using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
 using TT2 = NWheels.Entities.Factories.DomainObjectFactory.TemplateTypes;
@@ -80,6 +81,7 @@ namespace NWheels.Entities.Factories
         public Field<IDomainObjectFactory> DomainObjectFactoryField { get; set; }
         public Field<IFramework> FrameworkField { get; set; }
         public Field<EntityState> EntityStateField { get; set; }
+        public Field<IPersistableObjectLazyLoader> ThisLazyLoaderField { get; set; }
         public BitVectorField ModifiedVector { get; set; }
         public TypeMemberCache DomainObjectMembers { get; private set; }
         //public TypeMemberCache PersistableObjectMembers { get; private set; }

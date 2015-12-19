@@ -9,6 +9,7 @@ using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.DataObjects.Core.Factories;
+using NWheels.Entities;
 
 namespace NWheels.TypeModel.Core.Factories
 {
@@ -89,17 +90,17 @@ namespace NWheels.TypeModel.Core.Factories
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        public void WriteExportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector)
+
+        public void WriteExportStorageValue(MethodWriterBase methodWriter, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector)
         {
-            _target.WriteExportStorageValue(methodWriter, valueVector);
+            _target.WriteExportStorageValue(methodWriter, entityRepo, valueVector);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void WriteImportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector)
+        public void WriteImportStorageValue(MethodWriterBase methodWriter, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector)
         {
-            _target.WriteImportStorageValue(methodWriter, valueVector);
+            _target.WriteImportStorageValue(methodWriter, entityRepo, valueVector);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

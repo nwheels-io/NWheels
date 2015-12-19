@@ -3,6 +3,7 @@ using Autofac;
 using Hapil;
 using Hapil.Operands;
 using Hapil.Writers;
+using NWheels.Entities;
 
 namespace NWheels.DataObjects.Core.Factories
 {
@@ -17,8 +18,8 @@ namespace NWheels.DataObjects.Core.Factories
         void WriteDeserializedCallback(MethodWriterBase callbackMethodWriter);
         void WriteReturnTrueIfModified(FunctionMethodWriter<bool> functionWriter);
         void WriteValidation(MethodWriterBase writer);
-        void WriteExportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector);
-        void WriteImportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector);
+        void WriteExportStorageValue(MethodWriterBase methodWriter, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector);
+        void WriteImportStorageValue(MethodWriterBase methodWriter, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector);
         ObjectFactoryContext FactoryContext { get; }
         ITypeMetadataCache MetadataCache { get; }
         ITypeMetadata MetaType { get; }

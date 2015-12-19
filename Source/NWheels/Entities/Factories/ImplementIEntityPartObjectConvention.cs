@@ -4,6 +4,7 @@ using Autofac;
 using Hapil;
 using Hapil.Writers;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core.Factories;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.Utilities;
@@ -14,12 +15,14 @@ namespace NWheels.Entities.Factories
     public class ImplementIEntityPartObjectConvention : ImplementationConvention
     {
         private readonly ITypeMetadata _metaType;
+        private readonly PropertyImplementationStrategyMap _propertyStrategyMap;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ImplementIEntityPartObjectConvention(ITypeMetadata metaType)
+        public ImplementIEntityPartObjectConvention(ITypeMetadata metaType, PropertyImplementationStrategyMap propertyStrategyMap)
             : base(Will.ImplementBaseClass)
         {
+            _propertyStrategyMap = propertyStrategyMap;
             _metaType = metaType;
         }
 
@@ -39,8 +42,23 @@ namespace NWheels.Entities.Factories
             var domainObjectField = writer.Field<IDomainObject>("$domainObject");
 
             writer.ImplementInterfaceExplicitly<IEntityPartObject>()
-                .Method<object[]>(intf => intf.ExportValues).Throw<NotImplementedException>()
-                .Method<object[]>(intf => intf.ImportValues).Throw<NotImplementedException>();
+                .Method<IEntityRepository, object[]>(intf => intf.ExportValues).Implement((w, repo) => {
+                    var values = w.Local<object[]>();
+                    values.Assign(w.NewArray<object>(w.Const(_metaType.Properties.Count)));
+
+                    _propertyStrategyMap.InvokeStrategies(
+                        strategy => {
+                            strategy.WriteExportStorageValue(w, repo, values);
+                        });
+
+                    w.Return(values);
+                })
+                .Method<IEntityRepository, object[]>(intf => intf.ImportValues).Implement((w, repo, values) => {
+                    _propertyStrategyMap.InvokeStrategies(
+                        strategy => {
+                            strategy.WriteImportStorageValue(w, repo, values);
+                        });
+                });
 
                 //.Method<IDomainObject>(x => x.SetContainerObject).Implement((m, domainObject) => {
                 //    domainObjectField.Assign(domainObject);

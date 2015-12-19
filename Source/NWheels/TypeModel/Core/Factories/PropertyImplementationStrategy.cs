@@ -6,6 +6,7 @@ using Hapil;
 using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
+using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.TypeModel;
 using TT = Hapil.TypeTemplate;
@@ -124,17 +125,17 @@ namespace NWheels.DataObjects.Core.Factories
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        public void WriteExportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector)
+
+        public void WriteExportStorageValue(MethodWriterBase methodWriter, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector)
         {
-            OnWritingExportStorageValue(methodWriter, valueVector);
+            OnWritingExportStorageValue(methodWriter, entityRepo, valueVector);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void WriteImportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector)
+        public void WriteImportStorageValue(MethodWriterBase methodWriter, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector)
         {
-            OnWritingImportStorageValue(methodWriter, valueVector);
+            OnWritingImportStorageValue(methodWriter, entityRepo, valueVector);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -307,13 +308,13 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void OnWritingExportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector)
+        protected virtual void OnWritingExportStorageValue(MethodWriterBase methodWriter, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector)
         {
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual void OnWritingImportStorageValue(MethodWriterBase methodWriter, Operand<object[]> valueVector)
+        protected virtual void OnWritingImportStorageValue(MethodWriterBase methodWriter, Operand<IEntityRepository> entityRepo, Operand<object[]> valueVector)
         {
         }
 

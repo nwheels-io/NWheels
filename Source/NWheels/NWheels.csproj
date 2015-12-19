@@ -125,6 +125,7 @@
     <Compile Include="Concurrency\PerContextResourceConsumerScope.cs" />
     <Compile Include="Configuration\ConfiguredComponentAttribute.cs" />
     <Compile Include="Configuration\Core\CommandLineConfigurationLoader.cs" />
+    <Compile Include="Entities\Core\DomainModelRuntimeHelpers.cs" />
     <Compile Include="Entities\UnitOfWorkScopeOption.cs" />
     <Compile Include="TypeModel\Core\DomainContextMetadataBuilder.cs" />
     <Compile Include="TypeModel\Core\DomainContextMetadataCache.cs" />

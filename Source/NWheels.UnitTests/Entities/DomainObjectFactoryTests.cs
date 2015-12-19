@@ -681,6 +681,20 @@ namespace NWheels.UnitTests.Entities
             }
 
             #endregion
+
+            #region Implementation of IPersistableObject
+
+            public object[] ExportValues(IEntityRepository entityRepo)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void ImportValues(IEntityRepository entityRepo, object[] values)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

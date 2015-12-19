@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using Autofac;
 using Hapil;
 using Hapil.Members;
+using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Factories;
@@ -28,6 +30,7 @@ namespace NWheels.Entities.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private readonly DomainObjectFactoryContext _context;
+        private Field<IComponentContext> _componentsField;
         private MethodInfo[] _onNew;
         private MethodInfo[] _onValidate;
         private MethodInfo[] _beforeSave;
@@ -57,6 +60,9 @@ namespace NWheels.Entities.Factories
 
         protected override void OnImplementBaseClass(ImplementationClassWriter<TT.TBase> writer)
         {
+            _componentsField = writer.DependencyField<IComponentContext>("$components");
+            _context.ThisLazyLoaderField = writer.Field<IPersistableObjectLazyLoader>("$thisLazyLoader");
+
             ImplementIsModified(writer);
 
             var domainObjectImplementation = writer.ImplementInterfaceExplicitly<IDomainObject>();
@@ -68,6 +74,8 @@ namespace NWheels.Entities.Factories
 
             ImplementExportValues(domainObjectImplementation);
             ImplementImportValues(domainObjectImplementation);
+            ImplementInitializeValues(domainObjectImplementation);
+            ImplementSetLazyLoader(domainObjectImplementation);
 
             //ImplementGetContainedObject(writer);
             ImplementToString(writer);
@@ -164,12 +172,33 @@ namespace NWheels.Entities.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ImplementImportValues(ImplementationClassWriter<IDomainObject> writer)
+        private void ImplementSetLazyLoader(ImplementationClassWriter<IDomainObject> writer)
         {
-            writer.Method<object[]>(x => x.ImportValues).Implement((w, values) => {
+            writer.Method<IPersistableObjectLazyLoader>(x => x.SetLazyLoader).Implement((w, lazyLoader) => {
+                _context.ThisLazyLoaderField.Assign(lazyLoader);
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementInitializeValues(ImplementationClassWriter<IDomainObject> writer)
+        {
+            writer.Method<bool>(x => x.InitializeValues).Implement((w, idManuallyAssigned) => {
                 _context.PropertyMap.InvokeStrategies(
                     strategy => {
-                        strategy.WriteImportStorageValue(w, values);
+                        strategy.WriteInitialization(w, _componentsField, idManuallyAssigned);
+                    });
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementImportValues(ImplementationClassWriter<IDomainObject> writer)
+        {
+            writer.Method<IEntityRepository, object[]>(x => x.ImportValues).Implement((w, repo, values) => {
+                _context.PropertyMap.InvokeStrategies(
+                    strategy => {
+                        strategy.WriteImportStorageValue(w, repo, values);
                     });
             });
         }
@@ -178,13 +207,13 @@ namespace NWheels.Entities.Factories
 
         private void ImplementExportValues(ImplementationClassWriter<IDomainObject> writer)
         {
-            writer.Method<object[]>(x => x.ExportValues).Implement(w => {
+            writer.Method<IEntityRepository, object[]>(x => x.ExportValues).Implement((w, repo) => {
                 var values = w.Local<object[]>();
                 values.Assign(w.NewArray<object>(w.Const(_context.MetaType.Properties.Count)));
                 
                 _context.PropertyMap.InvokeStrategies(
                     strategy => {
-                        strategy.WriteExportStorageValue(w, values);
+                        strategy.WriteExportStorageValue(w, repo, values);
                     });
 
                 w.Return(values);

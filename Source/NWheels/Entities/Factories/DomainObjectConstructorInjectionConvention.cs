@@ -66,28 +66,28 @@ namespace NWheels.Entities.Factories
 
                     //persistable.CastTo<IPersistableObject>().Void<IDomainObject>(x => x.SetContainerObject, cw.This<IDomainObject>());
 
-                    PropertyImplementationStrategyMap.InvokeStrategies(
-                        _context.PropertyMap.Strategies,
-                        strategy => {
-                            using ( _context.CreatePropertyTypeTemplateScope(strategy.MetaProperty) )
-                            {
-                                strategy.WriteInitialization(cw, components);
-                            }
-                        });
+                    //PropertyImplementationStrategyMap.InvokeStrategies(
+                    //    _context.PropertyMap.Strategies,
+                    //    strategy => {
+                    //        using ( _context.CreatePropertyTypeTemplateScope(strategy.MetaProperty) )
+                    //        {
+                    //            strategy.WriteInitialization(cw, components);
+                    //        }
+                    //    });
 
-                    if ( _context.OnWriteOnNewTriggerCalls != null )
-                    {
-                        _context.OnWriteOnNewTriggerCalls(cw);
-                    }
+                    //if ( _context.OnWriteOnNewTriggerCalls != null )
+                    //{
+                    //    _context.OnWriteOnNewTriggerCalls(cw);
+                    //}
                 });
                 
-                writer.DefaultConstructor(
-                    cw => {
-                        //var persistable = cw.Local<TT.TContract>();
-                        var components = cw.Local<IComponentContext>();
-                        Static.GenericFunc(c => RuntimeEntityModelHelpers.InitializeDomainObjectConstructor(out c), components);
-                        cw.This(components);
-                    });
+                //writer.DefaultConstructor(
+                //    cw => {
+                //        //var persistable = cw.Local<TT.TContract>();
+                //        var components = cw.Local<IComponentContext>();
+                //        Static.GenericFunc(c => RuntimeEntityModelHelpers.InitializeDomainObjectConstructor(out c), components);
+                //        cw.This(components);
+                //    });
             }
         }
 

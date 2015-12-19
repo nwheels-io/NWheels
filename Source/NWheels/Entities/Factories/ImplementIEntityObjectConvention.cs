@@ -16,15 +16,15 @@ namespace NWheels.Entities.Factories
     public class ImplementIEntityObjectConvention : ImplementationConvention
     {
         private readonly ITypeMetadata _metaType;
-        private readonly PropertyImplementationStrategyMap _propertStrategyrMap;
+        private readonly PropertyImplementationStrategyMap _propertyStrategyrMap;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ImplementIEntityObjectConvention(ITypeMetadata metaType, PropertyImplementationStrategyMap propertStrategyrMap)
+        public ImplementIEntityObjectConvention(ITypeMetadata metaType, PropertyImplementationStrategyMap propertyStrategyrMap)
             : base(Will.ImplementBaseClass)
         {
             _metaType = metaType;
-            _propertStrategyrMap = propertStrategyrMap;
+            _propertyStrategyrMap = propertyStrategyrMap;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ namespace NWheels.Entities.Factories
                 context.TypeKey.PrimaryInterface.IsEntityContract() && 
                 _metaType.PrimaryKey != null &&
                 //_metaType.PrimaryKey.Properties[0].DeclaringContract == _metaType &&
-                !_propertStrategyrMap.IsImplementedByBaseEntity(_metaType.PrimaryKey.Properties[0].ContractPropertyInfo));
+                !_propertyStrategyrMap.IsImplementedByBaseEntity(_metaType.PrimaryKey.Properties[0].ContractPropertyInfo));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -61,8 +61,24 @@ namespace NWheels.Entities.Factories
                         keyBackingField.AsOperand<TT.TKey>().Assign(value.CastTo<TT.TKey>());
                     }
                 })
-                .Method<object[]>(intf => intf.ExportValues).Throw<NotImplementedException>()
-                .Method<object[]>(intf => intf.ImportValues).Throw<NotImplementedException>();
+                .Method<IEntityRepository, object[]>(intf => intf.ExportValues).Implement((w, repo) => {
+                    var values = w.Local<object[]>();
+                    values.Assign(w.NewArray<object>(w.Const(_metaType.Properties.Count)));
+
+                    _propertyStrategyrMap.InvokeStrategies(
+                        strategy => {
+                            strategy.WriteExportStorageValue(w, repo, values);
+                        });
+
+                    w.Return(values);
+                })
+                .Method<IEntityRepository, object[]>(intf => intf.ImportValues).Implement((w, repo, values) => {
+                    _propertyStrategyrMap.InvokeStrategies(
+                        strategy => {
+                            strategy.WriteImportStorageValue(w, repo, values);
+                        });
+                });
+
                 //.Method<IDomainObject>(x => x.SetContainerObject).Implement((m, domainObject) => {
                 //    domainObjectField.Assign(domainObject);
                 //})
