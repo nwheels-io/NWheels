@@ -1134,13 +1134,13 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
             <!-- DROP DOWN -->
-            <select ng-if="uidl.fieldType==='Lookup' && uidl.modifiers==='DropDown'"
+            <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown')"
                     class="form-control m-b"
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
                     id="{{::uniqueFieldId}}"
                     name="{{::uniqueFieldId}}">
-                <!--option value="">All</option-->
+                <option value="" ng-if="hasUidlModifier('LookupShowSelectAll')">All</option>
             </select>
             <!-- TYPEAHEAD -->
             <input ng-if="uidl.fieldType==='Lookup' && uidl.modifiers==='TypeAhead'"

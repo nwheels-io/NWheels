@@ -580,6 +580,7 @@ namespace NWheels.UI.Toolbox
         DateTimePicker = 0x80,
         Password = 0x100,
         Confirm = 0x200,
+        LookupShowSelectAll = 0x400,
         System = 0x2000
     }
 

@@ -1599,7 +1599,7 @@ function ($timeout, uidlService, entityService) {
                         return model[$scope.lookupTextProperty];
                     }
                     
-                    if ($scope.uidl.modifiers==='DropDown') {
+                    if ($scope.hasUidlModifier('DropDown')) {
                         $scope.entityService.queryEntity($scope.uidl.lookupEntityName).then(function(data) {
                             $scope.lookupResultSet = data.ResultSet;
 
