@@ -906,7 +906,7 @@ namespace NWheels.Stacks.MongoDb
             {
                 if ( _innerEnumerator.MoveNext() )
                 {
-                    _logger.QueryResult(_innerEnumerator.Current.ToString(), _rowCount);
+                    //_logger.QueryResult(_innerEnumerator.Current.ToString(), _rowCount);
                     _rowCount++;
                     return true;
                 }
