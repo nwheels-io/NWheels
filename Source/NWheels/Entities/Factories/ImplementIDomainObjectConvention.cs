@@ -77,6 +77,9 @@ namespace NWheels.Entities.Factories
             ImplementInitializeValues(domainObjectImplementation);
             ImplementSetLazyLoader(domainObjectImplementation);
 
+            ImplementEntityId(domainObjectImplementation);
+            ImplementGetId(domainObjectImplementation);
+
             //ImplementGetContainedObject(writer);
             ImplementToString(writer);
             ImplementTemporaryKey(domainObjectImplementation);
@@ -166,6 +169,77 @@ namespace NWheels.Entities.Factories
                     w.If(w.This<IDomainObject>().Prop(x => x.State) == EntityState.RetrievedDeleted).Then(() => {
                         WriteTriggerMethodCalls(w, _afterDelete);
                     });
+                }
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementEntityId(ImplementationClassWriter<IDomainObject> writer)
+        {
+            if ( _context.MetaType.BaseType != null )
+            {
+                //using ( TT.CreateScope<TT.TBase>(writer.OwnerClass.BaseType) )
+                //{
+                //    var entityIdPropertyInfo = ExpressionUtility.GetPropertyInfo<IDomainObject>(x => x.EntityId);
+                //    var baseEntityIdProperty =
+                //        TypeMemberCache.Of(writer.OwnerClass.BaseType).Properties.First(p => p.Name == entityIdPropertyInfo.Name && p.DeclaringType == entityIdPropertyInfo.DeclaringType);
+
+                //    writer.Property<object>(intf => intf.EntityId).Implement(p => p.Get(w => {
+                //        w.Return(w.This<TT.TBase>().Prop<object>(baseEntityIdProperty));
+                //    }));
+                //}
+
+                return;
+            }
+
+            var idProperty = _context.MetaType.EntityIdProperty;
+
+            if ( idProperty == null )
+            {
+                writer.Property<object>(intf => intf.EntityId).Implement(p => p.Get(w => {
+                    w.Return(w.Const<object>(null));
+                }));
+
+                return;
+            }
+
+            var idBackingField = writer.OwnerClass.GetPropertyBackingField(idProperty.ContractPropertyInfo);
+
+            writer.Property<object>(intf => intf.EntityId).Implement(p => p.Get(w => {
+                using ( TT.CreateScope<TT.TContract, TT.TKey>(_context.MetaType.ContractType, idProperty.ClrType) )
+                {
+                    w.Return(idBackingField.AsOperand<TT.TKey>().CastTo<object>());
+                }
+            }));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ImplementGetId(ImplementationClassWriter<IDomainObject> writer)
+        {
+            if ( _context.MetaType.BaseType != null )
+            {
+                return;
+            }
+
+            var idProperty = _context.MetaType.EntityIdProperty;
+
+            if ( idProperty == null )
+            {
+                writer.Method<IEntityId>(intf => intf.GetId).Implement(w => {
+                    w.Return(w.Const<IEntityId>(null));
+                });
+
+                return;
+            }
+
+            var idBackingField = writer.OwnerClass.GetPropertyBackingField(idProperty.ContractPropertyInfo);
+
+            writer.Method<IEntityId>(intf => intf.GetId).Implement(w => {
+                using ( TT.CreateScope<TT.TContract, TT.TKey>(_context.MetaType.ContractType, idProperty.ClrType) )
+                {
+                    w.Return(w.New<EntityId<TT.TContract, TT.TKey>>(idBackingField.AsOperand<TT.TKey>()));
                 }
             });
         }

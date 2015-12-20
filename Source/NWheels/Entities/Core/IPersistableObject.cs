@@ -15,5 +15,6 @@ namespace NWheels.Entities.Core
 
         object[] ExportValues(IEntityRepository entityRepo);
         void ImportValues(IEntityRepository entityRepo, object[] values);
+        object EntityId { get; }
     }
 }

@@ -104,7 +104,7 @@ namespace NWheels.Stacks.EntityFramework
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override IEnumerable<IEntityObject> GetCurrentChangeSet()
+        protected override IEnumerable<IDomainObject> GetCurrentChangeSet()
         {
             var changeEntityStates = 
                 System.Data.Entity.EntityState.Added | 
@@ -114,7 +114,7 @@ namespace NWheels.Stacks.EntityFramework
             var changeSet = _objectContext.ObjectStateManager.GetObjectStateEntries(changeEntityStates)
                 .Where(entry => entry.Entity != null)
                 .Select(entry => entry.Entity)
-                .Cast<IEntityObject>();
+                .Cast<IDomainObject>(); //TODO: this cast will not work
 
             return changeSet;
         }

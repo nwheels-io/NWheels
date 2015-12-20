@@ -10,22 +10,22 @@ namespace NWheels.Entities.Core
 {
     public abstract class UnitOfWorkDataRepositoryBase : DataRepositoryBase
     {
-        private readonly Dictionary<IEntityId, IEntityObject> _entityCache;
-        private readonly HashSet<IEntityObject> _insertBatch;
-        private readonly HashSet<IEntityObject> _updateBatch;
-        private readonly HashSet<IEntityObject> _saveBatch;
-        private readonly HashSet<IEntityObject> _deleteBatch;
+        private readonly Dictionary<IEntityId, IDomainObject> _entityCache;
+        private readonly HashSet<IDomainObject> _insertBatch;
+        private readonly HashSet<IDomainObject> _updateBatch;
+        private readonly HashSet<IDomainObject> _saveBatch;
+        private readonly HashSet<IDomainObject> _deleteBatch;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected UnitOfWorkDataRepositoryBase(IResourceConsumerScopeHandle consumerScope, IComponentContext components, bool autoCommit)
             : base(consumerScope, components, autoCommit)
         {
-            _entityCache = new Dictionary<IEntityId, IEntityObject>();
-            _insertBatch = new HashSet<IEntityObject>();
-            _updateBatch = new HashSet<IEntityObject>();
-            _saveBatch = new HashSet<IEntityObject>();
-            _deleteBatch = new HashSet<IEntityObject>();
+            _entityCache = new Dictionary<IEntityId, IDomainObject>();
+            _insertBatch = new HashSet<IDomainObject>();
+            _updateBatch = new HashSet<IDomainObject>();
+            _saveBatch = new HashSet<IDomainObject>();
+            _deleteBatch = new HashSet<IDomainObject>();
 
             BeginLifetimeScope();
         }
@@ -45,30 +45,30 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void TrackEntity<TEntityContract>(ref TEntityContract entity, EntityState state)
+        public void TrackEntity(ref IDomainObject entity, EntityState state)
         {
-            var key = ((IEntityObject)entity).GetId();
+            var key = entity.GetId();
 
             if ( key.Value == null )
             {
-                NotifyEntityState((IEntityObject)entity, EntityState.NewPristine);
+                NotifyEntityState(entity, EntityState.NewPristine);
                 return;
             }
 
             if ( !_entityCache.ContainsKey(key) )
             {
-                _entityCache.Add(key, (IEntityObject)entity);
-                NotifyEntityState((IEntityObject)entity, state);
+                _entityCache.Add(key, entity);
+                NotifyEntityState(entity, state);
             }
             else
             {
-                entity = (TEntityContract)_entityCache[key];
+                entity = _entityCache[key];
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void NotifyEntityState(IEntityObject entity, EntityState state)
+        public void NotifyEntityState(IDomainObject entity, EntityState state)
         {
             switch ( state )
             {
@@ -87,7 +87,7 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void SaveEntity(IEntityObject entity)
+        public void SaveEntity(IDomainObject entity)
         {
             _saveBatch.Add(entity);
         }
@@ -97,7 +97,7 @@ namespace NWheels.Entities.Core
         public bool TryGetFromCache<TEntityContract, TIdValue>(TIdValue idValue, out TEntityContract entity)
         {
             var key = new EntityId<TEntityContract, TIdValue>(idValue);
-            IEntityObject entityObject;
+            IDomainObject entityObject;
 
             if ( _entityCache.TryGetValue(key, out entityObject) )
             {
@@ -113,35 +113,35 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override IEnumerable<IEntityObject> GetCurrentChangeSet()
+        protected override IEnumerable<IDomainObject> GetCurrentChangeSet()
         {
             return _insertBatch.Concat(_updateBatch).Concat(_saveBatch).Concat(_deleteBatch);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected HashSet<IEntityObject> InsertBatch
+        protected HashSet<IDomainObject> InsertBatch
         {
             get { return _insertBatch; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected HashSet<IEntityObject> UpdateBatch
+        protected HashSet<IDomainObject> UpdateBatch
         {
             get { return _updateBatch; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected HashSet<IEntityObject> SaveBatch
+        protected HashSet<IDomainObject> SaveBatch
         {
             get { return _saveBatch; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected HashSet<IEntityObject> DeleteBatch
+        protected HashSet<IDomainObject> DeleteBatch
         {
             get { return _deleteBatch; }
         }

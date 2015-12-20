@@ -32,7 +32,7 @@ namespace NWheels.Entities.Factories
         {
             return new ContainedToContainerCollectionAdapter<TContained, TContainer, TContainedContract, TContainerContract>(
                 innerCollection,
-                persistable => (TContainer)(object)domainObjectFactory.CreateDomainObjectInstance<TContainerContract>((TContainerContract)(object)persistable));
+                persistable => (TContainer)(object)domainObjectFactory.CreateDomainObjectInstance<TContainerContract>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ namespace NWheels.Entities.Factories
         {
             return new ContainedToContainerListAdapter<TContained, TContainer, TContainedContract, TContainerContract>(
                 innerCollection,
-                persistable => (TContainer)(object)domainObjectFactory.CreateDomainObjectInstance<TContainerContract>((TContainerContract)(object)persistable));
+                persistable => (TContainer)(object)domainObjectFactory.CreateDomainObjectInstance<TContainerContract>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

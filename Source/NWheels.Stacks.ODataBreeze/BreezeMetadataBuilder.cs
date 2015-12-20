@@ -224,7 +224,7 @@ namespace NWheels.Stacks.ODataBreeze
 
         private Type GetEntityImplementationType(ITypeMetadata type)
         {
-            var domainObjectType = _domainObjectFactory.GetOrBuildDomainObjectType(type.ContractType, _entityObjectFactory.GetType());
+            var domainObjectType = _domainObjectFactory.GetOrBuildDomainObjectType(type.ContractType);
             return domainObjectType;
         }
 

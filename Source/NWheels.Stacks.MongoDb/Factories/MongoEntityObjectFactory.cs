@@ -9,6 +9,7 @@ using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Factories;
 using NWheels.Entities.Factories;
 using NWheels.Extensions;
+using NWheels.Stacks.MongoDb.Factories.PropertyStrategies;
 using NWheels.TypeModel;
 using NWheels.TypeModel.Core.Factories;
 
@@ -36,25 +37,27 @@ namespace NWheels.Stacks.MongoDb.Factories
             };
             
             return new IObjectFactoryConvention[] {
-                new BaseTypeConvention(MetadataCache, metaType), 
+                //new BaseTypeConvention(MetadataCache, metaType), 
                 new PropertyImplementationConvention(metaType, propertyMap),
-                new EntityContractMethodsNotSupportedConvention(),
-                new MaterializationConstructorConvention(metaType, propertyMap),
-                new InitializationConstructorConvention(metaType, propertyMap),
+                //new EntityContractMethodsNotSupportedConvention(),
+                //new MaterializationConstructorConvention(metaType, propertyMap),
+                //new InitializationConstructorConvention(metaType, propertyMap),
                 new ImplementIObjectConvention(), 
-                new EntityObjectStateConvention(), 
-                new ImplementIEntityObjectConvention(metaType, propertyMap), 
-                new ImplementIEntityPartObjectConvention(metaType, propertyMap), 
-                new ImplementIPartitionedObjectConvention(metaType), 
+                new MongoPersistableObjectConvention(propertyMap), 
+                new EntityContractMembersNotImplementedConvention()
+                //new EntityObjectStateConvention(), 
+                //new ImplementIEntityObjectConvention(metaType, propertyMap), 
+                //new ImplementIEntityPartObjectConvention(metaType, propertyMap), 
+                //new ImplementIPartitionedObjectConvention(metaType), 
                 //new EnsureDomainObjectConvention(metaType), 
-                new DependencyInjectionConvention(metaType, propertyMap, forceApply: true),
-                new ContextImplTypeInjectionConvention(conventionContext),
-                new NestedObjectsConvention(propertyMap), 
-                new ObjectIdGeneratorConvention(propertyMap, metaType), 
-                new BsonIgnoreConvention(MetadataCache, metaType),
-                new BsonDiscriminatorConvention(context, MetadataCache, metaType),
-                new BsonIgnoreExtraElementsConvention(),
-                new BsonIdAttributeConvention(metaType)
+                //new DependencyInjectionConvention(metaType, propertyMap, forceApply: true),
+                //new ContextImplTypeInjectionConvention(conventionContext),
+                //new NestedObjectsConvention(propertyMap), 
+                //new ObjectIdGeneratorConvention(propertyMap, metaType), 
+                //new BsonIgnoreConvention(MetadataCache, metaType),
+                //new BsonDiscriminatorConvention(context, MetadataCache, metaType),
+                //new BsonIgnoreExtraElementsConvention(),
+                //new BsonIdAttributeConvention(metaType)
                 //new LazyLoadDomainObjectConvention(metaType)
             };
         }
@@ -63,9 +66,8 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         protected override TypeKey CreateImplementationTypeKey(Type entityContractInterface)
         {
-            return new TypeKey(
-                primaryInterface: entityContractInterface,
-                baseType: BaseTypeConvention.GetBaseType(this, base.MetadataCache.GetTypeMetadata(entityContractInterface)));
+            return new TypeKey(primaryInterface: entityContractInterface, baseType: typeof(object));
+            //BaseTypeConvention.GetBaseType(this, base.MetadataCache.GetTypeMetadata(entityContractInterface)));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -88,55 +90,59 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Part && p.IsCollection,
-                p => new CollectionAdapterStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => new EmbeddedObjectCollectionPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Part && !p.IsCollection,
-                p => new RelationTypecastStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => new EmbeddedObjectPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             //-- entity relations - collections
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && p.IsCollection && ShouldPersistAsEmbeddedDocuments(p),
-                p => new CollectionAdapterStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => new EmbeddedObjectCollectionPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && p.IsCollection && ShouldPersistAsArrayOfDocumentIds(p),
-                p => new ArrayOfDocumentIdsStrategy(conventionContext, builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => new LazyLoadObjectCollectionByIdPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && p.IsCollection,
-                p => new LazyLoadCollectionByForeignKeyStrategy(conventionContext, builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => new LazyLoadObjectCollectionByInverseForeignKeyPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             //-- entity relations - single (non-collection)
             
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && !p.IsCollection && ShouldPersistAsEmbeddedDocuments(p),
-                p => new RelationTypecastStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => new EmbeddedObjectPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
-                p => p.Kind == PropertyKind.Relation && !p.IsCollection && ShouldPersistAsDocumentId(p),
-                p => new DocumentIdStrategy(conventionContext, builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => p.Kind == PropertyKind.Relation && !p.IsCollection && ShouldPersistAsDocumentId(p) && p.Relation.RelatedPartyType.EntityIdProperty.ClrType.IsValueType,
+                p => new LazyLoadObjectByValTypeIdPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+
+            builder.AddRule(
+                p => p.Kind == PropertyKind.Relation && !p.IsCollection && ShouldPersistAsDocumentId(p) && !p.Relation.RelatedPartyType.EntityIdProperty.ClrType.IsValueType,
+                p => new LazyLoadObjectByRefTypeIdPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
                 p => p.Kind == PropertyKind.Relation && !p.IsCollection,
-                p => new LazyLoadDocumentByForeignKeyStrategy(conventionContext, builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => new LazyLoadObjectByInverseForeignKeyPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             //-- scalar properties
 
-            builder.AddRule(
-                p => p.Kind == PropertyKind.Scalar && p.RelationalMapping != null && p.RelationalMapping.StorageType != null,
-                p => new StorageDataTypeStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+            //builder.AddRule(
+            //    p => p.Kind == PropertyKind.Scalar && p.RelationalMapping != null && p.RelationalMapping.StorageType != null,
+            //    p => new StorageDataTypeStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+
+            //builder.AddRule(
+            //    p => p.Kind == PropertyKind.Scalar && !(p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite),
+            //    p => new PublicAccessorWrapperStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
-                p => p.Kind == PropertyKind.Scalar && !(p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite),
-                p => new PublicAccessorWrapperStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+                p => p.Kind == PropertyKind.Scalar, // && p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite,
+                p => new ScalarPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
-            builder.AddRule(
-                p => p.Kind == PropertyKind.Scalar && p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite,
-                p => new AutomaticPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
-
-            return builder.Build(MetadataCache, metaType);
+            return builder.Build(MetadataCache, metaType, includeBaseProperties: true);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -211,10 +217,14 @@ namespace NWheels.Stacks.MongoDb.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static readonly Dictionary<Type, PropertyStorageStyle> _s_storageStyleByStrategyType = new Dictionary<Type, PropertyStorageStyle>() {
-            { typeof(RelationTypecastStrategy), PropertyStorageStyle.EmbeddedObject },
-            { typeof(CollectionAdapterStrategy), PropertyStorageStyle.EmbeddedObjectCollection },
-            { typeof(DocumentIdStrategy), PropertyStorageStyle.InlineForeignKey },
-            { typeof(ArrayOfDocumentIdsStrategy), PropertyStorageStyle.EmbeddedForeignKeyCollection },
+            { typeof(ScalarPropertyStrategy), PropertyStorageStyle.InlineScalar },
+            { typeof(EmbeddedObjectPropertyStrategy), PropertyStorageStyle.EmbeddedObject },
+            { typeof(EmbeddedObjectCollectionPropertyStrategy), PropertyStorageStyle.EmbeddedObjectCollection },
+            { typeof(LazyLoadObjectByValTypeIdPropertyStrategy), PropertyStorageStyle.InlineForeignKey },
+            { typeof(LazyLoadObjectByRefTypeIdPropertyStrategy), PropertyStorageStyle.InlineForeignKey },
+            { typeof(LazyLoadObjectByInverseForeignKeyPropertyStrategy), PropertyStorageStyle.InverseForeignKey },
+            { typeof(LazyLoadObjectCollectionByIdPropertyStrategy), PropertyStorageStyle.EmbeddedForeignKeyCollection },
+            { typeof(LazyLoadObjectCollectionByInverseForeignKeyPropertyStrategy), PropertyStorageStyle.InverseForeignKey },
         };
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -229,6 +239,10 @@ namespace NWheels.Stacks.MongoDb.Factories
                 {
                     var writableMetaProperty = (PropertyMetadataBuilder)strategy.MetaProperty;
                     writableMetaProperty.SafeGetRelationalMapping().StorageStyle = storageStyle;
+                }
+                else
+                {
+                    
                 }
             }
         }

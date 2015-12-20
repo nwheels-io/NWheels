@@ -472,10 +472,10 @@ namespace NWheels.Conventions.Core
                     {
                         var entityObjectLocal = m.Local<TT.TReturn>();
                         entityObjectLocal.Assign(
-                            _domainObjectFactoryField.Func<TT.TReturn, TT.TReturn>(x => x.CreateDomainObjectInstance,
-                                _entityFactoryField.Func<IComponentContext, TT.TReturn>(x => x.NewEntity<TT.TReturn>, 
-                                    m.This<DataRepositoryBase>().Prop(x => x.Components)
-                                )
+                            _domainObjectFactoryField.Func<TT.TReturn>(x => x.CreateDomainObjectInstance<TT.TReturn>
+                                //_entityFactoryField.Func<IComponentContext, TT.TReturn>(x => x.NewEntity<TT.TReturn>, 
+                                //    m.This<DataRepositoryBase>().Prop(x => x.Components)
+                                //)
                             )
                         );
 
@@ -594,7 +594,12 @@ namespace NWheels.Conventions.Core
 
             private void EnsureAllContractsImplemented()
             {
-                foreach (var entity in EntitiesInRepository)
+                foreach ( var entity in EntitiesInRepository )
+                {
+                    entity.EnsurePersistableObjectImplementationType();
+                }
+
+                foreach ( var entity in EntitiesInRepository )
                 {
                     entity.EnsureImplementationType();
                 }
@@ -825,6 +830,13 @@ namespace NWheels.Conventions.Core
                 }
 
                 _ownerConvention.DomainObjectFactory.GetOrBuildDomainObjectType(_contractType);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void EnsurePersistableObjectImplementationType()
+            {
+                _ownerConvention.EntityFactory.FindImplementationType(_contractType);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

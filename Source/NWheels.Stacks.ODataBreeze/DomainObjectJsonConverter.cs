@@ -35,6 +35,7 @@ namespace NWheels.Stacks.ODataBreeze
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        //TODO: revive this
         private IDomainObject CreateOrRetrieveDomainObject(Type implementationType, JsonReader reader)
         {
             var domainContext = JsonSerializationUtility.GetCurrentDomainContext();
@@ -51,9 +52,9 @@ namespace NWheels.Stacks.ODataBreeze
             {
                 case BreezeEntityState.Added:
                     var persistableObject = (IPersistableObject)domainContext.PersistableObjectFactory.NewEntity(contractType);
-                    var domainFactory = domainContext.Components.Resolve<IDomainObjectFactory>();
-                    domainObject = domainFactory.CreateDomainObjectInstance(persistableObject);
-                    domainObject.TemporaryKey = ReadTemporaryKey(idProperty, entityJson);
+                    //var domainFactory = domainContext.Components.Resolve<IDomainObjectFactory>();
+                    //domainObject = domainFactory.CreateDomainObjectInstance();
+                    //domainObject.TemporaryKey = ReadTemporaryKey(idProperty, entityJson);
                     break;
                 case BreezeEntityState.Modified:
                 case BreezeEntityState.Deleted:
@@ -65,7 +66,7 @@ namespace NWheels.Stacks.ODataBreeze
                     throw new NotSupportedException("cannot handle entity in state: " + entityState);
             }
 
-            return domainObject;
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

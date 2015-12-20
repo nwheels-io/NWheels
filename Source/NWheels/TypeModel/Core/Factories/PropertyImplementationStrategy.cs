@@ -341,6 +341,13 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected Field<TypeTemplate.TProperty> HelpGetPropertyBackingFieldByName(MethodWriterBase writer)
+        {
+            return writer.OwnerClass.GetMemberByName<PropertyMember>(MetaProperty.Name).BackingField.AsOperand<TT.TProperty>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected void SetMetaPropertyStorageStyle(PropertyStorageStyle storageStyle)
         {
             var writableMetaProperty = (PropertyMetadataBuilder)this.MetaProperty;

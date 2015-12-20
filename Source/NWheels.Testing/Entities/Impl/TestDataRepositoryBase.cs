@@ -47,18 +47,17 @@ namespace NWheels.Testing.Entities.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override IEnumerable<IEntityObject> GetCurrentChangeSet()
+        protected override IEnumerable<IDomainObject> GetCurrentChangeSet()
         {
-            IEnumerable<IEntityObject> changeSet = new IEntityObject[0];
+            IEnumerable<IDomainObject> changeSet = new IDomainObject[0];
 
             foreach ( var entityRepo in GetEntityRepositories().Where(repo => repo != null) )
             {
                 var storedEntityObjects = ((System.Collections.IEnumerable)entityRepo).Cast<object>()
-                    .Select(obj => obj.As<IPersistableObject>())
-                    .Cast<IEntityObject>()
+                    .Cast<IDomainObject>()
                     .ToArray();
                 
-                var changedEntityObjects = storedEntityObjects.Where(e => e.As<IDomainObject>().State != EntityState.RetrievedPristine);
+                var changedEntityObjects = storedEntityObjects.Where(e => e.State != EntityState.RetrievedPristine);
                 changeSet = changeSet.Concat(changedEntityObjects);
             }
 

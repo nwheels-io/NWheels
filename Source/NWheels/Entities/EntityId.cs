@@ -12,40 +12,35 @@ namespace NWheels.Entities
     {
         public static IEntityId Of(object entity)
         {
-            return GetValidatedEntityObject(entity).GetId();
+            return GetValidatedDomainObject(entity).GetId();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static object ValueOf(object entity)
         {
-            return GetValidatedEntityObject(entity).GetId().Value;
+            return GetValidatedDomainObject(entity).GetId().Value;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static T GetValue<T>(object entity)
         {
-            return GetValidatedEntityObject(entity).GetId().ValueAs<T>();
+            return GetValidatedDomainObject(entity).GetId().ValueAs<T>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static IEntityObject GetValidatedEntityObject(object obj)
+        private static IDomainObject GetValidatedDomainObject(object obj)
         {
-            var entityObject = obj.AsOrNull<IEntityObject>();
+            var domainObject = obj.AsOrNull<IDomainObject>();
 
-            if ( entityObject == null )
+            if ( domainObject == null )
             {
-                entityObject = (IEntityObject)obj.AsOrNull<IPersistableObject>();
+                throw new ArgumentException("Not an entity object", "obj");
             }
 
-            if ( entityObject == null )
-            {
-                throw new ArgumentException("Not an entity object", "entity");
-            }
-
-            return entityObject;
+            return domainObject;
         }
     }
 }

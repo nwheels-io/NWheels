@@ -79,6 +79,14 @@ namespace NWheels.DataObjects.Core.Conventions
                 {
                     thisType.PrimaryKey = basePrimaryKey;
                 }
+
+                foreach ( var property in baseType.AllKeys.SelectMany(k => k.Properties) )
+                {
+                    if ( !thisType.Properties.Any(p => p.Name == property.Name) )
+                    {
+                        thisType.Properties.Add(property);
+                    }
+                }
             }
         }
 

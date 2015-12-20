@@ -291,7 +291,7 @@ namespace NWheels.Entities.Core
         {
             foreach ( var contractType in _entityRepositoryByContractType.Keys )
             {
-                _domainObjectFactory.GetOrBuildDomainObjectType(contractType, this.PersistableObjectFactory.GetType());
+                _domainObjectFactory.GetOrBuildDomainObjectType(contractType);
             }
         }
 
@@ -459,7 +459,7 @@ namespace NWheels.Entities.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected abstract IEnumerable<IEntityObject> GetCurrentChangeSet();
+        protected abstract IEnumerable<IDomainObject> GetCurrentChangeSet();
         protected abstract void OnCommitChanges();
         protected abstract void OnRollbackChanges();
 

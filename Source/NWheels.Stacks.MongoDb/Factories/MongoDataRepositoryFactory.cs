@@ -21,6 +21,7 @@ using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
+using TT2 = NWheels.Stacks.MongoDb.Factories.PropertyStrategies.PersistableTypeTemplates;
 
 // ReSharper disable ConvertToLambdaExpression
 
@@ -121,12 +122,15 @@ namespace NWheels.Stacks.MongoDb.Factories
                 Operand<Func<object, string>> partitionNameFuncArgument;
                 GetPartitionOperands(writer, entity, partitionValue, out partitionValueArgument, out partitionNameFuncArgument);
 
-                return writer.New<MongoEntityRepository<TT.TContract, TT.TImpl>>(
-                    writer.This<MongoDataRepositoryBase>(), 
-                    base.MetadataCacheField,
-                    base.EntityFactoryField,
-                    partitionValueArgument,
-                    partitionNameFuncArgument);
+                using ( TT.CreateScope<TT2.TPersistable>(TT.Resolve<TT.TImpl>()) )
+                {
+                    return writer.New<MongoEntityRepository<TT.TContract, TT2.TPersistable>>(
+                        writer.This<MongoDataRepositoryBase>(),
+                        base.MetadataCacheField,
+                        base.EntityFactoryField,
+                        partitionValueArgument,
+                        partitionNameFuncArgument);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

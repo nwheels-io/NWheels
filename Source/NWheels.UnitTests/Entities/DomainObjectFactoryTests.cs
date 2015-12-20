@@ -694,6 +694,11 @@ namespace NWheels.UnitTests.Entities
                 throw new NotImplementedException();
             }
 
+            public object EntityId
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             #endregion
         }
 
@@ -725,6 +730,11 @@ namespace NWheels.UnitTests.Entities
             }
 
             public TEntityContract CreateDomainObjectInstance<TEntityContract>()
+            {
+                throw new NotImplementedException();
+            }
+
+            public IDomainObject CreateDomainObjectInstance(Type contractType)
             {
                 throw new NotImplementedException();
             }

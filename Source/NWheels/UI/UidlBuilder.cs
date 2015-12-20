@@ -303,7 +303,7 @@ namespace NWheels.UI
             
             if ( metaType.TryGetImplementation(_entityObjectFactory.GetType(), out persistableObjectType) )
             {
-                return _domainObjectFactory.GetOrBuildDomainObjectType(contractType, _entityObjectFactory.GetType());
+                return _domainObjectFactory.GetOrBuildDomainObjectType(contractType);
             }
             else
             {

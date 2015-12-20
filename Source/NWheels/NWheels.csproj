@@ -130,6 +130,7 @@
     <Compile Include="Configuration\ConfiguredComponentAttribute.cs" />
     <Compile Include="Configuration\Core\CommandLineConfigurationLoader.cs" />
     <Compile Include="Entities\Core\DomainModelRuntimeHelpers.cs" />
+    <Compile Include="Entities\Factories\EntityContractMembersNotImplementedConvention.cs" />
     <Compile Include="Entities\Factories\PropertyStrategies\LazyLoadObjectCollectionPropertyStrategy.cs" />
     <Compile Include="Entities\Factories\PropertyStrategies\LazyLoadObjectPropertyStrategy.cs" />
     <Compile Include="Entities\UnitOfWorkScopeOption.cs" />
@@ -152,8 +153,6 @@
     <Compile Include="Entities\Factories\ImplementIPartitionedObjectConvention.cs" />
     <Compile Include="Entities\Factories\PropertyStrategies\EmbeddedObjectCollectionPropertyStrategy.cs" />
     <Compile Include="Entities\Factories\PropertyStrategies\EmbeddedObjectPropertyStrategy.cs" />
-    <Compile Include="Entities\Factories\PropertyStrategies\__LazyObjectCollectionPropertyStrategy.cs" />
-    <Compile Include="Entities\Factories\PropertyStrategies\__LazyObjectPropertyStrategy.cs" />
     <Compile Include="Entities\Factories\PropertyStrategies\ScalarPropertyStrategy.cs" />
     <Compile Include="Entities\Impl\PartitionedRepository.cs" />
     <Compile Include="Entities\IPartitionedRepository.cs" />

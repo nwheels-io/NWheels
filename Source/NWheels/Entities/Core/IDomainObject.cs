@@ -17,7 +17,9 @@ namespace NWheels.Entities.Core
         void ImportValues(IEntityRepository entityRepo, object[] values);
         void InitializeValues(bool idManuallyAssigned);
         void SetLazyLoader(IPersistableObjectLazyLoader lazyLoader);
+        IEntityId GetId();
         EntityState State { get; }
+        object EntityId { get; }
         object TemporaryKey { get; set; }
     }
 }

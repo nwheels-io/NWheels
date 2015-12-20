@@ -16,6 +16,7 @@ namespace NWheels.DataObjects.Core.Factories
         private readonly bool _useDomainObjectAsBaseType;
         private readonly List<StrategyRule> _strategyRules;
         private readonly Dictionary<IPropertyMetadata, IPropertyImplementationStrategy> _map;
+        private ITypeMetadata _metaType;
         private HashSet<PropertyInfo> _baseProperties;
         private HashSet<string> _basePropertyNames;
 
@@ -75,6 +76,16 @@ namespace NWheels.DataObjects.Core.Factories
             }
 
             return key;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ITypeMetadata MetaType
+        {
+            get
+            {
+                return _metaType;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -156,14 +167,16 @@ namespace NWheels.DataObjects.Core.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void BuildMap(ITypeMetadataCache metadataCache, ITypeMetadata metaType)
+        private void BuildMap(ITypeMetadataCache metadataCache, ITypeMetadata metaType, bool includeBaseProperties)
         {
+            _metaType = metaType;
             _baseProperties = GetBaseContractProperties(metaType);
             _basePropertyNames = new HashSet<string>(_baseProperties.Select(p => p.Name));
 
             Func<IPropertyMetadata, bool> notImplementedByBaseEntity = p => !IsImplementedByBaseEntity(p.ContractPropertyInfo);
+            var propertySource = (includeBaseProperties ? metaType.Properties : metaType.Properties.Where(notImplementedByBaseEntity));
 
-            foreach ( var metaProperty in metaType.Properties.Where(notImplementedByBaseEntity) )
+            foreach ( var metaProperty in propertySource )
             {
                 var effectiveRule = _strategyRules.FirstOrDefault(rule => rule.Condition(metadataCache, metaType, metaProperty));
 
@@ -245,9 +258,9 @@ namespace NWheels.DataObjects.Core.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PropertyImplementationStrategyMap Build(ITypeMetadataCache metadataCache, ITypeMetadata metaType)
+            public PropertyImplementationStrategyMap Build(ITypeMetadataCache metadataCache, ITypeMetadata metaType, bool includeBaseProperties = false)
             {
-                _mapBeingBuilt.BuildMap(metadataCache, metaType);
+                _mapBeingBuilt.BuildMap(metadataCache, metaType, includeBaseProperties);
                 
                 var result = _mapBeingBuilt;
                 _mapBeingBuilt = null;

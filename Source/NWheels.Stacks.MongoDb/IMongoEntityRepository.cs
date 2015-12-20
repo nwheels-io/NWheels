@@ -8,14 +8,14 @@ namespace NWheels.Stacks.MongoDb
     {
         TEntityContract GetById<TEntityContract>(object id);
         IEnumerable<TEntityContract> GetByIdList<TEntityContract>(System.Collections.IEnumerable idList);
-        void CommitInsert(IEntityObject entity);
-        void CommitUpdate(IEntityObject entity);
-        void CommitSave(IEntityObject entity);
-        void CommitDelete(IEntityObject entity);
-        void CommitInsert(IEnumerable<IEntityObject> entities);
-        void CommitUpdate(IEnumerable<IEntityObject> entities);
-        void CommitSave(IEnumerable<IEntityObject> entities);
-        void CommitDelete(IEnumerable<IEntityObject> entities);
+        void CommitInsert(IDomainObject entity);
+        void CommitUpdate(IDomainObject entity);
+        void CommitSave(IDomainObject entity);
+        void CommitDelete(IDomainObject entity);
+        void CommitInsert(IEnumerable<IDomainObject> entities);
+        void CommitUpdate(IEnumerable<IDomainObject> entities);
+        void CommitSave(IEnumerable<IDomainObject> entities);
+        void CommitDelete(IEnumerable<IDomainObject> entities);
         MongoCollection GetMongoCollection();
         IEnumerable<TContract> TrackMongoCursor<TContract, TImpl>(MongoCursor<TImpl> cursor);
     }

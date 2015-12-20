@@ -180,27 +180,37 @@ namespace NWheels.Testing.Entities
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IApplicationDataRepository OwnerContext
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         TEntity IEntityRepository<TEntity>.New()
         {
-            return _domainObjectFactory.CreateDomainObjectInstance(_objectFactory.NewEntity<TEntity>());
+            return _domainObjectFactory.CreateDomainObjectInstance<TEntity>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         TConcreteEntity IEntityRepository<TEntity>.New<TConcreteEntity>() 
         {
-            return _domainObjectFactory.CreateDomainObjectInstance(_objectFactory.NewEntity<TConcreteEntity>());
+            return _domainObjectFactory.CreateDomainObjectInstance<TConcreteEntity>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         TEntity IEntityRepository<TEntity>.New(Type concreteContract)
         {
-            return _domainObjectFactory.CreateDomainObjectInstance((TEntity)_objectFactory.NewEntity(concreteContract));
+            return (TEntity)_domainObjectFactory.CreateDomainObjectInstance(concreteContract);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

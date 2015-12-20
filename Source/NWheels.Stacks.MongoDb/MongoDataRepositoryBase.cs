@@ -246,7 +246,7 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static class ThreadStaticRepositoryStack
+        internal static class ThreadStaticRepositoryStack
         {
             [ThreadStatic]
             private static Dictionary<Type, Stack<MongoDataRepositoryBase>> _s_stackByImplType;

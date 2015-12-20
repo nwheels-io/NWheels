@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Reflection;
 using Autofac;
 using Hapil;
 using Hapil.Operands;
@@ -24,6 +25,8 @@ namespace NWheels.DataObjects.Core.Factories
         ITypeMetadataCache MetadataCache { get; }
         ITypeMetadata MetaType { get; }
         IPropertyMetadata MetaProperty { get; }
+        PropertyInfo ImplementedContractProperty { get; }
+        PropertyInfo ImplementedStorageProperty { get; }
         bool HasDependencies { get; }
         bool HasNestedObjects { get; }
     }

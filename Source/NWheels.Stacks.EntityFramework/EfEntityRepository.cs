@@ -176,7 +176,7 @@ namespace NWheels.Stacks.EntityFramework
 
             if ( _ownerRepo.ObjectContext.TryGetObjectByKey(entityKey, out persistableObject) )
             {
-                var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)persistableObject);
+                var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>();
                 return domainObject;
             }
             else
@@ -260,14 +260,24 @@ namespace NWheels.Stacks.EntityFramework
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IApplicationDataRepository OwnerContext 
+        {
+            get
+            {
+                return _ownerRepo;
+            }
+        }
+
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TEntityContract New()
         {
-            var persistableObject = _ownerRepo.PersistableObjectFactory.NewEntity<TEntityContract>();
-            var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>(persistableObject);
+            //var persistableObject = _ownerRepo.PersistableObjectFactory.NewEntity<TEntityContract>();
+            var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>();
 
             return domainObject;
         }
@@ -276,8 +286,8 @@ namespace NWheels.Stacks.EntityFramework
 
         public TConcreteEntity New<TConcreteEntity>() where TConcreteEntity : class, TEntityContract
         {
-            var persistableObject = _ownerRepo.PersistableObjectFactory.NewEntity<TConcreteEntity>();
-            var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TConcreteEntity>(persistableObject);
+            //var persistableObject = _ownerRepo.PersistableObjectFactory.NewEntity<TConcreteEntity>();
+            var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TConcreteEntity>();
 
             return domainObject;
         }
@@ -286,8 +296,8 @@ namespace NWheels.Stacks.EntityFramework
 
         public TEntityContract New(Type concreteContract)
         {
-            var persistableObject = (TEntityContract)_ownerRepo.PersistableObjectFactory.NewEntity(concreteContract);
-            var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>(persistableObject);
+            //var persistableObject = (TEntityContract)_ownerRepo.PersistableObjectFactory.NewEntity(concreteContract);
+            var domainObject = _domainObjectFactory.CreateDomainObjectInstance<TEntityContract>();
 
             return domainObject;
         }
@@ -502,8 +512,9 @@ namespace NWheels.Stacks.EntityFramework
 
                 if ( entity != null )
                 {
-                    ObjectUtility.InjectDependenciesToObject(entity, _ownerRepo._ownerRepo.Components);
-                    return (TResult)(object)_ownerRepo._domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)entity);
+                    //ObjectUtility.InjectDependenciesToObject(entity, _ownerRepo._ownerRepo.Components);
+                    //TODO: revive this
+                    return (TResult)(object)_ownerRepo._domainObjectFactory.CreateDomainObjectInstance<TEntityContract>();
 
                 }
 
@@ -520,7 +531,8 @@ namespace NWheels.Stacks.EntityFramework
                 if ( entity != null )
                 {
                     ObjectUtility.InjectDependenciesToObject(entity, _ownerRepo._ownerRepo.Components);
-                    return _ownerRepo._domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)entity);
+                    //return _ownerRepo._domainObjectFactory.CreateDomainObjectInstance<TEntityContract>((TEntityContract)entity);
+                    return null; //TODO: revive this
                 }
 
                 return result;
@@ -687,7 +699,8 @@ namespace NWheels.Stacks.EntityFramework
 
                     ObjectUtility.InjectDependenciesToObject(currentEntityObject, _ownerUnitOfWork.Components);
 
-                    _current = (currentEntityObject is IObject ? _domainObjectFactory.CreateDomainObjectInstance(currentEntityObject) : currentEntityObject);
+                    //TODO: revive this
+                    _current = currentEntityObject;//(currentEntityObject is IObject ? _domainObjectFactory.CreateDomainObjectInstance() : currentEntityObject);
                     _hasCurrent = true;
                 }
                 else
@@ -764,7 +777,8 @@ namespace NWheels.Stacks.EntityFramework
 
                     ObjectUtility.InjectDependenciesToObject(currentEntityObject, _ownerUnitOfWork.Components);
 
-                    _current = (currentEntityObject is IObject ? _domainObjectFactory.CreateDomainObjectInstance(currentEntityObject) : currentEntityObject);
+                    //TODO: revive this
+                    _current = currentEntityObject;//(currentEntityObject is IObject ? _domainObjectFactory.CreateDomainObjectInstance(currentEntityObject) : currentEntityObject);
                 }
                 else
                 {

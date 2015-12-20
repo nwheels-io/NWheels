@@ -162,7 +162,7 @@ namespace NWheels.Stacks.ODataBreeze
                 var entityRepoProperty = contractPropertyPair.Value;
                 var entityMetadata = _metadataCache.GetTypeMetadata(entityContractType);
 
-                var domainObjectImplementationType = _domainObjectFactory.GetOrBuildDomainObjectType(entityContractType, _persistableObjectFactory.GetType());
+                var domainObjectImplementationType = _domainObjectFactory.GetOrBuildDomainObjectType(entityContractType);
                 var persistableObjectImplementationType = entityMetadata.GetImplementationBy(_persistableObjectFactory.GetType());
 
                 using ( TT.CreateScope<TT.TContract, TT.TImpl, TT.TImpl2>(entityContractType, domainObjectImplementationType, persistableObjectImplementationType) )

@@ -29,5 +29,12 @@ namespace NWheels.Utilities
         {
             return property.GetPropertyInfo().Name;
         }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static PropertyInfo GetPropertyInfo<TObject>(Expression<Func<TObject, object>> property)
+        {
+            return property.GetPropertyInfo();
+        }
     }
 }

@@ -43,9 +43,9 @@ namespace NWheels.Core
 
         public T NewDomainObject<T>() where T : class
         {
-            var entityObjectFactory = _components.Resolve<IEntityObjectFactory>();
-            var persistableObject = entityObjectFactory.NewEntity<T>();
-            return _components.Resolve<IDomainObjectFactory>().CreateDomainObjectInstance<T>(persistableObject);
+            //var entityObjectFactory = _components.Resolve<IEntityObjectFactory>();
+            //var persistableObject = entityObjectFactory.NewEntity<T>();
+            return _components.Resolve<IDomainObjectFactory>().CreateDomainObjectInstance<T>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

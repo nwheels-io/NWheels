@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
@@ -129,6 +130,20 @@ namespace NWheels.TypeModel.Core.Factories
         public virtual IPropertyMetadata MetaProperty
         {
             get { return _target.MetaProperty; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public PropertyInfo ImplementedContractProperty
+        {
+            get { return _target.ImplementedContractProperty; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public PropertyInfo ImplementedStorageProperty
+        {
+            get { return _target.ImplementedStorageProperty; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

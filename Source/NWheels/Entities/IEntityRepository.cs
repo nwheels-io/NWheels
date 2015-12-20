@@ -24,6 +24,7 @@ namespace NWheels.Entities
         Type ImplementationType { get; }
         Type PersistableObjectFactoryType { get; }
         ITypeMetadata Metadata { get; }
+        IApplicationDataRepository OwnerContext { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
