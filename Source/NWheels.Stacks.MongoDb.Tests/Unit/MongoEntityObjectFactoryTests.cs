@@ -38,11 +38,11 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
 
             //-- assert
 
-            Assert.That(attributeEntity, Is.InstanceOf<IR1.IAttribute>().And.InstanceOf<IEntityObject>().And.InstanceOf<IEntityPartId<ObjectId>>());
-            Assert.That(categoryEntity, Is.InstanceOf<IR1.ICategory>().And.InstanceOf<IEntityObject>().And.InstanceOf<IEntityPartId<ObjectId>>());
-            Assert.That(productEntity, Is.InstanceOf<IR1.IProduct>().And.InstanceOf<IEntityObject>().And.InstanceOf<IEntityPartId<ObjectId>>());
-            Assert.That(orderEntity, Is.InstanceOf<IR1.IOrder>().And.InstanceOf<IEntityObject>().And.InstanceOf<IEntityPartId<ObjectId>>());
-            Assert.That(orderLineEntity, Is.InstanceOf<IR1.IOrderLine>().And.InstanceOf<IEntityObject>().And.InstanceOf<IEntityPartId<ObjectId>>());
+            Assert.That(attributeEntity, Is.InstanceOf<IR1.IAttribute>().And.InstanceOf<IPersistableObject>().And.InstanceOf<IEntityPartId<ObjectId>>());
+            Assert.That(categoryEntity, Is.InstanceOf<IR1.ICategory>().And.InstanceOf<IPersistableObject>().And.InstanceOf<IEntityPartId<ObjectId>>());
+            Assert.That(productEntity, Is.InstanceOf<IR1.IProduct>().And.InstanceOf<IPersistableObject>().And.InstanceOf<IEntityPartId<ObjectId>>());
+            Assert.That(orderEntity, Is.InstanceOf<IR1.IOrder>().And.InstanceOf<IPersistableObject>().And.InstanceOf<IEntityPartId<ObjectId>>());
+            Assert.That(orderLineEntity, Is.InstanceOf<IR1.IOrderLine>().And.InstanceOf<IPersistableObject>().And.InstanceOf<IEntityPartId<ObjectId>>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

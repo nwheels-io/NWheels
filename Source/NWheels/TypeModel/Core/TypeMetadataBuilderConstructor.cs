@@ -117,9 +117,16 @@ namespace NWheels.DataObjects.Core
 
         private void CreateProperties()
         {
-            var propertyIndex = 0;
+            if ( _thisType.BaseType != null )
+            {
+                _thisType.Properties.AddRange(_thisType.BaseType.Properties);
+            }
 
-            foreach ( var propertyInfo in _allProperties )
+            var propertyIndex = _thisType.Properties.Count;
+            var missingProperties = new HashSet<PropertyInfo>(_allProperties);
+            missingProperties.ExceptWith(_thisType.Properties.Select(p => p.ContractPropertyInfo));
+
+            foreach ( var propertyInfo in missingProperties.OrderBy(p => p.Name) )
             {
                 _thisType.Properties.Add(new PropertyMetadataBuilder(_thisType, propertyInfo, propertyIndex++));
             }

@@ -258,6 +258,21 @@ namespace NWheels.Entities.Factories
         private void ImplementInitializeValues(ImplementationClassWriter<IDomainObject> writer)
         {
             writer.Method<bool>(x => x.InitializeValues).Implement((w, idManuallyAssigned) => {
+                if ( _context.MetaType.BaseType == null )
+                {
+                    _context.EntityStateField.Assign(w.Const(EntityState.NewPristine));
+                }
+                else
+                {
+                    var baseMethodInfo = writer.OwnerClass.BaseType.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
+                        .First(m => m.Name == "NWheels.Entities.Core.IDomainObject.InitializeValues");
+
+                    using ( TT.CreateScope<TT.TBase>(baseMethodInfo.DeclaringType) )
+                    {
+                        w.This<TT.TBase>().Void(baseMethodInfo, idManuallyAssigned);
+                    }
+                }
+
                 _context.PropertyMap.InvokeStrategies(
                     strategy => {
                         strategy.WriteInitialization(w, _componentsField, idManuallyAssigned);
@@ -270,6 +285,21 @@ namespace NWheels.Entities.Factories
         private void ImplementImportValues(ImplementationClassWriter<IDomainObject> writer)
         {
             writer.Method<IEntityRepository, object[]>(x => x.ImportValues).Implement((w, repo, values) => {
+                if ( _context.MetaType.BaseType == null )
+                {
+                    _context.EntityStateField.Assign(w.Const(EntityState.RetrievedPristine));
+                }
+                else
+                {
+                    var baseMethodInfo = writer.OwnerClass.BaseType.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
+                        .First(m => m.Name == "NWheels.Entities.Core.IDomainObject.ImportValues");
+
+                    using ( TT.CreateScope<TT.TBase>(baseMethodInfo.DeclaringType) )
+                    {
+                        w.This<TT.TBase>().Void(baseMethodInfo, repo, values);
+                    }
+                }
+
                 _context.PropertyMap.InvokeStrategies(
                     strategy => {
                         strategy.WriteImportStorageValue(w, repo, values);
@@ -281,16 +311,62 @@ namespace NWheels.Entities.Factories
 
         private void ImplementExportValues(ImplementationClassWriter<IDomainObject> writer)
         {
-            writer.Method<IEntityRepository, object[]>(x => x.ExportValues).Implement((w, repo) => {
-                var values = w.Local<object[]>();
-                values.Assign(w.NewArray<object>(w.Const(_context.MetaType.Properties.Count)));
-                
-                _context.PropertyMap.InvokeStrategies(
-                    strategy => {
+            /*
+            if ( _context.MetaType.BaseType != null )
+            {
+                var baseMethodInfo = writer.OwnerClass.BaseType.GetMethods(BindingFlags.Instance | BindingFlags.Public).First(m => m.Name == "OnExportValues");
+                writer.Function<IEntityRepository, object[], object[]>(baseMethodInfo).Implement(
+                    (w, repo, values) => {
+                        using ( TT.CreateScope<TT.TBase>(baseMethodInfo.DeclaringType) )
+                        {
+                            w.This<TT.TBase>().Func<object[]>(baseMethodInfo, repo, values);
+                        }
+                        _context.PropertyMap.InvokeStrategies(strategy => {
+                            strategy.WriteExportStorageValue(w, repo, values);
+                        });
+                    });
+            }
+            else
+            {
+                writer.NewVirtualFunction<IEntityRepository, object[], object[]>("OnExportValues", "repo", "values").Implement(
+                    (w, repo, values) => {
+                        values.Assign(w.NewArray<object>(length: w.Const(_context.MetaType.Properties.Count)));
+                        _context.PropertyMap.InvokeStrategies(strategy => {
+                            strategy.WriteExportStorageValue(w, repo, values);
+                        });
+                        w.Return(values);
+                    });
+            }
+            */
+            writer.NewVirtualFunction<IEntityRepository, object[], object[]>("OnExportValues", "repo", "values").Implement(
+                (w, repo, values) => {
+                    w.If(values.IsNull()).Then(() => {
+                        values.Assign(w.NewArray<object>(length: w.Const(_context.MetaType.Properties.Count)));
+                    });
+
+                    if ( _context.MetaType.BaseType != null )
+                    {
+                        var baseMethodInfo = writer.OwnerClass.BaseType.GetMethods(BindingFlags.Instance | BindingFlags.Public).First(m => m.Name == "OnExportValues");
+
+                        using ( TT.CreateScope<TT.TBase>(baseMethodInfo.DeclaringType) )
+                        {
+                            w.This<TT.TBase>().Func<object[]>(baseMethodInfo, repo, values);
+                        }
+                    }
+
+                    _context.PropertyMap.InvokeStrategies(strategy => {
                         strategy.WriteExportStorageValue(w, repo, values);
                     });
 
-                w.Return(values);
+                    w.Return(values);
+                });
+                
+            writer.Method<IEntityRepository, object[]>(x => x.ExportValues).Implement((w, repo) => {
+                var onExportValuesMethod = w.OwnerClass.GetMemberByName<MethodMember>("OnExportValues").MethodBuilder;
+                using ( TT.CreateScope<TT.TBase>(w.OwnerClass.TypeBuilder) )
+                {
+                    w.Return(w.This<TT.TBase>().Func<object[]>(onExportValuesMethod, repo, w.Const<object[]>(null)));
+                }
             });
         }
 
