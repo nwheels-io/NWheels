@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Hapil;
+using NWheels.DataObjects.Core;
+using NWheels.TypeModel;
 
 namespace NWheels.DataObjects
 {
@@ -72,6 +74,16 @@ namespace NWheels.DataObjects
             PropertyAccess? ISemanticDataType.GetDefaultPropertyAccess()
             {
                 return null;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public WellKnownSemanticType WellKnownSemantic
+            {
+                get
+                {
+                    return WellKnownSemanticType.None;
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -152,6 +164,152 @@ namespace NWheels.DataObjects
                 get
                 {
                     return null;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TimeUnits? TimeUnits
+            {
+                get
+                {
+                    return null;
+                }
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public abstract class SemanticDataTypeBuilder : ISemanticDataType
+        {
+            protected SemanticDataTypeBuilder(string name, Type clrType)
+            {
+                this.Name = name;
+                this.ClrType = clrType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of ISemanticDataType
+
+            public DataType GetDataTypeAnnotation()
+            {
+                return DataTypeAnnotation;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public abstract IPropertyValidationMetadata GetDefaultValidation();
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PropertyAccess? GetDefaultPropertyAccess()
+            {
+                return DefaultPropertyAccess;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string Name { get; private set; }
+            public Type ClrType { get; private set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public WellKnownSemanticType WellKnownSemantic { get; set; }
+            public DataType DataTypeAnnotation { get; set; }
+            public PropertyAccess? DefaultPropertyAccess { get; set; }
+            public string DefaultDisplayName { get; set; }
+            public string DefaultDisplayFormat { get; set; }
+            public bool? DefaultSortAscending { get; set; }
+            public TimeUnits? TimeUnits { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public abstract PropertyValidationMetadataBuilder DefaultValidation { get; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            object ISemanticDataType.DefaultValue
+            {
+                get
+                {
+                    return null;
+                }
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static SemanticDataTypeBuilder Create(string name, Type dataType)
+            {
+                return (SemanticDataTypeBuilder)Activator.CreateInstance(typeof(SemanticDataTypeBuilder<>).MakeGenericType(dataType), name);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class SemanticDataTypeBuilder<T> : SemanticDataTypeBuilder, ISemanticDataType, ISemanticDataType<T>
+        {
+            private PropertyValidationMetadataBuilder _defaultValidation = null;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public SemanticDataTypeBuilder(string name) 
+                : base(name, typeof(T))
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of ISemanticDataType<T>
+
+            public bool IsValid(T value)
+            {
+                if ( CustomValidator != null )
+                {
+                    return CustomValidator(value);
+                }
+
+                return true;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override IPropertyValidationMetadata GetDefaultValidation()
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override PropertyValidationMetadataBuilder DefaultValidation
+            {
+                get
+                {
+                    if ( _defaultValidation == null )
+                    {
+                        _defaultValidation = new PropertyValidationMetadataBuilder();
+                    }
+
+                    return _defaultValidation;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public T DefaultValue { get; set; }
+            public Func<T, bool> CustomValidator { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            object ISemanticDataType.DefaultValue
+            {
+                get
+                {
+                    return DefaultValue;
                 }
             }
 

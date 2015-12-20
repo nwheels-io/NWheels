@@ -289,7 +289,7 @@ namespace NWheels.Domains.Security
     [EntityContract]
     public interface IProfilePhotoEntity
     {
-        [PropertyContract.Semantic.Upload]
+        [PropertyContract.Semantic.ProfilePhoto]
         byte[] ImageContents { get; set; }
         string ImageType { get; set; }
         int PixelWidth { get; set; }

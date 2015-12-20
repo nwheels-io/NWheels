@@ -310,6 +310,7 @@
     <Compile Include="Processing\Messages\MessageIdHeader.cs" />
     <Compile Include="TypeModel\Serialization\IObjectSerializerConfigContainer.cs" />
     <Compile Include="TypeModel\TimeUnit.cs" />
+    <Compile Include="TypeModel\WellKnownSemanticType.cs" />
     <Compile Include="UI\AuthorizationContract.cs" />
     <Compile Include="UI\ApplicationEntityService.cs" />
     <Compile Include="UI\Core\IJsonSerializationExtension.cs" />

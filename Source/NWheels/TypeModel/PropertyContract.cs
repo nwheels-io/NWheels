@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Xml.Linq;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.StorageTypes;
 using NWheels.TypeModel;
@@ -118,6 +119,8 @@ namespace NWheels.DataObjects
             public object Value { get; private set; }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
         public class AutoGenerateAttribute : PropertyContractAttribute
         {
             public AutoGenerateAttribute(Type valueGeneratorType)
@@ -129,6 +132,8 @@ namespace NWheels.DataObjects
 
             public Type ValueGeneratorType { get; private set; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class PartitionAttribute : PropertyContractAttribute
         {
@@ -146,57 +151,204 @@ namespace NWheels.DataObjects
             public string PartitionNameProperty { get; set; }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static class Semantic
         {
-            public class DataTypeAttribute : PropertyContractAttribute
+            public abstract class SemanticAttributeBase : PropertyContractAttribute
             {
-                public DataTypeAttribute(Type type)
+                private readonly SemanticType.SemanticDataTypeBuilder _semanticDataType;
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                protected SemanticAttributeBase(
+                    Type dataType,
+                    WellKnownSemanticType wellKnownSemantic,
+                    Action<SemanticType.SemanticDataTypeBuilder> configuration = null)
+                    : this(wellKnownSemantic.ToString(), dataType, wellKnownSemantic, configuration)
                 {
-                    this.Type = type;
                 }
-                public Type Type { get; private set; }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                protected SemanticAttributeBase(
+                    string name,
+                    Type dataType,
+                    WellKnownSemanticType wellKnownSemantic = WellKnownSemanticType.None, 
+                    Action<SemanticType.SemanticDataTypeBuilder> configuration = null)
+                {
+                    _semanticDataType = SemanticType.SemanticDataTypeBuilder.Create(name, dataType);
+                    _semanticDataType.WellKnownSemantic = wellKnownSemantic;
+
+                    if ( configuration != null )
+                    {
+                        configuration(_semanticDataType);
+                    }
+                }
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                #region Overrides of PropertyContractAttribute
+
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+                {
+                    property.SemanticType = _semanticDataType;
+                    property.Validation.MergeWith(_semanticDataType.DefaultValidation);
+                }
+
+                #endregion
             }
 
-            public class InheritorOfAttribute : DataTypeAttribute, IPropertyContractAttribute
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class InheritorOfAttribute : SemanticAttributeBase
             {
-                public InheritorOfAttribute(Type requiredBase) :
-                    base(typeof (SemanticType.DefaultOf<Type>))
+                public InheritorOfAttribute(Type requiredBase) : base("InheritorOf", typeof(Type), WellKnownSemanticType.None)
                 {
                     this.RequiredBase = requiredBase;
                 }
                 public Type RequiredBase { get; private set; }
-
                 public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
                 {
-                    property.SafeGetRelationalMapping().StorageType = cache.GetStorageTypeInstance(typeof(ClrTypeStorageType), property.ClrType);
+                    property.Validation.AncestorClrType = RequiredBase;
                 }
             }
 
-            public class DateAttribute : DataTypeAttribute
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class CreaditCardAttribute : SemanticAttributeBase
             {
-                public DateAttribute(TimeUnits units = TimeUnits.HourMinuteSecond)
-                    : base(typeof(SemanticType.DefaultOf<DateTime>))
+                public CreaditCardAttribute()
+                    : base(typeof(DateTime), WellKnownSemanticType.CreditCard)
                 {
-                    
                 }
             }
 
-            public class TimeAttribute : DataTypeAttribute { public TimeAttribute() : base(typeof(SemanticType.DefaultOf<TimeSpan>)) { } }
-            
-            public class DurationAttribute : DataTypeAttribute {
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class CultureAttribute : SemanticAttributeBase
+            {
+                public CultureAttribute()
+                    : base(typeof(string), WellKnownSemanticType.Culture)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class CurrencyAttribute : SemanticAttributeBase
+            {
+                public CurrencyAttribute()
+                    : base(typeof(decimal), WellKnownSemanticType.Currency)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class DateAttribute : SemanticAttributeBase
+            {
+                public DateAttribute(TimeUnits units = TimeUnits.YearMonthDay) 
+                    : base(typeof(DateTime), WellKnownSemanticType.Date, sem => sem.TimeUnits = units)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class DurationAttribute : SemanticAttributeBase
+            {
                 public DurationAttribute(TimeUnits units = TimeUnits.HourMinuteSecond)
-                    : base(typeof(SemanticType.DefaultOf<TimeSpan>))
+                    : base(typeof(TimeSpan), WellKnownSemanticType.Duration, sem => sem.TimeUnits = units)
                 {
-                }
-                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
-                {
-                    //TODO: implement apply
                 }
             }
 
-            public class PasswordAttribute : DataTypeAttribute
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class EmailAddressAttribute : SemanticAttributeBase
             {
-                public PasswordAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { }
+                public EmailAddressAttribute()
+                    : base(typeof(string), WellKnownSemanticType.EmailAddress)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class IPAddressAttribute : SemanticAttributeBase
+            {
+                public IPAddressAttribute()
+                    : base(typeof(string), WellKnownSemanticType.IPAddress)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class ImageUploadAttribute : SemanticAttributeBase
+            {
+                public ImageUploadAttribute()
+                    : base(typeof(byte[]), WellKnownSemanticType.ImageUpload)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class ImageUrlAttribute : SemanticAttributeBase
+            {
+                public ImageUrlAttribute()
+                    : base(typeof(string), WellKnownSemanticType.ImageUrl)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class JsonAttribute : SemanticAttributeBase
+            {
+                public JsonAttribute()
+                    : base(typeof(string), WellKnownSemanticType.Json)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class LoginNameAttribute : SemanticAttributeBase
+            {
+                public LoginNameAttribute()
+                    : base(typeof(string), WellKnownSemanticType.LoginName, sem => {
+                        sem.DefaultValidation.IsUnique = true;
+                        sem.DefaultValidation.MinLength = 5;
+                        sem.DefaultValidation.MaxLength = 20;
+                    })
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class LocalFilePathAttribute : SemanticAttributeBase
+            {
+                public LocalFilePathAttribute()
+                    : base(typeof(string), WellKnownSemanticType.LocalFilePath)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class PasswordAttribute : SemanticAttributeBase
+            {
+                public PasswordAttribute()
+                    : base(typeof(string), WellKnownSemanticType.Password, sem => { 
+                        sem.DefaultValidation.MinLength = 5;
+                        sem.DefaultValidation.MaxLength = 20;
+                    })
+                {
+                }
                 public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
                 {
                     base.ApplyTo(property, cache);
@@ -204,24 +356,77 @@ namespace NWheels.DataObjects
                 }
             }
 
-            public class PhoneNumberAttribute : DataTypeAttribute { public PhoneNumberAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class CurrencyAttribute : DataTypeAttribute { public CurrencyAttribute() : base(typeof(SemanticType.DefaultOf<decimal>)) { } }
-            public class CultureAttribute : DataTypeAttribute { public CultureAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class MultilineTextAttribute : DataTypeAttribute { public MultilineTextAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class EmailAddressAttribute : DataTypeAttribute { public EmailAddressAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class LoginNameAttribute : DataTypeAttribute { public LoginNameAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class LocalFilePathAttribute : DataTypeAttribute { public LocalFilePathAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class UrlAttribute : DataTypeAttribute { public UrlAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class IPAddressAttribute : DataTypeAttribute { public IPAddressAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class ImageUrlAttribute : DataTypeAttribute { public ImageUrlAttribute() : base(typeof(SemanticType.DefaultOf<byte[]>)) { } }
-            public class CreditCardAttribute : DataTypeAttribute { public CreditCardAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class PostalCodeAttribute : DataTypeAttribute { public PostalCodeAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class UploadAttribute : DataTypeAttribute { public UploadAttribute() : base(typeof(SemanticType.DefaultOf<byte[]>)) { } }
-            public class HtmlAttribute : DataTypeAttribute { public HtmlAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class XmlAttribute : DataTypeAttribute { public XmlAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class JsonAttribute : DataTypeAttribute { public JsonAttribute() : base(typeof(SemanticType.DefaultOf<string>)) { } }
-            public class PercentageAttribute : DataTypeAttribute { public PercentageAttribute() : base(typeof(SemanticType.DefaultOf<decimal>)) { } }
-            public class OrderByAttribute : DataTypeAttribute { public OrderByAttribute() : base(typeof(SemanticType.DefaultOf<int>)) { } }
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class PercentageAttribute : SemanticAttributeBase
+            {
+                public PercentageAttribute()
+                    : base(typeof(decimal), WellKnownSemanticType.Percentage)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class PhoneNumberAttribute : SemanticAttributeBase
+            {
+                public PhoneNumberAttribute()
+                    : base(typeof(string), WellKnownSemanticType.PhoneNumber)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class PostalCodeAttribute : SemanticAttributeBase
+            {
+                public PostalCodeAttribute()
+                    : base(typeof(string), WellKnownSemanticType.PostalCode)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class ProfilePhotoAttribute : SemanticAttributeBase
+            {
+                public ProfilePhotoAttribute()
+                    : base(typeof(byte[]), WellKnownSemanticType.ProfilePhoto)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class TimeAttribute : SemanticAttributeBase
+            {
+                public TimeAttribute(TimeUnits units = TimeUnits.HourMinuteSecond)
+                    : base(typeof(DateTime), WellKnownSemanticType.Time, sem => sem.TimeUnits = units)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class UrlAttribute : SemanticAttributeBase
+            {
+                public UrlAttribute()
+                    : base(typeof(string), WellKnownSemanticType.Url)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class XmlAttribute : SemanticAttributeBase
+            {
+                public XmlAttribute()
+                    : base(typeof(string), WellKnownSemanticType.Xml)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public class DisplayNameAttribute : PropertyContractAttribute
             {
@@ -230,13 +435,27 @@ namespace NWheels.DataObjects
                     property.DeclaringContract.DefaultDisplayProperties.Add(property);
                 }
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class OrderByAttribute : PropertyContractAttribute
+            {
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+                {
+                    property.DeclaringContract.DefaultSortProperties.Add(property);
+                }
+            }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static class Aggregation
         {
             public class Dimension : PropertyContractAttribute { }
             public class Measure : PropertyContractAttribute { }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static class Storage
         {

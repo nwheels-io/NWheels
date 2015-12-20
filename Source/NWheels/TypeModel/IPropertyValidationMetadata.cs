@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace NWheels.DataObjects
 {
@@ -14,5 +15,6 @@ namespace NWheels.DataObjects
         bool MinValueExclusive { get; }
         bool MaxValueExclusive { get; }
         string RegularExpression { get; }
+        Type AncestorClrType { get; }
     }
 }

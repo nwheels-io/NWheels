@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Extensions;
+using NWheels.TypeModel;
 
 namespace NWheels.UI.Uidl
 {
@@ -19,11 +20,12 @@ namespace NWheels.UI.Uidl
             this.Kind = metadata.Kind;
             this.Role = metadata.Role;
             this.DataType = metadata.ClrType.Name;
-            this.SemanticType = (metadata.SemanticType != null ? metadata.SemanticType.Name : null);
+            this.Semantic = (metadata.SemanticType != null ? metadata.SemanticType.WellKnownSemantic : WellKnownSemanticType.None);
             this.AccessFlags = metadata.Access.ToString();
             this.IsSensitive = metadata.IsSensitive;
             this.IsCalculated = metadata.IsCalculated;
             this.Relation = metadata.Relation != null ? new MetaRelation(metadata.Relation) : null;
+            this.Semantic = (metadata.SemanticType != null ? metadata.SemanticType.WellKnownSemantic : WellKnownSemanticType.None);
             this.Validation = metadata.Validation != null ? new MetaValidation(metadata.Validation) : null;
             this.DefaultValue = metadata.DefaultValue;
             this.DefaultDisplayName = metadata.DefaultDisplayName;
@@ -47,7 +49,7 @@ namespace NWheels.UI.Uidl
         [DataMember]
         public string DataType { get; set; }
         [DataMember]
-        public string SemanticType { get; set; }
+        public WellKnownSemanticType Semantic { get; set; }
         [DataMember]
         public string AccessFlags { get; set; }
         [DataMember]

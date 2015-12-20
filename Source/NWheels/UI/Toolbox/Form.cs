@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Hapil;
 using NWheels.DataObjects;
 using NWheels.Extensions;
+using NWheels.TypeModel;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
@@ -302,6 +303,8 @@ namespace NWheels.UI.Toolbox
         [DataMember, ManuallyAssigned]
         public WidgetUidlNode NestedWidget { get; set; }
         [DataMember, ManuallyAssigned]
+        public WellKnownSemanticType Semantic { get; set; }
+        [DataMember, ManuallyAssigned]
         public IPropertyValidationMetadata Validation { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -318,6 +321,7 @@ namespace NWheels.UI.Toolbox
 
             this.MetaProperty = metaType.GetPropertyByName(this.PropertyName);
             this.Validation = this.MetaProperty.Validation;
+            this.Semantic = (this.MetaProperty.SemanticType != null ? this.MetaProperty.SemanticType.WellKnownSemantic : WellKnownSemanticType.None);
 
             if ( shouldSetDefaults )
             {
