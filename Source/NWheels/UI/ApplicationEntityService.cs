@@ -202,10 +202,10 @@ namespace NWheels.UI
                 }
 
                 context.CommitChanges();
+                
+                var resultJson = (domainObject != null ? JsonConvert.SerializeObject(domainObject, _serializerSettings) : null);
+                return resultJson;
             }
-
-            var resultJson = (domainObject != null ? JsonConvert.SerializeObject(domainObject, _serializerSettings) : null);
-            return resultJson;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
