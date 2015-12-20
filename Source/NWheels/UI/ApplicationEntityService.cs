@@ -848,6 +848,8 @@ namespace NWheels.UI
                     var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
                     IQueryable<TEntity> dbQuery = (IQueryable<TEntity>)query ?? repository;
 
+                    dbQuery = ((DataRepositoryBase)(object)context).AuthorizeQuery(dbQuery);
+
                     dbQuery = HandleFilter(options, dbQuery);
 
                     if ( options.NeedCountOperation )

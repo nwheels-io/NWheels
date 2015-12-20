@@ -39,7 +39,11 @@ namespace NWheels.Domains.Security
         {
             IApplicationDataRepository authenticationContext;
             IQueryable<IUserAccountEntity> userAccountQuery;
-            OpenAuthenticationContext(out authenticationContext, out userAccountQuery);
+            
+            using ( _sessionManager.JoinGlobalSystem() )
+            {
+                OpenAuthenticationContext(out authenticationContext, out userAccountQuery);
+            }
 
             using ( authenticationContext )
             {

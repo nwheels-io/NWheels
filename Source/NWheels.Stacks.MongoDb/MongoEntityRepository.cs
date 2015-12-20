@@ -78,7 +78,7 @@ namespace NWheels.Stacks.MongoDb
                     underlyingQuery = underlyingQuery.OfType<TEntityImpl>();
                 }
 
-            	var actualEnumerator = _ownerRepo.AuthorizeQuery(underlyingQuery).GetEnumerator();
+            	var actualEnumerator = underlyingQuery. /*_ownerRepo.AuthorizeQuery(underlyingQuery).*/GetEnumerator();
                 var transformingEnumerator = new DelegatingTransformingEnumerator<TEntityImpl, TEntityContract>(
                     actualEnumerator,
                     entity => InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>(entity));

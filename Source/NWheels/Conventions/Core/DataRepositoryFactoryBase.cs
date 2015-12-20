@@ -300,7 +300,18 @@ namespace NWheels.Conventions.Core
             {
                 if ( entity.RepositoryProperty != null )
                 {
-                    writer.Property(entity.RepositoryProperty).Implement(p => p.Get(w => w.Return(p.BackingField)));
+                    writer.Property(entity.RepositoryProperty).Implement(p => p.Get(
+                        w => {
+                            using ( TT.CreateScope<TT.TContract>(entity.ContractType) )
+                            {
+                                w.Return(
+                                    w.This<DataRepositoryBase>().Func<IQueryable<TT.TContract>, IQueryable<TT.TContract>>(x => x.AuthorizeQuery, 
+                                        p.BackingField.CastTo<IQueryable<TT.TContract>>()
+                                    )
+                                    .CastTo<TT.TProperty>()
+                                );
+                            }
+                        }));
                 }
 
                 Initializers.Add(cw => {
@@ -330,7 +341,15 @@ namespace NWheels.Conventions.Core
                         "Entity declared with IPartitionedRepository<,> must have a partition property - use [PropertyContract.Partition] attribute.");
                 }
 
-                writer.Property(entity.PartitionedRepositoryProperty).Implement(p => p.Get(w => w.Return(p.BackingField)));
+                writer.Property(entity.PartitionedRepositoryProperty).Implement(p => p.Get(
+                    w => {
+                        w.Return(
+                            w.This<DataRepositoryBase>().Func<IQueryable<TT.TContract>, IQueryable<TT.TContract>>(x => x.AuthorizeQuery, 
+                                p.BackingField.CastTo<IQueryable<TT.TContract>>()
+                            )
+                            .CastTo<TT.TProperty>()
+                        );
+                    }));
 
                 Initializers.Add(cw => {
                     using ( TT.CreateScope<TT.TContract, TT.TImpl, TT.TIndex1>(
