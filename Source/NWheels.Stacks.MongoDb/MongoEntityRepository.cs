@@ -138,19 +138,21 @@ namespace NWheels.Stacks.MongoDb
             get
             {
                 _ownerRepo.ValidateOperationalState();
-
-                if ( _queryProvider == null )
-                {
-                    _queryProvider = new InterceptingQueryProvider(this);
-                }
-
-                return _queryProvider;
+                return SafeGetQueryProvider();
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region IEntityRepository members
+
+        public IQueryable<TEntityContract> AsQueryable()
+        {
+            var authorizedQuery = _ownerRepo.AuthorizeQuery<TEntityContract>(this);
+            return authorizedQuery;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         object IEntityRepository.New()
         {
@@ -680,6 +682,18 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private IQueryProvider SafeGetQueryProvider()
+        {
+            if ( _queryProvider == null )
+            {
+                _queryProvider = new InterceptingQueryProvider(this);
+            }
+
+            return _queryProvider;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void LogMongoDbErrors(Exception exception, ILogActivity activity)
         {
             var bulkException = (exception as MongoBulkWriteException);
@@ -790,9 +804,9 @@ namespace NWheels.Stacks.MongoDb
 
             public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
             {
+                //var authorizedQuery = _ownerRepo._ownerRepo.AuthorizeQuery<TElement>(query);
                 var specializedExpression = _expressionSpecializer.Specialize(expression);
                 var query = _actualQueryProvider.CreateQuery<TElement>(specializedExpression);
-                var authorizedQuery = _ownerRepo._ownerRepo.AuthorizeQuery<TElement>(query);
                 return new InterceptingQuery<TElement>(_ownerRepo, query /*authorizedQuery*/, _ownerRepo._logger);
             }
 
@@ -860,6 +874,10 @@ namespace NWheels.Stacks.MongoDb
 
             #endregion
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1195,5 +1213,44 @@ namespace NWheels.Stacks.MongoDb
         }
 
         #endif
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    class AuthorizationQueryable<T> : IQueryable<T>
+    {
+        private readonly Expression _expression;
+        private readonly IQueryable<T> _underlyingQueryable;
+
+        public AuthorizationQueryable(Expression expression, IQueryable<T> underlyingQueryable)
+        {
+            _underlyingQueryable = underlyingQueryable;
+            _expression = expression;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _underlyingQueryable.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        public Type ElementType
+        {
+            get { return typeof(T); }
+        }
+
+        public Expression Expression
+        {
+            get { return _expression; }
+        }
+
+        public IQueryProvider Provider
+        {
+            get { return _underlyingQueryable.Provider; }
+        }
     }
 }

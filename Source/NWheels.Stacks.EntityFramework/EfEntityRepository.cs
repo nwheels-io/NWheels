@@ -105,6 +105,13 @@ namespace NWheels.Stacks.EntityFramework
 
         #region Implementation of IEntityRepository
 
+        public IQueryable<TEntityContract> AsQueryable()
+        {
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         object IEntityRepository.New()
         {
             return this.New();

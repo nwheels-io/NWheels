@@ -36,6 +36,13 @@ namespace NWheels.Testing.Entities
 
         #region Implementation of IEntityRepository
 
+        public IQueryable<TEntity> AsQueryable()
+        {
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         object IEntityRepository.New()
         {
             return ((IEntityRepository<TEntity>)this).New();

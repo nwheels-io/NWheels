@@ -30,6 +30,7 @@ namespace NWheels.Entities
 
     public interface IEntityRepository<TEntity> : IQueryable<TEntity>
     {
+        IQueryable<TEntity> AsQueryable();
         TEntity New();
         TEntity New(Type concreteContract);
         TEntity TryGetById(IEntityId id);
