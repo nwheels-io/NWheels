@@ -81,7 +81,7 @@ namespace NWheels.Domains.Security
             var userAccountsContext = _framework.NewUnitOfWork<IUserAccountDataRepository>();
 
             context = userAccountsContext;
-            userAccounts = userAccountsContext.AllUsers;
+            userAccounts = userAccountsContext.AllUsers.AsQueryable();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

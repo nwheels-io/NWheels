@@ -88,7 +88,7 @@ namespace NWheels.Entities.Core
         {
             using ( var data = _framework.NewUnitOfWork<IHiloDataRepository>() )
             {
-                var hilo = data.Hilo.Single();
+                var hilo = data.Hilo.AsQueryable().Single();
 
                 _next = hilo.Hi * _hiBase;
                 _max = _next + _hiBase;

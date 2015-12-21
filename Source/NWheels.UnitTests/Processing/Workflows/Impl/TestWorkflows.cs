@@ -74,8 +74,8 @@ namespace NWheels.UnitTests.Processing.Workflows.Impl
                     OrderItemState, 
                     OrderItemTrigger, 
                     OrderItemWorkflow, 
-                    IInstanceRepository, 
-                    IOrderItemEntity>(repo => repo.OrderItems);
+                    IInstanceRepository,
+                    IOrderItemEntity>(repo => repo.OrderItems.AsQueryable());
                 builder.NWheelsFeatures().Logging().RegisterLogger<IOrderItemLogger>();
             });
 

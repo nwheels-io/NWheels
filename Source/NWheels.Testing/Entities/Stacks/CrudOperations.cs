@@ -110,10 +110,10 @@ namespace NWheels.Testing.Entities.Stacks
             {
                 using ( repo )
                 {
-                    var categories = repo.Categories.OrderBy(c => c.Name).ToArray();
+                    var categories = repo.Categories.AsQueryable().OrderBy(c => c.Name).ToArray();
                     Assert.That(categories.Select(c => c.Name), Is.EqualTo(new[] { "CAT1", "CAT2", "CAT3" }));
 
-                    var attributes = repo.Attributes.OrderBy(a => a.Name).ToArray();
+                    var attributes = repo.Attributes.AsQueryable().OrderBy(a => a.Name).ToArray();
                     Assert.That(attributes.Select(a => a.Name), Is.EqualTo(new[] { "Color", "Size" }));
 
                     var product1 = repo.Products.New();
@@ -197,7 +197,7 @@ namespace NWheels.Testing.Entities.Stacks
             {
                 using ( repo )
                 {
-                    var size = repo.Attributes.Single(a => a.Name == "Size");
+                    var size = repo.Attributes.AsQueryable().Single(a => a.Name == "Size");
 
                     var sizeDefaultValue = (IR1.IClothingSizeAttributeValue)size.DefaultValue;
                     Assert.That(sizeDefaultValue.Value, Is.EqualTo("M"));
@@ -219,7 +219,7 @@ namespace NWheels.Testing.Entities.Stacks
                     Assert.That(sizeLarge.DisplayOrder, Is.EqualTo(3));
                     Assert.That(sizeLarge.Standard, Is.EqualTo("US"));
 
-                    var color = repo.Attributes.Single(a => a.Name == "Color");
+                    var color = repo.Attributes.AsQueryable().Single(a => a.Name == "Color");
 
                     var colorDefaultValue = (IR1.IColorAttributeValue)color.DefaultValue;
                     Assert.That(colorDefaultValue.Value, Is.EqualTo("White"));
@@ -315,10 +315,10 @@ namespace NWheels.Testing.Entities.Stacks
             {
                 using ( repo )
                 {
-                    var attributes = repo.Attributes.OrderBy(a => a.Name).ToDictionary(a => a.Name);
+                    var attributes = repo.Attributes.AsQueryable().OrderBy(a => a.Name).ToDictionary(a => a.Name);
 
-                    var product1 = repo.Products.Single(p => p.Name == "ABC");
-                    var product2 = repo.Products.Single(p => p.Name == "DEF");
+                    var product1 = repo.Products.AsQueryable().Single(p => p.Name == "ABC");
+                    var product2 = repo.Products.AsQueryable().Single(p => p.Name == "DEF");
 
                     var order = repo.Orders.New();
                     order.OrderNo = "ORD001";
@@ -337,7 +337,7 @@ namespace NWheels.Testing.Entities.Stacks
                     repo.OrdersLines.Insert(orderLine1);
                     repo.OrdersLines.Insert(orderLine2);
 
-                    order.Customer = repo.Customers.First(c => c.FullName == "John Smith");
+                    order.Customer = repo.Customers.AsQueryable().First(c => c.FullName == "John Smith");
 
                     repo.Orders.Insert(order);
                     repo.CommitChanges();
@@ -350,8 +350,8 @@ namespace NWheels.Testing.Entities.Stacks
             {
                 using ( repo )
                 {
-                    var product1 = repo.Products.Single(p => p.Name == "ABC");
-                    var product2 = repo.Products.Single(p => p.Name == "DEF");
+                    var product1 = repo.Products.AsQueryable().Single(p => p.Name == "ABC");
+                    var product2 = repo.Products.AsQueryable().Single(p => p.Name == "DEF");
 
                     var order = repo.Orders.New();
                     order.OrderNo = "ORD002";
@@ -366,7 +366,7 @@ namespace NWheels.Testing.Entities.Stacks
                     repo.OrdersLines.Insert(orderLine1);
                     repo.OrdersLines.Insert(orderLine2);
 
-                    order.Customer = repo.Customers.First(c => c.FullName == "Maria Garcia");
+                    order.Customer = repo.Customers.AsQueryable().First(c => c.FullName == "Maria Garcia");
 
                     repo.Orders.Insert(order);
                     repo.CommitChanges();
@@ -379,7 +379,7 @@ namespace NWheels.Testing.Entities.Stacks
             {
                 using ( repo )
                 {
-                    var product2 = repo.Products.Single(p => p.Name == "DEF");
+                    var product2 = repo.Products.AsQueryable().Single(p => p.Name == "DEF");
 
                     var order = repo.Orders.New();
                     order.OrderNo = "ORD003";
@@ -401,7 +401,7 @@ namespace NWheels.Testing.Entities.Stacks
 
                     repo.OrdersLines.Insert(orderLine1);
 
-                    order.Customer = repo.Customers.First(c => c.FullName == "John Smith");
+                    order.Customer = repo.Customers.AsQueryable().First(c => c.FullName == "John Smith");
 
                     repo.Orders.Insert(order);
                     repo.CommitChanges();
@@ -414,11 +414,11 @@ namespace NWheels.Testing.Entities.Stacks
             {
                 using ( repo )
                 {
-                    var order1 = repo.Orders.Single(o => o.OrderNo == "ORD001");
+                    var order1 = repo.Orders.AsQueryable().Single(o => o.OrderNo == "ORD001");
                     order1.Status = Interfaces.Repository1.OrderStatus.ProductsShipped;
                     repo.Orders.Update(order1);
 
-                    var order2 = repo.Orders.Single(o => o.OrderNo == "ORD002");
+                    var order2 = repo.Orders.AsQueryable().Single(o => o.OrderNo == "ORD002");
                     order2.Status = Interfaces.Repository1.OrderStatus.PaymentReceived;
                     repo.Orders.Update(order2);
 
@@ -442,7 +442,7 @@ namespace NWheels.Testing.Entities.Stacks
                     order2 = repo.Orders.Include(o => o.OrderLines.Select(ol => ol.Product)).Single(o => o.OrderNo == "ORD002");
                     order3 = repo.Orders.Include(o => o.OrderLines.Select(ol => ol.Product)).Single(o => o.OrderNo == "ORD003");
 
-                    var attributes = repo.Attributes.OrderBy(a => a.Name).ToDictionary(a => a.Name);
+                    var attributes = repo.Attributes.AsQueryable().OrderBy(a => a.Name).ToDictionary(a => a.Name);
 
                     #region Assert order1
 
@@ -550,7 +550,7 @@ namespace NWheels.Testing.Entities.Stacks
                 using ( repo )
                 {
                     var orderIdsByDate = (
-                        from o in repo.Orders
+                        from o in repo.Orders.AsQueryable()
                         group o by o.PlacedAt.Date into g  // note we're using DateTime.Date and not DbFunctions.TruncateTime!
                         orderby g.Key
                         select new { Date = g.Key, OrderIds = g.Select(x => x.OrderNo) }).ToArray();
@@ -575,7 +575,7 @@ namespace NWheels.Testing.Entities.Stacks
                 using ( repo )
                 {
                     var ordersOfAProducts = (
-                        from o in repo.Orders
+                        from o in repo.Orders.AsQueryable()
                         where o.OrderLines.Any(ol => ol.Product.Name.StartsWith("A"))
                         orderby o.OrderNo
                         select o).ToArray();

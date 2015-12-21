@@ -19,7 +19,7 @@ using EntityState = System.Data.Entity.EntityState;
 
 namespace NWheels.Stacks.EntityFramework
 {
-    public class EfEntityRepository<TEntityContract, TBaseImpl, TEntityImpl> : IEntityRepository<TEntityContract>, IEntityRepository
+    public class EfEntityRepository<TEntityContract, TBaseImpl, TEntityImpl> : IEntityRepository<TEntityContract>, IEntityRepository, IQueryable<TEntityContract>
         where TEntityContract : class
         where TBaseImpl : class
         where TEntityImpl : class, TEntityContract, TBaseImpl

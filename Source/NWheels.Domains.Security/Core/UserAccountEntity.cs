@@ -277,7 +277,7 @@ namespace NWheels.Domains.Security.Core
         {
             using ( var context = framework.NewUnitOfWork<IUserAccountDataRepository>() )
             {
-                return !context.AllUsers.Any(u => u.LoginName == loginName);
+                return !context.AllUsers.AsQueryable().Any(u => u.LoginName == loginName);
             }
         }
     }

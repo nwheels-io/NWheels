@@ -24,7 +24,7 @@ using NWheels.Utilities;
 
 namespace NWheels.Stacks.MongoDb
 {
-    public class MongoEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>, IEntityRepository, IMongoEntityRepository
+    public class MongoEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>, IEntityRepository, IMongoEntityRepository, IQueryable<TEntityContract>
         where TEntityContract : class
         where TEntityImpl : class, TEntityContract
     {

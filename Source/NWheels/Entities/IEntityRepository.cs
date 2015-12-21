@@ -28,7 +28,7 @@ namespace NWheels.Entities
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    public interface IEntityRepository<TEntity> : IQueryable<TEntity>
+    public interface IEntityRepository<TEntity>// : IQueryable<TEntity>
     {
         IQueryable<TEntity> AsQueryable();
         TEntity New();

@@ -14,7 +14,7 @@ using NWheels.Utilities;
 
 namespace NWheels.Testing.Entities
 {
-    public class TestEntityRepository<TEntity> : IEntityRepository<TEntity>, IEntityRepository
+    public class TestEntityRepository<TEntity> : IEntityRepository<TEntity>, IEntityRepository, IQueryable<TEntity>
         where TEntity : class
     {
         private readonly EntityObjectFactory _objectFactory;

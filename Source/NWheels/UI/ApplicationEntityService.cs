@@ -961,7 +961,7 @@ namespace NWheels.UI
                 {
                     var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
                     var idProperty = MetaType.PrimaryKey.Properties[0];
-                    IQueryable<TEntity> query = repository.Where(idProperty.MakeBinaryExpression<TEntity>(valueString: id, binaryFactory: Expression.Equal));
+                    IQueryable<TEntity> query = repository.AsQueryable().Where(idProperty.MakeBinaryExpression<TEntity>(valueString: id, binaryFactory: Expression.Equal));
 
                     var result = query.FirstOrDefault();
 
