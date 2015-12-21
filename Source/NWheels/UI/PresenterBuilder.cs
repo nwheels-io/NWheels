@@ -279,6 +279,30 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public PromiseBuilder<TInput> ActivateSessionTimeout(Expression<Func<ViewModel<TData, TState, TInput>, int>> timeoutMinutes = null)
+            {
+                var behavior = new UidlActivateSessionTimeoutBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                SetAndSubscribeBehavior(behavior);
+
+                if ( timeoutMinutes != null )
+                {
+                    behavior.IdleMinutesExpression = timeoutMinutes.ToNormalizedNavigationString(false, "model");
+                }
+
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<TInput> DeactivateSessionTimeout()
+            {
+                var behavior = new UidlDeactivateSessionTimeoutBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                SetAndSubscribeBehavior(behavior);
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public WhenOtherwiseBehaviorBuilder<TInput> When(Expression<Func<TData, TState, TInput, bool>> condition, Action<BehaviorBuilder<TInput>> onTrue)
             {
                 var behavior = new UidlBranchByRuleBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);

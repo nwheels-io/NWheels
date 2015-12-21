@@ -12,7 +12,7 @@ namespace NWheels.Processing.Messages.Impl
 
         public void HandleMessage(AbstractSessionPushMessage message)
         {
-            if ( message.ToSession.Endpoint != null && message.ToSession.Endpoint.IsPushSupprted )
+            if ( message.ToSession.Endpoint != null && message.ToSession.Endpoint.IsPushSupported )
             {
                 message.ToSession.Endpoint.PushMessage(message.ToSession, message);
             }

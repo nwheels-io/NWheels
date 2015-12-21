@@ -49,7 +49,9 @@ namespace NWheels.UI.Uidl
         InvokeCommand,
         QueryModel,
         AlterModel,
-        BranchByRule
+        BranchByRule,
+        ActivateSessionTimeout,
+        DeactivateSessionTimeout,
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

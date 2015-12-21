@@ -87,12 +87,19 @@ namespace NWheels.Stacks.ODataBreeze
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        bool IEndpoint.IsPushSupprted
+        bool IEndpoint.IsPushSupported
         {
             get
             {
                 return false;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TimeSpan? SessionIdleTimeoutDefault 
+        {
+            get { return null; }
         }
 
         #endregion

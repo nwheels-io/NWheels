@@ -82,7 +82,7 @@
     <Compile Include="Impl\UserAccountRoleClaim.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\CurrentLoggedInUser.cs" />
+    <Compile Include="UI\LoggedInUserWidget.cs" />
     <Compile Include="UI\UserLoginForm.cs" />
     <Compile Include="UserLogoutTransactionScript.cs" />
   </ItemGroup>

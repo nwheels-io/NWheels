@@ -84,12 +84,19 @@ namespace NWheels.Stacks.NancyFx
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        bool IEndpoint.IsPushSupprted
+        bool IEndpoint.IsPushSupported
         {
             get
             {
                 return true;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TimeSpan? SessionIdleTimeoutDefault 
+        {
+            get { return null; }
         }
 
         #endregion

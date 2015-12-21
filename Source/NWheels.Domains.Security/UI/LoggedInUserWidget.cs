@@ -8,16 +8,16 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.Domains.Security.UI
 {
-    public class CurrentLoggedInUser : WidgetBase<CurrentLoggedInUser, ILogUserOutRequest, CurrentLoggedInUser.IState>
+    public class LoggedInUserWidget : WidgetBase<LoggedInUserWidget, ILogUserOutRequest, LoggedInUserWidget.IState>
     {
-        public CurrentLoggedInUser(string idName, ControlledUidlNode parent)
+        public LoggedInUserWidget(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<CurrentLoggedInUser, ILogUserOutRequest, IState> presenter)
+        protected override void DescribePresenter(PresenterBuilder<LoggedInUserWidget, ILogUserOutRequest, IState> presenter)
         {
             presenter.On(LogOut)
                 .InvokeTransactionScript<UserLogoutTransactionScript>().FireAndForget((logout, data, state, input) => logout.Execute())

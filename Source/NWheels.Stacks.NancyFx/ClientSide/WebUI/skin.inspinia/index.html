@@ -36,7 +36,7 @@ HEAD, JS/CSS LINKS
     <link href="skin/assets/css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
     <link href="skin/assets/css/plugins/clockpicker/clockpicker.css" rel="stylesheet">
     <link href="skin/assets/css/plugins/daterangepicker/daterangepicker-bs3.css" rel="stylesheet">
-    <link href="skin/assets/css/plugins/select2/select2.min.css" rel="stylesheet">
+    <link href="skin/assets/css/plugins/isteven-multi-select/isteven-multi-select.css" rel="stylesheet">
     <link href="skin/assets/css/plugins/jqGrid/ui.jqgrid.css" rel="stylesheet">
     <link href="skin/assets/css/plugins/jQueryUI/jquery-ui-1.10.4.custom.min.css" rel="stylesheet">
     <link href="skin/assets/css/animate.css" rel="stylesheet">
@@ -125,8 +125,9 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <div id="wrapper" ng-if="app">
         <uidl-screen ng-if="currentScreen" uidl="currentScreen"></uidl-screen>
+        <uidl-widget uidl="uidl.modalAlert"></uidl-widget>
     </div>
-
+    
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL SCREEN
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -186,7 +187,7 @@ HEAD, JS/CSS LINKS
             </span>
         </div>
     </script>
-    
+ 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL USER ALERT - TECHNICAL INFO POPUP
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -208,6 +209,63 @@ HEAD, JS/CSS LINKS
         </div>
     </div>
     
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL USER ALERT - MODAL
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="uidl-element-template/ModalUserAlert">
+        <div class="modal inmodal fade" id="divModal_{{uidl.elementName}}" tabindex="-1" role="dialog"  aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <i  class="fa modal-icon pull-left" style="margin-top:-20px;"
+                            ng-class="{
+                               'fa-info':alert.uidl.type==='Info',
+                               'fa-check-square':alert.uidl.type==='Success',
+                               'fa-exclamation-triangle':alert.uidl.type==='Warning',
+                               'fa-times-circle':alert.uidl.type==='Error'
+                            }"></i>
+                        <h6 class="modal-title" style="padding-right:50px;">
+                            {{translate(alert.uidl.type)}}
+                        </h6>
+                    </div>
+                    <div class="modal-body">
+                        {{translate(alert.uidl.text)}}
+                    </div>
+                    <div class="modal-footer">
+                        <button 
+                            ng-repeat="choice in alert.uidl.resultChoices"
+                            class="btn btn-w-m"
+                            style="margin-left:5px;"
+                            ng-class="{
+                                'btn-info':alert.uidl.type==='Info',
+                                'btn-success':alert.uidl.type==='Success',
+                                'btn-warning':alert.uidl.type==='Warning',
+                                'btn-danger':alert.uidl.type==='Error'
+                            }"
+                            ng-click="answerAlert(choice);">
+                            {{::translate(choice)}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/javascript">
+        function initWidget_ModalUserAlert($scope) {
+            $("#divModal_" + $scope.uidl.elementName).modal({backdrop: 'static', keyboard: false});
+            $("#divModal_" + $scope.uidl.elementName).on('hidden', function () {
+                answerAlert('Cancel');
+            });
+            $scope.$on($scope.uidl.qualifiedName + ':ShowModal', function () {
+                $("#divModal_" + $scope.uidl.elementName).modal('show', {backdrop: 'static', keyboard: false});
+            });
+            $scope.$on($scope.uidl.qualifiedName + ':HideModal', function () {
+                $("#divModal_" + $scope.uidl.elementName).modal('hide');
+            });
+        }
+    </script>
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - SPLASH
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -267,7 +325,7 @@ HEAD, JS/CSS LINKS
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - CURRENT LOGGED-IN USER
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <script type="text/ng-template" id="uidl-element-template/CurrentLoggedInUser">
+    <script type="text/ng-template" id="uidl-element-template/LoggedInUserWidget">
         <a href="" ng-click="$emit(uidl.qualifiedName + ':LogOut:Executing')">
             <i class="fa fa-sign-out"></i> {{translate('LogOut')}}
         </a>
@@ -1151,7 +1209,7 @@ HEAD, JS/CSS LINKS
                 <option value="" ng-if="hasUidlModifier('LookupShowSelectAll')">All</option>
             </select>
             <!-- TYPEAHEAD -->
-            <input ng-if="uidl.fieldType==='Lookup' && uidl.modifiers==='TypeAhead'"
+            <input ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('TypeAhead')"
                 type="text" 
                 ng-model="entity[lookupForeignKeyProperty]" 
                 placeholder="None Selected" 
@@ -1215,6 +1273,19 @@ HEAD, JS/CSS LINKS
                     name="{{::uniqueFieldId}}">
                 <option value="">- {{::translate(uidl.propertyName)}} -</option>
             </select>
+            <!-- TYPEAHEAD -->
+            <input ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('TypeAhead')"
+                type="text" 
+                ng-model="entity[lookupForeignKeyProperty]" 
+                placeholder="None Selected" 
+                typeahead="item in loadTypeAhead($viewValue)" 
+                typeahead-input-formatter="formatTypeAheadItem($model)"
+                typeahead-loading="isLoadingTypeAhead" 
+                typeahead-no-results="isTypeAheadResultSetEmpty" 
+                typeahead-on-select="entity[lookupForeignKeyProperty]=$item['$id']"
+                class="form-control m-b"
+                id="{{::uniqueFieldId}}"
+                name="{{::uniqueFieldId}}">
         </div>
     </script>
     <script type="text/javascript">
@@ -1461,7 +1532,6 @@ HEAD, JS/CSS LINKS
         </div>
     </script>
     
-    
     <!------ HARD CODED  -------->
     
     <script type="text/ng-template" id="uidl-element-template/AffiliateSignUpForm">
@@ -1549,9 +1619,6 @@ HEAD, JS/CSS LINKS
     <!-- Date/time picker -->
     <script src="skin/assets/js/plugins/datetimepicker/bootstrap-datetimepicker.min.js"></script>
 
-    <!-- Select2 -->
-    <script src="skin/assets/js/plugins/select2/select2.full.min.js"></script>
-
     <!-- jqGrid -->
     <script src="skin/assets/js/plugins/jqGrid/i18n/grid.locale-en.js"></script>
     <script src="skin/assets/js/plugins/jqGrid/jquery.jqGrid.min.js"></script>
@@ -1573,6 +1640,9 @@ HEAD, JS/CSS LINKS
     <script src="skin/assets/js/plugins/chartJs/Chart.min.js"></script>
     <script src="skin/assets/js/plugins/ui-bootstrap-tpls-0.14.3.min.js"></script>
 
+    <!-- Multiselect -->
+    <script src="skin/assets/js/plugins/isteven-multi-select/isteven-multi-select.js"></script>
+    
     <script src="skin/assets/app/linqjs-2.2.0.2/linq.min.js"></script>
     <script src="skin/assets/app/toastr/toastr.js"></script>
     <script src="base/app.js"></script>
@@ -1594,6 +1664,25 @@ HEAD, JS/CSS LINKS
         angular.module('theApp').run(['$rootScope', 'uidlService', 
         function($rootScope, uidlService) {
             $rootScope.showPopupAlert = function(alertHandle) {
+                switch (alertHandle.uidl.type) {
+                    case 'Info':
+                        toastr.info(uidlService.translate(alertHandle.uidl.text));
+                        break;
+                    case 'Success':
+                        toastr.success(uidlService.translate(alertHandle.uidl.text), null, { timeOut: 2000 });
+                        break;
+                    case 'Warning':
+                        toastr.warning(uidlService.translate(alertHandle.uidl.text));
+                        break;
+                    case 'Error':
+                        toastr.error(
+                            '<a data-toggle="modal" data-target="#divModalTechnicalInfo"><i class="fa fa-xs fa-angle-double-right"></i>&nbsp;technical info</a>', 
+                            uidlService.translate(alertHandle.uidl.text),
+                            { timeOut: 5000 });
+                        break;
+                }
+            };
+            $rootScope.showModalAlert = function(alertHandle) {
                 switch (alertHandle.uidl.type) {
                     case 'Info':
                         toastr.info(uidlService.translate(alertHandle.uidl.text));

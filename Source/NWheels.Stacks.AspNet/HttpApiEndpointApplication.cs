@@ -70,9 +70,31 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        bool IEndpoint.IsPushSupprted
+        bool IEndpoint.IsPushSupported
         {
             get { return false; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TimeSpan? SessionIdleTimeoutDefault
+        {
+            get
+            {
+                var currentHttpContext = HttpContext.Current;
+
+                if ( HttpContext.Current != null )
+                {
+                    var currentSession = currentHttpContext.Session;
+
+                    if ( currentSession != null )
+                    {
+                        return TimeSpan.FromMinutes(currentSession.Timeout);
+                    }
+                }
+
+                return null;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

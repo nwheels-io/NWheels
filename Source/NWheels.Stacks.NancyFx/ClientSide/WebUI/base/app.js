@@ -526,7 +526,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
                     $rootScope.showPopupAlert(alertHandle);
                     break;
                 case 'Modal':
-                    $rootScope.showModalAlert(alertHandle);
+                    $rootScope.$broadcast(m_app.modalAlert.qualifiedName + ':Show', alertHandle);
                     break;
             }
             if (uidlAlert.resultChoices.length) {
@@ -586,6 +586,46 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    var m_sessionTimeout = null;
+    
+    m_behaviorImplementations['ActivateSessionTimeout'] = {
+        returnsPromise: false,
+        execute: function (scope, behavior, input) {
+            var timeoutMinutes = 0;
+            if (behavior.idleMinutesExpression) {
+                scope.model.input = input;
+                scope.model.Input = input;
+                var context = {
+                    model: scope.model
+                };
+                timeoutMinutes = Enumerable.Return(context).Select('ctx=>ctx.' + behavior.idleMinutesExpression).Single();
+            } else {
+                timeoutMinutes = m_app.sessionIdleTimeoutMinutes;
+            }
+            var timeoutMs = (timeoutMinutes - 1) * 60000;
+            m_sessionTimeout = $timeout(
+                function() {
+                    $rootScope.$broadcast(scope.appScope.uidl.qualifiedName + ':UserSessionExpired');
+                },
+                timeoutMs
+            );
+        },
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_behaviorImplementations['DeactivateSessionTimeout'] = {
+        returnsPromise: false,
+        execute: function (scope, behavior, input) {
+            if (m_sessionTimeout) {
+                $timeout.cancel(m_sessionTimeout);
+            }
+            m_sessionTimeout = null;
+        },
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     m_controllerImplementations['ScreenPartContainer'] = {
         implement: function (scope) {
             scope.$on(scope.uidl.qualifiedName + ':NavReq', function (event, data) {
@@ -616,6 +656,23 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
         },
     };
 
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_controllerImplementations['ModalUserAlert'] = {
+        implement: function (scope) {
+            scope.$on(scope.uidl.qualifiedName + ':Show', function(event, data) {
+                scope.alert = data;
+                scope.$broadcast(scope.uidl.qualifiedName + ':ShowModal');
+            });
+            
+            scope.answerAlert = function(choice) {
+                scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
+                scope.alert.answer(choice);
+                scope.alert = null;
+            }
+        }
+    };
+    
     //-----------------------------------------------------------------------------------------------------------------
 
     m_controllerImplementations['ManagementConsole'] = {
@@ -1352,13 +1409,18 @@ function ($http, $scope, $rootScope, uidlService, entityService, commandService)
 		$rootScope.commandService = commandService;
 		$rootScope.appScope = $scope;
 
+        $scope.uidl = $rootScope.app;
 		uidlService.implementController($scope);
 
 		$rootScope.currentScreen = uidlService.getCurrentScreen();
 		$rootScope.currentLocale = uidlService.getCurrentLocale();
 		$scope.pageTitle = $scope.translate($scope.app.text) + ' - ' + $scope.translate($scope.currentScreen.text);
-        $scope.uidl = $rootScope.app;
 
+        if ($scope.uidl.isUserAuthenticated===true) {
+            //$timeout(function() {
+                $scope.$emit($scope.uidl.qualifiedName + ':UserAlreadyAuthenticated');
+            //});
+        }
         //commandService.startPollingMessages();
     });
 
@@ -1505,7 +1567,11 @@ function (uidlService, entityService, commandService, $timeout, $http, $compile,
             }
             
             $scope.$on("$destroy", function() {
-                console.log('uidlWidget::$destroy() - ', $scope.uidl.qualifiedName);
+                if ($scope.uidl) {
+                    console.log('uidlWidget::$destroy() - ', $scope.uidl.qualifiedName);
+                } else {
+                    console.log('uidlWidget::$destroy() - ??? ', uniqueWidgetId);
+                }
             });            
         }
     };

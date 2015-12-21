@@ -14,6 +14,7 @@ using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 using NWheels.Utilities;
 using System.Security.Claims;
+using NWheels.Endpoints.Core;
 using NWheels.Entities;
 
 namespace NWheels.Domains.Security
@@ -69,7 +70,7 @@ namespace NWheels.Domains.Security
 
                 _sessionManager.As<ICoreSessionManager>().AuthorieSession(principal);
 
-                var result = new Result(principal);
+                var result = new Result(principal, currentSession.Endpoint);
                 return result;
             }
         }
@@ -114,7 +115,7 @@ namespace NWheels.Domains.Security
 
         public class Result
         {
-            internal protected Result(UserAccountPrincipal principal)
+            internal protected Result(UserAccountPrincipal principal, IEndpoint endpoint)
             {
                 var account = principal.Identity.GetUserAccount();
 
@@ -124,6 +125,7 @@ namespace NWheels.Domains.Security
                 UserRoles = principal.GetUserRoles();
                 AllClaims = principal.Identity.Claims.Select(c => c.Value).ToArray();
                 LastLoginAtUtc = account.LastLoginAtUtc;
+                IdleSessionExpiryMinutes = (int)endpoint.SessionIdleTimeoutDefault.GetValueOrDefault(TimeSpan.Zero).TotalMinutes;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -134,6 +136,7 @@ namespace NWheels.Domains.Security
             public string[] UserRoles { get; private set; }
             public string[] AllClaims { get; private set; }
             public DateTime? LastLoginAtUtc { get; private set; }
+            public int IdleSessionExpiryMinutes { get; private set; }
         }
     }
 }

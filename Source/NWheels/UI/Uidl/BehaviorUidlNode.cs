@@ -226,6 +226,7 @@ namespace NWheels.UI.Uidl
             RemoveMany
         }
     }
+
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [DataContract(Name = "QueryModelBehavior", Namespace = UidlDocument.DataContractNamespace)]
@@ -245,5 +246,32 @@ namespace NWheels.UI.Uidl
 
         [DataMember]
         public object ConstantValue { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [DataContract(Name = "ActivateSessionTimeoutBehavior", Namespace = UidlDocument.DataContractNamespace)]
+    public class UidlActivateSessionTimeoutBehavior : BehaviorUidlNode
+    {
+        public UidlActivateSessionTimeoutBehavior(string idName, ControlledUidlNode parent)
+            : base(idName, BehaviorType.ActivateSessionTimeout, parent)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public string IdleMinutesExpression { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [DataContract(Name = "DeactivateClearTimeoutBehavior", Namespace = UidlDocument.DataContractNamespace)]
+    public class UidlDeactivateSessionTimeoutBehavior : BehaviorUidlNode
+    {
+        public UidlDeactivateSessionTimeoutBehavior(string idName, ControlledUidlNode parent)
+            : base(idName, BehaviorType.DeactivateSessionTimeout, parent)
+        {
+        }
     }
 }

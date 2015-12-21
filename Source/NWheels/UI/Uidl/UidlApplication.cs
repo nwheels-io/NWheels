@@ -5,6 +5,10 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using NWheels.Authorization.Core;
+using NWheels.Concurrency;
+using NWheels.Endpoints.Core;
+using NWheels.UI.Toolbox;
 
 namespace NWheels.UI.Uidl
 {
@@ -47,11 +51,15 @@ namespace NWheels.UI.Uidl
         [DataMember]
         public Dictionary<string, UidlUserAlert> UserAlerts { get; set; }
         [DataMember]
+        public ModalUserAlert ModalAlert { get; set; }
+        [DataMember]
         public string DefaultSkin { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlNotification RequestNotAuthorized { get; set; }
+        public UidlNotification UserAlreadyAuthenticated { get; set; }
+        public UidlNotification UserSessionExpired { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -78,6 +86,37 @@ namespace NWheels.UI.Uidl
                 }
 
                 return Screens.First().QualifiedName;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public bool IsUserAuthenticated
+        {
+            get
+            {
+                return Thread.CurrentPrincipal.Identity.IsAuthenticated;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public int SessionIdleTimeoutMinutes
+        {
+            get
+            {
+                var endpoint = Session.Current.Endpoint;
+
+                if ( endpoint != null )
+                {
+                    return (int)endpoint.SessionIdleTimeoutDefault.GetValueOrDefault(TimeSpan.Zero).TotalMinutes;
+                }
+                else
+                {
+                    return 0;
+                }
             }
         }
 

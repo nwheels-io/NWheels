@@ -12,6 +12,7 @@ namespace NWheels.Endpoints.Core
     {
         void PushMessage(ISession session, IMessageObject message);
         string Name { get; }
-        bool IsPushSupprted { get; }
+        bool IsPushSupported { get; }
+        TimeSpan? SessionIdleTimeoutDefault { get; }
     }
 }
