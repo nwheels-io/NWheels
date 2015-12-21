@@ -58,6 +58,9 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public bool DetailPaneExpanded { get; set; }
 
+        [DataMember]
+        public int[] PageSizeOptions { get; set; }
+
         //[DataMember]
         //public string DetailPaneStaticTemplateName { get; set; }
 
