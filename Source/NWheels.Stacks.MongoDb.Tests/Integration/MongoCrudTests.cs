@@ -91,20 +91,6 @@ namespace NWheels.Stacks.MongoDb.Tests.Integration
             CrudOperations.Repository1.ExecuteAdvancedRetrievals(Framework, repoFactory);
         }
 
-        private DateTime m_TestDateTimePorperty = DateTime.Now;
-        public virtual DateTime TestDateTimePorperty
-        {
-            get
-            {
-                DateTime value = m_TestDateTimePorperty;
-                return new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second, value.Millisecond, DateTimeKind.Utc);
-            }
-            set
-            {
-                m_TestDateTimePorperty = value;
-            }
-        }
-
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Overrides of TestFixtureWithoutNodeHosts

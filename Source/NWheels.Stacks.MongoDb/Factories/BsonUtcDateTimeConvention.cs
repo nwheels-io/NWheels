@@ -42,6 +42,7 @@ namespace NWheels.Stacks.MongoDb.Factories
                                     retValAsDateTime.Prop(x => x.Hour),
                                     retValAsDateTime.Prop(x => x.Minute),
                                     retValAsDateTime.Prop(x => x.Second),
+                                    retValAsDateTime.Prop(x => x.Millisecond),
                                     w.Const(DateTimeKind.Utc)
                                 )
                                 .CastTo<TypeTemplate.TReturn>()
