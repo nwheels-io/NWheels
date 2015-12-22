@@ -36,13 +36,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.24.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil, Version=0.9.25.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.24\lib\net45\Hapil.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.25\lib\net45\Hapil.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil.Applied, Version=0.9.24.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil.Applied, Version=0.9.25.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.24\lib\net45\Hapil.Applied.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.25\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
     <Reference Include="MongoDB.Bson, Version=1.10.0.62, Culture=neutral, PublicKeyToken=f686731cfb9cc103, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -75,6 +75,8 @@
     <Compile Include="Factories\BsonIgnoreConvention.cs" />
     <Compile Include="Factories\BsonIdAttributeConvention.cs" />
     <Compile Include="Factories\BsonIgnoreExtraElementsConvention.cs" />
+    <Compile Include="Factories\BsonUtcDateTimeConvention.cs" />
+    <Compile Include="Factories\BsonStringEnumConvention.cs" />
     <Compile Include="Factories\DocumentIdStrategy.cs" />
     <Compile Include="Factories\ContextImplTypeInjectionConvention.cs" />
     <Compile Include="Factories\LazyLoadByForeignKeyStrategyBase.cs" />
