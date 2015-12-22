@@ -974,7 +974,12 @@ namespace NWheels.UI
 
             public override IDomainObject CreateNew()
             {
-                return Framework.NewDomainObject<TEntity>() as IDomainObject;
+                using ( var context = Framework.NewUnitOfWork<TContext>() )
+                {
+                    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
+                    var domainObject = repository.New();
+                    return (IDomainObject)domainObject;
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
