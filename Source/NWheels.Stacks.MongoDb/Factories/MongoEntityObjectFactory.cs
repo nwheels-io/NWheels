@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Autofac;
 using Hapil;
 using Hapil.Operands;
@@ -54,7 +55,9 @@ namespace NWheels.Stacks.MongoDb.Factories
                 new BsonIgnoreConvention(MetadataCache, metaType),
                 new BsonDiscriminatorConvention(context, MetadataCache, metaType),
                 new BsonIgnoreExtraElementsConvention(),
-                new BsonIdAttributeConvention(metaType)
+                new BsonIdAttributeConvention(metaType),
+                new BsonStringEnumConvention(),
+                new BsonUtcDateTimeConvention(),
                 //new LazyLoadDomainObjectConvention(metaType)
             };
         }
@@ -206,6 +209,17 @@ namespace NWheels.Stacks.MongoDb.Factories
                 default:
                     return false;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool IsPersistableObjectPropertyPersistedToDb(PropertyInfo property)
+        {
+            return (
+                property.GetMethod != null &&
+                property.GetMethod.IsPublic &&
+                property.SetMethod != null &&
+                property.SetMethod.IsPublic);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
