@@ -60,6 +60,7 @@ namespace NWheels.UI.Uidl
         public UidlNotification RequestNotAuthorized { get; set; }
         public UidlNotification UserAlreadyAuthenticated { get; set; }
         public UidlNotification UserSessionExpired { get; set; }
+        public UidlNotification ServerConnectionLost { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

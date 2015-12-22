@@ -303,6 +303,15 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public PromiseBuilder<TInput> RestartApp()
+            {
+                var behavior = new UidlRestartAppBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                SetAndSubscribeBehavior(behavior);
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public WhenOtherwiseBehaviorBuilder<TInput> When(Expression<Func<TData, TState, TInput, bool>> condition, Action<BehaviorBuilder<TInput>> onTrue)
             {
                 var behavior = new UidlBranchByRuleBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);

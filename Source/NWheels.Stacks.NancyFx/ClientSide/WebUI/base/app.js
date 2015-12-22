@@ -8,6 +8,25 @@ function toCamelCase(s) {
     return s.charAt(0).toLowerCase() + s.slice(1);
 }
 
+//-----------------------------------------------------------------------------------------------------------------
+
+theApp.factory('appHttpInterceptor',['$rootScope', '$q', function ($rootScope, $q) {
+    return {
+        'responseError': function(rejection) {
+            if (rejection.status===0) {
+                $rootScope.$broadcast($rootScope.app.qualifiedName + ':ServerConnectionLost');
+            };
+            return $q.reject(rejection);
+        }
+    };
+}]);
+
+//-----------------------------------------------------------------------------------------------------------------
+
+theApp.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.interceptors.push('appHttpInterceptor');
+}]);
+
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.service('commandService',
@@ -621,6 +640,15 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
                 $timeout.cancel(m_sessionTimeout);
             }
             m_sessionTimeout = null;
+        },
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_behaviorImplementations['RestartApp'] = {
+        returnsPromise: false,
+        execute: function (scope, behavior, input) {
+            window.location.reload();
         },
     };
 

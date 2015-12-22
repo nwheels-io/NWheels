@@ -266,11 +266,22 @@ namespace NWheels.UI.Uidl
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [DataContract(Name = "DeactivateClearTimeoutBehavior", Namespace = UidlDocument.DataContractNamespace)]
+    [DataContract(Name = "DeactivateSessionTimeoutBehavior", Namespace = UidlDocument.DataContractNamespace)]
     public class UidlDeactivateSessionTimeoutBehavior : BehaviorUidlNode
     {
         public UidlDeactivateSessionTimeoutBehavior(string idName, ControlledUidlNode parent)
             : base(idName, BehaviorType.DeactivateSessionTimeout, parent)
+        {
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [DataContract(Name = "RestartAppBehavior", Namespace = UidlDocument.DataContractNamespace)]
+    public class UidlRestartAppBehavior : BehaviorUidlNode
+    {
+        public UidlRestartAppBehavior(string idName, ControlledUidlNode parent)
+            : base(idName, BehaviorType.RestartApp, parent)
         {
         }
     }

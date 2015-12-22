@@ -52,6 +52,7 @@ namespace NWheels.UI.Uidl
         BranchByRule,
         ActivateSessionTimeout,
         DeactivateSessionTimeout,
+        RestartApp
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
