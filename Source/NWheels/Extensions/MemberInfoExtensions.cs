@@ -22,5 +22,13 @@ namespace NWheels.Extensions
             var parameter = Expression.Parameter(typeof(TEntity), "e");
             return Expression.Lambda<Func<TEntity, TProperty>>(Expression.Convert(Expression.Property(parameter, property), typeof(TProperty)), new[] { parameter });
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Expression<Func<TEntity, object>> PropertyAsObjectExpression<TEntity, TProperty>(this PropertyInfo property)
+        {
+            var parameter = Expression.Parameter(typeof(TEntity), "e");
+            return Expression.Lambda<Func<TEntity, object>>(Expression.Convert(Expression.Property(parameter, property), typeof(object)), new[] { parameter });
+        }
     }
 }

@@ -109,6 +109,13 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public LambdaExpression MakePropertyAsObjectExpression<TEntity>()
+        {
+            return GetExpressionFactory(this.ClrType).PropertyAsObject<TEntity>(this);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Expression<Func<TEntity, bool>> MakeBinaryExpression<TEntity>(
             object value, 
             Func<Expression, Expression, Expression> binaryFactory)
@@ -377,6 +384,7 @@ namespace NWheels.DataObjects.Core
         private abstract class ExpressionFactory
         {
             public abstract LambdaExpression Property<TEntity>(IPropertyMetadata metaProperty);
+            public abstract LambdaExpression PropertyAsObject<TEntity>(IPropertyMetadata metaProperty);
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -445,6 +453,13 @@ namespace NWheels.DataObjects.Core
             public override LambdaExpression Property<TEntity>(IPropertyMetadata metaProperty)
             {
                 return metaProperty.ContractPropertyInfo.PropertyExpression<TEntity, TProperty>();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override LambdaExpression PropertyAsObject<TEntity>(IPropertyMetadata metaProperty)
+            {
+                return metaProperty.ContractPropertyInfo.PropertyAsObjectExpression<TEntity, TProperty>();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
