@@ -423,12 +423,17 @@ namespace NWheels.UI.Toolbox
             switch ( this.FieldType )
             {
                 case FormFieldType.Lookup:
-                case FormFieldType.LookupMany:
-                    if ( this.FieldType == FormFieldType.LookupMany || this.Modifiers.HasFlag(FormFieldModifiers.Ellipsis) )
+                    if ( this.Modifiers == FormFieldModifiers.None || this.Modifiers.HasFlag(FormFieldModifiers.Ellipsis) )
                     {
                         widgetClosedType = typeof(DataGrid<>).MakeGenericType(nestedMetaType.ContractType);
-                        widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName + "Grid", parent);
+                        var dataGridInstance = (DataGrid)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName + "Grid", parent);
+                        dataGridInstance.EnableAutonomousQuery = true;
+                        widgetInstance = dataGridInstance;
                     }
+                    break;
+                case FormFieldType.LookupMany:
+                    widgetClosedType = typeof(LookupGrid<,>).MakeGenericType(nestedMetaType.EntityIdProperty.ClrType, nestedMetaType.ContractType);
+                    widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName + "Grid", parent);
                     break;
                 case FormFieldType.InlineGrid:
                     widgetClosedType = typeof(Crud<>).MakeGenericType(nestedMetaType.ContractType);
