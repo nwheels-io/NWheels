@@ -1183,7 +1183,6 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
                         
                     }
                 }
-
             };
 
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
@@ -1626,8 +1625,8 @@ theApp.directive('uidlGridField', ['uidlService', 'entityService', function (uid
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.directive('uidlFormField',
-['$timeout', 'uidlService', 'entityService',
-function ($timeout, uidlService, entityService) {
+['$timeout', '$rootScope', 'uidlService', 'entityService',
+function ($timeout, $rootScope, uidlService, entityService) {
     return {
         scope: {
             parentUidl: '=',
@@ -1693,7 +1692,19 @@ function ($timeout, uidlService, entityService) {
                         return model[$scope.lookupTextProperty];
                     }
                     
-                    if ($scope.hasUidlModifier('DropDown')) {
+                    $scope.ellipsisClicked = function() {
+                        var lookupContext = {
+                            targetEntity: $scope.entity,
+                            targetProperty: $scope.lookupForeignKeyProperty,
+                            lookupMetaType: $scope.lookupMetaType,
+                            lookupTextProperty: $scope.lookupTextProperty,
+                            lookupValueProperty: $scope.lookupValueProperty,
+                            dataGridUidl: $scope.uidl.nestedWidget
+                        };
+                        $rootScope.$broadcast(':global:AdvancedLookupRequest', lookupContext);
+                    };
+ 
+                    if ($scope.hasUidlModifier('DropDown') && !$scope.hasUidlModifier('TypeAhead')) {
                         $scope.entityService.queryEntity($scope.uidl.lookupEntityName).then(function(data) {
                             $scope.lookupResultSet = data.ResultSet;
 
@@ -1730,6 +1741,48 @@ function ($timeout, uidlService, entityService) {
                     initFunc($scope);
                 }
             });
+        }
+    };
+}]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+theApp.directive('uidlEllipsisLookupSearch',
+['$timeout', '$rootScope', 'uidlService', 'entityService',
+function ($timeout, $rootScope, uidlService, entityService) {
+    return {
+        scope: {
+        },
+        restrict: 'E',
+        replace: true,
+        link: function (scope, elem, attrs) {
+        },
+        templateUrl: function(elem, attrs) {
+            return 'uidl-element-template/' + (attrs.templateName || 'EllipsisLookupSearchModal');
+        },
+        controller: function ($scope) {
+            $scope.invokeInitFunc = function() {
+                var initFuncName = 'initWidget_EllipsisLookupSearchModal';
+                var initFunc = window[initFuncName];
+                if (typeof initFunc === 'function') {
+                    initFunc($scope);
+                } else {
+                    $timeout($scope.invokeInitFunc);
+                }
+            };
+            
+            $scope.$on(':global:AdvancedLookupRequest', function(event, data) {
+                $scope.lookupContext = data;
+                $scope.showLookupSearchModal();
+            });
+
+            $scope.lookupObjectSelected = function(selectedObject) {
+                $scope.hideLookupSearchModal();
+                $scope.lookupContext.targetEntity[$scope.lookupContext.targetProperty] = selectedObject[$scope.lookupContext.lookupValueProperty];
+                $scope.lookupContext = null;
+            };
+            
+            $scope.invokeInitFunc();
         }
     };
 }]);

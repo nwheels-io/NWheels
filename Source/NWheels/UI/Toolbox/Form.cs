@@ -52,7 +52,7 @@ namespace NWheels.UI.Toolbox
             FormFieldModifiers modifiers = FormFieldModifiers.None,
             Action<FormField> setup = null)
         {
-            var field = new FormField(propertySelector.GetPropertyInfo().Name) {
+            var field = new FormField(this, propertySelector.GetPropertyInfo().Name) {
                 FieldType = type,
                 Modifiers = modifiers
             };
@@ -209,7 +209,7 @@ namespace NWheels.UI.Toolbox
 
             var preConfiguredFields = Fields;
             Fields = new List<FormField>();
-            Fields.AddRange(fieldsToAdd.Select(f => preConfiguredFields.FirstOrDefault(pf => pf.PropertyName == f) ?? new FormField(f)));
+            Fields.AddRange(fieldsToAdd.Select(f => preConfiguredFields.FirstOrDefault(pf => pf.PropertyName == f) ?? new FormField(this, f)));
             Fields.AddRange(preConfiguredFields.Where(pf => !Fields.Any(f => f.PropertyName == pf.PropertyName)));
 
             foreach ( var field in Fields )
@@ -247,7 +247,7 @@ namespace NWheels.UI.Toolbox
 
             if ( field == null )
             {
-                field = new FormField(propertyName);
+                field = new FormField(this, propertyName);
                 Fields.Add(field);
             }
 
@@ -267,9 +267,24 @@ namespace NWheels.UI.Toolbox
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
     public class FormField
     {
-        public FormField(string propertyName)
+        private readonly IUidlForm _ownerForm;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public FormField(IUidlForm ownerForm, string propertyName)
         {
+            _ownerForm = ownerForm;
             this.PropertyName = propertyName;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TWidget UseNestedWidget<TWidget>() 
+            where TWidget : WidgetUidlNode
+        {
+            var widgetInstance = (TWidget)Activator.CreateInstance(typeof(TWidget), "Nested" + this.PropertyName + "Grid", (ControlledUidlNode)_ownerForm);;
+            this.NestedWidget = widgetInstance;
+            return widgetInstance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -332,7 +347,11 @@ namespace NWheels.UI.Toolbox
             {
                 this.LookupEntityName = MetaProperty.Relation.RelatedPartyType.QualifiedName;
                 this.LookupEntityContract = MetaProperty.Relation.RelatedPartyType.ContractType;
-                this.NestedWidget = CreateNestedWidget(parent, MetaProperty.Relation.RelatedPartyType);
+
+                if ( this.NestedWidget == null )
+                {
+                    this.NestedWidget = CreateNestedWidget(parent, MetaProperty.Relation.RelatedPartyType);
+                }
             }
 
             if ( this.LookupEntityContract != null )
@@ -403,9 +422,13 @@ namespace NWheels.UI.Toolbox
 
             switch ( this.FieldType )
             {
+                case FormFieldType.Lookup:
                 case FormFieldType.LookupMany:
-                    widgetClosedType = typeof(LookupGrid<,>).MakeGenericType(nestedMetaType.EntityIdProperty.ClrType, nestedMetaType.ContractType);
-                    widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName + "Grid", parent);
+                    if ( this.FieldType == FormFieldType.LookupMany || this.Modifiers.HasFlag(FormFieldModifiers.Ellipsis) )
+                    {
+                        widgetClosedType = typeof(LookupGrid<,>).MakeGenericType(nestedMetaType.EntityIdProperty.ClrType, nestedMetaType.ContractType);
+                        widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName + "Grid", parent);
+                    }
                     break;
                 case FormFieldType.InlineGrid:
                     widgetClosedType = typeof(Crud<>).MakeGenericType(nestedMetaType.ContractType);
@@ -476,7 +499,7 @@ namespace NWheels.UI.Toolbox
                     }
                     return FormFieldModifiers.None;
                 case FormFieldType.Lookup:
-                    return FormFieldModifiers.DropDown;//(StandardValues != null && StandardValues.Count > 0 ? FormFieldModifiers.DropDown : FormFieldModifiers.TypeAhead);
+                    return (StandardValues != null && StandardValues.Count > 0 ? FormFieldModifiers.DropDown : FormFieldModifiers.Ellipsis);
                 case FormFieldType.LookupMany:
                     return FormFieldModifiers.Tab;
                 case FormFieldType.InlineForm:

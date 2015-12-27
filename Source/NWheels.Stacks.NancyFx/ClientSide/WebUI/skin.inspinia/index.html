@@ -126,6 +126,7 @@ HEAD, JS/CSS LINKS
     <div id="wrapper" ng-if="app">
         <uidl-screen ng-if="currentScreen" uidl="currentScreen"></uidl-screen>
         <uidl-widget uidl="uidl.modalAlert"></uidl-widget>
+        <uidl-ellipsis-lookup-search></uidl-ellipsis-lookup-search>
     </div>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -776,7 +777,12 @@ HEAD, JS/CSS LINKS
                         hidegrid: false,
                         ignoreCase: true,
                         onSelectRow: function (rowId) {
-                            $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
+                            if ($scope.uidl.enableAutonomousQuery) {
+                                var rowObject = $scope.ResultSet[rowId - 1];
+                                $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelected', rowObject);
+                            } else {
+                                $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
+                            }
                         },
                         subGrid: $scope.uidl.enableDetailPane,
                         subGridOptions: { expandOnLoad: $scope.uidl.detailPaneExpanded },
@@ -905,6 +911,68 @@ HEAD, JS/CSS LINKS
                         }
                     });
                 });
+            });
+        }
+    </script>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL ELLIPSIS LOOKUP - MODAL
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="uidl-element-template/EllipsisLookupSearchModal">
+        <div class="modal inmodal fade" id="divModal_EllipsisLookupSearchModal" tabindex="-1" role="dialog"  aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header" style="padding:15px">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <i class="fa modal-icon fa-search pull-left" style="font-size:28pt;"></i>
+                        <h6 class="modal-title" style="padding-right:50px;">
+                            Search Entity
+                        </h6>
+                    </div>
+                    <div class="modal-body">
+                        <uidl-widget ng-if="lookupContext" uidl="lookupContext.dataGridUidl"></uidl-widget>
+                    </div>
+                    <div class="modal-footer">
+                        <button 
+                            type="button"
+                            class="btn btn-w-m btn-success"
+                            ng-disabled="isSelectButtonDisabled()"
+                            ng-click="lookupObjectSelected(selectedLookupObject)"
+                        ><i ng-if="command.icon" class="fa fa-check">&nbsp;</i>Select</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/javascript">
+        function initWidget_EllipsisLookupSearchModal($scope) {
+            $scope.unbindDataGridObjectSelected = null;
+            $scope.selectedLookupObject = null;
+        
+            $scope.showLookupSearchModal = function() {
+                $('#divModal_EllipsisLookupSearchModal').modal('show', {backdrop: 'static', keyboard: false});
+            };
+            $scope.hideLookupSearchModal = function() {
+                $('#divModal_EllipsisLookupSearchModal').modal('hide');
+            };
+            $scope.isSelectButtonDisabled = function() {
+                return ($scope.selectedLookupObject===null);
+            };
+ 
+            $scope.$watch('lookupContext', function(newValue, oldValue) {
+                $scope.selectedLookupObject = null;
+            
+                if ($scope.unbindDataGridObjectSelected) {
+                    $scope.unbindDataGridObjectSelected();
+                    $scope.unbindDataGridObjectSelected = null;
+                }
+                
+                if (newValue) {
+                    $scope.unbindDataGridObjectSelected = $scope.$on(newValue.dataGridUidl.qualifiedName + ':ObjectSelected', function(event, data) {
+                        $scope.selectedLookupObject = data;
+                        $scope.$apply();
+                    });
+                }
             });
         }
     </script>
@@ -1139,7 +1207,7 @@ HEAD, JS/CSS LINKS
         <div>
             <!-- LABEL -->
             <input ng-if="uidl.fieldType==='Label'" 
-                   disabled="" 
+                   readonly="" 
                    class="form-control m-b" 
                    type="text" 
                    ng-model="entity[uidl.propertyName]" 
@@ -1199,6 +1267,27 @@ HEAD, JS/CSS LINKS
                     <span class="glyphicon glyphicon-th"></span>
                 </div>
             </div>
+            <!-- LOOKUP ELLIPSIS -->
+            <div ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('Ellipsis')"
+                 class="input-group">
+                 <input type="text" 
+                        class="form-control"
+                        ng-init="isNowFocused=false" 
+                        ng-focus="isNowFocused=true" 
+                        ng-blur="isNowFocused=false"                        
+                        ng-model="entity[uidl.propertyName]"
+                        readonly
+                        id="{{::uniqueFieldId}}"
+                        name="{{::uniqueFieldId}}"> 
+                 <span class="input-group-btn"> 
+                     <button type="button" 
+                             class="btn" 
+                             ng-class="{'btn-primary':isNowFocused, 'btn-white':!isNowFocused}"
+                             ng-click="ellipsisClicked()">
+                        <i class="fa fa-search"></i>
+                     </button>
+                 </span>
+            </div>            
             <!-- DROP DOWN -->
             <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown')"
                     class="form-control m-b"
@@ -1265,7 +1354,7 @@ HEAD, JS/CSS LINKS
                    id="{{::uniqueFieldId + '__confirm'}}"
                    name="{{::uniqueFieldId + '__confirm'}}">
             <!-- DROP DOWN -->
-            <select ng-if="uidl.fieldType==='Lookup' && uidl.modifiers==='DropDown'"
+            <select ng-if="uidl.fieldType==='Lookup' && (hasUidlModifier('DropDown') || hasUidlModifier('Ellipsis'))"
                     class="form-control m-b"
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
