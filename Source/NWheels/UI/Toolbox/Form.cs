@@ -426,7 +426,7 @@ namespace NWheels.UI.Toolbox
                 case FormFieldType.LookupMany:
                     if ( this.FieldType == FormFieldType.LookupMany || this.Modifiers.HasFlag(FormFieldModifiers.Ellipsis) )
                     {
-                        widgetClosedType = typeof(LookupGrid<,>).MakeGenericType(nestedMetaType.EntityIdProperty.ClrType, nestedMetaType.ContractType);
+                        widgetClosedType = typeof(DataGrid<>).MakeGenericType(nestedMetaType.ContractType);
                         widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName + "Grid", parent);
                     }
                     break;

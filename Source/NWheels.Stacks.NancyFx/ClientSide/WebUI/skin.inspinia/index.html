@@ -1354,7 +1354,7 @@ HEAD, JS/CSS LINKS
                    id="{{::uniqueFieldId + '__confirm'}}"
                    name="{{::uniqueFieldId + '__confirm'}}">
             <!-- DROP DOWN -->
-            <select ng-if="uidl.fieldType==='Lookup' && (hasUidlModifier('DropDown') || hasUidlModifier('Ellipsis'))"
+            <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown')"
                     class="form-control m-b"
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
