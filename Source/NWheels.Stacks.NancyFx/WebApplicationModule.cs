@@ -340,7 +340,7 @@ namespace NWheels.Stacks.NancyFx
                 kvp => kvp.Value.ToStringOrDefault(),
                 StringComparer.InvariantCultureIgnoreCase);
 
-            var options = _context.EntityService.ParseQueryOptions(queryParameters);
+            var options = _context.EntityService.ParseQueryOptions(entityName, queryParameters);
             var json = _context.EntityService.QueryEntityJson(entityName, options);
 
             return Response.AsText(json, "application/json");

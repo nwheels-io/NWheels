@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -14,6 +15,7 @@ using NWheels.Extensions;
 using System.Reflection;
 using System.ComponentModel;
 using System.Linq.Expressions;
+using System.Text;
 using Hapil;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -35,7 +37,8 @@ namespace NWheels.UI
         private readonly IDomainContextLogger _domainContextLogger;
         private readonly Dictionary<string, EntityHandler> _handlerByEntityName;
         private readonly IJsonSerializationExtension[] _jsonExtensions;
-        private readonly JsonSerializerSettings _serializerSettings;
+        private readonly ConcurrentDictionary<string, JsonSerializerSettings> _serializerSettingsCache;
+        private readonly JsonSerializerSettings _defaultSerializerSettings;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -56,7 +59,8 @@ namespace NWheels.UI
 
             RegisterDomainObjects(domainContextTypes);
 
-            _serializerSettings = CreateSerializerSettings();
+            _serializerSettingsCache = new ConcurrentDictionary<string, JsonSerializerSettings>();
+            _defaultSerializerSettings = CreateSerializerSettings(queryOptions: null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -93,7 +97,7 @@ namespace NWheels.UI
             using ( handler.NewUnitOfWork() )
             {
                 var newEntity = handler.CreateNew();
-                json = JsonConvert.SerializeObject(newEntity, _serializerSettings);
+                json = JsonConvert.SerializeObject(newEntity, _defaultSerializerSettings);
             }
 
             return json;
@@ -101,9 +105,9 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public QueryOptions ParseQueryOptions(IDictionary<string, string> parameters)
+        public QueryOptions ParseQueryOptions(string entityName, IDictionary<string, string> parameters)
         {
-            return new QueryOptions(parameters);
+            return new QueryOptions(entityName, parameters);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -113,10 +117,13 @@ namespace NWheels.UI
             var handler = _handlerByEntityName[entityName];
             string json;
 
-            using ( handler.NewUnitOfWork() )
+            using ( QueryOptions.UseAsCurrent(options) )
             {
-                var results = handler.Query(options);
-                json = JsonConvert.SerializeObject(results, _serializerSettings);
+                using ( handler.NewUnitOfWork() )
+                {
+                    var results = handler.Query(options);
+                    json = JsonConvert.SerializeObject(results, GetCachedSerializerSettings(options));
+                }
             }
 
             return json;
@@ -129,10 +136,13 @@ namespace NWheels.UI
             var handler = _handlerByEntityName[entityName];
             string json;
 
-            using ( handler.NewUnitOfWork() )
+            using ( QueryOptions.UseAsCurrent(options) )
             {
-                var results = handler.Query(options, query);
-                json = JsonConvert.SerializeObject(results, _serializerSettings);
+                using ( handler.NewUnitOfWork() )
+                {
+                    var results = handler.Query(options, query);
+                    json = JsonConvert.SerializeObject(results, GetCachedSerializerSettings(options));
+                }
             }
 
             return json;
@@ -175,7 +185,7 @@ namespace NWheels.UI
                 if ( entityState.IsNew() )
                 {
                     domainObject = handler.CreateNew();
-                    JsonConvert.PopulateObject(json, domainObject, _serializerSettings);
+                    JsonConvert.PopulateObject(json, domainObject, _defaultSerializerSettings);
                     handler.Insert(domainObject);
                 }
                 else if ( entityState.IsModified() )
@@ -203,7 +213,7 @@ namespace NWheels.UI
 
                 context.CommitChanges();
                 
-                var resultJson = (domainObject != null ? JsonConvert.SerializeObject(domainObject, _serializerSettings) : null);
+                var resultJson = (domainObject != null ? JsonConvert.SerializeObject(domainObject, _defaultSerializerSettings) : null);
                 return resultJson;
             }
         }
@@ -240,15 +250,31 @@ namespace NWheels.UI
 
         public JsonSerializerSettings CreateSerializerSettings()
         {
+            return CreateSerializerSettings(queryOptions: null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private JsonSerializerSettings GetCachedSerializerSettings(QueryOptions queryOptions)
+        {
+            var cacheKey = queryOptions.BuildCacheKey();
+            var cachedSettings = _serializerSettingsCache.GetOrAdd(cacheKey, key => CreateSerializerSettings(queryOptions));
+            return cachedSettings;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private JsonSerializerSettings CreateSerializerSettings(QueryOptions queryOptions)
+        {
             var settings = new JsonSerializerSettings() {
-                ContractResolver = new DomainObjectContractResolver(_metadataCache, this),
+                ContractResolver = new DomainObjectContractResolver(_metadataCache, this, queryOptions),
                 DateFormatString = "yyyy-MM-dd HH:mm:ss",
                 MaxDepth = 10,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
 
             settings.Converters.Add(new StringEnumConverter());
-            settings.Converters.Add(new DomainObjectConverter(this));
+            settings.Converters.Add(new DomainObjectConverter(this, queryOptions));
             settings.Converters.Add(new ViewModelObjectConverter(this, _viewModelFactory));
 
             foreach ( var extension in _jsonExtensions )
@@ -445,19 +471,16 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public QueryOptions()
+            public QueryOptions(string entityName, IDictionary<string, string> queryParams)
             {
+                EntityName = entityName;
+                SelectPropertyNames = new List<QuerySelectItem>();
+                IncludePropertyNames = new List<QuerySelectItem>();
                 Filter = new List<QueryFilterItem>();
                 InMemoryFilter = new List<QueryFilterItem>();
                 OrderBy = new List<QueryOrderByItem>();
                 InMemoryOrderBy = new List<QueryOrderByItem>();
-            }
 
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public QueryOptions(IDictionary<string, string> queryParams)
-                : this()
-            {
                 foreach ( var parameter in queryParams )
                 {
                     if ( parameter.Key.EqualsIgnoreCase(SelectParameterKey) )
@@ -506,6 +529,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public string EntityName { get; private set; }
             public bool IsCountOnly { get; private set; }
             public IList<QuerySelectItem> SelectPropertyNames { get; private set; }
             public IList<QuerySelectItem> IncludePropertyNames { get; private set; }
@@ -530,6 +554,48 @@ namespace NWheels.UI
             public bool NeedCountOperation
             {
                 get { return (IsCountOnly || Page.HasValue); }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal string BuildCacheKey()
+            {
+                var key = new StringBuilder();
+
+                key.Append(EntityName);
+
+                BuildListCacheKey(SelectPropertyNames.OrderBy(p => p.AliasName), key);
+                BuildListCacheKey(IncludePropertyNames.OrderBy(p => p.AliasName), key);
+
+                key.Append("/"); key.Append(OfType);
+                key.Append("/"); key.Append(IsCountOnly);
+
+                return key.ToString().ToLower();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal static void BuildListCacheKey<T>(IEnumerable<T> list, StringBuilder key) where T : IBuildCacheKey
+            {
+                key.Append("/[");
+
+                if ( list != null )
+                {
+                    bool firstItem = true;
+
+                    foreach ( var item in list )
+                    {
+                        if ( !firstItem )
+                        {
+                            key.Append(",");
+                        }
+
+                        item.BuildCacheKey(key);
+                        firstItem = false;
+                    }
+                }
+
+                key.Append("]");
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -582,11 +648,37 @@ namespace NWheels.UI
                 var filterItem = new QueryFilterItem(propertyName, @operator, parameter.Value);
                 this.Filter.Add(filterItem);
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static IDisposable UseAsCurrent(QueryOptions options)
+            {
+                return new ThreadStaticResourceConsumerScope<QueryOptions>(
+                    handle => options, 
+                    externallyOwned: true, 
+                    forceNewResource: true);
+            }
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static QueryOptions Current
+            {
+                get
+                {
+                    return ThreadStaticResourceConsumerScope<QueryOptions>.CurrentResource;
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class QuerySelectItem
+        internal interface IBuildCacheKey
+        {
+            void BuildCacheKey(StringBuilder key);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class QuerySelectItem : IBuildCacheKey
         {
             public QuerySelectItem(string propertySpecifier)
             {
@@ -609,11 +701,21 @@ namespace NWheels.UI
 
             public IReadOnlyList<string> PropertyPath { get; private set; }
             public string AliasName { get; private set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            void IBuildCacheKey.BuildCacheKey(StringBuilder key)
+            {
+                key.Append("/[");
+                key.Append(string.Join(",", PropertyPath));
+                key.Append("]/");
+                key.Append(AliasName);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class QueryFilterItem
+        public class QueryFilterItem : IBuildCacheKey
         {
             public QueryFilterItem(string propertyName, string @operator, string stringValue)
             {
@@ -657,6 +759,14 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            void IBuildCacheKey.BuildCacheKey(StringBuilder key)
+            {
+                key.Append("/"); key.Append(PropertyName);
+                key.Append(":"); key.Append(Operator);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private static readonly Dictionary<string, Func<Expression, Expression, Expression>> _s_binaryExpressionFactoryByOperator =
                 new Dictionary<string, Func<Expression, Expression, Expression>>(StringComparer.InvariantCultureIgnoreCase) {
                     { QueryOptions.EqualOperator, Expression.Equal },
@@ -684,7 +794,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class QueryOrderByItem
+        public class QueryOrderByItem : IBuildCacheKey
         {
             public QueryOrderByItem(string propertyName, bool @ascending)
             {
@@ -733,6 +843,14 @@ namespace NWheels.UI
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public IPropertyMetadata MetaProperty { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            void IBuildCacheKey.BuildCacheKey(StringBuilder key)
+            {
+                key.Append("/"); key.Append(PropertyName);
+                key.Append("/"); key.Append(Ascending);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1168,14 +1286,16 @@ namespace NWheels.UI
         {
             private readonly ITypeMetadataCache _metadataCache;
             private readonly ApplicationEntityService _ownerService;
+            private readonly QueryOptions _queryOptions;
             private readonly CamelCasePropertyNamesContractResolver _camelCaseContractResolver;
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public DomainObjectContractResolver(ITypeMetadataCache metadataCache, ApplicationEntityService ownerService)
+            public DomainObjectContractResolver(ITypeMetadataCache metadataCache, ApplicationEntityService ownerService, QueryOptions queryOptions)
             {
                 _metadataCache = metadataCache;
                 _ownerService = ownerService;
+                _queryOptions = queryOptions;
                 _camelCaseContractResolver = new CamelCasePropertyNamesContractResolver();
             }
 
@@ -1258,6 +1378,40 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private void IncludeAdditionalProperties(ITypeMetadata[] metaTypes, IList<JsonProperty> jsonProperties)
+            {
+                if ( _queryOptions != null )
+                {
+                    foreach ( var selectItem in _queryOptions.IncludePropertyNames )
+                    {
+                        IPropertyMetadata metaProperty;
+                        var metaType = metaTypes.FirstOrDefault(t => t.TryGetPropertyByName(selectItem.PropertyPath.First(), out metaProperty));
+
+                        if ( metaType != null )
+                        {
+                            
+                        }
+                    }
+                }
+
+                foreach ( var jsonProperty in jsonProperties )
+                {
+                    var metaProperty = GetPropertyByName(metaTypes, jsonProperty.PropertyName);
+
+                    if ( IsEmbeddedObjectCollectionProperty(metaProperty) )
+                    {
+                        var converterClosedType =
+                            typeof(EmbeddedDomainObjectCollectionConverter<>).MakeGenericType(metaProperty.Relation.RelatedPartyType.ContractType);
+                        var converterInstance = (JsonConverter)Activator.CreateInstance(converterClosedType, _ownerService, metaProperty);
+                        jsonProperty.MemberConverter = converterInstance;
+
+                        //jsonProperty.ValueProvider = new EmbeddedCollectionValueProvider(innerProvider: jsonProperty.ValueProvider);
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private JsonProperty CreateReplacementForeignKeyProperty(IPropertyMetadata metaProperty, JsonProperty originalJsonProperty)
             {
                 var replacingJsonProperty = new JsonProperty {
@@ -1270,6 +1424,24 @@ namespace NWheels.UI
                 };
 
                 return replacingJsonProperty;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private JsonProperty CreateNavigationProperty(QuerySelectItem selectItem, IPropertyMetadata firstStepMetaProperty, JsonProperty firstStepJsonProperty)
+            {
+                throw new NotImplementedException();
+
+                //var navigationJsonProperty = new JsonProperty {
+                //    PropertyType = firstStepMetaProperty.Relation.RelatedPartyType.ContractType,
+                //    DeclaringType = firstStepMetaProperty.ContractPropertyInfo.DeclaringType,
+                //    PropertyName = selectItem.AliasName,
+                //    ValueProvider = new ForeignKeyValueProvider(_ownerService, metaProperty, originalJsonProperty),
+                //    Readable = true,
+                //    Writable = false,
+                //};
+
+                //return navigationJsonProperty;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1631,15 +1803,55 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class DomainObjectConverter : JsonConverter
+        public class NavigationValueProvider : IValueProvider
         {
-            private readonly ApplicationEntityService _ownerService;
+            private readonly IValueProvider _firstStepValueProvider;
+            private readonly IPropertyMetadata _firstStepMetaProperty;
+            private readonly QuerySelectItem _selectItem;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public DomainObjectConverter(ApplicationEntityService ownerService)
+            public NavigationValueProvider(IValueProvider firstStepValueProvider, IPropertyMetadata firstStepMetaProperty, QuerySelectItem selectItem)
+            {
+                _firstStepValueProvider = firstStepValueProvider;
+                _firstStepMetaProperty = firstStepMetaProperty;
+                _selectItem = selectItem;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public object GetValue(object target)
+            {
+                throw new NotImplementedException();
+                //var metaProperty = _firstStepMetaProperty;
+
+                //foreach ( var step in _selectItem.PropertyPath )
+                //{
+                //    step
+                //}
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void SetValue(object target, object value)
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class DomainObjectConverter : JsonConverter
+        {
+            private readonly ApplicationEntityService _ownerService;
+            private readonly QueryOptions _queryOptions;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public DomainObjectConverter(ApplicationEntityService ownerService, QueryOptions queryOptions)
             {
                 _ownerService = ownerService;
+                _queryOptions = queryOptions;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1921,7 +2133,7 @@ namespace NWheels.UI
                 jObjectReader.DateTimeZoneHandling = reader.DateTimeZoneHandling;
                 jObjectReader.FloatParseHandling = reader.FloatParseHandling;
 
-                var nestedSerializer = JsonSerializer.Create(_ownerService._serializerSettings);
+                var nestedSerializer = JsonSerializer.Create(_ownerService._defaultSerializerSettings);
                 nestedSerializer.Populate(jObjectReader, target);
 
                 return target;

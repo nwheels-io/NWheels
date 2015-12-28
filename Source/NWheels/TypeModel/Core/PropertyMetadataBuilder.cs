@@ -161,6 +161,38 @@ namespace NWheels.DataObjects.Core
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public object GetPropertyValue(object target)
+        {
+            //TODO: rewrite using dynamic methods
+            if ( this.ContractPropertyInfo != null )
+            {
+                return this.ContractPropertyInfo.GetValue(target);
+            }
+            else
+            {
+                var propertyInfo = target.GetType().GetProperty(this.Name);
+                return propertyInfo.GetValue(target);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void SetPropertyValue(object target, object value)
+        {
+            //TODO: rewrite using dynamic methods
+            if ( this.ContractPropertyInfo != null )
+            {
+                this.ContractPropertyInfo.SetValue(target, value);
+            }
+            else
+            {
+                var propertyInfo = target.GetType().GetProperty(this.Name);
+                propertyInfo.SetValue(target, value);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TypeMetadataBuilder DeclaringContract { get; set; }
         public string Name { get; set; }

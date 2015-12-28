@@ -108,6 +108,22 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Form<TEntity> DisplayRelatedEntityAs<TLookupEntity>(
+            Expression<Func<TEntity, TLookupEntity>> fieldSelector,
+            Expression<Func<TLookupEntity, object>> lookupDisplayProperty)
+        {
+            var metaType = MetadataCache.GetTypeMetadata(typeof(TEntity));
+            var metaProperty = metaType.GetPropertyByDeclaration(fieldSelector.GetPropertyInfo());
+            var propertyAsObjectExpression = metaType.MakePropertyAsObjectExpression(metaProperty);
+
+            var field = FindOrAddField((Expression<Func<TEntity, object>>)propertyAsObjectExpression);
+            field.LookupDisplayProperty = lookupDisplayProperty.GetPropertyInfo().Name;
+
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override IEnumerable<string> GetTranslatables()
         {
             var metaTypeTranslatables = new List<string>();
@@ -347,6 +363,12 @@ namespace NWheels.UI.Toolbox
             {
                 this.LookupEntityName = MetaProperty.Relation.RelatedPartyType.QualifiedName;
                 this.LookupEntityContract = MetaProperty.Relation.RelatedPartyType.ContractType;
+
+                if ( MetaProperty.Relation.RelatedPartyType.IsEntity )
+                {
+                    this.LookupValueProperty = MetaProperty.Relation.RelatedPartyType.EntityIdProperty.Name;
+                    this.LookupDisplayProperty = MetaProperty.Relation.RelatedPartyType.DefaultDisplayProperties.Select(p => p.Name).FirstOrDefault();
+                }
 
                 if ( this.NestedWidget == null )
                 {

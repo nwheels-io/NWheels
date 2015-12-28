@@ -192,7 +192,7 @@ namespace NWheels.Stacks.AspNet
             }
 
             var queryParameters = this.Request.GetQueryString();
-            var options = _context.EntityService.ParseQueryOptions(queryParameters);
+            var options = _context.EntityService.ParseQueryOptions(entityName, queryParameters);
             var command = TryCreateCommandMessage(target, contractName, operationName, queryParameters, synchronous: true);
 
             if ( command == null )
@@ -306,7 +306,7 @@ namespace NWheels.Stacks.AspNet
 
             var queryParameters = this.Request.GetQueryString();
 
-            var options = _context.EntityService.ParseQueryOptions(queryParameters);
+            var options = _context.EntityService.ParseQueryOptions(entityName, queryParameters);
             var json = _context.EntityService.QueryEntityJson(entityName, options);
 
             return ResponseMessage(new HttpResponseMessage() {

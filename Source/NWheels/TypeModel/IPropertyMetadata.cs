@@ -26,6 +26,8 @@ namespace NWheels.DataObjects
         Expression<Func<TEntity, bool>> MakeForeignKeyBinaryExpression<TEntity>(object value, Func<Expression, Expression, Expression> binaryFactory);
         Expression<Func<TEntity, bool>> MakeForeignKeyBinaryExpression<TEntity>(string valueString, Func<Expression, Expression, Expression> binaryFactory);
         IQueryable<TEntity> MakeOrderBy<TEntity>(IQueryable<TEntity> query, bool first, bool ascending);
+        object GetPropertyValue(object target);
+        void SetPropertyValue(object target, object value);
         ITypeMetadata DeclaringContract { get; }
         string Name { get; }
         string ContractQualifiedName { get; }
