@@ -3,12 +3,14 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
+using Hapil;
 
 namespace NWheels.DataObjects.Core
 {
     public class TypeMetadataCache : ITypeMetadataCache
     {
         private readonly IComponentContext _components;
+        private readonly DynamicMethodCompiler _dynamicMethodCompiler;
         private readonly ConcurrentDictionary<Type, TypeMetadataBuilder> _metadataByContractType = new ConcurrentDictionary<Type, TypeMetadataBuilder>();
         private readonly ConcurrentDictionary<string, TypeMetadataBuilder> _metadataByQualifiedName = new ConcurrentDictionary<string, TypeMetadataBuilder>();
         private readonly ConcurrentDictionary<Type, TypeMetadataBuilder> _metadataByImplementationType = new ConcurrentDictionary<Type, TypeMetadataBuilder>();
@@ -23,6 +25,7 @@ namespace NWheels.DataObjects.Core
         public TypeMetadataCache(IComponentContext components, MetadataConventionSet conventions)
         {
             _components = components;
+            _dynamicMethodCompiler = new DynamicMethodCompiler(components.Resolve<DynamicModule>());
 
             _conventions = conventions;
             _conventions.InjectCache(this);
@@ -218,6 +221,13 @@ namespace NWheels.DataObjects.Core
         internal void UpdateMetaTypeImplementation(TypeMetadataBuilder metaType, Type implementationType)
         {
             _metadataByImplementationType.TryAdd(implementationType, metaType);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal DynamicMethodCompiler DynamicMethodCompiler
+        {
+            get { return _dynamicMethodCompiler; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

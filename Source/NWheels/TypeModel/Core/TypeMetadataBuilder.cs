@@ -470,6 +470,13 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal TypeMetadataCache OwnerMetadataCache
+        {
+            get { return _ownerMetadataCache; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void EnsureRelationalMapping(MetadataConventionSet conventions, HashSet<TypeMetadataBuilder> visitedTypes)
         {
             if ( !visitedTypes.Add(this) )

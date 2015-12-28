@@ -117,7 +117,7 @@ namespace NWheels.UI
             var handler = _handlerByEntityName[entityName];
             string json;
 
-            using ( QueryOptions.UseAsCurrent(options) )
+            using ( QueryContext.NewQuery(this, options) )
             {
                 using ( handler.NewUnitOfWork() )
                 {
@@ -136,7 +136,7 @@ namespace NWheels.UI
             var handler = _handlerByEntityName[entityName];
             string json;
 
-            using ( QueryOptions.UseAsCurrent(options) )
+            using ( QueryContext.NewQuery(this, options) )
             {
                 using ( handler.NewUnitOfWork() )
                 {
@@ -401,6 +401,96 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public class QueryContext
+        {
+            private readonly ApplicationEntityService _ownerService;
+            private readonly ITypeMetadata _entityMetaType;
+            private readonly QueryOptions _options;
+            private readonly QueryResults _results;
+            private readonly Dictionary<IPropertyMetadata, LeftJoinOperation> _leftJoinByNavigation;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public QueryContext(ApplicationEntityService ownerService, QueryOptions options)
+            {
+                _ownerService = ownerService;
+                _options = options;
+                _results = new QueryResults();
+                _leftJoinByNavigation = new Dictionary<IPropertyMetadata, LeftJoinOperation>();
+                _entityMetaType = ownerService._metadataCache.GetTypeMetadata(options.EntityName);
+            }
+            
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public QueryOptions Options
+            {
+                get
+                {
+                    return _options;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public QueryResults Results
+            {
+                get
+                {
+                    return _results;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal LeftJoinOperation GetLeftJoinForNavigation(IPropertyMetadata navigationProperty)
+            {
+                var leftSideFactory = GetJoinLeftSideFactory(navigationProperty);
+
+                return _leftJoinByNavigation.GetOrAdd(
+                    navigationProperty,
+                    valueFactory: navigation => new LeftJoinOperation(_ownerService, leftSideFactory, navigation));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private Func<IEnumerable<object>> GetJoinLeftSideFactory(IPropertyMetadata navigationProperty)
+            {
+                if ( navigationProperty.DeclaringContract == _entityMetaType )
+                {
+                    return () => Results.ResultSet;
+                }
+                else
+                {
+                    return () => {
+                        var leftSideJoin = _leftJoinByNavigation.Values.First(j => j.Navigation.Relation.RelatedPartyType == navigationProperty.DeclaringContract);
+                        return leftSideJoin.RightSideResults;
+                    };
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static IDisposable NewQuery(ApplicationEntityService ownerService, QueryOptions options)
+            {
+                return new ThreadStaticResourceConsumerScope<QueryContext>(
+                    handle => new QueryContext(ownerService, options),
+                    externallyOwned: true,
+                    forceNewResource: true);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static QueryContext Current
+            {
+                get
+                {
+                    return ThreadStaticResourceConsumerScope<QueryContext>.CurrentResource;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class QueryResults
         {
             public int? PageNumber { get; set; }
@@ -648,25 +738,6 @@ namespace NWheels.UI
                 var filterItem = new QueryFilterItem(propertyName, @operator, parameter.Value);
                 this.Filter.Add(filterItem);
             }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public static IDisposable UseAsCurrent(QueryOptions options)
-            {
-                return new ThreadStaticResourceConsumerScope<QueryOptions>(
-                    handle => options, 
-                    externallyOwned: true, 
-                    forceNewResource: true);
-            }
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public static QueryOptions Current
-            {
-                get
-                {
-                    return ThreadStaticResourceConsumerScope<QueryOptions>.CurrentResource;
-                }
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -852,6 +923,110 @@ namespace NWheels.UI
                 key.Append("/"); key.Append(Ascending);
             }
         }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal class LeftJoinOperation
+        {
+            private readonly ApplicationEntityService _ownerService;
+            private readonly Func<IEnumerable<object>> _sourceFactory;
+            private readonly IPropertyMetadata _navigation;
+            private readonly Dictionary<object, object> _rightSideValueByLeftSideId;
+            private bool _executed;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public LeftJoinOperation(ApplicationEntityService ownerService, Func<IEnumerable<object>> sourceFactory, IPropertyMetadata navigation)
+            {
+                _ownerService = ownerService;
+                _sourceFactory = sourceFactory;
+                _navigation = navigation;
+                _rightSideValueByLeftSideId = new Dictionary<object, object>();
+                _executed = false;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool TryGetRightSideValue(object leftSideId, out object rightSideValue)
+            {
+                if ( !_executed )
+                {
+                    Execute();
+                }
+
+                return _rightSideValueByLeftSideId.TryGetValue(leftSideId, out rightSideValue);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IPropertyMetadata Navigation
+            {
+                get
+                {
+                    return _navigation;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IEnumerable<object> RightSideResults
+            {
+                get
+                {
+                    return _rightSideValueByLeftSideId.Values.Distinct();
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void Execute()
+            {
+                var source = _sourceFactory().ToArray();
+                var leftSideIdProperty = _navigation.DeclaringContract.EntityIdProperty;
+                var rightSideIdProperty = _navigation.Relation.RelatedPartyType.EntityIdProperty;
+                var rightSideHandler = _ownerService._handlerByEntityName[_navigation.Relation.RelatedPartyType.QualifiedName];
+
+                if ( _navigation.Kind == PropertyKind.Relation || _navigation.Kind == PropertyKind.Part )
+                {
+                    //TODO: implement one-shot left join, instead
+                    foreach ( var leftSideObject in source )
+                    {
+                        var leftSideId = leftSideIdProperty.ReadValue(leftSideObject);
+                        var rightSideObject = _navigation.ReadValue(leftSideObject);
+                        _rightSideValueByLeftSideId[leftSideId] = rightSideObject;
+                    }
+                }
+                else if ( _navigation.RelationalMapping != null )
+                {
+                    if ( _navigation.RelationalMapping.IsForeignKeyEmbeddedInParent )
+                    {
+                        var rightSideIds = source.Select(s => _navigation.ReadValue(s)).ToArray();
+                        var rightSideById = rightSideHandler.GetByIdList(rightSideIds).ToDictionary(r => rightSideIdProperty.ReadValue(r));
+
+                        for ( int i = 0 ; i < source.Length ; i++ )
+                        {
+                            var leftSideId = leftSideIdProperty.ReadValue(source[i]);
+                            var rightSideId = rightSideIds[i];
+                            _rightSideValueByLeftSideId[leftSideId] = rightSideById[rightSideId];
+                        }
+                    }
+                    else 
+                    {
+                        var leftSideIds = source.Select(s => leftSideIdProperty.ReadValue(s)).ToArray();
+                        var rightSideByLeftSideId = rightSideHandler
+                            .GetByForeignKeyList(_navigation.Relation.InverseProperty, leftSideIds)
+                            .ToDictionary(r => _navigation.Relation.InverseProperty.ReadValue(r));
+
+                        foreach ( var kvp in rightSideByLeftSideId )
+                        {
+                            _rightSideValueByLeftSideId[kvp.Key] = kvp.Value;
+                        }
+                    }
+                }
+
+                _executed = true;
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -870,6 +1045,8 @@ namespace NWheels.UI
             public abstract QueryResults Query(QueryOptions options, IQueryable query = null);
             public abstract IEntityId ParseEntityId(string id);
             public abstract IDomainObject GetById(string id);
+            public abstract IDomainObject[] GetByIdList(object[] idList);
+            public abstract IDomainObject[] GetByForeignKeyList(IPropertyMetadata inverseForeignKeyProperty, object[] leftSideIds);
             public abstract bool TryGetById(string id, out IDomainObject entity);
             public abstract IDomainObject CreateNew();
             public abstract void Insert(IDomainObject entity);
@@ -953,21 +1130,17 @@ namespace NWheels.UI
                 return Framework.NewUnitOfWork<TContext>();
             }
 
-
-
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override QueryResults Query(QueryOptions options, IQueryable query = null)
             {
-                var results = new QueryResults();
+                var results = QueryContext.Current.Results;
 
                 using ( var context = Framework.NewUnitOfWork<TContext>() )
                 {
                     var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
                     IQueryable<TEntity> dbQuery = (IQueryable<TEntity>)query ?? repository.AsQueryable();
                     
-                    //dbQuery = ((DataRepositoryBase)(object)context).AuthorizeQuery(dbQuery);
-
                     dbQuery = HandleFilter(options, dbQuery);
 
                     if ( options.NeedCountOperation )
@@ -1069,6 +1242,20 @@ namespace NWheels.UI
                 }
 
                 throw new ArgumentException("Specified entity does not exist.");
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override IDomainObject[] GetByIdList(object[] idList)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override IDomainObject[] GetByForeignKeyList(IPropertyMetadata inverseForeignKeyProperty, object[] leftSideIds)
+            {
+                throw new NotImplementedException();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1314,6 +1501,7 @@ namespace NWheels.UI
 
                     properties = ReplaceRelationPropertiesWithForeignKeys(metaTypes, properties);
                     ConfigureEmbeddedCollectionProperties(metaTypes, properties);
+                    IncludeNavigationProperties(metaTypes, properties);
 
                     properties.Insert(0, CreateObjectTypeProperty());
                     properties.Insert(1, CreateEntityIdProperty());
@@ -1378,7 +1566,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void IncludeAdditionalProperties(ITypeMetadata[] metaTypes, IList<JsonProperty> jsonProperties)
+            private void IncludeNavigationProperties(ITypeMetadata[] metaTypes, IList<JsonProperty> jsonProperties)
             {
                 if ( _queryOptions != null )
                 {
@@ -1389,23 +1577,14 @@ namespace NWheels.UI
 
                         if ( metaType != null )
                         {
-                            
+                            metaProperty = metaType.GetPropertyByName(selectItem.PropertyPath.First());
+
+                            if ( metaProperty.Relation != null )
+                            {
+                                var navigationProperty = CreateNavigationProperty(selectItem, metaProperty);
+                                jsonProperties.Add(navigationProperty);
+                            }
                         }
-                    }
-                }
-
-                foreach ( var jsonProperty in jsonProperties )
-                {
-                    var metaProperty = GetPropertyByName(metaTypes, jsonProperty.PropertyName);
-
-                    if ( IsEmbeddedObjectCollectionProperty(metaProperty) )
-                    {
-                        var converterClosedType =
-                            typeof(EmbeddedDomainObjectCollectionConverter<>).MakeGenericType(metaProperty.Relation.RelatedPartyType.ContractType);
-                        var converterInstance = (JsonConverter)Activator.CreateInstance(converterClosedType, _ownerService, metaProperty);
-                        jsonProperty.MemberConverter = converterInstance;
-
-                        //jsonProperty.ValueProvider = new EmbeddedCollectionValueProvider(innerProvider: jsonProperty.ValueProvider);
                     }
                 }
             }
@@ -1428,20 +1607,18 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private JsonProperty CreateNavigationProperty(QuerySelectItem selectItem, IPropertyMetadata firstStepMetaProperty, JsonProperty firstStepJsonProperty)
+            private JsonProperty CreateNavigationProperty(QuerySelectItem selectItem, IPropertyMetadata firstStepMetaProperty)
             {
-                throw new NotImplementedException();
+                var navigationJsonProperty = new JsonProperty {
+                    PropertyType = firstStepMetaProperty.Relation.RelatedPartyType.ContractType,
+                    DeclaringType = firstStepMetaProperty.ContractPropertyInfo.DeclaringType,
+                    PropertyName = selectItem.AliasName,
+                    ValueProvider = new NavigationValueProvider(selectItem, firstStepMetaProperty),
+                    Readable = true,
+                    Writable = false,
+                };
 
-                //var navigationJsonProperty = new JsonProperty {
-                //    PropertyType = firstStepMetaProperty.Relation.RelatedPartyType.ContractType,
-                //    DeclaringType = firstStepMetaProperty.ContractPropertyInfo.DeclaringType,
-                //    PropertyName = selectItem.AliasName,
-                //    ValueProvider = new ForeignKeyValueProvider(_ownerService, metaProperty, originalJsonProperty),
-                //    Readable = true,
-                //    Writable = false,
-                //};
-
-                //return navigationJsonProperty;
+                return navigationJsonProperty;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1805,30 +1982,45 @@ namespace NWheels.UI
 
         public class NavigationValueProvider : IValueProvider
         {
-            private readonly IValueProvider _firstStepValueProvider;
-            private readonly IPropertyMetadata _firstStepMetaProperty;
             private readonly QuerySelectItem _selectItem;
+            private readonly IPropertyMetadata _firstStepMetaProperty;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public NavigationValueProvider(IValueProvider firstStepValueProvider, IPropertyMetadata firstStepMetaProperty, QuerySelectItem selectItem)
+            public NavigationValueProvider(QuerySelectItem selectItem, IPropertyMetadata firstStepMetaProperty)
             {
-                _firstStepValueProvider = firstStepValueProvider;
-                _firstStepMetaProperty = firstStepMetaProperty;
                 _selectItem = selectItem;
+                _firstStepMetaProperty = firstStepMetaProperty;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public object GetValue(object target)
             {
-                throw new NotImplementedException();
-                //var metaProperty = _firstStepMetaProperty;
+                ITypeMetadata currentMetaType = _firstStepMetaProperty.DeclaringContract;
+                object currentTarget = target;
 
-                //foreach ( var step in _selectItem.PropertyPath )
-                //{
-                //    step
-                //}
+                for ( int stepIndex = 0 ; stepIndex < _selectItem.PropertyPath.Count ; stepIndex++ )
+                {
+                    var nextStepProperty = currentMetaType.GetPropertyByName(_selectItem.PropertyPath[stepIndex]);
+
+                    if ( nextStepProperty.Relation == null )
+                    {
+                        return nextStepProperty.ReadValue(currentTarget);
+                    }
+
+                    var leftJoin = QueryContext.Current.GetLeftJoinForNavigation(nextStepProperty);
+                    var leftSideIdProperty = nextStepProperty.DeclaringContract.EntityIdProperty;
+
+                    if ( !leftJoin.TryGetRightSideValue(leftSideIdProperty.ReadValue(currentTarget), out currentTarget) || currentTarget == null )
+                    {
+                        return null;
+                    }
+
+                    currentMetaType = nextStepProperty.Relation.RelatedPartyType;
+                }
+
+                return currentTarget;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

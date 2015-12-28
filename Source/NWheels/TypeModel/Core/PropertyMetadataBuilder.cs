@@ -20,12 +20,16 @@ namespace NWheels.DataObjects.Core
     public class PropertyMetadataBuilder : MetadataElement<IPropertyMetadata>, IPropertyMetadata
     {
         private readonly ConcurrentDictionary<Type, PropertyInfo> _implementationPropertyByFactoryType;
+        private readonly object _dynamicMethodSyncRoot;
+        private Func<object, object> _valueReaderDynamicMethod = null;
+        private Action<object, object> _valueWriterDynamicMethod = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public PropertyMetadataBuilder()
         {
             _implementationPropertyByFactoryType = new ConcurrentDictionary<Type, PropertyInfo>();
+            _dynamicMethodSyncRoot = new object();
 
             this.ContractAttributes = new List<PropertyContractAttribute>();
             this.Validation = new PropertyValidationMetadataBuilder();
@@ -162,34 +166,53 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        public object GetPropertyValue(object target)
+        public object ReadValue(object target)
         {
-            //TODO: rewrite using dynamic methods
-            if ( this.ContractPropertyInfo != null )
+            if ( ContractPropertyInfo == null )
             {
-                return this.ContractPropertyInfo.GetValue(target);
+                throw new InvalidOperationException("Cannot read value of a property which is not a member of contract interface");
             }
-            else
+
+            if ( target == null )
             {
-                var propertyInfo = target.GetType().GetProperty(this.Name);
-                return propertyInfo.GetValue(target);
+                throw new ArgumentNullException("target");
             }
+
+            if ( _valueReaderDynamicMethod == null )
+            {
+                lock ( _dynamicMethodSyncRoot )
+                {
+                    if ( _valueReaderDynamicMethod == null )
+                    {
+                        _valueReaderDynamicMethod = CompileValueReaderMethod();
+                    }
+                }
+            }
+
+            return _valueReaderDynamicMethod(target);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void SetPropertyValue(object target, object value)
+        public void WriteValue(object target, object value)
         {
-            //TODO: rewrite using dynamic methods
-            if ( this.ContractPropertyInfo != null )
+            if ( ContractPropertyInfo == null )
             {
-                this.ContractPropertyInfo.SetValue(target, value);
+                throw new InvalidOperationException("Cannot write value of a property which is not a member of contract interface");
             }
-            else
+
+            if ( _valueWriterDynamicMethod == null )
             {
-                var propertyInfo = target.GetType().GetProperty(this.Name);
-                propertyInfo.SetValue(target, value);
+                lock ( _dynamicMethodSyncRoot )
+                {
+                    if ( _valueWriterDynamicMethod == null )
+                    {
+                        _valueWriterDynamicMethod = CompileValueWriterMethod();
+                    }
+                }
             }
+
+            _valueWriterDynamicMethod(target, value);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -379,6 +402,40 @@ namespace NWheels.DataObjects.Core
             }
 
             return this.RelationalMapping;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Func<object, object> CompileValueReaderMethod()
+        {
+            var compiler = DeclaringContract.OwnerMetadataCache.DynamicMethodCompiler;
+
+            using ( TT.CreateScope<TT.TContract, TT.TProperty>(DeclaringContract.ContractType, ClrType) )
+            {
+                return compiler.CompileStaticFunction<object, object>(
+                    string.Format("{0}_{1}_ReadValue", DeclaringContract.Name, this.Name),
+                    (w, target) => {
+                        w.Return(target.CastTo<TT.TContract>().Prop<TT.TProperty>(ContractPropertyInfo).CastTo<object>());
+                    }
+                );
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Action<object, object> CompileValueWriterMethod()
+        {
+            var compiler = DeclaringContract.OwnerMetadataCache.DynamicMethodCompiler;
+
+            using ( TT.CreateScope<TT.TContract, TT.TProperty>(DeclaringContract.ContractType, ClrType) )
+            {
+                return compiler.CompileStaticVoidMethod<object, object>(
+                    string.Format("{0}_{1}_WriteValue", DeclaringContract.Name, this.Name),
+                    (w, target, value) => {
+                        target.CastTo<TT.TContract>().Prop<TT.TProperty>(ContractPropertyInfo).Assign(value.CastTo<TT.TProperty>());
+                    }
+                );
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
