@@ -154,6 +154,7 @@ function EntityQueryBuilder(entityName, commandUrl) {
     this._entityTypeFilter = null;
     this._filter = [];
     this._orderBy = [];
+    this._include = [];
     this._take = null;
     this._skip = null;
     this._page = null;
@@ -185,6 +186,13 @@ function EntityQueryBuilder(entityName, commandUrl) {
             ascending: (ascending === undefined ? true : ascending === true)
         };
         me._orderBy.push(item);
+        return me;
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    this.include = function(property) {
+        me._include.push(property);
         return me;
     };
 
@@ -240,6 +248,15 @@ function EntityQueryBuilder(entityName, commandUrl) {
             var item = me._orderBy[i];
             var direction = (item.ascending ? ':asc' : ':desc');
             queryString = queryString + delimiter + '$orderby=' + encodeURIComponent(item.propertyName) + direction;
+            delimiter = '&';
+        }
+
+        if (me._include.length > 0) {
+            var includeSpec = '';
+            for (var i = 0; i < me._include.length; i++) {
+                includeSpec = includeSpec + (i > 0 ? ',' : '') + me._include[i];
+            }
+            queryString = queryString + delimiter + '$include=' + includeSpec;
             delimiter = '&';
         }
 

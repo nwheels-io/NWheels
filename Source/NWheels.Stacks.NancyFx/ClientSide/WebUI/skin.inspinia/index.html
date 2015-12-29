@@ -725,6 +725,9 @@ HEAD, JS/CSS LINKS
                             if (postData.sidx) {
                                 queryBuilder.orderBy(postData.sidx, postData.sord==='asc');
                             }
+                            for (var i = 0; i < $scope.uidl.includedProperties.length; i++) {
+                                queryBuilder.include($scope.uidl.includedProperties[i]);
+                            }
                             if (postData._search === true) {
                                 var filterObject = JSON.parse(postData.filters);
                                 for (var i = 0; i < filterObject.rules.length; i++) {

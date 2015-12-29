@@ -24,7 +24,7 @@ using NWheels.Utilities;
 
 namespace NWheels.Stacks.MongoDb
 {
-    public class MongoEntityRepository<TEntityContract, TEntityImpl> : IEntityRepository<TEntityContract>, IEntityRepository, IMongoEntityRepository, IQueryable<TEntityContract>
+    public class MongoEntityRepository<TEntityContract, TEntityImpl, TEntityId> : IEntityRepository<TEntityContract>, IEntityRepository, IMongoEntityRepository, IQueryable<TEntityContract>
         where TEntityContract : class
         where TEntityImpl : class, TEntityContract
     {
@@ -171,6 +171,32 @@ namespace NWheels.Stacks.MongoDb
         object IEntityRepository.TryGetById(IEntityId id)
         {
             return TryGetById(id);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        object[] IEntityRepository.GetByIdList(object[] idValues)
+        {
+            var results = _ownerRepo.LazyLoadByIdList<TEntityContract, TEntityId>(idValues.Cast<TEntityId>()).ToArray();
+
+            return results
+                .Select(r => InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>((TEntityImpl)r, shouldTrack: true))
+                .Cast<object>()
+                .ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        object[] IEntityRepository.GetByForeignKeyList(IPropertyMetadata foreignKeyProperty, object[] foreignKeyValues)
+        {
+            var query = Query.In(foreignKeyProperty.Name, new BsonArray(foreignKeyValues));
+            var cursor = _mongoCollection.Find(query);
+
+            return new DelegatingTransformingEnumerable<TEntityImpl, TEntityContract>(
+                cursor,
+                e => InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>(e, shouldTrack: true))
+                .Cast<object>()
+                .ToArray();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -785,13 +811,13 @@ namespace NWheels.Stacks.MongoDb
 
         private class InterceptingQueryProvider : IQueryProvider
         {
-            private readonly MongoEntityRepository<TEntityContract, TEntityImpl> _ownerRepo;
+            private readonly MongoEntityRepository<TEntityContract, TEntityImpl, TEntityId> _ownerRepo;
             private readonly IQueryProvider _actualQueryProvider;
             private readonly MongoQueryExpressionSpecializer _expressionSpecializer;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public InterceptingQueryProvider(MongoEntityRepository<TEntityContract, TEntityImpl> ownerRepo)
+            public InterceptingQueryProvider(MongoEntityRepository<TEntityContract, TEntityImpl, TEntityId> ownerRepo)
             {
                 _ownerRepo = ownerRepo;
                 _actualQueryProvider = ownerRepo.MongoCollection.AsQueryable().Provider;
@@ -966,13 +992,13 @@ namespace NWheels.Stacks.MongoDb
 
         private class InterceptingQuery<T> : IOrderedQueryable<T>
         {
-            private readonly MongoEntityRepository<TEntityContract, TEntityImpl> _ownerRepo;
+            private readonly MongoEntityRepository<TEntityContract, TEntityImpl, TEntityId> _ownerRepo;
             private readonly IQueryable<T> _underlyingQuery;
             private readonly IMongoDbLogger _logger;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public InterceptingQuery(MongoEntityRepository<TEntityContract, TEntityImpl> ownerRepo, IQueryable<T> underlyingQuery, IMongoDbLogger logger)
+            public InterceptingQuery(MongoEntityRepository<TEntityContract, TEntityImpl, TEntityId> ownerRepo, IQueryable<T> underlyingQuery, IMongoDbLogger logger)
             {
                 _logger = logger;
                 _ownerRepo = ownerRepo;
@@ -1040,12 +1066,12 @@ namespace NWheels.Stacks.MongoDb
 
         private class InterceptingQuery : IOrderedQueryable
         {
-            private readonly MongoEntityRepository<TEntityContract, TEntityImpl> _ownerRepo;
+            private readonly MongoEntityRepository<TEntityContract, TEntityImpl, TEntityId> _ownerRepo;
             private readonly IQueryable _underlyingQuery;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public InterceptingQuery(MongoEntityRepository<TEntityContract, TEntityImpl> ownerRepo, IQueryable underlyingQuery)
+            public InterceptingQuery(MongoEntityRepository<TEntityContract, TEntityImpl, TEntityId> ownerRepo, IQueryable underlyingQuery)
             {
                 _ownerRepo = ownerRepo;
                 _underlyingQuery = underlyingQuery;

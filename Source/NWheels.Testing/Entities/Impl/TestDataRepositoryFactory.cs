@@ -12,6 +12,7 @@ using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
+using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Testing.Entities.Impl
 {
@@ -77,10 +78,13 @@ namespace NWheels.Testing.Entities.Impl
                 MethodWriterBase writer,
                 IOperand<TypeTemplate.TIndex1> partitionValue)
             {
-                return writer.New<TestEntityRepository<TypeTemplate.TContract>>(
-                    writer.This<DataRepositoryBase>().Prop(x => x.Components), 
-                    base.EntityFactoryField, 
-                    base.DomainObjectFactoryField);
+                using ( TT.CreateScope<TT.TKey>(entity.Metadata.EntityIdProperty.ClrType) )
+                {
+                    return writer.New<TestEntityRepository<TT.TContract, TT.TKey>>(
+                        writer.This<DataRepositoryBase>().Prop(x => x.Components),
+                        base.EntityFactoryField,
+                        base.DomainObjectFactoryField);
+                }
             }
         }
     }

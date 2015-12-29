@@ -14,7 +14,7 @@ using NWheels.Utilities;
 
 namespace NWheels.Testing.Entities
 {
-    public class TestEntityRepository<TEntity> : IEntityRepository<TEntity>, IEntityRepository, IQueryable<TEntity>
+    public class TestEntityRepository<TEntity, TEntityId> : IEntityRepository<TEntity>, IEntityRepository, IQueryable<TEntity>
         where TEntity : class
     {
         private readonly EntityObjectFactory _objectFactory;
@@ -60,6 +60,32 @@ namespace NWheels.Testing.Entities
         object IEntityRepository.TryGetById(IEntityId id)
         {
             return TryGetById(id);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        object[] IEntityRepository.GetByIdList(object[] idValues)
+        {
+            return idValues.Cast<TEntityId>().Select(id => TryGetById<TEntityId>(id)).Cast<object>().ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        object[] IEntityRepository.GetByForeignKeyList(IPropertyMetadata foreignKeyProperty, object[] foreignKeyValues)
+        {
+            var results = new List<object>();
+
+            foreach ( var entity in _storedEntities )
+            {
+                var value = foreignKeyProperty.ReadValue(entity);
+                
+                if ( foreignKeyValues.Any(v => (v == null && value == null) || (v != null && v.Equals(value))) )
+                {
+                    results.Add(entity);
+                }
+            }
+
+            return results.ToArray();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

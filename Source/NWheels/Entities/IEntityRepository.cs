@@ -14,6 +14,8 @@ namespace NWheels.Entities
         object New();
         object New(Type concreteContract);
         object TryGetById(IEntityId id);
+        object[] GetByIdList(object[] idValues);
+        object[] GetByForeignKeyList(IPropertyMetadata foreignKeyProperty, object[] foreignKeyValues);
         IEntityId MakeEntityId(object value);
         void Save(object entity);
         void Insert(object entity);

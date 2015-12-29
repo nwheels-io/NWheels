@@ -996,31 +996,28 @@ namespace NWheels.UI
                         _rightSideValueByLeftSideId[leftSideId] = rightSideObject;
                     }
                 }
-                else if ( _navigation.RelationalMapping != null )
+                else if ( _navigation.RelationalMapping == null || _navigation.RelationalMapping.IsForeignKeyEmbeddedInParent )
                 {
-                    if ( _navigation.RelationalMapping.IsForeignKeyEmbeddedInParent )
-                    {
-                        var rightSideIds = source.Select(s => _navigation.ReadValue(s)).ToArray();
-                        var rightSideById = rightSideHandler.GetByIdList(rightSideIds).ToDictionary(r => rightSideIdProperty.ReadValue(r));
+                    var rightSideIds = source.Select(s => _navigation.ReadValue(s)).ToArray();
+                    var rightSideById = rightSideHandler.GetByIdList(rightSideIds).ToDictionary(r => rightSideIdProperty.ReadValue(r));
 
-                        for ( int i = 0 ; i < source.Length ; i++ )
-                        {
-                            var leftSideId = leftSideIdProperty.ReadValue(source[i]);
-                            var rightSideId = rightSideIds[i];
-                            _rightSideValueByLeftSideId[leftSideId] = rightSideById[rightSideId];
-                        }
+                    for ( int i = 0 ; i < source.Length ; i++ )
+                    {
+                        var leftSideId = leftSideIdProperty.ReadValue(source[i]);
+                        var rightSideId = rightSideIds[i];
+                        _rightSideValueByLeftSideId[leftSideId] = rightSideById[rightSideId];
                     }
-                    else 
-                    {
-                        var leftSideIds = source.Select(s => leftSideIdProperty.ReadValue(s)).ToArray();
-                        var rightSideByLeftSideId = rightSideHandler
-                            .GetByForeignKeyList(_navigation.Relation.InverseProperty, leftSideIds)
-                            .ToDictionary(r => _navigation.Relation.InverseProperty.ReadValue(r));
+                }
+                else 
+                {
+                    var leftSideIds = source.Select(s => leftSideIdProperty.ReadValue(s)).ToArray();
+                    var rightSideByLeftSideId = rightSideHandler
+                        .GetByForeignKeyList(_navigation.Relation.InverseProperty, leftSideIds)
+                        .ToDictionary(r => _navigation.Relation.InverseProperty.ReadValue(r));
 
-                        foreach ( var kvp in rightSideByLeftSideId )
-                        {
-                            _rightSideValueByLeftSideId[kvp.Key] = kvp.Value;
-                        }
+                    foreach ( var kvp in rightSideByLeftSideId )
+                    {
+                        _rightSideValueByLeftSideId[kvp.Key] = kvp.Value;
                     }
                 }
 
@@ -1248,14 +1245,24 @@ namespace NWheels.UI
 
             public override IDomainObject[] GetByIdList(object[] idList)
             {
-                throw new NotImplementedException();
+                using ( var context = Framework.NewUnitOfWork<TContext>() )
+                {
+                    var repository = context.GetEntityRepository(typeof(TEntity));
+                    var results = repository.GetByIdList(idList);
+                    return results.Cast<IDomainObject>().ToArray();
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override IDomainObject[] GetByForeignKeyList(IPropertyMetadata inverseForeignKeyProperty, object[] leftSideIds)
             {
-                throw new NotImplementedException();
+                using ( var context = Framework.NewUnitOfWork<TContext>() )
+                {
+                    var repository = context.GetEntityRepository(typeof(TEntity));
+                    var results = repository.GetByForeignKeyList(inverseForeignKeyProperty, leftSideIds);
+                    return results.Cast<IDomainObject>().ToArray();
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

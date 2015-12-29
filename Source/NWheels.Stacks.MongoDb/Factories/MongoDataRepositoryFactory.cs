@@ -119,12 +119,15 @@ namespace NWheels.Stacks.MongoDb.Factories
                 Operand<Func<object, string>> partitionNameFuncArgument;
                 GetPartitionOperands(writer, entity, partitionValue, out partitionValueArgument, out partitionNameFuncArgument);
 
-                return writer.New<MongoEntityRepository<TT.TContract, TT.TImpl>>(
-                    writer.This<MongoDataRepositoryBase>(), 
-                    base.MetadataCacheField,
-                    base.EntityFactoryField,
-                    partitionValueArgument,
-                    partitionNameFuncArgument);
+                using ( TT.CreateScope<TT.TKey>(entity.Metadata.EntityIdProperty.ClrType) )
+                {
+                    return writer.New<MongoEntityRepository<TT.TContract, TT.TImpl, TT.TKey>>(
+                        writer.This<MongoDataRepositoryBase>(),
+                        base.MetadataCacheField,
+                        base.EntityFactoryField,
+                        partitionValueArgument,
+                        partitionNameFuncArgument);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

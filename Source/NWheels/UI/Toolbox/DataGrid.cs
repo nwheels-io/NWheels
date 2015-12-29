@@ -18,12 +18,40 @@ namespace NWheels.UI.Toolbox
             : base(idName, parent)
         {
             DisplayColumns = new List<GridColumn>();
+            IncludedProperties = new List<string>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void DescribePresenter(PresenterBuilder<DataGrid, Empty.Data, Empty.State> presenter)
         {
+            FindPropertiesToInclude();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void FindPropertiesToInclude()
+        {
+            var metaType = MetadataCache.GetTypeMetadata(this.EntityName);
+
+            foreach ( var column in DisplayColumns )
+            {
+                if ( column.Navigations.Length > 1 )
+                {
+                    for ( int i = 0 ; i < column.Navigations.Length ; i++ )
+                    {
+                        IPropertyMetadata metaProperty;
+
+                        if ( metaType.TryGetPropertyByName(column.Navigations[i], out metaProperty) )
+                        {
+                            if ( metaProperty.Relation != null && i < column.Navigations.Length - 1 && !metaProperty.Relation.RelatedPartyType.IsEntityPart )
+                            {
+                                IncludedProperties.Add(column.Expression);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,10 +61,13 @@ namespace NWheels.UI.Toolbox
         
         [DataMember]
         public List<GridColumn> DisplayColumns { get; set; }
-        
+
         [DataMember]
         public List<GridColumn> DefaultDisplayColumns { get; set; }
-        
+
+        [DataMember]
+        public List<string> IncludedProperties { get; set; }
+
         [DataMember]
         public bool UsePascalCase { get; set; }
 
@@ -101,10 +132,15 @@ namespace NWheels.UI.Toolbox
         public class GridColumn
         {
             public GridColumn(ITypeMetadata metaType, LambdaExpression propertyNavigation, string title = null, FieldSize size = FieldSize.Medium, string format = null)
+                : this(metaType, ParsePropertyNavigation(propertyNavigation), title, size, format)
             {
-                var expressionString = propertyNavigation.ToNormalizedNavigationString(convertToCamelCase: false);
+            }
 
-                this.Navigations = expressionString.Split('.').Skip(1).ToArray();
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal GridColumn(ITypeMetadata metaType, string[] navigations, string title = null, FieldSize size = FieldSize.Medium, string format = null)
+            {
+                this.Navigations = navigations;
                 this.Expression = string.Join(".", Navigations);
 
                 this.Title = title ?? this.Navigations.Last();
@@ -114,7 +150,7 @@ namespace NWheels.UI.Toolbox
                 ITypeMetadata destinationMetaType;
                 IPropertyMetadata destinationMetaProperty;
                 FindDeclaringMetaType(metaType, out destinationMetaType, out destinationMetaProperty);
-                    
+
                 this.DeclaringTypeName = destinationMetaType.QualifiedName;
                 this.MetaProperty = destinationMetaProperty;
             }
@@ -148,8 +184,7 @@ namespace NWheels.UI.Toolbox
                 {
                     var navigationMetaProperty = destinationMetaType.GetPropertyByName(Navigations[i]);
 
-                    if ( (navigationMetaProperty.Kind == PropertyKind.Part || navigationMetaProperty.Kind == PropertyKind.Relation) &&
-                        navigationMetaProperty.Relation != null )
+                    if ( i < Navigations.Length - 1 && navigationMetaProperty.Relation != null )
                     {
                         destinationMetaType = navigationMetaProperty.Relation.RelatedPartyType;
                     }
@@ -160,6 +195,14 @@ namespace NWheels.UI.Toolbox
                 }
 
                 destinationMetaProperty = destinationMetaType.GetPropertyByName(Navigations.Last());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            internal static string[] ParsePropertyNavigation(LambdaExpression propertyNavigation)
+            {
+                var expressionString = propertyNavigation.ToNormalizedNavigationString(convertToCamelCase: false);
+                return expressionString.Split('.').Skip(1).ToArray();
             }
         }
     }
@@ -196,7 +239,10 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DataGrid<TDataRow> Column<T>(Expression<Func<TDataRow, T>> propertySelector, string title = null, FieldSize size = FieldSize.Medium)
+        public DataGrid<TDataRow> Column<T>(
+            Expression<Func<TDataRow, T>> propertySelector, 
+            string title = null, 
+            FieldSize size = FieldSize.Medium)
         {
             this.DisplayColumns.Add(new GridColumn(MetaType, propertySelector, title, size));
             return this;
@@ -210,6 +256,23 @@ namespace NWheels.UI.Toolbox
         {
             var derivedMetaType = MetadataCache.GetTypeMetadata(typeof(TDerivedDataRow));
             this.DisplayColumns.Add(new GridColumn(derivedMetaType, propertySelector, title, size));
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DataGrid<TDataRow> ColumnWithNavigationTo<TDestinationEntity>(
+            Expression<Func<TDataRow, object>> sourcePropertySelector,
+            Expression<Func<TDestinationEntity, object>> destinationPropertySelector,
+            string title = null,
+            FieldSize size = FieldSize.Medium)
+        {
+            var navigations =
+                GridColumn.ParsePropertyNavigation(sourcePropertySelector)
+                .Concat(GridColumn.ParsePropertyNavigation(destinationPropertySelector))
+                .ToArray();
+
+            this.DisplayColumns.Add(new GridColumn(MetaType, navigations, title, size));
             return this;
         }
 

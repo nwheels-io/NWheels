@@ -41,7 +41,7 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
-            return new WidgetUidlNode[] { Form, FormTypeSelector }.Where(w => w != null);
+            return new WidgetUidlNode[] { Form, FormTypeSelector, Grid }.Where(w => w != null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

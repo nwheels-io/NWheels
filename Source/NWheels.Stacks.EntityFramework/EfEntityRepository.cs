@@ -133,6 +133,20 @@ namespace NWheels.Stacks.EntityFramework
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public object[] GetByIdList(object[] idValues)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public object[] GetByForeignKeyList(IPropertyMetadata foreignKeyProperty, object[] foreignKeyValues)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TEntityContract TryGetById<TId>(TId id)
         {
             IEntityId entityId = new EntityId<TEntityContract, TId>(id);
