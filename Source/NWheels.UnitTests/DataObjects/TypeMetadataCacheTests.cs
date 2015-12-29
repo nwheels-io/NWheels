@@ -12,14 +12,14 @@ using NWheels.Testing.DataObjects;
 namespace NWheels.UnitTests.DataObjects
 {
     [TestFixture]
-    public class TypeMetadataCacheTests
+    public class TypeMetadataCacheTests : UnitTestBase
     {
         [Test]
         public void CanBuildScalarProperties()
         {
             //-- Arrange
 
-            var cache = new TypeMetadataCache(new ContainerBuilder().Build(), CreateMetadataConventionSet());
+            var cache = new TypeMetadataCache(Framework.Components, CreateMetadataConventionSet());
 
             //-- Act
 
@@ -43,7 +43,7 @@ namespace NWheels.UnitTests.DataObjects
         {
             //-- Arrange
 
-            var cache = new TypeMetadataCache(new ContainerBuilder().Build(), CreateMetadataConventionSet());
+            var cache = new TypeMetadataCache(Framework.Components, CreateMetadataConventionSet());
 
             //-- Act
 
@@ -62,7 +62,7 @@ namespace NWheels.UnitTests.DataObjects
         {
             //-- Arrange
 
-            var cache = new TypeMetadataCache(new ContainerBuilder().Build(), CreateMetadataConventionSet());
+            var cache = new TypeMetadataCache(Framework.Components, CreateMetadataConventionSet());
 
             //-- Act
 
@@ -80,7 +80,7 @@ namespace NWheels.UnitTests.DataObjects
         {
             //-- Arrange
 
-            var cache = new TypeMetadataCache(new ContainerBuilder().Build(), CreateMetadataConventionSet());
+            var cache = new TypeMetadataCache(Framework.Components, CreateMetadataConventionSet());
 
             //-- Act
 
@@ -117,18 +117,19 @@ namespace NWheels.UnitTests.DataObjects
         {
             //-- Arrange
 
-            var builder = new ContainerBuilder();
+            Framework.UpdateComponents(
+                builder => {
+                    builder.RegisterInstance(
+                        new MixinRegistration(typeof(TestDataObjects.Repository2.IPrimaryContract), typeof(TestDataObjects.Repository2.IFirstMixinContract)))
+                        .As<MixinRegistration>();
 
-            builder.RegisterInstance(
-                new MixinRegistration(typeof(TestDataObjects.Repository2.IPrimaryContract), typeof(TestDataObjects.Repository2.IFirstMixinContract)))
-                .As<MixinRegistration>();
+                    builder.RegisterInstance(
+                        new MixinRegistration(typeof(TestDataObjects.Repository2.IPrimaryContract), typeof(TestDataObjects.Repository2.ISecondMixinContract)))
+                        .As<MixinRegistration>();
+                });
 
-            builder.RegisterInstance(
-                new MixinRegistration(typeof(TestDataObjects.Repository2.IPrimaryContract), typeof(TestDataObjects.Repository2.ISecondMixinContract)))
-                .As<MixinRegistration>();
 
-            var container = builder.Build();
-            var cache = new TypeMetadataCache(container, CreateMetadataConventionSet());
+            var cache = new TypeMetadataCache(Framework.Components, CreateMetadataConventionSet());
 
             //-- Act
 
