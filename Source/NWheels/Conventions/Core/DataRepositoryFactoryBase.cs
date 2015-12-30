@@ -192,7 +192,7 @@ namespace NWheels.Conventions.Core
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected DataRepositoryConvention(TypeMetadataCache metadataCache, EntityObjectFactory entityFactory)
-                : base(Will.InspectDeclaration | Will.ImplementPrimaryInterface)
+                : base(Will.InspectDeclaration | Will.ImplementBaseClass | Will.ImplementPrimaryInterface)
             {
                 _metadataCache = metadataCache;
                 _entityFactory = entityFactory;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
@@ -50,6 +51,10 @@ namespace NWheels.Stacks.MongoDb
             ThreadStaticRepositoryStack.Pop(this);
             base.EndLifetimeScope();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public abstract void InitializeDatabase(MongoDatabase database);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

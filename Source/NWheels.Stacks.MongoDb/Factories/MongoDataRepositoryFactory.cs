@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -32,6 +33,7 @@ namespace NWheels.Stacks.MongoDb.Factories
         private readonly IFrameworkDatabaseConfig _dbConfiguration;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly MongoEntityObjectFactory _entityFactory;
+        private readonly ConcurrentDictionary<string, DbInitializedIndicator> _dbInitializedIndicatorByName;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -49,6 +51,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             _entityFactory = entityFactory;
             _dbConfiguration = dbConfiguration;
             _metadataCache = metadataCache;
+            _dbInitializedIndicatorByName = new ConcurrentDictionary<string, DbInitializedIndicator>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -67,13 +70,17 @@ namespace NWheels.Stacks.MongoDb.Factories
             var server = client.GetServer();
             var database = server.GetDatabase(connectionStringBuilder.DatabaseName);
 
-            return (IApplicationDataRepository)CreateInstanceOf(repositoryType).UsingConstructor(
+            var dataRepository = (MongoDataRepositoryBase)CreateInstanceOf(repositoryType).UsingConstructor(
                 consumerScope,
                 _components, 
                 _entityFactory, 
                 _metadataCache, 
                 database, 
                 autoCommit);
+
+            EnsureDatabaseInitialized(dataRepository);
+
+            return dataRepository;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,6 +90,23 @@ namespace NWheels.Stacks.MongoDb.Factories
             return new IObjectFactoryConvention[] {
                 new MongoDataRepositoryConvention(_entityFactory, base.MetadataCache)
             };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void EnsureDatabaseInitialized(MongoDataRepositoryBase dataRepository)
+        {
+            _dbInitializedIndicatorByName.GetOrAdd(dataRepository.Database.Name, key => new DbInitializedIndicator(dataRepository));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class DbInitializedIndicator
+        {
+            public DbInitializedIndicator(MongoDataRepositoryBase repository)
+            {
+                repository.InitializeDatabase(repository.Database);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -97,13 +121,23 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            {
+                base.OnImplementBaseClass(writer);
+
+                writer.ImplementBase<MongoDataRepositoryBase>()
+                    .Method<MongoDatabase>(x => x.InitializeDatabase).Implement(WriteCollectionIndexes);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             protected override void ImplementBuildDbCompiledModel(
                 FunctionMethodWriter<object> writer,
                 Operand<ITypeMetadataCache> metadataCache,
                 Operand<MongoDatabase> connection)
             {
                 WritePolymorphicEntityRegistrations(writer);
-                WriteCollectionIndexes(writer, connection);
+                //WriteCollectionIndexes(writer, connection);
 
                 base.CompiledModelField.Assign(writer.New<object>());
             }
@@ -196,7 +230,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void WriteCollectionIndexes(FunctionMethodWriter<object> writer, Operand<MongoDatabase> database)
+            private void WriteCollectionIndexes(MethodWriterBase writer, Operand<MongoDatabase> database)
             {
                 var w = writer;
 
