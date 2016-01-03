@@ -39,7 +39,7 @@ namespace NWheels.UI
         private readonly IJsonSerializationExtension[] _jsonExtensions;
         private readonly ConcurrentDictionary<string, JsonSerializerSettings> _serializerSettingsCache;
         private readonly JsonSerializerSettings _defaultSerializerSettings;
-
+            
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ApplicationEntityService(
@@ -526,6 +526,17 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public enum AggregationType
+        {
+            None,
+            Sum,
+            Avg,
+            Min,
+            Max
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class QueryOptions
         {
             public const string TypeParameterKey = "$type";
@@ -561,6 +572,10 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public const string PropertyAggregationSeparator = "!";
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public QueryOptions(string entityName, IDictionary<string, string> queryParams)
             {
                 EntityName = entityName;
@@ -570,6 +585,7 @@ namespace NWheels.UI
                 InMemoryFilter = new List<QueryFilterItem>();
                 OrderBy = new List<QueryOrderByItem>();
                 InMemoryOrderBy = new List<QueryOrderByItem>();
+                InMemoryAggregations = new List<QuerySelectItem>();
 
                 foreach ( var parameter in queryParams )
                 {
@@ -627,6 +643,7 @@ namespace NWheels.UI
             public IList<QueryFilterItem> InMemoryFilter { get; private set; }
             public IList<QueryOrderByItem> OrderBy { get; private set; }
             public IList<QueryOrderByItem> InMemoryOrderBy { get; private set; }
+            public IList<QuerySelectItem> InMemoryAggregations { get; private set; }
             public int? Skip { get; private set; }
             public int? Take { get; private set; }
             public int? Page { get; private set; }
@@ -697,7 +714,13 @@ namespace NWheels.UI
 
                 foreach ( var specifier in propertySpecifiers )
                 {
-                    destination.Add(new QuerySelectItem(specifier));
+                    var selectItem = new QuerySelectItem(specifier);
+                    destination.Add(selectItem);
+
+                    if ( selectItem.AggregationType != AggregationType.None )
+                    {
+                        this.InMemoryAggregations.Add(selectItem);
+                    }
                 }
 
                 return destination;
@@ -754,7 +777,17 @@ namespace NWheels.UI
             public QuerySelectItem(string propertySpecifier)
             {
                 var aliasPosition = propertySpecifier.IndexOf(QueryOptions.PropertyAliasModifier, StringComparison.InvariantCultureIgnoreCase);
-                var propertyPathString = (aliasPosition > 0 ? propertySpecifier.Substring(0, aliasPosition) : propertySpecifier);
+                var pathAndAggregation = (aliasPosition > 0 ? propertySpecifier.Substring(0, aliasPosition) : propertySpecifier);
+
+                var aggregationPosition = pathAndAggregation.IndexOf(QueryOptions.PropertyAggregationSeparator, StringComparison.InvariantCultureIgnoreCase);
+                var aggregationString = (aggregationPosition > 0 ? pathAndAggregation.Substring(aggregationPosition + 1) : null);
+
+                if ( !string.IsNullOrEmpty(aggregationString) )
+                {
+                    this.AggregationType = (AggregationType)Enum.Parse(typeof(AggregationType), aggregationString, ignoreCase: true);
+                }
+
+                var propertyPathString = (aliasPosition > 0 ? pathAndAggregation.Substring(0, aggregationPosition) : pathAndAggregation);
 
                 this.PropertyPath = propertyPathString.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -772,6 +805,7 @@ namespace NWheels.UI
 
             public IReadOnlyList<string> PropertyPath { get; private set; }
             public string AliasName { get; private set; }
+            public AggregationType AggregationType { get; private set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 

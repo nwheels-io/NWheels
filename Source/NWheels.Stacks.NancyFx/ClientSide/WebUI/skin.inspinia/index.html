@@ -739,8 +739,6 @@ HEAD, JS/CSS LINKS
                             queryBuilder.page(postData.page);
                             var requestUrl = queryBuilder.getQueryUrl();
                             $scope.$http.post(
-                                //'http://localhost:9411/command/query/AffiliatePerformance/TransactionScript/TransactionScripts.AffiliatePerformanceReportTx/Execute',
-                                //{"input":{"Product":"7","Affiliate":"3","From":"2015-10-22 00:00:00","To":"2015-11-23 00:00:00","Grouping":"Monthly"}}
                                 requestUrl,
                                 $scope.preparedRequest.data
                             ).then(
@@ -775,6 +773,7 @@ HEAD, JS/CSS LINKS
                         pager: "#rdtpager_" + $scope.uniqueWidgetId,
                         viewrecords: true,
                         rownumbers: true,
+                        footerrow: ($scope.uidl.enableTotalRow===true),
                         add: false,
                         edit: false,
                         hidegrid: false,
@@ -825,11 +824,27 @@ HEAD, JS/CSS LINKS
                             return false;
                         },
                         gridComplete: function () {
+                            var grid = $('#rdt_' + $scope.uniqueWidgetId);
                             if ($scope.uidl.enableDetailPane && $scope.uidl.detailPaneExpanded) {
                                 var rowIds = $('#rdt_' + $scope.uniqueWidgetId).getDataIDs();
                                 $.each(rowIds, function (index, rowId) {
-                                    $('#rdt_' + $scope.uniqueWidgetId).expandSubGridRow(rowId); 
+                                    grid.expandSubGridRow(rowId); 
                                 });
+                            }
+                            if ($scope.uidl.enableTotalRow) {
+                                var totalSpec = { };
+                                $scope.gridColumns.forEach(function (metaColumn, idx) {
+                                    if (idx===0) {
+                                        totalSpec[metaColumn.expression] = 'Total:';
+                                    } else {
+                                        totalSpec[metaColumn.expression] = '1,000.00';
+                                    }
+                                });
+                                grid.jqGrid("footerData", "set", totalSpec);
+                                if ($scope.uidl.totalRowOnTop) {
+                                    var gview = grid.closest("ui-jqgrid-view"); // get div#gview_list
+                                    $("div.ui-jqgrid-sdiv",gview[0]).after($("div.ui-jqgrid-bdiv",gview[0]));
+                                }
                             }
                         }
                     };

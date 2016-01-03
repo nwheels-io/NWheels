@@ -133,6 +133,7 @@
     <Compile Include="Processing\Spikes\ProtobufSerializationTests.cs" />
     <Compile Include="Processing\TransientStateMachineTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\ApplicationEntityServiceTests.cs" />
     <Compile Include="Utilities\ObjectUtilityTests.cs" />
     <Compile Include="Utilities\ParseUtilityTests.cs" />
   </ItemGroup>

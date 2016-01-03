@@ -83,6 +83,12 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public bool EnableDetailPane { get; set; }
 
+        [DataMember]
+        public bool EnableTotalRow { get; set; }
+
+        [DataMember]
+        public bool TotalRowOnTop { get; set; }
+
         [DataMember, ManuallyAssigned]
         public WidgetUidlNode DetailPaneWidget { get; set; }
 

@@ -20,7 +20,7 @@ namespace NWheels.DataObjects.Core
     public class PropertyMetadataBuilder : MetadataElement<IPropertyMetadata>, IPropertyMetadata
     {
         private readonly ConcurrentDictionary<Type, PropertyInfo> _implementationPropertyByFactoryType;
-        private readonly object _dynamicMethodSyncRoot;
+        private readonly object _dynamicMethodSyncRoot = new object();
         private Func<object, object> _valueReaderDynamicMethod = null;
         private Action<object, object> _valueWriterDynamicMethod = null;
 
@@ -29,7 +29,6 @@ namespace NWheels.DataObjects.Core
         public PropertyMetadataBuilder()
         {
             _implementationPropertyByFactoryType = new ConcurrentDictionary<Type, PropertyInfo>();
-            _dynamicMethodSyncRoot = new object();
 
             this.ContractAttributes = new List<PropertyContractAttribute>();
             this.Validation = new PropertyValidationMetadataBuilder();

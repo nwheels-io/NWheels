@@ -47,6 +47,8 @@ namespace NWheels.UI.Toolbox
             CriteriaForm.Commands.Add(ShowReport);
             ResultTable.UsePascalCase = true;
             ResultTable.EnablePaging = true;
+            ResultTable.EnableTotalRow = true;
+            ResultTable.TotalRowOnTop = true;
             ShowReport.Kind = CommandKind.Submit;
 
             var attribute = typeof(TScript).GetCustomAttribute<TransactionScriptAttribute>();
