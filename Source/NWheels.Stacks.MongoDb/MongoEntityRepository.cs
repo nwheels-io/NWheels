@@ -543,6 +543,11 @@ namespace NWheels.Stacks.MongoDb
                         deleted: result.DeletedCount,
                         modified: result.ModifiedCount,
                         matched: result.MatchedCount);
+
+                    foreach ( var entity in entities )
+                    {
+                        entity.As<IDomainObject>().AfterCommit();
+                    }
                 }
                 catch ( Exception e )
                 {
