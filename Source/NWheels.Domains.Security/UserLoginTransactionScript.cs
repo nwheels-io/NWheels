@@ -125,7 +125,11 @@ namespace NWheels.Domains.Security
                 UserRoles = principal.GetUserRoles();
                 AllClaims = principal.Identity.Claims.Select(c => c.Value).ToArray();
                 LastLoginAtUtc = account.LastLoginAtUtc;
-                IdleSessionExpiryMinutes = (int)endpoint.SessionIdleTimeoutDefault.GetValueOrDefault(TimeSpan.Zero).TotalMinutes;
+
+                if ( endpoint != null )
+                {
+                    IdleSessionExpiryMinutes = (int)endpoint.SessionIdleTimeoutDefault.GetValueOrDefault(TimeSpan.Zero).TotalMinutes;
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
