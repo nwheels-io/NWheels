@@ -315,6 +315,8 @@
     <Compile Include="UI\ApplicationEntityService.cs" />
     <Compile Include="UI\Core\IJsonSerializationExtension.cs" />
     <Compile Include="UI\Core\IUidlApplicationEndpoint.cs" />
+    <Compile Include="UI\Factories\QueryResultAggregatorObjectFactory.cs" />
+    <Compile Include="UI\Core\IQueryResultAggregator.cs" />
     <Compile Include="UI\IFrameworkUIConfig.cs" />
     <Compile Include="UI\ContentRootAttribute.cs" />
     <Compile Include="UI\Toolbox\ChartReport.cs" />

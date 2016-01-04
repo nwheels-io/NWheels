@@ -833,13 +833,39 @@ HEAD, JS/CSS LINKS
                             }
                             if ($scope.uidl.enableTotalRow) {
                                 var totalSpec = { };
+                                var totalsQueryBuilder = (
+                                    $scope.preparedRequest.query ? 
+                                    $scope.preparedRequest.query.clone() : 
+                                    new EntityQueryBuilder($scope.uidl.entityName, $scope.preparedRequest.url));
+                                
                                 $scope.gridColumns.forEach(function (metaColumn, idx) {
                                     if (idx===0) {
                                         totalSpec[metaColumn.expression] = 'Total:';
-                                    } else {
-                                        totalSpec[metaColumn.expression] = '1,000.00';
+                                    } else if (metaColumn.includeInTotal) {
+                                        totalSpec[metaColumn.expression] = '...';
+                                        totalsQueryBuilder.select(metaColumn.expression, 'sum');
                                     }
                                 });
+                                grid.jqGrid("footerData", "set", totalSpec);
+                                var totalsRequestUrl = totalsQueryBuilder.getQueryUrl();
+                                $scope.$http.post(
+                                    totalsRequestUrl,
+                                    $scope.preparedRequest.data
+                                ).then(
+                                    function(response){
+                                        $scope.gridColumns.forEach(function (metaColumn, idx) {
+                                            if (metaColumn.includeInTotal) {
+                                                totalSpec[metaColumn.expression] = response.data.ResultSet[0][metaColumn.expression];
+                                            }
+                                        });
+                                        grid.jqGrid("footerData", "set", totalSpec);
+                                    },
+                                    function(faultResponse){
+                                        var faultInfo = $scope.commandService.createFaultInfo(faultResponse);
+                                        $scope.$emit($scope.uidl.qualifiedName + ':QueryFailed', faultInfo);
+                                    }
+                                );
+                                
                                 grid.jqGrid("footerData", "set", totalSpec);
                                 if ($scope.uidl.totalRowOnTop) {
                                     var gview = grid.closest("ui-jqgrid-view"); // get div#gview_list

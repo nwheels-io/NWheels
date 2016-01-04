@@ -137,14 +137,26 @@ namespace NWheels.UI.Toolbox
         [DataContract(Namespace = UidlDocument.DataContractNamespace, Name = "Crud")]
         public class GridColumn
         {
-            public GridColumn(ITypeMetadata metaType, LambdaExpression propertyNavigation, string title = null, FieldSize size = FieldSize.Medium, string format = null)
-                : this(metaType, ParsePropertyNavigation(propertyNavigation), title, size, format)
+            public GridColumn(
+                ITypeMetadata metaType, 
+                LambdaExpression propertyNavigation, 
+                string title = null, 
+                FieldSize size = FieldSize.Medium, 
+                string format = null,
+                bool includeInTotal = false)
+                : this(metaType, ParsePropertyNavigation(propertyNavigation), title, size, format, includeInTotal)
             {
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            internal GridColumn(ITypeMetadata metaType, string[] navigations, string title = null, FieldSize size = FieldSize.Medium, string format = null)
+            internal GridColumn(
+                ITypeMetadata metaType, 
+                string[] navigations, 
+                string title = null, 
+                FieldSize size = FieldSize.Medium, 
+                string format = null, 
+                bool includeInTotal = false)
             {
                 this.Navigations = navigations;
                 this.Expression = string.Join(".", Navigations);
@@ -152,6 +164,7 @@ namespace NWheels.UI.Toolbox
                 this.Title = title ?? this.Navigations.Last();
                 this.Size = size;
                 this.Format = format;
+                this.IncludeInTotal = includeInTotal;
 
                 ITypeMetadata destinationMetaType;
                 IPropertyMetadata destinationMetaProperty;
@@ -175,6 +188,8 @@ namespace NWheels.UI.Toolbox
             public string[] Navigations { get; set; }
             [DataMember]
             public string DeclaringTypeName { get; set; }
+            [DataMember]
+            public bool IncludeInTotal { get; set; }
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -248,20 +263,21 @@ namespace NWheels.UI.Toolbox
         public DataGrid<TDataRow> Column<T>(
             Expression<Func<TDataRow, T>> propertySelector, 
             string title = null, 
-            FieldSize size = FieldSize.Medium)
+            FieldSize size = FieldSize.Medium,
+            bool includeInTotal = false)
         {
-            this.DisplayColumns.Add(new GridColumn(MetaType, propertySelector, title, size));
+            this.DisplayColumns.Add(new GridColumn(MetaType, propertySelector, title, size, null, includeInTotal));
             return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public DataGrid<TDataRow> Column<TDerivedDataRow, T>(
-            Expression<Func<TDerivedDataRow, T>> propertySelector, string title = null, FieldSize size = FieldSize.Medium)
+            Expression<Func<TDerivedDataRow, T>> propertySelector, string title = null, FieldSize size = FieldSize.Medium, bool includeInTotal = false)
             where TDerivedDataRow : TDataRow
         {
             var derivedMetaType = MetadataCache.GetTypeMetadata(typeof(TDerivedDataRow));
-            this.DisplayColumns.Add(new GridColumn(derivedMetaType, propertySelector, title, size));
+            this.DisplayColumns.Add(new GridColumn(derivedMetaType, propertySelector, title, size, null, includeInTotal));
             return this;
         }
 

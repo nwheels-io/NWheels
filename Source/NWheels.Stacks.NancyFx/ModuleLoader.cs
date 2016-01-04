@@ -35,6 +35,9 @@ namespace NWheels.Stacks.NancyFx
             builder.RegisterType<WebApiDispatcherFactory>().SingleInstance();
             builder.RegisterType<WebApplicationModule>().InstancePerDependency();
 
+            builder.RegisterType<ViewModelObjectFactory>().As<ViewModelObjectFactory, IViewModelObjectFactory>().SingleInstance();
+            builder.RegisterType<QueryResultAggregatorObjectFactory>().As<IQueryResultAggregatorObjectFactory>().SingleInstance();
+
             StaticConfiguration.Caching.EnableRuntimeViewDiscovery = true;
             StaticConfiguration.Caching.EnableRuntimeViewUpdates = true;
 

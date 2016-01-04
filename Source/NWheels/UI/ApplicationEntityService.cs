@@ -34,18 +34,20 @@ namespace NWheels.UI
         private readonly IFramework _framework;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly IViewModelObjectFactory _viewModelFactory;
+        private readonly IQueryResultAggregatorObjectFactory _aggregatorFactory;
         private readonly IDomainContextLogger _domainContextLogger;
         private readonly Dictionary<string, EntityHandler> _handlerByEntityName;
         private readonly IJsonSerializationExtension[] _jsonExtensions;
         private readonly ConcurrentDictionary<string, JsonSerializerSettings> _serializerSettingsCache;
         private readonly JsonSerializerSettings _defaultSerializerSettings;
-            
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ApplicationEntityService(
             IFramework framework,
             ITypeMetadataCache metadataCache,
             IViewModelObjectFactory viewModelFactory,
+            IQueryResultAggregatorObjectFactory aggregatorFactory,
             IEnumerable<IJsonSerializationExtension> jsonExtensions,
             IDomainContextLogger domainContextLogger,
             IEnumerable<Type> domainContextTypes)
@@ -53,6 +55,7 @@ namespace NWheels.UI
             _framework = framework;
             _metadataCache = metadataCache;
             _viewModelFactory = viewModelFactory;
+            _aggregatorFactory = aggregatorFactory;
             _domainContextLogger = domainContextLogger;
             _handlerByEntityName = new Dictionary<string, EntityHandler>(StringComparer.InvariantCultureIgnoreCase);
             _jsonExtensions = jsonExtensions.ToArray();
@@ -408,6 +411,7 @@ namespace NWheels.UI
             private readonly QueryOptions _options;
             private readonly QueryResults _results;
             private readonly Dictionary<IPropertyMetadata, LeftJoinOperation> _leftJoinByNavigation;
+            private IQueryResultAggregator _aggregator;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -418,6 +422,7 @@ namespace NWheels.UI
                 _results = new QueryResults();
                 _leftJoinByNavigation = new Dictionary<IPropertyMetadata, LeftJoinOperation>();
                 _entityMetaType = ownerService._metadataCache.GetTypeMetadata(options.EntityName);
+                _aggregator = null;
             }
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -437,6 +442,21 @@ namespace NWheels.UI
                 get
                 {
                     return _results;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IQueryResultAggregator Aggregator
+            {
+                get
+                {
+                    if ( _aggregator == null )
+                    {
+                        _aggregator = _ownerService._aggregatorFactory.GetQueryResultAggregator(this);
+                    }
+
+                    return _aggregator;
                 }
             }
 
@@ -497,7 +517,7 @@ namespace NWheels.UI
             public int? PageSize { get; set; }
             public long? ResultCount { get; set; }
             public bool? MoreAvailable { get; set; }
-            public IDomainObject[] ResultSet { get; set; }
+            public object[] ResultSet { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -573,6 +593,10 @@ namespace NWheels.UI
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public const string PropertyAggregationSeparator = "!";
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private string _cacheKey = null;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -665,8 +689,25 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public bool NeedAggregations
+            {
+                get
+                {
+                    return (
+                        SelectPropertyNames.Any(s => s.IsAggregation) ||
+                        IncludePropertyNames.Any(s => s.IsAggregation));
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             internal string BuildCacheKey()
             {
+                if ( _cacheKey != null )
+                {
+                    return _cacheKey;
+                }
+
                 var key = new StringBuilder();
 
                 key.Append(EntityName);
@@ -677,7 +718,8 @@ namespace NWheels.UI
                 key.Append("/"); key.Append(OfType);
                 key.Append("/"); key.Append(IsCountOnly);
 
-                return key.ToString().ToLower();
+                _cacheKey = key.ToString().ToLower();
+                return _cacheKey;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -787,7 +829,7 @@ namespace NWheels.UI
                     this.AggregationType = (AggregationType)Enum.Parse(typeof(AggregationType), aggregationString, ignoreCase: true);
                 }
 
-                var propertyPathString = (aliasPosition > 0 ? pathAndAggregation.Substring(0, aggregationPosition) : pathAndAggregation);
+                var propertyPathString = (aggregationPosition > 0 ? pathAndAggregation.Substring(0, aggregationPosition) : pathAndAggregation);
 
                 this.PropertyPath = propertyPathString.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -809,12 +851,89 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public bool IsAggregation
+            {
+                get { return (AggregationType != AggregationType.None); }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             void IBuildCacheKey.BuildCacheKey(StringBuilder key)
             {
                 key.Append("/[");
                 key.Append(string.Join(",", PropertyPath));
                 key.Append("]/");
+                if ( this.AggregationType != AggregationType.None )
+                {
+                    key.Append(this.AggregationType.ToString());
+                }
+                key.Append("/");
                 key.Append(AliasName);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal object ReadValue(QueryContext queryContext, ITypeMetadata metaType, object target)
+            {
+                var stepTarget = target;
+                var stepMetaType = metaType;
+                object value = null;
+
+                foreach ( var stepPropertyName in PropertyPath )
+                {
+                    var stepMetaProperty = stepMetaType.GetPropertyByName(stepPropertyName);
+                    value = stepMetaProperty.ReadValue(stepTarget);
+
+                    if ( stepMetaProperty.Relation != null )
+                    {
+                        if ( !(value is IDomainObject) )
+                        {
+                            var leftJoin = queryContext.GetLeftJoinForNavigation(stepMetaProperty);
+                            var leftSideIdProperty = stepMetaProperty.DeclaringContract.EntityIdProperty;
+                            var leftSideIdValue = leftSideIdProperty.ReadValue(stepTarget);
+
+                            if ( !leftJoin.TryGetRightSideValue(leftSideIdValue, out value) || value == null )
+                            {
+                                return null;
+                            }
+                        }
+
+                        stepTarget = value;
+                        stepMetaType = stepMetaProperty.Relation.RelatedPartyType;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                return value;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal List<IPropertyMetadata> BuildMetaPropertyPath(ITypeMetadata metaType)
+            {
+                var metaPropertyPath = new List<IPropertyMetadata>();
+                var stepMetaType = metaType;
+
+                for ( int i = 0 ; i < PropertyPath.Count ; i++ )
+                {
+                    var stepMetaProperty = stepMetaType.GetPropertyByName(PropertyPath[i]);
+                    metaPropertyPath.Add(stepMetaProperty);
+
+                    if ( stepMetaProperty.Relation != null )
+                    {
+                        stepMetaType = stepMetaProperty.Relation.RelatedPartyType;
+                    }
+                    else if ( i != PropertyPath.Count - 1 )
+                    {
+                        throw new ArgumentException(string.Format(
+                            "Invalid property path for entity '{0}': {1}", metaType.QualifiedName, string.Join(".", PropertyPath)));
+                    }
+                }
+
+                return metaPropertyPath;
             }
         }
 
@@ -1181,8 +1300,11 @@ namespace NWheels.UI
 
                     if ( !options.IsCountOnly || options.NeedInMemoryOperations )
                     {
-                        dbQuery = HandleOrderBy(options, dbQuery);
-                        dbQuery = HandlePaging(options, dbQuery);
+                        if ( !options.NeedAggregations )
+                        {
+                            dbQuery = HandleOrderBy(options, dbQuery);
+                            dbQuery = HandlePaging(options, dbQuery);
+                        }
 
                         IEnumerable<TEntity> queryResults = new QueryResultEnumerable<TEntity>(dbQuery);
 
@@ -1194,6 +1316,10 @@ namespace NWheels.UI
                         if ( options.IsCountOnly )
                         {
                             results.ResultCount = queryResults.Count();
+                        }
+                        else if ( options.NeedAggregations )
+                        {
+                            ExecuteInMemoryAggregation(options, results, queryResults);
                         }
                         else
                         {
@@ -1218,6 +1344,21 @@ namespace NWheels.UI
                 }
 
                 return results;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ExecuteInMemoryAggregation(QueryOptions options, QueryResults results, IEnumerable<TEntity> dbCursor)
+            {
+                var queryContext = QueryContext.Current;
+                var aggregator = queryContext.Aggregator;
+
+                foreach ( var record in dbCursor )
+                {
+                    aggregator.Aggregate(record.As<IDomainObject>());
+                }
+
+                results.ResultSet = new object[] { aggregator };
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1654,11 +1795,11 @@ namespace NWheels.UI
                     PropertyType = firstStepMetaProperty.Relation.RelatedPartyType.ContractType,
                     DeclaringType = firstStepMetaProperty.ContractPropertyInfo.DeclaringType,
                     PropertyName = selectItem.AliasName,
-                    ValueProvider = new NavigationValueProvider(selectItem, firstStepMetaProperty),
                     Readable = true,
                     Writable = false,
                 };
 
+                navigationJsonProperty.ValueProvider = new NavigationValueProvider(selectItem, firstStepMetaProperty);
                 return navigationJsonProperty;
             }
 
@@ -2038,30 +2179,34 @@ namespace NWheels.UI
 
             public object GetValue(object target)
             {
-                ITypeMetadata currentMetaType = _firstStepMetaProperty.DeclaringContract;
-                object currentTarget = target;
+                var metaType = _firstStepMetaProperty.DeclaringContract;
+                var value = _selectItem.ReadValue(QueryContext.Current, metaType, target);
+                return value;
 
-                for ( int stepIndex = 0 ; stepIndex < _selectItem.PropertyPath.Count ; stepIndex++ )
-                {
-                    var nextStepProperty = currentMetaType.GetPropertyByName(_selectItem.PropertyPath[stepIndex]);
+                //ITypeMetadata currentMetaType = _firstStepMetaProperty.DeclaringContract;
+                //object currentTarget = target;
 
-                    if ( nextStepProperty.Relation == null )
-                    {
-                        return nextStepProperty.ReadValue(currentTarget);
-                    }
+                //for ( int stepIndex = 0 ; stepIndex < _selectItem.PropertyPath.Count ; stepIndex++ )
+                //{
+                //    var nextStepProperty = currentMetaType.GetPropertyByName(_selectItem.PropertyPath[stepIndex]);
 
-                    var leftJoin = QueryContext.Current.GetLeftJoinForNavigation(nextStepProperty);
-                    var leftSideIdProperty = nextStepProperty.DeclaringContract.EntityIdProperty;
+                //    if ( nextStepProperty.Relation == null )
+                //    {
+                //        return nextStepProperty.ReadValue(currentTarget);
+                //    }
 
-                    if ( !leftJoin.TryGetRightSideValue(leftSideIdProperty.ReadValue(currentTarget), out currentTarget) || currentTarget == null )
-                    {
-                        return null;
-                    }
+                //    var leftJoin = QueryContext.Current.GetLeftJoinForNavigation(nextStepProperty);
+                //    var leftSideIdProperty = nextStepProperty.DeclaringContract.EntityIdProperty;
 
-                    currentMetaType = nextStepProperty.Relation.RelatedPartyType;
-                }
+                //    if ( !leftJoin.TryGetRightSideValue(leftSideIdProperty.ReadValue(currentTarget), out currentTarget) || currentTarget == null )
+                //    {
+                //        return null;
+                //    }
 
-                return currentTarget;
+                //    currentMetaType = nextStepProperty.Relation.RelatedPartyType;
+                //}
+
+                //return currentTarget;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -2345,7 +2490,7 @@ namespace NWheels.UI
 
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -2396,4 +2541,4 @@ namespace NWheels.UI
             #endregion
         }
     }
-} ;
+}

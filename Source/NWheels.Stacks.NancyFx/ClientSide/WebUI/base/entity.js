@@ -154,6 +154,7 @@ function EntityQueryBuilder(entityName, commandUrl) {
     this._entityTypeFilter = null;
     this._filter = [];
     this._orderBy = [];
+    this._select = [];
     this._include = [];
     this._take = null;
     this._skip = null;
@@ -191,8 +192,15 @@ function EntityQueryBuilder(entityName, commandUrl) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    this.include = function(property) {
-        me._include.push(property);
+    this.select = function(property, aggregation) {
+        me._select.push(property + (aggregation ? '!' + aggregation : ''));
+        return me;
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    this.include = function(property, aggregation) {
+        me._include.push(property + (aggregation ? '!' + aggregation : ''));
         return me;
     };
 
@@ -251,6 +259,15 @@ function EntityQueryBuilder(entityName, commandUrl) {
             delimiter = '&';
         }
 
+        if (me._select.length > 0) {
+            var selectSpec = '';
+            for (var i = 0; i < me._select.length; i++) {
+                selectSpec = selectSpec + (i > 0 ? ',' : '') + me._select[i];
+            }
+            queryString = queryString + delimiter + '$select=' + selectSpec;
+            delimiter = '&';
+        }
+        
         if (me._include.length > 0) {
             var includeSpec = '';
             for (var i = 0; i < me._include.length; i++) {

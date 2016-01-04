@@ -1094,7 +1094,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
                     scope.$broadcast(scope.uidl.qualifiedName + ':RequestPrepared', preparedRequest);
                 });
             }
-
+            
             //for (var i = 0; i < scope.gridColumns.length; i++) {
             //    var column = scope.gridColumns[i];
             //    column.metaType = scope.uidlService.getMetaType(column.declaringTypeName);

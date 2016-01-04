@@ -28,6 +28,7 @@ namespace NWheels.Stacks.AspNet
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkUIConfig>();
 
             builder.RegisterType<ViewModelObjectFactory>().As<ViewModelObjectFactory, IViewModelObjectFactory>().SingleInstance();
+            builder.RegisterType<QueryResultAggregatorObjectFactory>().As<IQueryResultAggregatorObjectFactory>().SingleInstance();
 
             //builder.RegisterAdapter<HttpApiEndpointRegistration, IHttpController>((ctx, endpoint) => 
             //    ctx.Resolve<WebApiControllerFactory>().CreateControllerInstance(ctx.Resolve(endpoint.Contract))

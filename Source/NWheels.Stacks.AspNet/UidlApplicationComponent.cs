@@ -58,6 +58,7 @@ namespace NWheels.Stacks.AspNet
                 components.Resolve<IFramework>(),
                 components.Resolve<ITypeMetadataCache>(),
                 components.Resolve<IViewModelObjectFactory>(),
+                components.Resolve<IQueryResultAggregatorObjectFactory>(),
                 components.Resolve<IEnumerable<IJsonSerializationExtension>>(),
                 components.Resolve<IDomainContextLogger>(),
                 _application.RequiredDomainContexts);

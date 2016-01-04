@@ -16,6 +16,8 @@ namespace NWheels.UI.Factories
     {
     }
 
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
     public class ViewModelObjectFactory : EntityObjectFactory, IViewModelObjectFactory
     {
         public ViewModelObjectFactory(IComponentContext components, DynamicModule module, TypeMetadataCache metadataCache)
