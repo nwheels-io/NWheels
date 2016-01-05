@@ -158,6 +158,22 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [HttpGet]
+        [Route("appState/restore")]
+        public IHttpActionResult RestoreAppViewState()
+        {
+            var viewState = _context.Application.CreateViewStateForCurrentUser(_components);
+
+            var serializerSettings = _context.EntityService.CreateSerializerSettings();
+            var jsonString = JsonConvert.SerializeObject(viewState, serializerSettings);
+
+            return ResponseMessage(new HttpResponseMessage() {
+                Content = new StringContent(jsonString, Encoding.UTF8, "application/json")
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [HttpPost]
         [Route("command/requestReply/{target}/{contractName}/{operationName}")]
         public IHttpActionResult ExecuteCommand(string target, string contractName, string operationName)

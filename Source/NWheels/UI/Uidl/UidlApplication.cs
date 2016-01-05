@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac;
 using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Endpoints.Core;
@@ -38,6 +39,13 @@ namespace NWheels.UI.Uidl
                 .Concat(Screens.SelectMany(s => s.GetTranslatables()))
                 .Concat(ScreenParts.SelectMany(sp => sp.GetTranslatables()))
                 .Concat(UserAlerts.Values.Select(ua => ua.Text));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual object CreateViewStateForCurrentUser(IComponentContext components)
+        {
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

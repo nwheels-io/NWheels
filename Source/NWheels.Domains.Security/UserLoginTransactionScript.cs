@@ -115,7 +115,7 @@ namespace NWheels.Domains.Security
 
         public class Result
         {
-            internal protected Result(UserAccountPrincipal principal, IEndpoint endpoint)
+            public Result(UserAccountPrincipal principal, IEndpoint endpoint)
             {
                 var account = principal.Identity.GetUserAccount();
 

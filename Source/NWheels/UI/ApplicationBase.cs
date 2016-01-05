@@ -1,5 +1,7 @@
 using System.Linq;
 using System.Reflection;
+using Autofac;
+using NWheels.UI.Factories;
 using NWheels.UI.Uidl;
 
 namespace NWheels.UI
@@ -56,6 +58,13 @@ namespace NWheels.UI
             builder.DescribeNodePresenters(base.ScreenParts.Cast<AbstractUidlNode>().ToArray());
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override object CreateViewStateForCurrentUser(IComponentContext components)
+        {
+            return this.OnCreateViewStateForCurrentUser(components.Resolve<IViewModelObjectFactory>());
+        }
+
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public new UidlNotification<TInput> NavigatedHere { get; set; }
@@ -63,6 +72,13 @@ namespace NWheels.UI
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected abstract void DescribePresenter(PresenterBuilder<TApp, TData, TState> presenter);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual TState OnCreateViewStateForCurrentUser(IViewModelObjectFactory viewModelFactory)
+        {
+            return null;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

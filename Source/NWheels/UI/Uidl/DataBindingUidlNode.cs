@@ -52,8 +52,24 @@ namespace NWheels.UI.Uidl
     [DataContract(Name = "ModelBinding", Namespace = UidlDocument.DataContractNamespace)]
     public class UidlModelBinding : DataBindingUidlNode
     {
-        public UidlModelBinding(string idName, BindingSourceType sourceType, ControlledUidlNode parent)
-            : base(idName, sourceType, parent)
+        public UidlModelBinding(string idName, ControlledUidlNode parent)
+            : base(idName, BindingSourceType.Model, parent)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public string SourcePropertyExpression { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [DataContract(Name = "AppStateBinding", Namespace = UidlDocument.DataContractNamespace)]
+    public class UidlAppStateBinding : DataBindingUidlNode
+    {
+        public UidlAppStateBinding(string idName, ControlledUidlNode parent)
+            : base(idName, BindingSourceType.Model, parent)
         {
         }
 

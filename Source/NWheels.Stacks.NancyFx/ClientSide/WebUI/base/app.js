@@ -282,11 +282,14 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     function implementController(scope) {
         scope.translate = translate;
+        scope.appScope = $rootScope.appScope;
         scope.model = {
             data: {},
             state: {}
         };
-        scope.appScope = $rootScope.appScope;
+        if (scope.appScope.model) {
+            scope.model.appState = scope.appScope.model.state;
+        }
 
         if (scope.uidl) {
             console.log('uidlService::implementController', scope.uidl.qualifiedName);
@@ -1208,6 +1211,18 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    m_controllerImplementations['Text'] = {
+        implement: function (scope) {
+            scope.format = scope.uidl.format;
+            
+            scope.$on(scope.uidl.qualifiedName + ':FormatSetter', function(event, data) {
+                scope.format = data;
+            });
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     m_controllerImplementations['TransactionForm'] = {
         implement: function (scope) {
             scope.model.state.input = { };
@@ -1444,10 +1459,14 @@ function ($http, $scope, $rootScope, uidlService, entityService, commandService)
 		$scope.pageTitle = $scope.translate($scope.app.text) + ' - ' + $scope.translate($scope.currentScreen.text);
 
         if ($scope.uidl.isUserAuthenticated===true) {
-            //$timeout(function() {
-                $scope.$emit($scope.uidl.qualifiedName + ':UserAlreadyAuthenticated');
-            //});
+            $http.get('appState/restore').then(
+                function(response) {
+                    $scope.model.state = response.data;
+                    $scope.$emit($scope.uidl.qualifiedName + ':UserAlreadyAuthenticated');
+                }
+            );
         }
+        
         //commandService.startPollingMessages();
     });
 

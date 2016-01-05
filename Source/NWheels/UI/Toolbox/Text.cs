@@ -37,6 +37,10 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public UidlNotification<string> FormatSetter { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void DescribePresenter(PresenterBuilder<Text, Empty.Data, Empty.State> presenter)
         {
         }

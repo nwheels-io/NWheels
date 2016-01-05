@@ -34,6 +34,7 @@ namespace NWheels.UI.Uidl
     public enum BindingSourceType
     {
         Model,
+        AppState,
         Api,
         Entity
     }
