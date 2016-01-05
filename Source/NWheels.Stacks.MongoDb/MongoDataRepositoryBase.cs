@@ -135,22 +135,26 @@ namespace NWheels.Stacks.MongoDb
         {
             foreach ( var entityGroup in base.InsertBatch.GroupBy(x => x.As<IObject>().ContractType) )
             {
-                ((IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key)).CommitInsert(entityGroup);
+                CommitChangesOnEntityGroup(entityGroup, (repo, entities) => repo.CommitInsert(entities));
+                //((IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key)).CommitInsert(entityGroup);
             }
 
             foreach ( var entityGroup in base.UpdateBatch.GroupBy(x => x.As<IObject>().ContractType) )
             {
-                ((IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key)).CommitUpdate(entityGroup);
+                CommitChangesOnEntityGroup(entityGroup, (repo, entities) => repo.CommitUpdate(entities));
+                //((IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key)).CommitUpdate(entityGroup);
             }
 
             foreach ( var entityGroup in base.SaveBatch.GroupBy(x => x.As<IObject>().ContractType) )
             {
-                ((IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key)).CommitSave(entityGroup);
+                CommitChangesOnEntityGroup(entityGroup, (repo, entities) => repo.CommitSave(entities));
+                //((IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key)).CommitSave(entityGroup);
             }
 
             foreach ( var entityGroup in base.DeleteBatch.GroupBy(x => x.As<IObject>().ContractType) )
             {
-                ((IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key)).CommitDelete(entityGroup);
+                CommitChangesOnEntityGroup(entityGroup, (repo, entities) => repo.CommitDelete(entities));
+                //((IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key)).CommitDelete(entityGroup);
             }
         }
 
@@ -195,6 +199,32 @@ namespace NWheels.Stacks.MongoDb
         internal MongoDatabase Database
         {
             get { return _database; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void CommitChangesOnEntityGroup(
+            IGrouping<Type, IEntityObject> entityGroup,
+            Action<IMongoEntityRepository, IEnumerable<IEntityObject>> commitAction)
+        {
+            var isPartitionedEntity = (entityGroup.FirstOrDefault() is IPartitionedObject);
+
+            if ( isPartitionedEntity )
+            {
+                var singleEntityGroup = new IEntityObject[1];
+
+                foreach ( var entity in entityGroup )
+                {
+                    var repository = (IMongoEntityRepository)base.GetEntityRepository(entity);
+                    singleEntityGroup[0] = entity;
+                    commitAction(repository, singleEntityGroup);
+                }
+            }
+            else
+            {
+                var repository = (IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key);
+                commitAction(repository, entityGroup);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
