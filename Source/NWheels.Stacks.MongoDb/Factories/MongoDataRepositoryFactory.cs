@@ -236,24 +236,50 @@ namespace NWheels.Stacks.MongoDb.Factories
 
                 foreach ( var entity in base.EntitiesInRepository )
                 {
-                    foreach ( var key in entity.Metadata.AllKeys.Where(k => k.Kind == KeyKind.Index && k.Properties.Count == 1) )
-                    {
-                        Static.Void(RuntimeHelpers.CreateSearchIndex,
-                            database,
-                            w.Const(MongoDataRepositoryBase.GetMongoCollectionName(entity.Metadata, null, null)),
-                            w.Const(key.Properties.First().Name));
-                    }
+                    var collectionName = MongoDataRepositoryBase.GetMongoCollectionName(entity.Metadata, null, null);
+                    WriteCollectionIndexesForType(writer, database, collectionName, propertyPrefix: "", metaType: entity.Metadata);
+                }
+            }
 
-                    foreach ( var uniqueProperty in entity.Metadata.Properties.Where(p => p.Validation.IsUnique) )
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void WriteCollectionIndexesForType(
+                MethodWriterBase writer, 
+                Operand<MongoDatabase> database, 
+                string collectionName, 
+                string propertyPrefix, 
+                ITypeMetadata metaType)
+            {
+                var w = writer;
+
+                foreach ( var key in metaType.AllKeys.Where(k => k.Kind == KeyKind.Index && k.Properties.Count == 1) )
+                {
+                    Static.Void(RuntimeHelpers.CreateSearchIndex,
+                        database,
+                        w.Const(collectionName),
+                        w.Const(propertyPrefix + key.Properties.First().Name));
+                }
+
+                foreach ( var uniqueProperty in metaType.Properties.Where(p => p.Validation.IsUnique) )
+                {
+                    if ( uniqueProperty.DeclaringContract == metaType )
                     {
-                        if ( uniqueProperty.DeclaringContract == entity.Metadata )
-                        {
-                            Static.Void(RuntimeHelpers.CreateUniqueIndex,
-                                database,
-                                w.Const(MongoDataRepositoryBase.GetMongoCollectionName(entity.Metadata, null, null)),
-                                w.Const(uniqueProperty.Name));
-                        }
+                        Static.Void(RuntimeHelpers.CreateUniqueIndex,
+                            database,
+                            w.Const(collectionName),
+                            w.Const(propertyPrefix + uniqueProperty.Name));
                     }
+                }
+
+                foreach ( var partProperty in metaType.Properties.Where(
+                    p => p.Relation != null && p.Relation.RelatedPartyType != null && p.Relation.RelatedPartyType.IsEntityPart) )
+                {
+                    WriteCollectionIndexesForType(
+                        writer, 
+                        database, 
+                        collectionName, 
+                        propertyPrefix + partProperty.Name + ".", 
+                        partProperty.Relation.RelatedPartyType);
                 }
             }
         }
