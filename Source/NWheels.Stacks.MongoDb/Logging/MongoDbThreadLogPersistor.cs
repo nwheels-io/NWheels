@@ -74,24 +74,25 @@ namespace NWheels.Stacks.MongoDb.Logging
 
         private void StoreThreadLogsToDb(IReadOnlyThreadLog[] threadLogs)
         {
-            _threadLogCollection.InsertBatch(threadLogs.Select(log => new ThreadLogRecord() {
-                RootActivity = log.RootActivity.ToString(),
-                TaskType = log.TaskType,
-                CorrelationId = log.CorrelationId,
-                LogId = log.LogId,
-                MachineName = _s_machineName,
-                NodeInstance = log.Node.InstanceId,
-                NodeName = log.Node.NodeName,
-                ProcessId = _s_processId,
-                StartedAtUtc = log.ThreadStartedAtUtc
-            }));
+            _threadLogCollection.InsertBatch(threadLogs.Select(log => log.TakeSnapshot()));
+            //;  new ThreadLogRecord() {
+            //    RootActivity = log.RootActivity.ToString(),
+            //    TaskType = log.TaskType,
+            //    CorrelationId = log.CorrelationId,
+            //    LogId = log.LogId,
+            //    MachineName = _s_machineName,
+            //    NodeInstance = log.Node.InstanceId,
+            //    NodeName = log.Node.NodeName,
+            //    ProcessId = _s_processId,
+            //    StartedAtUtc = log.ThreadStartedAtUtc
+            //}));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private void ConnectToDatabase()
         {
-            var connectionString = new MongoConnectionStringBuilder(_loggingConfig.ThreadLogDbConnectionString);
+            var connectionString = new MongoConnectionStringBuilder(_loggingConfig.ThreadLogDbConnectionString ?? "server=localhost;database=nwheels_threadlog");
             var client = new MongoClient(connectionString.ConnectionString);
             var server = client.GetServer();
             

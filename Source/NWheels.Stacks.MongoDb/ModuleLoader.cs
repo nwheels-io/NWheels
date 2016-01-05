@@ -13,7 +13,9 @@ using NWheels.Hosting;
 using MongoDB.Bson;
 using NWheels.Conventions.Core;
 using NWheels.Entities.Core;
+using NWheels.Logging.Core;
 using NWheels.Stacks.MongoDb.Factories;
+using NWheels.Stacks.MongoDb.Logging;
 
 namespace NWheels.Stacks.MongoDb
 {
@@ -27,6 +29,8 @@ namespace NWheels.Stacks.MongoDb
             builder.RegisterType<AutoIncrementIntegerIdGenerator>().AsSelf().SingleInstance();
             builder.NWheelsFeatures().Entities().UseDefaultIdsOfType<ObjectId>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IMongoDbLogger>();
+
+            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<MongoDbThreadLogPersistor>().As<IThreadPostMortem>();
         }
     }
 }
