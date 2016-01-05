@@ -193,7 +193,11 @@ namespace NWheels.Logging.Core
         {
             get
             {
-                return true;
+                return (
+                    _taskType == ThreadTaskType.StartUp ||
+                    _taskType == ThreadTaskType.ShutDown ||
+                    _rootActivity.Level >= LogLevel.Warning || 
+                    _rootActivity.MillisecondsDuration >= 1000);
             }
         }
 

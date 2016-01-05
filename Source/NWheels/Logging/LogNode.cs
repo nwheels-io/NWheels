@@ -73,6 +73,13 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public DateTime GetUtcTimestamp()
+        {
+            return _threadLog.ThreadStartedAtUtc.AddMilliseconds(_millisecondsTimestamp);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override string ToString()
         {
             return this.SingleLineText;
@@ -85,6 +92,16 @@ namespace NWheels.Logging
             get
             {
                 return _messageId;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IThreadLog ThreadLog
+        {
+            get
+            {
+                return _threadLog;
             }
         }
 
@@ -359,16 +376,6 @@ namespace NWheels.Logging
         protected void BubbleContentTypesFrom(LogContentTypes subNodeContentTypes)
         {
             _contentTypes |= subNodeContentTypes;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal IThreadLog ThreadLog
-        {
-            get
-            {
-                return _threadLog;
-            }
         }
     }
 }

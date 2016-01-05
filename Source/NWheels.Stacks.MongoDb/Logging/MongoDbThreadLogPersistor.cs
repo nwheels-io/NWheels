@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using MongoDB.Driver;
+using MongoDB.Driver.Builders;
 using NWheels.Concurrency;
 using NWheels.Core;
 using NWheels.Extensions;
@@ -24,6 +25,8 @@ namespace NWheels.Stacks.MongoDb.Logging
         private IFrameworkLoggingConfiguration _loggingConfig;
         private MongoDatabase _database;
         private MongoCollection _threadLogCollection;
+        private MongoCollection _logMessageCollection;
+        private MongoCollection _dailySummaryCollection;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -46,10 +49,7 @@ namespace NWheels.Stacks.MongoDb.Logging
 
         public void Examine(IReadOnlyThreadLog threadLog)
         {
-            if ( threadLog.ShouldBePersisted )
-            {
-                _persistenceShuttle.Board(threadLog);
-            }
+            _persistenceShuttle.Board(threadLog);
         }
 
         #endregion
@@ -72,55 +72,60 @@ namespace NWheels.Stacks.MongoDb.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public MongoCollection ThreadLogCollection
+        {
+            get { return _threadLogCollection; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MongoCollection DailySummaryCollection
+        {
+            get { return _dailySummaryCollection; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public MongoCollection LogMessageCollection
+        {
+            get { return _logMessageCollection; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void StoreThreadLogsToDb(IReadOnlyThreadLog[] threadLogs)
         {
-            _threadLogCollection.InsertBatch(threadLogs.Select(log => log.TakeSnapshot()));
-            //;  new ThreadLogRecord() {
-            //    RootActivity = log.RootActivity.ToString(),
-            //    TaskType = log.TaskType,
-            //    CorrelationId = log.CorrelationId,
-            //    LogId = log.LogId,
-            //    MachineName = _s_machineName,
-            //    NodeInstance = log.Node.InstanceId,
-            //    NodeName = log.Node.NodeName,
-            //    ProcessId = _s_processId,
-            //    StartedAtUtc = log.ThreadStartedAtUtc
-            //}));
+            var batchPersistor = new ThreadLogBatchPersistor(this, threadLogs);
+            batchPersistor.PersistBatch();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private void ConnectToDatabase()
         {
-            var connectionString = new MongoConnectionStringBuilder(_loggingConfig.ThreadLogDbConnectionString ?? "server=localhost;database=nwheels_threadlog");
+            var connectionString = new MongoConnectionStringBuilder(_loggingConfig.ThreadLogDbConnectionString ?? "server=localhost;database=nwheels_log");
             var client = new MongoClient(connectionString.ConnectionString);
             var server = client.GetServer();
             
             _database = server.GetDatabase(connectionString.DatabaseName);
 
-            var collectionPrefix = string.Format("System.AppEvents.{0}.", _framework.CurrentNode.EnvironmentName);
+            var collectionPrefix = string.Format("System.Logs.{0}.", _framework.CurrentNode.EnvironmentName);
 
-            _threadLogCollection = _database.GetCollection<ThreadLogRecord>(collectionPrefix + "ThreadLogs");
+            _logMessageCollection = _database.GetCollection(collectionPrefix + "LogMessage");
+            _threadLogCollection = _database.GetCollection(collectionPrefix + "ThreadLog");
+            _dailySummaryCollection = _database.GetCollection(collectionPrefix + "DailySummary");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private readonly static string _s_machineName = System.Environment.MachineName;
+        private static readonly string _s_machineName = System.Environment.MachineName;
         private static readonly int _s_processId = System.Diagnostics.Process.GetCurrentProcess().Id;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class ThreadLogRecord
+        public static string MachineName
         {
-            public string NodeName { get; set; }
-            public string NodeInstance { get; set; }
-            public string MachineName { get; set; }
-            public int ProcessId { get; set; }
-            public Guid LogId { get; set; }
-            public Guid CorrelationId { get; set; }
-            public DateTime StartedAtUtc { get; set; }
-            public ThreadTaskType TaskType { get; set; }
-            public string RootActivity { get; set; }
+            get { return _s_machineName; }
         }
     }
 }

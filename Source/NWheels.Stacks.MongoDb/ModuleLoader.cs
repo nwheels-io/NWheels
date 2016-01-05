@@ -11,6 +11,7 @@ using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Conventions;
 using NWheels.Conventions.Core;
 using NWheels.Entities.Core;
 using NWheels.Logging.Core;
@@ -23,7 +24,7 @@ namespace NWheels.Stacks.MongoDb
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<MongoEntityObjectFactory>().As<MongoEntityObjectFactory, EntityObjectFactory, IEntityObjectFactory>() .SingleInstance();
+            builder.RegisterType<MongoEntityObjectFactory>().As<MongoEntityObjectFactory, EntityObjectFactory, IEntityObjectFactory>().SingleInstance();
             builder.RegisterType<MongoDataRepositoryFactory>().As<DataRepositoryFactoryBase, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<MongoDatabaseInitializer>().As<IStorageInitializer>().SingleInstance();
             builder.RegisterType<AutoIncrementIntegerIdGenerator>().AsSelf().SingleInstance();
@@ -31,6 +32,13 @@ namespace NWheels.Stacks.MongoDb
             builder.NWheelsFeatures().Logging().RegisterLogger<IMongoDbLogger>();
 
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<MongoDbThreadLogPersistor>().As<IThreadPostMortem>();
+
+            ConventionRegistry.Register(
+                "UnsignedNumericOverflowConvention",
+                new ConventionPack {
+                    new UnsignedNumericOverflowConvention()
+                },
+                t => true);
         }
     }
 }

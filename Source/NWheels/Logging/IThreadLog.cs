@@ -20,7 +20,7 @@ namespace NWheels.Logging
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    internal interface IThreadLog : IReadOnlyThreadLog
+    public interface IThreadLog : IReadOnlyThreadLog
     {
         void NotifyActivityClosed(ActivityLogNode activity);
         ActivityLogNode CurrentActivity { get; }
