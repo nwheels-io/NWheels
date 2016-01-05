@@ -25,7 +25,8 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         protected override void OnProperty(PropertyMember member, Func<PropertyDecorationBuilder> decorate)
         {
-            if ( member.PropertyType.IsEnum &&
+            if ( member.PropertyType.IsValueType && 
+                 member.PropertyType.IsEnum &&
                  MongoEntityObjectFactory.IsPersistableObjectPropertyPersistedToDb(member.PropertyBuilder) )
             {
                 decorate().Attribute<BsonRepresentationAttribute>(args => args.Arg(BsonType.String));
