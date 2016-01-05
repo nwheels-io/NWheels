@@ -440,6 +440,8 @@ namespace NWheels.Testing
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkEndpointsConfig>();
             //builder.NWheelsFeatures().Entities().UseDefaultIdsOfType<int>();
 
+            builder.NWheelsFeatures().Logging().RegisterLogger<IShuttleServiceLogger>();
+
             container = builder.Build();
 
             var metadataCache = CreateMetadataCacheWithDefaultConventions(_components);

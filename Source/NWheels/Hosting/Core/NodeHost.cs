@@ -42,6 +42,7 @@ using NWheels.Utilities;
 using Formatting = Newtonsoft.Json.Formatting;
 using NWheels.Entities.Factories;
 using NWheels.Authorization.Core;
+using NWheels.Concurrency;
 using NWheels.Processing.Commands.Factories;
 
 namespace NWheels.Hosting.Core
@@ -299,6 +300,7 @@ namespace NWheels.Hosting.Core
             builder.NWheelsFeatures().Configuration().RegisterSection<IFrameworkDatabaseConfig>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IConfigurationLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<INodeHostLogger>();
+            builder.NWheelsFeatures().Logging().RegisterLogger<IShuttleServiceLogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<TransientStateMachine<NodeState, NodeTrigger>.ILogger>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IDomainContextLogger>();
 

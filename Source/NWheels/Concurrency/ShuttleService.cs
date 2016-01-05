@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -60,6 +61,7 @@ namespace NWheels.Concurrency
             _cancellation = new CancellationTokenSource();
             _departureQueue = new BlockingCollection<T[]>();
             _driverThreads = new Thread[_driverThreadCount];
+            _itemsOnBoard = new T[_maxItemsOnBoard];
 
             Flush();
             StartDriverThreads();
@@ -101,6 +103,7 @@ namespace NWheels.Concurrency
             _cancellation = null;
             _departureQueue = null;
             _driverThreads = null;
+            _itemsOnBoard = null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -152,14 +155,18 @@ namespace NWheels.Concurrency
         {
             lock ( _syncRoot )
             {
-                if ( _itemsOnBoard == null || _numItemsOnBoard >= _maxItemsOnBoard )
+                if ( _numItemsOnBoard > 0 )
                 {
-                    if ( _itemsOnBoard != null )
-                    {
-                        _departureQueue.Add(_itemsOnBoard);
-                    }
+                    var batch = new T[_numItemsOnBoard];
+                    
+                    Array.Copy(_itemsOnBoard, batch, _numItemsOnBoard);
+                    _departureQueue.Add(batch);
 
-                    _itemsOnBoard = new T[_maxItemsOnBoard];
+                    for ( int i = 0 ; i < _numItemsOnBoard ; i++ )
+                    {
+                        _itemsOnBoard[i] = default(T);
+                    }
+                    
                     _numItemsOnBoard = 0;
                 }
 
@@ -231,7 +238,7 @@ namespace NWheels.Concurrency
                     {
                         Flush();
                         
-                        if ( _departureQueue.TryTake(out batch, 0, _cancellation.Token) )
+                        if ( _departureQueue.TryTake(out batch) )
                         {
                             InvokeDriver(threadIndex, batch);
                         }
