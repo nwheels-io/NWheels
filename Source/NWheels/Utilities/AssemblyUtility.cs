@@ -29,5 +29,10 @@ namespace NWheels.Utilities
 
             AppDomain.CurrentDomain.AssemblyResolve += handler;
         }
+
+        public static string GetCallerMethodName([System.Runtime.CompilerServices.CallerMemberName] string memberName = "")
+        {
+            return memberName;
+        }
     }
 }
