@@ -172,6 +172,7 @@ namespace NWheels.UI.Toolbox
 
                 this.DeclaringTypeName = destinationMetaType.QualifiedName;
                 this.MetaProperty = destinationMetaProperty;
+                this.IsText = (MetaProperty.ClrType == typeof(string));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -190,6 +191,8 @@ namespace NWheels.UI.Toolbox
             public string DeclaringTypeName { get; set; }
             [DataMember]
             public bool IncludeInTotal { get; set; }
+            [DataMember]
+            public bool IsText { get; set; }
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
