@@ -667,8 +667,12 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     m_dataBindingImplementations['AppState'] = {
         execute: function(scope, binding) {
-            var initialValue = readValueFromSource();
-            writeValueToDestination(initialValue);
+            try {
+                var initialValue = readValueFromSource();
+                writeValueToDestination(initialValue);
+            }
+            catch(err) {
+            }            
             
             scope.$watch('model.' + binding.sourceExpression, function(newValue, oldValue) {
                 writeValueToDestination(newValue);
