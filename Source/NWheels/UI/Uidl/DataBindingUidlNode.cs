@@ -19,9 +19,11 @@ namespace NWheels.UI.Uidl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
-        public string BoundWidgetQualifiedName { get; set; }
+        public string DestinationQualifiedName { get; set; }
         [DataMember]
-        public string BoundWidgetPropertyExpression { get; set; }
+        public string DestinationExpression { get; set; }
+        [DataMember]
+        public string[] DestinationNavigations { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -60,7 +62,7 @@ namespace NWheels.UI.Uidl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
-        public string SourcePropertyExpression { get; set; }
+        public string SourceExpression { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -69,14 +71,14 @@ namespace NWheels.UI.Uidl
     public class UidlAppStateBinding : DataBindingUidlNode
     {
         public UidlAppStateBinding(string idName, ControlledUidlNode parent)
-            : base(idName, BindingSourceType.Model, parent)
+            : base(idName, BindingSourceType.AppState, parent)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
-        public string SourcePropertyExpression { get; set; }
+        public string SourceExpression { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
