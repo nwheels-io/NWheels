@@ -222,7 +222,7 @@ namespace NWheels.UI.Toolbox
             
             internal static string[] ParsePropertyNavigation(LambdaExpression propertyNavigation)
             {
-                var expressionString = propertyNavigation.ToNormalizedNavigationString(convertToCamelCase: false);
+                var expressionString = propertyNavigation.ToNormalizedNavigationString();
                 return expressionString.Split('.').Skip(1).ToArray();
             }
         }

@@ -36,7 +36,7 @@ namespace NWheels.Domains.Security.UI
         {
             presenter.On(LogIn)
                 .InvokeTransactionScript<UserLoginTransactionScript>()
-                .WaitForReply((x, data, state, input) => x.Execute(data.LoginName, data.Password))
+                .WaitForReply((x, vm) => x.Execute(vm.Data.LoginName, vm.Data.Password))
                 .Then(
                     onSuccess: b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.User))
                         .Then(bb => bb.Broadcast(UserLoggedIn).WithPayload(m => m.Input).BubbleUp()),
@@ -47,7 +47,7 @@ namespace NWheels.Domains.Security.UI
 
             presenter.On(ChangePassword)
                 .InvokeTransactionScript<ChangePasswordTransactionScript>()
-                .WaitForCompletion((x, data, state, input) => x.Execute(data.LoginName, data.Password, data.NewPassword))
+                .WaitForCompletion((x, vm) => x.Execute(vm.Data.LoginName, vm.Data.Password, vm.Data.NewPassword))
                 .Then(
                     onSuccess: b => b.AlterModel(alt => alt.Copy(m => (string)null).To(m => m.State.LoginFault))
                         .Then(bb => bb.UserAlertFrom<IAlerts>().ShowInline((x, vm) => x.PasswordSuccessfullyChanged())),

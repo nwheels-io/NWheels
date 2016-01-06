@@ -25,7 +25,7 @@ namespace NWheels.UI.Toolbox
         public void BindToModelSetter<TModel>(UidlNotification<TModel> modelSetter, Expression<Func<TModel, ChartData>> dataProperty)
         {
             ModelSetterQualifiedName = modelSetter.QualifiedName;
-            DataExpression = dataProperty.ToNormalizedNavigationString(false, "input").TrimLead("input.");
+            DataExpression = dataProperty.ToNormalizedNavigationString("input").TrimLead("input.");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

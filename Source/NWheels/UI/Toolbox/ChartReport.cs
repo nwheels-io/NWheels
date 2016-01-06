@@ -15,7 +15,7 @@ namespace NWheels.UI.Toolbox
         where TScript : ITransactionScript
         where TCriteria : class
     {
-        private Expression<Func<TScript, Empty.Data, IReportState, Empty.Payload, ChartData>> _onExecuteCall;
+        private Expression<Func<TScript, ViewModel<Empty.Data, IReportState, Empty.Payload>, ChartData>> _onExecuteCall;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void OnExecute(Expression<Func<TScript, Empty.Data, IReportState, Empty.Payload, ChartData>> call)
+        public void OnExecute(Expression<Func<TScript, ViewModel<Empty.Data, IReportState, Empty.Payload>, ChartData>> call)
         {
             _onExecuteCall = call;
         }

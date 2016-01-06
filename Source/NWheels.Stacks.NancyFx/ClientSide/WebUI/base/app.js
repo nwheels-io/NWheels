@@ -152,6 +152,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
     };
     var m_currentScreen = null;
     var m_behaviorImplementations = {};
+    var m_dataBindingImplementations = {};
     var m_controllerImplementations = {};
 
     //var m_pendingCommands = { };
@@ -279,16 +280,23 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
     }
 
     //-----------------------------------------------------------------------------------------------------------------
+    
+    function implementDataBinding(scope, binding) {
+        var impl = m_dataBindingImplementations[binding.sourceType];
+        impl.execute(scope, binding);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
 
     function implementController(scope) {
         scope.translate = translate;
         scope.appScope = $rootScope.appScope;
         scope.model = {
-            data: {},
-            state: {}
+            Data: {},
+            State: {}
         };
         if (scope.appScope.model) {
-            scope.model.appState = scope.appScope.model.state;
+            scope.model.appState = scope.appScope.model.State;
         }
 
         if (scope.uidl) {
@@ -302,10 +310,11 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
                 var behavior = scope.uidl.behaviors[i];
                 if (behavior.subscription) {
                     implementSubscription(scope, behavior);
-                    //scope.$on(behavior.subscription.notificationQualifiedName, function(event, input) {
-                    //    implementBehavior(scope, behavior, input);
-                    //});
                 }
+            }
+
+            for (var i = 0; i < scope.uidl.dataBindings.length; i++) {
+                implementDataBinding(scope, scope.uidl.dataBindings[i]);
             }
         }
     }
@@ -476,9 +485,9 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
             console.log('run-behavior > callApi', behavior.callTargetType, behavior.contractName, behavior.operationName);
             var requestData = {};
             var parameterContext = {
-                data: scope.model.data,
-                state: scope.model.state,
-                input: input
+                Data: scope.model.Data,
+                State: scope.model.State,
+                Input: input
             };
             for (var i = 0; i < behavior.parameterNames.length; i++) {
                 var parameterValue = Enumerable.Return(parameterContext).Select('ctx=>ctx.' + behavior.parameterExpressions[i]).Single();
@@ -493,7 +502,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
                 '/' + behavior.operationName;
             
             if (behavior.callTargetType === 'EntityMethod') {
-                requestPath += '?$entityId=' + encodeURIComponent(scope.model.state.entity['$id']);
+                requestPath += '?$entityId=' + encodeURIComponent(scope.model.State.entity['$id']);
             }
             
             if (behavior.prepareOnly===true) {
@@ -526,8 +535,8 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
             var context = {
                 model: {
                     Input: input,
-                    Data: scope.model.data,
-                    State: scope.model.state
+                    Data: scope.model.Data,
+                    State: scope.model.State
                 }
             };
             var contextAsEnumerable = Enumerable.Return(context);
@@ -564,7 +573,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
     m_behaviorImplementations['AlterModel'] = {
         returnsPromise: false,
         execute: function (scope, behavior, input) {
-            scope.model.input = input;
+            scope.model.Input = input;
             var context = {
                 model: scope.model
             };
@@ -593,7 +602,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
     m_behaviorImplementations['QueryModel'] = {
         returnsPromise: true,
         execute: function (scope, behavior, input) {
-            scope.model.input = input;
+            scope.model.Input = input;
             var context = {
                 model: scope.model
             };
@@ -615,7 +624,6 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
         execute: function (scope, behavior, input) {
             var timeoutMinutes = 0;
             if (behavior.idleMinutesExpression) {
-                scope.model.input = input;
                 scope.model.Input = input;
                 var context = {
                     model: scope.model
@@ -655,6 +663,36 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
         },
     };
 
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_dataBindingImplementations['AppState'] = {
+        execute: function(scope, binding) {
+            var initialValue = readValueFromSource();
+            writeValueToDestination(initialValue);
+            
+            scope.$watch('model.' + binding.sourceExpression, function(newValue, oldValue) {
+                writeValueToDestination(newValue);
+            });
+        
+            function readValueFromSource() {
+                var context = {
+                    appState: scope.model.appState
+                };
+                var value = Enumerable.Return(context).Select('ctx=>ctx.' + binding.sourceExpression).Single();
+                return value;
+            }
+            
+            function writeValueToDestination(value) {
+                var target = scope;
+                for (var i = 0; i < binding.destinationNavigations.length - 1; i++) {
+                    target = target[binding.destinationNavigations[i]];
+                }
+                var lastNavigation = binding.destinationNavigations[binding.destinationNavigations.length-1];
+                target[lastNavigation] = value;
+            }
+        }
+    };
+    
     //-----------------------------------------------------------------------------------------------------------------
 
     m_controllerImplementations['ScreenPartContainer'] = {
@@ -737,27 +775,27 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     m_controllerImplementations['Report'] = {
         implement: function (scope) {
-            scope.model.state.criteria = {};
-            scope.model.state.reportInProgress = false;
+            scope.model.State.criteria = {};
+            scope.model.State.reportInProgress = false;
             
             $timeout(function() {
-                scope.$broadcast(scope.uidl.qualifiedName + ':CriteriaForm:ModelSetter', scope.model.state.criteria);
+                scope.$broadcast(scope.uidl.qualifiedName + ':CriteriaForm:ModelSetter', scope.model.State.criteria);
             });
 
             scope.$on(scope.uidl.qualifiedName + ':ShowReport:Executing', function(event, data) {
-                scope.model.state.reportInProgress = true;
+                scope.model.State.reportInProgress = true;
             });
             scope.$on(scope.uidl.resultTable.qualifiedName + ':QueryCompleted', function(event, data) {
-                if (scope.model.state.reportInProgress===true) {
-                    scope.model.state.reportInProgress = false;
+                if (scope.model.State.reportInProgress===true) {
+                    scope.model.State.reportInProgress = false;
                     scope.$emit(scope.uidl.qualifiedName + ':ReportReady', data);
                 }
             });
             scope.$on(scope.uidl.resultTable.qualifiedName + ':QueryFailed', function(event, data) {
-                if (scope.model.state.reportInProgress===true) {
+                if (scope.model.State.reportInProgress===true) {
                     scope.$emit(scope.uidl.qualifiedName + ':ReportFailed', data);
                 }
-                scope.model.state.reportInProgress = false;
+                scope.model.State.reportInProgress = false;
             });
         }
     };
@@ -766,10 +804,10 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     m_controllerImplementations['ChartReport'] = {
         implement: function (scope) {
-            scope.model.state.criteria = {};
+            scope.model.State.criteria = {};
 
             $timeout(function () {
-                scope.$broadcast(scope.uidl.qualifiedName + ':CriteriaForm:ModelSetter', scope.model.state.criteria);
+                scope.$broadcast(scope.uidl.qualifiedName + ':CriteriaForm:ModelSetter', scope.model.State.criteria);
             });
         }
     };
@@ -796,7 +834,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 			});
 
 			scope.$on(scope.uidl.modelSetterQualifiedName, function (event, data) {
-			    scope.model.state.data = scope.uidlService.selectValue(data, scope.uidl.dataExpression);
+			    scope.model.State.data = scope.uidlService.selectValue(data, scope.uidl.dataExpression);
 			});
         }
     };
@@ -807,7 +845,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
         implement: function (scope) {
 			scope.$on(scope.uidl.modelSetterQualifiedName, function (event, data) {
                 var valueContext = {
-                    input: data
+                    Input: data
                 };
                 var gaugeValues = [];
                 
@@ -821,11 +859,11 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
                     });
                 }
                 
-                scope.model.state.values = gaugeValues;
+                scope.model.State.values = gaugeValues;
 			});
 
             scope.$on(scope.uidl.updateSourceQualifiedName, function(event, data) {
-                scope.model.state.data = data;
+                scope.model.State.data = data;
             });
         }
     };
@@ -1189,7 +1227,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
             };
 
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
-                scope.model.data.entity = data;
+                scope.model.Data.entity = data;
                 scope.commandInProgress = false;
                 scope.tabSetIndex = 0;
 
@@ -1213,10 +1251,10 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     m_controllerImplementations['Text'] = {
         implement: function (scope) {
-            scope.format = scope.uidl.format;
+            scope.model.State.Contents = scope.uidl.text;
             
             scope.$on(scope.uidl.qualifiedName + ':FormatSetter', function(event, data) {
-                scope.format = data;
+                scope.model.State.Contents = data;
             });
         }
     };
@@ -1225,7 +1263,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     m_controllerImplementations['TransactionForm'] = {
         implement: function (scope) {
-            scope.model.state.input = { };
+            scope.model.State.Input = { };
         }
     };
 
@@ -1235,12 +1273,12 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
         implement: function (scope) {
             scope.$on(scope.uidl.qualifiedName + ':ShowModal', function(event, data) {
                 scope.commandInProgress = false;
-                if (scope.model.state.entity) {
-                    scope.model.state.input = { 
-                        '$entityId' : scope.model.state.entity['$id']
+                if (scope.model.State.entity) {
+                    scope.model.State.Input = { 
+                        '$entityId' : scope.model.State.entity['$id']
                     };
-                    scope.model.state.Input = scope.model.state.input; 
-                    scope.$broadcast(scope.uidl.inputForm.qualifiedName + ':ModelSetter', scope.model.state.input);
+                    scope.model.State.Input = scope.model.State.Input; 
+                    scope.$broadcast(scope.uidl.inputForm.qualifiedName + ':ModelSetter', scope.model.State.Input);
                 } else {
                     scope.$emit(scope.uidl.qualifiedName + ':NoEntityWasSelected');
                 }
@@ -1461,7 +1499,7 @@ function ($http, $scope, $rootScope, uidlService, entityService, commandService)
         if ($scope.uidl.isUserAuthenticated===true) {
             $http.get('appState/restore').then(
                 function(response) {
-                    $scope.model.state = response.data;
+                    $scope.model.State = response.data;
                     $scope.$emit($scope.uidl.qualifiedName + ':UserAlreadyAuthenticated');
                 }
             );

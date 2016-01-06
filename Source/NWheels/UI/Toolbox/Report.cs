@@ -57,14 +57,14 @@ namespace NWheels.UI.Toolbox
             {
                 presenter.On(ContextSetter)
                     .InvokeTransactionScript<TScript>()
-                    .WaitForReply((script, data, state, context) => script.InitializeInput(context))
+                    .WaitForReply((script, vm) => script.InitializeInput(vm.Input))
                     .Then(b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Criteria))
                     .Then(bb => bb.Broadcast(CriteriaForm.ModelSetter).WithPayload(m => m.Input).TunnelDown()));
             }
 
             presenter.On(ShowReport)
                 .InvokeTransactionScript<TScript>(queryAsEntityType: typeof(TResultRow))
-                .PrepareWaitForReply((script, data, state, input) => script.Execute(state.Criteria))
+                .PrepareWaitForReply((script, vm) => script.Execute(vm.State.Criteria))
                 .Then(b => b.Broadcast(ResultTable.RequestPrepared).WithPayload(vm => vm.Input).TunnelDown());
 
             presenter.On(ReportReady)

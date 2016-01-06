@@ -32,13 +32,6 @@ namespace NWheels.UI
             _ownerNode = ownerNode;
         }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public BindingSourceBuilder<TValue> Bind<TValue>(Expression<Func<TContents, TValue>> property)
-        {
-            return new BindingSourceBuilder<TValue>(_ownerNode, property);
-        }
-
         ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         //public BehaviorBuilder<TValue> OnChange<TValue>(Expression<Func<TContents, TValue>> property)
@@ -83,48 +76,6 @@ namespace NWheels.UI
 
         //BehaviorDescription Behavior<TInput>(Action<IBehaviorBuilder<TInput, TData, TState>> describe);
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class BindingSourceBuilder<TValue>
-        {
-            private readonly ControlledUidlNode _targetNode;
-            private readonly Expression<Func<TContents, TValue>> _destinationProperty;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public BindingSourceBuilder(ControlledUidlNode targetNode, Expression<Func<TContents, TValue>> destinationProperty)
-            {
-                _targetNode = targetNode;
-                _destinationProperty = destinationProperty;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public void ToModel(Expression<Func<ViewModel<TData, TState, Empty.Input>, TValue>> source)
-            {
-                _targetNode.DataBindings.Add(
-                    new UidlModelBinding("MB1", BindingSourceType.Model, _targetNode) {
-                        SourcePropertyExpression = source.ToNormalizedNavigationString("model")
-                    });
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public void ToApi<TApiContract>(Expression<Func<TApiContract, TValue>> apiCall) { }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public void ToApi<TApiContract, TReply>(
-                Expression<Func<TApiContract, TReply>> apiCall,
-                Expression<Func<TReply, TValue>> valueSelector) { }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public void ToEntity<TEntity>(
-                Action<IQueryable<TEntity>> query,
-                Expression<Func<TEntity[], TValue>> valueSelector)
-                where TEntity : class { }
-        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -286,7 +237,7 @@ namespace NWheels.UI
 
                 if ( timeoutMinutes != null )
                 {
-                    behavior.IdleMinutesExpression = timeoutMinutes.ToNormalizedNavigationString(false, "model");
+                    behavior.IdleMinutesExpression = timeoutMinutes.ToNormalizedNavigationString("model");
                 }
 
                 return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
@@ -459,7 +410,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<TInput> FireAndForget(Expression<Action<TContract, TData, TState, TInput>> call)
+            public PromiseBuilder<TInput> FireAndForget(Expression<Action<TContract, ViewModel<TData, TState, TInput>>> call)
             {
                 ParseMethodCall(call);
                 _behavior.CallType = ApiCallType.OneWay;
@@ -468,7 +419,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<TInput> WaitForCompletion(Expression<Action<TContract, TData, TState, TInput>> call)
+            public PromiseBuilder<TInput> WaitForCompletion(Expression<Action<TContract, ViewModel<TData, TState, TInput>>> call)
             {
                 ParseMethodCall(call);
                 _behavior.CallType = ApiCallType.RequestReply;
@@ -477,7 +428,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<TReply> WaitForReply<TReply>(Expression<Func<TContract, TData, TState, TInput, TReply>> call)
+            public PromiseBuilder<TReply> WaitForReply<TReply>(Expression<Func<TContract, ViewModel<TData, TState, TInput>, TReply>> call)
             {
                 ParseMethodCall(call);
                 _behavior.CallType = ApiCallType.RequestReply;
@@ -495,7 +446,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<object> PrepareWaitForReply<TReply>(Expression<Func<TContract, TData, TState, TInput, TReply>> call)
+            public PromiseBuilder<object> PrepareWaitForReply<TReply>(Expression<Func<TContract, ViewModel<TData, TState, TInput>, TReply>> call)
             {
                 _behavior.PrepareOnly = true;
                 _behavior.CallType = ApiCallType.RequestReply;
@@ -525,14 +476,17 @@ namespace NWheels.UI
 
             private string ToParameterExpressionString(Expression parameter)
             {
-                if ( _usePascalCase )
-                {
-                    return parameter.ToString();
-                }
-                else
-                {
-                    return parameter.ToString().ToCamelCaseExpression();
-                }
+                var effectiveExpression = string.Join(".", parameter.ToString().Split('.').Skip(1).ToArray());
+                return effectiveExpression.ToString();
+
+                //if ( _usePascalCase )
+                //{
+                //    return parameter.ToString();
+                //}
+                //else
+                //{
+                //    return parameter.ToString().ToCamelCaseExpression();
+                //}
             }
         }
 
@@ -883,7 +837,7 @@ namespace NWheels.UI
             {
                 if ( parameter != null )
                 {
-                    _behavior.FaultInfoExpression = parameter.ToNormalizedNavigationString(false, "model");
+                    _behavior.FaultInfoExpression = parameter.ToNormalizedNavigationString("model");
                 }
             }
 

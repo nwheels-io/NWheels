@@ -73,7 +73,7 @@ namespace NWheels.UI.Toolbox
         {
             if ( expression != null )
             {
-                return expression.ToNormalizedNavigationString(false, "input");
+                return expression.ToNormalizedNavigationString("input");
             }
             else
             {

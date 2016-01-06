@@ -9,12 +9,13 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
 {
-    public class Text : WidgetBase<Text, Empty.Data, Empty.State>
+    public class Text : WidgetBase<Text, Empty.Data, Text.IState>
     {
         public Text(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
-            this.Parameters = new Dictionary<string, object>();
+            Parameters = new Dictionary<string, object>();
+            TextSize = TextSize.Normal;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -23,7 +24,7 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<string> GetTranslatables()
         {
-            return base.GetTranslatables().ConcatIf<string>(this.Format);
+            return base.GetTranslatables().ConcatIf<string>(this.Contents);
         }
 
         #endregion
@@ -31,9 +32,11 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
-        public string Format { get; set; }
+        public string Contents { get; set; }
         [DataMember]
-        public Dictionary<string, object> Parameters { get; private set; }
+        public Dictionary<string, object> Parameters { get; set; }
+        [DataMember]
+        public TextSize TextSize { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -41,8 +44,27 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<Text, Empty.Data, Empty.State> presenter)
+        protected override void DescribePresenter(PresenterBuilder<Text, Empty.Data, Text.IState> presenter)
         {
         }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IState
+        {
+            string Contents { get; set; }
+            Dictionary<string, object> Parameters { get; set; }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum TextSize
+    {
+        Small,
+        Normal,
+        Header,
+        LargeHeader,
+        HugeHeader
     }
 }

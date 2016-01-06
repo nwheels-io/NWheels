@@ -284,26 +284,26 @@ HEAD, JS/CSS LINKS
                     <h1 class="logo-name">AFP</h1>
                 </div>
                 <h2>Sign In</h2>
-                <p ng-if="model.state.loginFault!='PasswordExpired'">Log in to your account.</p>
-                <form class="m-t" role="form" ng-if="model.state.loginFault!='PasswordExpired'" id="{{::uidl.elementName}}" novalidate>
+                <p ng-if="model.State.LoginFault!='PasswordExpired'">Log in to your account.</p>
+                <form class="m-t" role="form" ng-if="model.State.LoginFault!='PasswordExpired'" id="{{::uidl.elementName}}" novalidate>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.data.loginName" name="loginName" id="{{::uidl.elementName}}_name">
+                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.Data.LoginName" name="loginName" id="{{::uidl.elementName}}_name">
                     </div>
                     <div class="form-group">
-                        <input type="password" class="form-control" placeholder="Password" required="" ng-model="model.data.password" name="password" id="{{::uidl.elementName}}_password">
+                        <input type="password" class="form-control" placeholder="Password" required="" ng-model="model.Data.Password" name="password" id="{{::uidl.elementName}}_password">
                     </div>
                     <button class="btn btn-primary block full-width m-b" ng-click="invokeCommand('LogIn')">{{translate('Login')}}</button>
                 </form>
-                <p ng-if="model.state.loginFault=='PasswordExpired'">Please change your password.</p>
-                <form class="m-t" role="form" ng-if="model.state.loginFault=='PasswordExpired'" novalidate>
+                <p ng-if="model.State.LoginFault=='PasswordExpired'">Please change your password.</p>
+                <form class="m-t" role="form" ng-if="model.State.LoginFault=='PasswordExpired'" novalidate>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.data.loginName" >
+                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.Data.LoginName" >
                     </div>
                     <div class="form-group">
-                        <input type="password" class="form-control" placeholder="Current Password" required="" ng-model="model.data.password" >
+                        <input type="password" class="form-control" placeholder="Current Password" required="" ng-model="model.Data.Password" >
                     </div>
                     <div class="form-group">
-                        <input type="password" class="form-control" placeholder="New Password" required="" ng-model="model.data.newPassword" >
+                        <input type="password" class="form-control" placeholder="New Password" required="" ng-model="model.Data.NewPassword" >
                     </div>
                     <button class="btn btn-primary block full-width m-b" ng-click="invokeCommand('ChangePassword')">Change Password</button>
                 </form>
@@ -333,6 +333,26 @@ HEAD, JS/CSS LINKS
     </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - PROFILE PHOTO
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="uidl-element-template/UserProfilePhoto">
+        <div class="dropdown profile-element"> <span>
+            <img ng-if="model.State.ProfilePhotoId" alt="image" class="img-circle" ng-src="entity/queryImage/{{uidl.entityName}}/{{model.State.ProfilePhotoId}}/{{uidl.imageTypeProperty}}/{{uidl.imageContentProperty}}">
+             </span>
+            <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+            <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">{{model.State.PersonFullName}}</strong>
+             </span> <span class="text-muted text-xs block">{{model.State.UserRoles[0]}} <b class="caret"></b></span> </span> </a>
+            <!--ul class="dropdown-menu animated fadeInRight m-t-xs">
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="contacts.html">Contacts</a></li>
+                <li><a href="mailbox.html">Mailbox</a></li>
+                <li class="divider"></li>
+                <li><a href="login.html">Logout</a></li>
+            </ul-->
+        </div>    
+    </script>
+    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - MANAGEMENT CONSOLE
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/ManagementConsole">
@@ -340,22 +360,7 @@ HEAD, JS/CSS LINKS
             <div class="sidebar-collapse">
                 <ul class="nav metismenu" id="side-menu">
                     <li class="nav-header" style="padding-top:45px;padding-bottom:100px;">
-                        <div class="dropdown profile-element"> 
-                            <span>
-                                <!--img alt="image" class="img-circle" src="img/profile_small.jpg" /-->
-                            </span>
-                            <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-                                <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">{{appScope.model.state.user.fullName}}</strong>
-                                 </span> <span class="text-muted text-xs block">{{appScope.model.state.user.userRoles[0]}} <!--b class="caret"></b--></span> </span> 
-                            </a>
-                            <ul class="dropdown-menu animated fadeInRight m-t-xs">
-                                <li><a href="profile.html">Profile</a></li>
-                                <li><a href="contacts.html">Contacts</a></li>
-                                <li><a href="mailbox.html">Mailbox</a></li>
-                                <li class="divider"></li>
-                                <li><a href="login.html">Logout</a></li>
-                            </ul>
-                        </div>
+                        <uidl-widget uidl="uidl.profilePhoto"></uidl-widget>
                         <div class="logo-element">
                             IN+
                         </div>
@@ -551,7 +556,11 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - TEXT
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/Text">
-        {{translate(uidl.text)}}
+        <h2 ng-if="uidl.textSize==='HugeHeader'">{{translate(model.State.Contents)}}</h2>
+        <h3 ng-if="uidl.textSize==='LargeHeader'">{{translate(model.State.Contents)}}</h3>
+        <h4 ng-if="uidl.textSize==='Header'">{{translate(model.State.Contents)}}</h4>
+        <span ng-if="uidl.textSize==='Normal'">{{translate(model.State.Contents)}}</span>
+        <small ng-if="uidl.textSize==='HugeHeader'">{{translate(model.State.Contents)}}</small>
     </script>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -563,7 +572,7 @@ HEAD, JS/CSS LINKS
                 <span class="label label-success pull-right"></span>
                 <h3>{{::translate(uidl.text)}}</h3>
             </div>
-            <div ng-repeat="value in model.state.values" class="ibox-content text-right">
+            <div ng-repeat="value in model.State.values" class="ibox-content text-right">
                 <h3 ng-if="$first" class="pull-left">
                     <!--span class="label label-success">{{::translate(value.title)}}</span-->
                     <span ng-if="value.alertType" class="label label-warning"><i class="fa fa-warning"></i>&nbsp;{{::translate(value.alertText)}}</span>
@@ -1073,9 +1082,9 @@ HEAD, JS/CSS LINKS
                 <i ng-if="uidl.icon" class="fa fa-{{::uidl.icon}}"></i> {{::translate(uidl.text)}}
             </div>
             <div ng-if="uidl.inputForm" class="panel-body">
-                <uidl-widget uidl="uidl.inputForm" parent-model="model.state.input"></uidl-widget>
+                <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
             </div>
-            <uidl-widget ng-if="uidl.inputFormTypeSelector" uidl="uidl.inputFormTypeSelector" parent-model="model.state"></uidl-widget>
+            <uidl-widget ng-if="uidl.inputFormTypeSelector" uidl="uidl.inputFormTypeSelector" parent-model="model.State"></uidl-widget>
         </div>
     </script>
     
@@ -1091,7 +1100,7 @@ HEAD, JS/CSS LINKS
                 <h2>{{::translate(uidl.text)}}</h2>
                 <p ng-if="uidl.helpText">{{::translate(uidl.helpText)}}</p>
                 
-                <uidl-widget uidl="uidl.inputForm" parent-model="model.state.input"></uidl-widget>
+                <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
             </div>                
             <p class="m-t"> <small>Powered by BitWize</small> </p>
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
@@ -1109,7 +1118,7 @@ HEAD, JS/CSS LINKS
                        ng-class="{'col-lg-2':!uidl.isModalPopup, 'col-lg-4':uidl.isModalPopup}"
                        for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.propertyName)}}</label>
                 <div ng-class="{'col-lg-3':!uidl.isModalPopup, 'col-lg-6':uidl.isModalPopup}">
-                    <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.data.entity" />
+                    <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
             </div>
@@ -1118,14 +1127,14 @@ HEAD, JS/CSS LINKS
                 <label class="col-lg-2 control-label"
                        for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.propertyName)}}</label>
                 <div class="col-lg-3">
-                    <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.data.entity" />
+                    <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
                 <label ng-if="field['$nextCol']"
                        class="col-lg-2 control-label"
                        for="{{::uidl.elementName + '_' + field['$nextCol'].propertyName}}">{{::translate(field['$nextCol'].propertyName)}}</label>
                 <div ng-if="field['$nextCol']" class="col-lg-3">
-                    <uidl-form-field parent-uidl="uidl" uidl="field['$nextCol']" entity="model.data.entity" />
+                    <uidl-form-field parent-uidl="uidl" uidl="field['$nextCol']" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
             </div>
@@ -1137,7 +1146,7 @@ HEAD, JS/CSS LINKS
                 <div class="tab-content">
                     <div ng-repeat="field in tabSetFields" ng-class="{'tab-pane': true, active: $index == tabSetIndex}" ng-show="$index == tabSetIndex">
                         <div class="ibox-content nested">
-                            <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="model.data.entity"></uidl-widget>
+                            <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="model.Data.entity"></uidl-widget>
                         </div>
                     </div>
                 </div>
@@ -1162,7 +1171,7 @@ HEAD, JS/CSS LINKS
             <div class="form-group" ng-repeat-start="field in plainFields" style="margin-bottom:0">
                 <label class="control-label col-sm-4"
                        for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.propertyName, { upperCase: true })}}</label>
-                <div class="col-sm-8"><uidl-form-field parent-uidl="uidl" uidl="field" entity="model.data.entity" /></div>
+                <div class="col-sm-8"><uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" /></div>
             </div>
             <div ng-repeat-end class="hr-line-dashed"></div>
             <!-- COMMAND BUTTONS -->
@@ -1182,7 +1191,7 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="uidl-element-template/FormLoginStyle">
         <form class="m-t" role="form" id="{{::uidl.elementName}}" novalidate>
             <div class="form-group" ng-repeat="field in plainFields">
-                <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.data.entity" template-name="FormFieldLoginStyle"></uidl-form-field>
+                <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" template-name="FormFieldLoginStyle"></uidl-form-field>
             </div>
             <button ng-repeat="command in uidl.commands"
                     class="btn block full-width m-b"
@@ -1526,16 +1535,16 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - POINT CHART
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/PointChart">   
-        <table ng-if="model.state.data" border="1" style="margin-top: 10px; background: white" cellpadding="3" cellspacing="1">
+        <table ng-if="model.State.data" border="1" style="margin-top: 10px; background: white" cellpadding="3" cellspacing="1">
             <tr>
                 <td>&nbsp;</td>
-                <td>{{model.state.data.series[0].label}}</td>
-                <td>{{model.state.data.series[1].label}}</td>
+                <td>{{model.State.data.series[0].label}}</td>
+                <td>{{model.State.data.series[1].label}}</td>
             </tr>
-            <tr ng-repeat="label in model.state.data.labels track by $index">
+            <tr ng-repeat="label in model.State.data.labels track by $index">
                 <td>{{label}}</td>
-                <td>{{model.state.data.series[0].values[$index]}}</td>
-                <td>{{model.state.data.series[1].values[$index]}}</td>
+                <td>{{model.State.data.series[0].values[$index]}}</td>
+                <td>{{model.State.data.series[1].values[$index]}}</td>
             </tr>
         </table>
     </script>
@@ -1677,13 +1686,13 @@ HEAD, JS/CSS LINKS
                 <p>Apply for an affiliate account.</p>
                 <form class="m-t" role="form">
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.data.fullName" >
+                        <input type="text" class="form-control" placeholder="Your Name" required="" ng-model="model.Data.FullName" >
                     </div>
                     <div class="form-group">
-                        <input type="email" class="form-control" placeholder="Email" required="" ng-model="model.data.emailAddress" >
+                        <input type="email" class="form-control" placeholder="Email" required="" ng-model="model.Data.EmailAddress" >
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Phone Number" required="" ng-model="model.data.phoneNumber" >
+                        <input type="text" class="form-control" placeholder="Phone Number" required="" ng-model="model.Data.PhoneNumber" >
                     </div>
                     <!--div class="form-group">
                             <div class="checkbox i-checks"><label> <input type="checkbox"><i></i> Agree the terms and policy </label></div>

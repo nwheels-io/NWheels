@@ -22,14 +22,20 @@ namespace NWheels.Domains.Security
     public class UserLoginTransactionScript : ITransactionScript
     {
         private readonly IFramework _framework;
+        private readonly ITypeMetadataCache _metadataCache;
         private readonly IAuthenticationProvider _authenticationProvider;
         private readonly ISessionManager _sessionManager;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UserLoginTransactionScript(IFramework framework, IAuthenticationProvider authenticationProvider, ISessionManager sessionManager)
+        public UserLoginTransactionScript(
+            IFramework framework, 
+            ITypeMetadataCache metadataCache, 
+            IAuthenticationProvider authenticationProvider, 
+            ISessionManager sessionManager)
         {
             _framework = framework;
+            _metadataCache = metadataCache;
             _authenticationProvider = authenticationProvider;
             _sessionManager = sessionManager;
         }
@@ -70,7 +76,7 @@ namespace NWheels.Domains.Security
 
                 _sessionManager.As<ICoreSessionManager>().AuthorieSession(principal);
 
-                var result = new Result(principal, currentSession.Endpoint);
+                var result = new Result(principal, currentSession.Endpoint, _metadataCache);
                 return result;
             }
         }
@@ -115,12 +121,12 @@ namespace NWheels.Domains.Security
 
         public class Result
         {
-            public Result(UserAccountPrincipal principal, IEndpoint endpoint)
+            public Result(UserAccountPrincipal principal, IEndpoint endpoint, ITypeMetadataCache metadataCache)
             {
                 var account = principal.Identity.GetUserAccount();
 
                 FullName = principal.PersonFullName;
-                UserType = account.As<IObject>().ContractType.SimpleQualifiedName();
+                UserType = metadataCache.GetTypeMetadata(account.As<IObject>().ContractType).QualifiedName;
                 UserId = account.As<IPersistableObject>().As<IEntityObject>().GetId().Value.ToString();
                 UserRoles = principal.GetUserRoles();
                 AllClaims = principal.Identity.Claims.Select(c => c.Value).ToArray();
@@ -129,6 +135,13 @@ namespace NWheels.Domains.Security
                 if ( endpoint != null )
                 {
                     IdleSessionExpiryMinutes = (int)endpoint.SessionIdleTimeoutDefault.GetValueOrDefault(TimeSpan.Zero).TotalMinutes;
+                }
+
+                var accountWithProfilePhoto = account as IEntityPartUserAccountProfilePhoto;
+
+                if ( accountWithProfilePhoto != null && accountWithProfilePhoto.ProfilePhoto != null )
+                {
+                    this.ProfilePhotoId = EntityId.ValueOf(accountWithProfilePhoto.ProfilePhoto).ToStringOrDefault();
                 }
             }
 
@@ -139,6 +152,7 @@ namespace NWheels.Domains.Security
             public string UserType { get; private set; }
             public string[] UserRoles { get; private set; }
             public string[] AllClaims { get; private set; }
+            public string ProfilePhotoId { get; private set; }
             public DateTime? LastLoginAtUtc { get; private set; }
             public int IdleSessionExpiryMinutes { get; private set; }
         }

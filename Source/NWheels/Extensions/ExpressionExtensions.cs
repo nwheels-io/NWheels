@@ -81,13 +81,6 @@ namespace NWheels.Extensions
 
         public static string ToNormalizedNavigationString(this LambdaExpression expression, params string[] formalParameterNames)
         {
-            return ToNormalizedNavigationString(expression, true, formalParameterNames);
-        }
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public static string ToNormalizedNavigationString(this LambdaExpression expression, bool convertToCamelCase, params string[] formalParameterNames)
-        {
             if ( expression.Body is UnaryExpression && expression.Body.NodeType == ExpressionType.Convert )
             {
                 expression = Expression.Lambda(((UnaryExpression)expression.Body).Operand, expression.Parameters);
@@ -103,16 +96,7 @@ namespace NWheels.Extensions
             var leftSideLength = expressionString.IndexOf(arrowToken) + arrowToken.Length;
 
             var rightSideString = expressionString.Substring(leftSideLength).TrimStart();
-
-            if ( convertToCamelCase )
-            {
-                var camelCaseRightSideString = string.Join(".", rightSideString.Split('.').Select(s => s.ConvertToCamelCase()));
-                return NormalizeKnownTokens(camelCaseRightSideString);
-            }
-            else
-            {
-                return rightSideString;
-            }
+            return rightSideString;
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -95,7 +95,7 @@ namespace NWheels.UI.Toolbox
             {
                 presenter.On(Loaded)
                     .InvokeTransactionScript<TScript>()
-                    .WaitForReply((script, data, state, context) => script.InitializeInput(null))
+                    .WaitForReply((script, vm) => script.InitializeInput(null))
                     .Then(b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Input))
                     .Then(InvokeFormModelSetter));
             }
@@ -108,7 +108,7 @@ namespace NWheels.UI.Toolbox
 
             presenter.On(Execute)
                 .InvokeTransactionScript<TScript>()
-                .WaitForReply((script, data, state, input) => script.Execute(state.Input))
+                .WaitForReply((script, vm) => script.Execute(vm.State.Input))
                 .Then(
                     onSuccess: b => b
                         .AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Output))
