@@ -49,6 +49,8 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public Container StatusBar { get; set; }
         [DataMember]
+        public UserProfilePhoto ProfilePhoto { get; set; }
+        [DataMember]
         public ScreenPartContainer MainContent { get; set; }
         [DataMember]
         public string DashboardScreenPartQualifiedName { get; set; }
