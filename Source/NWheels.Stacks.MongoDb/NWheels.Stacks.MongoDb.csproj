@@ -77,6 +77,7 @@
     <Compile Include="Factories\BsonIgnoreExtraElementsConvention.cs" />
     <Compile Include="Factories\BsonUtcDateTimeConvention.cs" />
     <Compile Include="Factories\BsonStringEnumConvention.cs" />
+    <Compile Include="Factories\DictionaryStrategy.cs" />
     <Compile Include="Factories\DocumentIdStrategy.cs" />
     <Compile Include="Factories\ContextImplTypeInjectionConvention.cs" />
     <Compile Include="Factories\LazyLoadByForeignKeyStrategyBase.cs" />

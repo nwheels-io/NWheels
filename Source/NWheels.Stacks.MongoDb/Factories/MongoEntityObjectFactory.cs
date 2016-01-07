@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Autofac;
 using Hapil;
@@ -32,10 +33,6 @@ namespace NWheels.Stacks.MongoDb.Factories
 
             UpdateProperyRelationalMappings(propertyMap);
 
-            propertyMap.NeedImplementationTypeKey += (sender, args) => {
-                args.TypeKeyToUse = CreateImplementationTypeKey(args.ContractType);
-            };
-            
             return new IObjectFactoryConvention[] {
                 new BaseTypeConvention(MetadataCache, metaType), 
                 new PropertyImplementationConvention(metaType, propertyMap),
@@ -79,6 +76,11 @@ namespace NWheels.Stacks.MongoDb.Factories
             ConventionContext conventionContext)
         {
             var builder = new PropertyImplementationStrategyMap.Builder();
+
+            builder.MapBeingBuilt.NeedImplementationTypeKey += (sender, args) => {
+                args.TypeKeyToUse = CreateImplementationTypeKey(args.ContractType);
+            };
+
             Type collectionItemType;
 
             //-- calculated properties
@@ -136,7 +138,14 @@ namespace NWheels.Stacks.MongoDb.Factories
                 p => new PublicAccessorWrapperStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             builder.AddRule(
-                p => p.Kind == PropertyKind.Scalar && p.ContractPropertyInfo.CanRead && p.ContractPropertyInfo.CanWrite,
+                p => p.Kind == PropertyKind.Scalar && 
+                     p.ClrType.IsGenericType && 
+                     p.ClrType.GetGenericTypeDefinition() == typeof(Dictionary<,>) && 
+                     p.ClrType.GetGenericArguments().Any(t => t.IsEntityPartContract()),
+                p => new DictionaryStrategy(conventionContext, builder.MapBeingBuilt, context, MetadataCache, metaType, p));
+
+            builder.AddRule(
+                p => p.Kind == PropertyKind.Scalar,
                 p => new AutomaticPropertyStrategy(builder.MapBeingBuilt, context, MetadataCache, metaType, p));
 
             return builder.Build(MetadataCache, metaType);
