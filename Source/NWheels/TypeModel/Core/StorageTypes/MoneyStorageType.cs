@@ -13,14 +13,14 @@ namespace NWheels.DataObjects.Core.StorageTypes
 {
     public class MoneyStorageType : IStorageDataType<Money, MoneyStorageType.SerializableMoney>, IStorageContractConversionWriter
     {
-        public SerializableMoney ContractToStorage(Money contractValue)
+        public SerializableMoney ContractToStorage(IPropertyMetadata metaProperty, Money contractValue)
         {
             return new SerializableMoney(contractValue);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Money StorageToContract(SerializableMoney storageValue)
+        public Money StorageToContract(IPropertyMetadata metaProperty, SerializableMoney storageValue)
         {
             return storageValue.ToMoney();
         }
@@ -35,6 +35,7 @@ namespace NWheels.DataObjects.Core.StorageTypes
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void IStorageContractConversionWriter.WriteContractToStorageConversion(
+            IPropertyMetadata metaProperty,
             MethodWriterBase method,
             IOperand<TypeTemplate.TContract> contractValue,
             MutableOperand<TypeTemplate.TValue> storageValue)
@@ -45,6 +46,7 @@ namespace NWheels.DataObjects.Core.StorageTypes
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void IStorageContractConversionWriter.WriteStorageToContractConversion(
+            IPropertyMetadata metaProperty,
             MethodWriterBase method,
             MutableOperand<TypeTemplate.TContract> contractValue,
             IOperand<TypeTemplate.TValue> storageValue)
@@ -52,6 +54,20 @@ namespace NWheels.DataObjects.Core.StorageTypes
             method.If(storageValue.CastTo<SerializableMoney>().IsNotNull()).Then(() => {
                 contractValue.Assign(storageValue.CastTo<SerializableMoney>().Func<Money>(x => x.ToMoney).CastTo<TypeTemplate.TContract>());
             });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        object IStorageDataType.ContractToStorage(IPropertyMetadata metaProperty, object contractValue)
+        {
+            return this.ContractToStorage(metaProperty, (Money)contractValue);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        object IStorageDataType.StorageToContract(IPropertyMetadata metaProperty, object storageValue)
+        {
+            return this.StorageToContract(metaProperty, (SerializableMoney)storageValue);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

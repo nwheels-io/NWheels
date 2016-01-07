@@ -12,14 +12,14 @@ namespace NWheels.DataObjects.Core.StorageTypes
 {
     public class ClrTypeStorageType : IStorageDataType<System.Type, string>, IStorageContractConversionWriter
     {
-        public string ContractToStorage(Type contractValue)
+        public string ContractToStorage(IPropertyMetadata metaProperty, Type contractValue)
         {
             return contractValue.AssemblyQualifiedNameNonVersioned();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Type StorageToContract(string storageValue)
+        public Type StorageToContract(IPropertyMetadata metaProperty, string storageValue)
         {
             return Type.GetType(storageValue);
         }
@@ -34,6 +34,7 @@ namespace NWheels.DataObjects.Core.StorageTypes
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void IStorageContractConversionWriter.WriteContractToStorageConversion(
+            IPropertyMetadata metaProperty,
             MethodWriterBase method,
             IOperand<TypeTemplate.TContract> contractValue,
             MutableOperand<TypeTemplate.TValue> storageValue)
@@ -46,6 +47,7 @@ namespace NWheels.DataObjects.Core.StorageTypes
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         void IStorageContractConversionWriter.WriteStorageToContractConversion(
+            IPropertyMetadata metaProperty,
             MethodWriterBase method,
             MutableOperand<TypeTemplate.TContract> contractValue,
             IOperand<TypeTemplate.TValue> storageValue)
@@ -53,6 +55,20 @@ namespace NWheels.DataObjects.Core.StorageTypes
             contractValue.Assign(
                 Static.Func(Type.GetType, storageValue.CastTo<string>())
                 .CastTo<TypeTemplate.TContract>());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        object IStorageDataType.ContractToStorage(IPropertyMetadata metaProperty, object contractValue)
+        {
+            return this.ContractToStorage(metaProperty, (Type)contractValue);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        object IStorageDataType.StorageToContract(IPropertyMetadata metaProperty, object storageValue)
+        {
+            return this.StorageToContract(metaProperty, (string)storageValue);
         }
     }
 }

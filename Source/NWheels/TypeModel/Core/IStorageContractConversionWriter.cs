@@ -16,7 +16,18 @@ namespace NWheels.DataObjects.Core
     /// </summary>
     public interface IStorageContractConversionWriter
     {
-        void WriteContractToStorageConversion(MethodWriterBase method, IOperand<TypeTemplate.TContract> contractValue, MutableOperand<TypeTemplate.TValue> storageValue);
-        void WriteStorageToContractConversion(MethodWriterBase method, MutableOperand<TypeTemplate.TContract> contractValue, IOperand<TypeTemplate.TValue> storageValue);
+        void WriteContractToStorageConversion(
+            IPropertyMetadata metaProperty, 
+            MethodWriterBase method, 
+            IOperand<TypeTemplate.TContract> contractValue, 
+            MutableOperand<TypeTemplate.TValue> storageValue);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        void WriteStorageToContractConversion(
+            IPropertyMetadata metaProperty, 
+            MethodWriterBase method, 
+            MutableOperand<TypeTemplate.TContract> contractValue, 
+            IOperand<TypeTemplate.TValue> storageValue);
     }
 }

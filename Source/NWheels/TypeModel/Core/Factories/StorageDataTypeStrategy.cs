@@ -39,6 +39,7 @@ namespace NWheels.TypeModel.Core.Factories
             using ( TT.CreateScope<TT.TContract>(MetaProperty.ClrType) )
             {
                 conversiotWriter.WriteContractToStorageConversion(
+                    MetaProperty,
                     method, 
                     contractValue.CastTo<TT.TContract>(), 
                     storageValue);
@@ -57,6 +58,7 @@ namespace NWheels.TypeModel.Core.Factories
             using ( TT.CreateScope<TT.TContract>(MetaProperty.ClrType) )
             {
                 conversiotWriter.WriteStorageToContractConversion(
+                    MetaProperty,
                     method, 
                     (MutableOperand<TT.TContract>)contractValue.CastTo<TT.TContract>(), 
                     storageValue);

@@ -262,7 +262,7 @@ namespace NWheels.Conventions.Core
                     explicitImpl.Property(property).Implement(
                         getter: p => p.Get(m => {
                             m.If(stateField == DualValueStates.Storage).Then(() => {
-                                conversionWriter.WriteStorageToContractConversion(m, contractField, storageField);
+                                conversionWriter.WriteStorageToContractConversion(propertyMetadata, m, contractField, storageField);
                                 stateField.Assign(stateField | DualValueStates.Contract);
                             });
                             m.Return(contractField.CastTo<TT.TProperty>());
@@ -276,7 +276,7 @@ namespace NWheels.Conventions.Core
                     explicitImpl.NewVirtualWritableProperty<TT.TValue>(property.Name).Implement(
                         getter: p => p.Get(m => {
                             m.If(stateField == DualValueStates.Contract).Then(() => {
-                                conversionWriter.WriteContractToStorageConversion(m, contractField, storageField);
+                                conversionWriter.WriteContractToStorageConversion(propertyMetadata, m, contractField, storageField);
                                 stateField.Assign(stateField | DualValueStates.Storage);
                             });
                             m.Return(storageField);
