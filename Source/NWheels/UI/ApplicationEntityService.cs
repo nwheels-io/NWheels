@@ -1572,7 +1572,7 @@ namespace NWheels.UI
                     }
                     else
                     {
-                        dbQuery = navigationMetaPath[0].MakeOrderBy(navigationMetaPath, dbQuery, first: i == 0, ascending: orderItem.Ascending);
+                        dbQuery = metaProperty.MakeOrderBy(navigationMetaPath, dbQuery, first: i == 0, ascending: orderItem.Ascending);
                         i++;
                     }
                 }
