@@ -81,6 +81,30 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IPropertyMetadata FindPropertyByNameIncludingDerivedTypes(string propertyName)
+        {
+            IPropertyMetadata metaProperty;
+
+            if ( TryGetPropertyByName(propertyName, out metaProperty) )
+            {
+                return metaProperty;
+            }
+
+            foreach ( var derivedType in DerivedTypes )
+            {
+                if ( derivedType.TryGetPropertyByName(propertyName, out metaProperty) )
+                {
+                    return metaProperty;
+                }
+            }
+
+            throw new ArgumentException(string.Format(
+                "Property '{0}' does not exist in type '{1}' or any of its derived types.", 
+                propertyName, this.QualifiedName));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public LambdaExpression MakePropertyExpression(IPropertyMetadata property)
         {
             return GetExpressionFactory(property.ContractPropertyInfo.DeclaringType).MakePropertyExpression(property);

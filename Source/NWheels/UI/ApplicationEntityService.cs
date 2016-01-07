@@ -402,9 +402,9 @@ namespace NWheels.UI
 
             for ( int i = 0 ; i < pathSteps.Length ; i++ )
             {
-                var stepMetaProperty = stepMetaType.GetPropertyByName(pathSteps[i]);
+                var stepMetaProperty = stepMetaType.FindPropertyByNameIncludingDerivedTypes(pathSteps[i]);
                 metaPropertyPath[i] = stepMetaProperty;
-
+                
                 if ( stepMetaProperty.Relation != null && stepMetaProperty.Relation.RelatedPartyType != null )
                 {
                     stepMetaType = stepMetaProperty.Relation.RelatedPartyType;
@@ -945,7 +945,7 @@ namespace NWheels.UI
 
                 for ( int i = 0 ; i < PropertyPath.Count ; i++ )
                 {
-                    var stepMetaProperty = stepMetaType.GetPropertyByName(PropertyPath[i]);
+                    var stepMetaProperty = stepMetaType.FindPropertyByNameIncludingDerivedTypes(PropertyPath[i]);
                     metaPropertyPath.Add(stepMetaProperty);
 
                     if ( stepMetaProperty.Relation != null )

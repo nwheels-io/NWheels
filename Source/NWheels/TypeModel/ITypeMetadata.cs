@@ -14,6 +14,7 @@ namespace NWheels.DataObjects
         IPropertyMetadata GetPropertyByDeclaration(PropertyInfo declarationInContract);
         bool TryGetPropertyByName(string name, out IPropertyMetadata property);
         bool TryGetPropertyByDeclaration(PropertyInfo declarationInContract, out IPropertyMetadata property);
+        IPropertyMetadata FindPropertyByNameIncludingDerivedTypes(string propertyName);
         LambdaExpression MakePropertyExpression(IPropertyMetadata property);
         LambdaExpression MakePropertyAsObjectExpression(IPropertyMetadata property);
         IQueryable<TBase> MakeOfType<TBase>(IQueryable<TBase> query);
@@ -45,3 +46,4 @@ namespace NWheels.DataObjects
         ITypeRelationalMapping RelationalMapping { get; }
     }
 }
+

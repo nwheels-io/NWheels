@@ -219,7 +219,7 @@ namespace NWheels.UI.Toolbox
 
                 for ( int i = 0; i < Navigations.Length - 1; i++ )
                 {
-                    var navigationMetaProperty = FindPropertyByNameIncludingDerivedTypes(destinationMetaType, Navigations[i]);
+                    var navigationMetaProperty = destinationMetaType.FindPropertyByNameIncludingDerivedTypes(Navigations[i]);
 
                     if ( i < Navigations.Length - 1 && navigationMetaProperty.Relation != null )
                     {
@@ -236,30 +236,7 @@ namespace NWheels.UI.Toolbox
                     }
                 }
 
-                destinationMetaProperty = FindPropertyByNameIncludingDerivedTypes(destinationMetaType, Navigations.Last());
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private IPropertyMetadata FindPropertyByNameIncludingDerivedTypes(ITypeMetadata metaType, string propertyName)
-            {
-                IPropertyMetadata metaProperty;
-
-                if ( metaType.TryGetPropertyByName(propertyName, out metaProperty) )
-                {
-                    return metaProperty;
-                }
-
-                foreach ( var derivedType in metaType.DerivedTypes )
-                {
-                    if ( derivedType.TryGetPropertyByName(propertyName, out metaProperty) )
-                    {
-                        return metaProperty;
-                    }
-                }
-
-                throw new ArgumentException(
-                    string.Format("Property '{0}' does not exist in type '{1}' or any of its derived types.", propertyName, metaType.QualifiedName));
+                destinationMetaProperty = destinationMetaType.FindPropertyByNameIncludingDerivedTypes(Navigations.Last());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
