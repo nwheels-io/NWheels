@@ -79,7 +79,7 @@ namespace NWheels.Stacks.Nlog
 
             LogManager.Configuration.AddTarget(PlainTextConsoleTargetName, consoleTarget);
 
-            var consoleRule = new LoggingRule(PlainTextLoggerName, LogLevel.Trace, consoleTarget);
+            var consoleRule = new LoggingRule(PlainTextLoggerName, LogLevel.Warn, consoleTarget);
 
             LogManager.Configuration.LoggingRules.Add(consoleRule);
             LogManager.ReconfigExistingLoggers();
