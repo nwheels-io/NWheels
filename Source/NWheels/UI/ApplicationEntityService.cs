@@ -391,6 +391,32 @@ namespace NWheels.UI
 
             return contracts.ToArray();
         }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static IPropertyMetadata[] BuildNavigationMetaPath(ITypeMetadata metaType, string propertyPath)
+        {
+            var pathSteps = propertyPath.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            var stepMetaType = metaType;
+            var metaPropertyPath = new IPropertyMetadata[pathSteps.Length];
+
+            for ( int i = 0 ; i < pathSteps.Length ; i++ )
+            {
+                var stepMetaProperty = stepMetaType.GetPropertyByName(pathSteps[i]);
+                metaPropertyPath[i] = stepMetaProperty;
+
+                if ( stepMetaProperty.Relation != null && stepMetaProperty.Relation.RelatedPartyType != null )
+                {
+                    stepMetaType = stepMetaProperty.Relation.RelatedPartyType;
+                }
+                else if ( i < pathSteps.Length - 1 )
+                {
+                    return null;
+                }
+            }
+
+            return metaPropertyPath;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -961,11 +987,11 @@ namespace NWheels.UI
 
                 if ( MetaProperty.Kind == PropertyKind.Scalar )
                 {
-                    return MetaProperty.MakeBinaryExpression<TEntity>(StringValue, expressionFactory);
+                    return MetaProperty.MakeBinaryExpression<TEntity>(NavigationMetaPath, StringValue, expressionFactory);
                 }
                 else if ( MetaProperty.Kind == PropertyKind.Relation )
                 {
-                    return MetaProperty.MakeForeignKeyBinaryExpression<TEntity>(StringValue, expressionFactory);
+                    return MetaProperty.MakeForeignKeyBinaryExpression<TEntity>(NavigationMetaPath, StringValue, expressionFactory);
                 }
 
                 throw new NotSupportedException("Cannot create filter expression for property of kind: " + MetaProperty.Kind);
@@ -979,6 +1005,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public IPropertyMetadata[] NavigationMetaPath { get; set; }
             public IPropertyMetadata MetaProperty { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1051,12 +1078,14 @@ namespace NWheels.UI
 
             public IQueryable<TEntity> ApplyToQuery<TEntity>(IQueryable<TEntity> query, bool first)
             {
-                if ( MetaProperty == null )
-                {
-                    throw new InvalidOperationException("MetaProperty must be set before calling this method.");
-                }
+                throw new NotSupportedException();
 
-                return MetaProperty.MakeOrderBy(query, first, ascending: this.Ascending);
+                //if ( MetaProperty == null )
+                //{
+                //    throw new InvalidOperationException("MetaProperty must be set before calling this method.");
+                //}
+
+                //return MetaProperty.MakeOrderBy(query, first, ascending: this.Ascending);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1066,6 +1095,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public IPropertyMetadata[] NavigationMetaPath { get; set; }
             public IPropertyMetadata MetaProperty { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1448,7 +1478,10 @@ namespace NWheels.UI
                 {
                     var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
                     var idProperty = MetaType.PrimaryKey.Properties[0];
-                    IQueryable<TEntity> query = repository.AsQueryable().Where(idProperty.MakeBinaryExpression<TEntity>(valueString: id, binaryFactory: Expression.Equal));
+                    IQueryable<TEntity> query = repository.AsQueryable().Where(idProperty.MakeBinaryExpression<TEntity>(
+                        navigationPath: new[] { idProperty }, 
+                        valueString: id, 
+                        binaryFactory: Expression.Equal));
 
                     var result = query.FirstOrDefault();
 
@@ -1529,16 +1562,17 @@ namespace NWheels.UI
                 for ( int i = 0 ; i < options.OrderBy.Count ; )
                 {
                     var orderItem = options.OrderBy[i];
-                    var metaProperty = MetaType.GetPropertyByName(orderItem.PropertyName);
+                    var navigationMetaPath = BuildNavigationMetaPath(MetaType, orderItem.PropertyName);
+                    var metaProperty = navigationMetaPath.Last();
 
                     if ( metaProperty.IsCalculated )
                     {
-                        options.Filter.RemoveAt(i);
+                        options.OrderBy.RemoveAt(i);
                         options.InMemoryOrderBy.Add(orderItem);
                     }
                     else
                     {
-                        dbQuery = metaProperty.MakeOrderBy(dbQuery, first: i == 0, ascending: orderItem.Ascending);
+                        dbQuery = navigationMetaPath[0].MakeOrderBy(navigationMetaPath, dbQuery, first: i == 0, ascending: orderItem.Ascending);
                         i++;
                     }
                 }
@@ -1558,7 +1592,8 @@ namespace NWheels.UI
                 for ( int i = 0 ; i < options.Filter.Count ; )
                 {
                     var filterItem = options.Filter[i];
-                    filterItem.MetaProperty = MetaType.GetPropertyByName(filterItem.PropertyName);
+                    filterItem.NavigationMetaPath = BuildNavigationMetaPath(MetaType, filterItem.PropertyName);
+                    filterItem.MetaProperty = filterItem.NavigationMetaPath.Last();
 
                     if ( filterItem.MetaProperty.IsCalculated )
                     {

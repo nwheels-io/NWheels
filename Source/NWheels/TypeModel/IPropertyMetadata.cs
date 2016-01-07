@@ -22,11 +22,11 @@ namespace NWheels.DataObjects
         object ParseStringValue(string s);
         LambdaExpression MakePropertyExpression<TEntity>();
         LambdaExpression MakePropertyAsObjectExpression<TEntity>();
-        Expression<Func<TEntity, bool>> MakeBinaryExpression<TEntity>(object value, Func<Expression, Expression, Expression> binaryFactory);
-        Expression<Func<TEntity, bool>> MakeBinaryExpression<TEntity>(string valueString, Func<Expression, Expression, Expression> binaryFactory);
-        Expression<Func<TEntity, bool>> MakeForeignKeyBinaryExpression<TEntity>(object value, Func<Expression, Expression, Expression> binaryFactory);
-        Expression<Func<TEntity, bool>> MakeForeignKeyBinaryExpression<TEntity>(string valueString, Func<Expression, Expression, Expression> binaryFactory);
-        IQueryable<TEntity> MakeOrderBy<TEntity>(IQueryable<TEntity> query, bool first, bool ascending);
+        Expression<Func<TEntity, bool>> MakeBinaryExpression<TEntity>(IPropertyMetadata[] navigationPath, object value, Func<Expression, Expression, Expression> binaryFactory);
+        Expression<Func<TEntity, bool>> MakeBinaryExpression<TEntity>(IPropertyMetadata[] navigationPath, string valueString, Func<Expression, Expression, Expression> binaryFactory);
+        Expression<Func<TEntity, bool>> MakeForeignKeyBinaryExpression<TEntity>(IPropertyMetadata[] navigationPath, object value, Func<Expression, Expression, Expression> binaryFactory);
+        Expression<Func<TEntity, bool>> MakeForeignKeyBinaryExpression<TEntity>(IPropertyMetadata[] navigationPath, string valueString, Func<Expression, Expression, Expression> binaryFactory);
+        IQueryable<TEntity> MakeOrderBy<TEntity>(IPropertyMetadata[] navigationPath, IQueryable<TEntity> query, bool first, bool ascending);
         object ReadValue(object target);
         void WriteValue(object target, object value);
         ITypeMetadata DeclaringContract { get; }

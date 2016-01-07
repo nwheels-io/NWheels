@@ -120,47 +120,51 @@ namespace NWheels.DataObjects.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Expression<Func<TEntity, bool>> MakeBinaryExpression<TEntity>(
+            IPropertyMetadata[] navigationPath, 
             object value, 
             Func<Expression, Expression, Expression> binaryFactory)
         {
-            return GetExpressionFactory(this.ClrType).Binary<TEntity>(this, value, binaryFactory);
+            return GetExpressionFactory(this.ClrType).Binary<TEntity>(navigationPath, value, binaryFactory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Expression<Func<TEntity, bool>> MakeBinaryExpression<TEntity>(
+            IPropertyMetadata[] navigationPath, 
             string valueString,
             Func<Expression, Expression, Expression> binaryFactory)
         {
-            return GetExpressionFactory(this.ClrType).Binary<TEntity>(this, ParseStringValue(valueString), binaryFactory);
+            return GetExpressionFactory(this.ClrType).Binary<TEntity>(navigationPath, ParseStringValue(valueString), binaryFactory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Expression<Func<TEntity, bool>> MakeForeignKeyBinaryExpression<TEntity>(
+            IPropertyMetadata[] navigationPath, 
             object value,
             Func<Expression, Expression, Expression> binaryFactory)
         {
-            return GetExpressionFactory(this.ClrType).ForeignKeyBinary<TEntity>(this, value, binaryFactory);
+            return GetExpressionFactory(this.ClrType).ForeignKeyBinary<TEntity>(navigationPath, value, binaryFactory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Expression<Func<TEntity, bool>> MakeForeignKeyBinaryExpression<TEntity>(
+            IPropertyMetadata[] navigationPath, 
             string valueString,
             Func<Expression, Expression, Expression> binaryFactory)
         {
             var relatedEntityKeyProperty = GetRelatedEntityKeyProperty(this);
             var parsedValue = relatedEntityKeyProperty.ParseStringValue(valueString);
 
-            return GetExpressionFactory(this.ClrType).ForeignKeyBinary<TEntity>(this, parsedValue, binaryFactory);
+            return GetExpressionFactory(this.ClrType).ForeignKeyBinary<TEntity>(navigationPath, parsedValue, binaryFactory);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IQueryable<TEntity> MakeOrderBy<TEntity>(IQueryable<TEntity> query, bool first, bool ascending)
+        public IQueryable<TEntity> MakeOrderBy<TEntity>(IPropertyMetadata[] navigationPath, IQueryable<TEntity> query, bool first, bool ascending)
         {
-            return GetExpressionFactory(this.ClrType).OrderBy<TEntity>(query, this, first, ascending);
+            return GetExpressionFactory(this.ClrType).OrderBy<TEntity>(query, navigationPath, first, ascending);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -477,14 +481,14 @@ namespace NWheels.DataObjects.Core
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public abstract Expression<Func<TEntity, bool>> Binary<TEntity>(
-                IPropertyMetadata metaProperty, 
+                IPropertyMetadata[] navigationPath, 
                 object value, 
                 Func<Expression, Expression, Expression> expressionFactory);
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public abstract Expression<Func<TEntity, bool>> ForeignKeyBinary<TEntity>(
-                IPropertyMetadata metaProperty, 
+                IPropertyMetadata[] navigationPath, 
                 object value, 
                 Func<Expression, Expression, Expression> expressionFactory);
 
@@ -492,7 +496,7 @@ namespace NWheels.DataObjects.Core
 
             public abstract IQueryable<TEntity> OrderBy<TEntity>(
                 IQueryable<TEntity> query, 
-                IPropertyMetadata metaProperty, 
+                IPropertyMetadata[] navigationPath, 
                 bool first, 
                 bool ascending);
 
@@ -553,27 +557,59 @@ namespace NWheels.DataObjects.Core
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override Expression<Func<TEntity, bool>> Binary<TEntity>(
-                IPropertyMetadata metaProperty, 
+                IPropertyMetadata[] navigationPath, 
                 object value,
                 Func<Expression, Expression, Expression> expressionFactory)
             {
-                var parameter = Expression.Parameter(typeof(TEntity), "e");
-                var targetExpression = GetPropertyTargetExpression<TEntity>(metaProperty, parameter);
+                ParameterExpression parameter;
+                Expression targetExpression;
+                Expression propertyExpression;
+                BuildNavigationTargetExpression<TEntity>(navigationPath, out parameter, out targetExpression, out propertyExpression);
 
                 Expression binary = expressionFactory(
-                    Expression.Property(targetExpression, metaProperty.ContractPropertyInfo),
-                    Expression.Constant(value, metaProperty.ClrType));
+                    propertyExpression,
+                    Expression.Constant(value, navigationPath.Last().ClrType));
 
                 return Expression.Lambda<Func<TEntity, bool>>(binary, new[] { parameter });
+            }
+
+
+
+            private void BuildNavigationTargetExpression<TEntity>(
+                IPropertyMetadata[] navigationPath, 
+                out ParameterExpression parameter,
+                out Expression targetExpression,
+                out Expression propertyExpression)
+            {
+                parameter = Expression.Parameter(typeof(TEntity), "e");
+                targetExpression = parameter;
+                propertyExpression = null;
+
+                for ( int i = 0 ; i < navigationPath.Length ; i++ )
+                {
+                    targetExpression = GetPropertyTargetExpression<TEntity>(navigationPath[i], targetExpression);
+                    propertyExpression = Expression.Property(targetExpression, navigationPath[i].ContractPropertyInfo);
+
+                    if ( i < navigationPath.Length - 1 )
+                    {
+                        targetExpression = propertyExpression;
+                    }
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public override Expression<Func<TEntity, bool>> ForeignKeyBinary<TEntity>(
-                IPropertyMetadata metaProperty, 
+                IPropertyMetadata[] navigationPath, 
                 object value, 
                 Func<Expression, Expression, Expression> expressionFactory)
             {
+                if ( navigationPath.Length > 0 )
+                {
+                    throw new NotSupportedException();
+                }
+
+                var metaProperty = navigationPath[0];
                 var relatedKeyMetaProperty = GetRelatedEntityKeyProperty(metaProperty);
                 var entityIdGetValueMethod = GetExpressionFactory(relatedKeyMetaProperty.ClrType).EntityIdGetValueMethod;
                 var parameter = Expression.Parameter(typeof(TEntity), "e");
@@ -592,33 +628,35 @@ namespace NWheels.DataObjects.Core
 
             public override IQueryable<TEntity> OrderBy<TEntity>(
                 IQueryable<TEntity> query, 
-                IPropertyMetadata metaProperty, 
+                IPropertyMetadata[] navigationPath, 
                 bool first, 
                 bool ascending)
             {
-                var parameter = Expression.Parameter(typeof(TEntity), "e");
-                var targetExpression = GetPropertyTargetExpression<TEntity>(metaProperty, parameter);
+                ParameterExpression parameter;
+                Expression targetExpression;
+                Expression propertyExpression;
+                BuildNavigationTargetExpression<TEntity>(navigationPath, out parameter, out targetExpression, out propertyExpression);
                 
-                var propertyExpression = Expression.Lambda<Func<TEntity, TProperty>>(
-                    Expression.Property(targetExpression, metaProperty.ContractPropertyInfo), 
+                var lambda = Expression.Lambda<Func<TEntity, TProperty>>(
+                    propertyExpression, 
                     new[] { parameter }
                 );
 
                 if ( first && ascending )
                 {
-                    return query.OrderBy<TEntity, TProperty>(propertyExpression);
+                    return query.OrderBy<TEntity, TProperty>(lambda);
                 }
                 else if ( first )
                 {
-                    return query.OrderByDescending<TEntity, TProperty>(propertyExpression);
+                    return query.OrderByDescending<TEntity, TProperty>(lambda);
                 }
                 else if ( ascending )
                 {
-                    return ((IOrderedQueryable<TEntity>)query).ThenBy<TEntity, TProperty>(propertyExpression);
+                    return ((IOrderedQueryable<TEntity>)query).ThenBy<TEntity, TProperty>(lambda);
                 }
                 else 
                 {
-                    return ((IOrderedQueryable<TEntity>)query).ThenByDescending<TEntity, TProperty>(propertyExpression);
+                    return ((IOrderedQueryable<TEntity>)query).ThenByDescending<TEntity, TProperty>(lambda);
                 }
             }
 
