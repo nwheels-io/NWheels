@@ -42,6 +42,7 @@ namespace NWheels.DataObjects
         bool IsCollection { get; }
         bool IsCalculated { get; }
         bool IsPartition { get; }
+        int? NumericPrecision { get; }
         IReadOnlyList<PropertyContractAttribute> ContractAttributes { get; }
         PropertyInfo ContractPropertyInfo { get; }
         IRelationMetadata Relation { get; }

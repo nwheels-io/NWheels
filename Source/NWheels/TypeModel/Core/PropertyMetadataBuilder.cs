@@ -231,6 +231,7 @@ namespace NWheels.DataObjects.Core
         public bool IsSensitive { get; set; }
         public bool IsCalculated { get; set; }
         public bool IsPartition { get; set; }
+        public int? NumericPrecision { get; set; }
         public List<PropertyContractAttribute> ContractAttributes { get; set; }
         public System.Reflection.PropertyInfo ContractPropertyInfo { get; set; }
         public object DefaultValue { get; set; }
@@ -327,6 +328,7 @@ namespace NWheels.DataObjects.Core
             DefaultDisplayName = visitor.VisitAttribute("DefaultDisplayName", DefaultDisplayName);
             DefaultDisplayFormat = visitor.VisitAttribute("DefaultDisplayFormat", DefaultDisplayFormat);
             DefaultSortAscending = visitor.VisitAttribute("DefaultSortAscending", DefaultSortAscending);
+            NumericPrecision = visitor.VisitAttribute("NumericPrecision", NumericPrecision);
             IsSensitive = visitor.VisitAttribute("IsSensitive", IsSensitive);
             IsCalculated = visitor.VisitAttribute("IsCalculated", IsCalculated);
             IsPartition = visitor.VisitAttribute("IsPartition", IsPartition);

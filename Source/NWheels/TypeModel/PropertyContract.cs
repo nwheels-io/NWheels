@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.StorageTypes;
 using NWheels.TypeModel;
+using NWheels.TypeModel.Core.StorageTypes;
 
 namespace NWheels.DataObjects
 {
@@ -117,6 +118,22 @@ namespace NWheels.DataObjects
             }
 
             public object Value { get; private set; }
+        }
+
+        [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+        public class NumericPrecisionAttribute : PropertyContractAttribute
+        {
+            public NumericPrecisionAttribute(int decimalDigits)
+            {
+                this.DecimalDigits = decimalDigits;
+            }
+
+            public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+            {
+                property.NumericPrecision = this.DecimalDigits;
+            }
+
+            public int DecimalDigits { get; private set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -470,6 +487,19 @@ namespace NWheels.DataObjects
             public class JsonAttribute : StorageTypeAttribute { public JsonAttribute() : base(typeof(JsonStorageType<>)) { } }
             public class ClrTypeAttribute : StorageTypeAttribute { public ClrTypeAttribute() : base(typeof(ClrTypeStorageType)) { } }
             public class MoneyAttribute : StorageTypeAttribute { public MoneyAttribute() : base(typeof(MoneyStorageType)) { } }
+
+            public class DecimalAsIntSixDecimalDigitsAttribute : StorageTypeAttribute
+            {
+                public DecimalAsIntSixDecimalDigitsAttribute()
+                    : base(typeof(DecimalAsInt64StorageType))
+                {
+                }
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+                {
+                    base.ApplyTo(property, cache);
+                    property.NumericPrecision = 6;
+                }
+            }
 
             public class RelationalMappingAttribute : PropertyContractAttribute
             {
