@@ -678,8 +678,9 @@ HEAD, JS/CSS LINKS
                     editable: false,
                     width: (metaColumn.size==='Large' ? 360 : (metaColumn.size==='Small' ? 90 : 180)),
                     searchoptions: (metaColumn.isText ? {sopt: ['cn']} : {sopt: ['eq']}),
+                    search: metaColumn.isFilterSupported,
+                    sortable: metaColumn.isSortSupported,
                     //sorttype: column.dataType,
-                    //search: true
                 });
             });
             

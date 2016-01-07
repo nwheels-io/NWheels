@@ -168,11 +168,15 @@ namespace NWheels.UI.Toolbox
 
                 ITypeMetadata destinationMetaType;
                 IPropertyMetadata destinationMetaProperty;
-                FindDeclaringMetaType(metaType, out destinationMetaType, out destinationMetaProperty);
+                bool isManualJoinRequired;
+                FindDeclaringMetaType(metaType, out destinationMetaType, out destinationMetaProperty, out isManualJoinRequired);
 
                 this.DeclaringTypeName = destinationMetaType.QualifiedName;
                 this.MetaProperty = destinationMetaProperty;
                 this.IsText = (MetaProperty.ClrType == typeof(string));
+
+                this.IsFilterSupported = !isManualJoinRequired;
+                this.IsSortSupported = this.IsFilterSupported;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -193,6 +197,10 @@ namespace NWheels.UI.Toolbox
             public bool IncludeInTotal { get; set; }
             [DataMember]
             public bool IsText { get; set; }
+            [DataMember]
+            public bool IsSortSupported { get; set; }
+            [DataMember]
+            public bool IsFilterSupported { get; set; }
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -200,9 +208,14 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
             
-            private void FindDeclaringMetaType(ITypeMetadata metaType, out ITypeMetadata destinationMetaType, out IPropertyMetadata destinationMetaProperty)
+            private void FindDeclaringMetaType(
+                ITypeMetadata metaType, 
+                out ITypeMetadata destinationMetaType, 
+                out IPropertyMetadata destinationMetaProperty, 
+                out bool isManualJoinRequired)
             {
                 destinationMetaType = metaType;
+                isManualJoinRequired = false;
 
                 for ( int i = 0; i < Navigations.Length - 1; i++ )
                 {
@@ -211,6 +224,11 @@ namespace NWheels.UI.Toolbox
                     if ( i < Navigations.Length - 1 && navigationMetaProperty.Relation != null )
                     {
                         destinationMetaType = navigationMetaProperty.Relation.RelatedPartyType;
+
+                        if ( navigationMetaProperty.ClrType != navigationMetaProperty.Relation.RelatedPartyType.ContractType )
+                        {
+                            isManualJoinRequired = true;
+                        }
                     }
                     else
                     {
