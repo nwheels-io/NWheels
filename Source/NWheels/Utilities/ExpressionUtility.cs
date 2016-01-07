@@ -29,5 +29,21 @@ namespace NWheels.Utilities
         {
             return property.GetPropertyInfo().Name;
         }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static object Evaluate(Expression expression, params ParameterExpression[] parameters)
+        {
+            if ( expression.NodeType == ExpressionType.Constant )
+            {
+                return ((ConstantExpression)expression).Value;
+            }
+
+            var lambda = Expression.Lambda(expression, parameters);
+            var compiled = lambda.Compile();
+            var value = compiled.DynamicInvoke();
+
+            return value;
+        }
     }
 }

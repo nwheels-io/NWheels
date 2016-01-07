@@ -6,6 +6,7 @@ using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Stacks.MongoDb.Factories;
+using NWheels.Utilities;
 
 namespace NWheels.Stacks.MongoDb
 {
@@ -210,16 +211,45 @@ namespace NWheels.Stacks.MongoDb
 
             protected override Expression VisitBinary(BinaryExpression node)
             {
-                //var left = base.Visit(node.Left);
-                //var right = base.Visit(node.Right);
+                var left = base.Visit(node.Left);
+                var right = base.Visit(node.Right);
 
-                //if ( right.Type.IsEntityContract() )
-                //{
-                    
-                //}
+                if ( left.Type != right.Type )
+                {
+                    if ( left.Type != node.Left.Type )
+                    {
+                        var leftMember = node.Left as MemberExpression;
+                        if ( leftMember != null )
+                        {
+                            var leftProperty = leftMember.Member as PropertyInfo;
 
-                //var replaced = node.Update(left, node.Conversion, right);
+                            if ( leftProperty != null )
+                            {
+                                ITypeMetadata metaType;
+                                
+                                if ( _metadataCache.TryGetTypeMetadata(leftProperty.DeclaringType, out metaType) )
+                                {
+                                    var metaProperty = metaType.GetPropertyByDeclaration(leftProperty);
+                                    
+                                    if ( metaProperty.RelationalMapping != null && metaProperty.RelationalMapping.StorageType != null )
+                                    {
+                                        var rightValue = ExpressionUtility.Evaluate(right);
+                                        var convertedRightValue = metaProperty.RelationalMapping.StorageType.ContractToStorage(metaProperty, rightValue);
+                                        right = Expression.Constant(convertedRightValue);
+                                    
+                                        var replaced = Expression.MakeBinary(node.NodeType, left, right, node.IsLiftedToNull, method: null, conversion: null);
+                                        return replaced;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //var replaced = Expression.MakeBinary(node.NodeType, left, right, node.IsLiftedToNull, method: null, conversion: null); 
+                ////var replaced = node.Update(left, node.Conversion, right);
                 //return replaced;
+
                 return base.VisitBinary(node);
             }
 
