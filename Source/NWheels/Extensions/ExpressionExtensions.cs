@@ -95,7 +95,7 @@ namespace NWheels.Extensions
             var arrowToken = "=>";
             var leftSideLength = expressionString.IndexOf(arrowToken) + arrowToken.Length;
 
-            var rightSideString = expressionString.Substring(leftSideLength).TrimStart();
+            var rightSideString = expressionString.Substring(leftSideLength).TrimStart().Replace(")", "");
             return rightSideString;
         }
 
