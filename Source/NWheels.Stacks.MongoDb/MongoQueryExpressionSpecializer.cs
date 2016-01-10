@@ -58,15 +58,20 @@ namespace NWheels.Stacks.MongoDb
 
             protected override Expression VisitMethodCall(MethodCallExpression node)
             {
-                
                 if ( node.Method.IsGenericMethod && node.Method.GetGenericArguments().Any(ShouldReplaceType) )
                 {
                     var replacedTypeArguments = node.Method.GetGenericArguments().Select(t => t.Replace(ShouldReplaceType, GetReplacingType)).ToArray();
-                    
+                    var replacedArguments = node.Arguments.Select(arg => _ownerSpecializer.Specialize(arg)).ToArray();
+
+                    if ( IsQueryableOrderByOrGroupByMethod(node.Method) )
+                    {
+                        replacedTypeArguments[1] = replacedArguments[replacedArguments.Length - 1].Type.GetGenericArguments()[0].GetGenericArguments()[1];
+                    }
+
                     var specialized = Expression.Call(
                         _ownerSpecializer.Specialize(node.Object),
                         node.Method.GetGenericMethodDefinition().MakeGenericMethod(replacedTypeArguments),
-                        node.Arguments.Select(arg => _ownerSpecializer.Specialize(arg)));
+                        replacedArguments);
 
                     return specialized;
                 }
@@ -110,12 +115,27 @@ namespace NWheels.Stacks.MongoDb
 
             protected override Expression VisitLambda<T>(Expression<T> node)
             {
-                var replacedDelegateType = typeof(T).Replace(findWhat: ShouldReplaceType, replaceWith: GetReplacingType);
+                var specializedBody = _ownerSpecializer.Specialize(node.Body);
+                var specializedParameters = node.Parameters.Select(p => _ownerSpecializer.Specialize(p)).Cast<ParameterExpression>();
+
+                Type replacedDelegateType;
+
+                if ( node.Body.Type == specializedBody.Type )
+                {
+                    replacedDelegateType = typeof(T).Replace(findWhat: ShouldReplaceType, replaceWith: GetReplacingType);
+                }
+                else
+                {
+                    var oldNewTypePairs = new[] { node.Body.Type, specializedBody.Type };
+                    replacedDelegateType = typeof(T).Replace(
+                        findWhat: t => ShouldReplaceType(t, oldNewTypePairs),
+                        replaceWith: t => GetReplacingType(t, oldNewTypePairs));
+                }
 
                 var specialized = Expression.Lambda(
                     replacedDelegateType,
-                    _ownerSpecializer.Specialize(node.Body),
-                    node.Parameters.Select(p => _ownerSpecializer.Specialize(p)).Cast<ParameterExpression>());
+                    specializedBody,
+                    specializedParameters);
 
                 return specialized;
             }
@@ -178,6 +198,12 @@ namespace NWheels.Stacks.MongoDb
                         }
 
                         var replacedTarget = _ownerSpecializer.Specialize(node.Expression);
+
+                        if ( !implementationPropertyInfo.DeclaringType.IsAssignableFrom(replacedTarget.Type) )
+                        {
+                            replacedTarget = Expression.Convert(replacedTarget, implementationPropertyInfo.DeclaringType);
+                        }
+
                         var replaced = Expression.MakeMemberAccess(replacedTarget, implementationPropertyInfo);
                         return replaced;
                     }
@@ -255,6 +281,19 @@ namespace NWheels.Stacks.MongoDb
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private bool IsQueryableOrderByOrGroupByMethod(MethodInfo method)
+            {
+                return (
+                    method.DeclaringType == typeof(Queryable) &&
+                    (method.Name == "OrderBy" ||
+                    method.Name == "OrderByDescending" ||
+                    method.Name == "ThenBy" ||
+                    method.Name == "ThenByDescending" ||
+                    method.Name == "GroupBy"));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private bool ShouldReplaceType(Type type)
             {
                 return (type == _thisTypeMetadata.ContractType || type.IsInterface && _metadataCache.ContainsTypeMetadata(type));
@@ -265,6 +304,42 @@ namespace NWheels.Stacks.MongoDb
             private Type GetReplacingType(Type type)
             {
                 return _metadataCache.GetTypeMetadata(type).GetImplementationBy<MongoEntityObjectFactory>();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private bool ShouldReplaceType(Type type, params Type[] oldNewTypePairs)
+            {
+                if ( type == _thisTypeMetadata.ContractType || (type.IsInterface && _metadataCache.ContainsTypeMetadata(type)) )
+                {
+                    return true;
+                }
+
+                var index = Array.IndexOf(oldNewTypePairs, type);
+                return (index >= 0 && index < oldNewTypePairs.Length - 1);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private Type GetReplacingType(Type type, params Type[] oldNewTypePairs)
+            {
+                ITypeMetadata metaType;
+
+                if ( _metadataCache.TryGetTypeMetadata(type, out metaType) )
+                {
+                    return metaType.GetImplementationBy<MongoEntityObjectFactory>();
+                }
+                else
+                {
+                    var index = Array.IndexOf(oldNewTypePairs, type);
+                    
+                    if ( index >= 0 && index < oldNewTypePairs.Length - 1 )
+                    {
+                        return oldNewTypePairs[index + 1];
+                    }
+                }
+
+                return type;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
