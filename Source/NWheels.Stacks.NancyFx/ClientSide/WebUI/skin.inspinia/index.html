@@ -116,6 +116,11 @@ HEAD, JS/CSS LINKS
             text-overflow: ellipsis;
             float: left;
         }
+        .ui-jqgrid .jqgrid-overlay {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+        }        
     </style>
 </head>
 
@@ -729,7 +734,8 @@ HEAD, JS/CSS LINKS
             $scope.onRequestPrepared = function (event, request) {
                 $scope.preparedRequest = request;
                 $scope.$timeout(function () {
-                    $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
+                    $("#rdt_" + $scope.uniqueWidgetId).jqGrid('GridUnload');
+                    $scope.totalsRowDisplayed = false;
                     var gridOptions = {
                         datatype: function(postData) {
                             var queryBuilder = (request.query ? request.query.clone() : new EntityQueryBuilder($scope.uidl.entityName, request.url));
@@ -749,11 +755,14 @@ HEAD, JS/CSS LINKS
                             queryBuilder.take(postData.rows);
                             queryBuilder.page(postData.page);
                             var requestUrl = queryBuilder.getQueryUrl();
+                            var grid = $("#rdt_" + $scope.uniqueWidgetId);
+                            grid[0].grid.beginReq();
                             $scope.$http.post(
                                 requestUrl,
                                 $scope.preparedRequest.data
                             ).then(
                                 function(response){
+                                    grid[0].grid.endReq();
                                     $scope.ResultSet = response.data.ResultSet;
                                     $scope.entityService.trackRetrievedEntities(response.data.ResultSet);
                                     var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
@@ -761,6 +770,7 @@ HEAD, JS/CSS LINKS
                                     $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data.ResultSet);
                                 },
                                 function(faultResponse){
+                                    grid[0].grid.endReq();
                                     $scope.ResultSet = null;
                                     var faultInfo = $scope.commandService.createFaultInfo(faultResponse);
                                     $scope.$emit($scope.uidl.qualifiedName + ':QueryFailed', faultInfo);
@@ -788,6 +798,7 @@ HEAD, JS/CSS LINKS
                         add: false,
                         edit: false,
                         hidegrid: false,
+                        loadui: 'block',
                         ignoreCase: true,
                         onSelectRow: function (rowId) {
                             if ($scope.uidl.enableAutonomousQuery) {
@@ -842,7 +853,7 @@ HEAD, JS/CSS LINKS
                                     grid.expandSubGridRow(rowId); 
                                 });
                             }
-                            if ($scope.uidl.enableTotalRow) {
+                            if ($scope.uidl.enableTotalRow && !$scope.totalsRowDisplayed) {
                                 var totalSpec = { };
                                 var totalsQueryBuilder = (
                                     $scope.preparedRequest.query ? 
@@ -870,6 +881,7 @@ HEAD, JS/CSS LINKS
                                             }
                                         });
                                         grid.jqGrid("footerData", "set", totalSpec);
+                                        $scope.totalsRowDisplayed = true;
                                     },
                                     function(faultResponse){
                                         var faultInfo = $scope.commandService.createFaultInfo(faultResponse);
