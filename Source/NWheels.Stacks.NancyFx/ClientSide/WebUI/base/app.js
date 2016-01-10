@@ -10,12 +10,19 @@ function toCamelCase(s) {
 
 //-----------------------------------------------------------------------------------------------------------------
 
-theApp.factory('appHttpInterceptor',['$rootScope', '$q', function ($rootScope, $q) {
+theApp.factory('appHttpInterceptor', ['$rootScope', '$q', 'sessionService', function ($rootScope, $q, sessionService) {
     return {
+        'response': function(response) {
+            sessionService.slideExpiry();
+            return response;
+        },
         'responseError': function(rejection) {
             if (rejection.status===0) {
+                sessionService.deactivateExpiry();
                 $rootScope.$broadcast($rootScope.app.qualifiedName + ':ServerConnectionLost');
-            };
+            } else {
+                sessionService.slideExpiry();
+            }
             return $q.reject(rejection);
         }
     };
@@ -140,9 +147,64 @@ function ($http, $q, $interval, $timeout, $rootScope) {
 
 //---------------------------------------------------------------------------------------------------------------------
 
+theApp.service('sessionService',
+['$timeout', '$rootScope',
+function ($timeout, $rootScope) {
+
+    var m_sessionTimeout = null;
+    var m_expiryMilliseconds = -1;
+    var m_expiredNotificationId = null;
+    
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function activateExpiry(expiryMilliseconds, expiredNotificationId) {
+        if (m_sessionTimeout) {
+            $timeout.cancel(m_sessionTimeout);
+        }
+        m_expiryMilliseconds = expiryMilliseconds;
+        m_expiredNotificationId = expiredNotificationId;
+        m_sessionTimeout = $timeout(notifySessionExpired, expiryMilliseconds);
+    };
+    
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function slideExpiry() {
+        if (m_sessionTimeout) {
+            $timeout.cancel(m_sessionTimeout);
+            m_sessionTimeout = $timeout(notifySessionExpired, m_expiryMilliseconds);
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function deactivateExpiry() {
+        if (m_sessionTimeout) {
+            $timeout.cancel(m_sessionTimeout);
+        }
+        m_sessionTimeout = null;
+    };
+    
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function notifySessionExpired() {
+        deactivateExpiry();
+        $rootScope.$broadcast(m_expiredNotificationId);
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    return {
+        activateExpiry: activateExpiry,
+        slideExpiry: slideExpiry,
+        deactivateExpiry: deactivateExpiry
+    };
+}]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
 theApp.service('uidlService',
-['$q', '$http', '$rootScope', '$timeout', '$templateCache', 'commandService',
-function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
+['$q', '$http', '$rootScope', '$timeout', '$templateCache', 'commandService', 'sessionService',
+function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessionService) {
 
     var m_uidl = null;
     var m_app = null;
@@ -617,8 +679,6 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    var m_sessionTimeout = null;
-    
     m_behaviorImplementations['ActivateSessionTimeout'] = {
         returnsPromise: false,
         execute: function (scope, behavior, input) {
@@ -632,13 +692,8 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
             } else {
                 timeoutMinutes = m_app.sessionIdleTimeoutMinutes;
             }
-            var timeoutMs = (timeoutMinutes - 1) * 60000;
-            m_sessionTimeout = $timeout(
-                function() {
-                    $rootScope.$broadcast(scope.appScope.uidl.qualifiedName + ':UserSessionExpired');
-                },
-                timeoutMs
-            );
+            var timeoutMs = (timeoutMinutes * 60000) - 10000;
+            sessionService.activateExpiry(timeoutMs, scope.appScope.uidl.qualifiedName + ':UserSessionExpired');
         },
     };
 
@@ -647,10 +702,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService) {
     m_behaviorImplementations['DeactivateSessionTimeout'] = {
         returnsPromise: false,
         execute: function (scope, behavior, input) {
-            if (m_sessionTimeout) {
-                $timeout.cancel(m_sessionTimeout);
-            }
-            m_sessionTimeout = null;
+            sessionService.deactivateExpiry();
         },
     };
 
