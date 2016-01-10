@@ -1006,10 +1006,15 @@ HEAD, JS/CSS LINKS
                     <div class="modal-footer">
                         <button 
                             type="button"
+                            class="btn btn-w-m btn-warning"
+                            ng-click="clearSelection()"
+                        ><i class="fa fa-times">&nbsp;</i>Clear</button>
+                        <button 
+                            type="button"
                             class="btn btn-w-m btn-success"
                             ng-disabled="isSelectButtonDisabled()"
                             ng-click="lookupObjectSelected(selectedLookupObject)"
-                        ><i ng-if="command.icon" class="fa fa-check">&nbsp;</i>Select</button>
+                        ><i class="fa fa-check">&nbsp;</i>Select</button>
                     </div>
                 </div>
             </div>

@@ -1842,7 +1842,13 @@ function ($timeout, $rootScope, uidlService, entityService) {
                 $scope.lookupContext.targetEntity[$scope.lookupContext.targetProperty] = selectedObject[$scope.lookupContext.lookupValueProperty];
                 $scope.lookupContext = null;
             };
-            
+
+            $scope.clearSelection = function() {
+                $scope.hideLookupSearchModal();
+                $scope.lookupContext.targetEntity[$scope.lookupContext.targetProperty] = null;
+                $scope.lookupContext = null;
+            };
+
             $scope.invokeInitFunc();
         }
     };
