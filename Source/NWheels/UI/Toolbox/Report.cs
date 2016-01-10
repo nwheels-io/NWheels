@@ -47,7 +47,7 @@ namespace NWheels.UI.Toolbox
             CriteriaForm.Commands.Add(ShowReport);
             ResultTable.UsePascalCase = true;
             ResultTable.EnablePaging = true;
-            ResultTable.EnableTotalRow = true;
+            ResultTable.EnableTotalRow = ResultTable.DisplayColumns.Any(c => c.IncludeInTotal);
             ResultTable.TotalRowOnTop = true;
             ShowReport.Kind = CommandKind.Submit;
 
