@@ -15,6 +15,7 @@ using NWheels.Extensions;
 using System.Reflection;
 using System.ComponentModel;
 using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 using System.Text;
 using Hapil;
 using Newtonsoft.Json.Converters;
@@ -149,6 +150,22 @@ namespace NWheels.UI
             }
 
             return json;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void ProcessEntityCursor(string entityName, IQueryable query, QueryOptions options, Action<EntityCursor> action)
+        {
+            var handler = _handlerByEntityName[entityName];
+
+            using ( QueryContext.NewQuery(this, options) )
+            {
+                using ( handler.NewUnitOfWork() )
+                {
+                    var cursor = handler.QueryCursor(options, query);
+                    action(cursor);
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -463,6 +480,16 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public ITypeMetadata EntityMetaType
+            {
+                get
+                {
+                    return _entityMetaType;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public QueryResults Results
             {
                 get
@@ -547,6 +574,11 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            [JsonIgnore]
+            public EntityCursor ResultCursor { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public int? PageCount
             {
                 get
@@ -566,6 +598,162 @@ namespace NWheels.UI
                     {
                         return null;
                     }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class EntityCursorMetadata
+        {
+            private readonly ITypeMetadata _entityMetaType;
+            private readonly List<QuerySelectItem> _columns;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal EntityCursorMetadata(QueryContext context)
+            {
+                _entityMetaType = context.EntityMetaType;
+                _columns = new List<QuerySelectItem>();
+
+                var selectList = context.Options.SelectPropertyNames;
+                var includeList = context.Options.IncludePropertyNames;
+
+                if ( selectList.Count > 0 )
+                {
+                    _columns.AddRange(selectList);
+                }
+                else
+                {
+                    _columns.AddRange(_entityMetaType.Properties.Where(p => p.Kind == PropertyKind.Scalar).Select(p => new QuerySelectItem(p.Name)));
+                }
+
+                if ( includeList.Count > 0 )
+                {
+                    _columns.AddRange(includeList);
+                }
+
+                for ( int i = 0 ; i < _columns.Count ; i++ )
+                {
+                    _columns[i].BuildMetaPropertyPath(_entityMetaType);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ITypeMetadata EntityMetaType
+            {
+                get { return _entityMetaType; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IReadOnlyList<QuerySelectItem> Columns
+            {
+                get { return _columns; }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class EntityCursor : IEnumerable<EntityCursorRow>
+        {
+            private readonly EntityCursorMetadata _metadata;
+            private readonly QueryContext _queryContext;
+            private readonly EntityHandler _entityHandler;
+            private readonly IEnumerable<IDomainObject> _dataCursor;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal EntityCursor(EntityCursorMetadata metadata, QueryContext queryContext, EntityHandler entityHandler, IEnumerable<IDomainObject> dataCursor)
+            {
+                _metadata = metadata;
+                _queryContext = queryContext;
+                _entityHandler = entityHandler;
+                _dataCursor = dataCursor;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            #region Implementation of IEnumerable
+
+            IEnumerator<EntityCursorRow> IEnumerable<EntityCursorRow>.GetEnumerator()
+            {
+                return _dataCursor.Select(record => new EntityCursorRow(_queryContext, _metadata, record)).GetEnumerator();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return ((IEnumerable<EntityCursorRow>)this).GetEnumerator();
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public QueryContext QueryContext
+            {
+                get { return _queryContext; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ITypeMetadata PrimaryEntity
+            {
+                get { return _entityHandler.MetaType; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            public IReadOnlyList<QuerySelectItem> Columns 
+            {
+                get { return _metadata.Columns; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public int ColumnCount
+            {
+                get { return _metadata.Columns.Count; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public long RowCount
+            {
+                get
+                {
+                    return _queryContext.Results.ResultCount.GetValueOrDefault(-1);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class EntityCursorRow
+        {
+            private readonly QueryContext _queryContext;
+            private readonly EntityCursorMetadata _metadata;
+            private readonly IDomainObject _record;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal EntityCursorRow(QueryContext queryContext, EntityCursorMetadata metadata, IDomainObject record)
+            {
+                _metadata = metadata;
+                _queryContext = queryContext;
+                _record = record;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public object this[int columnIndex]
+            {
+                get
+                {
+                    return _metadata.Columns[columnIndex].ReadValue(_queryContext, _queryContext.EntityMetaType, _record);
                 }
             }
         }
@@ -842,6 +1030,10 @@ namespace NWheels.UI
 
         public class QuerySelectItem : IBuildCacheKey
         {
+            private IReadOnlyList<IPropertyMetadata> _metaPropertyPath;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public QuerySelectItem(string propertySpecifier)
             {
                 var aliasPosition = propertySpecifier.IndexOf(QueryOptions.PropertyAliasModifier, StringComparison.InvariantCultureIgnoreCase);
@@ -880,6 +1072,21 @@ namespace NWheels.UI
             public bool IsAggregation
             {
                 get { return (AggregationType != AggregationType.None); }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IPropertyMetadata MetaProperty
+            {
+                get
+                {
+                    if ( _metaPropertyPath != null )
+                    {
+                        return _metaPropertyPath[_metaPropertyPath.Count - 1];
+                    }
+
+                    return null;
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -938,8 +1145,13 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            internal List<IPropertyMetadata> BuildMetaPropertyPath(ITypeMetadata metaType)
+            internal IReadOnlyList<IPropertyMetadata> BuildMetaPropertyPath(ITypeMetadata metaType)
             {
+                if ( _metaPropertyPath != null )
+                {
+                    return _metaPropertyPath;
+                }
+
                 var metaPropertyPath = new List<IPropertyMetadata>();
                 var stepMetaType = metaType;
 
@@ -959,6 +1171,7 @@ namespace NWheels.UI
                     }
                 }
 
+                _metaPropertyPath = metaPropertyPath;
                 return metaPropertyPath;
             }
         }
@@ -1210,7 +1423,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private abstract class EntityHandler
+        internal abstract class EntityHandler
         {
             protected EntityHandler(ApplicationEntityService owner, ITypeMetadata metaType, Type domainContextType)
             {
@@ -1223,6 +1436,7 @@ namespace NWheels.UI
 
             public abstract IUnitOfWork NewUnitOfWork();
             public abstract QueryResults Query(QueryOptions options, IQueryable query = null);
+            public abstract EntityCursor QueryCursor(QueryOptions options, IQueryable query = null);
             public abstract IEntityId ParseEntityId(string id);
             public abstract IDomainObject GetById(string id);
             public abstract IDomainObject[] GetByIdList(object[] idList);
@@ -1312,6 +1526,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            //TODO: refactor to reuse QueryCursor(...)
             public override QueryResults Query(QueryOptions options, IQueryable query = null)
             {
                 var results = QueryContext.Current.Results;
@@ -1374,6 +1589,31 @@ namespace NWheels.UI
                 }
 
                 return results;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override EntityCursor QueryCursor(QueryOptions options, IQueryable query = null)
+            {
+                using ( var context = Framework.NewUnitOfWork<TContext>() )
+                {
+                    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
+                    IQueryable<TEntity> dbQuery = (IQueryable<TEntity>)query ?? repository.AsQueryable();
+
+                    dbQuery = HandleFilter(options, dbQuery);
+                    dbQuery = HandleOrderBy(options, dbQuery);
+
+                    IEnumerable<TEntity> queryResults = new QueryResultEnumerable<TEntity>(dbQuery);
+
+                    if ( options.NeedInMemoryOperations )
+                    {
+                        queryResults = HandleInMemoryOperations(options, queryResults);
+                    }
+
+                    var queryContext = QueryContext.Current;
+                    var metaCursor = new EntityCursorMetadata(queryContext);
+                    return new EntityCursor(metaCursor, queryContext, this, queryResults.Cast<IDomainObject>());
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

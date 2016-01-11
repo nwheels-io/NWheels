@@ -35,6 +35,7 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlCommand ShowReport { get; set; }
+        public UidlCommand DownloadExcel { get; set; }
         public UidlNotification<TContext> ContextSetter { get; set; }
         public UidlNotification ReportReady { get; set; }
         public UidlNotification<IPromiseFailureInfo> ReportFailed { get; set; }
@@ -45,11 +46,13 @@ namespace NWheels.UI.Toolbox
         {
             CriteriaForm.UsePascalCase = true;
             CriteriaForm.Commands.Add(ShowReport);
+            CriteriaForm.Commands.Add(DownloadExcel);
             ResultTable.UsePascalCase = true;
             ResultTable.EnablePaging = true;
             ResultTable.EnableTotalRow = ResultTable.DisplayColumns.Any(c => c.IncludeInTotal);
-            ResultTable.TotalRowOnTop = true;
+            ResultTable.TotalRowOnTop = false;//TODO: fix on-top total row in Inspinia skin
             ShowReport.Kind = CommandKind.Submit;
+            DownloadExcel.Kind = CommandKind.Submit;
 
             var attribute = typeof(TScript).GetCustomAttribute<TransactionScriptAttribute>();
 
@@ -61,6 +64,11 @@ namespace NWheels.UI.Toolbox
                     .Then(b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Criteria))
                     .Then(bb => bb.Broadcast(CriteriaForm.ModelSetter).WithPayload(m => m.Input).TunnelDown()));
             }
+
+            presenter.On(ShowReport)
+                .InvokeTransactionScript<TScript>(queryAsEntityType: typeof(TResultRow))
+                .PrepareWaitForReply((script, vm) => script.Execute(vm.State.Criteria))
+                .Then(b => b.Broadcast(ResultTable.RequestPrepared).WithPayload(vm => vm.Input).TunnelDown());
 
             presenter.On(ShowReport)
                 .InvokeTransactionScript<TScript>(queryAsEntityType: typeof(TResultRow))

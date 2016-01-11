@@ -28,6 +28,7 @@ using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Endpoints.Core;
 using NWheels.Entities.Core;
+using NWheels.Processing.Documents;
 
 namespace NWheels.Stacks.AspNet
 {
@@ -175,7 +176,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("command/requestReply/{target}/{contractName}/{operationName}")]
+        [Route("api/requestReply/command/{target}/{contractName}/{operationName}")]
         public IHttpActionResult ExecuteCommand(string target, string contractName, string operationName)
         {
             var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: true);
@@ -199,7 +200,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("command/query/{entityName}/{target}/{contractName}/{operationName}")]
+        [Route("api/requestReply/command/query/{entityName}/{target}/{contractName}/{operationName}")]
         public IHttpActionResult ExecuteCommandAsQuery(string entityName, string target, string contractName, string operationName)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
@@ -226,6 +227,51 @@ namespace NWheels.Stacks.AspNet
                 return ResponseMessage(new HttpResponseMessage() {
                     Content = new StringContent(json, Encoding.UTF8, "application/json")
                 });
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpPost]
+        [Route("command/exportReportAsync/{entityName}/{target}/{contractName}/{operationName}/{outputFormat}")]
+        public IHttpActionResult EnqueueCommandAsReportQueryExport(string entityName, string target, string contractName, string operationName, string outputFormat)
+        {
+            if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
+
+            var queryParameters = this.Request.GetQueryString();
+            var options = _context.EntityService.ParseQueryOptions(entityName, queryParameters);
+            var queryCommand = TryCreateCommandMessage(target, contractName, operationName, queryParameters, synchronous: true);
+
+            if ( queryCommand == null )
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
+
+            using ( _context.EntityService.NewUnitOfWork(entityName) )
+            {
+                _serviceBus.DispatchMessageOnCurrentThread(queryCommand);
+                var query = (IQueryable)queryCommand.Result.Result;
+                var exportCommand = new DocumentFormatRequestMessage(
+                    _framework, 
+                    Session.Current, 
+                    isSynchronous: false, 
+                    entityService: _context.EntityService, 
+                    reportCriteria: null,
+                    reportQuery: query,
+                    reportQueryOptions: options,
+                    documentDesign: null,
+                    outputFormatIdName: outputFormat);
+
+                _serviceBus.EnqueueMessage(exportCommand);
+
+                return Json(
+                    new {
+                        CommandMessageId = exportCommand.MessageId
+                    },
+                    _context.EntityService.CreateSerializerSettings());
             }
         }
 

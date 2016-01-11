@@ -111,8 +111,6 @@ namespace NWheels.Processing.Messages.Impl
 
         #region Overrides of LifecycleEventListenerBase
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public override void Load()
         {
             base.Load();
@@ -123,13 +121,14 @@ namespace NWheels.Processing.Messages.Impl
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override void Activate()
         {
             _stopRequest = new CancellationTokenSource();
             _workerThread = new Thread(RunWorkerThread);
             _workerThread.Start();
         }
-
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -64,5 +64,62 @@ namespace NWheels.Extensions
             var exception = keyNotFoundExceptionFactory(key);
             throw exception;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static TValue GetOrThrow<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, string keyNotFoundExceptionFormat)
+        {
+            TValue value;
+
+            if ( dictionary.TryGetValue(key, out value) )
+            {
+                return value;
+            }
+
+            throw new KeyNotFoundException(string.Format(keyNotFoundExceptionFormat, key));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static TValue ReadOnlyGetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue)
+        {
+            TValue value;
+
+            if ( dictionary.TryGetValue(key, out value) )
+            {
+                return value;
+            }
+
+            return defaultValue;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static TValue ReadOnlyGetOrThrow<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, Exception> keyNotFoundExceptionFactory)
+        {
+            TValue value;
+
+            if ( dictionary.TryGetValue(key, out value) )
+            {
+                return value;
+            }
+
+            var exception = keyNotFoundExceptionFactory(key);
+            throw exception;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static TValue ReadOnlyGetOrThrow<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key, string keyNotFoundExceptionFormat)
+        {
+            TValue value;
+
+            if ( dictionary.TryGetValue(key, out value) )
+            {
+                return value;
+            }
+
+            throw new KeyNotFoundException(string.Format(keyNotFoundExceptionFormat, key));
+        }
     }
 }

@@ -555,10 +555,10 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 var parameterValue = Enumerable.Return(parameterContext).Select('ctx=>ctx.' + behavior.parameterExpressions[i]).Single();
                 requestData[behavior.parameterNames[i]] = parameterValue;
             }
-            var callType = (behavior.callResultType==='EntityQuery' ? 'query/' + behavior.queryEntityName : behavior.callType);
             var requestPath = 
-                'command' + 
-                '/' + callType +
+                'api' + 
+                '/' + behavior.callType +
+                '/' + behavior.callResultType +
                 '/' + behavior.callTargetType + 
                 '/' + behavior.contractName + 
                 '/' + behavior.operationName;
