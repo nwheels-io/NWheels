@@ -77,6 +77,11 @@ namespace NWheels.Stacks.MongoDb
 
         public IEnumerable<TEntityContract> LazyLoadByIdList<TEntityContract, TId>(IEnumerable<TId> idList)
         {
+            if ( idList == null )
+            {
+                return new TEntityContract[0];
+            }
+
             var result = new List<TEntityContract>();
             var idsNotInCache = new List<TId>();
 
