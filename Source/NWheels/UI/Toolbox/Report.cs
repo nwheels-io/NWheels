@@ -72,7 +72,7 @@ namespace NWheels.UI.Toolbox
 
             presenter.On(DownloadExcel)
                 .InvokeTransactionScript<TScript>(queryAsEntityType: typeof(TResultRow))
-                .WaitForResultsDownloadReady((script, vm) => script.Execute(vm.State.Criteria), exportFormat: "CSV")
+                .WaitForResultsDownloadReady((script, vm) => script.Execute(vm.State.Criteria), exportFormat: "EXCEL")
                 .Then(
                     onSuccess: b => b
                         .BeginDownloadContent(vm => vm.Input)

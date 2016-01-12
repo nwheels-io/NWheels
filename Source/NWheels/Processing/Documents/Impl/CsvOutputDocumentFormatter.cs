@@ -53,7 +53,6 @@ namespace NWheels.Processing.Documents.Impl
                 output.AppendLine();
             }
 
-
             var metaDocument = new DocumentMetadata(_s_metaFormat, "report.csv");
             return new FormattedDocument(metaDocument, Encoding.UTF8.GetBytes(output.ToString()));
         }
