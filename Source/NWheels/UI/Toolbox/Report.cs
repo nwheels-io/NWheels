@@ -70,10 +70,17 @@ namespace NWheels.UI.Toolbox
                 .PrepareWaitForReply((script, vm) => script.Execute(vm.State.Criteria))
                 .Then(b => b.Broadcast(ResultTable.RequestPrepared).WithPayload(vm => vm.Input).TunnelDown());
 
-            presenter.On(ShowReport)
+            presenter.On(DownloadExcel)
                 .InvokeTransactionScript<TScript>(queryAsEntityType: typeof(TResultRow))
-                .PrepareWaitForReply((script, vm) => script.Execute(vm.State.Criteria))
-                .Then(b => b.Broadcast(ResultTable.RequestPrepared).WithPayload(vm => vm.Input).TunnelDown());
+                .WaitForResultsDownloadReady((script, vm) => script.Execute(vm.State.Criteria), exportFormat: "CSV")
+                .Then(
+                    onSuccess: b => b
+                        .BeginDownloadContent(vm => vm.Input)
+                        .Then(bb => bb.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady())
+                        .Then(bbb => bbb.Broadcast(CriteriaForm.StateResetter).TunnelDown())),
+                    onFailure: b => b
+                        .UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input)
+                        .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown()));
 
             presenter.On(ReportReady)
                 .Broadcast(CriteriaForm.StateResetter).TunnelDown()
@@ -118,6 +125,9 @@ namespace NWheels.UI.Toolbox
     {
         [SuccessAlert]
         UidlUserAlert ReportIsReady();
+
+        [SuccessAlert]
+        UidlUserAlert ReportDownloadIsReady();
 
         [ErrorAlert]
         UidlUserAlert FailedToPrepareReport();

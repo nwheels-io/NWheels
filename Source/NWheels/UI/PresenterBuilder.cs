@@ -123,7 +123,12 @@ namespace NWheels.UI
             {
                 var behavior = new UidlCallApiBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
                 SetAndSubscribeBehavior(behavior);
-                return new SendServerCommandBehaviorBuilder<TInput, TScript>(_ownerNode, behavior, _uidl, ApiCallTargetType.TransactionScript, queryAsEntityType);
+                return new SendServerCommandBehaviorBuilder<TInput, TScript>(
+                    _ownerNode, 
+                    behavior, 
+                    _uidl, 
+                    ApiCallTargetType.TransactionScript, 
+                    queryAsEntityType);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -133,7 +138,12 @@ namespace NWheels.UI
             {
                 var behavior = new UidlCallApiBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
                 SetAndSubscribeBehavior(behavior);
-                return new SendServerCommandBehaviorBuilder<TInput, TScript>(_ownerNode, behavior, _uidl, ApiCallTargetType.ServiceMethod, queryAsEntityType);
+                return new SendServerCommandBehaviorBuilder<TInput, TScript>(
+                    _ownerNode, 
+                    behavior, 
+                    _uidl, 
+                    ApiCallTargetType.ServiceMethod, 
+                    queryAsEntityType);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -258,6 +268,16 @@ namespace NWheels.UI
             {
                 var behavior = new UidlRestartAppBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
                 SetAndSubscribeBehavior(behavior);
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<TInput> BeginDownloadContent(Expression<Func<ViewModel<TData, TState, TInput>, string>> contentId)
+            {
+                var behavior = new UidlDownloadContentBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                SetAndSubscribeBehavior(behavior);
+                behavior.ContentIdExpression = contentId.ToNormalizedNavigationString("model");
                 return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
             }
 
@@ -452,6 +472,65 @@ namespace NWheels.UI
                 _behavior.CallType = ApiCallType.RequestReply;
                 ParseMethodCall(call);
                 return new PromiseBuilder<object>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<string> WaitForResultsDownloadReady(Expression<Action<TContract, ViewModel<TData, TState, TInput>>> call, string exportFormat)
+            {
+                ParseMethodCall(call);
+                _behavior.CallType = ApiCallType.RequestReply;
+                _behavior.CallResultType = ApiCallResultType.EntityQueryExport;
+                _behavior.ExportFormatId = exportFormat;
+                return new PromiseBuilder<string>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<TInput> WaitForCompletionAsync(Expression<Action<TContract, ViewModel<TData, TState, TInput>>> call)
+            {
+                ParseMethodCall(call);
+                _behavior.CallType = ApiCallType.RequestReplyAsync;
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<TReply> WaitForReplyAsync<TReply>(Expression<Func<TContract, ViewModel<TData, TState, TInput>, TReply>> call)
+            {
+                ParseMethodCall(call);
+                _behavior.CallType = ApiCallType.RequestReplyAsync;
+                return new PromiseBuilder<TReply>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<TReply> WaitForReplyOrCompletionAsync<TReply>(LambdaExpression call)
+            {
+                ParseMethodCall(call);
+                _behavior.CallType = ApiCallType.RequestReplyAsync;
+                return new PromiseBuilder<TReply>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<object> PrepareWaitForReplyAsync<TReply>(Expression<Func<TContract, ViewModel<TData, TState, TInput>, TReply>> call)
+            {
+                _behavior.PrepareOnly = true;
+                _behavior.CallType = ApiCallType.RequestReplyAsync;
+                ParseMethodCall(call);
+                return new PromiseBuilder<object>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<string> WaitForResultsDownloadReadyAsync(Expression<Action<TContract, ViewModel<TData, TState, TInput>>> call, string exportFormat)
+            {
+                ParseMethodCall(call);
+                _behavior.CallType = ApiCallType.RequestReplyAsync;
+                _behavior.CallResultType = ApiCallResultType.EntityQueryExport;
+                _behavior.ExportFormatId = exportFormat;
+                return new PromiseBuilder<string>(_ownerNode, _behavior, _uidl);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

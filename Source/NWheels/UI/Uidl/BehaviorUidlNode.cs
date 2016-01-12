@@ -91,6 +91,8 @@ namespace NWheels.UI.Uidl
         [DataMember]
         public string EntityId { get; set; }
         [DataMember]
+        public string ExportFormatId { get; set; }
+        [DataMember]
         public string[] ParameterNames { get; set; }
         [DataMember]
         public string[] ParameterExpressions { get; set; }
@@ -284,5 +286,21 @@ namespace NWheels.UI.Uidl
             : base(idName, BehaviorType.RestartApp, parent)
         {
         }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [DataContract(Name = "DownloadContentBehavior", Namespace = UidlDocument.DataContractNamespace)]
+    public class UidlDownloadContentBehavior : BehaviorUidlNode
+    {
+        public UidlDownloadContentBehavior(string idName, ControlledUidlNode parent)
+            : base(idName, BehaviorType.DownloadContent, parent)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public string ContentIdExpression { get; set; }
     }
 }

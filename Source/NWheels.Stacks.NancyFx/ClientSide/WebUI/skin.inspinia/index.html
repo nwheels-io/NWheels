@@ -216,6 +216,12 @@ HEAD, JS/CSS LINKS
     </div>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    IFRAME FOR 'BEGIN DOWNLOAD' BEHAVIOR
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <iframe id="iframe_content_download" style="display:none;"></iframe>
+    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL USER ALERT - MODAL
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="uidl-element-template/ModalUserAlert">
@@ -1696,7 +1702,7 @@ HEAD, JS/CSS LINKS
             <a ng-if="property.kind==='Relation'">Go to</a>
         </div>
     </script>
-    
+        
     <!------ HARD CODED  -------->
     
     <script type="text/ng-template" id="uidl-element-template/AffiliateSignUpForm">
@@ -1865,6 +1871,9 @@ HEAD, JS/CSS LINKS
                             { timeOut: 5000 });
                         break;
                 }
+            };
+            $rootScope.beginBrowserDownload = function(url) {
+                document.getElementById('iframe_content_download').src = url;
             };
         }]);
         

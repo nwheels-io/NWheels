@@ -19,8 +19,8 @@ namespace NWheels.Processing.Documents
             : base(
                 framework, 
                 toSession, 
-                commandMessageId, 
-                result: document.Metadata, 
+                commandMessageId,
+                result: commandMessageId.ToString("N"), 
                 success: true, 
                 newSessionId: null, 
                 faultCode: null, 
@@ -28,6 +28,7 @@ namespace NWheels.Processing.Documents
                 faultReason:null , 
                 technicalInfo: null)
         {
+            this.Document = document;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

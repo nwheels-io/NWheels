@@ -176,8 +176,30 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
+        [Route("api/oneWay/command/{target}/{contractName}/{operationName}")]
+        public IHttpActionResult ApiOneWayCommand(string target, string contractName, string operationName)
+        {
+            var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: false);
+
+            if ( command == null )
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
+
+            _serviceBus.EnqueueMessage(command);
+
+            return Json(
+                new  {
+                    CommandMessageId = command.MessageId
+                },
+                _context.EntityService.CreateSerializerSettings());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpPost]
         [Route("api/requestReply/command/{target}/{contractName}/{operationName}")]
-        public IHttpActionResult ExecuteCommand(string target, string contractName, string operationName)
+        public IHttpActionResult ApiRequestReplyCommand(string target, string contractName, string operationName)
         {
             var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: true);
 
@@ -200,8 +222,30 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("api/requestReply/command/query/{entityName}/{target}/{contractName}/{operationName}")]
-        public IHttpActionResult ExecuteCommandAsQuery(string entityName, string target, string contractName, string operationName)
+        [Route("api/requestReplyAsync/command/{target}/{contractName}/{operationName}")]
+        public IHttpActionResult ApiRequestReplyAsyncCommand(string target, string contractName, string operationName)
+        {
+            var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: false);
+
+            if ( command == null )
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
+
+            _serviceBus.EnqueueMessage(command);
+
+            return Json(
+                new {
+                    CommandMessageId = command.MessageId
+                },
+                _context.EntityService.CreateSerializerSettings());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpPost]
+        [Route("api/requestReply/entityQuery/{entityName}/{target}/{contractName}/{operationName}")]
+        public IHttpActionResult ApiRequestReplyEntityQuery(string entityName, string target, string contractName, string operationName)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
             {
@@ -233,8 +277,8 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("command/exportReportAsync/{entityName}/{target}/{contractName}/{operationName}/{outputFormat}")]
-        public IHttpActionResult EnqueueCommandAsReportQueryExport(string entityName, string target, string contractName, string operationName, string outputFormat)
+        [Route("api/requestReply/entityQueryExport/{entityName}/{target}/{contractName}/{operationName}/{outputFormat}")]
+        public IHttpActionResult ApiRequestReplyEntityQueryExport(string entityName, string target, string contractName, string operationName, string outputFormat)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
             {
@@ -257,7 +301,7 @@ namespace NWheels.Stacks.AspNet
                 var exportCommand = new DocumentFormatRequestMessage(
                     _framework, 
                     Session.Current, 
-                    isSynchronous: false, 
+                    isSynchronous: true, 
                     entityService: _context.EntityService, 
                     reportCriteria: null,
                     reportQuery: query,
@@ -265,36 +309,40 @@ namespace NWheels.Stacks.AspNet
                     documentDesign: null,
                     outputFormatIdName: outputFormat);
 
-                _serviceBus.EnqueueMessage(exportCommand);
+                _serviceBus.DispatchMessageOnCurrentThread(exportCommand);
+                var download = exportCommand.Result as DocumentFormatReplyMessage;
 
-                return Json(
-                    new {
-                        CommandMessageId = exportCommand.MessageId
-                    },
-                    _context.EntityService.CreateSerializerSettings());
+                if ( download != null )
+                {
+                    HttpContext.Current.Session[exportCommand.MessageId.ToString("N")] = download.Document;
+                }
+
+                return Json(exportCommand.Result.TakeSerializableSnapshot(), _context.EntityService.CreateSerializerSettings());
             }
         }
-
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [HttpPost]
-        [Route("command/oneWay/{target}/{contractName}/{operationName}")]
-        public IHttpActionResult EnqueueCommand(string target, string contractName, string operationName)
+        [HttpGet]
+        [Route("downloadContent/{contentId}")]
+        public IHttpActionResult DownloadContent(string contentId)
         {
-            var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: false);
+            var document = HttpContext.Current.Session[contentId] as FormattedDocument;
 
-            if ( command == null )
+            if ( document == null )
             {
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            _serviceBus.EnqueueMessage(command);
+            HttpResponseMessage download = new HttpResponseMessage(HttpStatusCode.OK);
+            
+            var stream = new MemoryStream(document.Contents);
+            download.Content = new StreamContent(stream);
+            download.Content.Headers.ContentType = new MediaTypeHeaderValue(document.Metadata.Format.ContentType);
+            download.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+            download.Content.Headers.ContentDisposition.FileName = document.Metadata.FileName;
 
-            return Json(
-                new {
-                    CommandMessageId = command.MessageId
-                },
-                _context.EntityService.CreateSerializerSettings());
+            HttpContext.Current.Session.Remove(contentId);
+            return ResponseMessage(download); 
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

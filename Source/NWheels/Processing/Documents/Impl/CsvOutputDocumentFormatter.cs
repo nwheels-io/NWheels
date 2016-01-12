@@ -36,6 +36,8 @@ namespace NWheels.Processing.Documents.Impl
                 output.Append(CsvEncode(queryResults.Columns[i].AliasName));
             }
 
+            output.AppendLine();
+
             foreach ( var row in queryResults )
             {
                 for ( int i = 0; i < queryResults.ColumnCount; i++ )
@@ -47,6 +49,8 @@ namespace NWheels.Processing.Documents.Impl
 
                     output.Append(CsvEncode(row[i].ToString()));
                 }
+
+                output.AppendLine();
             }
 
 

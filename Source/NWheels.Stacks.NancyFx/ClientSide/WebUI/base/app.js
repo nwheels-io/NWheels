@@ -559,10 +559,14 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 'api' + 
                 '/' + behavior.callType +
                 '/' + behavior.callResultType +
+                (behavior.callResultType==='EntityQuery' || behavior.callResultType==='EntityQueryExport' ? '/' + behavior.queryEntityName : '') +
                 '/' + behavior.callTargetType + 
                 '/' + behavior.contractName + 
                 '/' + behavior.operationName;
             
+            if (behavior.callResultType === 'EntityQueryExport') {
+                requestPath += '/' + behavior.exportFormatId;
+            }
             if (behavior.callTargetType === 'EntityMethod') {
                 requestPath += '?$entityId=' + encodeURIComponent(scope.model.State.entity['$id']);
             }
@@ -712,6 +716,20 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
         returnsPromise: false,
         execute: function (scope, behavior, input) {
             window.location.reload();
+        },
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_behaviorImplementations['DownloadContent'] = {
+        returnsPromise: false,
+        execute: function (scope, behavior, input) {
+            scope.model.Input = input;
+            var context = {
+                model: scope.model
+            };
+            var contentId = Enumerable.Return(context).Select('ctx=>ctx.' + behavior.contentIdExpression).Single();
+            $rootScope.beginBrowserDownload('downloadContent/' + contentId);
         },
     };
 
