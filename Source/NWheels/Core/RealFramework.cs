@@ -17,6 +17,7 @@ using NWheels.Logging.Core;
 using System.Collections.Concurrent;
 using NWheels.Authorization.Core;
 using NWheels.Conventions.Core;
+using NWheels.Entities.Core;
 
 namespace NWheels.Core
 {
@@ -79,6 +80,15 @@ namespace NWheels.Core
             var dataRepositoryContract = dataRepositoryFactory.GetDataRepositoryContract(entityContractType);
 
             return _unitOfWorkFactory.NewUnitOfWork(dataRepositoryContract, autoCommit, scopeOption, connectionString);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IDomainObject NewDomainObject(Type contractType)
+        {
+            var entityObjectFactory = _components.Resolve<IEntityObjectFactory>();
+            var persistableObject = (IPersistableObject)entityObjectFactory.NewEntity(contractType);
+            return _components.Resolve<IDomainObjectFactory>().CreateDomainObjectInstance(persistableObject);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

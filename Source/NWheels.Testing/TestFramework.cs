@@ -104,6 +104,15 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        IDomainObject ICoreFramework.NewDomainObject(Type contractType)
+        {
+            var entityObjectFactory = _components.Resolve<IEntityObjectFactory>();
+            var persistableObject = (IPersistableObject)entityObjectFactory.NewEntity(contractType);
+            return _components.Resolve<IDomainObjectFactory>().CreateDomainObjectInstance(persistableObject);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IApplicationDataRepository NewUnitOfWorkForEntity(
             Type entityContractType, 
             bool autoCommit = true, 

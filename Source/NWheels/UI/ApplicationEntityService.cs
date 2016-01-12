@@ -1736,9 +1736,24 @@ namespace NWheels.UI
             {
                 using ( var context = Framework.NewUnitOfWork<TContext>() )
                 {
-                    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
-                    var domainObject = repository.New();
-                    return (IDomainObject)domainObject;
+                    IEntityRepository repository;
+
+                    if ( context.TryGetEntityRepository(typeof(TEntity), out repository) )
+                    {
+                        var domainObject = repository.As<IEntityRepository<TEntity>>().New();
+                        return (IDomainObject)domainObject;
+                    }
+                    else if ( MetaType.IsEntityPart )
+                    {
+                        var domainObject = Framework.NewDomainObject<TEntity>();
+                        return (IDomainObject)domainObject;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(string.Format(
+                            "Entity repository for entity '{0}' is not declared in domain context.", 
+                            MetaType.QualifiedName));
+                    }
                 }
             }
 

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using NWheels.Entities;
+using NWheels.Entities.Core;
 
 namespace NWheels.Core
 {
@@ -22,7 +23,9 @@ namespace NWheels.Core
             bool autoCommit = true, 
             UnitOfWorkScopeOption? scopeOption = null, 
             string databaseName = null);
-        
+
+        IDomainObject NewDomainObject(Type contractType);
+
         IComponentContext Components { get; }
     }
 }
