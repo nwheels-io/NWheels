@@ -794,7 +794,7 @@ HEAD, JS/CSS LINKS
                         width: null,
                         height: '100%',
                         rownumWidth: 45,
-                        rowNum: ($scope.uidl.mode === 'Standalone' ? 10 : 5),
+                        rowNum: ($scope.uidl.pageSizeOptions && $scope.uidl.pageSizeOptions.length ? $scope.uidl.pageSizeOptions[0] : ($scope.uidl.mode === 'Standalone' ? 10 : 5)),
                         rowList: $scope.uidl.pageSizeOptions || [10, 20, 50],
                         colModel: columnsModel,
                         pager: "#rdtpager_" + $scope.uniqueWidgetId,
