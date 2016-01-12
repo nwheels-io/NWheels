@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using NWheels.Authorization.Core;
 using NWheels.DataObjects;
 using NWheels.Entities.Core;
+using NWheels.Extensions;
 using NWheels.Processing.Documents;
 using NWheels.Processing.Documents.Core;
 using NWheels.UI;
@@ -36,7 +37,7 @@ namespace NWheels.Stacks.Formats.EPPlus
                 {
                     for ( int i = 0; i < queryResults.ColumnCount; i++ )
                     {
-                        worksheet.Cells[rowNumber, i + 1].Value = row[i].ToString();
+                        worksheet.Cells[rowNumber, i + 1].Value = row[i].ToStringOrDefault("N/A");
                     }
 
                     rowNumber++;

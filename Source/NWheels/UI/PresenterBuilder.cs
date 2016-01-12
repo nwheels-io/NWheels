@@ -430,6 +430,16 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public SendServerCommandBehaviorBuilder<TInput, TContract> SetupEnityQueryFor(DataGrid dataGrid)
+            {
+                _behavior.QueryEntityName = dataGrid.EntityName;
+                _behavior.QueryIncludeList = dataGrid.IncludedProperties;
+                _behavior.QuerySelectList = dataGrid.DisplayColumns.Select(c => c.Expression).Where(name => !_behavior.QueryIncludeList.Contains(name)).ToList();
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public PromiseBuilder<TInput> FireAndForget(Expression<Action<TContract, ViewModel<TData, TState, TInput>>> call)
             {
                 ParseMethodCall(call);

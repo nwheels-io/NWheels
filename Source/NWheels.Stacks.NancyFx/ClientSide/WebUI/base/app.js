@@ -570,7 +570,20 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             if (behavior.callTargetType === 'EntityMethod') {
                 requestPath += '?$entityId=' + encodeURIComponent(scope.model.State.entity['$id']);
             }
-            
+            if (behavior.querySelectList || behavior.queryIncludeList) {
+                var queryBuilder = new EntityQueryBuilder(behavior.queryEntityName, requestPath);
+                if (behavior.querySelectList) {
+                    for (var i = 0; i < behavior.querySelectList.length; i++) {
+                        queryBuilder.select(behavior.querySelectList[i]);
+                    }
+                }
+                if (behavior.queryIncludeList) {
+                    for (var i = 0; i < behavior.queryIncludeList.length; i++) {
+                        queryBuilder.include(behavior.queryIncludeList[i]);
+                    }
+                }
+                requestPath += queryBuilder.getQueryString();
+            }
             if (behavior.prepareOnly===true) {
                 return $q.when({
                     url: requestPath,

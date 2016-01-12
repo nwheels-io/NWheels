@@ -181,6 +181,11 @@ namespace NWheels.DataObjects.Core
                 throw new ArgumentNullException("target");
             }
 
+            if ( !this.ContractPropertyInfo.DeclaringType.IsInstanceOfType(target) )
+            {
+                return null;
+            }
+
             if ( _valueReaderDynamicMethod == null )
             {
                 lock ( _dynamicMethodSyncRoot )

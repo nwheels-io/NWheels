@@ -236,7 +236,7 @@ function EntityQueryBuilder(entityName, commandUrl) {
 
     this.getQueryString = function () {
         var queryString = '';
-        var delimiter = '?';
+        var delimiter = ((me._commandUrl && me._commandUrl.indexOf('?') > -1) ? '&' : '?');   
 
         if (me._entityTypeFilter) {
             queryString = queryString + delimiter + '$type=' + me._entityTypeFilter;

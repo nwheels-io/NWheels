@@ -72,6 +72,7 @@ namespace NWheels.UI.Toolbox
 
             presenter.On(DownloadExcel)
                 .InvokeTransactionScript<TScript>(queryAsEntityType: typeof(TResultRow))
+                .SetupEnityQueryFor(ResultTable)
                 .WaitForResultsDownloadReady((script, vm) => script.Execute(vm.State.Criteria), exportFormat: "EXCEL")
                 .Then(
                     onSuccess: b => b
@@ -89,14 +90,6 @@ namespace NWheels.UI.Toolbox
             presenter.On(ResultTable.QueryFailed)
                 .Broadcast(CriteriaForm.StateResetter).TunnelDown()
                 .Then(b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input));
-
-            //onSuccess: 
-            //    b => b.Broadcast(ResultTable.DataReceived).WithPayload(m => m.Input).TunnelDown()
-            //    .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown()
-            //    .Then(bbb => bbb.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady()))),
-            //onFailure:
-            //    b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input)
-            //    .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown()));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

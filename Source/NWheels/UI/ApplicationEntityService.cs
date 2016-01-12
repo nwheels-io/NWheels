@@ -1114,7 +1114,7 @@ namespace NWheels.UI
 
                 foreach ( var stepPropertyName in PropertyPath )
                 {
-                    var stepMetaProperty = stepMetaType.GetPropertyByName(stepPropertyName);
+                    var stepMetaProperty = stepMetaType.FindPropertyByNameIncludingDerivedTypes(stepPropertyName);
                     value = stepMetaProperty.ReadValue(stepTarget);
 
                     if ( stepMetaProperty.Relation != null )

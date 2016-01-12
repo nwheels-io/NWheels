@@ -85,6 +85,10 @@ namespace NWheels.UI.Uidl
         [DataMember]
         public string QueryEntityName { get; set; }
         [DataMember]
+        public List<string> QuerySelectList { get; set; }
+        [DataMember]
+        public List<string> QueryIncludeList { get; set; }
+        [DataMember]
         public string ContractName { get; set; }
         [DataMember]
         public string OperationName { get; set; }
