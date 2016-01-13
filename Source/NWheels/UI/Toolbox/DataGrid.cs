@@ -139,6 +139,19 @@ namespace NWheels.UI.Toolbox
         {
             public GridColumn(
                 ITypeMetadata metaType, 
+                FieldSpecialName specialName,
+                string title = null, 
+                FieldSize size = FieldSize.Medium, 
+                string format = null)
+                : this(metaType, new[] { "$" + specialName.ToString().ToCamelCase() }, title, size, format, includeInTotal: false)
+            {
+                this.SpecialName = specialName;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public GridColumn(
+                ITypeMetadata metaType, 
                 LambdaExpression propertyNavigation, 
                 string title = null, 
                 FieldSize size = FieldSize.Medium, 
@@ -181,6 +194,8 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            [DataMember]
+            public FieldSpecialName SpecialName { get; set; }
             [DataMember]
             public string Title { get; set; }
             [DataMember]

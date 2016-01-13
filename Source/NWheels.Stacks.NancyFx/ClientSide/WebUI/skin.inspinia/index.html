@@ -697,12 +697,15 @@ HEAD, JS/CSS LINKS
             
             $scope.onDataReceived = function (event, data) {
                 $scope.ResultSet = data;
+                for (var  i = 0; i < data.length; i++) {
+                    data[i]['$index'] = i;
+                }
                 $scope.$timeout(function () {
                     $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
                     $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
                         datatype: 'local',
                         localReader: {
-                           id: "$id",
+                           id: "$index",
                         },
                         data: data,
                         loadonce: true,
@@ -724,7 +727,10 @@ HEAD, JS/CSS LINKS
                         ignoreCase: true,
                         onSelectRow: function (rowId) {
                             var rowObject = $(this).getLocalRow(rowId);
-                            $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelected', rowObject);
+                            var dataObject = Enumerable.From($scope.ResultSet).FirstOrDefault(null, '$.$index===' + rowObject['$index']);
+                            if (dataObject) {
+                                $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelected', dataObject);
+                            }
                         }
                     });
                     var grid = $("#rdt_" + $scope.uniqueWidgetId);
@@ -1355,7 +1361,7 @@ HEAD, JS/CSS LINKS
                  <input type="text" 
                         class="form-control"
                         ng-init="isNowFocused=false" 
-                        ng-focus="isNowFocused=true" 
+                        ng-focus="isNowFocused=!hasUidlModifier('ReadOnly')" 
                         ng-blur="isNowFocused=false"                        
                         ng-model="entity[uidl.propertyName]"
                         readonly
@@ -1364,6 +1370,7 @@ HEAD, JS/CSS LINKS
                  <span class="input-group-btn"> 
                      <button type="button" 
                              class="btn" 
+                             ng-disabled="hasUidlModifier('ReadOnly')"
                              ng-class="{'btn-primary':isNowFocused, 'btn-white':!isNowFocused}"
                              ng-click="ellipsisClicked()">
                         <i class="fa fa-search"></i>
@@ -1586,11 +1593,11 @@ HEAD, JS/CSS LINKS
             <div class="form-group">
                 <label class="col-lg-2 control-label">Type</label>
                 <div class="col-lg-3">
-                    <select ng-options="s.typeName as (s.text | translated) for s in uidl.selections" ng-model="selectedType" ng-change="selectedTypeChanged(selectedType)" class="form-control m-b"></select>
+                    <select ng-options="s.typeName as (s.text | translated) for s in uidl.selections" ng-model="selectedType.name" ng-change="selectedTypeChanged(selectedType.name)" class="form-control m-b"></select>
                 </div>
             </div>
         </form>
-        <uidl-widget ng-repeat="selection in uidl.selections" ng-if="selectedType==selection.typeName" uidl="selection.widget" parent-model="model.entity"></uidl-widget>
+        <uidl-widget ng-repeat="selection in uidl.selections" ng-if="selectedType.name==selection.typeName" uidl="selection.widget" parent-model="model.entity"></uidl-widget>
     </script>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

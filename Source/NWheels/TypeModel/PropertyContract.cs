@@ -645,6 +645,13 @@ namespace NWheels.DataObjects
 
         public static class Presentation
         {
+            public class HiddenAttribute : PropertyContractAttribute
+            {
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+                {
+                    property.DefaultDisplayVisible = false;
+                }
+            }
             public class DisplayNameAttribute : PropertyContractAttribute
             {
                 public DisplayNameAttribute(string text)

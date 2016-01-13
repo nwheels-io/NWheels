@@ -229,17 +229,18 @@ namespace NWheels.Processing.Commands.Factories
                             }
                         })
                         .Method<int, object>(intf => intf.GetParameterValue).Implement((w, index) => {
-                            var switchStatement = w.Switch(index);
-                            for ( int i = 0 ; i < callArguments.Length ; i++ )
+                            if ( callArguments.Length > 0 )
                             {
-                                var argumentIndex = i;
-                                switchStatement.Case(i).Do(() => {
-                                    w.Return(callArguments[argumentIndex].CastTo<object>());
-                                });
+                                var switchStatement = w.Switch(index);
+                                for ( int i = 0; i < callArguments.Length; i++ )
+                                {
+                                    var argumentIndex = i;
+                                    switchStatement.Case(i).Do(() => {
+                                        w.Return(callArguments[argumentIndex].CastTo<object>());
+                                    });
+                                }
                             }
-                            switchStatement.Default(() => {
-                                w.Throw<ArgumentOutOfRangeException>("Argument index was out of range.");
-                            });
+                            w.Throw<ArgumentOutOfRangeException>("Argument index was out of range.");
                         })
                         .Property(intf => intf.MethodInfo).Implement(p =>
                             p.Get(gw => {

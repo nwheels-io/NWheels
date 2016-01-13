@@ -121,6 +121,75 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void CanGetCallArgumentsOfVoidMethod()
+        {
+            //-- arrange
+
+            var factoryUnderTest = new MethodCallObjectFactory(base.DyamicModule);
+            var methodThreeInfo = typeof(TestTarget).GetMethod("MethodThree");
+
+            var call = factoryUnderTest.NewMessageCallObject(methodThreeInfo);
+            dynamic callAsDynamic = call;
+
+            callAsDynamic.Num = 123;
+            callAsDynamic.Str = "ABC";
+
+            //-- act
+
+            var numValue = call.GetParameterValue(0);
+            var strValue = call.GetParameterValue(1);
+
+            //-- assert
+
+            numValue.ShouldBe(123);
+            strValue.ShouldBe("ABC");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanGetCallArgumentsOfNonVoidMethod()
+        {
+            //-- arrange
+
+            var factoryUnderTest = new MethodCallObjectFactory(base.DyamicModule);
+            var methodTwoInfo = typeof(TestTarget).GetMethod("MethodTwo");
+
+            var call = factoryUnderTest.NewMessageCallObject(methodTwoInfo);
+            dynamic callAsDynamic = call;
+
+            callAsDynamic.Num = 123;
+
+            //-- act
+
+            var numValue = call.GetParameterValue(0);
+
+            //-- assert
+
+            numValue.ShouldBe(123);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanThrowOnGetCallArgumentBadIndex()
+        {
+            //-- arrange
+
+            var factoryUnderTest = new MethodCallObjectFactory(base.DyamicModule);
+            var methodTwoInfo = typeof(TestTarget).GetMethod("MethodTwo");
+            var call = factoryUnderTest.NewMessageCallObject(methodTwoInfo);
+
+            //-- act & assert
+
+            Should.Throw<ArgumentOutOfRangeException>(() => {
+                call.GetParameterValue(1);        
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public interface ITestTargetLogger : IApplicationEventLogger
         {
             [LogInfo]

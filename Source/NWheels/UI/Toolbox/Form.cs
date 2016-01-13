@@ -251,7 +251,7 @@ namespace NWheels.UI.Toolbox
             //    return false;
             //}
 
-            return true;
+            return property.DefaultDisplayVisible.GetValueOrDefault(true);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -507,6 +507,20 @@ namespace NWheels.UI.Toolbox
 
         private FormFieldModifiers GetDefaultModifiers(FormFieldType type)
         {
+            var value = GetBasicDefaultModifiers(type);
+
+            if ( MetaProperty.Access == PropertyAccess.ReadOnly )
+            {
+                value |= FormFieldModifiers.ReadOnly;
+            }
+
+            return value;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private FormFieldModifiers GetBasicDefaultModifiers(FormFieldType type)
+        {
             switch ( type )
             {
                 case FormFieldType.Label:
@@ -645,5 +659,14 @@ namespace NWheels.UI.Toolbox
         Small,
         Medium,
         Large
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum FieldSpecialName
+    {
+        None,
+        Id,
+        Type
     }
 }

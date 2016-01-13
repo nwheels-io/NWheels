@@ -241,6 +241,7 @@ namespace NWheels.DataObjects.Core
         public System.Reflection.PropertyInfo ContractPropertyInfo { get; set; }
         public object DefaultValue { get; set; }
         public Type DefaultValueGeneratorType { get; set; }
+        public bool? DefaultDisplayVisible { get; set; }
         public string DefaultDisplayName { get; set; }
         public string DefaultDisplayFormat { get; set; }
         public bool DefaultSortAscending { get; set; }
@@ -330,6 +331,7 @@ namespace NWheels.DataObjects.Core
             ContractAttributes = visitor.VisitAttribute("ContractAttributes", ContractAttributes);
             ContractPropertyInfo = visitor.VisitAttribute("ContractPropertyInfo", ContractPropertyInfo);
             DefaultValueGeneratorType = visitor.VisitAttribute("DefaultValueGeneratorType", DefaultValueGeneratorType);
+            DefaultDisplayVisible = visitor.VisitAttribute("DefaultDisplayVisible", DefaultDisplayVisible);
             DefaultDisplayName = visitor.VisitAttribute("DefaultDisplayName", DefaultDisplayName);
             DefaultDisplayFormat = visitor.VisitAttribute("DefaultDisplayFormat", DefaultDisplayFormat);
             DefaultSortAscending = visitor.VisitAttribute("DefaultSortAscending", DefaultSortAscending);
@@ -611,7 +613,7 @@ namespace NWheels.DataObjects.Core
                 object value, 
                 Func<Expression, Expression, Expression> expressionFactory)
             {
-                if ( navigationPath.Length > 0 )
+                if ( navigationPath.Length > 1 )
                 {
                     throw new NotSupportedException();
                 }

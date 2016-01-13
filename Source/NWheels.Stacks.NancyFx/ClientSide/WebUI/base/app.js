@@ -1178,6 +1178,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 scope.resetCrudState();
                 scope.resultSet = data;
                 scope.selectedEntity = null;
+                scope.requestAuthorization();
                 scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
             });
 
@@ -1449,6 +1450,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
 
     m_controllerImplementations['TypeSelector'] = {
         implement: function (scope) {
+            scope.selectedType = { name: null };
             scope.parentModelProperty = toCamelCase(scope.uidl.parentModelProperty);
             
             scope.selectedTypeChanged = function (type) {
@@ -1457,8 +1459,8 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                         entity: newObj
                     };
 
-                    scope.selectedType = newObj['$type'];
-                    scope.selectTabByType(scope.selectedType);
+                    scope.selectedType.name = newObj['$type'];
+                    scope.selectTabByType(scope.selectedType.name);
 
                     if (scope.parentModel) {
                         if (scope.parentUidl) {
@@ -1474,7 +1476,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             };
 
             scope.sendModelToSelectedWidget = function () {
-                var selection = Enumerable.From(scope.uidl.selections).Where("$.typeName=='" + scope.selectedType + "'").First();
+                var selection = Enumerable.From(scope.uidl.selections).Where("$.typeName=='" + scope.selectedType.name + "'").First();
                 var selectedWidgetQualifiedName = selection.widget.qualifiedName;
                 $timeout(function() {
                     scope.$broadcast(selectedWidgetQualifiedName + ':ModelSetter', scope.model.entity);
@@ -1491,8 +1493,8 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 }
 
                 if (scope.model.entity) {
-                    scope.selectedType = scope.model.entity['$type'];
-                    scope.selectTabByType(scope.selectedType);
+                    scope.selectedType.name = scope.model.entity['$type'];
+                    scope.selectTabByType(scope.selectedType.name);
                 }
             };
             
@@ -1500,6 +1502,9 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 if (index !== scope.selectedTabIndex) {
                     scope.selectedTabIndex = index;
                     scope.$emit(scope.uidl.qualifiedName + ':SelectionChanged', scope.uidl.selections[index]);
+                    $timeout(function() {
+                        scope.$broadcast(scope.uidl.selections[index].widget.qualifiedName + ':NavigatedHere');
+                    });
                 }
             }
 
@@ -1531,8 +1536,8 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             });
 
             if (scope.model.entity) {
-                scope.selectedType = scope.model.entity['$type'];
-                scope.selectTabByType(scope.selectedType);
+                scope.selectedType.name = scope.model.entity['$type'];
+                scope.selectTabByType(scope.selectedType.name);
                 scope.sendModelToSelectedWidget();
             } else if (scope.uidl.defaultTypeName) {
                 scope.selectTabByType(scope.uidl.defaultTypeName);

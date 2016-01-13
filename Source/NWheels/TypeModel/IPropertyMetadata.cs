@@ -49,6 +49,7 @@ namespace NWheels.DataObjects
         IPropertyValidationMetadata Validation { get; }
         object DefaultValue { get; }
         Type DefaultValueGeneratorType { get; }
+        bool? DefaultDisplayVisible { get; }
         string DefaultDisplayName { get; }
         string DefaultDisplayFormat { get; }
         bool DefaultSortAscending { get; }
