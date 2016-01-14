@@ -682,17 +682,41 @@ HEAD, JS/CSS LINKS
         function initWidget_DataGrid($scope) {
             var columnsModel = [];
             $scope.gridColumns.forEach(function (metaColumn, idx) {
-                columnsModel.push({
+                var colWidthPx = (metaColumn.size==='Large' ? 360 : (metaColumn.size==='Small' ? 90 : 180));
+                var modelItem = {
                     name: metaColumn.expression,
                     label: $scope.translate(metaColumn.title),
                     index: metaColumn.expression,
                     editable: false,
-                    width: (metaColumn.size==='Large' ? 360 : (metaColumn.size==='Small' ? 90 : 180)),
-                    searchoptions: (metaColumn.isText ? {sopt: ['cn']} : {sopt: ['eq']}),
+                    width: colWidthPx,
                     search: metaColumn.isFilterSupported,
                     sortable: metaColumn.isSortSupported,
                     //sorttype: column.dataType,
-                });
+                };
+                switch (metaColumn.columnType) {
+                    case 'Number':
+                    case 'Key':
+                        modelItem.searchoptions = {sopt: ['eq']};
+                        break;
+                    case 'Enum':
+                        modelItem.searchoptions = {sopt: ['cn']};
+                        break;
+                    case 'Image':
+                        modelItem.searchoptions = {sopt: ['cn']};
+                        modelItem.formatter = function(cellvalue, options, rowObject) {
+                            return '<img src="' + cellvalue + '" width="' + colWidthPx + '">';
+                        };
+                        break;
+                    case 'Link':
+                        modelItem.searchoptions = {sopt: ['cn']};
+                        modelItem.formatter = function(cellvalue, options, rowObject) {
+                            return '<a target="_blank" href="' + cellvalue + '" style="text-decoration:underline;">' + cellvalue + '</a>';
+                        };
+                        break;
+                    default:
+                        modelItem.searchoptions = {sopt: ['cn']};
+                }
+                columnsModel.push(modelItem);
             });
             
             $scope.onDataReceived = function (event, data) {

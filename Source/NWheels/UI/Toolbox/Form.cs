@@ -59,7 +59,7 @@ namespace NWheels.UI.Toolbox
 
             if ( setup != null )
             {
-                setup(field);
+                field.OnSetup += setup;
             }
 
             Fields.Add(field);
@@ -343,6 +343,7 @@ namespace NWheels.UI.Toolbox
         internal IPropertyMetadata MetaProperty { get; private set; }
         internal int OrderIndex { get; private set; }
         internal Type LookupEntityContract { get; set; }
+        internal Action<FormField> OnSetup { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -396,6 +397,11 @@ namespace NWheels.UI.Toolbox
             this.OrderIndex = GetOrderIndex();
 
             builder.BuildManuallyInstantiatedNodes(NestedWidget);
+
+            if ( OnSetup != null )
+            {
+                OnSetup(this);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

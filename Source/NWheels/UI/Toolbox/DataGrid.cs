@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
@@ -8,6 +9,7 @@ using NWheels.DataObjects;
 using NWheels.Extensions;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
+using NWheels.TypeModel;
 
 namespace NWheels.UI.Toolbox
 {
@@ -142,8 +144,9 @@ namespace NWheels.UI.Toolbox
                 FieldSpecialName specialName,
                 string title = null, 
                 FieldSize size = FieldSize.Medium, 
-                string format = null)
-                : this(metaType, new[] { "$" + specialName.ToString().ToCamelCase() }, title, size, format, includeInTotal: false)
+                string format = null,
+                GridColumnType? columnType = null)
+                : this(metaType, new[] { "$" + specialName.ToString().ToCamelCase() }, title, size, format, includeInTotal: false, columnType: columnType)
             {
                 this.SpecialName = specialName;
             }
@@ -156,8 +159,9 @@ namespace NWheels.UI.Toolbox
                 string title = null, 
                 FieldSize size = FieldSize.Medium, 
                 string format = null,
-                bool includeInTotal = false)
-                : this(metaType, ParsePropertyNavigation(propertyNavigation), title, size, format, includeInTotal)
+                bool includeInTotal = false,
+                GridColumnType? columnType = null)
+                : this(metaType, ParsePropertyNavigation(propertyNavigation), title, size, format, includeInTotal, columnType)
             {
             }
 
@@ -168,8 +172,9 @@ namespace NWheels.UI.Toolbox
                 string[] navigations, 
                 string title = null, 
                 FieldSize size = FieldSize.Medium, 
-                string format = null, 
-                bool includeInTotal = false)
+                string format = null,
+                bool includeInTotal = false,
+                GridColumnType? columnType = null)
             {
                 this.Navigations = navigations;
                 this.Expression = string.Join(".", Navigations);
@@ -186,7 +191,7 @@ namespace NWheels.UI.Toolbox
 
                 this.DeclaringTypeName = destinationMetaType.QualifiedName;
                 this.MetaProperty = destinationMetaProperty;
-                this.IsText = (MetaProperty.ClrType == typeof(string));
+                this.ColumnType = columnType.GetValueOrDefault(GetGridColumnType(MetaProperty));
 
                 this.IsFilterSupported = !isManualJoinRequired;
                 this.IsSortSupported = this.IsFilterSupported;
@@ -196,6 +201,8 @@ namespace NWheels.UI.Toolbox
 
             [DataMember]
             public FieldSpecialName SpecialName { get; set; }
+            [DataMember]
+            public GridColumnType ColumnType { get; set; }
             [DataMember]
             public string Title { get; set; }
             [DataMember]
@@ -210,8 +217,6 @@ namespace NWheels.UI.Toolbox
             public string DeclaringTypeName { get; set; }
             [DataMember]
             public bool IncludeInTotal { get; set; }
-            [DataMember]
-            public bool IsText { get; set; }
             [DataMember]
             public bool IsSortSupported { get; set; }
             [DataMember]
@@ -261,6 +266,41 @@ namespace NWheels.UI.Toolbox
                 var expressionString = propertyNavigation.ToNormalizedNavigationString();
                 return expressionString.Split('.').Skip(1).ToArray();
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal static GridColumnType GetGridColumnType(IPropertyMetadata metaProperty)
+            {
+                if ( metaProperty.Kind == PropertyKind.Relation || metaProperty.Relation != null )
+                {
+                    return GridColumnType.Key;
+                }
+
+                if ( metaProperty.ClrType.IsNumericType() )
+                {
+                    return GridColumnType.Number;
+                }
+
+                if ( metaProperty.ClrType.IsEnum )
+                {
+                    return GridColumnType.Enum;
+                }
+
+                if ( metaProperty.SemanticType != null )
+                {
+                    var semantic = metaProperty.SemanticType.WellKnownSemantic;
+
+                    switch ( semantic )
+                    {
+                        case WellKnownSemanticType.ImageUrl:
+                            return GridColumnType.Image;
+                        case WellKnownSemanticType.Url:
+                            return GridColumnType.Link;
+                    }
+                }
+
+                return GridColumnType.Text;
+            }
         }
     }
 
@@ -300,20 +340,25 @@ namespace NWheels.UI.Toolbox
             Expression<Func<TDataRow, T>> propertySelector, 
             string title = null, 
             FieldSize size = FieldSize.Medium,
-            bool includeInTotal = false)
+            bool includeInTotal = false,
+            GridColumnType? columnType = null)
         {
-            this.DisplayColumns.Add(new GridColumn(MetaType, propertySelector, title, size, null, includeInTotal));
+            this.DisplayColumns.Add(new GridColumn(MetaType, propertySelector, title, size, null, includeInTotal, columnType));
             return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public DataGrid<TDataRow> Column<TDerivedDataRow, T>(
-            Expression<Func<TDerivedDataRow, T>> propertySelector, string title = null, FieldSize size = FieldSize.Medium, bool includeInTotal = false)
+            Expression<Func<TDerivedDataRow, T>> propertySelector, 
+            string title = null, 
+            FieldSize size = FieldSize.Medium,
+            bool includeInTotal = false,
+            GridColumnType? columnType = null)
             where TDerivedDataRow : TDataRow
         {
             var derivedMetaType = MetadataCache.GetTypeMetadata(typeof(TDerivedDataRow));
-            this.DisplayColumns.Add(new GridColumn(derivedMetaType, propertySelector, title, size, null, includeInTotal));
+            this.DisplayColumns.Add(new GridColumn(derivedMetaType, propertySelector, title, size, null, includeInTotal, columnType));
             return this;
         }
 
@@ -323,14 +368,15 @@ namespace NWheels.UI.Toolbox
             Expression<Func<TDataRow, object>> sourcePropertySelector,
             Expression<Func<TDestinationEntity, object>> destinationPropertySelector,
             string title = null,
-            FieldSize size = FieldSize.Medium)
+            FieldSize size = FieldSize.Medium,
+            GridColumnType? columnType = null)
         {
             var navigations =
                 GridColumn.ParsePropertyNavigation(sourcePropertySelector)
                 .Concat(GridColumn.ParsePropertyNavigation(destinationPropertySelector))
                 .ToArray();
 
-            this.DisplayColumns.Add(new GridColumn(MetaType, navigations, title, size));
+            this.DisplayColumns.Add(new GridColumn(MetaType, navigations, title, size, columnType: columnType));
             return this;
         }
 
@@ -451,5 +497,17 @@ namespace NWheels.UI.Toolbox
         Inline,
         LookupOne,
         LookupMany
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum GridColumnType
+    {
+        Text,
+        Number,
+        Enum,
+        Image,
+        Link,
+        Key
     }
 }
