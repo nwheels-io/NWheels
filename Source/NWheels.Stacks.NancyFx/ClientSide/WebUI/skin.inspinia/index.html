@@ -1224,7 +1224,7 @@ HEAD, JS/CSS LINKS
         </form>
     </script>
     <script type="text/ng-template" id="uidl-element-template/FormLoginStyle">
-        <form class="m-t" role="form" id="{{::uidl.elementName}}" novalidate>
+        <form class="m-t" role="form" id="{{::uidl.elementName}}" novalidate autocomplete="off">
             <div class="form-group" ng-repeat="field in plainFields">
                 <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" template-name="FormFieldLoginStyle"></uidl-form-field>
             </div>

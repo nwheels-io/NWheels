@@ -552,7 +552,10 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 Input: input
             };
             for (var i = 0; i < behavior.parameterNames.length; i++) {
-                var parameterValue = Enumerable.Return(parameterContext).Select('ctx=>ctx.' + behavior.parameterExpressions[i]).Single();
+                var parameterValue = (
+                    behavior.parameterExpressions[i] && behavior.parameterExpressions[i].length > 0 ?
+                    Enumerable.Return(parameterContext).Select('ctx=>ctx.' + behavior.parameterExpressions[i]).Single() :
+                    null);
                 requestData[behavior.parameterNames[i]] = parameterValue;
             }
             var requestPath = 
