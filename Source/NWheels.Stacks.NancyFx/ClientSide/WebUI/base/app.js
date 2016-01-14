@@ -935,7 +935,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
         implement: function (scope) {
 			scope.$on(scope.uidl.modelSetterQualifiedName, function (event, data) {
                 var valueContext = {
-                    Input: data
+                    input: data
                 };
                 var gaugeValues = [];
                 

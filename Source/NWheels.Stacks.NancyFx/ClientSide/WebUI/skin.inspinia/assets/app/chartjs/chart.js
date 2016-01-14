@@ -12,7 +12,7 @@ function ($http, $scope, $rootScope, uidlService, $timeout) {
     $scope.$on("$destroy", function() {
     });            
 
-	$scope.$watch('model.state.data', function (newValue, oldValue) {
+	$scope.$watch('model.State.data', function (newValue, oldValue) {
         if ($scope.chartJsObject) {
             $scope.chartJsObject.destroy();
             $scope.chartJsObject = null;
