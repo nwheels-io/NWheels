@@ -74,8 +74,10 @@
     <Compile Include="Controllers\ControllerRequestFailedException.cs" />
     <Compile Include="Controllers\ControllerStateEventArgs.cs" />
     <Compile Include="Controllers\EnvironmentController.cs" />
+    <Compile Include="Controllers\ILogConnection.cs" />
     <Compile Include="Controllers\NodeController.cs" />
     <Compile Include="Controllers\NodeInstanceController.cs" />
+    <Compile Include="Controllers\NodeInstanceLogConnection.cs" />
     <Compile Include="CoreUnitTestBase.cs" />
     <Compile Include="DataObjects\Jsonlike.cs" />
     <Compile Include="ModuleLoader.cs" />

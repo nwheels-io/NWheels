@@ -11,6 +11,23 @@ namespace NWheels.Stacks.MongoDb.Logging
 {
     public class ThreadLogRecord
     {
+        public ThreadLogRecord(ThreadLogSnapshot snapshot)
+        {
+            this.LogId = snapshot.LogId.ToString("N");
+            this.Timestamp = snapshot.StartedAtUtc;
+            this.TaskType = snapshot.TaskType;
+            this.CorrelationId = snapshot.CorrelationId.ToString("N");
+            this.Level = snapshot.RootActivity.Level;
+
+            this.MachineName = MongoDbThreadLogPersistor.MachineName;
+            this.NodeName = snapshot.NodeName;
+            this.NodeInstance = snapshot.NodeInstance;
+
+            this.Snapshot = snapshot;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public ThreadLogRecord(IReadOnlyThreadLog threadLog)
         {
             this.LogId = threadLog.LogId.ToString("N");

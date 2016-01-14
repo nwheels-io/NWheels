@@ -77,7 +77,7 @@ namespace NWheels.Logging
             snapshot.SubNodes = subNodes;
             snapshot.IsActivity = true;
             snapshot.Duration = this.MillisecondsDuration;
-            snapshot.CpuTime = this.MillisecondsCpuTime;
+            snapshot.CpuTime = (long)this.MillisecondsCpuTime;
 
             return snapshot;
         }

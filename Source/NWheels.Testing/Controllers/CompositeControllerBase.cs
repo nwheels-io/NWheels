@@ -41,6 +41,17 @@ namespace NWheels.Testing.Controllers
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of ControllerBase
+
+        public override IEnumerable<ILogConnection> CreateLogConnections()
+        {
+            return GetSubControllers().SelectMany(controller => controller.CreateLogConnections());
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IReadOnlyList<TSubController> SubControllers
         {
             get

@@ -127,6 +127,8 @@
     <Compile Include="Configuration\ConfiguredComponentAttribute.cs" />
     <Compile Include="Configuration\Core\CommandLineConfigurationLoader.cs" />
     <Compile Include="Entities\UnitOfWorkScopeOption.cs" />
+    <Compile Include="Logging\LogNodeOptions.cs" />
+    <Compile Include="Logging\ThreadLogPersistenceLevel.cs" />
     <Compile Include="Processing\Commands\Impl\CommandActorBase.cs" />
     <Compile Include="Processing\Documents\Impl\CsvOutputDocumentFormatter.cs" />
     <Compile Include="Processing\Documents\Core\DocumentFormatActor.cs" />

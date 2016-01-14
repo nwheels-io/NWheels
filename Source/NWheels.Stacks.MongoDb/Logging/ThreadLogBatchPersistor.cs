@@ -37,7 +37,7 @@ namespace NWheels.Stacks.MongoDb.Logging
             {
                 VisitLogActivity(log.RootActivity);
 
-                if ( log.ShouldBePersisted )
+                if ( ShouldPersistThreadLog(log) )
                 {
                     _threadLogBatch.Add(new ThreadLogRecord(log));
                 }
@@ -57,6 +57,39 @@ namespace NWheels.Stacks.MongoDb.Logging
             if ( _threadLogBatch.Count > 0 )
             {
                 _owner.ThreadLogCollection.InsertBatch(_threadLogBatch, WriteConcern.Acknowledged);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool ShouldPersistThreadLog(IReadOnlyThreadLog log)
+        {
+            switch ( _owner.LoggingConfig.ThreadLogPersistenceLevel )
+            {
+                case ThreadLogPersistenceLevel.All:
+                    return true;
+                case ThreadLogPersistenceLevel.StartupShutdown:
+                    return (
+                        log.TaskType == ThreadTaskType.StartUp || 
+                        log.TaskType == ThreadTaskType.ShutDown);
+                case ThreadLogPersistenceLevel.StartupShutdownErrors:
+                    return (
+                        log.TaskType == ThreadTaskType.StartUp || 
+                        log.TaskType == ThreadTaskType.ShutDown ||
+                        log.RootActivity.Level >= LogLevel.Error);
+                case ThreadLogPersistenceLevel.StartupShutdownErrorsWarnings:
+                    return (
+                        log.TaskType == ThreadTaskType.StartUp ||
+                        log.TaskType == ThreadTaskType.ShutDown ||
+                        log.RootActivity.Level >= LogLevel.Warning);
+                case ThreadLogPersistenceLevel.StartupShutdownErrorsWarningsDuration:
+                    return (
+                        log.TaskType == ThreadTaskType.StartUp ||
+                        log.TaskType == ThreadTaskType.ShutDown ||
+                        log.RootActivity.Level >= LogLevel.Warning ||
+                        log.RootActivity.MillisecondsDuration >= 1000);
+                default:
+                    return false;
             }
         }
 

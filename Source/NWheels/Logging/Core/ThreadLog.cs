@@ -189,20 +189,6 @@ namespace NWheels.Logging.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool ShouldBePersisted
-        {
-            get
-            {
-                return (
-                    _taskType == ThreadTaskType.StartUp ||
-                    _taskType == ThreadTaskType.ShutDown ||
-                    _rootActivity.Level >= LogLevel.Warning || 
-                    _rootActivity.MillisecondsDuration >= 1000);
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public ActivityLogNode CurrentActivity
         {
             get

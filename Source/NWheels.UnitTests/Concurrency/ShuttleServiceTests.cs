@@ -15,7 +15,7 @@ using Shouldly;
 
 namespace NWheels.UnitTests.Concurrency
 {   
-    [TestFixture]
+    [TestFixture, Category(TestCategory.Integration)]
     public class ShuttleServiceTests : UnitTestBase
     {
         private readonly object _receivedBatchesSyncRoot = new object();

@@ -21,12 +21,24 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public LogViewerViewModel(string explorerItemPath, ControllerBase controller)
+            : this(explorerItemPath, controller.CreateLogConnections())
+        {
+            _controller = controller;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public LogViewerViewModel(string explorerItemPath, IEnumerable<ILogConnection> connections)
         {
             _explorerItemPath = explorerItemPath;
-            _controller = controller;
 
             _connections = new List<ILogConnection>();
-            AddLogConnectionsTo(controller);
+            _connections.AddRange(connections);
+
+            foreach ( var connection in _connections )
+            {
+                connection.ThreadLogsCaptured += OnThreadLogsCaptured;
+            }
 
             _logs = new LogPanelViewModel();
             
@@ -119,25 +131,6 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
             foreach ( var connection in _connections )
             {
                 connection.StopCapture();
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void AddLogConnectionsTo(ControllerBase controller)
-        {
-            var nodeInstance = (controller as NodeInstanceController);
-
-            if ( nodeInstance != null )
-            {
-                var connection = new NodeInstanceLogConnection(nodeInstance);
-                connection.ThreadLogsCaptured += OnThreadLogsCaptured;
-                _connections.Add(connection);
-            }
-
-            foreach ( var subController in controller.GetSubControllers() )
-            {
-                AddLogConnectionsTo(subController);
             }
         }
 

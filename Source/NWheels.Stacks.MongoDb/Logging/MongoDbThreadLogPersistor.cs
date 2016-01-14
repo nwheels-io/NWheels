@@ -93,6 +93,13 @@ namespace NWheels.Stacks.MongoDb.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IFrameworkLoggingConfiguration LoggingConfig
+        {
+            get { return _loggingConfig; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void StoreThreadLogsToDb(IReadOnlyThreadLog[] threadLogs)
         {
             var batchPersistor = new ThreadLogBatchPersistor(this, threadLogs);

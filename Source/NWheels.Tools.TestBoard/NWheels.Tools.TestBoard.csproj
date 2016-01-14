@@ -94,6 +94,14 @@
     <Reference Include="Microsoft.Owin.Hosting">
       <HintPath>..\packages\Microsoft.Owin.Hosting.3.0.1\lib\net45\Microsoft.Owin.Hosting.dll</HintPath>
     </Reference>
+    <Reference Include="MongoDB.Bson, Version=1.10.0.62, Culture=neutral, PublicKeyToken=f686731cfb9cc103, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\mongocsharpdriver.1.10.0\lib\net35\MongoDB.Bson.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Driver, Version=1.10.0.62, Culture=neutral, PublicKeyToken=f686731cfb9cc103, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\mongocsharpdriver.1.10.0\lib\net35\MongoDB.Driver.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -192,7 +200,6 @@
       <DependentUpon>ApplicationExplorerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\LogViewer\GridViewRowPresenterWithGridLines.cs" />
-    <Compile Include="Modules\LogViewer\ILogConnection.cs" />
     <Compile Include="Modules\LogViewer\LogNodeKind.cs" />
     <Compile Include="Modules\LogViewer\LogPanelViewModel.cs" />
     <Compile Include="Modules\LogViewer\LogView.xaml.cs">
@@ -204,7 +211,7 @@
       <DependentUpon>LogViewerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\LogViewer\LogViewerModule.cs" />
-    <Compile Include="Modules\LogViewer\NodeInstanceLogConnection.cs" />
+    <Compile Include="Modules\LogViewer\MongoDbLogConnection.cs" />
     <Compile Include="Modules\LogViewer\ThreadLogViewModel.cs" />
     <Compile Include="Modules\LogViewer\TreeNodeItem.cs" />
     <Compile Include="Modules\LogViewer\TreeNodeItemExtensions.cs" />
@@ -258,6 +265,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NWheels.Stacks.MongoDb\NWheels.Stacks.MongoDb.csproj">
+      <Project>{4209cd2a-da3d-4806-939f-9454fcd475d3}</Project>
+      <Name>NWheels.Stacks.MongoDb</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NWheels.Testing\NWheels.Testing.csproj">
       <Project>{CD358C0A-E2B8-43E1-8F3E-618E56EFFE0F}</Project>
       <Name>NWheels.Testing</Name>

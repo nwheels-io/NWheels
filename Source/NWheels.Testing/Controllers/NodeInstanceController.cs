@@ -29,6 +29,15 @@ namespace NWheels.Testing.Controllers
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override IEnumerable<ILogConnection> CreateLogConnections()
+        {
+            return new ILogConnection[] {
+                new NodeInstanceLogConnection(this),     
+            };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override string DisplayName
         {
             get { return string.Format("Instance {0}", _instanceId); }

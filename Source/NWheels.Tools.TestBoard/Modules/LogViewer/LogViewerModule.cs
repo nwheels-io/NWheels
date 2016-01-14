@@ -14,8 +14,8 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
     [Export(typeof(IModule))]
     public class LogViewerModule : ModuleBase
     {
-        //[Export]
-        //public static MenuItemDefinition ViewLogMenuItem =
-        //    new CommandMenuItemDefinition<ViewThreadLogsCommandDefinition>(MainModule.ViewMenuGroup, 0);
+        [Export]
+        public static MenuItemDefinition ViewLogMenuItem =
+            new CommandMenuItemDefinition<ViewMongoDbThreadLogsCommandDefinition>(MainModule.ViewMenuGroup, 0);
     }
 }

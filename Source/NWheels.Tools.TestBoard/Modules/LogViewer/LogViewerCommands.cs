@@ -12,13 +12,14 @@ using Gemini.Framework.Services;
 using Gemini.Framework.Threading;
 using NWheels.Tools.TestBoard.Modules.StartPage;
 using NWheels.Tools.TestBoard.Services;
+using NWheels.Testing.Controllers;
 
 namespace NWheels.Tools.TestBoard.Modules.LogViewer
 {
     #region ViewThreadLogs
 
     [CommandDefinition]
-    public class ViewThreadLogsCommandDefinition : CommandDefinition
+    public class ViewMongoDbThreadLogsCommandDefinition : CommandDefinition
     {
         public const string CommandName = "Log.ViewThreadLogs";
 
@@ -33,28 +34,28 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
 
         public override string Text
         {
-            get { return "Thread Logs"; }
+            get { return "Thread Logs from Mongo DB"; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override string ToolTip
         {
-            get { return "Open the Thread Logs window"; }
+            get { return "Open Thread Logs stored in Mongo databases"; }
         }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [CommandHandler]
-    public class ViewThreadLogsCommandHandler : CommandHandlerBase<ViewThreadLogsCommandDefinition>
+    public class ViewMongoDbThreadLogsCommandHandler : CommandHandlerBase<ViewMongoDbThreadLogsCommandDefinition>
     {
         private readonly IShell _shell;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ImportingConstructor]
-        public ViewThreadLogsCommandHandler(IShell shell)
+        public ViewMongoDbThreadLogsCommandHandler(IShell shell)
         {
             _shell = shell;
         }
@@ -71,6 +72,8 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
             }
             else
             {
+                var connection = new MongoDbLogConnection(new[] { "server=localhost;database=nwheels_log" });
+                _shell.OpenDocument(new LogViewerViewModel("from Mongo DB", new ILogConnection[] { connection }));
                 _shell.OpenDocument(IoC.Get<LogViewerViewModel>());
             }
 

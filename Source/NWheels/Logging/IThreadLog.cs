@@ -15,7 +15,6 @@ namespace NWheels.Logging
         long ElapsedThreadMilliseconds { get; }
         ulong UsedThreadCpuCycles { get; }
         ActivityLogNode RootActivity { get; }
-        bool ShouldBePersisted { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

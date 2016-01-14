@@ -28,6 +28,7 @@ namespace NWheels.Logging
         private string _formattedSingleLineText = null;
         private string _formattedFullDetailsText = null;
         private string _formattedNameValuePairsText = null;
+        private static string _s_commaSpaceSeparator = ", ";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -48,7 +49,7 @@ namespace NWheels.Logging
             var snapshot = new ThreadLogSnapshot.LogNodeSnapshot {
                 MessageId = _messageId,
                 MillisecondsTimestamp = _millisecondsTimestamp,
-                CpuCycles = _cpuCyclesTimestamp,
+                CpuCycles = (long)_cpuCyclesTimestamp,
                 Level = _level,
                 ContentTypes = _contentTypes,
                 NameValuePairs = new List<ThreadLogSnapshot.NameValuePairSnapshot>(capacity: pairs.Length),
@@ -287,7 +288,7 @@ namespace NWheels.Logging
         protected virtual string FormatSingleLineText()
         {
             var valuesInSingleLineText = string.Join(
-                ", ", 
+                _s_commaSpaceSeparator, 
                 this.NameValuePairs.Where(p => p.IsIncludedInSingleLineText()).Select(p => p.FormatLogString()));
 
             return MessageIdToText() + (string.IsNullOrEmpty(valuesInSingleLineText) ? string.Empty : ": " + valuesInSingleLineText);

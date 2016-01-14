@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NWheels.Logging;
 
-namespace NWheels.Tools.TestBoard.Modules.LogViewer
+namespace NWheels.Testing.Controllers
 {
     public interface ILogConnection : IDisposable
     {

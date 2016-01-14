@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Autofac;
-using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.Logging.Core;
-using NWheels.Testing.Controllers;
 
-namespace NWheels.Tools.TestBoard.Modules.LogViewer
+namespace NWheels.Testing.Controllers
 {
     internal class NodeInstanceLogConnection : ILogConnection
     {

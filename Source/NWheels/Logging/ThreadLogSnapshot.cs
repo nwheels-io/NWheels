@@ -57,9 +57,9 @@ namespace NWheels.Logging
             [DataMember]
             public IList<LogNodeSnapshot> SubNodes { get; set; }
             [DataMember(Order = 2, EmitDefaultValue = false, IsRequired = false)]
-            public ulong CpuCycles { get; set; }
+            public long CpuCycles { get; set; }
             [DataMember(Order = 2, EmitDefaultValue = false, IsRequired = false)]
-            public ulong CpuTime { get; set; }
+            public long CpuTime { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
