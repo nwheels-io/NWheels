@@ -118,7 +118,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
-            if ( MetaProperty.ClrType.IsEntityPartContract() )
+            if ( MetaProperty.ClrType.IsEntityPartContract() && !MetaProperty.ContractPropertyInfo.CanWrite )
             {
                 using ( TT.CreateScope<TT.TValue>(_storageType) )
                 {
