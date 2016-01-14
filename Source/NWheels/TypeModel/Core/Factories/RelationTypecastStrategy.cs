@@ -118,7 +118,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnWritingInitializationConstructor(MethodWriterBase writer, Operand<IComponentContext> components, params IOperand[] args)
         {
-            if ( MetaProperty.ClrType.IsEntityPartContract() && !MetaProperty.ContractPropertyInfo.CanWrite )
+            if ( ShouldInstantiateAutomatically() )
             {
                 using ( TT.CreateScope<TT.TValue>(_storageType) )
                 {
@@ -131,7 +131,7 @@ namespace NWheels.TypeModel.Core.Factories
 
         protected override void OnWritingDeserializedCallback(MethodWriterBase writer)
         {
-            if ( MetaProperty.ClrType.IsEntityPartContract() )
+            if ( ShouldInstantiateAutomatically() )
             {
                 using ( TT.CreateScope<TT.TValue>(_storageType) )
                 {
@@ -168,5 +168,12 @@ namespace NWheels.TypeModel.Core.Factories
         }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        private bool ShouldInstantiateAutomatically()
+        {
+            return MetaProperty.ClrType.IsEntityPartContract() && !MetaProperty.ContractPropertyInfo.CanWrite;
+        }
     }
 }
