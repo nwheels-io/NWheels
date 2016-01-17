@@ -465,7 +465,7 @@ namespace NWheels.UI.Toolbox
                     break;
                 case FormFieldType.InlineGrid:
                     widgetClosedType = typeof(Crud<>).MakeGenericType(nestedMetaType.ContractType);
-                    widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName + "Crud", parent, DataGridMode.Inline);
+                    widgetInstance = (WidgetUidlNode)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName + "Crud", parent, MetaProperty);
                     break;
                 case FormFieldType.InlineForm:
                     widgetInstance = UidlUtility.CreateFormOrTypeSelector(nestedMetaType, "Nested" + this.PropertyName + "Form", parent, isInline: true);

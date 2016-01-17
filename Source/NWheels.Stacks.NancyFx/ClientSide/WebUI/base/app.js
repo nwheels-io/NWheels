@@ -995,14 +995,18 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 scope.selectedEntity = null;
                 scope.commandInProgress = true;
                 
-                if (scope.uidl.mode !== 'Inline') {
+                if (scope.uidl.mode !== 'Inline' || scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
                     scope.resultSet = null;
                     var query = scope.entityService.newQueryBuilder(scope.uidl.entityName);
                     
                     if (scope.uidl.entityTypeFilter) {
                         query.ofType(scope.uidl.entityTypeFilter);
                     }
-                    
+
+                    if (scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
+                        query.where(scope.uidl.inverseNavigationProperty, scope.parentEntityId, 'eq');
+                    }
+
                     var preparedRequest = {
                         query: query,
                         data: { }
@@ -1090,6 +1094,11 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             scope.newEntityCreated = function(newObj) {
                 scope.model.entity = newObj;
                 scope.model.isNew = true;
+                
+                if (scope.uidl.mode === 'Inline' && scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
+                    newObj[scope.uidl.inverseNavigationProperty] = scope.parentEntityId;
+                }
+                
                 if (scope.uidl.form) {
                     scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelSetter', scope.model.entity);
                 } else if (scope.uidl.formTypeSelector) {
@@ -1106,7 +1115,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                     return;
                 }
 
-                if (scope.uidl.mode !== 'Inline') {
+                if (scope.uidl.mode !== 'Inline' || scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
                     scope.entityService.deleteEntity(entity).then(
                         function(result) {
                             scope.queryEntities();
@@ -1131,7 +1140,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             scope.saveChanges = function (entity) {
                 //scope.$broadcast(':global:FormValidating', { isValud: true });
 
-                if (scope.uidl.mode !== 'Inline') {
+                if (scope.uidl.mode !== 'Inline' || scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
                     scope.entityService.storeEntity(entity).then(
                         function() {
                             scope.$emit(scope.uidl.qualifiedName + ':StoreEntityCompleted');
@@ -1178,11 +1187,17 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
 
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function (event, data) {
                 scope.commandInProgress = false;
-                scope.resetCrudState();
-                scope.resultSet = data;
-                scope.selectedEntity = null;
-                scope.requestAuthorization();
-                scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
+
+                if (scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
+                    scope.parentEntityId = data['$id'];
+                    scope.refresh();
+                } else {
+                    scope.resetCrudState();
+                    scope.resultSet = data;
+                    scope.selectedEntity = null;
+                    scope.requestAuthorization();
+                    scope.$broadcast(scope.uidl.qualifiedName + ':Grid:DataReceived', scope.resultSet);
+                }
             });
 
             scope.$on(scope.uidl.qualifiedName + ':Save:Executing', function (event) {
@@ -1326,7 +1341,11 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                     Enumerable.From(scope.uidl.fields)
                         .Where("$.fieldType=='InlineGrid' || $.fieldType=='InlineForm' || $.fieldType=='LookupMany'")
                         .ForEach(function (field) {
-                            scope.$broadcast(field.nestedWidget.qualifiedName + ':ModelSetter', data[field.propertyName]);
+                            if (field.nestedWidget.widgetType === 'Crud' && field.nestedWidget.inlineStorageStyle === 'InverseForeignKey') {
+                                scope.$broadcast(field.nestedWidget.qualifiedName + ':ModelSetter', data);
+                            } else {
+                                scope.$broadcast(field.nestedWidget.qualifiedName + ':ModelSetter', data[field.propertyName]);
+                            }
                         });
                 });
             });

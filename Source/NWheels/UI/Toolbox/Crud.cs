@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Extensions;
+using NWheels.TypeModel;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 
@@ -35,6 +36,21 @@ namespace NWheels.UI.Toolbox
             this.EntityCommands = new List<UidlCommand>();
 
             CreateForm();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Crud(string idName, ControlledUidlNode parent, IPropertyMetadata parentEntityNavigation)
+            : this(idName, parent, DataGridMode.Inline)
+        {
+            if ( parentEntityNavigation.RelationalMapping != null &&
+                 parentEntityNavigation.RelationalMapping.StorageStyle == PropertyStorageStyle.InverseForeignKey &&
+                 parentEntityNavigation.Relation != null &&
+                 parentEntityNavigation.Relation.InverseProperty != null )
+            {
+                this.InlineStorageStyle = parentEntityNavigation.RelationalMapping.StorageStyle;
+                this.InverseNavigationProperty = parentEntityNavigation.Relation.InverseProperty.Name;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -71,6 +87,10 @@ namespace NWheels.UI.Toolbox
         public string EntityTypeFilter { get; set; }
         [DataMember]
         public DataGridMode Mode { get; set; }
+        [DataMember]
+        public PropertyStorageStyle? InlineStorageStyle { get; set; }
+        [DataMember]
+        public string InverseNavigationProperty { get; set; }
         [DataMember]
         public DataGrid<TEntity> Grid { get; set; }
         [DataMember, ManuallyAssigned]
