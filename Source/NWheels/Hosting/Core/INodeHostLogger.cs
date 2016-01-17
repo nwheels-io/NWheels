@@ -7,7 +7,12 @@ namespace NWheels.Hosting.Core
     public interface INodeHostLogger : IApplicationEventLogger
     {
         [LogThread(ThreadTaskType.StartUp)]
-        ILogActivity NodeStartingUp();
+        ILogActivity NodeStartingUp(
+            [Detail] string applicationName,
+            [Detail(IncludeInSingleLineText = true)] string environmentType,
+            [Detail(IncludeInSingleLineText = true)] string environmentName,
+            [Detail] string nodeName,
+            [Detail] string instanceId);
 
         [LogThread(ThreadTaskType.StartUp)]
         ILogActivity NodeLoading();

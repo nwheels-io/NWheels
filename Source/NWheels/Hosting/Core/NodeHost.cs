@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -130,7 +131,12 @@ namespace NWheels.Hosting.Core
         {
             InitializeBeforeLoad();
 
-            using ( _logger.NodeStartingUp() )
+            using ( _logger.NodeStartingUp(
+                _bootConfig.ApplicationName, 
+                _bootConfig.EnvironmentType,
+                _bootConfig.EnvironmentName,
+                _bootConfig.NodeName,
+                _bootConfig.InstanceId) )
             {
                 Load();
                 Activate();

@@ -13,34 +13,34 @@ namespace NWheels.Authorization.Core
 {
     public interface ISessionEventLogger : IApplicationEventLogger
     {
-        [LogError(Audit = true)]
+        [LogError(AuditLog = true)]
         SecurityException DuplicateSessionId(string sessionId);
 
-        [LogWarning(Audit = true)]
+        [LogWarning(AuditLog = true)]
         SecurityException SessionNotFound(string sessionId);
 
-        [LogVerbose(Audit = true)]
+        [LogVerbose(AuditLog = true)]
         void SessionOpened(string sessionId, IPrincipal user, IEndpoint endpoint);
 
-        [LogVerbose(Audit = true)]
+        [LogVerbose(AuditLog = true)]
         void SessionClosed(string sessionId, IPrincipal user, IEndpoint endpoint);
 
-        [LogVerbose(Audit = true)]
+        [LogVerbose(AuditLog = true)]
         void ThreadJoiningSession(string sessionId, IPrincipal user, IEndpoint endpoint);
 
-        [LogVerbose(Audit = true)]
+        [LogVerbose(AuditLog = true)]
         void ThreadLeavingSession(string sessionId, IPrincipal user, IEndpoint endpoint);
 
-        [LogVerbose(Audit = true)]
+        [LogVerbose(AuditLog = true)]
         void ThreadJoiningAnonymousSession();
 
-        [LogVerbose(Audit = true)]
+        [LogVerbose(AuditLog = true)]
         void ThreadJoiningSystemSession();
 
-        [LogVerbose(Audit = true)]
+        [LogVerbose(AuditLog = true)]
         void DroppingSession(string sessionId);
 
-        [LogVerbose(Audit = true)]
+        [LogVerbose(AuditLog = true)]
         void ClosingSession(string sessionId);
     }
 }

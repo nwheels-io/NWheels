@@ -257,20 +257,20 @@ namespace NWheels.Concurrency
 
         private bool InvokeDriver(int threadIndex, T[] batch)
         {
-            using ( var activity = _logger.InvokingDriver(_serviceName, threadIndex, batch.Length) )
-            {
+            //using ( var activity = _logger.InvokingDriver(_serviceName, threadIndex, batch.Length) )
+            //{
                 try
                 {
                     _driver(batch);
                     return true;
                 }
-                catch ( Exception e )
+                catch// ( Exception e )
                 {
-                    activity.Fail(e);
-                    _logger.DriverInvocationFailed(_serviceName, threadIndex, batch.Length, e);
+                    //activity.Fail(e);
+                    //_logger.DriverInvocationFailed(_serviceName, threadIndex, batch.Length, e);
                     return false;
                 }
-            }
+            //}
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -331,7 +331,7 @@ namespace NWheels.Concurrency
         [LogCritical]
         void ShuttleServiceHasFailedToStop(string serviceName, Exception error);
 
-        [LogActivity]
+        [LogActivity(ThreadLog = false, CollectStats = true)]
         ILogActivity InvokingDriver(string serviceName, int threadIndex, int itemsInBatch);
 
         [LogError]

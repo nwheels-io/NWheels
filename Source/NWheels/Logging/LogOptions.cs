@@ -15,6 +15,8 @@ namespace NWheels.Logging
         AuditLog = 0x04,
         CollectCount = 0x08,
         CollectStats = 0x10,
-        StoreContents = 0x20,
+        RetainDetails = 0x20,
+        RetainThreadLog = 0x40,
+        PublishStats = 0x100,
     }
 }
