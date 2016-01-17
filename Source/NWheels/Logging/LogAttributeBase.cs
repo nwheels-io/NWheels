@@ -21,11 +21,12 @@ namespace NWheels.Logging
 
         public bool MustFormatEarly { get; set; }
         public bool Audit { get; set; }
+        public ThreadTaskType TaskType { get; set; }
         public LogLevel Level { get; private set; }
         public bool IsActivity { get; private set; }
         public bool IsThread { get; private set; }
         public bool IsMethodCall { get; private set; }
-        public ThreadTaskType TaskType { get; protected set; }
+        public LogOptions Options { get; private set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
