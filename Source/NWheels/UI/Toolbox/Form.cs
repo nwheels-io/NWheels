@@ -532,11 +532,11 @@ namespace NWheels.UI.Toolbox
                 case FormFieldType.Label:
                     return FormFieldModifiers.ReadOnly | (MetaProperty.IsCalculated ? FormFieldModifiers.None : FormFieldModifiers.System);
                 case FormFieldType.Edit:
-                    if ( MetaProperty.ClrType == typeof(Boolean) )
+                    if ( MetaProperty.ClrType == typeof(Boolean) || MetaProperty.ClrType == typeof(Boolean?) )
                     {
                         return FormFieldModifiers.Checkbox;
                     }
-                    else if ( MetaProperty.ClrType == typeof(DateTime) )
+                    else if ( MetaProperty.ClrType == typeof(DateTime) || MetaProperty.ClrType == typeof(DateTime?) )
                     {
                         return FormFieldModifiers.DateTimePicker;
                     }
