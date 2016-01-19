@@ -225,11 +225,11 @@ namespace NWheels.UI.Uidl
 
         public enum AlterationType
         {
-            Copy,
-            InsertOne,
-            InsertMany,
-            RemoveOne,
-            RemoveMany
+            Copy = 10,
+            InsertOne = 20,
+            InsertMany = 30,
+            RemoveOne = 40,
+            RemoveMany = 50
         }
     }
 
