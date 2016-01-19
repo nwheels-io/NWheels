@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
+using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
@@ -20,15 +22,35 @@ namespace NWheels.Stacks.MongoDb
             internal int MaxInBulk { get; set; }
         }
 
-        private IFramework _framework;
-        private int _bulkSize;
+        private readonly IFramework _framework;
+        private readonly ITypeMetadataCache _metadataCache;
+        private readonly Hashtable _bulkSizeByQualifiedPropertyName;
+        private readonly object _bulkSizeSyncRoot;
         Dictionary<string, BulkInfo> _bulkInfoMap = new Dictionary<string, BulkInfo>();
 
-
-        public AutoIncrementIntegerIdGenerator(IFramework framework)
+        public AutoIncrementIntegerIdGenerator(IFramework framework, ITypeMetadataCache metadataCache)
         {
+            _metadataCache = metadataCache;
             _framework = framework;
-            _bulkSize = 50;
+            _bulkSizeByQualifiedPropertyName = new Hashtable();
+        }
+
+        //todo: test SetBulkSize...
+        public void SetBulkSize<TEntity>(int bulkSize)
+        {
+            var metaType = _metadataCache.GetTypeMetadata(typeof(TEntity));
+
+            if ( !metaType.IsEntity || metaType.EntityIdProperty == null )
+            {
+                throw new NotSupportedException("Id property does not exist in type: " + metaType.QualifiedName);
+            }
+
+            var qualifiedPropertyName = metaType.EntityIdProperty.ContractQualifiedName;
+
+            lock ( _bulkSizeSyncRoot )
+            {
+                _bulkSizeByQualifiedPropertyName[qualifiedPropertyName] = bulkSize;
+            }
         }
 
         public int GenerateValue(string qualifiedPropertyName)
@@ -49,17 +71,29 @@ namespace NWheels.Stacks.MongoDb
             {
                 AutoIncrementHandler handler = new AutoIncrementHandler();
                 handler.QualifiedPropertyName = qualifiedPropertyName;
-                handler.BulkSize = _bulkSize;
+                handler.BulkSize = GetBulkSize(qualifiedPropertyName);
                 db.InvokeGenericOperation(typeof(IAutoIncrementIdEntity), handler);
                 bulkInfo = new BulkInfo()
                 {
-                    LastGiven = handler.NewMaxInBulk - _bulkSize + 1,
+                    LastGiven = handler.NewMaxInBulk - handler.BulkSize + 1,
                     MaxInBulk = handler.NewMaxInBulk
                 };
                 _bulkInfoMap[qualifiedPropertyName] = bulkInfo;
                 return bulkInfo.LastGiven;
             }
 
+        }
+
+        private int GetBulkSize(string qualifiedPropertyName)
+        {
+            var value = _bulkSizeByQualifiedPropertyName[qualifiedPropertyName];
+
+            if ( value != null )
+            {
+                return (int)value;
+            }
+
+            return 1;
         }
 
         private class AutoIncrementHandler : IDataRepositoryCallback<IAutoIncrementIdEntity>

@@ -55,7 +55,7 @@ namespace NWheels.Testing.Entities.Impl
                 decorate().OnSuccess(w =>
                     backingField.AsOperand<int>().Assign(
                         Static.Func(ResolutionExtensions.Resolve<TestIntIdValueGenerator>, _componentsField)
-                        .Func<string, int>(x => x.GenerateValue, w.Const(_metaType.Name + "." + _targetProperty.Name))
+                        .Func<string, int>(x => x.GenerateValue, w.Const(_targetProperty.ContractQualifiedName))
                     )
                 );
             }
