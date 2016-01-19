@@ -42,7 +42,7 @@ namespace NWheels.Stacks.AspNet
         private readonly ISessionManager _sessionManager;
         private readonly Dictionary<string, TransactionScriptEntry> _transactionScriptByName;
         private readonly ConcurrentDictionary<string, ConcurrentQueue<IMessageObject>> _pendingPushMessagesBySessionId;
-        private readonly JsonSerializerSettings _jsonSettings;
+        private readonly JsonSerializerSettings _uidlJsonSettings;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -63,7 +63,7 @@ namespace NWheels.Stacks.AspNet
 
             _transactionScriptByName = new Dictionary<string, TransactionScriptEntry>(StringComparer.InvariantCultureIgnoreCase);
             _pendingPushMessagesBySessionId = new ConcurrentDictionary<string, ConcurrentQueue<IMessageObject>>();
-            _jsonSettings = CreateJsonSerializerSettings();
+            _uidlJsonSettings = CreateUidlJsonSettings();
 
             RegisterTransactionScripts(components);
         }
@@ -154,7 +154,11 @@ namespace NWheels.Stacks.AspNet
         [Route("uidl.json")]
         public IHttpActionResult GetUidl()
         {
-            return Json(_context.Uidl, _jsonSettings);
+            //_context.Uidl.MetaTypes = null;
+            //_context.Uidl.Locales = null;
+            //_context.Uidl.Applications[0].Screens = null;
+            //_context.Uidl.Applications[0].ScreenParts = null;
+            return Json(_context.Uidl, _uidlJsonSettings);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -636,11 +640,12 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static JsonSerializerSettings CreateJsonSerializerSettings()
+        private static JsonSerializerSettings CreateUidlJsonSettings()
         {
             var jsonSettings = new JsonSerializerSettings {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
                 DateFormatString = "yyyy-MM-dd HH:mm:ss",
+                DefaultValueHandling = DefaultValueHandling.Ignore
             };
 
             jsonSettings.Converters.Add(new StringEnumConverter());
@@ -664,7 +669,7 @@ namespace NWheels.Stacks.AspNet
             public override void BindCommandValues(UidlApplicationController controller, IMethodCallObject callObject)
             {
                 var json = controller.Request.Content.ReadAsStringAsync().Result;
-                JsonConvert.PopulateObject(json, callObject, CreateJsonSerializerSettings());
+                JsonConvert.PopulateObject(json, callObject, CreateUidlJsonSettings());
             }
 
             #endregion

@@ -1278,7 +1278,7 @@ HEAD, JS/CSS LINKS
                     fieldRules.maxlength = field.validation.maxLength;
                 }
                 validationRules[fieldElementId] = fieldRules;
-                if (field.modifiers.indexOf('Password') > -1 && field.modifiers.indexOf('Confirm') > -1) {
+                if (field.modifiers && field.modifiers.indexOf('Password') > -1 && field.modifiers.indexOf('Confirm') > -1) {
                     validationRules[fieldElementId + '__confirm'] = {
                         equalTo: '#' + fieldElementId
                     };
@@ -1340,7 +1340,7 @@ HEAD, JS/CSS LINKS
                 </label>
             </div>
             <!-- TEXT -->
-            <input ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='None'"
+            <input ng-if="uidl.fieldType==='Edit' && (uidl.modifiers==='None' || !uidl.modifiers)"
                    class="form-control m-b"
                    type="text"
                    ng-model="entity[uidl.propertyName]"
@@ -1443,7 +1443,7 @@ HEAD, JS/CSS LINKS
             <!-- LABEL -->
             <h3 ng-if="uidl.fieldType==='Label'" ng-bind="entity[uidl.propertyName]"></h3>
             <!-- TEXT -->
-            <input ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='None'"
+            <input ng-if="uidl.fieldType==='Edit' && (uidl.modifiers==='None' || !uidl.modifiers)"
                    class="form-control"
                    type="text"
                    placeholder="{{::translate(uidl.propertyName)}}"

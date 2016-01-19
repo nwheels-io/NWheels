@@ -962,7 +962,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
 
     m_controllerImplementations['Crud'] = {
         implement: function (scope) {
-            if (scope.uidl.formTypeSelector !== null && scope.uidl.formTypeSelector.selections.length === 1) {
+            if (scope.uidl.formTypeSelector && scope.uidl.formTypeSelector.selections.length === 1) {
                 scope.uidl.entityName = scope.uidl.formTypeSelector.selections[0].widget.entityName;
                 scope.uidl.form = scope.uidl.formTypeSelector.selections[0].widget;
                 scope.uidl.formTypeSelector = null;
@@ -1819,7 +1819,7 @@ function ($timeout, $rootScope, uidlService, entityService) {
             $scope.uniqueFieldId = $scope.parentUidl.elementName + '_' + $scope.uidl.propertyName;
             $scope.translate = $scope.uidlService.translate;
             $scope.hasUidlModifier = function (modifier) {
-                return ($scope.uidl.modifiers.indexOf(modifier) > -1);
+                return ($scope.uidl.modifiers && $scope.uidl.modifiers.indexOf(modifier) > -1);
             };
             
             if ($scope.parentUidl.usePascalCase === false) {

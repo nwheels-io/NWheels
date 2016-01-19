@@ -1,0 +1,9 @@
+ORIGINAL                1728789
+Default Values Omitted  1262527    -466262  (26%)
+MetaTypes NULL          1036929    -225598  (13%)
+Locales NULL            1021086     -15843  (0.9%)
+Screens NULL             960151     -60935  (3%)
+Screen Parts NULL         13993    -946158  (55%)
+
+
+316369 = 18%
