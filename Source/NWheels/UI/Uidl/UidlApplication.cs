@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
+using Newtonsoft.Json;
 using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Endpoints.Core;
@@ -54,7 +55,7 @@ namespace NWheels.UI.Uidl
         public string Version { get; set; }
         [DataMember]
         public List<UidlScreen> Screens { get; set; }
-        [DataMember]
+        [DataMember, JsonIgnore]
         public List<UidlScreenPart> ScreenParts { get; set; }
         [DataMember]
         public Dictionary<string, UidlUserAlert> UserAlerts { get; set; }

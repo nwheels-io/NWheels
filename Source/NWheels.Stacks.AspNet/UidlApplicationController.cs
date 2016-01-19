@@ -151,14 +151,41 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("uidl.json")]
-        public IHttpActionResult GetUidl()
+        [Route("uidl.json/{elementType?}/{elementName?}")]
+        public IHttpActionResult GetUidl(string elementType = null, string elementName = null)
         {
+            if ( string.IsNullOrEmpty(elementType) )
+            {
+                return Json(_context.Uidl, _uidlJsonSettings);
+            }
+
+            object element;
+
+            switch ( elementType.ToUpper() )
+            {
+                case "SCREEN":
+                    element = _context.Uidl.Applications[0].Screens.FirstOrDefault(s => s.ElementName.EqualsIgnoreCase(elementName));
+                    break;
+                case "SCREENPART":
+                    element = _context.Uidl.Applications[0].ScreenParts.FirstOrDefault(s => s.ElementName.EqualsIgnoreCase(elementName));
+                    break;
+                default:
+                    element = null;
+                    break;
+            }
+
+            if ( element != null )
+            {
+                return Json(element, _uidlJsonSettings);
+            }
+
+            return StatusCode(HttpStatusCode.NotFound);
+
             //_context.Uidl.MetaTypes = null;
             //_context.Uidl.Locales = null;
             //_context.Uidl.Applications[0].Screens = null;
             //_context.Uidl.Applications[0].ScreenParts = null;
-            return Json(_context.Uidl, _uidlJsonSettings);
+            //return Json(_context.Uidl, _uidlJsonSettings);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

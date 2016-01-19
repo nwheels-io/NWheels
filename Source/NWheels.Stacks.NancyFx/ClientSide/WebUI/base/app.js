@@ -229,11 +229,33 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             m_index.screens[m_app.screens[i].qualifiedName] = m_app.screens[i];
         }
 
-        for (var i = 0; i < m_app.screenParts.length; i++) {
-            m_index.screenParts[m_app.screenParts[i].qualifiedName] = m_app.screenParts[i];
+        if (m_app.screenParts) {
+            for (var i = 0; i < m_app.screenParts.length; i++) {
+                m_index.screenParts[m_app.screenParts[i].qualifiedName] = m_app.screenParts[i];
+            }
         }
 
         m_currentScreen = m_index.screens[m_app.initialScreenQualifiedName];
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function beginGetScreenPartUidl(qualifiedName) {
+        var elementName = qualifiedName.replace(':','-').replace('<', '').replace('>', '');
+        var uidl = m_index.screenParts[qualifiedName];
+        
+        if (uidl) {
+            return $q.when(uidl);
+        }
+        
+        return $http.get('uidl.json/ScreenPart/' + encodeURIComponent(elementName), { cache: true }).then(
+            function (response) {
+                return response.data;
+            },
+            function (error) {
+                return $q.reject(error);
+            }
+        );
     }
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -501,10 +523,11 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                     });
                     break;
                 case 'ScreenPart':
-                    var screenPart = m_index.screenParts[behavior.targetQualifiedName];
-                    $rootScope.$broadcast(behavior.targetContainerQualifiedName + ':NavReq', {
-                        screenPart: screenPart,
-                        input: input
+                    beginGetScreenPartUidl(behavior.targetQualifiedName).then(function(screenPart) {
+                        $rootScope.$broadcast(behavior.targetContainerQualifiedName + ':NavReq', {
+                            screenPart: screenPart,
+                            input: input
+                        });
                     });
                     break;
             }
@@ -806,10 +829,12 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 });
             });
             if (scope.uidl.initalScreenPartQualifiedName) {
-                scope.currentScreenPart = m_index.screenParts[scope.uidl.initalScreenPartQualifiedName];
-                $timeout(function() {
-                    scope.$broadcast(scope.uidl.initalScreenPartQualifiedName + ':NavigatedHere');
-                    $rootScope.$broadcast(scope.uidl.qualifiedName + ':ScreenPartLoaded', scope.currentScreenPart);
+                beginGetScreenPartUidl(scope.uidl.initalScreenPartQualifiedName).then(function(screenPart) {
+                    scope.currentScreenPart = screenPart;
+                    $timeout(function() {
+                        scope.$broadcast(scope.uidl.initalScreenPartQualifiedName + ':NavigatedHere');
+                        $rootScope.$broadcast(scope.uidl.qualifiedName + ':ScreenPartLoaded', scope.currentScreenPart);
+                    });
                 });
             }
         },
