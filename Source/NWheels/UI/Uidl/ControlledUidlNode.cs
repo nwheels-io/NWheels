@@ -36,11 +36,7 @@ namespace NWheels.UI.Uidl
         public List<BehaviorUidlNode> Behaviors { get; set; }
         [DataMember]
         public List<DataBindingUidlNode> DataBindings { get; set; }
-        [DataMember]
-        public string ModelDataType { get; set; }
-        [DataMember]
-        public string ModelStateType { get; set; } 
-        
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlNotification Loaded { get; private set; }
@@ -65,5 +61,10 @@ namespace NWheels.UI.Uidl
 
             return "B" + index;
         }
+    
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal string ModelDataType { get; set; }
+        internal string ModelStateType { get; set; }
     }
 }

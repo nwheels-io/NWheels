@@ -628,14 +628,14 @@ namespace NWheels.UI.Toolbox
 
     public enum FormFieldType
     {
-        Default,
-        Label,
-        Edit,
-        ImageUpload,
-        Lookup,
-        LookupMany,
-        InlineGrid,
-        InlineForm,
+        Default = 0,
+        Label = 10,
+        Edit = 20,
+        ImageUpload = 30,
+        Lookup = 40,
+        LookupMany = 50,
+        InlineGrid = 60,
+        InlineForm = 70,
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -662,17 +662,17 @@ namespace NWheels.UI.Toolbox
 
     public enum FieldSize
     {
-        Small,
-        Medium,
-        Large
+        Small = 10,
+        Medium = 20,
+        Large = 30
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public enum FieldSpecialName
     {
-        None,
-        Id,
-        Type
+        None = 0,
+        Id = 10,
+        Type = 20
     }
 }

@@ -689,8 +689,8 @@ HEAD, JS/CSS LINKS
                     index: metaColumn.expression,
                     editable: false,
                     width: colWidthPx,
-                    search: metaColumn.isFilterSupported,
-                    sortable: metaColumn.isSortSupported,
+                    search: metaColumn.isFilterSupported===true,
+                    sortable: metaColumn.isSortSupported===true,
                     //sorttype: column.dataType,
                 };
                 switch (metaColumn.columnType) {

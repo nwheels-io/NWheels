@@ -146,9 +146,16 @@ namespace NWheels.UI.Toolbox
                 FieldSize size = FieldSize.Medium, 
                 string format = null,
                 GridColumnType? columnType = null)
-                : this(metaType, new[] { "$" + specialName.ToString().ToCamelCase() }, title, size, format, includeInTotal: false, columnType: columnType)
+                : this(
+                    metaType, 
+                    new[] { "$" + specialName.ToString().ToCamelCase() }, 
+                    specialName, 
+                    title, 
+                    size, 
+                    format, 
+                    includeInTotal: false, 
+                    columnType: columnType)
             {
-                this.SpecialName = specialName;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -161,7 +168,7 @@ namespace NWheels.UI.Toolbox
                 string format = null,
                 bool includeInTotal = false,
                 GridColumnType? columnType = null)
-                : this(metaType, ParsePropertyNavigation(propertyNavigation), title, size, format, includeInTotal, columnType)
+                : this(metaType, ParsePropertyNavigation(propertyNavigation), FieldSpecialName.None, title, size, format, includeInTotal, columnType)
             {
             }
 
@@ -169,7 +176,8 @@ namespace NWheels.UI.Toolbox
 
             internal GridColumn(
                 ITypeMetadata metaType, 
-                string[] navigations, 
+                string[] navigations,
+                FieldSpecialName specialName = FieldSpecialName.None,
                 string title = null, 
                 FieldSize size = FieldSize.Medium, 
                 string format = null,
@@ -178,6 +186,7 @@ namespace NWheels.UI.Toolbox
             {
                 this.Navigations = navigations;
                 this.Expression = string.Join(".", Navigations);
+                this.SpecialName = specialName;
 
                 this.Title = title ?? this.Navigations.Last();
                 this.Size = size;
@@ -193,7 +202,7 @@ namespace NWheels.UI.Toolbox
                 this.MetaProperty = destinationMetaProperty;
                 this.ColumnType = columnType.GetValueOrDefault(GetGridColumnType(MetaProperty));
 
-                this.IsFilterSupported = !isManualJoinRequired;
+                this.IsFilterSupported = (specialName == FieldSpecialName.None && !isManualJoinRequired);
                 this.IsSortSupported = this.IsFilterSupported;
             }
 
@@ -237,6 +246,12 @@ namespace NWheels.UI.Toolbox
                 destinationMetaType = metaType;
                 isManualJoinRequired = false;
 
+                if ( this.SpecialName != FieldSpecialName.None )
+                {
+                    destinationMetaProperty = null;
+                    return;
+                }
+
                 for ( int i = 0; i < Navigations.Length - 1; i++ )
                 {
                     var navigationMetaProperty = destinationMetaType.FindPropertyByNameIncludingDerivedTypes(Navigations[i]);
@@ -271,6 +286,11 @@ namespace NWheels.UI.Toolbox
 
             internal static GridColumnType GetGridColumnType(IPropertyMetadata metaProperty)
             {
+                if ( metaProperty == null )
+                {
+                    return GridColumnType.Text;
+                }
+
                 if ( metaProperty.Kind == PropertyKind.Relation || metaProperty.Relation != null )
                 {
                     return GridColumnType.Key;
@@ -364,6 +384,14 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public DataGrid<TDataRow> ColumnForType(string title = "Type", FieldSize size = FieldSize.Medium)
+        {
+            this.DisplayColumns.Add(new GridColumn(MetaType, FieldSpecialName.Type, title, size));
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public DataGrid<TDataRow> ColumnWithNavigationTo<TDestinationEntity>(
             Expression<Func<TDataRow, object>> sourcePropertySelector,
             Expression<Func<TDestinationEntity, object>> destinationPropertySelector,
@@ -376,7 +404,7 @@ namespace NWheels.UI.Toolbox
                 .Concat(GridColumn.ParsePropertyNavigation(destinationPropertySelector))
                 .ToArray();
 
-            this.DisplayColumns.Add(new GridColumn(MetaType, navigations, title, size, columnType: columnType));
+            this.DisplayColumns.Add(new GridColumn(MetaType, navigations, FieldSpecialName.None, title, size, columnType: columnType));
             return this;
         }
 
