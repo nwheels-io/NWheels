@@ -48,11 +48,13 @@ namespace NWheels.UI.Toolbox
 
         public Form<TEntity> Field(
             Expression<Func<TEntity, object>> propertySelector,
+            string label = null,
             FormFieldType type = FormFieldType.Default,
             FormFieldModifiers modifiers = FormFieldModifiers.None,
             Action<FormField> setup = null)
         {
             var field = new FormField(this, propertySelector.GetPropertyInfo().Name) {
+                Label = label,
                 FieldType = type,
                 Modifiers = modifiers
             };
@@ -308,6 +310,8 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string PropertyName { get; set; }
         [DataMember]
+        public string Label { get; set; }
+        [DataMember]
         public FormFieldType FieldType { get; set; }
         [DataMember]
         public FormFieldModifiers Modifiers { get; set; }
@@ -354,6 +358,11 @@ namespace NWheels.UI.Toolbox
             this.MetaProperty = metaType.GetPropertyByName(this.PropertyName);
             this.Validation = this.MetaProperty.Validation;
             this.Semantic = (this.MetaProperty.SemanticType != null ? this.MetaProperty.SemanticType.WellKnownSemantic : WellKnownSemanticType.None);
+
+            if ( string.IsNullOrEmpty(this.Label) )
+            {
+                this.Label = GetDefaultFieldLabel(MetaProperty);
+            }
 
             if ( shouldSetDefaults )
             {
@@ -489,6 +498,10 @@ namespace NWheels.UI.Toolbox
                             ? FormFieldType.Edit 
                             : FormFieldType.Label);
                     }
+                    else if ( MetaProperty.Relation != null && MetaProperty.Relation.RelatedPartyType != null )
+                    {
+                        return (MetaProperty.IsCollection ? FormFieldType.LookupMany : FormFieldType.Lookup);
+                    }
                     else
                     {
                         return (MetaProperty.ClrType.IsEnum ? FormFieldType.Lookup : FormFieldType.Edit);
@@ -564,6 +577,11 @@ namespace NWheels.UI.Toolbox
         {
             int value = 0;
 
+            if ( MetaProperty == MetaProperty.DeclaringContract.EntityIdProperty )
+            {
+                value |= 0x2000;
+            }
+
             if ( Modifiers.HasFlag(FormFieldModifiers.System) )
             {
                 value |= 0x1000;
@@ -599,6 +617,20 @@ namespace NWheels.UI.Toolbox
             }
 
             return value;
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetDefaultFieldLabel(IPropertyMetadata metaProperty)
+        {
+            if ( metaProperty.Kind == PropertyKind.Scalar && metaProperty.Relation != null && metaProperty.Name.Length > 2 && metaProperty.Name.EndsWith("Id") )
+            {
+                return metaProperty.Name.TrimSuffix("Id");
+            }
+            else
+            {
+                return metaProperty.Name;
+            }
         }
     }
 

@@ -188,7 +188,6 @@ namespace NWheels.UI.Toolbox
                 this.Expression = string.Join(".", Navigations);
                 this.SpecialName = specialName;
 
-                this.Title = title ?? this.Navigations.Last();
                 this.Size = size;
                 this.Format = format;
                 this.IncludeInTotal = includeInTotal;
@@ -198,6 +197,7 @@ namespace NWheels.UI.Toolbox
                 bool isManualJoinRequired;
                 FindDeclaringMetaType(metaType, out destinationMetaType, out destinationMetaProperty, out isManualJoinRequired);
 
+                this.Title = title ?? (destinationMetaProperty != null ? FormField.GetDefaultFieldLabel(destinationMetaProperty) : this.Navigations.Last());
                 this.DeclaringTypeName = destinationMetaType.QualifiedName;
                 this.MetaProperty = destinationMetaProperty;
                 this.ColumnType = columnType.GetValueOrDefault(GetGridColumnType(MetaProperty));
@@ -521,21 +521,21 @@ namespace NWheels.UI.Toolbox
 
     public enum DataGridMode
     {
-        Standalone,
-        Inline,
-        LookupOne,
-        LookupMany
+        Standalone = 10,
+        Inline = 20,
+        LookupOne = 30,
+        LookupMany = 40
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public enum GridColumnType
     {
-        Text,
-        Number,
-        Enum,
-        Image,
-        Link,
-        Key
+        Text = 10,
+        Number = 20,
+        Enum = 30,
+        Image = 40,
+        Link = 50,
+        Key = 60
     }
 }

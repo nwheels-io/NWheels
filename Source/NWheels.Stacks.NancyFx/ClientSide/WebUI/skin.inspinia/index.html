@@ -844,8 +844,8 @@ HEAD, JS/CSS LINKS
                                 $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
                             }
                         },
-                        subGrid: $scope.uidl.enableDetailPane,
-                        subGridOptions: { expandOnLoad: $scope.uidl.detailPaneExpanded },
+                        subGrid: ($scope.uidl.enableDetailPane===true),
+                        subGridOptions: { expandOnLoad: ($scope.uidl.detailPaneExpanded===true) },
                         subGridRowExpanded: function(subgrid_id, row_id) {
                             var rowData = $scope.ResultSet[row_id - 1];
                             var element = $("#" + subgrid_id);
@@ -1175,7 +1175,7 @@ HEAD, JS/CSS LINKS
             <div ng-if="plainFields.length <= 6" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields">
                 <label class="control-label"
                        ng-class="{'col-lg-2':!uidl.isModalPopup, 'col-lg-4':uidl.isModalPopup}"
-                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.propertyName)}}</label>
+                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.label)}}</label>
                 <div ng-class="{'col-lg-3':!uidl.isModalPopup, 'col-lg-6':uidl.isModalPopup}">
                     <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
@@ -1184,14 +1184,14 @@ HEAD, JS/CSS LINKS
             <!-- PLAIN FIELDS TWO-COLUMN LAYOUT -->
             <div ng-if="plainFields.length > 6" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields | twoColumnRows">
                 <label class="col-lg-2 control-label"
-                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.propertyName)}}</label>
+                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.label)}}</label>
                 <div class="col-lg-3">
                     <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
                 <label ng-if="field['$nextCol']"
                        class="col-lg-2 control-label"
-                       for="{{::uidl.elementName + '_' + field['$nextCol'].propertyName}}">{{::translate(field['$nextCol'].propertyName)}}</label>
+                       for="{{::uidl.elementName + '_' + field['$nextCol'].propertyName}}">{{::translate(field['$nextCol'].label)}}</label>
                 <div ng-if="field['$nextCol']" class="col-lg-3">
                     <uidl-form-field parent-uidl="uidl" uidl="field['$nextCol']" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
@@ -1200,7 +1200,7 @@ HEAD, JS/CSS LINKS
             <!-- TABS -->
             <div ng-if="tabSetFields.length" class="tabs-container" style="margin-top:20px;">
                 <ul class="nav nav-tabs">
-                    <li ng-class="{active: $index == tabSetIndex}" ng-repeat="field in tabSetFields"><a ng-click="selectTab($index)">{{translate(field.propertyName)}}</a></li>
+                    <li ng-class="{active: $index == tabSetIndex}" ng-repeat="field in tabSetFields"><a ng-click="selectTab($index)">{{translate(field.label)}}</a></li>
                 </ul>
                 <div class="tab-content">
                     <div ng-repeat="field in tabSetFields" ng-class="{'tab-pane': true, active: $index == tabSetIndex}" ng-show="$index == tabSetIndex">
@@ -1229,7 +1229,7 @@ HEAD, JS/CSS LINKS
             <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
             <div class="form-group" ng-repeat-start="field in plainFields" style="margin-bottom:0">
                 <label class="control-label col-sm-4"
-                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.propertyName, { upperCase: true })}}</label>
+                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.label, { upperCase: true })}}</label>
                 <div class="col-sm-8"><uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" /></div>
             </div>
             <div ng-repeat-end class="hr-line-dashed"></div>
@@ -1446,7 +1446,7 @@ HEAD, JS/CSS LINKS
             <input ng-if="uidl.fieldType==='Edit' && (uidl.modifiers==='None' || !uidl.modifiers)"
                    class="form-control"
                    type="text"
-                   placeholder="{{::translate(uidl.propertyName)}}"
+                   placeholder="{{::translate(uidl.label)}}"
                    ng-model="entity[uidl.propertyName]"
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}">
@@ -1454,7 +1454,7 @@ HEAD, JS/CSS LINKS
             <input ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password')"
                    class="form-control"
                    type="password"
-                   placeholder="{{::translate(uidl.propertyName)}}"
+                   placeholder="{{::translate(uidl.label)}}"
                    ng-model="entity[uidl.propertyName]"
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}">
@@ -1473,7 +1473,7 @@ HEAD, JS/CSS LINKS
                     ng-model="entity[lookupForeignKeyProperty]"
                     id="{{::uniqueFieldId}}"
                     name="{{::uniqueFieldId}}">
-                <option value="">- {{::translate(uidl.propertyName)}} -</option>
+                <option value="">- {{::translate(uidl.label)}} -</option>
             </select>
             <!-- TYPEAHEAD -->
             <input ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('TypeAhead')"
