@@ -74,7 +74,7 @@ function ($http, $q, $interval, $timeout, $rootScope) {
     //-----------------------------------------------------------------------------------------------------------------
 
     function receiveMessages() {
-        $http.post('takeMessages').then(
+        $http.post('app/takeMessages').then(
             function (response) {
                 for (var i = 0 ; i < response.data.length ; i++) {
                     var message = response.data[i];
@@ -248,7 +248,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             return $q.when(uidl);
         }
         
-        return $http.get('uidl.json/ScreenPart/' + encodeURIComponent(elementName), { cache: true }).then(
+        return $http.get('app/uidl.json/ScreenPart/' + encodeURIComponent(elementName), { cache: true }).then(
             function (response) {
                 return response.data;
             },
@@ -444,7 +444,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
     //-----------------------------------------------------------------------------------------------------------------
 
     function loadTemplateById(templateId) {
-        var fullTemplateId = 'uidl-element-template/' + templateId;
+        var fullTemplateId = 'app/uidl-element-template/' + templateId;
         var template = $templateCache.get(fullTemplateId);
 
         if (template) {
@@ -582,7 +582,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 requestData[behavior.parameterNames[i]] = parameterValue;
             }
             var requestPath = 
-                'api' + 
+                'app/api' + 
                 '/' + behavior.callType +
                 '/' + behavior.callResultType +
                 (behavior.callResultType==='EntityQuery' || behavior.callResultType==='EntityQueryExport' ? '/' + behavior.queryEntityName : '') +
@@ -768,7 +768,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 model: scope.model
             };
             var contentId = Enumerable.Return(context).Select('ctx=>ctx.' + behavior.contentIdExpression).Single();
-            $rootScope.beginBrowserDownload('downloadContent/' + contentId);
+            $rootScope.beginBrowserDownload('app/downloadContent/' + contentId);
         },
     };
 
@@ -1618,7 +1618,7 @@ function ($http, $scope, $rootScope, uidlService, entityService, commandService)
 
     $scope.pageTitle = 'LOADING . . .';
 
-    $http.get('uidl.json').then(function (httpResult) {
+    $http.get('app/uidl.json').then(function (httpResult) {
         uidlService.setDocument(httpResult.data);
 
 		$rootScope.app = uidlService.getApp();
@@ -1636,7 +1636,7 @@ function ($http, $scope, $rootScope, uidlService, entityService, commandService)
 		$scope.pageTitle = $scope.translate($scope.app.text) + ' - ' + $scope.translate($scope.currentScreen.text);
 
         if ($scope.uidl.isUserAuthenticated===true) {
-            $http.get('appState/restore').then(
+            $http.get('app/stateRestore').then(
                 function(response) {
                     $scope.model.State = response.data;
                     $scope.$emit($scope.uidl.qualifiedName + ':UserAlreadyAuthenticated');
@@ -1754,7 +1754,7 @@ function (uidlService, entityService, commandService, $timeout, $http, $compile,
         link: function (scope, elem, attrs) {
             scope.uniqueWidgetId = 'uidlWidget' + uniqueWidgetId++;
         },
-        template: '<ng-include src="\'uidl-element-template/\' + uidl.templateName"></ng-include>',
+        template: '<ng-include src="\'app/uidl-element-template/\' + uidl.templateName"></ng-include>',
         controller: function ($scope) {
             $scope.$timeout = $timeout;
             $scope.$http = $http;
@@ -1812,7 +1812,7 @@ theApp.directive('uidlGridField', ['uidlService', 'entityService', function (uid
         replace: true,
         link: function (scope, elem, attrs) {
         },
-        templateUrl: 'uidl-element-template/GridField',
+        templateUrl: 'app/uidl-element-template/GridField',
         controller: function ($scope) {
         }
     };
@@ -1834,7 +1834,7 @@ function ($timeout, $rootScope, uidlService, entityService) {
         link: function (scope, elem, attrs) {
         },
         templateUrl: function(elem, attrs) {
-            return 'uidl-element-template/' + (attrs.templateName || 'FormField');
+            return 'app/uidl-element-template/' + (attrs.templateName || 'FormField');
         },
         //templateUrl: 'uidl-element-template/' + parentUidl.fieldsTemplateName, 
         //template: '<ng-include src="\'uidl-element-template/\' + parentUidl.fieldsTemplateName"></ng-include>',
@@ -1954,7 +1954,7 @@ function ($timeout, $rootScope, uidlService, entityService) {
         link: function (scope, elem, attrs) {
         },
         templateUrl: function(elem, attrs) {
-            return 'uidl-element-template/' + (attrs.templateName || 'EllipsisLookupSearchModal');
+            return 'app/uidl-element-template/' + (attrs.templateName || 'EllipsisLookupSearchModal');
         },
         controller: function ($scope) {
             $scope.invokeInitFunc = function() {
@@ -2048,7 +2048,7 @@ theApp.directive('uidlReportLookup', ['entityService', function(entityService) {
 		scope: {
 			entityMetaType: '='
 		},
-		templateUrl: 'uidl-element-template-report-lookup',
+		templateUrl: 'app/uidl-element-template-report-lookup',
 		controller: function($scope) {
 			if ($scope.entityMetaType == null)
 				return;

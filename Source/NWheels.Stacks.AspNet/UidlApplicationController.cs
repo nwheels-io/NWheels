@@ -87,7 +87,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("Application.js")]
+        [Route("app/Application.js")]
         public IHttpActionResult GetApplicationJavaScript()
         {
             var filePath = HttpContext.Current.Server.MapPath("~/UI/Web/Scripts/" + _context.Application.IdName + ".js");
@@ -109,7 +109,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("skin/{*path}")]
+        [Route("app/skin/{*path}")]
         public HttpResponseMessage GetSkinStaticContent(string path)
         {
             var filePath = Path.Combine(_context.ContentRootPath, _context.SkinSubFolderName, path.Replace("/", "\\"));
@@ -119,7 +119,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("base/{*path}")]
+        [Route("app/base/{*path}")]
         public HttpResponseMessage GetBaseStaticContent(string path)
         {
             var filePath = Path.Combine(_context.ContentRootPath, _context.BaseSubFolderName, path.Replace("/", "\\"));
@@ -129,7 +129,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("uidl-element-template/{templateName}")]
+        [Route("app/uidl-element-template/{templateName}")]
         public IHttpActionResult GetApplicationTemplate(string templateName)
         {
             var filePath = HttpContext.Current.Server.MapPath("~/UI/Web/Templates/" + templateName + ".html");
@@ -151,7 +151,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("uidl.json/{elementType?}/{elementName?}")]
+        [Route("app/uidl.json/{elementType?}/{elementName?}")]
         public IHttpActionResult GetUidl(string elementType = null, string elementName = null)
         {
             if ( string.IsNullOrEmpty(elementType) )
@@ -191,7 +191,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("appState/restore")]
+        [Route("app/stateRestore")]
         public IHttpActionResult RestoreAppViewState()
         {
             var viewState = _context.Application.CreateViewStateForCurrentUser(_components);
@@ -207,7 +207,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("api/oneWay/command/{target}/{contractName}/{operationName}")]
+        [Route("app/api/oneWay/command/{target}/{contractName}/{operationName}")]
         public IHttpActionResult ApiOneWayCommand(string target, string contractName, string operationName)
         {
             var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: false);
@@ -229,7 +229,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("api/requestReply/command/{target}/{contractName}/{operationName}")]
+        [Route("app/api/requestReply/command/{target}/{contractName}/{operationName}")]
         public IHttpActionResult ApiRequestReplyCommand(string target, string contractName, string operationName)
         {
             var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: true);
@@ -272,7 +272,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("api/requestReplyAsync/command/{target}/{contractName}/{operationName}")]
+        [Route("app/api/requestReplyAsync/command/{target}/{contractName}/{operationName}")]
         public IHttpActionResult ApiRequestReplyAsyncCommand(string target, string contractName, string operationName)
         {
             var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: false);
@@ -294,7 +294,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("api/requestReply/entityQuery/{entityName}/{target}/{contractName}/{operationName}")]
+        [Route("app/api/requestReply/entityQuery/{entityName}/{target}/{contractName}/{operationName}")]
         public IHttpActionResult ApiRequestReplyEntityQuery(string entityName, string target, string contractName, string operationName)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
@@ -348,7 +348,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("api/requestReply/entityQueryExport/{entityName}/{target}/{contractName}/{operationName}/{outputFormat}")]
+        [Route("app/api/requestReply/entityQueryExport/{entityName}/{target}/{contractName}/{operationName}/{outputFormat}")]
         public IHttpActionResult ApiRequestReplyEntityQueryExport(string entityName, string target, string contractName, string operationName, string outputFormat)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
@@ -419,7 +419,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("downloadContent/{contentId}")]
+        [Route("app/downloadContent/{contentId}")]
         public IHttpActionResult DownloadContent(string contentId)
         {
             var document = HttpContext.Current.Session[contentId] as FormattedDocument;
@@ -444,7 +444,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("takeMessages")]
+        [Route("app/takeMessages")]
         public IHttpActionResult TakePendingPushMessages()
         {
             var results = new List<object>();
@@ -469,7 +469,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("entity/checkAuth/{entityName}")]
+        [Route("app/entity/checkAuth/{entityName}")]
         public IHttpActionResult CheckEntityAuthorization(string entityName)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
@@ -484,7 +484,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("entity/new/{entityName}")]
+        [Route("app/entity/new/{entityName}")]
         public IHttpActionResult NewEntity(string entityName)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
@@ -502,7 +502,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet, HttpPost]
-        [Route("entity/query/{entityName}")]
+        [Route("app/entity/query/{entityName}")]
         public IHttpActionResult QueryEntity(string entityName)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
@@ -523,7 +523,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet, HttpPost]
-        [Route("entity/queryImage/{entityName}/{entityId}/{imageTypeProperty}/{imageContentProperty}")]
+        [Route("app/entity/queryImage/{entityName}/{entityId}/{imageTypeProperty}/{imageContentProperty}")]
         public IHttpActionResult QueryImage(string entityName, string entityId, string imageTypeProperty, string imageContentProperty)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
@@ -551,7 +551,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("entity/store/{entityName}")]
+        [Route("app/entity/store/{entityName}")]
         public IHttpActionResult StoreEntity(string entityName)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
@@ -583,7 +583,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("entity/storeBatch")]
+        [Route("app/entity/storeBatch")]
         public IHttpActionResult StoreEntityBatch()
         {
             return StatusCode(HttpStatusCode.NotImplemented);
@@ -592,7 +592,7 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("entity/delete/{entityName}")]
+        [Route("app/entity/delete/{entityName}")]
         public IHttpActionResult DeleteEntity(string entityName, string entityId)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )

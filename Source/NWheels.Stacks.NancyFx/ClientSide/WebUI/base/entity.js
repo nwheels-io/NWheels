@@ -25,7 +25,7 @@ function ($http, $q, $timeout) {
     //-----------------------------------------------------------------------------------------------------------------
 
     function newDomainObject(typeName) {
-        return $http.get('entity/new/' + typeName).then(
+        return $http.get('app/entity/new/' + typeName).then(
             function (response) {
                 response.data['$state'] = 'NewModified';
                 return response.data;
@@ -39,7 +39,7 @@ function ($http, $q, $timeout) {
     //-----------------------------------------------------------------------------------------------------------------
 
     function checkAuthorization(typeName) {
-        return $http.get('entity/checkAuth/' + typeName).then(
+        return $http.get('app/entity/checkAuth/' + typeName).then(
             function (response) {
                 return {
                     create: response.data.CanCreate,
@@ -97,7 +97,7 @@ function ($http, $q, $timeout) {
         var entityState = entity['$state'];
 
         var url = 
-            'entity/store/' + entityName + 
+            'app/entity/store/' + entityName + 
             '?EntityId=' + encodeURIComponent(entityId) + 
             '&EntityState=' + encodeURIComponent(entityState);
 
@@ -118,7 +118,7 @@ function ($http, $q, $timeout) {
         var entityId = entity['$id'];
 
         var url =
-            'entity/delete/' + entityName +
+            'app/entity/delete/' + entityName +
             '?EntityId=' + encodeURIComponent(entityId);
 
         return $http.post(url).then(
@@ -307,7 +307,7 @@ function EntityQueryBuilder(entityName, commandUrl) {
         if (me._commandUrl) {
             url = me._commandUrl + me.getQueryString();
         } else {
-            url = 'entity/query/' + me._entityName + me.getQueryString();
+            url = 'app/entity/query/' + me._entityName + me.getQueryString();
         }
         return url;
     }
@@ -340,6 +340,16 @@ function EntityQueryBuilder(entityName, commandUrl) {
             });
         }
 
+        cloned._select = [];
+        for (var i = 0; i < me._select.length; i++) {
+            cloned._select.push(me._select[i]);
+        }
+
+        cloned._include = [];
+        for (var i = 0; i < me._include.length; i++) {
+            cloned._include.push(me._include[i]);
+        }
+ 
         return cloned;
     }
 };
