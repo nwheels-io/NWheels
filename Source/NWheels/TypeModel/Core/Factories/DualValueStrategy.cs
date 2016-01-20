@@ -61,7 +61,7 @@ namespace NWheels.TypeModel.Core.Factories
                     getter: p => p.Get(m => {
                         base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
 
-                        m.If(_stateField == DualValueStates.Storage).Then(() => {
+                        m.If(_stateField == DualValueStates.Storage || _stateField == DualValueStates.None).Then(() => {
                             OnWritingStorageToContractConversion(m, _contractField, _storageField);
                             _stateField.Assign(/*_stateField | */ DualValueStates.Contract);
                         });
