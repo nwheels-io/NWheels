@@ -2008,10 +2008,19 @@ theApp.directive('uidlUserAlertInline', ['uidlService', 'entityService', functio
             $scope.entityService = entityService;
             //console.log('uidlUserAlertInline::controller');
             uidlService.implementController($scope);
+
+            $scope.getDisplayText = function() {
+                if ($scope.alert.current.faultInfo && $scope.alert.current.faultInfo.faultCode && $scope.alert.current.faultInfo.faultCode.length > 0) {
+                    return $scope.translate($scope.alert.current.faultInfo.faultCode);
+                } else {
+                    return $scope.translate($scope.alert.current.text);
+                }
+            }
+
             $scope.answerAlert = function(choice) {
                 $scope.alert.current.answer(choice);
                 $scope.alert.current = null;
-            }
+            };
         },
     }
 }]);

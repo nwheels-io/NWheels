@@ -23,6 +23,13 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool HasFaultResult()
+        {
+            return (Result != null && Result.Success == false && !string.IsNullOrEmpty(Result.FaultCode));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IPrincipal Principal { get; private set; }
         public ISession Session { get; private set; }
         public bool IsSynchronous { get; private set; }

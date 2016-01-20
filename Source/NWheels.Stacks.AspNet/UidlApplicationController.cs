@@ -239,15 +239,34 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            _serviceBus.DispatchMessageOnCurrentThread(command);
-
-            if ( command.Result.NewSessionId != null )
+            try
             {
-                var sessionIdKey = _sessionManager.As<ICoreSessionManager>().SessionIdCookieName;
-                HttpContext.Current.Session[sessionIdKey] = command.Result.NewSessionId;
+                _serviceBus.DispatchMessageOnCurrentThread(command);
+                
+                if ( command.Result.NewSessionId != null )
+                {
+                    var sessionIdKey = _sessionManager.As<ICoreSessionManager>().SessionIdCookieName;
+                    HttpContext.Current.Session[sessionIdKey] = command.Result.NewSessionId;
+                }
+            }
+            catch ( Exception e )
+            {
+                _context.Logger.CommandFailed(this.Request.RequestUri.AbsolutePath, e);
+
+                if ( !command.HasFaultResult() )
+                {
+                    throw;
+                }
             }
 
-            return Json(command.Result.TakeSerializableSnapshot(), _context.EntityService.CreateSerializerSettings());
+            var responseJsonString = JsonConvert.SerializeObject(
+                command.Result.TakeSerializableSnapshot(), 
+                _context.EntityService.CreateSerializerSettings());
+
+            return ResponseMessage(new HttpResponseMessage() {
+                StatusCode = (command.HasFaultResult() ? HttpStatusCode.InternalServerError : HttpStatusCode.OK),
+                Content = new StringContent(responseJsonString, Encoding.UTF8, "application/json")
+            });
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -294,14 +313,35 @@ namespace NWheels.Stacks.AspNet
 
             using ( _context.EntityService.NewUnitOfWork(entityName) )
             {
-                _serviceBus.DispatchMessageOnCurrentThread(command);
+                try
+                {
+                    _serviceBus.DispatchMessageOnCurrentThread(command);
 
-                var query = (IQueryable)command.Result.Result;
-                var json = _context.EntityService.QueryEntityJson(entityName, query, options);
+                    var query = (IQueryable)command.Result.Result;
+                    var json = _context.EntityService.QueryEntityJson(entityName, query, options);
 
-                return ResponseMessage(new HttpResponseMessage() {
-                    Content = new StringContent(json, Encoding.UTF8, "application/json")
-                });
+                    return ResponseMessage(new HttpResponseMessage() {
+                        Content = new StringContent(json, Encoding.UTF8, "application/json")
+                    });
+                }
+                catch ( Exception e )
+                {
+                    _context.Logger.CommandFailed(this.Request.RequestUri.AbsolutePath, e);
+
+                    if ( command.HasFaultResult() )
+                    {
+                        var responseJsonString = JsonConvert.SerializeObject(
+                            command.Result.TakeSerializableSnapshot(),
+                            _context.EntityService.CreateSerializerSettings());
+
+                        return ResponseMessage(new HttpResponseMessage() {
+                            StatusCode = HttpStatusCode.InternalServerError,
+                            Content = new StringContent(responseJsonString, Encoding.UTF8, "application/json")
+                        });
+                    }
+
+                    throw;
+                }
             }
         }
 
@@ -327,30 +367,55 @@ namespace NWheels.Stacks.AspNet
 
             using ( _context.EntityService.NewUnitOfWork(entityName) )
             {
-                _serviceBus.DispatchMessageOnCurrentThread(queryCommand);
-                var query = (IQueryable)queryCommand.Result.Result;
-                var exportCommand = new DocumentFormatRequestMessage(
-                    _framework, 
-                    Session.Current, 
-                    isSynchronous: true, 
-                    entityService: _context.EntityService, 
-                    reportCriteria: null,
-                    reportQuery: query,
-                    reportQueryOptions: options,
-                    documentDesign: null,
-                    outputFormatIdName: outputFormat);
-
-                _serviceBus.DispatchMessageOnCurrentThread(exportCommand);
-                var download = exportCommand.Result as DocumentFormatReplyMessage;
-
-                if ( download != null )
+                DocumentFormatRequestMessage exportCommand = null;
+                
+                try
                 {
-                    HttpContext.Current.Session[exportCommand.MessageId.ToString("N")] = download.Document;
-                }
+                    _serviceBus.DispatchMessageOnCurrentThread(queryCommand);
+                    var query = (IQueryable)queryCommand.Result.Result;
+                    
+                    exportCommand = new DocumentFormatRequestMessage(
+                        _framework, 
+                        Session.Current, 
+                        isSynchronous: true, 
+                        entityService: _context.EntityService, 
+                        reportCriteria: null,
+                        reportQuery: query,
+                        reportQueryOptions: options,
+                        documentDesign: null,
+                        outputFormatIdName: outputFormat);
 
-                return Json(exportCommand.Result.TakeSerializableSnapshot(), _context.EntityService.CreateSerializerSettings());
+                    _serviceBus.DispatchMessageOnCurrentThread(exportCommand);
+                    var download = exportCommand.Result as DocumentFormatReplyMessage;
+
+                    if ( download != null )
+                    {
+                        HttpContext.Current.Session[exportCommand.MessageId.ToString("N")] = download.Document;
+                    }
+
+                    return Json(exportCommand.Result.TakeSerializableSnapshot(), _context.EntityService.CreateSerializerSettings());
+                }
+                catch ( Exception e )
+                {
+                    _context.Logger.CommandFailed(this.Request.RequestUri.AbsolutePath, e);
+
+                    if ( queryCommand.HasFaultResult() || (exportCommand != null && exportCommand.HasFaultResult()) )
+                    {
+                        var responseJsonString = JsonConvert.SerializeObject(
+                            (exportCommand ?? queryCommand).Result.TakeSerializableSnapshot(),
+                            _context.EntityService.CreateSerializerSettings());
+
+                        return ResponseMessage(new HttpResponseMessage() {
+                            StatusCode = HttpStatusCode.InternalServerError,
+                            Content = new StringContent(responseJsonString, Encoding.UTF8, "application/json")
+                        });
+                    }
+
+                    throw;
+                }
             }
         }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]

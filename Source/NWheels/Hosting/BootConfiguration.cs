@@ -19,7 +19,10 @@ namespace NWheels.Hosting
         public const string DefaultBootConfigFileName = "boot.config";
         public const string DefaultModuleConfigFileName = "module.config";
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private string _environmentInitLog = "";
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Validate()
@@ -66,6 +69,8 @@ namespace NWheels.Hosting
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void LoadEnvironmentConfig()
         {
             var envConfig = EnvironmentConfiguration.LoadFromFile(Path.Combine(LoadedFromDirectory, EnvironmentConfiguration.DefaultEnvironmentConfigFileName));
@@ -102,7 +107,7 @@ namespace NWheels.Hosting
             var text = new StringBuilder();
 
             text.AppendLine();
-            text.AppendFormat("MachineName   - {0}", Environment.MachineName);
+            text.AppendFormat("MachineName        - {0}", Environment.MachineName);
             text.AppendLine();
             text.AppendFormat("Application Name   - {0}", this.ApplicationName);
             text.AppendLine();
@@ -171,7 +176,6 @@ namespace NWheels.Hosting
 
         [DataMember(Order = 7, IsRequired = false, EmitDefaultValue = false)]
         public List<ConfigFile> ConfigFiles { get; set; }
-
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

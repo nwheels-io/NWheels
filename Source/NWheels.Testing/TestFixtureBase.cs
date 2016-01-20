@@ -10,7 +10,6 @@ namespace NWheels.Testing
     [TestFixture]
     public abstract class TestFixtureBase
     {
-
         [SetUp]
         public void MyBaseSetUp()
         {

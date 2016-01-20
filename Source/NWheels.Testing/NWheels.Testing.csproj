@@ -109,6 +109,7 @@
     <Compile Include="Processing\Messages\TestServiceBus.cs" />
     <Compile Include="SingleNodeSystemTestBase.cs" />
     <Compile Include="IntegrationTestWithNodeHosts.cs" />
+    <Compile Include="SystemTestConfiguration.cs" />
     <Compile Include="TestAgentComponent.cs" />
     <Compile Include="TestFixtureBase.cs" />
     <Compile Include="TestFixtureWithNodeHosts.cs" />

@@ -171,7 +171,7 @@ HEAD, JS/CSS LINKS
                    'fa-times-circle':alert.current.uidl.type==='Error'
                }"></i>
             <span>
-                {{translate(alert.current.uidl.text)}}
+                {{getDisplayText()}}
                 <span ng-if="alert.current.parameters.reason" class="moreInfo">
                     <br/>{{alert.current.parameters.reason}}
                 </span>

@@ -1,6 +1,4 @@
-﻿#if false
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -35,7 +33,16 @@ namespace NWheels.Hosting
             }
             else
             {
-                Environments.ForEach(ValidateEnvironment);
+                //Environments.ForEach(ValidateEnvironment);
+            }
+
+            if ( Nodes == null )
+            {
+                Nodes = new List<NodeConfig>();
+            }
+            else
+            {
+                //Nodes.ForEach(ValidateNode);
             }
         }
 
@@ -43,38 +50,18 @@ namespace NWheels.Hosting
 
         public string ToLogString()
         {
-            var text = new StringBuilder();
-
-            text.AppendFormat("Application Name   - {0}", this.ApplicationName);
-            text.AppendLine();
-
-            foreach ( var environment in this.Environments )
-            {
-                text.AppendFormat("+ Environment - {0} : type '{1}'", environment.Name, environment.Type);
-                NodeListToLogString(environment.Nodes, text);
-                text.AppendLine();
-            }
-
-            return text.ToString();
+            return ApplicationName;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void NodeListToLogString(List<BootConfiguration> nodeList, StringBuilder text)
-        {
-            foreach ( var node in nodeList )
-            {
-                text.AppendLine();
-                text.AppendFormat(node.ToLogString());
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [DataMember(Order = 1, Name = "Application", IsRequired = true)]
+        [DataMember(Order = 101, IsRequired = true)]
         public string ApplicationName { get; set; }
 
-        [DataMember(Order = 2, IsRequired = false, EmitDefaultValue = false)]
+        [DataMember(Order = 102, IsRequired = true)]
+        public List<NodeConfig> Nodes { get; set; }
+
+        [DataMember(Order = 103, IsRequired = true)]
         public List<EnvironmentConfig> Environments { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -98,39 +85,74 @@ namespace NWheels.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void ValidateEnvironment(EnvironmentConfig environment)
+        [DataContract(Namespace = "NWheels.Hosting", Name = "Environment")]
+        public class EnvironmentConfig
         {
-            if ( string.IsNullOrEmpty(environment.Name) )
-            {
-                throw new NodeHostConfigException("Each Environment must have Name specified.");
-            }
+            [DataMember(Order = 101, IsRequired = true)]
+            public string Name { get; set; }
 
-            if ( string.IsNullOrEmpty(environment.Type) )
-            {
-                throw new NodeHostConfigException("Each Environment must have Type specified.");
-            }
+            [DataMember(Order = 102, IsRequired = true)]
+            public string Type { get; set; }
 
-            if ( environment.Nodes == null )
-            {
-                environment.Nodes = new List<BootConfiguration>();
-            }
+            [DataMember(Order = 103, IsRequired = true)]
+            public List<MachineConfig> Machines { get; set; }
+
+            [DataMember(Order = 104, IsRequired = true)]
+            public List<EnvironmentNodeConstraint> Constraints { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        [DataContract(Namespace = "NWheels.Hosting", Name = "Environment")]
-        public class EnvironmentConfig
+        [DataContract(Namespace = "NWheels.Hosting", Name = "Node")]
+        public class NodeConfig
         {
-            [DataMember(Order = 1, IsRequired = false, EmitDefaultValue = false)]
+            [DataMember(Order = 101, IsRequired = true)]
             public string Name { get; set; }
 
-            [DataMember(Order = 2, IsRequired = false, EmitDefaultValue = false)]
-            public string Type { get; set; }
+            [DataMember(Order = 102, IsRequired = true)]
+            public BootConfiguration Boot { get; set; }
 
-            [DataMember(Order = 3, IsRequired = false, EmitDefaultValue = false)]
-            public List<BootConfiguration> Nodes { get; set; }
+            [DataMember(Order = 103, IsRequired = true)]
+            public List<string> MachineRoles { get; set; } // look for intersection with MachineConfig.Roles
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataContract(Namespace = "NWheels.Hosting", Name = "Machine")]
+        public class MachineConfig
+        {
+            [DataMember(Order = 1, IsRequired = true)]
+            public string DnsName { get; set; }
+
+            [DataMember(Order = 2, IsRequired = true)]
+            public string IPAddress { get; set; }
+
+            [DataMember(Order = 3, IsRequired = true)]
+            public List<string> Roles { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataContract(Namespace = "NWheels.Hosting", Name = "Constraint")]
+        public class EnvironmentNodeConstraint
+        {
+            [DataMember(Order = 101, IsRequired = true)]
+            public string NodeName { get; set; }
+
+            [DataMember(Order = 102, IsRequired = true)]
+            public int? InstanceCount { get; set; } // mutually exclusive with InstanceIds
+
+            [DataMember(Order = 103, IsRequired = true)]
+            public List<string> InstanceIds { get; set; } // mutually exclusive with InstanceCount
+
+            [DataMember(Order = 104, IsRequired = true)]
+            public int? StandbyCountPerActiveInstance { get; set; } // number of failover standby instances per active instance
+
+            [DataMember(Order = 106, IsRequired = true)]
+            public int? MaxActiveInstancesPerMachine { get; set; }
+
+            [DataMember(Order = 105, IsRequired = true)]
+            public int? MaxTotalInstancesPerMachine { get; set; }
         }
     }
 }
-
-#endif

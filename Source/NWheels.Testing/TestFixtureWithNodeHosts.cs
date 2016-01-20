@@ -37,6 +37,8 @@ namespace NWheels.Testing
         [SetUp]
         public virtual void BaseSetUp()
         {
+            InitializeTestDefaults();
+
             if ( ShouldAutoStartApplication )
             {
                 Thread.CurrentPrincipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
@@ -155,17 +157,8 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal protected virtual bool ShouldRebuildDatabase
-        {
-            get { return HasDatabase; }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        internal protected virtual bool ShouldAutoStartApplication
-        {
-            get { return true; }
-        }
+        internal protected bool ShouldRebuildDatabase { get; set; }
+        internal protected bool ShouldAutoStartApplication { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -190,6 +183,14 @@ namespace NWheels.Testing
 
             bootConfig.Validate();
             return bootConfig;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void InitializeTestDefaults()
+        {
+            ShouldAutoStartApplication = true;
+            ShouldRebuildDatabase = HasDatabase;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
