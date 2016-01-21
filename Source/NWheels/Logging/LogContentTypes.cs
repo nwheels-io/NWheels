@@ -13,6 +13,7 @@ namespace NWheels.Logging
         Exception = 0x02,
         DataEntity = 0x04,
         CommunicationMessage = 0x08,
-        PerformanceMeasurement = 0x10
+        PerformanceStats = 0x10,
+        ComponentInvocation = 0x20
     }
 }

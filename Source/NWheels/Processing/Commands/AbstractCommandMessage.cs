@@ -30,6 +30,10 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public abstract bool CheckAuthorization(out bool authenticationRequired);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IPrincipal Principal { get; private set; }
         public ISession Session { get; private set; }
         public bool IsSynchronous { get; private set; }

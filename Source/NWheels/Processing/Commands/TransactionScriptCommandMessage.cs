@@ -17,6 +17,13 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override bool CheckAuthorization(out bool authenticationRequired)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Type TransactionScriptType { get; private set; }
     }
 }

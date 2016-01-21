@@ -3,56 +3,189 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
+using System.Security.Claims;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
+using System.Threading;
+using Hapil;
+using Hapil.Operands;
+using Hapil.Writers;
+using NWheels.Authorization;
+using NWheels.Authorization.Core;
+using NWheels.Conventions.Core;
+using NWheels.Exceptions;
+using System.Security.Principal;
 
 namespace NWheels
 {
     public static class SecurityCheck
     {
-        public static void DemandAuthentication()
+        private static readonly System.Collections.Hashtable _s_claimValueByEntityAccessRuleContract = new System.Collections.Hashtable();
+        private static readonly object _s_claimValueWriterSyncRoot = new object();
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void RequireAuthentication()
         {
-            new UserIdentityClaimPermission().Demand();
+            RequireAuthentication(Thread.CurrentPrincipal);
         }
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void DemandUserRole(string userRole)
+        public static void RequireUserRole(object userRole)
         {
-            new ClaimsPermission(UserRoleClaim.UserRoleClaimTypeString, userRole).Demand();
+            RequireUserRole(Thread.CurrentPrincipal, userRole);
         }
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void DemandPermission(string permission)
+        public static void RequirePermission(object permission)
         {
-            new ClaimsPermission(OperationPermissionClaim.OperationPermissionClaimTypeString, permission).Demand();
+            RequirePermission(Thread.CurrentPrincipal, permission);
         }
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void DemandDataRule(string dataRule)
+        public static void RequireEntityAccessRule(Type entityAccessRuleType)
         {
-            new ClaimsPermission(EntityAccessRuleClaim.EntityAccessRuleClaimTypeString, dataRule).Demand();
+            RequireEntityAccessRule(Thread.CurrentPrincipal, entityAccessRuleType);
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void RequireClaim(IPrincipal principal, string claimType, object claimValue)
+        {
+            if ( principal is SystemPrincipal )
+            {
+                return;
+            }
+
+            var claimsPrincipal = principal as ClaimsPrincipal;
+
+            if ( claimsPrincipal == null )
+            {
+                throw new AccessDeniedException();
+            }
+
+            if ( !claimsPrincipal.HasClaim(claimType, claimValue.ToString()) )
+            {
+                throw new AccessDeniedException(claimType, claimValue.ToString());
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void RequireAuthentication(IPrincipal principal)
+        {
+            if ( principal == null || principal.Identity == null || !principal.Identity.IsAuthenticated )
+            {
+                throw new AccessDeniedException();
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void RequireUserRole(IPrincipal principal, object userRole)
+        {
+            if ( principal == null || !principal.IsInRole(userRole.ToString()) )
+            {
+                throw new AccessDeniedException();
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void RequirePermission(IPrincipal principal, object permission)
+        {
+            RequireClaim(principal, OperationPermissionClaim.OperationPermissionClaimTypeString, permission);
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void RequireEntityAccessRule(IPrincipal principal, Type entityAccessRuleType)
+        {
+            var claimValue = GetEntityAccessRuleClaimValue(entityAccessRuleType);
+            RequireClaim(principal, EntityAccessRuleClaim.EntityAccessRuleClaimTypeString, claimValue);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class AllowAnonymousAttribute : CodeAccessSecurityAttribute
+        private static string GetEntityAccessRuleClaimValue(Type entityAccessRuleType)
         {
-            public AllowAnonymousAttribute(SecurityAction action)
-                : base(action)
+            // ReSharper disable once InconsistentlySynchronizedField (Hashtable is safe for concurrent reads)
+            var existingValue = _s_claimValueByEntityAccessRuleContract[entityAccessRuleType]; 
+
+            if ( existingValue != null )
+            {
+                return (string)existingValue;
+            }
+
+            var claimValueAttribute = entityAccessRuleType.GetCustomAttribute<ClaimValueAttribute>();
+            var newValue = (claimValueAttribute != null ? claimValueAttribute.Value : entityAccessRuleType.FullName);
+
+            lock ( _s_claimValueWriterSyncRoot )
+            {
+                _s_claimValueByEntityAccessRuleContract[entityAccessRuleType] = newValue;
+            }
+
+            return newValue;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class AllowAnonymousAttribute : AccessSecurityAttributeBase
+        {
+            #region Overrides of AccessSecurityAttributeBase
+
+            public override void ValidateAccessOrThrow(ClaimsPrincipal principal)
             {
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            #region Overrides of SecurityAttribute
-
-            public override IPermission CreatePermission()
+            public override void WriteSecurityCheck(MethodWriterBase writer, IOperand<ClaimsPrincipal> principal, StaticStringsDecorator staticStrings)
             {
-                return new AnonymousAccessPermission();
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static void WriteRequireAuthenticationCheck(MethodWriterBase writer, IOperand<ClaimsPrincipal> principal)
+            {
+                Static.Void(RequireAuthentication, principal);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class RequireUserRoleAttribute : AccessSecurityAttributeBase
+        {
+            private readonly object _userRole;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public RequireUserRoleAttribute(object userRole)
+            {
+                _userRole = userRole;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of AccessSecurityAttributeBase
+
+            public override void ValidateAccessOrThrow(ClaimsPrincipal principal)
+            {
+                RequireUserRole(principal, _userRole);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void WriteSecurityCheck(MethodWriterBase writer, IOperand<ClaimsPrincipal> principal, StaticStringsDecorator staticStrings)
+            {
+                Static.Void(RequireUserRole, principal, staticStrings.GetStaticStringOperand(_userRole.ToString()));
             }
 
             #endregion
@@ -60,102 +193,66 @@ namespace NWheels
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class AuthenticationAttribute : CodeAccessSecurityAttribute
+        public class RequirePermissionAttribute : AccessSecurityAttributeBase
         {
-            public AuthenticationAttribute(SecurityAction action)
-                : base(action)
+            private readonly object _permission;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public RequirePermissionAttribute(object permission)
             {
+                _permission = permission;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            #region Overrides of SecurityAttribute
+            #region Overrides of AccessSecurityAttributeBase
 
-            public override IPermission CreatePermission()
+            public override void ValidateAccessOrThrow(ClaimsPrincipal principal)
             {
-                return new UserIdentityClaimPermission();
+                RequirePermission(principal, _permission);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void WriteSecurityCheck(MethodWriterBase writer, IOperand<ClaimsPrincipal> principal, StaticStringsDecorator staticStrings)
+            {
+                Static.Void(RequirePermission, principal, staticStrings.GetStaticStringOperand(_permission.ToString()));
             }
 
             #endregion
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public bool Must { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class UserRoleAttribute : CodeAccessSecurityAttribute
+        public class RequireEntityAccessRuleAttribute : AccessSecurityAttributeBase
         {
-            public UserRoleAttribute(SecurityAction action)
-                : base(action)
+            private readonly Type _ruleContractType;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public RequireEntityAccessRuleAttribute(Type ruleContractType)
             {
+                _ruleContractType = ruleContractType;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            #region Overrides of SecurityAttribute
+            #region Overrides of AccessSecurityAttributeBase
 
-            public override IPermission CreatePermission()
+            public override void ValidateAccessOrThrow(ClaimsPrincipal principal)
             {
-                return new ClaimsPermission(UserRoleClaim.UserRoleClaimTypeString, this.UserRole);
+                RequireEntityAccessRule(principal, _ruleContractType);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override void WriteSecurityCheck(MethodWriterBase writer, IOperand<ClaimsPrincipal> principal, StaticStringsDecorator staticStrings)
+            {
+                Static.Void(RequireEntityAccessRule, principal, writer.Const(_ruleContractType));
             }
 
             #endregion
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public string UserRole { get; set; }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class PermissionAttribute : CodeAccessSecurityAttribute
-        {
-            public PermissionAttribute(SecurityAction action)
-                : base(action)
-            {
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            #region Overrides of SecurityAttribute
-
-            public override IPermission CreatePermission()
-            {
-                return new ClaimsPermission(OperationPermissionClaim.OperationPermissionClaimTypeString, this.Permission);
-            }
-
-            #endregion
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public string Permission { get; set; }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class DataRuleAttribute : CodeAccessSecurityAttribute
-        {
-            public DataRuleAttribute(SecurityAction action)
-                : base(action)
-            {
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            #region Overrides of SecurityAttribute
-
-            public override IPermission CreatePermission()
-            {
-                return new ClaimsPermission(EntityAccessRuleClaim.EntityAccessRuleClaimTypeString, this.DataRule);
-            }
-
-            #endregion
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public string DataRule { get; set; }
         }
     }
 }

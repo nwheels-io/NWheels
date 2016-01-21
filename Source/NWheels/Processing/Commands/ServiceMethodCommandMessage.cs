@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Security.Principal;
+using System.Threading;
 using NWheels.Authorization;
 using NWheels.Extensions;
 using NWheels.Processing.Commands.Impl;
@@ -20,6 +21,14 @@ namespace NWheels.Processing.Commands
             : base(framework, session, synchronous)
         {
             _call = call;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override bool CheckAuthorization(out bool authenticationRequired)
+        {
+            authenticationRequired = true;
+            return Thread.CurrentPrincipal.Identity.IsAuthenticated;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

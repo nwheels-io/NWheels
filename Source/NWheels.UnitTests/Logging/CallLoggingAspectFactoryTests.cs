@@ -5,8 +5,10 @@ using System.Xml.Linq;
 using Hapil;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
+using NWheels.Hosting.Factories;
 using NWheels.Logging;
 using NWheels.Logging.Core;
+using NWheels.Logging.Factories;
 using NWheels.Testing;
 
 namespace NWheels.UnitTests.Logging
@@ -22,7 +24,7 @@ namespace NWheels.UnitTests.Logging
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
-            _factory = new CallLoggingAspectFactory(base.Module);
+            _factory = new ComponentAspectFactory(base.Module);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -254,7 +256,7 @@ namespace NWheels.UnitTests.Logging
                     string str4 = ((CallLoggingAspectFactoryTests.ITestComponent)this._target).ThisIsMyFunction(num, str);
                     LogNameValuePair<string> pair3 = new LogNameValuePair<string>
                     {
-                        Name = CallLoggingAspectFactory.CallOutputReturnValueName,
+                        Name = CallLoggingAspectConvention.CallOutputReturnValueName,
                         Value = str4,
                         IsDetail = true
                     };

@@ -74,7 +74,7 @@ namespace NWheels.Logging
     {
         public PerformanceMeasurementDetailAttribute()
         {
-            base.ContentTypes = LogContentTypes.PerformanceMeasurement;
+            base.ContentTypes = LogContentTypes.PerformanceStats;
         }
     }
 }

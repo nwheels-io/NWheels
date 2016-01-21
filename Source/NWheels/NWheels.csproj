@@ -85,7 +85,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Authorization\Core\AccessSecurityAttributeBase.cs" />
     <Compile Include="Authorization\AnonymousEntityAccessRule.cs" />
+    <Compile Include="Authorization\ClaimValueAttribute.cs" />
     <Compile Include="Authorization\Claims\AnonymousAccessPermission.cs" />
     <Compile Include="Authorization\Claims\UserIdentityClaimPermission.cs" />
     <Compile Include="Authorization\Claims\IImplyMoreClaims.cs" />
@@ -97,6 +99,7 @@
     <Compile Include="Authorization\Core\IAccessControlList.cs" />
     <Compile Include="Authorization\Core\AccessControlListCache.cs" />
     <Compile Include="Authorization\Core\ICoreSessionManager.cs" />
+    <Compile Include="Authorization\Factories\CallAuthorizationAspectConvention.cs" />
     <Compile Include="Authorization\IAuthorizationLogger.cs" />
     <Compile Include="Authorization\Impl\AccessControlList.cs" />
     <Compile Include="Authorization\Impl\EntityAccessControlBuilder.cs" />
@@ -126,7 +129,9 @@
     <Compile Include="Concurrency\ShuttleService.cs" />
     <Compile Include="Configuration\ConfiguredComponentAttribute.cs" />
     <Compile Include="Configuration\Core\CommandLineConfigurationLoader.cs" />
+    <Compile Include="Conventions\Core\StaticStringDecorator.cs" />
     <Compile Include="Entities\UnitOfWorkScopeOption.cs" />
+    <Compile Include="Logging\Factories\CallLoggingAspectConvention.cs" />
     <Compile Include="Logging\LogOptions.cs" />
     <Compile Include="Logging\ThreadLogPersistenceLevel.cs" />
     <Compile Include="Processing\Commands\Impl\CommandActorBase.cs" />
@@ -541,7 +546,7 @@
     <Compile Include="IFramework.cs" />
     <Compile Include="Logging\ActivityLogNode.cs" />
     <Compile Include="Logging\Core\ApplicationEventLoggerConvention.cs" />
-    <Compile Include="Logging\Core\CallLoggingAspectFactory.cs" />
+    <Compile Include="Hosting\Factories\ComponentAspectFactory.cs" />
     <Compile Include="Logging\Core\CrashLog.cs" />
     <Compile Include="Logging\Core\IClock.cs" />
     <Compile Include="Logging\Core\IFrameworkLoggingConfiguration.cs" />

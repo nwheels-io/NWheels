@@ -24,7 +24,7 @@ namespace NWheels.Authorization
 
         bool IIdentityInfo.IsInRole(string userRole)
         {
-            return (userRole == SystemRole);
+            return true;//(userRole == SystemRole);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ namespace NWheels.Authorization
 
         bool IPrincipal.IsInRole(string role)
         {
-            return (role == SystemRole);
+            return true;//(role == SystemRole);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

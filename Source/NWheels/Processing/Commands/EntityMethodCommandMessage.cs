@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Security.Principal;
+using System.Threading;
 using NWheels.Authorization;
 using NWheels.Entities;
 using NWheels.Extensions;
@@ -31,6 +32,14 @@ namespace NWheels.Processing.Commands
             _entityId = entityId;
             _domainContextContract = domainContextContract;
             _call = call;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override bool CheckAuthorization(out bool authenticationRequired)
+        {
+            authenticationRequired = true;
+            return Thread.CurrentPrincipal.Identity.IsAuthenticated;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

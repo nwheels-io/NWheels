@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NWheels.Authorization;
 using NWheels.Entities.Core;
@@ -52,6 +53,14 @@ namespace NWheels.Processing.Documents
             this.ReportQuery = reportQuery;
             this.ReportQueryOptions = reportQueryOptions;
             this.DocumentDesign = documentDesign;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override bool CheckAuthorization(out bool authenticationRequired)
+        {
+            authenticationRequired = true;
+            return Thread.CurrentPrincipal.Identity.IsAuthenticated;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
