@@ -97,6 +97,20 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void ExcludeTypes(params Type[] typesToExclude)
+        {
+            Selections = Selections.Where(s => !typesToExclude.Contains(s.MetaType.ContractType)).ToList();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void Exclude<T>()
+        {
+            ExcludeTypes(typeof(T));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void UseTabStyle()
         {
             this.TemplateName = "TypeSelectorWithTabs";
