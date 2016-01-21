@@ -704,7 +704,7 @@ HEAD, JS/CSS LINKS
                     case 'Image':
                         modelItem.searchoptions = {sopt: ['cn']};
                         modelItem.formatter = function(cellvalue, options, rowObject) {
-                            return '<img src="' + cellvalue + '" width="' + colWidthPx + '">';
+                            return '<img src="' + cellvalue + '" style="max-width:' + colWidthPx + 'px;">';
                         };
                         break;
                     case 'Link':
