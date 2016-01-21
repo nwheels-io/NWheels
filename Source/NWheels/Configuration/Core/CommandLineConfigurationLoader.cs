@@ -1,27 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using NWheels.Extensions;
 using NWheels.Hosting;
 
 namespace NWheels.Configuration.Core
 {
     public class CommandLineConfigurationLoader : LifecycleEventListenerBase
     {
-        private const string ConfigurationArgumentName = "config:";
-
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private readonly XmlConfigurationLoader _loader;
+        private readonly string[] _configurationParameters;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CommandLineConfigurationLoader(XmlConfigurationLoader loader)
+        public CommandLineConfigurationLoader(XmlConfigurationLoader loader, string[] configurationParameters)
         {
             _loader = loader;
+            _configurationParameters = configurationParameters;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -36,9 +32,7 @@ namespace NWheels.Configuration.Core
                     alwaysXml = new XElement(XmlConfigurationLoader.AlwaysElementName, 
                         new XAttribute(XmlConfigurationLoader.CommentAttributeName, "Read from command line arguments"))));
 
-            var arguments = Environment.GetCommandLineArgs();
-
-            foreach ( var arg in arguments )
+            foreach ( var arg in _configurationParameters )
             {
                 string sectionName;
                 string propertyName;
@@ -58,31 +52,20 @@ namespace NWheels.Configuration.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private bool IsConfigurationArgument(string arg, out string sectionName, out string propertyName, out string value)
+        private bool IsConfigurationArgument(string argBody, out string sectionName, out string propertyName, out string value)
         {
             sectionName = null;
             propertyName = null;
             value = null;
 
-            if ( arg[0] != '/' && arg[0] != '-' )
-            {
-                return false;
-            }
-
-            if ( !arg.Substring(1).StartsWith(ConfigurationArgumentName, StringComparison.InvariantCultureIgnoreCase) )
-            {
-                return false;
-            }
-
-            var body = arg.Substring(1 + ConfigurationArgumentName.Length);
-            var equalsIndex = body.IndexOf('=');
+            var equalsIndex = argBody.IndexOf('=');
 
             if ( equalsIndex < 1 )
             {
                 return false;
             }
 
-            var dotNames = body.Substring(0, equalsIndex).Split('.');
+            var dotNames = argBody.Substring(0, equalsIndex).Split('.');
 
             if ( dotNames.Length < 2 )
             {
@@ -91,7 +74,7 @@ namespace NWheels.Configuration.Core
 
             sectionName = string.Join(".", dotNames.Take(dotNames.Length - 1));
             propertyName = dotNames.Last();
-            value = body.Substring(equalsIndex + 1);
+            value = argBody.Substring(equalsIndex + 1);
 
             return true;
         }

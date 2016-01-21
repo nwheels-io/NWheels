@@ -116,15 +116,15 @@ namespace NWheels.Stacks.Nlog
                     _nameValuePairLogger.Info(node.NameValuePairsText);
                     break;
                 case NWheels.Logging.LogLevel.Warning:
-                    _plainTextLogger.Warn(node.SingleLineText, node.Exception);
+                    _plainTextLogger.Warn(node.Exception, node.SingleLineText);
                     _nameValuePairLogger.Warn(node.NameValuePairsText);
                     break;
                 case NWheels.Logging.LogLevel.Error:
-                    _plainTextLogger.Error(node.SingleLineText, node.Exception);
+                    _plainTextLogger.Error(node.Exception, node.SingleLineText);
                     _nameValuePairLogger.Error(node.NameValuePairsText);
                     break;
                 case NWheels.Logging.LogLevel.Critical:
-                    _plainTextLogger.Fatal(node.SingleLineText, node.Exception);
+                    _plainTextLogger.Fatal(node.Exception, node.SingleLineText);
                     _nameValuePairLogger.Fatal(node.NameValuePairsText);
                     break;
             }

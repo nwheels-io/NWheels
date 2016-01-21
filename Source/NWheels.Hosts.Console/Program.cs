@@ -1,238 +1,183 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml;
-using Autofac;
-using NWheels.Configuration.Core;
-using NWheels.Extensions;
+﻿using Microsoft.Win32;
 using NWheels.Hosting;
-using NWheels.Hosting.Core;
 using NWheels.Logging.Core;
 using NWheels.Stacks.Nlog;
-using NWheels.Utilities;
+using Topshelf;
+using Topshelf.HostConfigurators;
+using Topshelf.Runtime;
 
 namespace NWheels.Hosts.Console
 {
-    class Program
+    static class Program
     {
-        public const string BatchJobModeArgumentName = "batchjob";
+        private static bool _s_isAfterInstallCalled;
+        private static string _s_instanceName;
+        private static string _s_serviceName;
+        private static ProgramConfig _s_programConfig;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static string _s_bootConfigFilePath;
-        private static BootConfiguration _s_bootConfig;
-        private static NodeHost _s_nodeHost;
-        private static ManualResetEvent _s_stopRequested;
-        private static IPlainLog _s_log;
-        private static bool _s_isBatchJobMode;
-        
+        const string BootFileParamKey = "bootfile";
+        const string BatchjobParamKey = "batchjob";
+        const string ConfigParamKey = "config";
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        static int Main(string[] args)
+        public static void Main()
         {
             CrashLog.RegisterUnhandledExceptionHandler();
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+            _s_programConfig = new ProgramConfig();
+            
+            HostFactory.Run(x => {
+                x.UseNLog();
+                x.Service(s => {
+                    _s_programConfig.HostSettings = s;
+                    return new NodeHostControl(_s_programConfig);
+                });
 
-            _s_log = NLogBasedPlainLog.Instance;
-            _s_log.ConfigureConsoleOutput();
-            _s_log.Info("NWheels Console Host version {0}", typeof(Program).Assembly.GetName().Version);
-
-            _s_isBatchJobMode = args.Any(IsBatchJobModeArgument);
-
-            if ( _s_isBatchJobMode )
-            {
-                _s_log.Info("Running in batch job mode.");
-            }
-
-            try
-            {
-                LoadBootConfig(args);
-                System.Console.Title += ": " + _s_bootConfig.ApplicationName + "." + _s_bootConfig.NodeName;
-            }
-            catch ( Exception e )
-            {
-                _s_log.Critical("FAILED TO LOAD BOOT CONFIG: {0}", e.Message);
-                return 1;
-            }
-
-            try
-            {
-                StartNodeHost();
-            }
-            catch ( Exception e )
-            {
-                _s_log.Critical("NODE FAILED TO START! {0}", e.ToString());
-                return 2;
-            }
-
-            if ( _s_isBatchJobMode )
-            {
-                _s_log.Info("DONE - IN BATCH JOB MODE");
-            }
-            else
-            {
-                BlockUntilStopRequested();
-            }
-
-            try
-            {
-                StopNodeHost();
-            }
-            catch ( Exception e )
-            {
-                _s_log.Warning("NODE WAS NOT CORRECTLY STOPPED! {0}", e.ToString());
-            }
-
-            return 0;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static bool IsBatchJobModeArgument(string arg)
-        {
-            return (
-                (arg[0] == '/' || arg[0] == '-') && 
-                arg.Substring(1).EqualsIgnoreCase(BatchJobModeArgumentName));
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static void LoadBootConfig(string[] programArgs)
-        {
-            var hasBootConfigArgument = (programArgs.Length > 0 && !programArgs[0].StartsWith("-") && !programArgs[0].StartsWith("/"));
-            _s_bootConfigFilePath = PathUtility.HostBinPath(hasBootConfigArgument ? programArgs[0] : BootConfiguration.DefaultBootConfigFileName);
-
-            _s_log.Debug("Loading configuration from: {0}", _s_bootConfigFilePath);
-
-            _s_bootConfig = BootConfiguration.LoadFromFile(_s_bootConfigFilePath);
-            _s_bootConfig.Validate();
-
-            _s_log.Debug("> Application Name   - {0}", _s_bootConfig.ApplicationName);
-            _s_log.Debug("> Node Name          - {0}", _s_bootConfig.NodeName);
-
-            foreach ( var module in _s_bootConfig.FrameworkModules )
-            {
-                _s_log.Debug("> Framework Module   - {0}", module.Name);
-            }
-
-            foreach ( var module in _s_bootConfig.ApplicationModules )
-            {
-                _s_log.Debug("> Application Module - {0}", module.Name);
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        private static void StartNodeHost()
-        {
-            _s_nodeHost = new NodeHost(_s_bootConfig, RegisterHostComponents);
-            _s_nodeHost.LoadAndActivate();
-
-            _s_stopRequested = new ManualResetEvent(initialState: false);
-            System.Console.CancelKeyPress += Console_CancelKeyPress;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static void RegisterHostComponents(ContainerBuilder builder)
-        {
-            builder.RegisterModule<NWheels.Stacks.Nlog.ModuleLoader>();
-            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<CommandLineConfigurationLoader>();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static void StopNodeHost()
-        {
-            _s_nodeHost.DeactivateAndUnload();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static void BlockUntilStopRequested()
-        {
-            var stopRequestFilePath = PathUtility.HostBinPath(fileName: "stop.request");
-
-            System.Console.ForegroundColor = ConsoleColor.Green;
-            System.Console.WriteLine();
-            System.Console.WriteLine("{0:HH:mm:ss.fff} UP AND RUNNING. PRESS CTRL + BREAK TO STOP", DateTime.UtcNow);
-            System.Console.WriteLine();
-            System.Console.ForegroundColor = ConsoleColor.Gray;
-
-            if ( File.Exists(stopRequestFilePath) )
-            {
-                File.Delete(stopRequestFilePath);
-            }
-
-            var stopRequestPollingTimer = new Timer(state => {
-                if ( File.Exists(stopRequestFilePath) )
-                {
-                    _s_stopRequested.Set();
-                }
-            }, state:null, dueTime: 1000, period: 1000);
-
-            _s_stopRequested.WaitOne();
-
-            stopRequestPollingTimer.Dispose();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
-        {
-            e.Cancel = true;
-            _s_stopRequested.Set();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            var assemblyName = new AssemblyName(args.Name);
-            var assemblyProbePaths = new List<string>();
-
-            assemblyProbePaths.Add(Path.Combine(Path.GetDirectoryName(_s_bootConfigFilePath), assemblyName.Name + ".dll"));
-            assemblyProbePaths.Add(PathUtility.HostBinPath(assemblyName.Name + ".dll"));
-
-            foreach ( var probePath in assemblyProbePaths )
-            {
-                if ( File.Exists(probePath) )
-                {
-                    return Assembly.LoadFrom(probePath);
-                }
-            }
-
-            return null;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        private static void GenerateDummyNodeHostConfig()
-        {
-            _s_bootConfig = new BootConfiguration() {
-                ApplicationName = "Test App",
-                NodeName = "Test Node",
-                ApplicationModules = new List<BootConfiguration.ModuleConfig> {
-                    new BootConfiguration.ModuleConfig {
-                        Assembly = "Dummy.Module"
+                x.AddCommandLineDefinition(BootFileParamKey, v => {
+                    if ( _s_programConfig.BootConfig == null )
+                    {
+                        _s_programConfig.BootConfigFilePath = v;
                     }
-                }
-            };
+                });
+                x.AddCommandLineDefinition(BatchjobParamKey, v => {
+                    _s_programConfig.IsBatchJob = true;
+                });
+                x.AddCommandLineDefinition(ConfigParamKey, v => {
+                    _s_programConfig.CommandLineConfigValues.Add(v);
+                });
+                x.ApplyCommandLine();
 
-            var serializer = new DataContractSerializer(typeof(BootConfiguration));
-            using ( var file = File.Create(PathUtility.HostBinPath(BootConfiguration.DefaultBootConfigFileName)) )
+                if ( string.IsNullOrEmpty(_s_programConfig.BootConfigFilePath) )
+                {
+                    _s_programConfig.BootConfigFilePath = BootConfiguration.DefaultBootConfigFileName;
+                }
+
+                _s_programConfig.BootConfig = LoadBootConfig(_s_programConfig.BootConfigFilePath, hostConfig: x);
+                
+                x.RunAsLocalSystem();
+                //x.BeforeInstall(BeforeInstall);
+                x.AfterInstall(AfterInstall);
+                
+                //x.BeforeUninstall(BeforeUninstall);
+                //x.AfterUninstall(AfterUninstall);
+
+                //x.SetDescription("Sample Topshelf Host"); // Optional - deaults to service name
+                //x.SetDisplayName("Sample Topshelf Host");  // Sets the Console window header (if exists); Display name in the services list. Optional, defaults to service name.
+                //x.SetServiceName("SampleTopshelfHost");  // Unique per instance - Can be sent by InstanceName command-line option
+            });
+
+            // Fix commandline of service
+            if ( _s_isAfterInstallCalled )
             {
-                serializer.WriteObject(file, _s_bootConfig);
-                file.Flush();
+                FixServiceCommandLineAfterInstall();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void FixServiceCommandLineAfterInstall()
+        {
+            //System.Console.WriteLine("Fixed imagePath called ------");
+            //System.Console.WriteLine("_s_serviceName = " + _s_serviceName);
+            //System.Console.WriteLine("_s_instanceName = " + _s_instanceName);
+            //System.Console.ReadLine();
+
+            using ( var system = Registry.LocalMachine.OpenSubKey("SYSTEM") )
+            using ( var controlSet = system.OpenSubKey("CurrentControlSet") )
+            using ( var services = controlSet.OpenSubKey("services") )
+            using ( var service = services.OpenSubKey(_s_serviceName, true) )
+            {
+                if ( service == null )
+                    return;
+
+                var imagePath = service.GetValue("ImagePath") as string;
+
+                if ( string.IsNullOrEmpty(imagePath) )
+                    return;
+
+                string appendix = string.Format(" -{0} \"{1}\"", BootFileParamKey, _s_programConfig.BootConfigFilePath);
+                if ( _s_programConfig.IsBatchJob )
+                {
+                    appendix += string.Format(" -{0}",BatchjobParamKey);
+                    
+                }
+                foreach ( string v in _s_programConfig.CommandLineConfigValues )
+                {
+                    appendix += string.Format(" -{0} \"{1}\"", ConfigParamKey, v);
+                }
+                imagePath = imagePath + appendix;
+
+                service.SetValue("ImagePath", imagePath);
+                //System.Console.WriteLine("Fixed imagePath ------");
+                //System.Console.ReadLine();
             }
 
-            _s_bootConfig = null;
+        }
+
+        //private static void BeforeUninstall()
+        //{
+        //    System.Console.WriteLine("Before Uninstall Called ------");
+        //    System.Console.ReadLine();
+        //}
+
+        //private static void AfterUninstall()
+        //{
+
+        //    System.Console.WriteLine("After Uninstall Called ------");
+        //    System.Console.ReadLine();
+        //}
+
+        //private static void BeforeInstall()
+        //{
+        //    System.Console.WriteLine("Before Install Called ------");
+        //    System.Console.ReadLine();
+        //}
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void AfterInstall(InstallHostSettings s)
+        {
+            _s_instanceName = s.InstanceName;
+            _s_serviceName = s.ServiceName;
+            _s_isAfterInstallCalled = true;
+            //System.Console.WriteLine("After Install Called ------");
+            //System.Console.ReadLine();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static BootConfiguration LoadBootConfig(string filePath, HostConfigurator hostConfig)
+        {
+            IPlainLog log = NLogBasedPlainLog.Instance;
+
+            log.Debug("Loading configuration from: {0}", filePath);
+
+            //load boot config from path
+            BootConfiguration bootConfig = BootConfiguration.LoadFromFile(filePath);
+            bootConfig.Validate();
+
+            log.Debug("> Application Name   - {0}", bootConfig.ApplicationName);
+            log.Debug("> Node Name          - {0}", bootConfig.NodeName);
+
+            foreach ( var module in bootConfig.FrameworkModules )
+            {
+                log.Debug("> Framework Module   - {0}", module.Name);
+            }
+
+            foreach ( var module in bootConfig.ApplicationModules )
+            {
+                log.Debug("> Application Module - {0}", module.Name);
+            }
+
+            //hostConfig.SetDescription("Late Sample Topshelf Host"); // Optional - deaults to service name
+            //hostConfig.SetDisplayName("Late Sample Topshelf Host");  // Sets the Console window header (if exists); Display name in the services list. Optional, defaults to service name.
+            hostConfig.SetServiceName(string.Format("{0}-{1}", bootConfig.ApplicationName, bootConfig.NodeName));
+            //hostConfig.SetDisplayName(string.Format("{0} / {1} Host Process", bootConfig.ApplicationName, bootConfig.NodeName))
+            //hostConfig.SetDisplayName(string.Format("Host Process for Application '{0}' {1}", bootConfig.ApplicationName, bootConfig.NodeName))
+
+            return bootConfig;
         }
     }
 }
