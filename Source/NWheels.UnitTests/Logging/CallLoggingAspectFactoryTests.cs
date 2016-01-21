@@ -13,7 +13,7 @@ using NWheels.Testing;
 
 namespace NWheels.UnitTests.Logging
 {
-    [TestFixture]
+    [TestFixture, Ignore("Moving functionality to ComponentAspectFactory")]
     public class CallLoggingAspectFactoryTests : NUnitEmittedTypesTestBase
     {
         private ConventionObjectFactory _factory;
