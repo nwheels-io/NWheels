@@ -339,7 +339,22 @@ namespace NWheels.Stacks.MongoDb
 
             private static Stack<MongoDataRepositoryBase> GetOrAddStack(Type implType)
             {
-                return _s_stackByImplType.GetOrAdd(implType, t => new Stack<MongoDataRepositoryBase>());
+                foreach ( var entry in _s_stackByImplType )
+                {
+                    if ( implType.IsAssignableFrom(entry.Key) )
+                    {
+                        return entry.Value;
+                    }
+                }
+
+                if ( implType.IsInterface )
+                {
+                    throw new InvalidOperationException("Cannot create thread repository stack for contract type. Implementation type is required.");
+                }
+
+                var newStack = new Stack<MongoDataRepositoryBase>();
+                _s_stackByImplType.Add(implType, newStack);
+                return newStack;
             }
         }
     }

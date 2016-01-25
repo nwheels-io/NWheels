@@ -1,4 +1,6 @@
-﻿namespace NWheels.DataObjects
+﻿using System;
+
+namespace NWheels.DataObjects
 {
     public interface IRelationMetadata : IMetadataElement
     {
@@ -7,6 +9,7 @@
         RelationPartyKind ThisPartyKind { get; }
         IKeyMetadata ThisPartyKey { get; }
         ITypeMetadata RelatedPartyType { get; }
+        Type RelatedPartyContextType { get; set; }
         RelationPartyKind RelatedPartyKind { get; }
         IKeyMetadata RelatedPartyKey { get; }
         IPropertyMetadata InverseProperty { get; }

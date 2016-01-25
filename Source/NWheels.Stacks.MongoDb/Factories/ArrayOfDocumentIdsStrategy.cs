@@ -149,11 +149,21 @@ namespace NWheels.Stacks.MongoDb.Factories
             var m = method;
 
             var lazyLoadQueryLocal = m.Local<IEnumerable<TT.TItem>>();
-                
+            IOperand<Type> contextTypeOperand;
+
+            if ( MetaProperty.Relation.RelatedPartyContextType != null )
+            {
+                contextTypeOperand = method.Const(MetaProperty.Relation.RelatedPartyContextType);
+            }
+            else
+            {
+                contextTypeOperand = _conventionContext.ContextImplTypeField;
+            }
+
             lazyLoadQueryLocal.Assign(
                 Static.Func(MongoDataRepositoryBase.ResolveFrom, 
-                    _componentsField, 
-                    _conventionContext.ContextImplTypeField
+                    _componentsField,
+                    contextTypeOperand //_conventionContext.ContextImplTypeField
                 )
                 .Func<IEnumerable<TT.TKey>, IEnumerable<TT.TItem>>(x => x.LazyLoadByIdList<TT.TItem, TT.TKey>, 
                     storageValue.CastTo<IEnumerable<TT.TKey>>()

@@ -1,4 +1,6 @@
-﻿namespace NWheels.DataObjects.Core
+﻿using System;
+
+namespace NWheels.DataObjects.Core
 {
     public class RelationMetadataBuilder : MetadataElement<IRelationMetadata>, IRelationMetadata
     {
@@ -72,6 +74,7 @@
         
         public KeyMetadataBuilder ThisPartyKey { get; set; }
         public TypeMetadataBuilder RelatedPartyType { get; set; }
+        public Type RelatedPartyContextType { get; set; }
         public KeyMetadataBuilder RelatedPartyKey { get; set; }
         public PropertyMetadataBuilder InverseProperty { get; set; }
 
@@ -85,6 +88,7 @@
             ThisPartyKey = visitor.VisitElementReference<IKeyMetadata, KeyMetadataBuilder>("ThisPartyKey", ThisPartyKey);
 
             RelatedPartyType = visitor.VisitElementReference<ITypeMetadata, TypeMetadataBuilder>("RelatedPartyType", RelatedPartyType);
+            RelatedPartyContextType = visitor.VisitAttribute("RelatedPartyContextType", RelatedPartyContextType);
             RelatedPartyKind = visitor.VisitAttribute("RelatedPartyKind", RelatedPartyKind);
             RelatedPartyKey = visitor.VisitElementReference<IKeyMetadata, KeyMetadataBuilder>("RelatedPartyKey", RelatedPartyKey);
 

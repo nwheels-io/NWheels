@@ -748,9 +748,9 @@ namespace NWheels.DataObjects
                 }
             }
 
-            public class LinkToAttribute : PropertyContractAttribute
+            public class LinkToEntityAttribute : PropertyContractAttribute
             {
-                public LinkToAttribute(Type contractType)
+                public LinkToEntityAttribute(Type contractType)
                 {
                     this.ContractType = contractType;
                 }
@@ -788,6 +788,22 @@ namespace NWheels.DataObjects
 
                 public Type ContractType { get; private set; }
                 public string PropertyName { get; set; }
+            }
+
+            public class LinkToContextAttribute : PropertyContractAttribute
+            {
+                public LinkToContextAttribute(Type contextType)
+                {
+                    this.ContextType = contextType;
+                }
+
+                public override void ApplyTo(PropertyMetadataBuilder metadata, TypeMetadataCache cache)
+                {
+                    var relation = metadata.SafeGetRelation();
+                    relation.RelatedPartyContextType = ContextType;
+                }
+
+                public Type ContextType { get; private set; }
             }
         }
 
