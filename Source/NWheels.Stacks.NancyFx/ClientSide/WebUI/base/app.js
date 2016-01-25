@@ -1594,6 +1594,16 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    m_controllerImplementations['TaskPadItem'] = {
+        implement: function (scope) {
+            scope.performTask = function(command) {
+                scope.$emit(command.qualifiedName + ':Executing');
+            };
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     return {
         setDocument: setDocument,
         getApp: getApp,

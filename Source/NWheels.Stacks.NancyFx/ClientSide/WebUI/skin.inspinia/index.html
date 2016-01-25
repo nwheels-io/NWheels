@@ -1510,6 +1510,44 @@ HEAD, JS/CSS LINKS
     </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - TASK PAD / TASK PAD ITEM
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="app/uidl-element-template/TaskPad">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="ibox">
+                    <div class="ibox-title">
+                        <h5>{{::translate(uidl.text)}}</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="list-group">
+                            <uidl-widget ng-repeat="item in uidl.items" uidl="item"></uidl-widget>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/ng-template" id="app/uidl-element-template/TaskPadItem">
+        <a class="list-group-item">
+            <h3 class="list-group-item-heading">{{::translate(uidl.text)}}</h3>
+            <p class="list-group-item-text">{{::translate(uidl.description)}}</p>
+            <button 
+                ng-repeat="command in uidl.commands"
+                type="button"
+                class="btn"
+                ng-click="performTask(command);"
+                ng-class="{
+                    'btn-success':command.severity=='Read',
+                    'btn-primary':command.severity=='Change',
+                    'btn-warning':command.severity=='Loose',
+                    'btn-danger':command.severity=='Destroy'
+                }"
+            ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+        </a>
+    </script>
+    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - CHAT
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/Chat">
