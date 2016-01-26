@@ -381,6 +381,15 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void OverrideEntityIdValueGenerator<TEntity, TGenerator>()
+            where TEntity : class
+            where TGenerator : IPropertyValueGenerator
+        {
+            ((PropertyMetadataBuilder)MetadataCache.GetTypeMetadata(typeof(TEntity)).EntityIdProperty).DefaultValueGeneratorType = typeof(TGenerator);            
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IIdentityInfo PresetIdentity { get; set; }
         public string PresetSessionId { get; set; }
         public Queue<Guid> PresetGuids { get; private set; }
