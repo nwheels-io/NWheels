@@ -353,6 +353,18 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void RegisterModuleLoader(Autofac.Module module)
+        {
+            UpdateComponents(
+                builder => {
+                    builder.RegisterModule(module);
+                });
+
+            RebuildMetadataCache();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void RebuildMetadataCache(
             IMetadataConvention[] customMetadataConventions = null,
             MixinRegistration[] mixinRegistrations = null,
