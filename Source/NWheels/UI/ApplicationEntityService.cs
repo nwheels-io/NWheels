@@ -1451,6 +1451,16 @@ namespace NWheels.UI
 
             public AuthorizationCheckResults CheckAuthorization()
             {
+                if ( !MetaType.IsEntity )
+                {
+                    return new AuthorizationCheckResults() {
+                        CanRetrieve = true,
+                        CanCreate = true,
+                        CanUpdate = true,
+                        CanDelete = true
+                    };
+                }
+
                 var accessControl = Framework.CurrentIdentity.GetAccessControlList().GetEntityAccessControl(MetaType.ContractType);
 
                 using ( var domainContext = NewUnitOfWork() )
