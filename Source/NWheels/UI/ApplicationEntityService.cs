@@ -22,10 +22,12 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NWheels.Authorization;
+using NWheels.DataObjects.Core;
 using NWheels.Entities.Factories;
 using NWheels.TypeModel;
 using NWheels.UI.Core;
 using NWheels.UI.Factories;
+using NWheels.UI.Toolbox;
 using NWheels.Utilities;
 
 namespace NWheels.UI
@@ -1059,6 +1061,11 @@ namespace NWheels.UI
                 {
                     this.AliasName = propertyPathString;
                 }
+
+                if ( propertySpecifier.EqualsIgnoreCase("$type") )
+                {
+                    this.SpecialName = FieldSpecialName.Type;
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1066,6 +1073,7 @@ namespace NWheels.UI
             public IReadOnlyList<string> PropertyPath { get; private set; }
             public string AliasName { get; private set; }
             public AggregationType AggregationType { get; private set; }
+            public FieldSpecialName SpecialName { get; private set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1108,6 +1116,11 @@ namespace NWheels.UI
 
             internal object ReadValue(QueryContext queryContext, ITypeMetadata metaType, object target)
             {
+                if ( SpecialName == FieldSpecialName.Type )
+                {
+                    return ((IObject)target).ContractType.Name.TrimPrefix("I").TrimSuffix("Entity");
+                }
+
                 var stepTarget = target;
                 var stepMetaType = metaType;
                 object value = null;
@@ -1150,6 +1163,11 @@ namespace NWheels.UI
                 if ( _metaPropertyPath != null )
                 {
                     return _metaPropertyPath;
+                }
+
+                if ( SpecialName != FieldSpecialName.None )
+                {
+                    return null;
                 }
 
                 var metaPropertyPath = new List<IPropertyMetadata>();
