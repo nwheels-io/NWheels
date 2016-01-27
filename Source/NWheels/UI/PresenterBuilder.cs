@@ -294,7 +294,7 @@ namespace NWheels.UI
 
             public PromiseBuilder<TInput> PopupEntityMethodForm<TEntity, TMethodIn, TMethodOut>(
                 EntityMethodForm<TEntity, TMethodIn, TMethodOut> form,
-                Expression<Func<TEntity, Empty.Data, EntityMethodForm<TEntity, TMethodIn, TMethodOut>.IState, Empty.Payload, TMethodOut>> onExecute)
+                Expression<Func<TEntity, ViewModel<Empty.Data, EntityMethodForm<TEntity, TMethodIn, TMethodOut>.IState, Empty.Payload>, TMethodOut>> onExecute)
                 where TEntity : class
                 where TMethodIn : class
                 where TMethodOut : class
@@ -307,7 +307,7 @@ namespace NWheels.UI
 
             public PromiseBuilder<TInput> PopupEntityMethodForm<TEntity, TMethodIn>(
                 EntityMethodForm<TEntity, TMethodIn> form,
-                Expression<Action<TEntity, Empty.Data, EntityMethodForm<TEntity, TMethodIn>.IState, Empty.Payload>> onExecute)
+                Expression<Action<TEntity, ViewModel<Empty.Data, EntityMethodForm<TEntity, TMethodIn>.IState, Empty.Payload>>> onExecute)
                 where TEntity : class
                 where TMethodIn : class
             {

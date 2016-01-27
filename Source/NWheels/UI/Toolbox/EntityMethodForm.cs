@@ -58,7 +58,7 @@ namespace NWheels.UI.Toolbox
         public void AttachTo<TController, TControllerData, TControllerState>(
             PresenterBuilder<TController, TControllerData, TControllerState> controller, 
             UidlCommand command,
-            Expression<Action<TEntity, Empty.Data, IState, Empty.Payload>> onExecute)
+            Expression<Action<TEntity, ViewModel<Empty.Data, IState, Empty.Payload>>> onExecute)
             where TController : ControlledUidlNode
             where TControllerData : class 
             where TControllerState : class
@@ -74,7 +74,7 @@ namespace NWheels.UI.Toolbox
         public void AttachTo<TController, TControllerData, TControllerState, TMethodOut>(
             PresenterBuilder<TController, TControllerData, TControllerState> controller,
             UidlCommand command,
-            Expression<Func<TEntity, Empty.Data, IState, Empty.Payload, TMethodOut>> onExecute)
+            Expression<Func<TEntity, ViewModel<Empty.Data, IState, Empty.Payload>, TMethodOut>> onExecute)
             where TController : ControlledUidlNode
             where TControllerData : class
             where TControllerState : class
@@ -87,14 +87,14 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void OnExecute(Expression<Func<TEntity, Empty.Data, IState, Empty.Payload, TOutput>> callExpression)
+        public void OnExecute(Expression<Func<TEntity, ViewModel<Empty.Data, IState, Empty.Payload>, TOutput>> callExpression)
         {
             _methodCallExpression = callExpression;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void OnExecute(Expression<Action<TEntity, Empty.Data, IState, Empty.Payload>> callExpression)
+        public void OnExecute(Expression<Action<TEntity, ViewModel<Empty.Data, IState, Empty.Payload>>> callExpression)
         {
             _methodCallExpression = callExpression;
         }

@@ -54,7 +54,7 @@ namespace NWheels.Domains.Security.UI
 
             presenter.On(ChangePassword).PopupEntityMethodForm(
                 ChangePasswordForm, 
-                onExecute: (user, data, state, payload) => user.SetPassword(state.Input.NewPassword));
+                onExecute: (user, vm) => user.SetPassword(vm.State.Input.NewPassword));
 
             Crud.AddEntityCommands(ChangePassword);
         }

@@ -594,7 +594,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 requestPath += '/' + behavior.exportFormatId;
             }
             if (behavior.callTargetType === 'EntityMethod') {
-                requestPath += '?$entityId=' + encodeURIComponent(scope.model.State.entity['$id']);
+                requestPath += '?$entityId=' + encodeURIComponent(scope.model.State.Entity['$id']);
             }
             if (behavior.querySelectList || behavior.queryIncludeList) {
                 var queryBuilder = new EntityQueryBuilder(behavior.queryEntityName, requestPath);
@@ -1408,11 +1408,11 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
         implement: function (scope) {
             scope.$on(scope.uidl.qualifiedName + ':ShowModal', function(event, data) {
                 scope.commandInProgress = false;
-                if (scope.model.State.entity) {
+                if (scope.model.State.Entity) {
                     scope.model.State.Input = { 
-                        '$entityId' : scope.model.State.entity['$id']
+                        '$entityId' : scope.model.State.Entity['$id']
                     };
-                    scope.model.State.Input = scope.model.State.Input; 
+                    //scope.model.State.Input = scope.model.State.Input; 
                     scope.$broadcast(scope.uidl.inputForm.qualifiedName + ':ModelSetter', scope.model.State.Input);
                 } else {
                     scope.$emit(scope.uidl.qualifiedName + ':NoEntityWasSelected');
