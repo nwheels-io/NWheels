@@ -399,6 +399,7 @@ namespace NWheels.UnitTests.Entities
             /// <summary>
             /// By convention, this method will be called just prior to committing create or update of the entity
             /// </summary>
+            [EntityImplementation.TriggerBeforeSave]
             protected virtual void EntityTriggerBeforeSave()
             {
                 Logger.BeforeSave(EntityState, TermWasModified, ExpirationWasModified, IsApprovedWasModified);
@@ -409,6 +410,7 @@ namespace NWheels.UnitTests.Entities
             /// <summary>
             /// By convention, this method will be called just prior to committing create or update of the entity
             /// </summary>
+            [EntityImplementation.TriggerAfterSave]
             protected virtual void EntityTriggerAfterSave()
             {
                 Logger.AfterSave(EntityState, TermWasModified, ExpirationWasModified, IsApprovedWasModified);
