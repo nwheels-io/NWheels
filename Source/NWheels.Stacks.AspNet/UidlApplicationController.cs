@@ -87,6 +87,30 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
+        [Route("favicon.ico")]
+        public IHttpActionResult GetFavicon()
+        {
+            var filePath = HttpContext.Current.Server.MapPath("~/UI/Web/favicon.ico");
+
+            if ( File.Exists(filePath) )
+            {
+                var iconContents = File.ReadAllBytes(filePath);
+                var response = new HttpResponseMessage() {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new ByteArrayContent(iconContents)
+                };
+                response.Content.Headers.ContentType = new MediaTypeHeaderValue("image/x-icon");
+                return ResponseMessage(response);
+            }
+            else
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpGet]
         [Route("app/Application.js")]
         public IHttpActionResult GetApplicationJavaScript()
         {
