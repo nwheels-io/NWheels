@@ -14,17 +14,6 @@ namespace NWheels.Entities.Factories
 {
     public class ImplementIDomainObjectConvention : ImplementationConvention
     {
-        public const string TriggerMethodNameOnNew = "EntityTriggerOnNew";
-        public const string TriggerMethodNameOnValidateInvariants = "EntityTriggerOnValidateInvariants";
-        public const string TriggerMethodNameBeforeSave = "EntityTriggerBeforeSave";
-        public const string TriggerMethodNameAfterSave = "EntityTriggerAfterSave";
-        public const string TriggerMethodNameBeforeDelete = "EntityTriggerBeforeDelete";
-        public const string TriggerMethodNameAfterDelete = "EntityTriggerAfterDelete";
-        public const string TriggerMethodNameInsteadOfSave = "EntityTriggerInsteadOfSave";
-        public const string TriggerMethodNameInsteadOfDelete = "EntityTriggerInsteadOfDelete";
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         private readonly DomainObjectFactoryContext _context;
         private MethodInfo[] _onNew;
         private MethodInfo[] _onValidate;
@@ -215,24 +204,24 @@ namespace NWheels.Entities.Factories
         {
             var members = TypeMemberCache.Of(baseType);
 
-            _onNew = TryFindTriggerMethods<EntityImplementation.TriggerOnNewAttribute>(members, TriggerMethodNameOnNew);
-            _onValidate = TryFindTriggerMethods<EntityImplementation.TriggerOnValidateInvariantsAttribute>(members, TriggerMethodNameOnValidateInvariants);
-            _beforeSave = TryFindTriggerMethods<EntityImplementation.TriggerBeforeSaveAttribute>(members, TriggerMethodNameBeforeSave);
-            _afterSave = TryFindTriggerMethods<EntityImplementation.TriggerAfterSaveAttribute>(members, TriggerMethodNameAfterSave);
-            _beforeDelete = TryFindTriggerMethods<EntityImplementation.TriggerBeforeDeleteAttribute>(members, TriggerMethodNameBeforeDelete);
-            _afterDelete = TryFindTriggerMethods<EntityImplementation.TriggerAfterDeleteAttribute>(members, TriggerMethodNameAfterDelete);
+            _onNew = TryFindTriggerMethods<EntityImplementation.TriggerOnNewAttribute>(members);
+            _onValidate = TryFindTriggerMethods<EntityImplementation.TriggerOnValidateInvariantsAttribute>(members);
+            _beforeSave = TryFindTriggerMethods<EntityImplementation.TriggerBeforeSaveAttribute>(members);
+            _afterSave = TryFindTriggerMethods<EntityImplementation.TriggerAfterSaveAttribute>(members);
+            _beforeDelete = TryFindTriggerMethods<EntityImplementation.TriggerBeforeDeleteAttribute>(members);
+            _afterDelete = TryFindTriggerMethods<EntityImplementation.TriggerAfterDeleteAttribute>(members);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private MethodInfo[] TryFindTriggerMethods<TAttribute>(TypeMemberCache members, string methodName)
+        private MethodInfo[] TryFindTriggerMethods<TAttribute>(TypeMemberCache members)
             where TAttribute : Attribute
         {
             var foundMethods = members
                 .SelectVoids(m => 
                     m.GetParameters().Length == 0 &&
                     !m.IsPublic && 
-                    (m.Name == methodName || m.HasAttribute<TAttribute>()))
+                    m.HasAttribute<TAttribute>())
                 .ToArray();
 
             return foundMethods;
