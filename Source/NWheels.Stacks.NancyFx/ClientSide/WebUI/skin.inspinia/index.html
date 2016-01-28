@@ -822,12 +822,12 @@ HEAD, JS/CSS LINKS
                         //height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
                         shrinkToFit: false,
                         width: null,
-                        height: '100%',
+                        height: ($scope.uidl.mode === 'Standalone' ? document.documentElement.clientHeight - $("#rdt_" + $scope.uniqueWidgetId).offset().top - 150 : '100%'),
                         rownumWidth: 45,
                         rowNum: ($scope.uidl.pageSizeOptions && $scope.uidl.pageSizeOptions.length ? $scope.uidl.pageSizeOptions[0] : ($scope.uidl.mode === 'Standalone' ? 10 : 5)),
                         rowList: $scope.uidl.pageSizeOptions || [10, 20, 50],
-                        colModel: columnsModel,
                         pager: "#rdtpager_" + $scope.uniqueWidgetId,
+                        colModel: columnsModel,
                         viewrecords: true,
                         rownumbers: true,
                         footerrow: ($scope.uidl.enableTotalRow===true),
@@ -836,6 +836,8 @@ HEAD, JS/CSS LINKS
                         hidegrid: false,
                         loadui: 'block',
                         ignoreCase: true,
+                        //toppager: true,
+                        //clonetotop: true,
                         onSelectRow: function (rowId) {
                             if ($scope.uidl.enableAutonomousQuery) {
                                 var rowObject = $scope.ResultSet[rowId - 1];
@@ -1666,13 +1668,13 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - TYPE SELECTOR WITH TABS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/TypeSelectorWithTabs">
-        <div class="tabs-container">
+        <div class="tabs-container" style="padding:0;">
             <ul class="nav nav-tabs">
                 <li ng-class="{active: selectedTabIndex===$index}" ng-repeat="selection in uidl.selections"><a ng-click="selectTabByIndex($index)">{{translate(selection.text)}}</a></li>
             </ul>
             <div class="tab-content">
                 <div class="tab-pane" ng-repeat="selection in uidl.selections" ng-class="{active: selectedTabIndex===$index}">
-                    <div class="panel-body">
+                    <div class="panel-body" style="padding:10px;">
                         <uidl-widget ng-if="selectedTabIndex===$index" uidl="selection.widget"></uidl-widget>
                     </div>
                 </div>

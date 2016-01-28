@@ -47,6 +47,7 @@ namespace NWheels.UI.Toolbox
             CriteriaForm.UsePascalCase = true;
             CriteriaForm.Commands.Add(ShowReport);
             CriteriaForm.Commands.Add(DownloadExcel);
+            ResultTable.Mode = DataGridMode.Standalone;
             ResultTable.UsePascalCase = true;
             ResultTable.EnablePaging = true;
             ResultTable.EnableTotalRow = ResultTable.DisplayColumns.Any(c => c.IncludeInTotal);
