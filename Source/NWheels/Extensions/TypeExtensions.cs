@@ -52,6 +52,20 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static bool IsCollectionTypeOfItem(this Type type, Type itemType)
+        {
+            Type actualItemType;
+
+            if ( type.IsCollectionType(out actualItemType) )
+            {
+                return itemType.IsAssignableFrom(actualItemType);
+            }
+
+            return false;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static bool IsAnonymousType(this Type type)
         {
             var hasCompilerGeneratedAttribute = type.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Any();

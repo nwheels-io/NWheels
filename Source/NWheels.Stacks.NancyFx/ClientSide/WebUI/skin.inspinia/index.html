@@ -699,6 +699,18 @@ HEAD, JS/CSS LINKS
                     case 'Number':
                     case 'Key':
                         modelItem.searchoptions = {sopt: ['eq']};
+                        //modelItem.stype = 'select';
+                        //modelItem.searchoptions = {
+                            //sopt: ['eq'],
+                            //value: ':Any;1:GCM - Forex;2:GCM - Asia'
+                            //dataInit: function(elem) {
+                            //    $(elem).autocomplete({
+                            //        source: ,
+                            //        delay:0,
+                            //        minLength:0
+                            //    });
+                            //}
+                        //};
                         break;
                     case 'Enum':
                         modelItem.searchoptions = {sopt: ['cn']};
@@ -780,8 +792,8 @@ HEAD, JS/CSS LINKS
                             if (postData.sidx) {
                                 queryBuilder.orderBy(postData.sidx, postData.sord==='asc');
                             }
-                            for (var i = 0; i < $scope.uidl.includedProperties.length; i++) {
-                                queryBuilder.include($scope.uidl.includedProperties[i]);
+                            for (var i = 0; i < $scope.gridColumns.length; i++) {
+                                queryBuilder.select($scope.gridColumns[i].expression);
                             }
                             if (postData._search === true) {
                                 var filterObject = JSON.parse(postData.filters);
@@ -1879,10 +1891,11 @@ HEAD, JS/CSS LINKS
     <script src="skin/assets/js/plugins/dataTables/dataTables.bootstrap.js"></script>
     <script src="skin/assets/js/plugins/dataTables/dataTables.responsive.js"></script>
     <script src="skin/assets/js/plugins/dataTables/dataTables.tableTools.min.js"></script-->
-    
+
     <script src="app/skin/assets/app/angular-1.3.16/angular.min.js"></script>
     <script src="app/skin/assets/js/plugins/chartJs/Chart.min.js"></script>
     <script src="app/skin/assets/js/plugins/ui-bootstrap-tpls-0.14.3.min.js"></script>
+    <!--script src="app/skin/assets/js/plugins/jquery-ui/jquery-ui.min.js"></script-->
 
     <!-- Multiselect -->
     <script src="app/skin/assets/js/plugins/isteven-multi-select/isteven-multi-select.js"></script>

@@ -468,6 +468,11 @@ namespace NWheels.UI
                 _leftJoinByNavigation = new Dictionary<IPropertyMetadata, LeftJoinOperation>();
                 _entityMetaType = ownerService._metadataCache.GetTypeMetadata(options.EntityName);
                 _aggregator = null;
+
+                foreach ( var selectItem in options.SelectPropertyNames.Concat(options.IncludePropertyNames) )
+                {
+                    selectItem.BuildMetaPropertyPath(_entityMetaType);
+                }
             }
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1033,6 +1038,7 @@ namespace NWheels.UI
         public class QuerySelectItem : IBuildCacheKey
         {
             private IReadOnlyList<IPropertyMetadata> _metaPropertyPath;
+            private bool _needsJoinOperation;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1099,6 +1105,21 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public bool NeedsJoinOperation
+            {
+                get
+                {
+                    if ( _metaPropertyPath != null )
+                    {
+                        return _needsJoinOperation;
+                    }
+
+                    throw new InvalidOperationException("BuildMetaPropertyPath was not invoked on this QuerySelectItem instance.");
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             void IBuildCacheKey.BuildCacheKey(StringBuilder key)
             {
                 key.Append("/[");
@@ -1114,7 +1135,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            internal object ReadValue(QueryContext queryContext, ITypeMetadata metaType, object target)
+            internal object ReadValue(QueryContext queryContext, ITypeMetadata metaType, object target, int skipSteps = 0, int makeSteps = 0)
             {
                 if ( SpecialName == FieldSpecialName.Type )
                 {
@@ -1123,9 +1144,10 @@ namespace NWheels.UI
 
                 var stepTarget = target;
                 var stepMetaType = metaType;
+                var subsetOfPropertyPath = GetSubsetOfPropertyPath(PropertyPath, skipSteps, makeSteps);
                 object value = null;
 
-                foreach ( var stepPropertyName in PropertyPath )
+                foreach ( var stepPropertyName in subsetOfPropertyPath )
                 {
                     var stepMetaProperty = stepMetaType.FindPropertyByNameIncludingDerivedTypes(stepPropertyName);
                     value = stepMetaProperty.ReadValue(stepTarget);
@@ -1181,6 +1203,11 @@ namespace NWheels.UI
                     if ( stepMetaProperty.Relation != null )
                     {
                         stepMetaType = stepMetaProperty.Relation.RelatedPartyType;
+
+                        if ( stepMetaProperty.ClrType != stepMetaProperty.Relation.RelatedPartyType.ContractType )
+                        {
+                            _needsJoinOperation = (i < PropertyPath.Count - 1);
+                        }
                     }
                     else if ( i != PropertyPath.Count - 1 )
                     {
@@ -1191,6 +1218,25 @@ namespace NWheels.UI
 
                 _metaPropertyPath = metaPropertyPath;
                 return metaPropertyPath;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IEnumerable<string> GetSubsetOfPropertyPath(IReadOnlyList<string> path, int skipSteps, int makeSteps)
+            {
+                IEnumerable<string> subset = path;
+
+                if ( skipSteps > 0 )
+                {
+                    subset = subset.Skip(skipSteps);
+                }
+
+                if ( makeSteps > 0 )
+                {
+                    subset = subset.Take(makeSteps);
+                }
+
+                return subset;
             }
         }
 
@@ -2070,7 +2116,7 @@ namespace NWheels.UI
             {
                 if ( _queryOptions != null )
                 {
-                    foreach ( var selectItem in _queryOptions.IncludePropertyNames )
+                    foreach ( var selectItem in _queryOptions.SelectPropertyNames.Where(s => s.NeedsJoinOperation) )
                     {
                         IPropertyMetadata metaProperty;
                         var metaType = metaTypes.FirstOrDefault(t => t.TryGetPropertyByName(selectItem.PropertyPath.First(), out metaProperty));
@@ -2081,8 +2127,16 @@ namespace NWheels.UI
 
                             if ( metaProperty.Relation != null )
                             {
-                                var navigationProperty = CreateNavigationProperty(selectItem, metaProperty);
-                                jsonProperties.Add(navigationProperty);
+                                if ( metaProperty.IsCollection && metaProperty.ClrType.IsCollectionTypeOfItem(metaProperty.Relation.RelatedPartyType.ContractType) )
+                                {
+                                    var reduceProperty = CreateReduceCollectionProperty(selectItem, metaProperty);
+                                    jsonProperties.Add(reduceProperty);
+                                }
+                                else if ( !metaProperty.IsCollection )
+                                {
+                                    var navigationProperty = CreateNavigationProperty(selectItem, metaProperty);
+                                    jsonProperties.Add(navigationProperty);
+                                }
                             }
                         }
                     }
@@ -2119,6 +2173,22 @@ namespace NWheels.UI
 
                 navigationJsonProperty.ValueProvider = new NavigationValueProvider(selectItem, firstStepMetaProperty);
                 return navigationJsonProperty;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private JsonProperty CreateReduceCollectionProperty(QuerySelectItem selectItem, IPropertyMetadata firstStepMetaProperty)
+            {
+                var reduceJsonProperty = new JsonProperty {
+                    PropertyType = typeof(string),
+                    DeclaringType = firstStepMetaProperty.ContractPropertyInfo.DeclaringType,
+                    PropertyName = selectItem.AliasName,
+                    Readable = true,
+                    Writable = false,
+                };
+
+                reduceJsonProperty.ValueProvider = new ReduceCollectionValueProvider(selectItem, firstStepMetaProperty);
+                return reduceJsonProperty;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -2202,7 +2272,7 @@ namespace NWheels.UI
                     return false;
                 }
 
-                if ( metaProperty.DeclaringContract.IsViewModel )
+                if ( metaProperty.DeclaringContract.IsViewModel && metaProperty.Relation.Multiplicity != RelationMultiplicity.ManyToMany )
                 {
                     return true;
                 }
@@ -2219,7 +2289,7 @@ namespace NWheels.UI
                     return false;
                 }
 
-                if ( metaProperty.DeclaringContract.IsViewModel )
+                if ( metaProperty.DeclaringContract.IsViewModel && metaProperty.Relation.Multiplicity == RelationMultiplicity.ManyToMany )
                 {
                     return true;
                 }
@@ -2525,6 +2595,50 @@ namespace NWheels.UI
                 //}
 
                 //return currentTarget;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void SetValue(object target, object value)
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ReduceCollectionValueProvider : IValueProvider
+        {
+            private readonly QuerySelectItem _selectItem;
+            private readonly IPropertyMetadata _firstStepMetaProperty;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ReduceCollectionValueProvider(QuerySelectItem selectItem, IPropertyMetadata firstStepMetaProperty)
+            {
+                _selectItem = selectItem;
+                _firstStepMetaProperty = firstStepMetaProperty;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public object GetValue(object target)
+            {
+                var metaType = _firstStepMetaProperty.DeclaringContract;
+                var itemMetaType = _firstStepMetaProperty.Relation.RelatedPartyType;
+                var collection = _selectItem.ReadValue(QueryContext.Current, metaType, target, makeSteps: 1) as IEnumerable;
+
+                if ( collection != null )
+                {
+                    return string.Join(
+                        ", ", 
+                        collection.Cast<IDomainObject>().Select(item => 
+                            _selectItem.ReadValue(QueryContext.Current, itemMetaType, item, skipSteps: 1)
+                        )
+                    );
+                }
+
+                return null;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

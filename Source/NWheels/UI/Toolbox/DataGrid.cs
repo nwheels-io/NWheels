@@ -20,41 +20,40 @@ namespace NWheels.UI.Toolbox
             : base(idName, parent)
         {
             DisplayColumns = new List<GridColumn>();
-            IncludedProperties = new List<string>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void DescribePresenter(PresenterBuilder<DataGrid, Empty.Data, Empty.State> presenter)
         {
-            FindPropertiesToInclude();
+            //FindPropertiesToInclude();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void FindPropertiesToInclude()
-        {
-            var metaType = MetadataCache.GetTypeMetadata(this.EntityName);
+        //private void FindPropertiesToInclude()
+        //{
+        //    var metaType = MetadataCache.GetTypeMetadata(this.EntityName);
 
-            foreach ( var column in DisplayColumns )
-            {
-                if ( column.Navigations.Length > 1 )
-                {
-                    for ( int i = 0 ; i < column.Navigations.Length ; i++ )
-                    {
-                        IPropertyMetadata metaProperty;
+        //    foreach ( var column in DisplayColumns )
+        //    {
+        //        if ( column.Navigations.Length > 1 )
+        //        {
+        //            for ( int i = 0 ; i < column.Navigations.Length ; i++ )
+        //            {
+        //                IPropertyMetadata metaProperty;
 
-                        if ( metaType.TryGetPropertyByName(column.Navigations[i], out metaProperty) )
-                        {
-                            if ( metaProperty.Relation != null && i < column.Navigations.Length - 1 && !metaProperty.Relation.RelatedPartyType.IsEntityPart )
-                            {
-                                IncludedProperties.Add(column.Expression);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //                if ( metaType.TryGetPropertyByName(column.Navigations[i], out metaProperty) )
+        //                {
+        //                    if ( metaProperty.Relation != null && i < column.Navigations.Length - 1 && !metaProperty.Relation.RelatedPartyType.IsEntityPart )
+        //                    {
+        //                        IncludedProperties.Add(column.Expression);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -66,9 +65,6 @@ namespace NWheels.UI.Toolbox
 
         [DataMember]
         public List<GridColumn> DefaultDisplayColumns { get; set; }
-
-        [DataMember]
-        public List<string> IncludedProperties { get; set; }
 
         [DataMember]
         public bool UsePascalCase { get; set; }
@@ -204,6 +200,11 @@ namespace NWheels.UI.Toolbox
 
                 this.IsFilterSupported = (specialName == FieldSpecialName.None && !isManualJoinRequired);
                 this.IsSortSupported = this.IsFilterSupported;
+
+                if ( MetaProperty != null && MetaProperty.Relation != null )
+                {
+                    this.RelatedEntityName = MetaProperty.Relation.RelatedPartyType.QualifiedName;
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -230,6 +231,8 @@ namespace NWheels.UI.Toolbox
             public bool IsSortSupported { get; set; }
             [DataMember]
             public bool IsFilterSupported { get; set; }
+            [DataMember]
+            public string RelatedEntityName { get; set; }
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -394,6 +397,24 @@ namespace NWheels.UI.Toolbox
 
         public DataGrid<TDataRow> ColumnWithNavigationTo<TDestinationEntity>(
             Expression<Func<TDataRow, object>> sourcePropertySelector,
+            Expression<Func<TDestinationEntity, object>> destinationPropertySelector,
+            string title = null,
+            FieldSize size = FieldSize.Medium,
+            GridColumnType? columnType = null)
+        {
+            var navigations =
+                GridColumn.ParsePropertyNavigation(sourcePropertySelector)
+                .Concat(GridColumn.ParsePropertyNavigation(destinationPropertySelector))
+                .ToArray();
+
+            this.DisplayColumns.Add(new GridColumn(MetaType, navigations, FieldSpecialName.None, title, size, columnType: columnType));
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DataGrid<TDataRow> ColumnWithCollectionNavigation<TDestinationEntity>(
+            Expression<Func<TDataRow, ICollection<TDestinationEntity>>> sourcePropertySelector,
             Expression<Func<TDestinationEntity, object>> destinationPropertySelector,
             string title = null,
             FieldSize size = FieldSize.Medium,

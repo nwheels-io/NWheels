@@ -433,8 +433,8 @@ namespace NWheels.UI
             public SendServerCommandBehaviorBuilder<TInput, TContract> SetupEnityQueryFor(DataGrid dataGrid)
             {
                 _behavior.QueryEntityName = dataGrid.EntityName;
-                _behavior.QueryIncludeList = dataGrid.IncludedProperties;
-                _behavior.QuerySelectList = dataGrid.DisplayColumns.Select(c => c.Expression).Where(name => !_behavior.QueryIncludeList.Contains(name)).ToList();
+                _behavior.QuerySelectList = dataGrid.DisplayColumns.Select(c => c.Expression).ToList();
+                _behavior.QueryIncludeList = new List<string>();
                 return this;
             }
 
