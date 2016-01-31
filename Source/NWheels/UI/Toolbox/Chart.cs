@@ -70,6 +70,9 @@ namespace NWheels.UI.Toolbox
         public class SeriesData
         {
             [DataMember]
+            public ChartSeriesType Type { get; set; }
+
+            [DataMember]
             public string Label { get; set; }
 
             [DataMember]
@@ -90,5 +93,14 @@ namespace NWheels.UI.Toolbox
             [DataMember]
             public int? Percent { get; set; }
         }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum ChartSeriesType
+    {
+        Line = 10,
+        Bar = 20,
+        StackedBar = 30
     }
 }
