@@ -233,11 +233,21 @@ namespace NWheels.Stacks.MongoDb.Factories
             private void WriteCollectionIndexes(MethodWriterBase writer, Operand<MongoDatabase> database)
             {
                 var w = writer;
+                var visitedIndexSet = new HashSet<string>();
 
                 foreach ( var entity in base.EntitiesInRepository )
                 {
                     var collectionName = MongoDataRepositoryBase.GetMongoCollectionName(entity.Metadata, null, null);
-                    WriteCollectionIndexesForType(writer, database, collectionName, propertyPrefix: "", metaType: entity.Metadata);
+
+                    if ( entity.Metadata != null && entity.Metadata.DerivedTypes.Count > 0 && visitedIndexSet.Add("D:" + collectionName) )
+                    {
+                        Static.Void(RuntimeHelpers.CreateSearchIndex,
+                            database,
+                            w.Const(collectionName),
+                            w.Const("_t"));
+                    }
+
+                    WriteCollectionIndexesForType(writer, database, visitedIndexSet, collectionName, propertyPrefix: "", metaType: entity.Metadata);
                 }
             }
 
@@ -246,6 +256,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             private void WriteCollectionIndexesForType(
                 MethodWriterBase writer, 
                 Operand<MongoDatabase> database, 
+                HashSet<string> visitedIndexSet,
                 string collectionName, 
                 string propertyPrefix, 
                 ITypeMetadata metaType)
@@ -254,15 +265,18 @@ namespace NWheels.Stacks.MongoDb.Factories
 
                 foreach ( var key in metaType.AllKeys.Where(k => k.Kind == KeyKind.Index && k.Properties.Count == 1) )
                 {
-                    Static.Void(RuntimeHelpers.CreateSearchIndex,
-                        database,
-                        w.Const(collectionName),
-                        w.Const(propertyPrefix + key.Properties.First().Name));
+                    if ( visitedIndexSet.Add("U:" + collectionName + propertyPrefix + key.Properties.First().Name) )
+                    { 
+                        Static.Void(RuntimeHelpers.CreateSearchIndex,
+                            database,
+                            w.Const(collectionName),
+                            w.Const(propertyPrefix + key.Properties.First().Name));
+                    }
                 }
 
                 foreach ( var uniqueProperty in metaType.Properties.Where(p => p.Validation.IsUnique) )
                 {
-                    if ( uniqueProperty.DeclaringContract == metaType )
+                    if ( uniqueProperty.DeclaringContract == metaType && visitedIndexSet.Add("S:" + collectionName + propertyPrefix + uniqueProperty.Name) )
                     {
                         Static.Void(RuntimeHelpers.CreateUniqueIndex,
                             database,
@@ -276,7 +290,8 @@ namespace NWheels.Stacks.MongoDb.Factories
                 {
                     WriteCollectionIndexesForType(
                         writer, 
-                        database, 
+                        database,
+                        visitedIndexSet,
                         collectionName, 
                         propertyPrefix + partProperty.Name + ".", 
                         partProperty.Relation.RelatedPartyType);
