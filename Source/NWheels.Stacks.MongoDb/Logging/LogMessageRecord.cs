@@ -42,6 +42,14 @@ namespace NWheels.Stacks.MongoDb.Logging
 
             this.KeyValues = node.NameValuePairs.Where(nvp => !nvp.IsBaseValue()).Select(nvp => nvp.FormatLogString()).ToArray();
             //TODO: fill AdditionalDetails
+
+            var activityNode = (node as ActivityLogNode);
+
+            if ( activityNode != null )
+            {
+                this.DurationMs = activityNode.MillisecondsDuration;
+            }
+
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -78,6 +86,10 @@ namespace NWheels.Stacks.MongoDb.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public string MessageId { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public long? DurationMs { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
