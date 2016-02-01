@@ -86,7 +86,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private void CompleteRelations(TypeMetadataBuilder type)
         {
-            foreach ( var property in type.Properties.Where(p => p.Kind == PropertyKind.Relation) )
+            foreach ( var property in type.Properties.Where(p => p.Relation != null) )
             {
                 CompleteRelationMetadata(type, property);
             }
@@ -124,7 +124,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
             property.Relation.InverseProperty =
                 property.Relation.RelatedPartyType.Properties
-                    .FirstOrDefault(p => p.Kind == PropertyKind.Relation && p.Relation.RelatedPartyType.ContractType == type.ContractType);
+                    .FirstOrDefault(p => p.Relation != null && p.Relation.RelatedPartyType.ContractType == type.ContractType);
 
             CompleteInversePropertyRelation(property);
         }
@@ -148,7 +148,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
             property.Relation.InverseProperty =
                 property.Relation.RelatedPartyType.Properties
-                    .FirstOrDefault(p => p.Kind == PropertyKind.Relation && p.Relation.RelatedPartyType.ContractType == type.ContractType);
+                    .FirstOrDefault(p => p.Relation != null && p.Relation.RelatedPartyType.ContractType == type.ContractType);
 
             CompleteInversePropertyRelation(property);
         }

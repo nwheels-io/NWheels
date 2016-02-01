@@ -783,7 +783,10 @@ namespace NWheels.DataObjects
                         relation.ThisPartyKey.Properties.Add((PropertyMetadataBuilder)property);
                     }
 
-                    metadata.DeclaringContract.AllKeys.Add(relation.ThisPartyKey);
+                    if ( !metadata.DeclaringContract.AllKeys.Any(key => key.Name == relation.ThisPartyKey.Name) )
+                    {
+                        metadata.DeclaringContract.AllKeys.Add(relation.ThisPartyKey);
+                    }
                 }
 
                 public Type ContractType { get; private set; }
