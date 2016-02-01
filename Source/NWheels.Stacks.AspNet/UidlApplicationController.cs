@@ -147,12 +147,20 @@ namespace NWheels.Stacks.AspNet
         {
             if ( version == _context.Application.Version )
             {
-                return ResponseMessage(new HttpResponseMessage() {
-                    Content = new StringContent(_scriptBundles.JsBundle, Encoding.UTF8, "text/javascript")
-                });
-            }
+                var response = new HttpResponseMessage() {
+                    Content = new StringContent(_scriptBundles.JsBundle, Encoding.UTF8, "application/javascript")
+                };
+                response.Headers.CacheControl = new CacheControlHeaderValue() {
+                    Public = true,
+                    MaxAge = TimeSpan.FromDays(365),
+                };
 
-            return StatusCode(HttpStatusCode.NotFound);
+                return ResponseMessage(response);
+            }
+            else
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -163,12 +171,20 @@ namespace NWheels.Stacks.AspNet
         {
             if ( version == _context.Application.Version )
             {
-                return ResponseMessage(new HttpResponseMessage() {
+                var response = new HttpResponseMessage() {
                     Content = new StringContent(_scriptBundles.CssBundle, Encoding.UTF8, "text/css")
-                });
-            }
+                };
+                response.Headers.CacheControl = new CacheControlHeaderValue() {
+                    Public = true,
+                    MaxAge = TimeSpan.FromDays(365),
+                };
 
-            return StatusCode(HttpStatusCode.NotFound);
+                return ResponseMessage(response);
+            }
+            else
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
