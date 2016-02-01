@@ -43,6 +43,8 @@ namespace NWheels.Stacks.AspNet
         private readonly Dictionary<string, TransactionScriptEntry> _transactionScriptByName;
         private readonly ConcurrentDictionary<string, ConcurrentQueue<IMessageObject>> _pendingPushMessagesBySessionId;
         private readonly JsonSerializerSettings _uidlJsonSettings;
+        private readonly ClientScriptBundles _scriptBundles;
+        private readonly string _indexHtml;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -65,6 +67,14 @@ namespace NWheels.Stacks.AspNet
             _pendingPushMessagesBySessionId = new ConcurrentDictionary<string, ConcurrentQueue<IMessageObject>>();
             _uidlJsonSettings = CreateUidlJsonSettings();
 
+            _scriptBundles = new ClientScriptBundles(
+                context, 
+                jsBundleUrlPath: "app/v/" + context.Application.Version + "/bundle.js",
+                cssBundleUrlPath: "app/v/" + context.Application.Version + "/bundle.css",
+                mapPath: MapStaticContentPath);
+            _indexHtml = _scriptBundles.ProcessHtml(LoadIndexHtml());
+            _scriptBundles.BuildBundles();
+
             RegisterTransactionScripts(components);
         }
 
@@ -74,8 +84,7 @@ namespace NWheels.Stacks.AspNet
         [Route("")]
         public IHttpActionResult GetIndexHtml()
         {
-            var filePath = Path.Combine(_context.ContentRootPath, _context.SkinSubFolderName, "index.html");
-            var fileContents = File.ReadAllText(filePath);
+            var fileContents = _indexHtml;
             var resolvedMacrosFileContents = fileContents.Replace("##BASE_URL##", this.Request.RequestUri.ToString().EnsureTrailingSlash());
 
             return base.ResponseMessage(
@@ -128,6 +137,38 @@ namespace NWheels.Stacks.AspNet
             {
                 return StatusCode(HttpStatusCode.NotFound);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpGet]
+        [Route("app/v/{version}/bundle.js")]
+        public IHttpActionResult GetJsBundle(string version)
+        {
+            if ( version == _context.Application.Version )
+            {
+                return ResponseMessage(new HttpResponseMessage() {
+                    Content = new StringContent(_scriptBundles.JsBundle, Encoding.UTF8, "text/javascript")
+                });
+            }
+
+            return StatusCode(HttpStatusCode.NotFound);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpGet]
+        [Route("app/v/{version}/bundle.css")]
+        public IHttpActionResult GetCssBundle(string version)
+        {
+            if ( version == _context.Application.Version )
+            {
+                return ResponseMessage(new HttpResponseMessage() {
+                    Content = new StringContent(_scriptBundles.CssBundle, Encoding.UTF8, "text/css")
+                });
+            }
+
+            return StatusCode(HttpStatusCode.NotFound);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -627,6 +668,49 @@ namespace NWheels.Stacks.AspNet
             _context.EntityService.DeleteEntity(entityName, entityId);
 
             return StatusCode(HttpStatusCode.OK);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        private string MapStaticContentPath(string urlPath)
+        {
+            var urlPathLowerCase = urlPath.ToLower();
+            string pathSuffix;
+
+            if ( MatchStaticContentPath(urlPathLowerCase, "app/base/", out pathSuffix) )
+            {
+                return Path.Combine(_context.ContentRootPath, _context.BaseSubFolderName, pathSuffix);
+            }
+
+            if ( MatchStaticContentPath(urlPathLowerCase, "app/skin/", out pathSuffix) )
+            {
+                return Path.Combine(_context.ContentRootPath, _context.SkinSubFolderName, pathSuffix);
+            }
+
+            return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool MatchStaticContentPath(string path, string prefix, out string suffix)
+        {
+            if ( path.StartsWith(prefix) )
+            {
+                suffix = path.Substring(prefix.Length);
+                return true;
+            }
+
+            suffix = null;
+            return false;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string LoadIndexHtml()
+        {
+            var filePath = Path.Combine(_context.ContentRootPath, _context.SkinSubFolderName, "index.html");
+            var fileContents = File.ReadAllText(filePath);
+            return _scriptBundles.ProcessHtml(fileContents);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
