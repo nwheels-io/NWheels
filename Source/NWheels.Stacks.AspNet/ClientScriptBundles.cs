@@ -191,9 +191,9 @@ namespace NWheels.Stacks.AspNet
                         var rebasedPath = RebaseResourceUrlPath(resourceUrlPathParts, fileUrlPathParts, bundleUrlPathParts);
                         var matchValueToReplaceWith = "url('" + rebasedPath + "')";
 
-                        File.AppendAllText(
-                            @"C:\Temp\css-url-regex.log", 
-                            string.Format("[{0}] -> [{1}] -> [{2}] -> [{3}]", match.Value, resourceUrlPath, rebasedPath, matchValueToReplaceWith) + Environment.NewLine);
+                        //File.AppendAllText(
+                        //    @"C:\Temp\css-url-regex.log", 
+                        //    string.Format("[{0}] -> [{1}] -> [{2}] -> [{3}]", match.Value, resourceUrlPath, rebasedPath, matchValueToReplaceWith) + Environment.NewLine);
 
                         return matchValueToReplaceWith;
                     }
