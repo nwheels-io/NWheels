@@ -108,7 +108,19 @@ namespace NWheels.Entities.Impl
 
         private bool ShouldInitializeStorageOnStartup(DataRepositoryRegistration contextRegistration)
         {
-            return _initializationCheckRegistrations.Any(check => check.ContextType == contextRegistration.DataRepositoryType);
+            if ( _initializationCheckRegistrations.Any(check => check.ContextType == contextRegistration.DataRepositoryType) )
+            {
+                return true;
+            }
+
+            var contextConfig = _configuration.GetContextConnectionConfig(contextRegistration.DataRepositoryType);
+
+            if ( contextConfig != null )
+            {
+                return contextConfig.AutoCreateDatabase;
+            }
+
+            return false;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

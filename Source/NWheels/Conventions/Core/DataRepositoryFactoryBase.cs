@@ -188,6 +188,7 @@ namespace NWheels.Conventions.Core
             private DataRepositoryFactoryBase _ownerFactory;
             private Field<EntityObjectFactory> _entityFactoryField;
             private Field<IDomainObjectFactory> _domainObjectFactoryField;
+            private Type _domainContextContract;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -247,6 +248,7 @@ namespace NWheels.Conventions.Core
             protected override void OnInspectDeclaration(ObjectFactoryContext context)
             {
                 _ownerFactory = (DataRepositoryFactoryBase)context.Factory;
+                _domainContextContract = context.TypeKey.PrimaryInterface;
                 context.BaseType = this.RepositoryBaseType;
             }
 
@@ -262,6 +264,7 @@ namespace NWheels.Conventions.Core
                 _entityFactoryField = writer.Field<EntityObjectFactory>("EntityFactory", isPublic: true);
                 _domainObjectFactoryField = writer.Field<IDomainObjectFactory>("$domainFactory");
 
+                ImplementDomainContextContract(writer);
                 ImplementStaticConstructor(writer);
                 ImplementEntityRepositoryProperties(writer);
                 ImplementGetOrBuildDbCompiledModel(writer);
@@ -271,6 +274,16 @@ namespace NWheels.Conventions.Core
                 ImplementGetEntityRepositories(writer);
                 ImplementNewEntityMethods(writer);
                 ImplementToStringMethod(writer);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected virtual void ImplementDomainContextContract(ImplementationClassWriter<TypeTemplate.TInterface> writer)
+            {
+                writer.ImplementBase<DataRepositoryBase>()
+                    .Property(x => x.DomainContextContract).Implement(p => p.Get(
+                        w => w.Return(w.Const(_domainContextContract))
+                    ));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -579,6 +592,13 @@ namespace NWheels.Conventions.Core
             protected List<Action<ConstructorWriter>> Initializers
             {
                 get { return _initializers; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type DomainContextContract
+            {
+                get { return _domainContextContract; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

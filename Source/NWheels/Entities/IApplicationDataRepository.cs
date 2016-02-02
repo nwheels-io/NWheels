@@ -19,5 +19,6 @@ namespace NWheels.Entities
         IEntityRepository GetEntityRepository(object entity);
         bool TryGetEntityRepository(object entity, out IEntityRepository entityRepository);
         IEntityObjectFactory PersistableObjectFactory { get; }
+        Type DomainContextContract { get; }
     }
 }

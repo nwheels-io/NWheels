@@ -96,16 +96,21 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         private void EnsureDatabaseInitialized(MongoDataRepositoryBase dataRepository)
         {
-            _dbInitializedIndicatorByName.GetOrAdd(dataRepository.Database.Name, key => new DbInitializedIndicator(dataRepository));
+            _dbInitializedIndicatorByName.GetOrAdd(dataRepository.Database.Name, key => new DbInitializedIndicator(dataRepository, _dbConfiguration));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private class DbInitializedIndicator
         {
-            public DbInitializedIndicator(MongoDataRepositoryBase repository)
+            public DbInitializedIndicator(MongoDataRepositoryBase repository, IFrameworkDatabaseConfig configuration)
             {
-                repository.InitializeDatabase(repository.Database);
+                var contextConfiguration = configuration.GetContextConnectionConfig(repository.DomainContextContract);
+
+                if ( contextConfiguration == null || contextConfiguration.AutoMigrateDatabase )
+                {
+                    repository.InitializeDatabase(repository.Database);
+                }
             }
         }
 
