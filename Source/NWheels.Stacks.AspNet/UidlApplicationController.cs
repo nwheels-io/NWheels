@@ -152,7 +152,7 @@ namespace NWheels.Stacks.AspNet
                 };
                 response.Headers.CacheControl = new CacheControlHeaderValue() {
                     Public = true,
-                    MaxAge = TimeSpan.FromDays(365),
+                    MaxAge = TimeSpan.FromDays(90),
                 };
 
                 return ResponseMessage(response);
@@ -176,7 +176,7 @@ namespace NWheels.Stacks.AspNet
                 };
                 response.Headers.CacheControl = new CacheControlHeaderValue() {
                     Public = true,
-                    MaxAge = TimeSpan.FromDays(365),
+                    MaxAge = TimeSpan.FromDays(90),
                 };
 
                 return ResponseMessage(response);
