@@ -96,6 +96,11 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private void CompleteRelationMetadata(TypeMetadataBuilder type, PropertyMetadataBuilder property)
         {
+            if ( property.Relation.RelatedPartyType == null )
+            {
+                return;
+            }
+
             switch ( property.Relation.Multiplicity )
             {
                 case RelationMultiplicity.OneToOne:
@@ -124,7 +129,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
             property.Relation.InverseProperty =
                 property.Relation.RelatedPartyType.Properties
-                    .FirstOrDefault(p => p.Relation != null && p.Relation.RelatedPartyType.ContractType == type.ContractType);
+                    .FirstOrDefault(p => p.Relation != null && p.Relation.RelatedPartyType != null && p.Relation.RelatedPartyType.ContractType == type.ContractType);
 
             CompleteInversePropertyRelation(property);
         }
@@ -148,7 +153,7 @@ namespace NWheels.DataObjects.Core.Conventions
 
             property.Relation.InverseProperty =
                 property.Relation.RelatedPartyType.Properties
-                    .FirstOrDefault(p => p.Relation != null && p.Relation.RelatedPartyType.ContractType == type.ContractType);
+                    .FirstOrDefault(p => p.Relation != null && p.Relation.RelatedPartyType != null && p.Relation.RelatedPartyType.ContractType == type.ContractType);
 
             CompleteInversePropertyRelation(property);
         }
