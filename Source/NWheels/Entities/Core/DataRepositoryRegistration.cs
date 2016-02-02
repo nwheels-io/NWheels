@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autofac;
-using NWheels.Entities.Impl;
 using NWheels.Extensions;
 
-namespace NWheels.Entities
+namespace NWheels.Entities.Core
 {
     public abstract class DataRepositoryRegistration
     {
         public abstract Type DataRepositoryType { get; }
-        public abstract bool ShouldInitializeStorageOnStartup { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -21,7 +15,6 @@ namespace NWheels.Entities
         where TRepo : class, IApplicationDataRepository
     {
         private readonly ContainerBuilder _builder;
-        private bool _shouldInitializeStorageOnStartup;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -41,7 +34,7 @@ namespace NWheels.Entities
 
         public DataRepositoryRegistration<TRepo> WithInitializeStorageOnStartup()
         {
-            _shouldInitializeStorageOnStartup = true;
+            _builder.RegisterInstance(new DatabaseInitializationCheckRegistration(typeof(TRepo))).AsSelf();
             return this;
         }
 
@@ -52,16 +45,6 @@ namespace NWheels.Entities
             get
             {
                 return typeof(TRepo);
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public override bool ShouldInitializeStorageOnStartup 
-        {
-            get
-            {
-                return _shouldInitializeStorageOnStartup;
             }
         }
     }

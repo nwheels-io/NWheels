@@ -399,6 +399,14 @@ namespace NWheels.Extensions
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public void RegisterDatabaseInitializationCheck<TRepo>() where TRepo : class, IApplicationDataRepository
+            {
+                var registration = new DatabaseInitializationCheckRegistration(typeof(TRepo));
+                _builder.RegisterInstance(registration).AsSelf();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public IRegistrationBuilder<TPopulator, ConcreteReflectionActivatorData, SingleRegistrationStyle> 
                 RegisterDataPopulator<TPopulator>() where TPopulator : IDomainContextPopulator
             {

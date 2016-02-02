@@ -130,6 +130,7 @@
     <Compile Include="Configuration\ConfiguredComponentAttribute.cs" />
     <Compile Include="Configuration\Core\CommandLineConfigurationLoader.cs" />
     <Compile Include="Conventions\Core\StaticStringDecorator.cs" />
+    <Compile Include="Entities\Core\DatabaseInitializationCheckRegistration.cs" />
     <Compile Include="Entities\UnitOfWorkScopeOption.cs" />
     <Compile Include="Logging\Factories\CallLoggingAspectConvention.cs" />
     <Compile Include="Logging\LogOptions.cs" />
@@ -486,7 +487,7 @@
     <Compile Include="Entities\IEntityPartUniqueDisplayName.cs" />
     <Compile Include="Entities\IFrameworkDatabaseConfig.cs" />
     <Compile Include="TypeModel\IDataObjectKeyGenerator.cs" />
-    <Compile Include="Entities\DataRepositoryRegistration.cs" />
+    <Compile Include="Entities\Core\DataRepositoryRegistration.cs" />
     <Compile Include="Entities\RelationalMappingConventionDefault.cs" />
     <Compile Include="Entities\EntityContractAttribute.cs" />
     <Compile Include="TypeModel\IDataObjectKey.cs" />

@@ -21,6 +21,7 @@ namespace NWheels.Entities.Impl
         private readonly IComponentContext _components;
         private readonly IStorageInitializer _storageInitializer;
         private readonly IEnumerable<DataRepositoryRegistration> _contextRegistrations;
+        private readonly IEnumerable<DatabaseInitializationCheckRegistration> _initializationCheckRegistrations;
         private readonly Pipeline<IDomainContextPopulator> _populators;
         private readonly ISessionManager _sessionManager;
         private readonly UnitOfWorkFactory _unitOfWorkFactory;
@@ -33,6 +34,7 @@ namespace NWheels.Entities.Impl
             IComponentContext components,
             IStorageInitializer storageInitializer,
             IEnumerable<DataRepositoryRegistration> contextRegistrations,
+            IEnumerable<DatabaseInitializationCheckRegistration> initializationCheckRegistrations,
             Pipeline<IDomainContextPopulator> populators, 
             ISessionManager sessionManager,
             UnitOfWorkFactory unitOfWorkFactory,
@@ -41,6 +43,7 @@ namespace NWheels.Entities.Impl
             _components = components;
             _storageInitializer = storageInitializer;
             _contextRegistrations = contextRegistrations;
+            _initializationCheckRegistrations = initializationCheckRegistrations;
             _populators = populators;
             _sessionManager = sessionManager;
             _unitOfWorkFactory = unitOfWorkFactory;
@@ -55,7 +58,7 @@ namespace NWheels.Entities.Impl
 
             foreach ( var registration in _contextRegistrations )
             {
-                if ( registration.ShouldInitializeStorageOnStartup )
+                if ( ShouldInitializeStorageOnStartup(registration) )
                 {
                     _logger.RunningStorageInitializationCheck(contextType: registration.DataRepositoryType);
 
@@ -99,6 +102,13 @@ namespace NWheels.Entities.Impl
             }
 
             newDatabaseCreated = true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool ShouldInitializeStorageOnStartup(DataRepositoryRegistration contextRegistration)
+        {
+            return _initializationCheckRegistrations.Any(check => check.ContextType == contextRegistration.DataRepositoryType);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
