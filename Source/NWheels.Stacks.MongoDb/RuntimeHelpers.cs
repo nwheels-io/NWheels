@@ -26,18 +26,25 @@ namespace NWheels.Stacks.MongoDb
 
         public static void CreateSearchIndex(MongoDatabase database, string collectionName, string propertyName)
         {
+            var options = new IndexOptionsBuilder();
+            options.SetBackground(true);
+
             database.GetCollection(collectionName).CreateIndex(
                 new IndexKeysBuilder().Ascending(propertyName),
-                new IndexOptionsBuilder());
+                options);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static void CreateUniqueIndex(MongoDatabase database, string collectionName, string propertyName)
         {
+            var options = new IndexOptionsBuilder();
+            options.SetBackground(true);
+            options.SetUnique(true);
+
             database.GetCollection(collectionName).CreateIndex(
                 new IndexKeysBuilder().Ascending(propertyName), 
-                new IndexOptionsBuilder().SetUnique(true));
+                options);
         }
     }
 }
