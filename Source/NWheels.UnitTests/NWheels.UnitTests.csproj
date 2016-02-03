@@ -108,6 +108,7 @@
     <Compile Include="Logging\NameValuePairLogNodeTests.cs" />
     <Compile Include="Logging\ThreadLogTests.cs" />
     <Compile Include="Logging\ThreadLogUnitTestBase.cs" />
+    <Compile Include="PipelineTests.cs" />
     <Compile Include="Processing\Commands\Factories\MethodCallObjectFactoryTests.cs" />
     <Compile Include="IntervalTests.cs" />
     <Compile Include="Processing\Rules\CompiledRuleSystemTests.cs" />

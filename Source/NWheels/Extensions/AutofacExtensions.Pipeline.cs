@@ -8,6 +8,7 @@ using Autofac;
 using Autofac.Builder;
 using Autofac.Features.LightweightAdapters;
 using Autofac.Features.Metadata;
+using NWheels.Core;
 
 namespace NWheels.Extensions
 {
@@ -24,10 +25,13 @@ namespace NWheels.Extensions
 
         public static IRegistrationBuilder<Pipeline<TService>, LightweightAdapterActivatorData, DynamicRegistrationStyle> RegisterPipeline<TService>(
             this ContainerBuilder builder)
+            where TService : class
         {
             return builder.RegisterAdapter<IEnumerable<Meta<TService>>, Pipeline<TService>>(
-                metaPipe => {
-                    return new Pipeline<TService>(metaPipe.OrderBy(GetPipelineIndex).Select(m => m.Value));
+                (components, metaPipe) => {
+                    return new Pipeline<TService>(
+                        metaPipe.OrderBy(GetPipelineIndex).Select(m => m.Value), 
+                        components.Resolve<PipelineObjectFactory>());
                 }
             );
         }
@@ -51,6 +55,7 @@ namespace NWheels.Extensions
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static Pipeline<TService> ResolvePipeline<TService>(this IComponentContext container)
+            where TService : class
         {
             return container.Resolve<Pipeline<TService>>();
         }

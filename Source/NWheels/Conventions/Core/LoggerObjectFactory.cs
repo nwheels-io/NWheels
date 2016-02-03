@@ -7,21 +7,21 @@ namespace NWheels.Conventions.Core
 {
     internal class LoggerObjectFactory : ConventionObjectFactory, IAutoObjectFactory
     {
-        private readonly IThreadLogAppender _appender;
+        private readonly Pipeline<IThreadLogAppender> _appenderPipeline;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public LoggerObjectFactory(DynamicModule module, IThreadLogAppender appender)
+        public LoggerObjectFactory(DynamicModule module, Pipeline<IThreadLogAppender> appenderPipeline)
             : base(module, new ApplicationEventLoggerConvention())
         {
-            _appender = appender;
+            _appenderPipeline = appenderPipeline;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TService CreateService<TService>() where TService : class
         {
-            return base.CreateInstanceOf<TService>().UsingConstructor<IThreadLogAppender>(_appender);
+            return base.CreateInstanceOf<TService>().UsingConstructor<Pipeline<IThreadLogAppender>>(_appenderPipeline);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

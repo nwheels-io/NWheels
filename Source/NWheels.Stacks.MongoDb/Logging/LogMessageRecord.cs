@@ -49,7 +49,6 @@ namespace NWheels.Stacks.MongoDb.Logging
             {
                 this.DurationMs = activityNode.MillisecondsDuration;
             }
-
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

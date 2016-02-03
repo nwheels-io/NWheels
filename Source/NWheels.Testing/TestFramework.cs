@@ -70,7 +70,9 @@ namespace NWheels.Testing
             //_metadataCache = CreateMetadataCacheWithDefaultConventions();
             _dynamicModule = dynamicModule;
             _logAppender = new TestThreadLogAppender(this);
-            _loggerFactory = new LoggerObjectFactory(_dynamicModule, _logAppender);
+            
+            var logAppenderPipeline = new Pipeline<IThreadLogAppender>(new IThreadLogAppender[] { _logAppender }, new PipelineObjectFactory(dynamicModule));
+            _loggerFactory = new LoggerObjectFactory(_dynamicModule, logAppenderPipeline);
 
             BuildComponentContainer(out _components);
 
@@ -435,6 +437,7 @@ namespace NWheels.Testing
             builder.RegisterType<UniversalThreadLogAnchor>().As<IThreadLogAnchor>().SingleInstance();
 
             builder.RegisterInstance(_loggerFactory).As<LoggerObjectFactory, IAutoObjectFactory>();
+            builder.RegisterType<PipelineObjectFactory>().SingleInstance();
             builder.RegisterType<ConfigurationObjectFactory>().As<IAutoObjectFactory, IConfigurationObjectFactory, ConfigurationObjectFactory>().SingleInstance();
             builder.RegisterType<TestEntityObjectFactory>().As<IEntityObjectFactory, EntityObjectFactory, TestEntityObjectFactory>().SingleInstance();
             builder.RegisterType<TestDataRepositoryFactory>().As<TestDataRepositoryFactory, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();

@@ -130,6 +130,7 @@
     <Compile Include="Configuration\ConfiguredComponentAttribute.cs" />
     <Compile Include="Configuration\Core\CommandLineConfigurationLoader.cs" />
     <Compile Include="Conventions\Core\StaticStringDecorator.cs" />
+    <Compile Include="Core\PipelineObjectFactory.cs" />
     <Compile Include="Entities\Core\DatabaseInitializationCheckRegistration.cs" />
     <Compile Include="Entities\UnitOfWorkScopeOption.cs" />
     <Compile Include="Logging\Factories\CallLoggingAspectConvention.cs" />
@@ -344,6 +345,7 @@
     <Compile Include="UI\ContentRootAttribute.cs" />
     <Compile Include="UI\Toolbox\ChartReport.cs" />
     <Compile Include="UI\Toolbox\EntityMethodForm.cs" />
+    <Compile Include="UI\Toolbox\ChartTableReport.cs" />
     <Compile Include="UI\Toolbox\TaskPad.cs" />
     <Compile Include="UI\Toolbox\UserProfilePhoto.cs" />
     <Compile Include="UI\Toolbox\ReportScreenPart.cs" />
@@ -571,7 +573,7 @@
     <Compile Include="Logging\ILoggableObject.cs" />
     <Compile Include="Logging\Impl\StupidXmlThreadLogPersistor.cs" />
     <Compile Include="Logging\IThreadLog.cs" />
-    <Compile Include="Logging\IThreadLogAppender.cs" />
+    <Compile Include="Logging\Core\IThreadLogAppender.cs" />
     <Compile Include="Logging\LogAttributeBase.cs" />
     <Compile Include="Logging\LogLevel.cs" />
     <Compile Include="Logging\LogContentTypes.cs" />

@@ -272,7 +272,8 @@ namespace NWheels.Hosting.Core
             builder.RegisterInstance(_bootConfig).As<INodeConfiguration>();
             builder.RegisterType<UniversalThreadLogAnchor>().As<IThreadLogAnchor>().SingleInstance();
             builder.RegisterType<ThreadRegistry>().As<ThreadRegistry, IThreadRegistry>().SingleInstance();
-            builder.RegisterType<ThreadLogAppender>().As<IThreadLogAppender>().SingleInstance();
+            builder.RegisterPipeline<IThreadLogAppender>().SingleInstance();
+            builder.RegisterType<ThreadLogAppender>().As<IThreadLogAppender>().SingleInstance().LastInPipeline();
             builder.RegisterPipeline<IThreadPostMortem>().SingleInstance();
             //builder.RegisterType<StupidXmlThreadLogPersistor>().As<IThreadLogPersistor, ILifecycleEventListener>().SingleInstance();
             builder.RegisterPipeline<ILifecycleEventListener>();
@@ -281,6 +282,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<DefaultAssemblySearchPathProvider>().As<IAssemblySearchPathProvider>();
 
             builder.RegisterType<LoggerObjectFactory>().As<LoggerObjectFactory, IAutoObjectFactory>().SingleInstance();
+            builder.RegisterType<PipelineObjectFactory>().SingleInstance();
             builder.RegisterType<ConfigurationObjectFactory>().As<ConfigurationObjectFactory, IConfigurationObjectFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<XmlConfigurationLoader>().SingleInstance().InstancePerLifetimeScope();
             builder.RegisterAdapter<RelationalMappingConventionDefault, IRelationalMappingConvention>(RelationalMappingConventionBase.FromDefault).SingleInstance();
@@ -500,6 +502,7 @@ namespace NWheels.Hosting.Core
                 _lifecycleComponents = new List<ILifecycleEventListener>();
 
                 LoadModules();
+                RebuildPipelines();
                 //FindLifecycleComponents();
             }
 
@@ -768,6 +771,13 @@ namespace NWheels.Hosting.Core
                     assembly = null;
                     return false;
                 }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void RebuildPipelines()
+            {
+                _lifetimeContainer.Resolve<Pipeline<IThreadLogAppender>>().Rebuild(_lifetimeContainer);
             }
         }
 

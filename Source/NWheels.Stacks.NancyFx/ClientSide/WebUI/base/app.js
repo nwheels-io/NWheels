@@ -949,7 +949,11 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
 			});
 
 			scope.$on(scope.uidl.modelSetterQualifiedName, function (event, data) {
-			    scope.model.State.data = scope.uidlService.selectValue(data, scope.uidl.dataExpression);
+                if (scope.uidl.dataExpression) {
+                    scope.model.State.data = scope.uidlService.selectValue(data, scope.uidl.dataExpression);
+                } else {
+                    scope.model.State.data = data;
+                }
 			});
         }
     };

@@ -4,6 +4,8 @@ using Autofac;
 using Autofac.Core;
 using Autofac.Core.Lifetime;
 using NUnit.Framework;
+using NWheels.Core;
+using NWheels.Extensions;
 
 namespace NWheels.UnitTests.Hosting
 {

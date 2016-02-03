@@ -122,7 +122,8 @@ namespace NWheels.Stacks.MongoDb.Tests.Unit
                 metadataCache,
                 base.Resolve<IStorageInitializer>(),
                 new IDbConnectionStringResolver[0],
-                dbConfiguration);
+                dbConfiguration,
+                base.Resolve<IMongoDbLogger>());
 
             Framework.UpdateComponents(
                 builder => {

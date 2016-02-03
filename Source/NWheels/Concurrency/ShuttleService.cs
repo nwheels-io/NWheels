@@ -71,6 +71,11 @@ namespace NWheels.Concurrency
 
         public void Stop(TimeSpan timeout)
         {
+            if ( _cancellation == null )
+            {
+                return;
+            }
+
             if ( !_cancellation.IsCancellationRequested )
             {
                 _cancellation.Cancel();

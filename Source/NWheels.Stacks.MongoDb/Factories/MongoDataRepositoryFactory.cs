@@ -34,6 +34,7 @@ namespace NWheels.Stacks.MongoDb.Factories
         private readonly ITypeMetadataCache _metadataCache;
         private readonly MongoEntityObjectFactory _entityFactory;
         private readonly ConcurrentDictionary<string, DbInitializedIndicator> _dbInitializedIndicatorByName;
+        private readonly IMongoDbLogger _logger;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -44,7 +45,8 @@ namespace NWheels.Stacks.MongoDb.Factories
             TypeMetadataCache metadataCache,
             IStorageInitializer storageInitializer,
             IEnumerable<IDbConnectionStringResolver> databaseNameResolvers,
-            IFrameworkDatabaseConfig dbConfiguration)
+            IFrameworkDatabaseConfig dbConfiguration,
+            IMongoDbLogger logger)
             : base(module, metadataCache, storageInitializer, dbConfiguration, databaseNameResolvers)
         {
             _components = components;
@@ -52,6 +54,7 @@ namespace NWheels.Stacks.MongoDb.Factories
             _dbConfiguration = dbConfiguration;
             _metadataCache = metadataCache;
             _dbInitializedIndicatorByName = new ConcurrentDictionary<string, DbInitializedIndicator>();
+            _logger = logger;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -96,20 +99,37 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         private void EnsureDatabaseInitialized(MongoDataRepositoryBase dataRepository)
         {
-            _dbInitializedIndicatorByName.GetOrAdd(dataRepository.Database.Name, key => new DbInitializedIndicator(dataRepository, _dbConfiguration));
+            _dbInitializedIndicatorByName.GetOrAdd(dataRepository.Database.Name, key => new DbInitializedIndicator(dataRepository, _dbConfiguration, _logger));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private class DbInitializedIndicator
         {
-            public DbInitializedIndicator(MongoDataRepositoryBase repository, IFrameworkDatabaseConfig configuration)
+            private readonly IMongoDbLogger _logger;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public DbInitializedIndicator(MongoDataRepositoryBase repository, IFrameworkDatabaseConfig configuration, IMongoDbLogger logger)
             {
+                _logger = logger;
+
                 var contextConfiguration = configuration.GetContextConnectionConfig(repository.DomainContextContract);
 
                 if ( contextConfiguration == null || contextConfiguration.AutoMigrateDatabase )
                 {
-                    repository.InitializeDatabase(repository.Database);
+                    using ( var activity = _logger.MigratingDatabase(repository.Database.Name) )
+                    {
+                        try
+                        {
+                            repository.InitializeDatabase(repository.Database);
+                        }
+                        catch ( Exception e )
+                        {
+                            activity.Fail(e);
+                            throw;
+                        }
+                    }
                 }
             }
         }

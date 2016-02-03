@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using Hapil;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
+using NWheels.Core;
 using NWheels.Logging;
 using NWheels.Logging.Core;
 using NWheels.Testing;
@@ -12,7 +13,7 @@ using NWheels.Testing;
 namespace NWheels.UnitTests.Logging
 {
     [TestFixture]
-    public class ApplicationEventLoggerConventionTests : NUnitEmittedTypesTestBase
+    public class ApplicationEventLoggerConventionTests : UnitTestBase
     {
         private ConventionObjectFactory _factory;
         private TestThreadLogAppender _logAppender;
@@ -22,9 +23,6 @@ namespace NWheels.UnitTests.Logging
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
-            _factory = new ConventionObjectFactory(
-                base.Module, 
-                new ApplicationEventLoggerConvention());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,7 +30,11 @@ namespace NWheels.UnitTests.Logging
         [SetUp]
         public void SetUp()
         {
-            _logAppender = new TestThreadLogAppender(new TestFramework(base.Module));
+            _factory = new ConventionObjectFactory(
+                base.CreateDynamicModule(),
+                new ApplicationEventLoggerConvention());
+
+            _logAppender = new TestThreadLogAppender(base.Framework);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -356,7 +358,8 @@ namespace NWheels.UnitTests.Logging
 
         private ITestLogger CreateTestLogger()
         {
-            return _factory.CreateInstanceOf<ITestLogger>().UsingConstructor<IThreadLogAppender>(_logAppender);
+            var threadLogAppenderPipeline = new Pipeline<IThreadLogAppender>(new IThreadLogAppender[] { _logAppender }, Resolve<PipelineObjectFactory>());
+            return _factory.CreateInstanceOf<ITestLogger>().UsingConstructor<Pipeline<IThreadLogAppender>>(threadLogAppenderPipeline);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

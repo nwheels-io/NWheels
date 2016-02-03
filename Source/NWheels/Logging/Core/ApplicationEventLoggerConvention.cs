@@ -85,7 +85,9 @@ namespace NWheels.Logging.Core
         {
             _threadLogAppenderField = writer.Field<IThreadLogAppender>("_threadLogAppender");
 
-            writer.Constructor<IThreadLogAppender>((w, appender) => _threadLogAppenderField.Assign(appender));
+            writer.Constructor<Pipeline<IThreadLogAppender>>((w, appender) => {
+                _threadLogAppenderField.Assign(appender.Func<IThreadLogAppender>(x => x.AsService));
+            });
             
             writer.AllMethods().Implement(ImplementLogMethod);
             

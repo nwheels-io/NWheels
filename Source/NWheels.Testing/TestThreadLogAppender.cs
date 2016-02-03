@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Logging;
+using NWheels.Logging.Core;
 
 namespace NWheels.Testing
 {

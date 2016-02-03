@@ -49,5 +49,8 @@ namespace NWheels.Stacks.MongoDb
 
         [LogDebug]
         void BulkWriteResult(string entity, string operation, int size, long inserted, long deleted, long modified, long matched);
+
+        [LogActivity]
+        ILogActivity MigratingDatabase(string name);
     }
 }
