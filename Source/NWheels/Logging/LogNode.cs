@@ -20,6 +20,7 @@ namespace NWheels.Logging
         private readonly string _messageId;
         private LogContentTypes _contentTypes;
         private LogLevel _level;
+        private LogOptions _options;
         private long _millisecondsTimestamp;
         private ulong _cpuCyclesTimestamp;
         private IThreadLog _threadLog = null;
@@ -32,11 +33,12 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected LogNode(string messageId, LogContentTypes contentTypes, LogLevel initialLevel)
+        protected LogNode(string messageId, LogContentTypes contentTypes, LogLevel initialLevel, LogOptions options)
         {
             _messageId = messageId;
             _contentTypes = contentTypes;
             _level = initialLevel;
+            _options = options;
             _millisecondsTimestamp = -1;
         }
 
@@ -133,6 +135,16 @@ namespace NWheels.Logging
             get
             {
                 return _level;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public LogOptions Options
+        {
+            get
+            {
+                return _options;
             }
         }
 

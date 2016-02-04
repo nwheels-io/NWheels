@@ -28,7 +28,7 @@ namespace NWheels.Logging
             string fullDetailsText = null, 
             LogContentTypes contentTypes = LogContentTypes.Text, 
             Exception exception = null)
-            : this(AdHocFormattedMessageId, level, singleLineText, fullDetailsText, contentTypes, exception)
+            : this(AdHocFormattedMessageId, level, singleLineText, fullDetailsText, contentTypes, LogOptions.None, exception)
         {
         }
 
@@ -40,8 +40,9 @@ namespace NWheels.Logging
             string singleLineText,
             string fullDetailsText = null,
             LogContentTypes contentTypes = LogContentTypes.Text,
+            LogOptions options = LogOptions.None,
             Exception exception = null)
-            : base(messageId, contentTypes, level)
+            : base(messageId, contentTypes, level, options)
         {
             _singleLineText = singleLineText;
             _fullDetailsText = fullDetailsText;

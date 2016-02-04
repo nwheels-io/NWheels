@@ -248,6 +248,13 @@ namespace NWheels.Testing
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public DynamicModule DynamicModule
+        {
+            get { return _dynamicModule; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Thread CreateThread(Action threadCode, Func<ILogActivity> threadLogFactory, ThreadTaskType? taskType, string description)
         {
             return new Thread(() => RunThreadCode(threadCode, threadLogFactory, taskType, description));

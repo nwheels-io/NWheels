@@ -20,8 +20,8 @@ namespace NWheels.Testing.UnitTests
         {
             //-- Arrange
 
-            var node1 = new NameValuePairLogNode("msg1", LogLevel.Debug, exception: null);
-            var node2 = new NameValuePairLogNode("msg2", LogLevel.Error, exception: new Exception("e1"));
+            var node1 = new NameValuePairLogNode("msg1", LogLevel.Debug, LogOptions.None, exception: null);
+            var node2 = new NameValuePairLogNode("msg2", LogLevel.Error, LogOptions.None, exception: new Exception("e1"));
             
             var matcher = new LogexImpl.AnyNodeMatcher();
 
@@ -43,8 +43,8 @@ namespace NWheels.Testing.UnitTests
         {
             //-- Arrange
 
-            var node1 = new NameValuePairLogNode("w1", LogLevel.Warning, exception: null);
-            var node2 = new NameValuePairLogNode("e2", LogLevel.Error, exception: new Exception("e2"));
+            var node1 = new NameValuePairLogNode("w1", LogLevel.Warning, LogOptions.None, exception: null);
+            var node2 = new NameValuePairLogNode("e2", LogLevel.Error, LogOptions.None, exception: new Exception("e2"));
 
             var matcher = new LogexImpl.ByLevelNodeMatcher(new[] { LogLevel.Warning });
 
@@ -66,9 +66,9 @@ namespace NWheels.Testing.UnitTests
         {
             //-- Arrange
 
-            var node1 = new NameValuePairLogNode("w1", LogLevel.Warning, exception: null);
-            var node2 = new NameValuePairLogNode("e2", LogLevel.Error, exception: new Exception("e2"));
-            var node3 = new NameValuePairLogNode("v3", LogLevel.Verbose, exception: null);
+            var node1 = new NameValuePairLogNode("w1", LogLevel.Warning, LogOptions.None, exception: null);
+            var node2 = new NameValuePairLogNode("e2", LogLevel.Error, LogOptions.None, exception: new Exception("e2"));
+            var node3 = new NameValuePairLogNode("v3", LogLevel.Verbose, LogOptions.None, exception: null);
 
             var matcher = new LogexImpl.ByLevelOrHigherNodeMatcher(LogLevel.Warning);
 
@@ -92,9 +92,9 @@ namespace NWheels.Testing.UnitTests
         {
             //-- Arrange
 
-            var node1 = new NameValuePairLogNode("w1", LogLevel.Warning, exception: null);
-            var node2 = new NameValuePairLogNode("e2", LogLevel.Error, exception: new Exception("e2"));
-            var node3 = new NameValuePairLogNode("v3", LogLevel.Verbose, exception: null);
+            var node1 = new NameValuePairLogNode("w1", LogLevel.Warning, LogOptions.None, exception: null);
+            var node2 = new NameValuePairLogNode("e2", LogLevel.Error, LogOptions.None, exception: new Exception("e2"));
+            var node3 = new NameValuePairLogNode("v3", LogLevel.Verbose, LogOptions.None, exception: null);
 
             var matcher = new LogexImpl.ByLevelOrLowerNodeMatcher(LogLevel.Warning);
 
@@ -264,7 +264,7 @@ namespace NWheels.Testing.UnitTests
 
             var matchLog = new List<LogNode>();
             var matcher = new LogexImpl.OperatorAndNodeMatcher(new TestNodeMatcher(matchLog, left), new TestNodeMatcher(matchLog, right));
-            var node = new NameValuePairLogNode("m1", LogLevel.Debug, exception: null);
+            var node = new NameValuePairLogNode("m1", LogLevel.Debug, LogOptions.None, exception: null);
 
             //-- Act 
 
@@ -289,7 +289,7 @@ namespace NWheels.Testing.UnitTests
 
             var matchLog = new List<LogNode>();
             var matcher = new LogexImpl.OperatorOrNodeMatcher(new TestNodeMatcher(matchLog, left), new TestNodeMatcher(matchLog, right));
-            var node = new NameValuePairLogNode("m1", LogLevel.Debug, exception: null);
+            var node = new NameValuePairLogNode("m1", LogLevel.Debug, LogOptions.None, exception: null);
 
             //-- Act 
 
@@ -312,7 +312,7 @@ namespace NWheels.Testing.UnitTests
 
             var matchLog = new List<LogNode>();
             var matcher = new LogexImpl.OperatorNotNodeMatcher(new TestNodeMatcher(matchLog, operand));
-            var node = new NameValuePairLogNode("m1", LogLevel.Debug, exception: null);
+            var node = new NameValuePairLogNode("m1", LogLevel.Debug, LogOptions.None, exception: null);
 
             //-- Act 
 

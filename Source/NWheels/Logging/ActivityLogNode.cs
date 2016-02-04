@@ -18,8 +18,8 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected ActivityLogNode(string messageId)
-            : base(messageId, LogContentTypes.PerformanceStats, LogLevel.Verbose)
+        protected ActivityLogNode(string messageId, LogLevel level, LogOptions options)
+            : base(messageId, LogContentTypes.PerformanceStats, level, options)
         {
         }
 

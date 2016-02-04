@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Features.Metadata;
 using NUnit.Framework;
+using NWheels.Core;
 using NWheels.Extensions;
+using NWheels.Testing;
 
 namespace NWheels.UnitTests.Extensions
 {
     [TestFixture]
-    public class AutofacExtensionTests
+    public class AutofacExtensionTests : UnitTestBase
     {
         [Test]
         public void RegisterPipeline_Resolve_OrderedAsExpected()
@@ -19,6 +21,9 @@ namespace NWheels.UnitTests.Extensions
             //-- arrange
 
             var builder = new ContainerBuilder();
+
+            builder.RegisterInstance(Framework.DynamicModule);
+            builder.RegisterType<PipelineObjectFactory>().SingleInstance();
 
             builder.RegisterPipeline<ITestComponent>();
             builder.RegisterType<ComponentC>().As<ITestComponent>();
@@ -52,6 +57,9 @@ namespace NWheels.UnitTests.Extensions
 
             var builder = new ContainerBuilder();
 
+            builder.RegisterInstance(Framework.DynamicModule);
+            builder.RegisterType<PipelineObjectFactory>().SingleInstance();
+
             builder.RegisterPipeline<ITestComponent>().SingleInstance();
             builder.RegisterType<ComponentB>().As<ITestComponent>();
             builder.RegisterType<ComponentC>().As<ITestComponent>().LastInPipeline();
@@ -78,6 +86,9 @@ namespace NWheels.UnitTests.Extensions
 
             var builder = new ContainerBuilder();
 
+            builder.RegisterInstance(Framework.DynamicModule);
+            builder.RegisterType<PipelineObjectFactory>().SingleInstance();
+
             builder.RegisterPipeline<ITestComponent>().InstancePerDependency();
             builder.RegisterType<ComponentB>().As<ITestComponent>();
             builder.RegisterType<ComponentC>().As<ITestComponent>().LastInPipeline();
@@ -103,6 +114,9 @@ namespace NWheels.UnitTests.Extensions
             //-- arrange
 
             var builder = new ContainerBuilder();
+
+            builder.RegisterInstance(Framework.DynamicModule);
+            builder.RegisterType<PipelineObjectFactory>().SingleInstance();
 
             builder.RegisterPipeline<ITestComponent>().SingleInstance();
             builder.RegisterType<ComponentB>().As<ITestComponent>();
@@ -138,6 +152,10 @@ namespace NWheels.UnitTests.Extensions
 
             var builder = new ContainerBuilder();
 
+            builder.RegisterInstance(Framework.DynamicModule);
+            builder.RegisterType<PipelineObjectFactory>().SingleInstance();
+
+            builder.RegisterType<PipelineObjectFactory>().SingleInstance();
             builder.RegisterPipeline<ITestComponent>().InstancePerDependency();
             builder.RegisterType<ComponentB>().As<ITestComponent>().InstancePerDependency();
             builder.RegisterType<ComponentC>().As<ITestComponent>().LastInPipeline().InstancePerDependency();

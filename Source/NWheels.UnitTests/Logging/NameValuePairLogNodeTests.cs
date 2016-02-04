@@ -43,7 +43,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var node = new NameValuePairLogNode("Test.MessageOne", LogLevel.Info, exception: null);
+            var node = new NameValuePairLogNode("Test.MessageOne", LogLevel.Info, LogOptions.None, exception: null);
             _threadLog.AppendNode(node);
 
             //-- Act
@@ -65,7 +65,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var exception = new DivideByZeroException();
-            var node = new NameValuePairLogNode("Test.MessageOne", LogLevel.Info, exception);
+            var node = new NameValuePairLogNode("Test.MessageOne", LogLevel.Info, LogOptions.None, exception);
             _threadLog.AppendNode(node);
 
             //-- Act
@@ -90,7 +90,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var node = new NameValuePairLogNode<string>("Test.MessageOne", LogLevel.Info, exception: null, value1: new LogNameValuePair<string> {
+            var node = new NameValuePairLogNode<string>("Test.MessageOne", LogLevel.Info, LogOptions.None, exception: null, value1: new LogNameValuePair<string> {
                 Name = "accountId",
                 Value = "ABCD1234"
             });
@@ -117,7 +117,7 @@ namespace NWheels.UnitTests.Logging
 
             var exception = new DivideByZeroException();
             var node = new NameValuePairLogNode<string, decimal>(
-                "Test.MessageOne", LogLevel.Info, exception, 
+                "Test.MessageOne", LogLevel.Info, LogOptions.None, exception, 
                 value1: new LogNameValuePair<string> {
                     Name = "accountId",
                     Value = "ABCD1234"
@@ -156,7 +156,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var node = new NameValuePairLogNode<string, decimal, DayOfWeek>(
-                "Test.MessageOne", LogLevel.Info, exception: null,
+                "Test.MessageOne", LogLevel.Info, LogOptions.None, exception: null,
                 value1: new LogNameValuePair<string> { Name = "P1", Value = "ABC" },
                 value2: new LogNameValuePair<decimal> { Name = "P2", Value = 123m },
                 value3: new LogNameValuePair<DayOfWeek> { Name = "P3", Value = DayOfWeek.Monday });
@@ -185,7 +185,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var node = new NameValuePairLogNode<string, decimal, DayOfWeek, TimeSpan>(
-                "Test.MessageOne", LogLevel.Info, exception: null,
+                "Test.MessageOne", LogLevel.Info, LogOptions.None, exception: null,
                 value1: new LogNameValuePair<string> { Name = "P1", Value = "ABC" },
                 value2: new LogNameValuePair<decimal> { Name = "P2", Value = 123m },
                 value3: new LogNameValuePair<DayOfWeek> { Name = "P3", Value = DayOfWeek.Monday },
@@ -215,7 +215,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var node = new NameValuePairLogNode<string, decimal, DayOfWeek, TimeSpan, DateTime>(
-                "Test.MessageOne", LogLevel.Info, exception: null,
+                "Test.MessageOne", LogLevel.Info, LogOptions.None, exception: null,
                 value1: new LogNameValuePair<string> { Name = "P1", Value = "ABC" },
                 value2: new LogNameValuePair<decimal> { Name = "P2", Value = 123m },
                 value3: new LogNameValuePair<DayOfWeek> { Name = "P3", Value = DayOfWeek.Monday },
@@ -246,7 +246,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var node = new NameValuePairLogNode<string, decimal, DayOfWeek, TimeSpan, DateTime, bool>(
-                "Test.MessageOne", LogLevel.Info, exception: null,
+                "Test.MessageOne", LogLevel.Info, LogOptions.None, exception: null,
                 value1: new LogNameValuePair<string> { Name = "P1", Value = "ABC" },
                 value2: new LogNameValuePair<decimal> { Name = "P2", Value = 123m },
                 value3: new LogNameValuePair<DayOfWeek> { Name = "P3", Value = DayOfWeek.Monday },
@@ -278,7 +278,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var node = new NameValuePairLogNode<string, decimal, DayOfWeek, TimeSpan, DateTime, bool, Guid>(
-                "Test.MessageOne", LogLevel.Info, exception: null,
+                "Test.MessageOne", LogLevel.Info, LogOptions.None, exception: null,
                 value1: new LogNameValuePair<string> { Name = "P1", Value = "ABC" },
                 value2: new LogNameValuePair<decimal> { Name = "P2", Value = 123m },
                 value3: new LogNameValuePair<DayOfWeek> { Name = "P3", Value = DayOfWeek.Monday },
@@ -311,7 +311,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var node = new NameValuePairLogNode<string, decimal, DayOfWeek, TimeSpan, DateTime, bool, string, int>(
-                "Test.MessageOne", LogLevel.Info, exception: null,
+                "Test.MessageOne", LogLevel.Info, LogOptions.None, exception: null,
                 value1: new LogNameValuePair<string> { Name = "P1", Value = "ABC" },
                 value2: new LogNameValuePair<decimal> { Name = "P2", Value = 123m },
                 value3: new LogNameValuePair<DayOfWeek> { Name = "P3", Value = DayOfWeek.Monday },

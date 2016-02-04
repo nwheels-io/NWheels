@@ -13,16 +13,16 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NameValuePairLogNode(string messageId, LogLevel level, Exception exception)
-            : base(messageId, LogContentTypes.Text, level)
+        public NameValuePairLogNode(string messageId, LogLevel level, LogOptions options, Exception exception)
+            : base(messageId, LogContentTypes.Text, level, options)
         {
             _exception = exception;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected NameValuePairLogNode(string messageId, LogLevel level, Exception exception, LogContentTypes contentTypes)
-            : base(messageId, contentTypes, level)
+        protected NameValuePairLogNode(string messageId, LogLevel level, LogOptions options, Exception exception, LogContentTypes contentTypes)
+            : base(messageId, contentTypes, level, options)
         {
             _exception = exception;
         }
@@ -55,9 +55,9 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NameValuePairLogNode(string messageId, LogLevel level, Exception exception, LogNameValuePair<T1> value1)
+        public NameValuePairLogNode(string messageId, LogLevel level, LogOptions options, Exception exception, LogNameValuePair<T1> value1)
             : base(
-                messageId, level, exception, 
+                messageId, level, options, exception, 
                 value1.ContentTypes)
         {
             _value1 = value1;
@@ -82,9 +82,9 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NameValuePairLogNode(string messageId, LogLevel level, Exception exception, LogNameValuePair<T1> value1, LogNameValuePair<T2> value2)
+        public NameValuePairLogNode(string messageId, LogLevel level, LogOptions options, Exception exception, LogNameValuePair<T1> value1, LogNameValuePair<T2> value2)
             : base(
-                messageId, level, exception, 
+                messageId, level, options, exception, 
                 value1.ContentTypes | value2.ContentTypes)
         {
             _value1 = value1;
@@ -113,10 +113,10 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairLogNode(
-            string messageId, LogLevel level, Exception exception,
+            string messageId, LogLevel level, LogOptions options, Exception exception,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3)
             : base(
-                messageId, level, exception,
+                messageId, level, options, exception,
                 value1.ContentTypes | value2.ContentTypes | value3.ContentTypes)
         {
             _value1 = value1;
@@ -148,10 +148,10 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairLogNode(
-            string messageId, LogLevel level, Exception exception,
+            string messageId, LogLevel level, LogOptions options, Exception exception,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4)
             : base(
-                messageId, level, exception,
+                messageId, level, options, exception,
                 value1.ContentTypes | value2.ContentTypes | value3.ContentTypes | value4.ContentTypes)
         {
             _value1 = value1;
@@ -186,10 +186,10 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairLogNode(
-            string messageId, LogLevel level, Exception exception,
+            string messageId, LogLevel level, LogOptions options, Exception exception,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5)
             : base(
-                messageId, level, exception,
+                messageId, level, options, exception,
                 value1.ContentTypes | value2.ContentTypes | value3.ContentTypes | value4.ContentTypes | value5.ContentTypes)
         {
             _value1 = value1;
@@ -227,10 +227,10 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairLogNode(
-            string messageId, LogLevel level, Exception exception,
+            string messageId, LogLevel level, LogOptions options, Exception exception,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5, LogNameValuePair<T6> value6)
             : base(
-                messageId, level, exception,
+                messageId, level, options, exception,
                 value1.ContentTypes | value2.ContentTypes | value3.ContentTypes | value4.ContentTypes | value5.ContentTypes | value6.ContentTypes)
         {
             _value1 = value1;
@@ -271,10 +271,10 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairLogNode(
-            string messageId, LogLevel level, Exception exception,
+            string messageId, LogLevel level, LogOptions options, Exception exception,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5, LogNameValuePair<T6> value6, LogNameValuePair<T7> value7)
             : base(
-                messageId, level, exception,
+                messageId, level, options, exception,
                 value1.ContentTypes | value2.ContentTypes | value3.ContentTypes | value4.ContentTypes | 
                 value5.ContentTypes | value6.ContentTypes | value7.ContentTypes)
         {
@@ -319,10 +319,10 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairLogNode(
-            string messageId, LogLevel level, Exception exception,
+            string messageId, LogLevel level, LogOptions options, Exception exception,
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5, LogNameValuePair<T6> value6, LogNameValuePair<T7> value7, LogNameValuePair<T8> value8)
             : base(
-                messageId, level, exception,
+                messageId, level, options, exception,
                 value1.ContentTypes | value2.ContentTypes | value3.ContentTypes | value4.ContentTypes | 
                 value5.ContentTypes | value6.ContentTypes | value7.ContentTypes | value8.ContentTypes)
         {

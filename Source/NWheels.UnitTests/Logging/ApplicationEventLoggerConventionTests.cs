@@ -478,7 +478,7 @@ namespace NWheels.UnitTests.Logging
 
             public void ThisIsMyEmptyDebugMessage()
             {
-                var node = new NameValuePairLogNode("ThisIsMyEmptyDebugMessage", LogLevel.Debug, exception: null);
+                var node = new NameValuePairLogNode("ThisIsMyEmptyDebugMessage", LogLevel.Debug, LogOptions.None, exception: null);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -495,7 +495,9 @@ namespace NWheels.UnitTests.Logging
                     Name = "str",
                     Value = str
                 };
-                var node = new NameValuePairLogNode<int, string>("ApplicationEventLoggerConventionTests.Test.ThisIsMyDebugMessage", LogLevel.Debug, null, pair1, pair2);
+                var node = new NameValuePairLogNode<int, string>(
+                    "ApplicationEventLoggerConventionTests.Test.ThisIsMyDebugMessage", LogLevel.Debug, LogOptions.None, null, pair1, pair2);
+                
                 this._threadLogAppender.AppendLogNode(node);
             }
 
@@ -608,7 +610,7 @@ namespace NWheels.UnitTests.Logging
 
             public void ThisIsMyVoidMethod(Action method)
             {
-                using ( ILogActivity activity = new NameValuePairActivityLogNode("Test.ThisIsMyVoidMethod") )
+                using ( ILogActivity activity = new NameValuePairActivityLogNode("Test.ThisIsMyVoidMethod", LogLevel.Debug, LogOptions.None) )
                 {
                     try
                     {
@@ -630,8 +632,8 @@ namespace NWheels.UnitTests.Logging
                 var pair2 = new LogNameValuePair<int> { Name = "num", Value = num };
                 var pair3 = new LogNameValuePair<decimal> { Name = "value", Value = value };
 
-                using ( ILogActivity activity =
-                    new NameValuePairActivityLogNode<string, int, decimal>("Test.ThisIsMyVoidMethodWithParameters", pair1, pair2, pair3) )
+                using ( ILogActivity activity = new NameValuePairActivityLogNode<string, int, decimal>(
+                    "Test.ThisIsMyVoidMethodWithParameters", LogLevel.Debug, LogOptions.None, pair1, pair2, pair3) )
                 {
                     try
                     {
@@ -649,7 +651,7 @@ namespace NWheels.UnitTests.Logging
 
             public bool ThisIsMyFunction(Func<bool> method)
             {
-                using ( ILogActivity activity = new NameValuePairActivityLogNode("Test.ThisIsMyFunction") )
+                using ( ILogActivity activity = new NameValuePairActivityLogNode("Test.ThisIsMyFunction", LogLevel.Debug, LogOptions.None) )
                 {
                     try
                     {
@@ -671,7 +673,7 @@ namespace NWheels.UnitTests.Logging
                 var pair2 = new LogNameValuePair<decimal> { Name = "value", Value = value };
 
                 using ( ILogActivity activity =
-                    new NameValuePairActivityLogNode<int, decimal>("Test.ThisIsMyFunctionWithParameters", pair1, pair2) )
+                    new NameValuePairActivityLogNode<int, decimal>("Test.ThisIsMyFunctionWithParameters", LogLevel.Debug, LogOptions.None, pair1, pair2) )
                 {
                     try
                     {

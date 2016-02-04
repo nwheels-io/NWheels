@@ -305,7 +305,11 @@ namespace NWheels.Logging.Core
 
                 using ( TT.CreateScope<TT.TItem>(activityType) )
                 {
-                    var constructorArguments = new IOperand[] { m.Const(_messageId) }.Concat(_nameValuePairLocals).ToArray();
+                    var constructorArguments = 
+                        new IOperand[] { m.Const(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options) }
+                        .Concat(_nameValuePairLocals)
+                        .ToArray();
+
                     var activityLocal = m.Local<TT.TItem>(initialValue: m.New<TT.TItem>(constructorArguments));
 
                     if ( _attribute.IsThread )
@@ -354,7 +358,7 @@ namespace NWheels.Logging.Core
                 using ( TT.CreateScope<TT.TItem>(nodeType) )
                 {
                     var constructorArguments = 
-                        new IOperand[] { m.Const(_messageId), m.Const(_attribute.Level), _exceptionOperand }
+                        new IOperand[] { m.Const(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options), _exceptionOperand }
                         .Concat(_nameValuePairLocals).ToArray();
 
                     var nodeLocal = m.Local<TT.TItem>(initialValue: m.New<TT.TItem>(constructorArguments));

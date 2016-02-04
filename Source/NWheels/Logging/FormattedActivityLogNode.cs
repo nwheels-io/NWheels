@@ -16,15 +16,15 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public FormattedActivityLogNode(string singleLineText)
-            : this(FormattedLogNode.AdHocFormattedMessageId, singleLineText)
+        public FormattedActivityLogNode(string singleLineText, LogLevel level = LogLevel.Verbose, LogOptions options = LogOptions.None)
+            : this(FormattedLogNode.AdHocFormattedMessageId, singleLineText, level, options)
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public FormattedActivityLogNode(string messageId, string singleLineText)
-            : base(messageId)
+        public FormattedActivityLogNode(string messageId, string singleLineText, LogLevel level = LogLevel.Verbose, LogOptions options = LogOptions.None)
+            : base(messageId, level, options)
         {
             _singleLineText = singleLineText;
         }

@@ -168,15 +168,15 @@ namespace NWheels.UnitTests.Logging
 
             public void ThisIsMyVoidMethod()
             {
-                _logAppender.AppendLogNode(new NameValuePairLogNode("!BACKEND:ThisIsMyVoidMethod", LogLevel.Debug, exception: null));
+                _logAppender.AppendLogNode(new NameValuePairLogNode("!BACKEND:ThisIsMyVoidMethod", LogLevel.Debug, LogOptions.None, exception: null));
             }
             public void ThisIsMyVoidMethodWithParameters(int num, string str)
             {
-                _logAppender.AppendLogNode(new NameValuePairLogNode("!BACKEND:ThisIsMyVoidMethod", LogLevel.Debug, exception: null));
+                _logAppender.AppendLogNode(new NameValuePairLogNode("!BACKEND:ThisIsMyVoidMethod", LogLevel.Debug, LogOptions.None, exception: null));
             }
             public string ThisIsMyFunction(int num, string str)
             {
-                _logAppender.AppendLogNode(new NameValuePairLogNode("!BACKEND:ThisIsMyFunction", LogLevel.Debug, exception: null));
+                _logAppender.AppendLogNode(new NameValuePairLogNode("!BACKEND:ThisIsMyFunction", LogLevel.Debug, LogOptions.None, exception: null));
                 return "ABC";
             }
             public DateTime ThisIsMyMethodWithPrimitiveValues(TimeSpan time, DayOfWeek day)
@@ -249,7 +249,7 @@ namespace NWheels.UnitTests.Logging
                     Value = str,
                     IsDetail = true
                 };
-                ActivityLogNode activity = new NameValuePairActivityLogNode<int, string>(_s_string_TestComponentThisIsMyFunction, pair, pair2);
+                ActivityLogNode activity = new NameValuePairActivityLogNode<int, string>(_s_string_TestComponentThisIsMyFunction, LogLevel.Debug, LogOptions.None, pair, pair2);
                 this._threadLogAppender.AppendActivityNode(activity);
                 try
                 {
@@ -260,7 +260,7 @@ namespace NWheels.UnitTests.Logging
                         Value = str4,
                         IsDetail = true
                     };
-                    this._threadLogAppender.AppendLogNode(new NameValuePairLogNode<string>(_s_string_CallLoggingAspectLoggingCallOutputs, LogLevel.Debug, null, pair3));
+                    this._threadLogAppender.AppendLogNode(new NameValuePairLogNode<string>(_s_string_CallLoggingAspectLoggingCallOutputs, LogLevel.Debug, LogOptions.None, null, pair3));
                     return str4;
                 }
                 catch (Exception exception)
