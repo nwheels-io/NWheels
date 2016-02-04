@@ -104,7 +104,7 @@ namespace NWheels.Stacks.MongoDb.Logging
                 Query<DailySummaryRecord>.EQ(x => x.Date, this.Date),
                 Query<DailySummaryRecord>.EQ(x => x.MachineName, this.MachineName),
                 Query<DailySummaryRecord>.EQ(x => x.NodeName, this.NodeName),
-                Query<DailySummaryRecord>.EQ(x => x.NodeInstance, this.NodeInstance),
+                Query<DailySummaryRecord>.EQ(x => x.NodeInstance, this.NodeInstance.NullIfEmpty()),
                 Query<DailySummaryRecord>.EQ(x => x.Level, this.Level),
                 Query<DailySummaryRecord>.EQ(x => x.Logger, this.Logger),
                 Query<DailySummaryRecord>.EQ(x => x.MessageId, this.MessageId),
@@ -170,7 +170,7 @@ namespace NWheels.Stacks.MongoDb.Logging
 
             this.MachineName = MongoDbThreadLogPersistor.MachineName;
             this.NodeName = currentNode.NodeName;
-            this.NodeInstance = currentNode.InstanceId;
+            this.NodeInstance = currentNode.InstanceId.NullIfEmpty();
             this.MessageId = node.MessageId;
             this.Level = node.Level;
 
