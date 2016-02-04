@@ -10,6 +10,7 @@ using Autofac;
 using NWheels.Core;
 using NWheels.Extensions;
 using NWheels.Logging;
+using NWheels.Logging.Core;
 using NWheels.Processing.Messages;
 
 namespace NWheels.Concurrency
@@ -24,6 +25,7 @@ namespace NWheels.Concurrency
         private readonly int _driverThreadCount;
         private readonly Action<T[]> _driver;
         private readonly IShuttleServiceLogger _logger;
+        private readonly IPlainLog _plainLog;
         private CancellationTokenSource _cancellation;
         private BlockingCollection<T[]> _departureQueue;
         private Thread[] _driverThreads;
@@ -34,7 +36,7 @@ namespace NWheels.Concurrency
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ShuttleService(
-            IFramework framework, 
+            IFramework framework,
             string serviceName, 
             int maxItemsOnBoard, 
             TimeSpan boardingTimeout, 
@@ -52,6 +54,7 @@ namespace NWheels.Concurrency
             _numItemsOnBoard = 0;
 
             _logger = _framework.As<ICoreFramework>().Components.Resolve<IShuttleServiceLogger>();
+            _plainLog = _framework.As<ICoreFramework>().Components.Resolve<IPlainLog>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -269,10 +272,11 @@ namespace NWheels.Concurrency
                     _driver(batch);
                     return true;
                 }
-                catch// ( Exception e )
+                catch ( Exception e )
                 {
                     //activity.Fail(e);
                     //_logger.DriverInvocationFailed(_serviceName, threadIndex, batch.Length, e);
+                    _plainLog.Error("ShuttleService[{0}].InvokeDriver failed. {1}", _serviceName, e);
                     return false;
                 }
             //}
