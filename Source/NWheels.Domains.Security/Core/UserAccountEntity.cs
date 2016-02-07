@@ -208,7 +208,7 @@ namespace NWheels.Domains.Security.Core
         {
             if ( IsLockedOut )
             {
-                Logger.FailedLoginAttempt(LoginFault.AccountLockedOut, LoginName);
+                Logger.AccountLockedOut(LoginName, EntityId.ValueOf(this).ToString(), EmailAddress);
                 throw new DomainFaultException<LoginFault>(LoginFault.AccountLockedOut);
             }
         }
@@ -221,7 +221,7 @@ namespace NWheels.Domains.Security.Core
 
             if ( activePassword == null )
             {
-                Logger.FailedLoginAttempt(LoginFault.PasswordExpired, LoginName);
+                Logger.UserLoginFailed(LoginName, LoginFault.PasswordExpired);
                 throw new DomainFaultException<LoginFault>(LoginFault.PasswordExpired);
             }
 
@@ -234,7 +234,7 @@ namespace NWheels.Domains.Security.Core
         {
             if ( !CryptoProvider.MatchHash(activePassword.Hash, password, LoginName) )
             {
-                Logger.FailedLoginAttempt(LoginFault.LoginIncorrect, LoginName);
+                Logger.UserLoginFailed(LoginName, LoginFault.LoginIncorrect);
 
                 if ( ++FailedLoginCount >= policy.FailedLoginAttemptsBeforeLockOut )
                 {
@@ -259,7 +259,7 @@ namespace NWheels.Domains.Security.Core
 
         private void LockOut()
         {
-            Logger.UserAccountLockedOut(LoginName);
+            Logger.AccountLockedOut(LoginName, EntityId.ValueOf(this).ToString(), EmailAddress);
             IsLockedOut = true;
         }
 

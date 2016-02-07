@@ -14,19 +14,23 @@ namespace NWheels.Domains.Security
     public class UserLogoutTransactionScript : ITransactionScript
     {
         private readonly ICoreSessionManager _sessionManager;
+        private readonly ISecurityDomainLogger _logger;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UserLogoutTransactionScript(ICoreSessionManager sessionManager)
+        public UserLogoutTransactionScript(ICoreSessionManager sessionManager, ISecurityDomainLogger logger)
         {
             _sessionManager = sessionManager;
+            _logger = logger;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Execute()
         {
+            var session = Session.Current;
             _sessionManager.CloseCurrentSession();
+            _logger.UserLoggedOut(session.UserIdentity.LoginName, session.UserIdentity.UserId, session.UserIdentity.EmailAddress, session.Id);
         }
     }
 }

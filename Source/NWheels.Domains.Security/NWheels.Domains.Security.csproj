@@ -65,6 +65,7 @@
     <Compile Include="Core\UserAccountPolicySet.cs" />
     <Compile Include="Core\UserAccountPrincipal.cs" />
     <Compile Include="IdentityInfoExtensions.cs" />
+    <Compile Include="ISecurityDomainLogger.cs" />
     <Compile Include="LoggedInUserInfo.cs" />
     <Compile Include="UI\JsonSerializationExtension.cs" />
     <Compile Include="UI\UserAccountCrudScreenPart.cs" />
@@ -76,7 +77,6 @@
     <Compile Include="Impl\DefaultCryptoProvider.cs" />
     <Compile Include="Core\IAuthenticationProvider.cs" />
     <Compile Include="Core\ICryptoProvider.cs" />
-    <Compile Include="Core\ISecurityDomainLogger.cs" />
     <Compile Include="Impl\PrivateAuthenticationProvider.cs" />
     <Compile Include="Core\UserAccountIdentity.cs" />
     <Compile Include="Impl\UserAccountRoleClaim.cs" />

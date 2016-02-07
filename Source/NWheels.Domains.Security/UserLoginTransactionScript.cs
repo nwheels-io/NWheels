@@ -26,6 +26,7 @@ namespace NWheels.Domains.Security
         private readonly ITypeMetadataCache _metadataCache;
         private readonly IAuthenticationProvider _authenticationProvider;
         private readonly ISessionManager _sessionManager;
+        private readonly ISecurityDomainLogger _logger;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -33,12 +34,14 @@ namespace NWheels.Domains.Security
             IFramework framework, 
             ITypeMetadataCache metadataCache, 
             IAuthenticationProvider authenticationProvider, 
-            ISessionManager sessionManager)
+            ISessionManager sessionManager,
+            ISecurityDomainLogger logger)
         {
             _framework = framework;
             _metadataCache = metadataCache;
             _authenticationProvider = authenticationProvider;
             _sessionManager = sessionManager;
+            _logger = logger;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -75,7 +78,8 @@ namespace NWheels.Domains.Security
                     _sessionManager.OpenAnonymous(currentSession.Endpoint);
                 }
 
-                _sessionManager.As<ICoreSessionManager>().AuthorieSession(principal);
+                var session = _sessionManager.As<ICoreSessionManager>().AuthorieSession(principal);
+                _logger.UserLoggedIn(principal.LoginName, principal.UserId, principal.EmailAddress, session.Id);
 
                 var result = new Result(principal, currentSession.Endpoint, _metadataCache);
                 return result;
