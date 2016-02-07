@@ -4,6 +4,7 @@ using System.Linq;
 using Autofac;
 using NWheels.Authorization;
 using NWheels.Extensions;
+using NWheels.Processing.Commands;
 using NWheels.Processing.Commands.Impl;
 using NWheels.Processing.Messages;
 using NWheels.UI;

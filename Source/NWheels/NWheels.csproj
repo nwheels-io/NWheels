@@ -182,7 +182,7 @@
     <Compile Include="Processing\Commands\Factories\IMethodCallObjectFactory.cs" />
     <Compile Include="Processing\Commands\Factories\MethodCallObjectFactory.cs" />
     <Compile Include="Processing\Commands\Impl\CommandActor.cs" />
-    <Compile Include="Processing\Commands\Impl\ICommandActorLogger.cs" />
+    <Compile Include="Processing\Commands\ICommandActorLogger.cs" />
     <Compile Include="Processing\Commands\IMethodCallObject.cs" />
     <Compile Include="Processing\ITransactionScript.cs" />
     <Compile Include="Processing\Commands\AbstractCommandMessage.cs" />

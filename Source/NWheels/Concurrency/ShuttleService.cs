@@ -340,7 +340,7 @@ namespace NWheels.Concurrency
         [LogCritical]
         void ShuttleServiceHasFailedToStop(string serviceName, Exception error);
 
-        [LogActivity(ThreadLog = false, CollectStats = true)]
+        [LogActivity(ToThreadLog = false, CollectStats = true)]
         ILogActivity InvokingDriver(string serviceName, int threadIndex, int itemsInBatch);
 
         [LogError]

@@ -29,7 +29,7 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool ThreadLog
+        public bool ToThreadLog
         {
             get { return GetLogOption(LogOptions.ThreadLog); }
             set { SetLogOption(LogOptions.ThreadLog, value); }
@@ -37,7 +37,7 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool PlainLog
+        public bool ToPlainLog
         {
             get { return GetLogOption(LogOptions.PlainLog); }
             set { SetLogOption(LogOptions.PlainLog, value); }
@@ -45,7 +45,7 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool AuditLog
+        public bool ToAuditLog
         {
             get { return GetLogOption(LogOptions.AuditLog); }
             set { SetLogOption(LogOptions.AuditLog, value); }

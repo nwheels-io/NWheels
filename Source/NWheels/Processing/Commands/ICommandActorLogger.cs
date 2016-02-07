@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 using NWheels.Authorization;
 using NWheels.Endpoints.Core;
 using NWheels.Entities;
 using NWheels.Exceptions;
 using NWheels.Logging;
 
-namespace NWheels.Processing.Commands.Impl
+namespace NWheels.Processing.Commands
 {
     public interface ICommandActorLogger : IApplicationEventLogger
     {

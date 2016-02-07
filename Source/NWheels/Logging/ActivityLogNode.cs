@@ -182,6 +182,10 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Action<ActivityLogNode> Closed { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected void BubbleActivityResultsFrom(ActivityLogNode subActivity)
         {
             base.BubbleLogLevelFrom(subActivity.Level);
@@ -249,7 +253,12 @@ namespace NWheels.Logging
             {
                 _parent.BubbleActivityResultsFrom(this);
             }
-            
+
+            if ( Closed != null )
+            {
+                Closed(this);
+            }
+
             if ( ThreadLog != null )
             {
                 ThreadLog.NotifyActivityClosed(this);

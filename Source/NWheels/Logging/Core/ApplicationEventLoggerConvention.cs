@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using Hapil;
 using Hapil.Members;
@@ -114,7 +115,7 @@ namespace NWheels.Logging.Core
         {
             if ( loggerInterface.IsNested )
             {
-                if ( loggerInterface.Name == "ILogger" )
+                if ( loggerInterface.Name.EqualsIgnoreCase("ILogger") )
                 {
                     return loggerInterface.DeclaringType.Name.TrimPrefix("I");
                 }
@@ -125,9 +126,13 @@ namespace NWheels.Logging.Core
                         loggerInterface.Name.TrimPrefix("I").TrimSuffix("Logger");
                 }
             }
+            else if ( !loggerInterface.Name.EqualsIgnoreCase("ILogger") )
+            {
+                return loggerInterface.Name.TrimPrefix("I").TrimSuffix("Logger");
+            }
             else
             {
-                return loggerInterface.Name.TrimPrefix("I");
+                return loggerInterface.Namespace;
             }
         }
 
@@ -136,6 +141,15 @@ namespace NWheels.Logging.Core
         public static string GetMessageId(MethodInfo method)
         {
             return GetMessageIdClassifier(method.DeclaringType) + "." + method.Name;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetMessageId<TLogger>(Expression<Action<TLogger>> messageSelector)
+            where TLogger : IApplicationEventLogger
+        {
+            var method = messageSelector.GetMethodInfo();
+            return GetMessageId(method);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

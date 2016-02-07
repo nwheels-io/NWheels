@@ -218,7 +218,7 @@ namespace NWheels.Stacks.ODataBreeze
             [LogError]
             void RestEndpointFailedToStop(string repositoryName, Exception e);
             
-            [LogWarning(AuditLog = true)]
+            [LogWarning(ToAuditLog = true)]
             void FailedToDecryptSessionCookie(CryptographicException error);
             
             [LogThread(ThreadTaskType.ApiRequest)]

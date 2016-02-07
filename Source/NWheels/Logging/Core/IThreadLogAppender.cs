@@ -5,6 +5,5 @@
         void StartThreadLog(ThreadTaskType taskType, ActivityLogNode rootActivity);
         void AppendLogNode(LogNode node);
         void AppendActivityNode(ActivityLogNode activity);
-        //void NotifyActivityClosed(ActivityLogNode activity);
     }
 }

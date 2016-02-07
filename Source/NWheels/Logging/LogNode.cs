@@ -17,6 +17,10 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static string _s_commaSpaceSeparator = ", ";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private readonly string _messageId;
         private LogContentTypes _contentTypes;
         private LogLevel _level;
@@ -29,7 +33,6 @@ namespace NWheels.Logging
         private string _formattedSingleLineText = null;
         private string _formattedFullDetailsText = null;
         private string _formattedNameValuePairsText = null;
-        private static string _s_commaSpaceSeparator = ", ";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
