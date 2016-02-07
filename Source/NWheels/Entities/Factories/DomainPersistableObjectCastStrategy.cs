@@ -60,11 +60,16 @@ namespace NWheels.Entities.Factories
                 p => baseProperty.CanWrite
                     ? p.Set((sw, value) => {
                         base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
-                        _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(
-                            value
-                            .CastTo<IContain<IPersistableObject>>()
-                            .Func<IPersistableObject>(x => x.GetContainedObject)
-                            .CastTo<TT.TProperty>());
+
+                        sw.If(value.IsNotNull()).Then(() => {
+                            _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(
+                                value
+                                .CastTo<IContain<IPersistableObject>>()
+                                .Func<IPersistableObject>(x => x.GetContainedObject)
+                                .CastTo<TT.TProperty>());
+                        }).Else(() => {
+                            _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(sw.Const<TT.TProperty>(null));
+                        });
                     })
                     : null
             );
