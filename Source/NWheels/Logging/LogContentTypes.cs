@@ -14,6 +14,7 @@ namespace NWheels.Logging
         DataEntity = 0x04,
         CommunicationMessage = 0x08,
         PerformanceStats = 0x10,
-        ComponentInvocation = 0x20
+        ComponentInvocation = 0x20,
+        UserStory = 0x40
     }
 }

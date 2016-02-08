@@ -14,13 +14,15 @@ namespace NWheels.Logging
         private bool _isClosed = false;
         private long? _finalMillisecondsDuration = null;
         private ulong? _finalCpuCycles = null;
+        private string _userStory = null;
         private Exception _exception = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected ActivityLogNode(string messageId, LogLevel level, LogOptions options)
+        protected ActivityLogNode(string messageId, LogLevel level, LogOptions options, string userStory)
             : base(messageId, LogContentTypes.PerformanceStats, level, options)
         {
+            _userStory = userStory;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -182,6 +184,16 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string UserStory
+        {
+            get
+            {
+                return _userStory;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Action<ActivityLogNode> Closed { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -209,6 +221,11 @@ namespace NWheels.Logging
         {
             base.AttachToThreadLog(threadLog, parent);
             _parent = parent;
+
+            if (_parent != null && string.IsNullOrEmpty(_userStory))
+            {
+                _userStory = _parent.UserStory;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

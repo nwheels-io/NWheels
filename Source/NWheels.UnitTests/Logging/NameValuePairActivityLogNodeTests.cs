@@ -44,7 +44,7 @@ namespace NWheels.UnitTests.Logging
         {
             //-- Arrange
 
-            var node = new NameValuePairActivityLogNode("Test.MessageOne", LogLevel.Verbose, LogOptions.None);
+            var node = new NameValuePairActivityLogNode("Test.MessageOne", LogLevel.Verbose, LogOptions.None, userStory: null);
             _threadLog.AppendNode(node);
 
             //-- Act
@@ -68,7 +68,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var exception = new DivideByZeroException();
-            var node = new NameValuePairActivityLogNode("Test.MessageOne", LogLevel.Debug, LogOptions.None);
+            var node = new NameValuePairActivityLogNode("Test.MessageOne", LogLevel.Debug, LogOptions.None, userStory: null);
             _threadLog.AppendNode(node);
 
             ((ILogActivity)node).Fail(exception);
@@ -106,7 +106,8 @@ namespace NWheels.UnitTests.Logging
                 "Test.MessageOne", 
                LogLevel.Verbose, 
                LogOptions.None,
-                value1: new LogNameValuePair<string> { Name = "accountId", Value = "ABCD1234" });
+               userStory: null,
+               value1: new LogNameValuePair<string> { Name = "accountId", Value = "ABCD1234" });
 
             _threadLog.AppendNode(node);
 

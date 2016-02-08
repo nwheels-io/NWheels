@@ -24,7 +24,7 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public FormattedActivityLogNode(string messageId, string singleLineText, LogLevel level = LogLevel.Verbose, LogOptions options = LogOptions.None)
-            : base(messageId, level, options)
+            : base(messageId, level, options, userStory: null)
         {
             _singleLineText = singleLineText;
         }

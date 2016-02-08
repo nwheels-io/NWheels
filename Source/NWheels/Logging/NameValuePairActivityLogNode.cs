@@ -9,8 +9,8 @@ namespace NWheels.Logging
 {
     public class NameValuePairActivityLogNode : ActivityLogNode
     {
-        public NameValuePairActivityLogNode(string messageId, LogLevel level, LogOptions options)
-            : base(messageId, level, options)
+        public NameValuePairActivityLogNode(string messageId, LogLevel level, LogOptions options, string userStory)
+            : base(messageId, level, options, userStory)
         {
         }
     
@@ -32,8 +32,8 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NameValuePairActivityLogNode(string messageId, LogLevel level, LogOptions options, LogNameValuePair<T1> value1)
-            : base(messageId, level, options)
+        public NameValuePairActivityLogNode(string messageId, LogLevel level, LogOptions options, string userStory, LogNameValuePair<T1> value1)
+            : base(messageId, level, options, userStory)
         {
             _value1 = value1;
         }
@@ -57,8 +57,8 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public NameValuePairActivityLogNode(string messageId, LogLevel level, LogOptions options, LogNameValuePair<T1> value1, LogNameValuePair<T2> value2)
-            : base(messageId, level, options)
+        public NameValuePairActivityLogNode(string messageId, LogLevel level, LogOptions options, string userStory, LogNameValuePair<T1> value1, LogNameValuePair<T2> value2)
+            : base(messageId, level, options, userStory)
         {
             _value1 = value1;
             _value2 = value2;
@@ -86,9 +86,9 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairActivityLogNode(
-            string messageId, LogLevel level, LogOptions options, 
+            string messageId, LogLevel level, LogOptions options, string userStory, 
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3)
-            : base(messageId, level, options)
+            : base(messageId, level, options, userStory)
         {
             _value1 = value1;
             _value2 = value2;
@@ -119,9 +119,9 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairActivityLogNode(
-            string messageId, LogLevel level, LogOptions options, 
+            string messageId, LogLevel level, LogOptions options, string userStory, 
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4)
-            : base(messageId, level, options)
+            : base(messageId, level, options, userStory)
         {
             _value1 = value1;
             _value2 = value2;
@@ -155,9 +155,9 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairActivityLogNode(
-            string messageId, LogLevel level, LogOptions options, 
+            string messageId, LogLevel level, LogOptions options, string userStory, 
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5)
-            : base(messageId, level, options)
+            : base(messageId, level, options, userStory)
         {
             _value1 = value1;
             _value2 = value2;
@@ -194,9 +194,9 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairActivityLogNode(
-            string messageId, LogLevel level, LogOptions options, 
+            string messageId, LogLevel level, LogOptions options, string userStory, 
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5, LogNameValuePair<T6> value6)
-            : base(messageId, level, options)
+            : base(messageId, level, options, userStory)
         {
             _value1 = value1;
             _value2 = value2;
@@ -236,9 +236,9 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairActivityLogNode(
-            string messageId, LogLevel level, LogOptions options, 
+            string messageId, LogLevel level, LogOptions options, string userStory, 
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5, LogNameValuePair<T6> value6, LogNameValuePair<T7> value7)
-            : base(messageId, level, options)
+            : base(messageId, level, options, userStory)
         {
             _value1 = value1;
             _value2 = value2;
@@ -281,9 +281,9 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public NameValuePairActivityLogNode(
-            string messageId, LogLevel level, LogOptions options, 
+            string messageId, LogLevel level, LogOptions options, string userStory, 
             LogNameValuePair<T1> value1, LogNameValuePair<T2> value2, LogNameValuePair<T3> value3, LogNameValuePair<T4> value4, LogNameValuePair<T5> value5, LogNameValuePair<T6> value6, LogNameValuePair<T7> value7, LogNameValuePair<T8> value8)
-            : base(messageId, level, options)
+            : base(messageId, level, options, userStory)
         {
             _value1 = value1;
             _value2 = value2;

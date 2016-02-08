@@ -249,7 +249,7 @@ namespace NWheels.UnitTests.Logging
                     Value = str,
                     IsDetail = true
                 };
-                ActivityLogNode activity = new NameValuePairActivityLogNode<int, string>(_s_string_TestComponentThisIsMyFunction, LogLevel.Debug, LogOptions.None, pair, pair2);
+                ActivityLogNode activity = new NameValuePairActivityLogNode<int, string>(_s_string_TestComponentThisIsMyFunction, LogLevel.Debug, LogOptions.None, null, pair, pair2);
                 this._threadLogAppender.AppendActivityNode(activity);
                 try
                 {

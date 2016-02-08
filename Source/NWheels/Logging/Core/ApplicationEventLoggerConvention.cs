@@ -261,6 +261,11 @@ namespace NWheels.Logging.Core
                             pairLocal.Field(x => x.IsDetail).Assign(m.Const(true));
                         }
 
+                        if ( details.Indexed )
+                        {
+                            pairLocal.Field(x => x.IsIndexed).Assign(m.Const(true));
+                        }
+
                         pairLocal.Field(x => x.MaxStringLength).Assign(m.Const(details.MaxStringLength));
                         pairLocal.Field(x => x.ContentTypes).Assign(m.Const(details.ContentTypes));
                     }
@@ -320,7 +325,7 @@ namespace NWheels.Logging.Core
                 using ( TT.CreateScope<TT.TItem>(activityType) )
                 {
                     var constructorArguments = 
-                        new IOperand[] { m.Const(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options) }
+                        new IOperand[] { m.Const(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options), m.Const(_attribute.UserStory) }
                         .Concat(_nameValuePairLocals)
                         .ToArray();
 

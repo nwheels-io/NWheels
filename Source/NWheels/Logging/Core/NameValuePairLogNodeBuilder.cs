@@ -16,6 +16,7 @@ namespace NWheels.Logging.Core
         private readonly List<IOperand> _values;
         private readonly List<string> _formats;
         private readonly List<bool?> _isDetails;
+        private readonly List<bool?> _isIndexed;
         private readonly List<int?> _maxStringLengths;
         private readonly List<LogContentTypes?> _contentTypes;
 
@@ -30,6 +31,7 @@ namespace NWheels.Logging.Core
             _values = new List<IOperand>(capacity: _s_logNodeGenericTypeByValueCount.Length);
             _formats = new List<string>(capacity: _s_logNodeGenericTypeByValueCount.Length);
             _isDetails = new List<bool?>(capacity: _s_logNodeGenericTypeByValueCount.Length);
+            _isIndexed = new List<bool?>(capacity: _s_logNodeGenericTypeByValueCount.Length);
             _maxStringLengths = new List<int?>(capacity: _s_logNodeGenericTypeByValueCount.Length);
             _contentTypes = new List<LogContentTypes?>(capacity: _s_logNodeGenericTypeByValueCount.Length);
         }
@@ -42,6 +44,7 @@ namespace NWheels.Logging.Core
             IOperand value, 
             string format = null,
             bool? isDetail = null,
+            bool? isIndexed = null,
             int? maxStringLength = null,
             LogContentTypes? contentTypes = null)
         {
@@ -55,6 +58,7 @@ namespace NWheels.Logging.Core
             _values.Add(value);
             _formats.Add(format);
             _isDetails.Add(isDetail);
+            _isIndexed.Add(isIndexed);
             _maxStringLengths.Add(maxStringLength);
             _contentTypes.Add(contentTypes);
         }
@@ -136,7 +140,11 @@ namespace NWheels.Logging.Core
             {
                 pairLocal.Field(x => x.IsDetail).Assign(_isDetails[index].Value);
             }
-            if ( _maxStringLengths[index].HasValue )
+            if ( _isIndexed[index].HasValue )
+            {
+                pairLocal.Field(x => x.IsIndexed).Assign(_isIndexed[index].Value);
+            }
+            if (_maxStringLengths[index].HasValue)
             {
                 pairLocal.Field(x => x.MaxStringLength).Assign(_maxStringLengths[index].Value);
             }

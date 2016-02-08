@@ -12,8 +12,8 @@ namespace NWheels.Logging
     {
         public DetailAttribute()
         {
-            MaxStringLength = 255;
             ContentTypes = LogContentTypes.Text;
+            MaxStringLength = 255;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,6 +83,17 @@ namespace NWheels.Logging
         public PerformanceMeasurementDetailAttribute()
         {
             base.ContentTypes = LogContentTypes.PerformanceStats;
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    public class UserStoryDetailAttribute : DetailAttribute
+    {
+        public UserStoryDetailAttribute()
+        {
+            base.ContentTypes = LogContentTypes.UserStory;
         }
     }
 }

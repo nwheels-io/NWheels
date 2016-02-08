@@ -13,6 +13,7 @@ namespace NWheels.Logging
         string FormatLogString();
         LogContentTypes GetContentTypes();
         bool IsBaseValue();
+        bool IsIndexed();
         bool IsIncludedInSingleLineText();
         object GetValueAsObject();
     }
@@ -25,6 +26,7 @@ namespace NWheels.Logging
         public T Value;
         public string Format;
         public bool IsDetail;
+        public bool IsIndexed;
         public int MaxStringLength;
         public LogContentTypes ContentTypes;
 
@@ -84,6 +86,13 @@ namespace NWheels.Logging
         public bool IsBaseValue()
         {
             return (this.Name != null && this.Name.StartsWith("$"));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        bool ILogNameValuePair.IsIndexed()
+        {
+            return this.IsIndexed;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
