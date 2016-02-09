@@ -17,7 +17,7 @@
     <copyright>Copyright © 2014-2015 Felix Berman</copyright>
     <tags>Fullstack Enterprise Application Architecture Productivity Cross Platform</tags>
     <dependencies>
-      <dependency id="FelixB.Hapil" version="0.9.28" />
+      <dependency id="FelixB.Hapil" version="0.9.29" />
       <dependency id="Autofac" version="3.5.2" />
     </dependencies>
     <references>
