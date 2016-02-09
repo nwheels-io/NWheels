@@ -89,7 +89,13 @@ namespace NWheels
 
         public void Rebuild(IComponentContext components)
         {
-            _orderedComponents = components.Resolve<IEnumerable<TService>>().ToArray();
+            var sinkRegistrations = components.ComponentRegistry.Registrations.Where(r => typeof(TService).IsAssignableFrom(r.Activator.LimitType));
+            var orderedSinkRegistrations = sinkRegistrations.OrderBy(r => GetPipelineIndex(r.Metadata));
+            _orderedComponents = orderedSinkRegistrations
+                .Select(r => components.ResolveComponent(r, new Autofac.Core.Parameter[0]))
+                .Cast<TService>()
+                .ToArray();
+
             _pipelineAsService = null;
         }
 
@@ -117,11 +123,42 @@ namespace NWheels
             return _pipelineAsService;
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IEnumerable<TService> GetOrderedComponents(IComponentContext context, IEnumerable<Meta<TService>> metaPipe)
+        {
+            var orderedMetaPipe = metaPipe.OrderBy(GetPipelineIndex);
+            return orderedMetaPipe.Select(m => m.Value);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static implicit operator Pipeline<TService>(TService[] orderedComponents)
         {
             return new Pipeline<TService>(orderedComponents);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static int GetPipelineIndex(Meta<TService> meta)
+        {
+            return GetPipelineIndex(meta.Metadata);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static int GetPipelineIndex(IDictionary<string, object> metadataValues)
+        {
+            object indexValue;
+
+            if (metadataValues.TryGetValue(AutofacExtensions.PipelineIndexMetadataKey, out indexValue))
+            {
+                return (int)indexValue;
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }

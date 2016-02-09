@@ -30,7 +30,7 @@ namespace NWheels.Extensions
             return builder.RegisterAdapter<IEnumerable<Meta<TService>>, Pipeline<TService>>(
                 (components, metaPipe) => {
                     return new Pipeline<TService>(
-                        metaPipe.OrderBy(GetPipelineIndex).Select(m => m.Value), 
+                        Pipeline<TService>.GetOrderedComponents(components, metaPipe),
                         components.Resolve<PipelineObjectFactory>());
                 }
             );
@@ -58,22 +58,6 @@ namespace NWheels.Extensions
             where TService : class
         {
             return container.Resolve<Pipeline<TService>>();
-        }
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static int GetPipelineIndex<T>(Meta<T> meta)
-        {
-            object indexValue;
-
-            if ( meta.Metadata.TryGetValue(AutofacExtensions.PipelineIndexMetadataKey, out indexValue) )
-            {
-                return (int)indexValue;
-            }
-            else
-            {
-                return 0;
-            }
         }
     }
 }

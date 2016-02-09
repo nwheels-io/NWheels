@@ -155,7 +155,6 @@ namespace NWheels.UnitTests.Extensions
             builder.RegisterInstance(Framework.DynamicModule);
             builder.RegisterType<PipelineObjectFactory>().SingleInstance();
 
-            builder.RegisterType<PipelineObjectFactory>().SingleInstance();
             builder.RegisterPipeline<ITestComponent>().InstancePerDependency();
             builder.RegisterType<ComponentB>().As<ITestComponent>().InstancePerDependency();
             builder.RegisterType<ComponentC>().As<ITestComponent>().LastInPipeline().InstancePerDependency();
@@ -179,6 +178,86 @@ namespace NWheels.UnitTests.Extensions
             Assert.That(pipeline2[0], Is.Not.SameAs(pipeline1[0]));
             Assert.That(pipeline2[1], Is.Not.SameAs(pipeline1[1]));
             Assert.That(pipeline2[2], Is.Not.SameAs(pipeline1[2]));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Rebuild_InstancePerDependency_NewSinksIncluded()
+        {
+            //-- arrange
+
+            var builder = new ContainerBuilder();
+
+            builder.RegisterInstance(Framework.DynamicModule);
+            builder.RegisterType<PipelineObjectFactory>().SingleInstance();
+
+            builder.RegisterPipeline<ITestComponent>().InstancePerDependency();
+            builder.RegisterType<ComponentA>().As<ITestComponent>().FirstInPipeline().InstancePerDependency();
+            builder.RegisterType<ComponentB>().As<ITestComponent>().LastInPipeline().InstancePerDependency();
+
+            var container = builder.Build();
+            var updater = new ContainerBuilder();
+
+            updater.RegisterType<ComponentC>().As<ITestComponent>().FirstInPipeline().InstancePerDependency();
+            updater.RegisterType<ComponentD>().As<ITestComponent>().LastInPipeline().InstancePerDependency();
+
+            //-- act
+
+            var pipeline0 = container.ResolvePipeline<ITestComponent>();
+            updater.Update(container.ComponentRegistry);
+            var pipeline1 = container.ResolvePipeline<ITestComponent>();
+
+            //-- assert
+
+            Assert.That(pipeline0.Count, Is.EqualTo(2));
+            Assert.That(pipeline0[0], Is.InstanceOf<ComponentA>());
+            Assert.That(pipeline0[1], Is.InstanceOf<ComponentB>());
+
+            Assert.That(pipeline1.Count, Is.EqualTo(4));
+            Assert.That(pipeline1[0], Is.InstanceOf<ComponentC>());
+            Assert.That(pipeline1[1], Is.InstanceOf<ComponentA>());
+            Assert.That(pipeline1[2], Is.InstanceOf<ComponentB>());
+            Assert.That(pipeline1[3], Is.InstanceOf<ComponentD>());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Rebuild_SingleInstance_NewSinksIncluded()
+        {
+            //-- arrange
+
+            var builder = new ContainerBuilder();
+
+            builder.RegisterInstance(Framework.DynamicModule);
+            builder.RegisterType<PipelineObjectFactory>().SingleInstance();
+
+            builder.RegisterPipeline<ITestComponent>().SingleInstance();
+            builder.RegisterType<ComponentA>().As<ITestComponent>().FirstInPipeline();
+            builder.RegisterType<ComponentB>().As<ITestComponent>().LastInPipeline();
+
+            var container = builder.Build();
+            var pipeline0 = container.ResolvePipeline<ITestComponent>();
+
+            //-- act
+
+            var updater = new ContainerBuilder();
+            updater.RegisterType<ComponentC>().As<ITestComponent>().FirstInPipeline();
+            updater.RegisterType<ComponentD>().As<ITestComponent>().LastInPipeline();
+            updater.Update(container.ComponentRegistry);
+            
+            var pipeline1 = container.ResolvePipeline<ITestComponent>();
+            pipeline1.Rebuild(container);
+
+            //-- assert
+
+            Assert.That(pipeline1, Is.SameAs(pipeline0));
+            Assert.That(pipeline1.Count, Is.EqualTo(4));
+            Assert.That(pipeline1[0], Is.InstanceOf<ComponentC>());
+            Assert.That(pipeline1[1], Is.InstanceOf<ComponentA>());
+            Assert.That(pipeline1[2], Is.InstanceOf<ComponentB>());
+            Assert.That(pipeline1[3], Is.InstanceOf<ComponentD>());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
