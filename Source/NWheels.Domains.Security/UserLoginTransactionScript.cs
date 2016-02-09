@@ -20,6 +20,7 @@ using NWheels.Entities;
 namespace NWheels.Domains.Security
 {
     [SecurityCheck.AllowAnonymous]
+    [TransactionScript(AuditName = "SecurityDomain.Login")]
     public class UserLoginTransactionScript : ITransactionScript
     {
         private readonly IFramework _framework;

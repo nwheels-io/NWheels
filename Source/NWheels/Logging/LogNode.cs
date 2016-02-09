@@ -22,9 +22,10 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private readonly string _messageId;
+        private readonly LogOptions _options;
         private LogContentTypes _contentTypes;
         private LogLevel _level;
-        private LogOptions _options;
+        private int _indexInLog;
         private long _millisecondsTimestamp;
         private ulong _cpuCyclesTimestamp;
         private IThreadLog _threadLog = null;
@@ -108,6 +109,16 @@ namespace NWheels.Logging
             get
             {
                 return _threadLog;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public int IndexInLog
+        {
+            get
+            {
+                return _indexInLog;
             }
         }
 
@@ -263,9 +274,10 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal virtual void AttachToThreadLog(IThreadLog thread, ActivityLogNode parent)
+        internal virtual void AttachToThreadLog(IThreadLog thread, ActivityLogNode parent, int indexInLog)
         {
             _threadLog = thread;
+            _indexInLog = indexInLog;
             _millisecondsTimestamp = thread.ElapsedThreadMilliseconds;
             _cpuCyclesTimestamp = thread.UsedThreadCpuCycles;
         }
@@ -392,6 +404,17 @@ namespace NWheels.Logging
         protected void BubbleContentTypesFrom(LogContentTypes subNodeContentTypes)
         {
             _contentTypes |= subNodeContentTypes;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected void AppendGroupKeyUp<T>(StringBuilder key, ref LogNameValuePair<T> nameValuePair)
+        {
+            if (nameValuePair.IsGroupingStats)
+            {
+                key.Append('\0');
+                key.Append(nameValuePair.Value);
+            }
         }
     }
 }

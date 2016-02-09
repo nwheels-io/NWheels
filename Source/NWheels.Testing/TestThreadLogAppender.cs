@@ -27,7 +27,7 @@ namespace NWheels.Testing
         public void AppendLogNode(LogNode node)
         {
             _logNodes.Add(node);
-            node.AttachToThreadLog(_threadLog, parent: null);
+            node.AttachToThreadLog(_threadLog, parent: null, indexInLog: 0);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ namespace NWheels.Testing
         public void AppendActivityNode(ActivityLogNode activity)
         {
             _logNodes.Add(activity);
-            activity.AttachToThreadLog(_threadLog, parent: null);
+            activity.AttachToThreadLog(_threadLog, parent: null, indexInLog: 0);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ namespace NWheels.Testing
             this.StartedThreadTaskType = taskType;
 
             _logNodes.Add(rootActivity);
-            rootActivity.AttachToThreadLog(_threadLog, parent: null);
+            rootActivity.AttachToThreadLog(_threadLog, parent: null, indexInLog: 0);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -23,6 +23,20 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static int GetHashCodeOrDefault(this object obj, int defaultValue = 0)
+        {
+            if (obj != null)
+            {
+                return obj.GetHashCode();
+            }
+            else
+            {
+                return defaultValue;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static T AsOrNull<T>(this object obj) where T : class
         {
             var objAsT = obj as T;

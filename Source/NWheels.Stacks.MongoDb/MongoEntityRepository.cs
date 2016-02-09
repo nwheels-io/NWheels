@@ -66,7 +66,7 @@ namespace NWheels.Stacks.MongoDb
         {
             _ownerRepo.ValidateOperationalState();
 
-            var queryLog = _logger.ExecutingQuery(((IQueryable)this).Expression, null/*_mongoCollection.AsQueryable().ToMongoQueryText()*/);
+            var queryLog = _logger.Query(_metadata.QualifiedName, _mongoCollection.Name, resultCount: -1);
             //_logger.QueryPlanExplained(_mongoCollection.AsQueryable().ExplainTyped<TEntityContract>().ToString());
 
             try
@@ -857,7 +857,7 @@ namespace NWheels.Stacks.MongoDb
                 var specializedExpression = _expressionSpecializer.Specialize(expression);
                 TResult result;
 
-                using ( _ownerRepo._logger.ExecutingQuery(specializedExpression, null) )
+                using ( _ownerRepo._logger.Query(_ownerRepo._metadata.QualifiedName, _ownerRepo._mongoCollection.Name, resultCount: -1) )
                 {
                     result = _actualQueryProvider.Execute<TResult>(specializedExpression);
                 }
@@ -936,6 +936,9 @@ namespace NWheels.Stacks.MongoDb
             {
                 try
                 {
+                    //TODO: below line is a hack; provide built-in ability to change a value of activity detail
+                    ((NameValuePairActivityLogNode<string, string, int>)_enumerationActivity).Value3.Value = _rowCount;
+
                     _enumerationActivity.Dispose();
                     _innerEnumerator.Dispose();
                 }
@@ -1014,7 +1017,7 @@ namespace NWheels.Stacks.MongoDb
 
             public IEnumerator<T> GetEnumerator()
             {
-                var queryActivity = _logger.ExecutingQuery(this.Expression, null /*_underlyingQuery.ToMongoQueryText()*/);
+                var queryActivity = _logger.Query(_ownerRepo._metadata.QualifiedName, _ownerRepo._mongoCollection.Name, resultCount: -1);
                 //_logger.QueryPlanExplained(_underlyingQuery.ExplainTyped<T>().ToString());
 
                 var actualResults = _underlyingQuery.GetEnumerator();

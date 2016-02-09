@@ -44,6 +44,21 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override Dictionary<string, object> GetParameters()
+        {
+            var parameterInfos = EntityMethod.GetParameters();
+            var parametersPairs = new Dictionary<string, object>();
+
+            for (int i = 0; i < parameterInfos.Length; i++)
+            {
+                parametersPairs[parameterInfos[i].Name] = Call.GetParameterValue(i);
+            }
+
+            return parametersPairs;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override IReadOnlyCollection<IMessageHeader> OnGetHeaders()
         {
             return null;
@@ -98,5 +113,29 @@ namespace NWheels.Processing.Commands
                 return _call;
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of AbstractCommandMessage
+
+        public override string AuditName
+        {
+            get
+            {
+                return EntityContract.Name + "." + EntityMethod.Name;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string CommandString
+        {
+            get
+            {
+                return string.Format("InvokeEntityMethod({0}.{1}, entityId={2})", EntityContract.Name, EntityMethod.Name, EntityId.Value);
+            }
+        }
+
+        #endregion
     }
 }

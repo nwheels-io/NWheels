@@ -11,8 +11,11 @@ namespace NWheels.Stacks.MongoDb
 {
     public interface IMongoDbLogger : IApplicationEventLogger
     {
-        [LogActivity]
-        ILogActivity ExecutingQuery(Expression expression, string nativeQuery);
+        [LogActivity(LogLevel.Verbose, CollectStats = true)]
+        ILogActivity Query(
+            [Detail(GroupStats = true, IncludeInSingleLineText = true)] string entity, 
+            [Detail(IncludeInSingleLineText = true)] string collection, 
+            [Detail(Mutable = true)] int resultCount);
 
         [LogDebug]
         void QueryPlanExplained([Detail(MaxStringLength = 1024)] string queryPlan);

@@ -16,7 +16,7 @@ namespace NWheels.Processing.Commands
         [LogError]
         EntityNotFoundException EntityNotFound(IEntityId id);
 
-        [LogActivity]
+        [LogActivity(LogLevel.Verbose, ToAuditLog = true)]
         ILogActivity ExecutingCommand(AbstractCommandMessage command, IEndpoint endpoint, ISession session, IPrincipal principal);
 
         [LogError]

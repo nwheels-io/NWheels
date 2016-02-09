@@ -65,6 +65,16 @@ namespace NWheels.Processing.Documents
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override string CommandString
+        {
+            get
+            {
+                return string.Format("FormatDocument(type={0}, outputFormat={1})", RequestType, OutputFormatIdName);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public DocumentFormatRequestType RequestType { get; private set; }
         public ApplicationEntityService EntityService { get; private set; }
         public IDomainObject DocumentModel { get; private set; }

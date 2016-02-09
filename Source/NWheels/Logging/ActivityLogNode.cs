@@ -14,15 +14,13 @@ namespace NWheels.Logging
         private bool _isClosed = false;
         private long? _finalMillisecondsDuration = null;
         private ulong? _finalCpuCycles = null;
-        private string _userStory = null;
         private Exception _exception = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected ActivityLogNode(string messageId, LogLevel level, LogOptions options, string userStory)
+        protected ActivityLogNode(string messageId, LogLevel level, LogOptions options)
             : base(messageId, LogContentTypes.PerformanceStats, level, options)
         {
-            _userStory = userStory;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -82,6 +80,74 @@ namespace NWheels.Logging
             snapshot.CpuTime = (long)this.MillisecondsCpuTime;
 
             return snapshot;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public LogNode TryFindLogNode(Func<LogNode, bool> predicate, Func<ActivityLogNode, bool> recursionPredicate = null)
+        {
+            if (predicate(this))
+            {
+                return this;
+            }
+
+            for (var node = _firstChild ; node != null ; node = node.NextSibling)
+            {
+                if (predicate(node))
+                {
+                    return node;
+                }
+
+                var activity = (node as ActivityLogNode);
+
+                if (activity != null)
+                {
+                    if (recursionPredicate == null || recursionPredicate(activity))
+                    {
+                        return activity.TryFindLogNode(predicate, recursionPredicate);
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IEnumerable<LogNode> FindLogNodes(Func<LogNode, bool> predicate, Func<ActivityLogNode, bool> recursionPredicate = null)
+        {
+            if (predicate(this))
+            {
+                yield return this;
+            }
+
+            for (var node = _firstChild; node != null; node = node.NextSibling)
+            {
+                if (predicate(node))
+                {
+                    yield return node;
+                }
+
+                var activity = (node as ActivityLogNode);
+
+                if (activity != null)
+                {
+                    if (recursionPredicate == null || recursionPredicate(activity))
+                    {
+                        foreach (var found in activity.FindLogNodes(predicate, recursionPredicate))
+                        {
+                            yield return found;
+                        }
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual string GetStatsGroupKey()
+        {
+            return MessageId;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -184,16 +250,6 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string UserStory
-        {
-            get
-            {
-                return _userStory;
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public Action<ActivityLogNode> Closed { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -217,15 +273,10 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal override void AttachToThreadLog(IThreadLog threadLog, ActivityLogNode parent)
+        internal override void AttachToThreadLog(IThreadLog threadLog, ActivityLogNode parent, int indexInLog)
         {
-            base.AttachToThreadLog(threadLog, parent);
+            base.AttachToThreadLog(threadLog, parent, indexInLog);
             _parent = parent;
-
-            if (_parent != null && string.IsNullOrEmpty(_userStory))
-            {
-                _userStory = _parent.UserStory;
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

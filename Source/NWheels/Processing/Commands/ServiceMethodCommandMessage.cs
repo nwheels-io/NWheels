@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Security.Principal;
@@ -33,6 +34,21 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override Dictionary<string, object> GetParameters()
+        {
+            var parameterInfos = ServiceMethod.GetParameters();
+            var parametersPairs = new Dictionary<string, object>();
+
+            for (int i = 0 ; i < parameterInfos.Length ; i++)
+            {
+                parametersPairs[parameterInfos[i].Name] = Call.GetParameterValue(i);
+            }
+            
+            return parametersPairs;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IMethodCallObject Call
         {
             get
@@ -60,5 +76,29 @@ namespace NWheels.Processing.Commands
                 return _call.MethodInfo;
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of AbstractCommandMessage
+
+        public override string AuditName
+        {
+            get
+            {
+                return ServiceContract.Name + "." + ServiceMethod.Name;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override string CommandString
+        {
+            get
+            {
+                return string.Format("InvokeServiceMethod({0}.{1})", ServiceContract.Name, ServiceMethod.Name);
+            }
+        }
+
+        #endregion
     }
 }

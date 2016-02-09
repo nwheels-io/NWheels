@@ -9,14 +9,13 @@ namespace NWheels.Logging
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     public abstract class LogAttributeBase : Attribute
     {
-        protected LogAttributeBase(LogLevel level, bool isActivity, bool isThread, bool isMethodCall, string userStory)
+        protected LogAttributeBase(LogLevel level, bool isActivity, bool isThread, bool isMethodCall)
         {
             this.Level = level;
             this.IsActivity = isActivity;
             this.IsThread = isThread;
             this.IsMethodCall = isMethodCall;
             this.Options = GetDefaultLogOptions(level, isActivity);
-            this.UserStory = userStory;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -24,7 +23,6 @@ namespace NWheels.Logging
         public ThreadTaskType TaskType { get; set; }
         public LogLevel Level { get; private set; }
         public LogOptions Options { get; private set; }
-        public string UserStory { get; private set; }
         public bool IsActivity { get; private set; }
         public bool IsThread { get; private set; }
         public bool IsMethodCall { get; private set; }
@@ -139,7 +137,7 @@ namespace NWheels.Logging
     public class LogDebugAttribute : LogAttributeBase
     {
         public LogDebugAttribute()
-            : base(LogLevel.Debug, isActivity: false, isThread: false, isMethodCall: false, userStory: null)
+            : base(LogLevel.Debug, isActivity: false, isThread: false, isMethodCall: false)
         {
         }
     }
@@ -149,7 +147,7 @@ namespace NWheels.Logging
     public class LogVerboseAttribute : LogAttributeBase
     {
         public LogVerboseAttribute()
-            : base(LogLevel.Verbose, isActivity: false, isThread: false, isMethodCall: false, userStory: null)
+            : base(LogLevel.Verbose, isActivity: false, isThread: false, isMethodCall: false)
         {
         }
     }
@@ -159,7 +157,7 @@ namespace NWheels.Logging
     public class LogInfoAttribute : LogAttributeBase
     {
         public LogInfoAttribute()
-            : base(LogLevel.Info, isActivity: false, isThread: false, isMethodCall: false, userStory: null)
+            : base(LogLevel.Info, isActivity: false, isThread: false, isMethodCall: false)
         {
         }
     }
@@ -169,7 +167,7 @@ namespace NWheels.Logging
     public class LogWarningAttribute : LogAttributeBase
     {
         public LogWarningAttribute()
-            : base(LogLevel.Warning, isActivity: false, isThread: false, isMethodCall: false, userStory: null)
+            : base(LogLevel.Warning, isActivity: false, isThread: false, isMethodCall: false)
         {
         }
     }
@@ -179,7 +177,7 @@ namespace NWheels.Logging
     public class LogErrorAttribute : LogAttributeBase
     {
         public LogErrorAttribute()
-            : base(LogLevel.Error, isActivity: false, isThread: false, isMethodCall: false, userStory: null)
+            : base(LogLevel.Error, isActivity: false, isThread: false, isMethodCall: false)
         {
         }
     }
@@ -189,8 +187,19 @@ namespace NWheels.Logging
     public class LogCriticalAttribute : LogAttributeBase
     {
         public LogCriticalAttribute()
-            : base(LogLevel.Critical, isActivity: false, isThread: false, isMethodCall: false, userStory: null)
+            : base(LogLevel.Critical, isActivity: false, isThread: false, isMethodCall: false)
         {
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class LogAuditAttribute : LogAttributeBase
+    {
+        public LogAuditAttribute()
+            : base(LogLevel.Audit, isActivity: false, isThread: false, isMethodCall: false)
+        {
+            base.ToAuditLog = true;
         }
     }
 
@@ -198,8 +207,8 @@ namespace NWheels.Logging
 
     public class LogActivityAttribute : LogAttributeBase
     {
-        public LogActivityAttribute(LogLevel level = LogLevel.Verbose, string userStory = null)
-            : base(level, isActivity: true, isThread: false, isMethodCall: false, userStory: userStory)
+        public LogActivityAttribute(LogLevel level = LogLevel.Verbose)
+            : base(level, isActivity: true, isThread: false, isMethodCall: false)
         {
         }
     }
@@ -209,7 +218,7 @@ namespace NWheels.Logging
     public class LogMethodAttribute : LogAttributeBase
     {
         public LogMethodAttribute()
-            : base(LogLevel.Info, isActivity: true, isThread: false, isMethodCall: true, userStory: null)
+            : base(LogLevel.Info, isActivity: true, isThread: false, isMethodCall: true)
         {
         }
     }
@@ -218,8 +227,8 @@ namespace NWheels.Logging
 
     public class LogThreadAttribute : LogAttributeBase
     {
-        public LogThreadAttribute(ThreadTaskType taskType, string userStory = null)
-            : base(LogLevel.Info, isActivity: true, isThread: true, isMethodCall: false, userStory: userStory)
+        public LogThreadAttribute(ThreadTaskType taskType)
+            : base(LogLevel.Info, isActivity: true, isThread: true, isMethodCall: false)
         {
             base.TaskType = taskType;
         }

@@ -239,7 +239,7 @@ namespace NWheels.Logging.Core
             {
                 var m = _underlyingWriter;
 
-                using ( TT.CreateScope<TT.TValue>(_signature.ArgumentType[argumentIndex]) )
+                using (TT.CreateScope<TT.TValue>(_signature.ArgumentType[argumentIndex]))
                 {
                     var pairLocal = m.Local<LogNameValuePair<TT.TValue>>();
                     pairLocal.Assign(m.New<LogNameValuePair<TT.TValue>>());
@@ -247,23 +247,30 @@ namespace NWheels.Logging.Core
                     pairLocal.Field(x => x.Name).Assign(m.Const(_signature.ArgumentName[argumentIndex]));
                     pairLocal.Field(x => x.Value).Assign(m.Argument<TT.TValue>(argumentIndex + 1));
 
-                    if ( _valueArgumentFormat[argumentIndex] != null )
+                    if (_valueArgumentFormat[argumentIndex] != null)
                     {
                         pairLocal.Field(x => x.Format).Assign(m.Const(_valueArgumentFormat[argumentIndex]));
                     }
 
                     var details = _valueArgumentDetails[argumentIndex];
 
-                    if ( details != null )
+                    if (details != null)
                     {
-                        if ( !details.IncludeInSingleLineText )
+                        if (!details.IncludeInSingleLineText)
                         {
                             pairLocal.Field(x => x.IsDetail).Assign(m.Const(true));
                         }
-
-                        if ( details.Indexed )
+                        if (details.Indexed)
                         {
                             pairLocal.Field(x => x.IsIndexed).Assign(m.Const(true));
+                        }
+                        if (details.Mutable)
+                        {
+                            pairLocal.Field(x => x.IsMutable).Assign(m.Const(true));
+                        }
+                        if (details.GroupStats)
+                        {
+                            pairLocal.Field(x => x.IsGroupingStats).Assign(m.Const(true));
                         }
 
                         pairLocal.Field(x => x.MaxStringLength).Assign(m.Const(details.MaxStringLength));
@@ -325,7 +332,7 @@ namespace NWheels.Logging.Core
                 using ( TT.CreateScope<TT.TItem>(activityType) )
                 {
                     var constructorArguments = 
-                        new IOperand[] { m.Const(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options), m.Const(_attribute.UserStory) }
+                        new IOperand[] { m.Const(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options) }
                         .Concat(_nameValuePairLocals)
                         .ToArray();
 

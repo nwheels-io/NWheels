@@ -14,6 +14,8 @@ namespace NWheels.Logging
         LogContentTypes GetContentTypes();
         bool IsBaseValue();
         bool IsIndexed();
+        bool IsMutable();
+        bool IsGroupingStats();
         bool IsIncludedInSingleLineText();
         object GetValueAsObject();
     }
@@ -27,6 +29,8 @@ namespace NWheels.Logging
         public string Format;
         public bool IsDetail;
         public bool IsIndexed;
+        public bool IsMutable;
+        public bool IsGroupingStats;
         public int MaxStringLength;
         public LogContentTypes ContentTypes;
 
@@ -93,6 +97,20 @@ namespace NWheels.Logging
         bool ILogNameValuePair.IsIndexed()
         {
             return this.IsIndexed;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        bool ILogNameValuePair.IsMutable()
+        {
+            return this.IsMutable;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        bool ILogNameValuePair.IsGroupingStats()
+        {
+            return this.IsGroupingStats;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

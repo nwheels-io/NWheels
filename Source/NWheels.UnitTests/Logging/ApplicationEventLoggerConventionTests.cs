@@ -610,7 +610,7 @@ namespace NWheels.UnitTests.Logging
 
             public void ThisIsMyVoidMethod(Action method)
             {
-                using ( ILogActivity activity = new NameValuePairActivityLogNode("Test.ThisIsMyVoidMethod", LogLevel.Debug, LogOptions.None, userStory: null) )
+                using ( ILogActivity activity = new NameValuePairActivityLogNode("Test.ThisIsMyVoidMethod", LogLevel.Debug, LogOptions.None) )
                 {
                     try
                     {
@@ -633,7 +633,7 @@ namespace NWheels.UnitTests.Logging
                 var pair3 = new LogNameValuePair<decimal> { Name = "value", Value = value };
 
                 using ( ILogActivity activity = new NameValuePairActivityLogNode<string, int, decimal>(
-                    "Test.ThisIsMyVoidMethodWithParameters", LogLevel.Debug, LogOptions.None, null, pair1, pair2, pair3) )
+                    "Test.ThisIsMyVoidMethodWithParameters", LogLevel.Debug, LogOptions.None, pair1, pair2, pair3) )
                 {
                     try
                     {
@@ -651,7 +651,7 @@ namespace NWheels.UnitTests.Logging
 
             public bool ThisIsMyFunction(Func<bool> method)
             {
-                using ( ILogActivity activity = new NameValuePairActivityLogNode("Test.ThisIsMyFunction", LogLevel.Debug, LogOptions.None, userStory: null) )
+                using ( ILogActivity activity = new NameValuePairActivityLogNode("Test.ThisIsMyFunction", LogLevel.Debug, LogOptions.None) )
                 {
                     try
                     {
@@ -673,7 +673,7 @@ namespace NWheels.UnitTests.Logging
                 var pair2 = new LogNameValuePair<decimal> { Name = "value", Value = value };
 
                 using ( ILogActivity activity =
-                    new NameValuePairActivityLogNode<int, decimal>("Test.ThisIsMyFunctionWithParameters", LogLevel.Debug, LogOptions.None, null, pair1, pair2) )
+                    new NameValuePairActivityLogNode<int, decimal>("Test.ThisIsMyFunctionWithParameters", LogLevel.Debug, LogOptions.None, pair1, pair2) )
                 {
                     try
                     {

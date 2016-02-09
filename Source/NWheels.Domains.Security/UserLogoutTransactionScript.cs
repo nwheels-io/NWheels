@@ -11,6 +11,7 @@ using NWheels.Utilities;
 
 namespace NWheels.Domains.Security
 {
+    [TransactionScript(AuditName = "SecurityDomain.Logout")]
     public class UserLogoutTransactionScript : ITransactionScript
     {
         private readonly ICoreSessionManager _sessionManager;

@@ -26,5 +26,6 @@ namespace NWheels.Processing
     {
         public bool SupportsInitializeInput { get; set; }
         public bool SupportsPreview { get; set; }
+        public string AuditName { get; set; }
     }
 }

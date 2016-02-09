@@ -18,6 +18,7 @@ namespace NWheels.Logging.Core
         private readonly ulong _threadStartCpuCycles;
         private ActivityLogNode _rootActivity;
         private ActivityLogNode _currentActivity;
+        private int _nodeCountInLog;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -34,6 +35,7 @@ namespace NWheels.Logging.Core
             _correlationId = _logId;
             _node = framework.CurrentNode;
             _clock = clock;
+            _nodeCountInLog = 0;
 
             if ( ThreadCpuTimeUtility.IsThreadCpuTimeSupported )
             {
@@ -41,7 +43,7 @@ namespace NWheels.Logging.Core
                 _threadStartCpuCycles = clock.ThreadCpuCycles;
             }
 
-            _rootActivity.AttachToThreadLog(this, parent: null);
+            _rootActivity.AttachToThreadLog(this, parent: null, indexInLog: _nodeCountInLog++);
             _registry.ThreadStarted(this);
         }
 
@@ -49,7 +51,7 @@ namespace NWheels.Logging.Core
 
         public void AppendNode(LogNode node, bool clearFailure = false)
         {
-            node.AttachToThreadLog(this, _currentActivity);
+            node.AttachToThreadLog(this, _currentActivity, indexInLog: _nodeCountInLog++);
             _currentActivity.AppendChildNode(node, clearFailure);
 
             var nodeAsActivity = (node as ActivityLogNode);

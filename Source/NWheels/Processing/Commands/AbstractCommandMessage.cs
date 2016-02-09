@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.Principal;
 using NWheels.Authorization;
 using NWheels.Processing.Messages;
@@ -34,9 +35,41 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public virtual Dictionary<string, object> GetParameters()
+        {
+            return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of Object
+
+        public override string ToString()
+        {
+            return CommandString;
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public IPrincipal Principal { get; private set; }
         public ISession Session { get; private set; }
         public bool IsSynchronous { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual string AuditName
+        {
+            get
+            {
+                return CommandString;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public abstract string CommandString { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
