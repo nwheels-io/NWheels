@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Autofac;
 using NWheels.Authorization;
 using NWheels.Core;
+using NWheels.DataObjects.Core;
+using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Processing.Messages;
 
@@ -89,6 +91,12 @@ namespace NWheels.Processing.Commands.Impl
                 if ( entityInstance != null )
                 {
                     command.Call.ExecuteOn(entityInstance);
+
+                    if (((IObject)entityInstance).IsModified)
+                    {
+                        ((IActiveRecord)entityInstance).Save();
+                    }
+
                     context.CommitChanges();
                     return command.Call.Result;
                 }
