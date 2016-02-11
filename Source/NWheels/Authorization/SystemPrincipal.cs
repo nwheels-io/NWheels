@@ -13,6 +13,17 @@ namespace NWheels.Authorization
 {
     public class SystemPrincipal : IPrincipal, IIdentity, IIdentityInfo
     {
+        #region Overrides of Object
+
+        public override string ToString()
+        {
+            return "System";
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Implementation of IPrincipal
 
         public bool IsOfType(Type accountEntityType)

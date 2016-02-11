@@ -23,6 +23,17 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of Object
+
+        public override string ToString()
+        {
+            return "User[id=" + this.UserId + ", login=" + this.LoginName + "]";
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Overrides of ClaimsPrincipal
 
         public override bool IsInRole(string role)

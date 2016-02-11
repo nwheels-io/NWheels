@@ -44,9 +44,10 @@ namespace NWheels.Logging
 
         public override string GetStatsGroupKey()
         {
+            bool first = true;
             var key = new StringBuilder(base.GetStatsGroupKey());
-            AppendGroupKeyUp(key, ref Value1);
-            return key.ToString();
+            AppendGroupKeyUp(key, ref Value1, ref first);
+            return EndGroupKey(key, ref first);
         }
 
         #endregion
@@ -83,10 +84,11 @@ namespace NWheels.Logging
 
         public override string GetStatsGroupKey()
         {
+            bool first = true;
             var key = new StringBuilder(base.GetStatsGroupKey());
-            AppendGroupKeyUp(key, ref Value1);
-            AppendGroupKeyUp(key, ref Value2);
-            return key.ToString();
+            AppendGroupKeyUp(key, ref Value1, ref first);
+            AppendGroupKeyUp(key, ref Value2, ref first);
+            return EndGroupKey(key, ref first);
         }
 
         #endregion
@@ -128,11 +130,12 @@ namespace NWheels.Logging
 
         public override string GetStatsGroupKey()
         {
+            bool first = true;
             var key = new StringBuilder(base.GetStatsGroupKey());
-            AppendGroupKeyUp(key, ref Value1);
-            AppendGroupKeyUp(key, ref Value2);
-            AppendGroupKeyUp(key, ref Value3);
-            return key.ToString();
+            AppendGroupKeyUp(key, ref Value1, ref first);
+            AppendGroupKeyUp(key, ref Value2, ref first);
+            AppendGroupKeyUp(key, ref Value3, ref first);
+            return EndGroupKey(key, ref first);
         }
 
         #endregion
@@ -177,12 +180,13 @@ namespace NWheels.Logging
 
         public override string GetStatsGroupKey()
         {
+            bool first = true;
             var key = new StringBuilder(base.GetStatsGroupKey());
-            AppendGroupKeyUp(key, ref Value1);
-            AppendGroupKeyUp(key, ref Value2);
-            AppendGroupKeyUp(key, ref Value3);
-            AppendGroupKeyUp(key, ref Value4);
-            return key.ToString();
+            AppendGroupKeyUp(key, ref Value1, ref first);
+            AppendGroupKeyUp(key, ref Value2, ref first);
+            AppendGroupKeyUp(key, ref Value3, ref first);
+            AppendGroupKeyUp(key, ref Value4, ref first);
+            return EndGroupKey(key, ref first);
         }
 
         #endregion
@@ -230,13 +234,14 @@ namespace NWheels.Logging
 
         public override string GetStatsGroupKey()
         {
+            bool first = true;
             var key = new StringBuilder(base.GetStatsGroupKey());
-            AppendGroupKeyUp(key, ref Value1);
-            AppendGroupKeyUp(key, ref Value2);
-            AppendGroupKeyUp(key, ref Value3);
-            AppendGroupKeyUp(key, ref Value4);
-            AppendGroupKeyUp(key, ref Value5);
-            return key.ToString();
+            AppendGroupKeyUp(key, ref Value1, ref first);
+            AppendGroupKeyUp(key, ref Value2, ref first);
+            AppendGroupKeyUp(key, ref Value3, ref first);
+            AppendGroupKeyUp(key, ref Value4, ref first);
+            AppendGroupKeyUp(key, ref Value5, ref first);
+            return EndGroupKey(key, ref first);
         }
 
         #endregion
@@ -288,14 +293,15 @@ namespace NWheels.Logging
 
         public override string GetStatsGroupKey()
         {
+            bool first = true;
             var key = new StringBuilder(base.GetStatsGroupKey());
-            AppendGroupKeyUp(key, ref Value1);
-            AppendGroupKeyUp(key, ref Value2);
-            AppendGroupKeyUp(key, ref Value3);
-            AppendGroupKeyUp(key, ref Value4);
-            AppendGroupKeyUp(key, ref Value5);
-            AppendGroupKeyUp(key, ref Value6);
-            return key.ToString();
+            AppendGroupKeyUp(key, ref Value1, ref first);
+            AppendGroupKeyUp(key, ref Value2, ref first);
+            AppendGroupKeyUp(key, ref Value3, ref first);
+            AppendGroupKeyUp(key, ref Value4, ref first);
+            AppendGroupKeyUp(key, ref Value5, ref first);
+            AppendGroupKeyUp(key, ref Value6, ref first);
+            return EndGroupKey(key, ref first);
         }
 
         #endregion
@@ -350,15 +356,16 @@ namespace NWheels.Logging
 
         public override string GetStatsGroupKey()
         {
+            bool first = true;
             var key = new StringBuilder(base.GetStatsGroupKey());
-            AppendGroupKeyUp(key, ref Value1);
-            AppendGroupKeyUp(key, ref Value2);
-            AppendGroupKeyUp(key, ref Value3);
-            AppendGroupKeyUp(key, ref Value4);
-            AppendGroupKeyUp(key, ref Value5);
-            AppendGroupKeyUp(key, ref Value6);
-            AppendGroupKeyUp(key, ref Value7);
-            return key.ToString();
+            AppendGroupKeyUp(key, ref Value1, ref first);
+            AppendGroupKeyUp(key, ref Value2, ref first);
+            AppendGroupKeyUp(key, ref Value3, ref first);
+            AppendGroupKeyUp(key, ref Value4, ref first);
+            AppendGroupKeyUp(key, ref Value5, ref first);
+            AppendGroupKeyUp(key, ref Value6, ref first);
+            AppendGroupKeyUp(key, ref Value7, ref first);
+            return EndGroupKey(key, ref first);
         }
 
         #endregion
@@ -416,16 +423,17 @@ namespace NWheels.Logging
 
         public override string GetStatsGroupKey()
         {
+            bool first = true;
             var key = new StringBuilder(base.GetStatsGroupKey());
-            AppendGroupKeyUp(key, ref Value1);
-            AppendGroupKeyUp(key, ref Value2);
-            AppendGroupKeyUp(key, ref Value3);
-            AppendGroupKeyUp(key, ref Value4);
-            AppendGroupKeyUp(key, ref Value5);
-            AppendGroupKeyUp(key, ref Value6);
-            AppendGroupKeyUp(key, ref Value7);
-            AppendGroupKeyUp(key, ref Value8);
-            return key.ToString();
+            AppendGroupKeyUp(key, ref Value1, ref first);
+            AppendGroupKeyUp(key, ref Value2, ref first);
+            AppendGroupKeyUp(key, ref Value3, ref first);
+            AppendGroupKeyUp(key, ref Value4, ref first);
+            AppendGroupKeyUp(key, ref Value5, ref first);
+            AppendGroupKeyUp(key, ref Value6, ref first);
+            AppendGroupKeyUp(key, ref Value7, ref first);
+            AppendGroupKeyUp(key, ref Value8, ref first);
+            return EndGroupKey(key, ref first);
         }
 
         #endregion

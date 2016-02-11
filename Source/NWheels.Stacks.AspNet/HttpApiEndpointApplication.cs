@@ -136,6 +136,24 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of Object
+
+        public override string ToString()
+        {
+            var httpContext = HttpContext.Current;
+
+            if (httpContext != null)
+            {
+                return "HttpApiEndpointApplication @ " + httpContext.Request.Url.Authority + httpContext.Request.ApplicationPath;
+            }
+
+            return "HttpApiEndpointApplication";
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void SessionModule_OnStart(object sender, EventArgs eventArgs)
         {
             var sessionId = Session.SessionID;

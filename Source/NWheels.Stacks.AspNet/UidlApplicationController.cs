@@ -643,21 +643,33 @@ namespace NWheels.Stacks.AspNet
             var queryString = Request.GetQueryString();
             var entityStateString = queryString.GetValueOrDefault("EntityState", EntityState.NewModified.ToString());
             var entityIdString = queryString.GetValueOrDefault("EntityId", null);
-
             var entityState = ParseUtility.Parse<EntityState>(entityStateString);
-            var jsonString = Request.Content.ReadAsStringAsync().Result;
+            var session = Session.Current;
 
-            var json = _context.EntityService.StoreEntityJson(entityName, entityState, entityIdString, jsonString);
+            using (var activity = _context.Logger.StoreEntity(
+                entityName, entityState, entityIdString, session.UserIdentity.LoginName, session.Endpoint, session.UserPrincipal))
+            {
+                try
+                {
+                    var jsonString = Request.Content.ReadAsStringAsync().Result;
+                    var json = _context.EntityService.StoreEntityJson(entityName, entityState, entityIdString, jsonString);
 
-            if ( json != null )
-            {
-                return ResponseMessage(new HttpResponseMessage() {
-                    Content = new StringContent(json, Encoding.UTF8, "application/json")
-                });
-            }
-            else
-            {
-                return StatusCode(HttpStatusCode.OK);
+                    if (json != null)
+                    {
+                        return ResponseMessage(new HttpResponseMessage() {
+                            Content = new StringContent(json, Encoding.UTF8, "application/json")
+                        });
+                    }
+                    else
+                    {
+                        return StatusCode(HttpStatusCode.OK);
+                    }
+                }
+                catch (Exception e)
+                {
+                    activity.Fail(e);
+                    throw;
+                }
             }
         }
 
@@ -681,9 +693,21 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            _context.EntityService.DeleteEntity(entityName, entityId);
+            var session = Session.Current;
 
-            return StatusCode(HttpStatusCode.OK);
+            using (var activity = _context.Logger.DeleteEntity(entityName, entityId, session.UserIdentity.LoginName, session.Endpoint, session.UserPrincipal))
+            {
+                try
+                {
+                    _context.EntityService.DeleteEntity(entityName, entityId);
+                    return StatusCode(HttpStatusCode.OK);
+                }
+                catch (Exception e)
+                {
+                    activity.Fail(e);
+                    throw;
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -134,6 +134,7 @@
     <Compile Include="Entities\Core\DatabaseInitializationCheckRegistration.cs" />
     <Compile Include="Entities\UnitOfWorkScopeOption.cs" />
     <Compile Include="Logging\Factories\CallLoggingAspectConvention.cs" />
+    <Compile Include="Logging\LogCallsAttribute.cs" />
     <Compile Include="Logging\LogOptions.cs" />
     <Compile Include="Logging\ThreadLogPersistenceLevel.cs" />
     <Compile Include="Processing\Commands\Impl\CommandActorBase.cs" />

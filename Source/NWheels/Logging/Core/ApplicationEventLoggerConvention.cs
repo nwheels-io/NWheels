@@ -268,9 +268,9 @@ namespace NWheels.Logging.Core
                         {
                             pairLocal.Field(x => x.IsMutable).Assign(m.Const(true));
                         }
-                        if (details.GroupStats)
+                        if (details.StatsOption != LogStatsOption.None)
                         {
-                            pairLocal.Field(x => x.IsGroupingStats).Assign(m.Const(true));
+                            pairLocal.Field(x => x.StatsOption).Assign(m.Const(details.StatsOption));
                         }
 
                         pairLocal.Field(x => x.MaxStringLength).Assign(m.Const(details.MaxStringLength));

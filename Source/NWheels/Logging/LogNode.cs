@@ -408,13 +408,34 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected void AppendGroupKeyUp<T>(StringBuilder key, ref LogNameValuePair<T> nameValuePair)
+        protected void AppendGroupKeyUp<T>(StringBuilder key, ref LogNameValuePair<T> nameValuePair, ref bool first)
         {
-            if (nameValuePair.IsGroupingStats)
+            if (nameValuePair.StatsOption == LogStatsOption.GroupBy)
             {
-                key.Append('\0');
+                if (first)
+                {
+                    first = false;
+                    key.Append('[');
+                }
+                else
+                {
+                    key.Append(',');
+                }
+
                 key.Append(nameValuePair.Value);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected string EndGroupKey(StringBuilder key, ref bool first)
+        {
+            if (!first)
+            {
+                key.Append(']');
+            }
+
+            return key.ToString();
         }
     }
 }

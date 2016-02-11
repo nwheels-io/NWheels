@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Net;
 using System.Security.Cryptography;
+using System.Security.Principal;
+using NWheels.Endpoints.Core;
+using NWheels.Entities;
 using NWheels.Logging;
 
 namespace NWheels.Stacks.AspNet
@@ -30,5 +33,22 @@ namespace NWheels.Stacks.AspNet
 
         [LogWarning]
         void FailedToDecryptSessionCookie(CryptographicException error);
+
+        [LogActivity(LogLevel.Audit)]
+        ILogActivity StoreEntity(
+            [Detail(IncludeInSingleLineText = true, Indexed = true)] string entityName,
+            [Detail(IncludeInSingleLineText = true, Indexed = true)] EntityState entityState,
+            [Detail(IncludeInSingleLineText = true, Indexed = true)] string entityId,
+            [Detail(Indexed = true)] string user,
+            [Detail] IEndpoint endpoint, 
+            [Detail] IPrincipal principal);
+
+        [LogActivity(LogLevel.Audit)]
+        ILogActivity DeleteEntity(
+            [Detail(IncludeInSingleLineText = true, Indexed = true)] string entityName,
+            [Detail(IncludeInSingleLineText = true, Indexed = true)] string entityId,
+            [Detail(Indexed = true)] string user,
+            [Detail] IEndpoint endpoint,
+            [Detail] IPrincipal principal);
     }
 }

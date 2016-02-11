@@ -33,6 +33,17 @@ namespace NWheels.Authorization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of Object
+
+        public override string ToString()
+        {
+            return "Anonymous";
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Implementation of IPrincipal
 
         public bool IsOfType(Type accountEntityType)

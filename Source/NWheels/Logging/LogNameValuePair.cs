@@ -15,7 +15,7 @@ namespace NWheels.Logging
         bool IsBaseValue();
         bool IsIndexed();
         bool IsMutable();
-        bool IsGroupingStats();
+        LogStatsOption GetStatsOption();
         bool IsIncludedInSingleLineText();
         object GetValueAsObject();
     }
@@ -30,7 +30,7 @@ namespace NWheels.Logging
         public bool IsDetail;
         public bool IsIndexed;
         public bool IsMutable;
-        public bool IsGroupingStats;
+        public LogStatsOption StatsOption;
         public int MaxStringLength;
         public LogContentTypes ContentTypes;
 
@@ -108,9 +108,9 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        bool ILogNameValuePair.IsGroupingStats()
+        LogStatsOption ILogNameValuePair.GetStatsOption()
         {
-            return this.IsGroupingStats;
+            return this.StatsOption;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

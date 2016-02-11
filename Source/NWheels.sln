@@ -113,6 +113,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Domains.SystemMonit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Domains.SystemMonitor.Tests", "NWheels.Domains.SystemMonitor.Tests\NWheels.Domains.SystemMonitor.Tests.csproj", "{17C6B360-014D-43FC-9260-D9EF473334A2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Tools.ChromeListener", "NWheels.Tools.ChromeListener\NWheels.Tools.ChromeListener.csproj", "{FAD1A0E9-C375-4C67-A7E5-4EDC5E8C9720}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -243,6 +245,10 @@ Global
 		{17C6B360-014D-43FC-9260-D9EF473334A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17C6B360-014D-43FC-9260-D9EF473334A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17C6B360-014D-43FC-9260-D9EF473334A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAD1A0E9-C375-4C67-A7E5-4EDC5E8C9720}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAD1A0E9-C375-4C67-A7E5-4EDC5E8C9720}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAD1A0E9-C375-4C67-A7E5-4EDC5E8C9720}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAD1A0E9-C375-4C67-A7E5-4EDC5E8C9720}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -291,5 +297,6 @@ Global
 		{0220E1CE-C5B6-4FFA-9700-39377ABDB79F} = {71D49538-44D0-4F25-9140-19043FC0E7E9}
 		{50958672-45AF-42B5-957D-84AB15A2EAFF} = {0220E1CE-C5B6-4FFA-9700-39377ABDB79F}
 		{17C6B360-014D-43FC-9260-D9EF473334A2} = {0220E1CE-C5B6-4FFA-9700-39377ABDB79F}
+		{FAD1A0E9-C375-4C67-A7E5-4EDC5E8C9720} = {CE3F724B-60C0-4274-B3F3-1C2CDD3D8531}
 	EndGlobalSection
 EndGlobal

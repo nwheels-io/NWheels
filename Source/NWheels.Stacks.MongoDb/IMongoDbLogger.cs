@@ -13,9 +13,9 @@ namespace NWheels.Stacks.MongoDb
     {
         [LogActivity(LogLevel.Verbose, CollectStats = true)]
         ILogActivity Query(
-            [Detail(GroupStats = true, IncludeInSingleLineText = true)] string entity, 
+            [Detail(StatsOption = LogStatsOption.GroupBy, IncludeInSingleLineText = true)] string entity, 
             [Detail(IncludeInSingleLineText = true)] string collection, 
-            [Detail(Mutable = true)] int resultCount);
+            [Detail(Mutable = true, StatsOption = LogStatsOption.Sum)] int resultCount);
 
         [LogDebug]
         void QueryPlanExplained([Detail(MaxStringLength = 1024)] string queryPlan);
