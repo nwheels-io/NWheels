@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.DataObjects;
 
 namespace NWheels.UI
 {
@@ -11,5 +12,11 @@ namespace NWheels.UI
     public interface IFrameworkUIConfig : IConfigurationSection
     {
         string WebContentRootPath { get; set; }
+
+        [PropertyContract.DefaultValue(true)]
+        bool EnableContentBundling { get; set; }
+
+        [PropertyContract.DefaultValue(true)]
+        bool EnableContentMinification { get; set; }
     }
 }

@@ -29,6 +29,7 @@ using NWheels.Concurrency;
 using NWheels.Endpoints.Core;
 using NWheels.Entities.Core;
 using NWheels.Processing.Documents;
+using NWheels.UI;
 
 namespace NWheels.Stacks.AspNet
 {
@@ -40,6 +41,7 @@ namespace NWheels.Stacks.AspNet
         private readonly IServiceBus _serviceBus;
         private readonly IMethodCallObjectFactory _callFactory;
         private readonly ISessionManager _sessionManager;
+        private readonly IFrameworkUIConfig _uiConfig;
         private readonly Dictionary<string, TransactionScriptEntry> _transactionScriptByName;
         private readonly ConcurrentDictionary<string, ConcurrentQueue<IMessageObject>> _pendingPushMessagesBySessionId;
         private readonly JsonSerializerSettings _uidlJsonSettings;
@@ -54,7 +56,8 @@ namespace NWheels.Stacks.AspNet
             IWebModuleContext context, 
             IServiceBus serviceBus, 
             IMethodCallObjectFactory callFactory,
-            ISessionManager sessionManager)
+            ISessionManager sessionManager,
+            IFrameworkUIConfig uiConfig)
         {
             _framework = framework;
             _components = components;
@@ -62,18 +65,27 @@ namespace NWheels.Stacks.AspNet
             _serviceBus = serviceBus;
             _callFactory = callFactory;
             _sessionManager = sessionManager;
+            _uiConfig = uiConfig;
 
             _transactionScriptByName = new Dictionary<string, TransactionScriptEntry>(StringComparer.InvariantCultureIgnoreCase);
             _pendingPushMessagesBySessionId = new ConcurrentDictionary<string, ConcurrentQueue<IMessageObject>>();
             _uidlJsonSettings = CreateUidlJsonSettings();
 
-            _scriptBundles = new ClientScriptBundles(
-                context, 
-                jsBundleUrlPath: "app/v/" + context.Application.Version + "/bundle.js",
-                cssBundleUrlPath: "app/v/" + context.Application.Version + "/bundle.css",
-                mapPath: MapStaticContentPath);
-            _indexHtml = _scriptBundles.ProcessHtml(LoadIndexHtml());
-            _scriptBundles.BuildBundles();
+            if (_uiConfig.EnableContentBundling)
+            {
+                _scriptBundles = new ClientScriptBundles(
+                    context,
+                    jsBundleUrlPath: "app/v/" + context.Application.Version + "/bundle.js",
+                    cssBundleUrlPath: "app/v/" + context.Application.Version + "/bundle.css",
+                    mapPath: MapStaticContentPath);
+
+                _indexHtml = _scriptBundles.ProcessHtml(LoadIndexHtml());
+                _scriptBundles.BuildBundles();
+            }
+            else
+            {
+                _indexHtml = LoadIndexHtml();
+            }
 
             RegisterTransactionScripts(components);
         }
@@ -750,7 +762,7 @@ namespace NWheels.Stacks.AspNet
         {
             var filePath = Path.Combine(_context.ContentRootPath, _context.SkinSubFolderName, "index.html");
             var fileContents = File.ReadAllText(filePath);
-            return _scriptBundles.ProcessHtml(fileContents);
+            return fileContents;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
