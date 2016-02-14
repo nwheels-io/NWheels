@@ -8,5 +8,6 @@ namespace NWheels.Hosting
         string InstanceId { get; }
         string EnvironmentName { get; }
         string EnvironmentType { get; }
+        string MachineName { get; }
     }
 }

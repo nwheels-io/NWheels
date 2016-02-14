@@ -14,9 +14,12 @@ namespace NWheels.Configuration.Core
         public const string AlwaysElementName = "Always";
         public const string IfElementName = "If";
         public const string CommentAttributeName = "comment";
+        public const string MachineAttributeName = "machine"; // same as MachineNameAttributeName
+        public const string MachineNameAttributeName = "machine-name"; // same as MachineAttributeName
         public const string NodeAttributeName = "node";
         public const string InstanceIdAttributeName = "instance-id";
-        public const string EnvironmentAttributeName = "environment";
+        public const string EnvironmentAttributeName = "environment"; // same as EnvironmentNameAttributeName
+        public const string EnvironmentNameAttributeName = "environment-name"; // same sa EnvironmentAttributeName
         public const string EnvironmentTypeAttributeName = "environment-type";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -154,22 +157,37 @@ namespace NWheels.Configuration.Core
 
         private bool ShouldApplyScope(XElement scopeElement)
         {
-            if ( !Match(_framework.CurrentNode.NodeName, scopeElement.GetAttributeIgnoreCase(NodeAttributeName)) )
+            if (!Match(_framework.CurrentNode.MachineName, scopeElement.GetAttributeIgnoreCase(MachineAttributeName)))
+            {
+                return false;
+            }
+            
+            if (!Match(_framework.CurrentNode.MachineName, scopeElement.GetAttributeIgnoreCase(MachineNameAttributeName)))
             {
                 return false;
             }
 
-            if ( !Match(_framework.CurrentNode.InstanceId, scopeElement.GetAttributeIgnoreCase(InstanceIdAttributeName)) )
+            if (!Match(_framework.CurrentNode.NodeName, scopeElement.GetAttributeIgnoreCase(NodeAttributeName)))
             {
                 return false;
             }
 
-            if ( !Match(_framework.CurrentNode.EnvironmentName, scopeElement.GetAttributeIgnoreCase(EnvironmentAttributeName)) )
+            if (!Match(_framework.CurrentNode.InstanceId, scopeElement.GetAttributeIgnoreCase(InstanceIdAttributeName)))
             {
                 return false;
             }
 
-            if ( !Match(_framework.CurrentNode.EnvironmentType, scopeElement.GetAttributeIgnoreCase(EnvironmentTypeAttributeName)) )
+            if (!Match(_framework.CurrentNode.EnvironmentName, scopeElement.GetAttributeIgnoreCase(EnvironmentAttributeName)))
+            {
+                return false;
+            }
+
+            if (!Match(_framework.CurrentNode.EnvironmentName, scopeElement.GetAttributeIgnoreCase(EnvironmentNameAttributeName)))
+            {
+                return false;
+            }
+
+            if (!Match(_framework.CurrentNode.EnvironmentType, scopeElement.GetAttributeIgnoreCase(EnvironmentTypeAttributeName)))
             {
                 return false;
             }
