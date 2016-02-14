@@ -21,6 +21,7 @@ namespace NWheels.UI.Toolbox
         private readonly List<string> _visibleFields;
         private readonly List<string> _hiddenFields;
         private UidlBuilder _uidlBuilder;
+        private int _nextFieldGroupId;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -42,6 +43,7 @@ namespace NWheels.UI.Toolbox
 
             _visibleFields = new List<string>();
             _hiddenFields = new List<string>();
+            _nextFieldGroupId = 1;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,6 +67,32 @@ namespace NWheels.UI.Toolbox
             }
 
             Fields.Add(field);
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public Form<TEntity> Range<T>(
+            string label,
+            Expression<Func<TEntity, T>> startPropertySelector,
+            Expression<Func<TEntity, T>> endPropertySelector,
+            params object[] presets)
+        {
+            var groupId = TakeNextFieldGroupId();
+            var startField = FindOrAddField(startPropertySelector);
+            var endField = FindOrAddField(endPropertySelector);
+
+            startField.Label = label;
+            startField.GroupId = groupId;
+            startField.GroupIndex = 0;
+            startField.Modifiers |= FormFieldModifiers.RangeStart;
+            endField.GroupId = groupId;
+            endField.GroupIndex = 1;
+            endField.Modifiers |= FormFieldModifiers.RangeEnd;
+
+            startField.StandardValues = presets.Select(v => v.ToString()).ToList();
+            startField.StandardValuesExclusive = true;
+            
             return this;
         }
 
@@ -209,6 +237,13 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private int TakeNextFieldGroupId()
+        {
+            return _nextFieldGroupId++;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void BuildFields(UidlBuilder builder)
         {
             var metaType = builder.MetadataCache.GetTypeMetadata(typeof(TEntity));
@@ -258,7 +293,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private FormField FindOrAddField(Expression<Func<TEntity, object>> fieldSelector)
+        private FormField FindOrAddField<T>(Expression<Func<TEntity, T>> fieldSelector)
         {
             var propertyName = fieldSelector.GetPropertyInfo().Name;
             var field = Fields.FirstOrDefault(f => f.PropertyName == propertyName);
@@ -315,6 +350,10 @@ namespace NWheels.UI.Toolbox
         public FormFieldType FieldType { get; set; }
         [DataMember]
         public FormFieldModifiers Modifiers { get; set; }
+        [DataMember]
+        public int? GroupId { get; set; }
+        [DataMember]
+        public int? GroupIndex { get; set; }
         [DataMember]
         public string LookupEntityName { get; set; }
         [DataMember]
@@ -400,7 +439,7 @@ namespace NWheels.UI.Toolbox
 
             if ( shouldSetDefaults )
             {
-                this.Modifiers = GetDefaultModifiers(this.FieldType);
+                this.Modifiers |= GetDefaultModifiers(this.FieldType);
             }
 
             this.OrderIndex = GetOrderIndex();
@@ -687,7 +726,9 @@ namespace NWheels.UI.Toolbox
         Password = 0x100,
         Confirm = 0x200,
         LookupShowSelectAll = 0x400,
-        System = 0x2000
+        RangeStart = 0x800,
+        RangeEnd = 0x1000,
+        System = 0x40000000
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -706,5 +747,35 @@ namespace NWheels.UI.Toolbox
         None = 0,
         Id = 10,
         Type = 20
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum TimeRangePreset
+    {
+        Last5Minutes,
+        Last15Minutes,
+        Last30Minutes,
+        LastHour,
+        Last3Hours,
+        Last4Hours,
+        Last6Hours,
+        Last12Hours,
+        Last24Hours,
+        Last3Days,
+        Last7Days,
+        Last30Days,
+        Last3Months,
+        Last6Months,
+        Last12Months,
+        Today,
+        Yesterday,
+        ThisWeek,
+        LastWeek,
+        ThisMonth,
+        LastMonth,
+        ThisQuarter,
+        ThisYear,
+        LastYear,
     }
 }

@@ -1395,6 +1395,14 @@ HEAD, JS/CSS LINKS
                     <span class="glyphicon glyphicon-th"></span>
                 </div>
             </div>
+            <!-- DATE-TIME RANGE PICKER -->
+            <div ng-if="uidl.fieldType==='Edit' && hasUidlModifier('DateTimePicker') && hasUidlModifier('RangeStart')"
+                 class="form-control m-b"
+                 id="{{::uniqueFieldId}}"
+                 name="{{::uniqueFieldId}}">
+                <i class="fa fa-calendar"></i>
+                <span></span> <b class="caret"></b>
+            </div>
             <!-- LOOKUP ELLIPSIS -->
             <div ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('Ellipsis')"
                  class="input-group m-b">
@@ -1521,6 +1529,45 @@ HEAD, JS/CSS LINKS
                     allowInputToggle: true
                 })
                 .on('dp.change', dateTimePickerValueChanged);
+            }
+            if ($scope.hasUidlModifier('DateTimePicker') && $scope.hasUidlModifier('RangeStart')) {
+                $scope.timeRangePresets = null;
+                $scope.dateTimeRangePickerCreated = false;
+                $scope.$http.get('app/timeRangePresets').then(function (response) {
+                    var presetDictionary = { };
+                    for (var i = 0; i < response.data.length ; i++) {
+                        var preset = response.data[i];
+                        if ($.inArray(preset.name, $scope.uidl.standardValues) >= 0) {
+                            presetDictionary[$scope.translate(preset.name)] = [moment(preset.start, 'YYYY-MM-DD HH:mm:ss'), moment(preset.end, 'YYYY-MM-DD HH:mm:ss')];
+                        }
+                    }
+                    $scope.timeRangePresets = presetDictionary;
+                });
+                $scope.displayDateRange = function(start, end) {
+                    $('#' + $scope.uniqueFieldId + ' span').html(start.format('YYYY-MM-DD') + ' - ' + end.format('YYYY-MM-DD'));
+                };
+                $scope.createDateTimeRangePicker = function() {
+                    if ($scope.dateTimeRangePickerCreated || !$scope.entity[$scope.uidl.propertyName] || !$scope.timeRangePresets) {
+                        return;
+                    }
+                    $('#' + $scope.uniqueFieldId).daterangepicker({
+                        startDate: moment($scope.entity[$scope.uidl.propertyName], 'YYYY-MM-DD HH:mm:ss'),
+                        endDate: moment($scope.entity[$scope.groupFields[0].propertyName], 'YYYY-MM-DD HH:mm:ss'),
+                        ranges: $scope.timeRangePresets,
+                    }, function(start, end, label) {
+                        $scope.displayDateRange(start, end);
+                        $scope.entity[$scope.uidl.propertyName] = start.format('YYYY-MM-DD HH:mm:ss');
+                        $scope.entity[$scope.groupFields[0].propertyName] = end.format('YYYY-MM-DD HH:mm:ss');
+                    });
+                    $scope.dateTimeRangePickerCreated = true;
+                };
+                $scope.$watch('entity', function(newValue, oldValue) {
+                    $scope.displayDateRange(moment($scope.entity[$scope.uidl.propertyName]), moment($scope.entity[$scope.groupFields[0].propertyName]));
+                    $scope.createDateTimeRangePicker();
+                });
+                $scope.$watch('timeRangePresets', function(newValue, oldValue) {
+                    $scope.createDateTimeRangePicker();
+                });
             }
         }
     </script>

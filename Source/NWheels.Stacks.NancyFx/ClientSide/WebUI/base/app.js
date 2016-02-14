@@ -1309,10 +1309,15 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
 
     m_controllerImplementations['Form'] = {
         implement: function (scope) {
+            function fieldHasModifier(field, modifier) {
+                return (field.modifiers && field.modifiers.indexOf(modifier) > -1);
+            };
+            
             scope.metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
-
             scope.tabSetIndex = 0;
-            scope.plainFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers!='Tab' && $.modifiers!='Section'").ToArray();
+            scope.plainFields = Enumerable.From(scope.uidl.fields).Where(function(f) {
+                return (!fieldHasModifier(f, 'Tag') && !fieldHasModifier(f, 'Section') && !fieldHasModifier(f, 'RangeEnd'));
+            }).ToArray();
             scope.sectionFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Section'").ToArray();
             scope.tabSetFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Tab'").ToArray();
 
@@ -1835,8 +1840,8 @@ theApp.directive('uidlGridField', ['uidlService', 'entityService', function (uid
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.directive('uidlFormField',
-['$timeout', '$rootScope', 'uidlService', 'entityService',
-function ($timeout, $rootScope, uidlService, entityService) {
+['$timeout', '$rootScope', 'uidlService', 'entityService', '$http',
+function ($timeout, $rootScope, uidlService, entityService, $http) {
     return {
         scope: {
             parentUidl: '=',
@@ -1855,6 +1860,7 @@ function ($timeout, $rootScope, uidlService, entityService) {
         controller: function ($scope) {
             $scope.uidlService = uidlService;
             $scope.entityService = entityService;
+            $scope.$http = $http;
             $scope.uniqueFieldId = $scope.parentUidl.elementName + '_' + $scope.uidl.propertyName;
             $scope.translate = $scope.uidlService.translate;
             $scope.hasUidlModifier = function (modifier) {
@@ -1865,6 +1871,12 @@ function ($timeout, $rootScope, uidlService, entityService) {
                 $scope.uidl.propertyName = toCamelCase($scope.uidl.propertyName);
             }
 
+            if ($scope.uidl.groupIndex===0) {
+                $scope.groupFields = Enumerable.From($scope.parentUidl.fields).Where(function(f) {
+                    return (f !== $scope.uidl && f.groupId === $scope.uidl.groupId)
+                }).OrderBy('$.groupIndex').ToArray();
+            }
+            
             if ($scope.uidl.fieldType==='Lookup') {
                 if ($scope.uidl.lookupEntityName) {
                     var metaType = uidlService.getMetaType($scope.uidl.lookupEntityName);

@@ -26,5 +26,20 @@ namespace NWheels.Extensions
         {
             return new DateTime(dt.Year, dt.Month, 1, 0, 0, 0, dt.Kind);
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static DateTime StartOfQuarter(this DateTime dt)
+        {
+            int quarterNumber = ((dt.Month - 1) / 3) + 1;
+            return new DateTime(dt.Year, (quarterNumber - 1) * 3 + 1, 1, 0, 0, 0, dt.Kind);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static DateTime StartOfyear(this DateTime dt)
+        {
+            return new DateTime(dt.Year, 1, 1, 0, 0, 0, dt.Kind);
+        }
     }
 }
