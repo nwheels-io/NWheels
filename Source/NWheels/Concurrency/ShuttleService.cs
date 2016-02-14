@@ -138,7 +138,7 @@ namespace NWheels.Concurrency
 
         public bool Board(T item)
         {
-            if ( _cancellation.IsCancellationRequested )
+            if (IsCancelled())
             {
                 return false;
             }
@@ -180,6 +180,14 @@ namespace NWheels.Concurrency
 
                 _departureAtUtc = _framework.UtcNow.Add(_boardingTimeout);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool IsCancelled()
+        {
+            var cancellation = _cancellation;
+            return (cancellation == null || cancellation.IsCancellationRequested);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
