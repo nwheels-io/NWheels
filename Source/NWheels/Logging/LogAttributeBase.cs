@@ -53,6 +53,14 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool ToAuditLogIfFailure
+        {
+            get { return GetLogOption(LogOptions.AuditLogIfFailure); }
+            set { SetLogOption(LogOptions.AuditLogIfFailure, value); }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public bool CollectCount
         {
             get { return GetLogOption(LogOptions.CollectCount); }

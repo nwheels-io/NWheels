@@ -13,10 +13,11 @@ namespace NWheels.Logging
         ThreadLog = 0x01,
         PlainLog = 0x02,
         AuditLog = 0x04,
-        CollectCount = 0x08,
-        CollectStats = 0x10,
-        RetainDetails = 0x20,
-        RetainThreadLog = 0x40,
+        AuditLogIfFailure = 0x08,
+        CollectCount = 0x10,
+        CollectStats = 0x20,
+        RetainDetails = 0x40,
+        RetainThreadLog = 0x80,
         PublishStats = 0x100,
     }
 }
