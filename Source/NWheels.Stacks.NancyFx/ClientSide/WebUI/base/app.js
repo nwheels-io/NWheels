@@ -1315,8 +1315,8 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             
             scope.metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
             scope.tabSetIndex = 0;
-            scope.plainFields = Enumerable.From(scope.uidl.fields).Where(function(f) {
-                return (!fieldHasModifier(f, 'Tag') && !fieldHasModifier(f, 'Section') && !fieldHasModifier(f, 'RangeEnd'));
+            scope.plainFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers!='Tab' && $.modifiers!='Section'").Where(function(f) {
+                return !fieldHasModifier(f, 'RangeEnd');
             }).ToArray();
             scope.sectionFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Section'").ToArray();
             scope.tabSetFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Tab'").ToArray();
