@@ -1039,6 +1039,7 @@ namespace NWheels.UI
         {
             private IReadOnlyList<IPropertyMetadata> _metaPropertyPath;
             private bool _needsJoinOperation;
+            private bool _needsForeignKeyNavigation;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1112,6 +1113,21 @@ namespace NWheels.UI
                     if ( _metaPropertyPath != null )
                     {
                         return _needsJoinOperation;
+                    }
+
+                    throw new InvalidOperationException("BuildMetaPropertyPath was not invoked on this QuerySelectItem instance.");
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool NeedsForeignKeyNavigation
+            {
+                get
+                {
+                    if (_metaPropertyPath != null)
+                    {
+                        return _needsForeignKeyNavigation;
                     }
 
                     throw new InvalidOperationException("BuildMetaPropertyPath was not invoked on this QuerySelectItem instance.");
@@ -1197,6 +1213,7 @@ namespace NWheels.UI
 
                 for ( int i = 0 ; i < PropertyPath.Count ; i++ )
                 {
+                    var isLastStep = (i == PropertyPath.Count - 1);
                     var stepMetaProperty = stepMetaType.FindPropertyByNameIncludingDerivedTypes(PropertyPath[i]);
                     metaPropertyPath.Add(stepMetaProperty);
 
@@ -1206,10 +1223,14 @@ namespace NWheels.UI
 
                         if ( stepMetaProperty.ClrType != stepMetaProperty.Relation.RelatedPartyType.ContractType )
                         {
-                            _needsJoinOperation = (i < PropertyPath.Count - 1);
+                            _needsJoinOperation = !isLastStep;
+                        }
+                        else if (stepMetaProperty.RelationalMapping != null && stepMetaProperty.RelationalMapping.IsForeignKeyEmbeddedInParent)
+                        {
+                            _needsForeignKeyNavigation = !isLastStep;
                         }
                     }
-                    else if ( i != PropertyPath.Count - 1 )
+                    else if ( !isLastStep )
                     {
                         throw new ArgumentException(string.Format(
                             "Invalid property path for entity '{0}': {1}", metaType.QualifiedName, string.Join(".", PropertyPath)));
@@ -2116,7 +2137,7 @@ namespace NWheels.UI
             {
                 if ( _queryOptions != null )
                 {
-                    foreach ( var selectItem in _queryOptions.SelectPropertyNames.Where(s => s.NeedsJoinOperation) )
+                    foreach ( var selectItem in _queryOptions.SelectPropertyNames.Where(s => s.NeedsJoinOperation || s.NeedsForeignKeyNavigation) )
                     {
                         IPropertyMetadata metaProperty;
                         var metaType = metaTypes.FirstOrDefault(t => t.TryGetPropertyByName(selectItem.PropertyPath.First(), out metaProperty));
