@@ -1136,6 +1136,28 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public bool NeedsForeignKeyDisplayName
+            {
+                get
+                {
+                    var property = this.MetaProperty;
+
+                    if (property == null)
+                    {
+                        throw new InvalidOperationException("BuildMetaPropertyPath was not invoked on this QuerySelectItem instance.");
+                    }
+
+                    return (
+                        PropertyPath.Count == 1 &&
+                        !property.IsCollection &&
+                        property.Relation != null &&
+                        property.Relation.RelatedPartyType != null && 
+                        property.Relation.RelatedPartyType.DisplayNameProperty != null);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             void IBuildCacheKey.BuildCacheKey(StringBuilder key)
             {
                 key.Append("/[");
@@ -1239,6 +1261,19 @@ namespace NWheels.UI
 
                 _metaPropertyPath = metaPropertyPath;
                 return metaPropertyPath;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal bool IsForeignKeyDisplayNameFor(IPropertyMetadata navigationProperty)
+            {
+                return (
+                    navigationProperty.Relation != null &&
+                    navigationProperty.Relation.RelatedPartyType != null &&
+                    navigationProperty.Relation.RelatedPartyType.DisplayNameProperty != null &&
+                    PropertyPath.Count == 2 &&
+                    PropertyPath[0] == navigationProperty.Name &&
+                    PropertyPath[1] == navigationProperty.Relation.RelatedPartyType.DisplayNameProperty.Name);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -2069,6 +2104,7 @@ namespace NWheels.UI
                     properties = ReplaceRelationPropertiesWithForeignKeys(metaTypes, properties);
                     ConfigureEmbeddedCollectionProperties(metaTypes, properties);
                     IncludeNavigationProperties(metaTypes, properties);
+                    //IncludeForeignKeyDisplayNameProperties(metaTypes, properties);
 
                     properties.Insert(0, CreateObjectTypeProperty());
                     properties.Insert(1, CreateEntityIdProperty());
@@ -2166,6 +2202,38 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private void IncludeForeignKeyDisplayNameProperties(ITypeMetadata[] metaTypes, IList<JsonProperty> jsonPproperties)
+            {
+                if (_queryOptions != null)
+                {
+                    foreach (var selectItem in _queryOptions.SelectPropertyNames.Where(s => s.NeedsForeignKeyDisplayName))
+                    {
+                        IPropertyMetadata metaProperty = null;
+                        var metaType = metaTypes.FirstOrDefault(t => t.TryGetPropertyByName(selectItem.PropertyPath.First(), out metaProperty));
+
+                        if (metaType != null && metaProperty != null)
+                        {
+                            EnsureForeignKeyDisplayNameProperty(selectItem, metaProperty, jsonPproperties);
+                        }
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void EnsureForeignKeyDisplayNameProperty(QuerySelectItem selectItem, IPropertyMetadata metaProperty, IList<JsonProperty> jsonProperties)
+            {
+                var displayNamePropertyExists = _queryOptions.SelectPropertyNames.Any(s => s.IsForeignKeyDisplayNameFor(metaProperty));
+
+                if (!displayNamePropertyExists)
+                {
+                    var displayNameProperty = CreateNavigationDisplayNameProperty(selectItem, metaProperty);
+                    jsonProperties.Add(displayNameProperty);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private JsonProperty CreateReplacementForeignKeyProperty(IPropertyMetadata metaProperty, JsonProperty originalJsonProperty)
             {
                 var replacingJsonProperty = new JsonProperty {
@@ -2194,6 +2262,15 @@ namespace NWheels.UI
 
                 navigationJsonProperty.ValueProvider = new NavigationValueProvider(selectItem, firstStepMetaProperty);
                 return navigationJsonProperty;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private JsonProperty CreateNavigationDisplayNameProperty(QuerySelectItem selectItem, IPropertyMetadata metaProperty)
+            {
+                var displayNameSelectItem = new QuerySelectItem(metaProperty.Name + "." + metaProperty.Relation.RelatedPartyType.DisplayNameProperty.Name);
+                displayNameSelectItem.BuildMetaPropertyPath(metaProperty.DeclaringContract);
+                return CreateNavigationProperty(displayNameSelectItem, metaProperty);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

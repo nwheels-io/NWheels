@@ -1935,6 +1935,32 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
                             }
                         });
                     }
+
+                    if ($scope.hasUidlModifier('Ellipsis')) {
+                        $scope.getLookupDisplayText = function() {
+                            if ($scope.displayName) {
+                                var idText = $scope.entity[$scope.uidl.propertyName] + ' | ';
+                                if (idText.length < 15) {
+                                    return idText + $scope.displayName;
+                                }
+                            }
+                            return $scope.entity[$scope.uidl.propertyName];
+                        };
+                        
+                        $scope.$watch('entity.' + $scope.uidl.propertyName, function(newValue, oldValue) {
+                            $scope.displayName = null;
+                            if (newValue) {
+                                var query = new EntityQueryBuilder($scope.uidl.lookupEntityName);
+                                query.select($scope.lookupTextProperty);
+                                query.where($scope.lookupValueProperty, newValue);
+                                $http.get(query.getQueryUrl()).then(function(response) {
+                                    if (response.data.ResultSet && response.data.ResultSet.length == 1) {
+                                        $scope.displayName = response.data.ResultSet[0][$scope.lookupTextProperty];
+                                    }
+                                });
+                            }
+                        });
+                    }
                 } else if ($scope.uidl.standardValues) {
                     $scope.lookupValueProperty = 'id';
                     $scope.lookupTextProperty = 'text';

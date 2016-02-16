@@ -1411,7 +1411,7 @@ HEAD, JS/CSS LINKS
                         ng-init="isNowFocused=false" 
                         ng-focus="isNowFocused=!hasUidlModifier('ReadOnly')" 
                         ng-blur="isNowFocused=false"                        
-                        ng-model="entity[uidl.propertyName]"
+                        value="{{getLookupDisplayText()}}"
                         readonly
                         id="{{::uniqueFieldId}}"
                         name="{{::uniqueFieldId}}"> 

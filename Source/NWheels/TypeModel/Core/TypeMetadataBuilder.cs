@@ -212,6 +212,13 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        IPropertyMetadata ITypeMetadata.DisplayNameProperty
+        {
+            get { return this.DisplayNameProperty; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         IReadOnlyList<IPropertyMetadata> ITypeMetadata.DefaultDisplayProperties
         {
             get { return _defaultDisplayPropertiesAdapter; }
@@ -255,6 +262,16 @@ namespace NWheels.DataObjects.Core
             get
             {
                 return (PrimaryKey != null && PrimaryKey.Properties.Count == 1 ? PrimaryKey.Properties[0] : null);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public PropertyMetadataBuilder DisplayNameProperty
+        {
+            get
+            {
+                return (DefaultDisplayProperties != null && DefaultDisplayProperties.Count == 1 ? DefaultDisplayProperties[0] : null);
             }
         }
 

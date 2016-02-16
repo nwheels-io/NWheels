@@ -174,7 +174,7 @@ function EntityQueryBuilder(entityName, commandUrl) {
         me._filter.push({ 
             property: property,
             value: value,
-            operator: operator || ':eq'
+            operator: operator || 'eq'
         });
         return me;
     };

@@ -168,6 +168,17 @@ namespace NWheels.UI.Toolbox
             {
             }
 
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal GridColumn(ITypeMetadata metaType, FormField lookupField)
+                : this(
+                    metaType, 
+                    navigations: new[] { lookupField.PropertyName, lookupField.LookupDisplayProperty },
+                    columnType: GridColumnType.Hidden)
+            {
+            }
+
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             internal GridColumn(
@@ -233,6 +244,16 @@ namespace NWheels.UI.Toolbox
             public bool IsFilterSupported { get; set; }
             [DataMember]
             public string RelatedEntityName { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal bool HasDataForLookupField(FormField field)
+            {
+                return (
+                    Navigations.Length == 2 && 
+                    Navigations[0] == field.PropertyName && 
+                    Navigations[1] == field.LookupDisplayProperty);
+            }
             
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -491,6 +512,16 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal void EnsureDataForLookupField(FormField field)
+        {
+            if (!DisplayColumns.Any(c => c.HasDataForLookupField(field)))
+            {
+                DisplayColumns.Add(new GridColumn(MetaType, field));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private bool ShouldDisplayPropertyByDefault(IPropertyMetadata metaProperty)
         {
             return (
@@ -508,6 +539,7 @@ namespace NWheels.UI.Toolbox
                 metaProperty.ClrType == typeof(DateTime) || 
                 metaProperty.ClrType == typeof(TimeSpan));
         }
+
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         private int GetColumnPropertyDefaultOrder(IPropertyMetadata metaProperty)
@@ -557,6 +589,7 @@ namespace NWheels.UI.Toolbox
         Enum = 30,
         Image = 40,
         Link = 50,
-        Key = 60
+        Key = 60,
+        Hidden = 100
     }
 }

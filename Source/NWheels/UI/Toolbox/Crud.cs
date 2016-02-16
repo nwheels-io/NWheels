@@ -139,13 +139,18 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected override void PostDescribePresenter(PresenterBuilder<Crud<TEntity>, Empty.Data, ICrudViewState<TEntity>> presenter)
+        {
+            ConfigureForms();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void OnBuild(UidlBuilder builder)
         {
             builder.RegisterMetaType(typeof(TEntity));
 
             var metaType = builder.MetadataCache.GetTypeMetadata(typeof(TEntity));
-
-            ConfigureForms();
 
             builder.BuildManuallyInstantiatedNodes(Form, FormTypeSelector);
         }
@@ -201,6 +206,13 @@ namespace NWheels.UI.Toolbox
 
             foreach ( var field in form.Fields )
             {
+                //if (field.FieldType == FormFieldType.Lookup && 
+                //    (field.Modifiers & FormFieldModifiers.Ellipsis) != 0 && 
+                //    !string.IsNullOrEmpty(field.LookupDisplayProperty))
+                //{
+                //    Grid.EnsureDataForLookupField(field);
+                //}
+
                 var nestedForm = field.NestedWidget as IUidlForm;
 
                 if ( nestedForm != null )

@@ -37,8 +37,11 @@ namespace NWheels.UI
 
         void UidlBuilder.IBuildableUidlNode.DescribePresenter(UidlBuilder builder)
         {
-            DescribePresenter(new PresenterBuilder<TWidget, TData, TState>(builder, this));
+            var presenter = new PresenterBuilder<TWidget, TData, TState>(builder, this);
+            
+            DescribePresenter(presenter);
             builder.DescribeNodePresenters(this.GetNestedWidgets().Cast<AbstractUidlNode>().ToArray());
+            PostDescribePresenter(presenter);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -51,6 +54,12 @@ namespace NWheels.UI
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected abstract void DescribePresenter(PresenterBuilder<TWidget, TData, TState> presenter);
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void PostDescribePresenter(PresenterBuilder<TWidget, TData, TState> presenter)
+        {
+        }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
