@@ -1944,7 +1944,10 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
                                     return idText + $scope.displayName;
                                 }
                             }
-                            return $scope.entity[$scope.uidl.propertyName];
+                            if ($scope.entity) {
+                                return $scope.entity[$scope.uidl.propertyName];
+                            }
+                            return null;
                         };
                         
                         $scope.$watch('entity.' + $scope.uidl.propertyName, function(newValue, oldValue) {
