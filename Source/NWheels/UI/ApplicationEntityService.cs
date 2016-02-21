@@ -1110,7 +1110,12 @@ namespace NWheels.UI
             {
                 get
                 {
-                    if ( _metaPropertyPath != null )
+                    if (SpecialName != FieldSpecialName.None)
+                    {
+                        return false;
+                    }
+
+                    if (_metaPropertyPath != null)
                     {
                         return _needsJoinOperation;
                     }
@@ -1125,6 +1130,11 @@ namespace NWheels.UI
             {
                 get
                 {
+                    if (SpecialName != FieldSpecialName.None)
+                    {
+                        return false;
+                    }
+
                     if (_metaPropertyPath != null)
                     {
                         return _needsForeignKeyNavigation;
