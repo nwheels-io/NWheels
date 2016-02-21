@@ -1761,6 +1761,12 @@ theApp.directive('uidlScreenPart', ['uidlService', 'entityService', function (ui
             $scope.$watch('uidl', function (newValue, oldValue) {
                 console.log('uidlScreenPart::watch(uidl)', oldValue.qualifiedName, '->', $scope.uidl.qualifiedName);
                 uidlService.implementController($scope);
+                
+                var initFuncName = 'initWidget_ScreenPart';
+                var initFunc = window[initFuncName];
+                if (typeof initFunc === 'function') {
+                    initFunc($scope);
+                }
             });
             //$scope.$on($scope.uidl.qualifiedName + ':NavigatingAway', function () {
             //    $scope.$destroy();

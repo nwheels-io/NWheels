@@ -126,7 +126,7 @@ HEAD, JS/CSS LINKS
     </style>
 </head>
 
-<body>
+<body class="pace-done">
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     PAGE BODY
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -387,7 +387,7 @@ HEAD, JS/CSS LINKS
             <div class="row border-bottom">
                 <nav class="navbar navbar-static-top gray-bg" role="navigation" style="margin-bottom: 0">
                     <div class="navbar-header">
-                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>                        
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
                         <form role="search" class="navbar-form-custom" action="search_results.html">
                             <div class="form-group">
                                 <!--input type="text" placeholder="Search for something..." class="form-control" name="top-search" id="top-search"-->
@@ -518,6 +518,10 @@ HEAD, JS/CSS LINKS
         function initWidget_ManagementConsole($scope){
             $scope.$timeout(function() {
                 $('#side-menu').metisMenu();
+                $('.navbar-minimalize').click(function () {
+                    $("body").toggleClass("mini-navbar");
+                    SmoothlyMenu();
+                });
             });
         }
     </script>
@@ -1408,7 +1412,7 @@ HEAD, JS/CSS LINKS
             <!-- LOOKUP ELLIPSIS -->
             <div ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('Ellipsis')"
                  class="input-group m-b">
-                 <span ng-show ="entity" class="input-group-addon">{{entity[uidl.propertyName]}}</span>
+                 <span ng-show ="entity && entity[uidl.propertyName]" class="input-group-addon">{{entity[uidl.propertyName]}}</span>
                  <input type="text" 
                         class="form-control"
                         ng-init="isNowFocused=false" 
@@ -2025,8 +2029,12 @@ HEAD, JS/CSS LINKS
                 document.getElementById('iframe_content_download').src = url;
             };
         }]);
-        
+
         /*
+        function initWidget_ScreenPart($scope) {
+            alert('initWidget_ScreenPart : ' + $scope.uidl.qualifiedName);
+        }
+
         angular.module('theApp').service('skinService', ['$rootScope', '$q', 'uidlService', 
         function($rootScope, $q, uidlService) {
             
