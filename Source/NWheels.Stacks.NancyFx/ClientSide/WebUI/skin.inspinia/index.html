@@ -660,7 +660,7 @@ HEAD, JS/CSS LINKS
                         ng-disabled="commandInProgress"
                         ng-click="invokeCommand(command)"
                         ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
-                    ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                    ><i ng-if="command.icon" class="fa fa-{{commandInProgress ? 'spinner' : command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                 </div>
             </div>
         </div>
@@ -1187,6 +1187,7 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/Form">
         <form class="form-horizontal" id="{{::uidl.elementName}}">
+            <fieldset ng-disabled="commandInProgress">
             <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
             <div ng-if="plainFields.length <= 6" class="form-group" style="margin-bottom:0px;" ng-repeat="field in plainFields">
                 <label class="control-label"
@@ -1238,6 +1239,7 @@ HEAD, JS/CSS LINKS
                             ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                 </div>
             </div>
+            </fieldset>
         </form>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/FormBigFrontEnd">

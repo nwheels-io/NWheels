@@ -1177,15 +1177,16 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                         },
                         function (fault) {
                             scope.$emit(scope.uidl.qualifiedName + ':StoreEntityFailed', commandService.createFaultInfo(fault));
+                            scope.commandInProgress = false;
+                            scope.resetFormState();
                         }
                     );
                 } else {
                     if (scope.model.isNew) {
                         scope.resultSet.push(entity);
                     }
+                    scope.refresh();
                 }
-
-                scope.refresh();
             };
 
             scope.rejectChanges = function (entity) {
@@ -1204,6 +1205,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                     scope.$broadcast(':global:FormValidating', validationResult);
                     $timeout(function() {
                         if (validationResult.isValid===true) {
+                            scope.resetFormState({ commandInProgress: true });
                             scope.$emit(command.qualifiedName + ':Executing');
                         } else {
                             scope.commandInProgress = false;
@@ -1213,6 +1215,14 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                     scope.$emit(command.qualifiedName + ':Executing');
                 }
             }
+            
+            scope.resetFormState = function(state) {
+                if (scope.uidl.form) {
+                    scope.$broadcast(scope.uidl.form.qualifiedName + ':StateResetter', state);
+                } else if (scope.uidl.formTypeSelector) {
+                    scope.$broadcast(scope.uidl.formTypeSelector.qualifiedName + ':StateResetter', state);
+                }
+            };
 
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function (event, data) {
                 scope.commandInProgress = false;
@@ -1385,8 +1395,12 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             });
 
             scope.$on(scope.uidl.qualifiedName + ':StateResetter', function (event, data) {
-                scope.commandInProgress = false;
-                scope.tabSetIndex = 0;
+                if (data && data.commandInProgress) {
+                    scope.commandInProgress = data.commandInProgress;
+                } else {
+                    scope.commandInProgress = false;
+                    scope.tabSetIndex = 0;
+                }
             });
         }
     };
