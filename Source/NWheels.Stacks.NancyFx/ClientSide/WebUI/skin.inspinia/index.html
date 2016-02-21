@@ -1408,12 +1408,13 @@ HEAD, JS/CSS LINKS
             <!-- LOOKUP ELLIPSIS -->
             <div ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('Ellipsis')"
                  class="input-group m-b">
+                 <span ng-show ="entity" class="input-group-addon">{{entity[uidl.propertyName]}}</span>
                  <input type="text" 
                         class="form-control"
                         ng-init="isNowFocused=false" 
                         ng-focus="isNowFocused=!hasUidlModifier('ReadOnly')" 
                         ng-blur="isNowFocused=false"                        
-                        value="{{getLookupDisplayText()}}"
+                        ng-model="displayName"
                         readonly
                         id="{{::uniqueFieldId}}"
                         name="{{::uniqueFieldId}}"> 
