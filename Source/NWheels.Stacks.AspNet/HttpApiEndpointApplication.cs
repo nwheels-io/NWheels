@@ -208,7 +208,8 @@ namespace NWheels.Stacks.AspNet
                         (context != null && context.Request != null ? context.Request.HttpMethod : "N/A"),
                         (context != null && context.Request != null ? context.Request.Path : "N/A"),
                         (activity != null ? (int)activity.MillisecondsDuration : -1),
-                        (context != null && context.Response != null ? context.Response.StatusCode : -1));
+                        (context != null && context.Response != null ? context.Response.StatusCode : -1),
+                        (context != null && context.Error != null ? context.Error : new Exception("Error is not available")));
                 }
 
                 ((IDisposable)activity).Dispose();
@@ -356,7 +357,7 @@ namespace NWheels.Stacks.AspNet
             void RequestError(string verb, string uri, string controller, Exception error);
 
             [LogError]
-            void RequestFailed(string verb, string path, int duration, int statusCode);
+            void RequestFailed(string verb, string path, int duration, int statusCode, Exception error);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
