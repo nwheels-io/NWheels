@@ -1,53 +1,64 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Xml.Linq;
-using NWheels.Hosting;
+using NWheels.Configuration.Core;
 
-namespace NWheels.Configuration.Core
+namespace NWheels.Configuration.Impls
 {
-    public class CommandLineConfigurationLoader : LifecycleEventListenerBase
+    public class CommandLineConfigurationSource : ConfigurationSourceBase
     {
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private readonly XmlConfigurationLoader _loader;
         private readonly string[] _configurationParameters;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CommandLineConfigurationLoader(XmlConfigurationLoader loader, string[] configurationParameters)
+        public CommandLineConfigurationSource(string[] configurationParameters)
+            : base("CommandLine", ConfigurationSourceLevel.Deployment)
         {
-            _loader = loader;
             _configurationParameters = configurationParameters;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public override void NodeConfigured(List<ILifecycleEventListener> additionalComponentsToHost)
-        {
-            XElement alwaysXml;
+        #region Overrides of ConfigurationSourceBase
 
-            var document = new XDocument(
-                new XElement(XmlConfigurationLoader.ConfigurationElementName, 
+        public override IEnumerable<ConfigurationDocument> GetConfigurationDocuments()
+        {
+            var xml = CreateConfigurationXml();
+            var document = new ConfigurationDocument(xml, new ConfigurationSourceInfo(this.SourceLevel, this.SourceType, name: null));
+
+            return new[] { document };
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private XDocument CreateConfigurationXml()
+        {
+            XElement alwaysElement;
+
+            var xml = new XDocument(
+                new XElement(XmlConfigurationLoader.ConfigurationElementName,
                     new XAttribute(XmlConfigurationLoader.CommentAttributeName, "Read from command line arguments"),
-                    alwaysXml = new XElement(XmlConfigurationLoader.AlwaysElementName, 
+                    alwaysElement = new XElement(XmlConfigurationLoader.AlwaysElementName,
                         new XAttribute(XmlConfigurationLoader.CommentAttributeName, "Read from command line arguments"))));
 
-            foreach ( var arg in _configurationParameters )
+            foreach (var arg in _configurationParameters)
             {
                 string sectionName;
                 string propertyName;
                 string value;
 
-                if ( IsConfigurationArgument(arg, out sectionName, out propertyName, out value) )
+                if (IsConfigurationArgument(arg, out sectionName, out propertyName, out value))
                 {
-                    alwaysXml.Add(new XElement(sectionName, new XAttribute(propertyName, value)));
+                    alwaysElement.Add(new XElement(sectionName, new XAttribute(propertyName, value)));
                 }
             }
 
-            using ( ConfigurationSourceInfo.UseSource(ConfigurationSourceLevel.Deployment, "CommandLine", name: null) )
-            {
-                _loader.LoadConfigurationXml(document);
-            }
+            return xml;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -60,14 +71,14 @@ namespace NWheels.Configuration.Core
 
             var equalsIndex = argBody.IndexOf('=');
 
-            if ( equalsIndex < 1 )
+            if (equalsIndex < 1)
             {
                 return false;
             }
 
             var dotNames = argBody.Substring(0, equalsIndex).Split('.');
 
-            if ( dotNames.Length < 2 )
+            if (dotNames.Length < 2)
             {
                 return false;
             }

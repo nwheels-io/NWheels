@@ -11,6 +11,7 @@ using System.Xml;
 using Autofac;
 using Autofac.Core;
 using NWheels.Configuration.Core;
+using NWheels.Configuration.Impls;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Hosting.Core;
@@ -135,6 +136,7 @@ namespace NWheels.Hosts.Console
         private void RegisterHostComponents(ContainerBuilder builder)
         {
             builder.RegisterModule<NWheels.Stacks.Nlog.ModuleLoader>();
+            builder.RegisterType<CommandLineConfigurationSource>().As<IConfigurationSource>().LastInPipeline();
 
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<CommandLineConfigurationLoader>()
                 .WithParameter(TypedParameter.From(_hostConfig.CommandLineConfigValues.ToArray()))

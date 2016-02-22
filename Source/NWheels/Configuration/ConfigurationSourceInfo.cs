@@ -8,22 +8,24 @@ namespace NWheels.Configuration
 {
     public class ConfigurationSourceInfo
     {
-        public ConfigurationSourceInfo(ConfigurationSourceLevel level, string name)
+        public ConfigurationSourceInfo(ConfigurationSourceLevel level, string type, string name)
         {
             this.Level = level;
+            this.Type = type;
             this.Name = name;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ConfigurationSourceLevel Level { get; private set; }
+        public string Type { get; private set; }
         public string Name { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static readonly ConfigurationSourceInfo _s_default = new ConfigurationSourceInfo(ConfigurationSourceLevel.Code, "Default");
-        private static readonly ConfigurationSourceInfo _s_program = new ConfigurationSourceInfo(ConfigurationSourceLevel.Code, "Program");
-        private static readonly ConfigurationSourceInfo _s_unknown = new ConfigurationSourceInfo(ConfigurationSourceLevel.Unknown, "???");
+        private static readonly ConfigurationSourceInfo _s_default = new ConfigurationSourceInfo(ConfigurationSourceLevel.Code, "Default", name: null);
+        private static readonly ConfigurationSourceInfo _s_program = new ConfigurationSourceInfo(ConfigurationSourceLevel.Code, "Program", name: null);
+        private static readonly ConfigurationSourceInfo _s_unknown = new ConfigurationSourceInfo(ConfigurationSourceLevel.Unknown, "???",  name: null);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -32,9 +34,9 @@ namespace NWheels.Configuration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static IDisposable UseSource(ConfigurationSourceLevel level, string name)
+        public static IDisposable UseSource(ConfigurationSourceLevel level, string type, string name)
         {
-            return UseSource(new ConfigurationSourceInfo(level, name));
+            return UseSource(new ConfigurationSourceInfo(level, type, name));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

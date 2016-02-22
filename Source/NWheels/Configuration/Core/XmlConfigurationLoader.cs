@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Autofac;
 using NWheels.Exceptions;
 using NWheels.Extensions;
 using NWheels.Hosting;
@@ -28,16 +29,22 @@ namespace NWheels.Configuration.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private readonly IComponentContext _components;
         private readonly IFramework _framework;
         private readonly IConfigurationLogger _logger;
         private readonly Dictionary<string, IInternalConfigurationObject> _sectionsByXmlName;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public XmlConfigurationLoader(IFramework framework, Auto<IConfigurationLogger> logger, IEnumerable<IConfigurationSection> configurationSections)
+        public XmlConfigurationLoader(
+            IComponentContext components, 
+            IFramework framework, 
+            IConfigurationLogger logger, 
+            IEnumerable<IConfigurationSection> configurationSections)
         {
+            _components = components;
             _framework = framework;
-            _logger = logger.Instance;
+            _logger = logger;
             
             _sectionsByXmlName = configurationSections.Cast<IInternalConfigurationObject>().ToDictionary(
                 s => s.GetXmlName(), 
@@ -46,55 +53,27 @@ namespace NWheels.Configuration.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void LoadConfiguration(IEnumerable<BootConfiguration.ConfigFile> configFiles)
+        public void LoadConfiguration(Pipeline<IConfigurationSource> configSources)
         {
-            using ( _logger.LoadingConfiguration() )
+            using (_logger.LoadingConfiguration())
             {
-                foreach ( var file in configFiles )
+                foreach (var source in configSources)
                 {
-                    LoadConfigurationFile(file);
-                }
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void LoadConfigurationFile(BootConfiguration.ConfigFile file)
-        {
-            if ( file.IsOptionalAndMissing )
-            {
-                _logger.OptionalFileNotPresentSkipping(file.Path);
-                return;
-            }
-
-            using ( _logger.LoadingConfigurationFile(file.Path) )
-            {
-                using ( ConfigurationSourceInfo.UseSource(ConfigurationSourceLevel.Deployment, file.Path) )
-                {
-                    try
-                    {
-                        var document = XDocument.Load(file.Path, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
-                        LoadConfigurationDocument(document);
-                    }
-                    catch ( Exception e )
-                    {
-                        _logger.FailedToLoadConfigurationFile(file.Path, e);
-                        throw;
-                    }
+                    LoadConfigurationFromSource(source);
                 }
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
-        public void LoadConfigurationDocument(XDocument document)
+        public void LoadConfigurationXml(XDocument xml)
         {
-            if ( !document.Root.NameEqualsIgnoreCase(ConfigurationElementName) )
+            if ( xml.Root == null || !xml.Root.NameEqualsIgnoreCase(ConfigurationElementName) )
             {
                 throw new XmlConfigurationException("The root element must be CONFIGURATION.");
             }
 
-            foreach ( var scopeElement in document.Root.Elements() )
+            foreach ( var scopeElement in xml.Root.Elements() )
             {
                 if ( scopeElement.NameEqualsIgnoreCase(AlwaysElementName) )
                 {
@@ -150,6 +129,53 @@ namespace NWheels.Configuration.Core
                 var sectionElement = new XElement(section.GetXmlName());
                 scopeElement.Add(sectionElement);
                 section.SaveXml(sectionElement, options);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void LoadConfigurationFromSource(IConfigurationSource source)
+        {
+            using (_logger.LoadingConfigurationSource(source.SourceType, source.SourceLevel))
+            {
+                try
+                {
+                    LoadSourceDocuments(source);
+
+                    using (var activity = _logger.ApplyingProgrammaticConfiguration())
+                    {
+                        using (ConfigurationSourceInfo.UseSource(source.SourceLevel, source.SourceType, name: null))
+                        {
+                            try
+                            {
+                                source.ApplyConfigurationProgrammatically(_components);
+                            }
+                            catch (Exception e)
+                            {
+                                activity.Fail(e);
+                                throw;
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.FailedToLoadConfigurationSource(source.SourceType, source.SourceLevel, e);
+                    throw;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void LoadSourceDocuments(IConfigurationSource source)
+        {
+            foreach (var document in source.GetConfigurationDocuments())
+            {
+                using (ConfigurationSourceInfo.UseSource(document.SourceInfo))
+                {
+                    LoadConfigurationXml(document.Xml);
+                }
             }
         }
 

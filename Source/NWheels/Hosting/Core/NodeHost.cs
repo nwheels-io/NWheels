@@ -44,6 +44,7 @@ using Formatting = Newtonsoft.Json.Formatting;
 using NWheels.Entities.Factories;
 using NWheels.Authorization.Core;
 using NWheels.Concurrency;
+using NWheels.Configuration.Impls;
 using NWheels.Processing.Commands.Factories;
 
 namespace NWheels.Hosting.Core
@@ -222,6 +223,16 @@ namespace NWheels.Hosting.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal BootConfiguration BootConfig
+        {
+            get
+            {
+                return _bootConfig;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void InitializeBeforeLoad()
         {
             if ( Interlocked.Increment(ref _initializationCount) > 1 )
@@ -284,6 +295,8 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<LoggerObjectFactory>().As<LoggerObjectFactory, IAutoObjectFactory>().SingleInstance();
             builder.RegisterType<PipelineObjectFactory>().SingleInstance();
             builder.RegisterType<ConfigurationObjectFactory>().As<ConfigurationObjectFactory, IConfigurationObjectFactory, IAutoObjectFactory>().SingleInstance();
+            builder.RegisterPipeline<IConfigurationSource>();
+            builder.Register(c => new XmlFileConfigurationSource(this, c.Resolve<IConfigurationLogger>())).As<IConfigurationSource>().LastInPipeline();
             builder.RegisterType<XmlConfigurationLoader>().SingleInstance().InstancePerLifetimeScope();
             builder.RegisterAdapter<RelationalMappingConventionDefault, IRelationalMappingConvention>(RelationalMappingConventionBase.FromDefault).SingleInstance();
             builder.RegisterType<VoidDataRepositoryFactory>().As<IDataRepositoryFactory>();
@@ -856,8 +869,9 @@ namespace NWheels.Hosting.Core
 
             private void LoadConfiguration()
             {
+                var sources = OwnerLifetime.LifetimeContainer.ResolvePipeline<IConfigurationSource>();
                 var loader = OwnerLifetime.LifetimeContainer.Resolve<XmlConfigurationLoader>();
-                loader.LoadConfiguration(OwnerLifetime.NodeConfig.ConfigFiles);
+                loader.LoadConfiguration(sources);
 
                 var loggingConfiguration = OwnerLifetime.LifetimeContainer.Resolve<IFrameworkLoggingConfiguration>();
                 _suppressDynamicArtifacts = loggingConfiguration.SuppressDynamicArtifacts;

@@ -84,13 +84,14 @@ namespace NWheels.UnitTests.Configuration
                 </CONFIGURATION>";
 
             var loader = new XmlConfigurationLoader(
+                Framework.Components,
                 Framework,
-                Framework.LoggerAuto<IConfigurationLogger>(),
+                Framework.Logger<IConfigurationLogger>(),
                 new IConfigurationSection[] { one, two });
 
             //-- Act
 
-            loader.LoadConfigurationDocument(XDocument.Parse(xml));
+            loader.LoadConfigurationXml(XDocument.Parse(xml));
 
             //-- Assert
 

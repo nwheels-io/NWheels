@@ -494,12 +494,12 @@ namespace NWheels.UnitTests.Configuration
 
             section.Tens.Add("AAA").IntValue = 123;
 
-            using ( ConfigurationSourceInfo.UseSource(ConfigurationSourceLevel.Code, "XML-1") )
+            using ( ConfigurationSourceInfo.UseSource(ConfigurationSourceLevel.Code, "XML-1", null) )
             {
                 section.AsInternalConfigurationObject().LoadObject(LoadXmlWithLineInfoFromString(xml1));
             }
 
-            using ( ConfigurationSourceInfo.UseSource(ConfigurationSourceLevel.Code, "XML-2") )
+            using ( ConfigurationSourceInfo.UseSource(ConfigurationSourceLevel.Code, "XML-2", null) )
             {
                 section.AsInternalConfigurationObject().LoadObject(LoadXmlWithLineInfoFromString(xml2));
             }
@@ -511,20 +511,20 @@ namespace NWheels.UnitTests.Configuration
 
             //-- Assert
 
-            Assert.That(nineHistory.Select(h => h.Source.Name), Is.EquivalentTo(new[] { "XML-1", "XML-2" }));
+            Assert.That(nineHistory.Select(h => h.Source.Type), Is.EquivalentTo(new[] { "XML-1", "XML-2" }));
 
             Assert.That(nineHistory["TimeSpan"].Select(h => h.Value), Is.EqualTo(new[] { "11:12:13", "12:13:14" }));
-            Assert.That(nineHistory["TimeSpan"].Select(h => h.Source.Name), Is.EqualTo(new[] { "Default", "XML-2" }));
+            Assert.That(nineHistory["TimeSpan"].Select(h => h.Source.Type), Is.EqualTo(new[] { "Default", "XML-2" }));
 
             //TODO: changes done to configuration objects through code are not reflected in the override history
             //Assert.That(aaaHistory.Select(h => h.Source.Name), Is.EquivalentTo(new[] { "Program", "XML-2" }));
             //Assert.That(aaaHistory["IntValue"].Select(h => h.Value), Is.EquivalentTo(new[] { "123", "777" }));
             //Assert.That(aaaHistory["IntValue"].Select(h => h.Source.Name), Is.EquivalentTo(new[] { "Program", "XML-2" }));
 
-            Assert.That(cccHistory.Select(h => h.Source.Name), Is.EquivalentTo(new[] { "XML-1", "XML-2" }));
+            Assert.That(cccHistory.Select(h => h.Source.Type), Is.EquivalentTo(new[] { "XML-1", "XML-2" }));
 
             Assert.That(cccHistory["IntValue"].Select(h => h.Value), Is.EquivalentTo(new[] { "333", "999" }));
-            Assert.That(cccHistory["IntValue"].Select(h => h.Source.Name), Is.EquivalentTo(new[] { "XML-1", "XML-2" }));
+            Assert.That(cccHistory["IntValue"].Select(h => h.Source.Type), Is.EquivalentTo(new[] { "XML-1", "XML-2" }));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

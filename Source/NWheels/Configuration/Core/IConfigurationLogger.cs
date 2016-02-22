@@ -19,6 +19,18 @@ namespace NWheels.Configuration.Core
         void BadPropertyValue(string configPath, string propertyName, Exception error);
 
         [LogActivity]
+        ILogActivity LoadingConfigurationSource(string type, ConfigurationSourceLevel level);
+
+        [LogActivity]
+        ILogActivity LoadingConfigurationDocument(string name);
+
+        [LogActivity]
+        ILogActivity ApplyingProgrammaticConfiguration();
+
+        [LogError]
+        void FailedToLoadConfigurationSource(string type, ConfigurationSourceLevel level, Exception error);
+
+        [LogActivity]
         ILogActivity LoadingConfigurationFile(string path);
 
         [LogError]

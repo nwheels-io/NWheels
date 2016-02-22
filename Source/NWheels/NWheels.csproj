@@ -129,6 +129,12 @@
     <Compile Include="Concurrency\ShuttleService.cs" />
     <Compile Include="Configuration\ConfiguredComponentAttribute.cs" />
     <Compile Include="Configuration\Core\CommandLineConfigurationLoader.cs" />
+    <Compile Include="Configuration\Core\ConfigurationDocument.cs" />
+    <Compile Include="Configuration\Core\ConfigurationSourceBase.cs" />
+    <Compile Include="Configuration\Core\IConfigurationSource.cs" />
+    <Compile Include="Configuration\Impls\AppConfigConfigurationSource.cs" />
+    <Compile Include="Configuration\Impls\CommandLineConfigurationSource.cs" />
+    <Compile Include="Configuration\Impls\XmlFileConfigurationSource.cs" />
     <Compile Include="Conventions\Core\StaticStringDecorator.cs" />
     <Compile Include="Core\PipelineObjectFactory.cs" />
     <Compile Include="Entities\Core\DatabaseInitializationCheckRegistration.cs" />
