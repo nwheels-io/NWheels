@@ -78,7 +78,9 @@ namespace NWheels.Entities.Factories
 
                     if ( _context.OnWriteOnNewTriggerCalls != null )
                     {
-                        _context.OnWriteOnNewTriggerCalls(cw);
+                        cw.If(_context.EntityStateField == cw.Const(EntityState.NewPristine)).Then(() => {
+                            _context.OnWriteOnNewTriggerCalls(cw);
+                        });
                     }
                 });
                 
