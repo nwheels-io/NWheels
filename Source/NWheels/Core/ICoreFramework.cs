@@ -27,6 +27,7 @@ namespace NWheels.Core
             string databaseName = null);
 
         IDomainObject NewDomainObject(Type contractType);
+        T NewDomainObject<T>(IComponentContext externalComponents) where T : class;
 
         Thread CreateThread(Action threadCode, Func<ILogActivity> threadLogFactory = null, ThreadTaskType? taskType = null, string description = null);
         void RunThreadCode(Action threadCode, Func<ILogActivity> threadLogFactory = null, ThreadTaskType? taskType = null, string description = null);

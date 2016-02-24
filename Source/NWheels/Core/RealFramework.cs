@@ -55,6 +55,15 @@ namespace NWheels.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public T NewDomainObject<T>(IComponentContext externalComponents) where T : class
+        {
+            var entityObjectFactory = _components.Resolve<IEntityObjectFactory>();
+            var persistableObject = entityObjectFactory.NewEntity<T>(externalComponents);
+            return _components.Resolve<IDomainObjectFactory>().CreateDomainObjectInstance<T>(persistableObject);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TRepository NewUnitOfWork<TRepository>(bool autoCommit, UnitOfWorkScopeOption? scopeOption = null, string connectionString = null) 
             where TRepository : class, IApplicationDataRepository
         {

@@ -113,6 +113,11 @@ namespace NWheels.Testing
             return _components.Resolve<IDomainObjectFactory>().CreateDomainObjectInstance(persistableObject);
         }
 
+        public T NewDomainObject<T>(IComponentContext externalComponents) where T : class
+        {
+            throw new NotImplementedException();
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public IApplicationDataRepository NewUnitOfWorkForEntity(

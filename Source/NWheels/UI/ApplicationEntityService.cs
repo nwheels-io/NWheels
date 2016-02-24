@@ -1885,7 +1885,7 @@ namespace NWheels.UI
                     }
                     else if ( MetaType.IsEntityPart )
                     {
-                        var domainObject = Framework.NewDomainObject<TEntity>();
+                        var domainObject = Framework.As<ICoreFramework>().NewDomainObject<TEntity>(((DataRepositoryBase)(object)context).Components);
                         return (IDomainObject)domainObject;
                     }
                     else
