@@ -92,10 +92,11 @@ namespace NWheels.Processing.Commands.Impl
                 {
                     command.Call.ExecuteOn(entityInstance);
 
-                    if (((IObject)entityInstance).IsModified)
-                    {
+                    //TODO: fix IsModified to take inherited properties into account - Hapil? inherited properties are not decorated? DomainObjectFactory
+                    //if (((IObject)entityInstance).IsModified)
+                    //{
                         ((IActiveRecord)entityInstance).Save();
-                    }
+                    //}
 
                     context.CommitChanges();
                     return command.Call.Result;

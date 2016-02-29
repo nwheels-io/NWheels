@@ -52,8 +52,14 @@ namespace NWheels.Domains.Security.UI
                 }
             }
 
-            presenter.On(ChangePassword).PopupEntityMethodForm(
-                ChangePasswordForm, 
+            ChangePassword.Severity = CommandSeverity.Change;
+            ChangePassword.Icon = "lock";
+
+
+            presenter.On(Crud.SelectedEntityChanged).Broadcast(ChangePasswordForm.EntitySetter).WithPayload(vm => vm.Input).TunnelDown();
+            ChangePasswordForm.AttachTo(
+                presenter,
+                command: ChangePassword,
                 onExecute: (user, vm) => user.SetPassword(vm.State.Input.NewPassword));
 
             Crud.AddEntityCommands(ChangePassword);
