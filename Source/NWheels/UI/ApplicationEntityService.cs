@@ -1531,7 +1531,12 @@ namespace NWheels.UI
                     {
                         var leftSideId = leftSideIdProperty.ReadValue(source[i]);
                         var rightSideId = rightSideIds[i];
-                        _rightSideValueByLeftSideId[leftSideId] = rightSideById[rightSideId];
+
+                        IDomainObject rightSideValue;
+                        if (rightSideById.TryGetValue(rightSideId, out rightSideValue))
+                        {
+                            _rightSideValueByLeftSideId[leftSideId] = rightSideValue;
+                        }
                     }
                 }
                 else 
