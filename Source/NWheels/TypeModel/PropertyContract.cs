@@ -554,6 +554,19 @@ namespace NWheels.DataObjects
 
         public static class Validation
         {
+            public class OptionalAttribute : PropertyContractAttribute
+            {
+                #region Overrides of PropertyContractAttribute
+
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
+                {
+                    base.ApplyTo(property, cache);
+                    property.Validation.IsRequired = false;
+                }
+
+                #endregion
+            }
+
             public class ValidatorAttribute : PropertyContractAttribute
             {
                 public ValidatorAttribute(Type validatorType)
