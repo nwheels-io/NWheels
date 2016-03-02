@@ -2,7 +2,6 @@ namespace NWheels.Logging.Core
 {
     public interface IPlainLog
     {
-        void Reconfigure(IFrameworkLoggingConfiguration configuration);
         void ConfigureConsoleOutput();
         void ConfigureWindowsEventLogOutput(string logName, string sourceName);
         void LogNode(NWheels.Logging.LogNode node);

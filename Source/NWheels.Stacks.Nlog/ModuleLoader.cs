@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Hosting;
 using NWheels.Logging.Core;
 
 namespace NWheels.Stacks.Nlog
@@ -12,7 +13,7 @@ namespace NWheels.Stacks.Nlog
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterInstance(NLogBasedPlainLog.Instance).As<IPlainLog>();
+            builder.RegisterInstance(NLogBasedPlainLog.Instance).As<IPlainLog, ILifecycleEventListener>();
         }
     }
 }

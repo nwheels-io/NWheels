@@ -3,11 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 
 namespace NWheels.Hosting
 {
     public abstract class LifecycleEventListenerBase : ILifecycleEventListener
     {
+        public virtual void InjectDependencies(IComponentContext components)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public virtual void NodeConfigured(List<ILifecycleEventListener> additionalComponentsToHost)
         {
         }

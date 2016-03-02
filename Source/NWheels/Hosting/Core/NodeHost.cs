@@ -854,8 +854,6 @@ namespace NWheels.Hosting.Core
                 sequence.Once().OnRevert(SaveDynamicModuleToAssembly);
                 sequence.Once().OnRevert(WriteEffectiveMetadataJson);
                 sequence.Once().OnPerform(LoadConfiguration);
-                sequence.Once().OnPerform(ReconfigurePlainLog);
-                //sequence.Once().OnPerform(CallHostComponentsConfigured);
                 sequence.Once().OnPerform(FindLifecycleComponents);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeConfigured);
                 sequence.Once().OnPerform(LoadDataRepositories);
@@ -877,16 +875,6 @@ namespace NWheels.Hosting.Core
                 _suppressDynamicArtifacts = loggingConfiguration.SuppressDynamicArtifacts;
                 
                 WriteEffectiveConfigurationXml(loader);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void ReconfigurePlainLog()
-            {
-                var loggingConfiguration = OwnerLifetime.LifetimeContainer.Resolve<IFrameworkLoggingConfiguration>();
-                var plainLog = OwnerLifetime.LifetimeContainer.Resolve<IPlainLog>();
-
-                plainLog.Reconfigure(loggingConfiguration);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1077,6 +1065,7 @@ namespace NWheels.Hosting.Core
                     try
                     {
                         var additionalComponents = new List<ILifecycleEventListener>();
+                        component.InjectDependencies(OwnerLifetime.LifetimeContainer);
                         component.NodeConfigured(additionalComponents);
                         OwnerLifetime.LifecycleComponents.AddRange(additionalComponents);
                     }

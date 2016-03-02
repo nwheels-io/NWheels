@@ -3,11 +3,11 @@
     public enum LogLevel
     {
         Debug = 0,
-        Verbose = 10,
-        Info = 20,
-        Warning = 30,
-        Error = 40,
-        Critical = 50,
-        Audit = 60
+        Verbose = 1,
+        Info = 2,
+        Warning = 3,
+        Error = 4,
+        Critical = 5,
+        Audit = 6
     }
 }

@@ -143,6 +143,48 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static string OrDefaultIfNull(this string s, string defaultValue)
+        {
+            if (s == null)
+            {
+                return defaultValue;
+            }
+            else
+            {
+                return s;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string OrDefaultIfNullOrEmpty(this string s, string defaultValue)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                return defaultValue;
+            }
+            else
+            {
+                return s;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string OrDefaultIfNullOrWhitespace(this string s, string defaultValue)
+        {
+            if (string.IsNullOrWhiteSpace(s))
+            {
+                return defaultValue;
+            }
+            else
+            {
+                return s;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static string EmptyIfNull(this string s)
         {
             if ( s == null )
