@@ -2137,6 +2137,24 @@ theApp.directive('uidlReportLookup', ['entityService', function(entityService) {
 
 //---------------------------------------------------------------------------------------------------------------------
 
+theApp.directive('applyAutoFillFix', ['$timeout', function ($timeout) {
+    return {
+        require: 'ngModel',
+        link: function (scope, elem, attrs, ctrl) {
+            scope.check = function(){
+                var val = elem[0].value;
+                if(ctrl.$viewValue !== val){
+                    ctrl.$setViewValue(val)
+                }
+                $timeout(scope.check, 300);
+            };
+            scope.check();
+        }
+    }
+}]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
 theApp.filter('localized', ['$scope', function ($scope) {
     return function (stringId) {
         var localizedString = $scope.currentLocale.translations[stringId];

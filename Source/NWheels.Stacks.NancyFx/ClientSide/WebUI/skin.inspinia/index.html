@@ -1478,25 +1478,28 @@ HEAD, JS/CSS LINKS
                    class="form-control"
                    type="text"
                    placeholder="{{::translate(uidl.label)}}"
-                   ng-model="entity[uidl.propertyName]"
+                   ng-model="$parent.entity[uidl.propertyName]"
                    id="{{::uniqueFieldId}}"
-                   name="{{::uniqueFieldId}}">
+                   name="{{::uniqueFieldId}}"
+                   apply-auto-fill-fix>
             <!-- PASSWORD -->
             <input ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password')"
                    class="form-control"
                    type="password"
                    placeholder="{{::translate(uidl.label)}}"
-                   ng-model="entity[uidl.propertyName]"
+                   ng-model="$parent.entity[uidl.propertyName]"
                    id="{{::uniqueFieldId}}"
-                   name="{{::uniqueFieldId}}">
+                   name="{{::uniqueFieldId}}"
+                   apply-auto-fill-fix>
             <input ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password') && hasUidlModifier('Confirm')"
                    class="form-control"
                    style="margin-top:15px;"
                    type="password"
                    placeholder="Confirm password"
-                   ng-model="hiddenValues[uidl.propertyName]"
+                   ng-model="$parent.hiddenValues[uidl.propertyName]"
                    id="{{::uniqueFieldId + '__confirm'}}"
-                   name="{{::uniqueFieldId + '__confirm'}}">
+                   name="{{::uniqueFieldId + '__confirm'}}"
+                   apply-auto-fill-fix>
             <!-- DROP DOWN -->
             <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown')"
                     class="form-control m-b"
