@@ -155,6 +155,9 @@
     <Compile Include="Processing\Documents\DocumentMetadata.cs" />
     <Compile Include="Processing\Documents\Core\IOutputDocumentFormatter.cs" />
     <Compile Include="Processing\DocumentFormattersFeatureLoader.cs" />
+    <Compile Include="Processing\ICommandProcessedEvent.cs" />
+    <Compile Include="Processing\IPushEvent.cs" />
+    <Compile Include="Processing\IServerCommand.cs" />
     <Compile Include="TypeModel\Core\DomainContextMetadataBuilder.cs" />
     <Compile Include="TypeModel\Core\DomainContextMetadataCache.cs" />
     <Compile Include="TypeModel\Core\StorageTypes\DecimalAsInt64StorageType.cs" />
