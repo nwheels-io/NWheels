@@ -131,6 +131,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Wcf", "Wcf", "{E74B5B92-DAB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.Endpoints.Wcf", "NWheels.Stacks.Endpoints.Wcf\NWheels.Stacks.Endpoints.Wcf.csproj", "{B201A9AE-9D62-47CB-905A-A2CCF86A3599}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWheels.Stacks.Endpoints.Wcf.Tests", "NWheels.Stacks.Endpoints.Wcf.Tests\NWheels.Stacks.Endpoints.Wcf.Tests.csproj", "{E64DCBA3-09D6-4EE8-A2B6-21611998AA48}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -273,6 +275,10 @@ Global
 		{B201A9AE-9D62-47CB-905A-A2CCF86A3599}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B201A9AE-9D62-47CB-905A-A2CCF86A3599}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B201A9AE-9D62-47CB-905A-A2CCF86A3599}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E64DCBA3-09D6-4EE8-A2B6-21611998AA48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E64DCBA3-09D6-4EE8-A2B6-21611998AA48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E64DCBA3-09D6-4EE8-A2B6-21611998AA48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E64DCBA3-09D6-4EE8-A2B6-21611998AA48}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -330,5 +336,6 @@ Global
 		{12BF8D27-AB82-4BC2-B9E3-73FD149ECACE} = {9234A40D-AD13-4C09-8009-2E402D7EC821}
 		{E74B5B92-DABF-4124-AB39-07CFEDA989A7} = {6D002239-752E-44DE-8694-8DFC26A1A3FA}
 		{B201A9AE-9D62-47CB-905A-A2CCF86A3599} = {E74B5B92-DABF-4124-AB39-07CFEDA989A7}
+		{E64DCBA3-09D6-4EE8-A2B6-21611998AA48} = {E74B5B92-DABF-4124-AB39-07CFEDA989A7}
 	EndGlobalSection
 EndGlobal

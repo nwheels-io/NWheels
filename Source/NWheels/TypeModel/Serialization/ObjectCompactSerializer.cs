@@ -18,12 +18,12 @@ namespace NWheels.TypeModel.Serialization
         private readonly IComponentContext _components;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly ObjectCompactReaderWriterFactory _readerWriterFactory;
-        private readonly IObjectTypeResolver _typeResolver;
+        private readonly Pipeline<IObjectTypeResolver> _typeResolvers;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public ObjectCompactSerializer(IComponentContext components, ITypeMetadataCache metadataCache, ObjectCompactReaderWriterFactory readerWriterFactory)
-            : this(components, metadataCache, readerWriterFactory, new VoidTypeResolver())
+            : this(components, metadataCache, readerWriterFactory, new IObjectTypeResolver[] { new VoidTypeResolver() })
         {
         }
 
@@ -33,12 +33,12 @@ namespace NWheels.TypeModel.Serialization
             IComponentContext components,
             ITypeMetadataCache metadataCache,
             ObjectCompactReaderWriterFactory readerWriterFactory,
-            IObjectTypeResolver typeResolver)
+            Pipeline<IObjectTypeResolver> typeResolvers)
         {
             _components = components;
             _metadataCache = metadataCache;
             _readerWriterFactory = readerWriterFactory;
-            _typeResolver = typeResolver;
+            _typeResolvers = typeResolvers;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -77,17 +77,24 @@ namespace NWheels.TypeModel.Serialization
                     throw new InvalidDataException(string.Format("Input stream is invalid: object indicator byte={0}.", indicatorByte));
             }
 
-                    actualType = _typeResolver.GetDeserializationType(declaredType, serializedType);
+            object materializedInstance;
+            var materializer = TryFindMaterializingResolver(declaredType, serializedType);
 
-            if (_typeResolver.CanMaterialize(declaredType, ))
+            if (materializer != null)
+            {
+                materializedInstance = materializer.Materialize(declaredType, serializedType);
+            }
+            else
+            {
+                var materializationType = GetDeserializationType(declaredType, serializedType);
+                var creator = _readerWriterFactory.GetDefaultCreator(materializationType);
+                materializedInstance = creator(_components);
+            }
 
-            var creator = _readerWriterFactory.GetDefaultCreator(actualType);
-            var reader = _readerWriterFactory.GetReader(actualType);
-            var obj = creator(_components);
+            var reader = _readerWriterFactory.GetReader(materializedInstance.GetType());
+            reader(this, input, dictionary, materializedInstance);
 
-            reader(this, input, dictionary, obj);
-
-            return obj;
+            return materializedInstance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -122,7 +129,7 @@ namespace NWheels.TypeModel.Serialization
                 return;
             }
 
-            var resolvedSerializationType = _typeResolver.GetSerializationType(declaredType, obj);
+            var resolvedSerializationType = GetSerializationType(declaredType, obj);
 
             int typeKey;
             if (dictionary.ShouldWriteTypeKey(obj, declaredType, resolvedSerializationType, out typeKey))
@@ -141,6 +148,55 @@ namespace NWheels.TypeModel.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private Type GetSerializationType(Type declaredType, object obj)
+        {
+            for (int i = 0 ; i < _typeResolvers.Count ; i++)
+            {
+                var serializationType = _typeResolvers[i].GetSerializationType(declaredType, obj);
+
+                if (serializationType != declaredType)
+                {
+                    return serializationType;
+                }
+            }
+
+            return declaredType;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Type GetDeserializationType(Type declaredType, Type serializedType)
+        {
+            for (int i = 0; i < _typeResolvers.Count; i++)
+            {
+                var deserializationType = _typeResolvers[i].GetDeserializationType(declaredType, serializedType);
+
+                if (deserializationType != declaredType)
+                {
+                    return deserializationType;
+                }
+            }
+
+            return declaredType;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IObjectTypeResolver TryFindMaterializingResolver(Type declaredType, Type serializedType)
+        {
+            for (int i = 0; i < _typeResolvers.Count; i++)
+            {
+                if (_typeResolvers[i].CanMaterialize(declaredType, serializedType))
+                {
+                    return _typeResolvers[i];
+                }
+            }
+
+            return null;
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private class VoidTypeResolver : IObjectTypeResolver
         {
             public Type GetSerializationType(Type declaredType, object obj)
@@ -152,7 +208,7 @@ namespace NWheels.TypeModel.Serialization
 
             public Type GetDeserializationType(Type declaredType, Type serializedType)
             {
-                return serializedType;
+                return declaredType;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

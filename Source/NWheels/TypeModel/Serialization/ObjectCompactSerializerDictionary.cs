@@ -10,8 +10,8 @@ namespace NWheels.TypeModel.Serialization
 {
     public class ObjectCompactSerializerDictionary
     {
-        private readonly ConcurrentDictionary<int, MemberInfo> _memberByKey;
-        private readonly ConcurrentDictionary<int, Type> _typeByKey;
+        //private readonly ConcurrentDictionary<int, MemberInfo> _memberByKey;
+        //private readonly ConcurrentDictionary<int, Type> _typeByKey;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -82,7 +82,8 @@ namespace NWheels.TypeModel.Serialization
 
         public bool ShouldWriteTypeKey(object obj, Type declaredType, Type resolvedSerializationType, out int key)
         {
-            throw new NotImplementedException();
+            key = -1;
+            return false;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
