@@ -78,11 +78,12 @@ namespace NWheels.Stacks.MongoDb
                     underlyingQuery = underlyingQuery.OfType<TEntityImpl>();
                 }
 
-            	var actualEnumerator = underlyingQuery. /*_ownerRepo.AuthorizeQuery(underlyingQuery).*/GetEnumerator();
+                var actualEnumerator = underlyingQuery. /*_ownerRepo.AuthorizeQuery(underlyingQuery).*/GetEnumerator();
                 var transformingEnumerator = new DelegatingTransformingEnumerator<TEntityImpl, TEntityContract>(
                     actualEnumerator,
                     entity => InjectDependenciesAndTrackAndWrapInDomainObject<TEntityContract>(entity));
-                var loggingEnumerator = new ResultLoggingEnumerator<TEntityContract>(transformingEnumerator, _logger, queryLog);
+                var accessControlEnumerator = new AccessControlEnumerator<TEntityContract>(transformingEnumerator, _ownerRepo);
+                var loggingEnumerator = new ResultLoggingEnumerator<TEntityContract>(accessControlEnumerator, _logger, queryLog);
 
                 return loggingEnumerator;
             }
@@ -908,7 +909,74 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private class AccessControlEnumerator<T> : IEnumerator<T>
+        {
+            private readonly IEnumerator<T> _innerEnumerator;
+            private readonly MongoDataRepositoryBase _domainContext;
 
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public AccessControlEnumerator(IEnumerator<T> innerEnumerator, MongoDataRepositoryBase domainContext)
+            {
+                _innerEnumerator = innerEnumerator;
+                _domainContext = domainContext;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IDisposable
+
+            public void Dispose()
+            {
+                _innerEnumerator.Dispose();
+            }
+
+            #endregion
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of IEnumerator
+
+            public bool MoveNext()
+            {
+                do
+                {
+                    if (!_innerEnumerator.MoveNext())
+                    {
+                        return false;
+                    }
+
+                } while (!_domainContext.CanRetrieve<TEntityContract>(_innerEnumerator.Current));
+
+                return true;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void Reset()
+            {
+                _innerEnumerator.Reset();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public T Current
+            {
+                get
+                {
+                    return _innerEnumerator.Current;
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            object IEnumerator.Current
+            {
+                get { return this.Current; }
+            }
+
+            #endregion
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1023,7 +1091,13 @@ namespace NWheels.Stacks.MongoDb
                 var actualResults = _underlyingQuery.GetEnumerator();
 
                 return new DelegatingTransformingEnumerator<T, T>(
-                    new ResultLoggingEnumerator<T>(actualResults, _logger, queryActivity),
+                    new ResultLoggingEnumerator<T>(
+                        new AccessControlEnumerator<T>(
+                            actualResults, 
+                            _ownerRepo._ownerRepo
+                        ), 
+                        _logger, queryActivity
+                    ),
                     item => {
                         return _ownerRepo.InjectDependenciesAndTrackAndWrapInDomainObject<T>((TEntityImpl)(object)item);
                     });

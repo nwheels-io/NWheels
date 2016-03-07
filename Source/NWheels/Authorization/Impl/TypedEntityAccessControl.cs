@@ -183,6 +183,54 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override bool? CanInsert(IAccessControlContext context)
+        {
+            if (_entityInsert != null && !HasGlobalInsert)
+            {
+                return true;
+            }
+
+            return base.CanInsert(context);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override bool? CanRetrieve(IAccessControlContext context)
+        {
+            if (_entityRetrieve != null && !HasGlobalRetrieve)
+            {
+                return true;
+            }
+
+            return base.CanRetrieve(context);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override bool? CanUpdate(IAccessControlContext context)
+        {
+            if (_entityUpdate != null && !HasGlobalUpdate)
+            {
+                return true;
+            }
+
+            return base.CanUpdate(context);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public override bool? CanDelete(IAccessControlContext context)
+        {
+            if (_entityDelete != null && !HasGlobalDelete)
+            {
+                return true;
+            }
+
+            return base.CanDelete(context);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override bool? CanRetrieve(IAccessControlContext context, object entity)
         {
             var canRetrieveResult = base.CanRetrieve(context, entity);

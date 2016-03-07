@@ -22,7 +22,7 @@ namespace NWheels.Authorization.Impl
 
         #region Implementation of IRuntimeEntityAccessRule
 
-        public void AuthorizeRetrieve(IAccessControlContext context)
+        public virtual void AuthorizeRetrieve(IAccessControlContext context)
         {
             ValidateOrThrow("Retrieve", CanRetrieve(context));
         }
@@ -57,7 +57,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool? CanRetrieve(IAccessControlContext context)
+        public virtual bool? CanRetrieve(IAccessControlContext context)
         {
             if ( _globalRetrieve != null )
             {
@@ -69,7 +69,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool? CanInsert(IAccessControlContext context)
+        public virtual bool? CanInsert(IAccessControlContext context)
         {
             if ( _globalInsert != null )
             {
@@ -81,7 +81,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool? CanUpdate(IAccessControlContext context)
+        public virtual bool? CanUpdate(IAccessControlContext context)
         {
             if ( _globalUpdate != null )
             {
@@ -93,7 +93,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool? CanDelete(IAccessControlContext context)
+        public virtual bool? CanDelete(IAccessControlContext context)
         {
             if ( _globalDelete != null )
             {
@@ -377,6 +377,34 @@ namespace NWheels.Authorization.Impl
         protected StringBuilder BuildLog
         {
             get { return _buildLog; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected bool HasGlobalRetrieve
+        {
+            get { return _globalRetrieve != null; } 
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        protected bool HasGlobalInsert
+        {
+            get { return _globalInsert != null; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        protected bool HasGlobalUpdate
+        {
+            get { return _globalUpdate != null; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        protected bool HasGlobalDelete
+        {
+            get { return _globalDelete != null; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
