@@ -114,9 +114,9 @@ namespace NWheels.Domains.Security
 
             var uidlEndpoint = currentSession.Endpoint as IUidlApplicationEndpoint;
 
-            if ( uidlEndpoint != null )
+            if (uidlEndpoint != null)
             {
-                if ( !uidlEndpoint.UidlApplication.Authorization.TryValidateUser(principal.Identity) )
+                if (!uidlEndpoint.UidlApplication.ValidateUser(principal))
                 {
                     throw new DomainFaultException<LoginFault>(LoginFault.NotAuthorized);
                 }

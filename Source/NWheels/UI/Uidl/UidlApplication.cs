@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.UI;
 using Autofac;
 using Newtonsoft.Json;
+using NWheels.Authorization;
 using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Endpoints.Core;
@@ -47,6 +50,25 @@ namespace NWheels.UI.Uidl
         public virtual object CreateViewStateForCurrentUser(IComponentContext components)
         {
             return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool ValidateUser(IPrincipal user)
+        {
+            var identity = (IIdentityInfo)user.Identity;
+            
+            if (!Authorization.TryValidateUser(identity))
+            {
+                return false;
+            }
+
+            if (!ValidateUser(identity))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -135,6 +157,13 @@ namespace NWheels.UI.Uidl
         internal protected UidlScreen InitialScreenIfAuthenticated { get; protected set; }
         internal protected UidlScreen InitialScreenIfNotAuthenticated { get; protected set; }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual bool ValidateUser(IIdentityInfo identity)
+        {
+            return true;
+        }
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected void RequireDomainApi<TContract>() 
