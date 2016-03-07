@@ -18,7 +18,6 @@ using NWheels.DataObjects;
 using NWheels.DataObjects.Core;
 using NWheels.DataObjects.Core.Conventions;
 using NWheels.Endpoints;
-using NWheels.Endpoints.Core.Wcf;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Entities.Impl;
@@ -152,13 +151,13 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void UseWcfForSoapEndpoints(this ContainerBuilder builder)
-        {
-            builder.RegisterType<WcfEndpointComponent>();
-            builder.RegisterAdapter<SoapApiEndpointRegistration, WcfEndpointComponent>(
-                (context, endpoint) => context.Resolve<WcfEndpointComponent>(TypedParameter.From(endpoint)))
-                .As<ILifecycleEventListener>();
-        }
+        //public static void UseWcfForSoapEndpoints(this ContainerBuilder builder)
+        //{
+        //    builder.RegisterType<WcfEndpointComponent>();
+        //    builder.RegisterAdapter<SoapApiEndpointRegistration, WcfEndpointComponent>(
+        //        (context, endpoint) => context.Resolve<WcfEndpointComponent>(TypedParameter.From(endpoint)))
+        //        .As<ILifecycleEventListener>();
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

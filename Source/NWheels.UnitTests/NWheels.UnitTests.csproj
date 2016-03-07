@@ -91,6 +91,7 @@
     <Compile Include="Configuration\ConfigurationSectionConventionTests.cs" />
     <Compile Include="Configuration\XmlConfigurationLoaderTest.cs" />
     <Compile Include="DataObjects\Core\ContainedToContainerCollectionAdapterTests.cs" />
+    <Compile Include="DataObjects\Serialization\ObjectCompactSerializerTests.cs" />
     <Compile Include="DataObjects\TestDataObjects.cs" />
     <Compile Include="DataObjects\TypeMetadataBuilderConstructorTests.cs" />
     <Compile Include="DataObjects\TypeMetadataCacheTests.cs" />

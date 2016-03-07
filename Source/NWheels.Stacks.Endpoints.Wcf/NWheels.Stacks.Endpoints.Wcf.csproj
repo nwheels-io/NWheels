@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B201A9AE-9D62-47CB-905A-A2CCF86A3599}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NWheels.Stacks.Endpoints.Wcf</RootNamespace>
+    <AssemblyName>NWheels.Stacks.Endpoints.Wcf</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Bin\Core\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\Bin\Core\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Hapil, Version=0.9.29.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\FelixB.Hapil.0.9.29\lib\net45\Hapil.dll</HintPath>
+    </Reference>
+    <Reference Include="Hapil.Applied">
+      <HintPath>..\packages\FelixB.Hapil.0.9.29\lib\net45\Hapil.Applied.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ContractNames.cs" />
+    <Compile Include="NetworkApi\INetworkApiEndpointService.cs" />
+    <Compile Include="ServiceHostComponents\ErrorHandler.cs" />
+    <Compile Include="ServiceHostComponents\ErrorHandlerBehavior.cs" />
+    <Compile Include="ServiceHostComponents\InjectionEnabledInstanceProvider.cs" />
+    <Compile Include="ServiceHostComponents\InjectionEnabledInstancingBehavior.cs" />
+    <Compile Include="ServiceHostComponents\InjectionEnabledServiceHost.cs" />
+    <Compile Include="IWcfServiceLogger.cs" />
+    <Compile Include="ServiceHostComponents\LoggingMessageInspector.cs" />
+    <Compile Include="ServiceHostComponents\MessageLogBehavior.cs" />
+    <Compile Include="ModuleLoader.cs" />
+    <Compile Include="ServiceHostComponents\PerCallInstanceContextProvider.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceHostComponents\SingletonInstanceContextProvider.cs" />
+    <Compile Include="ServiceHostComponents\ThreadLogOperationContextExtension.cs" />
+    <Compile Include="NetworkEndpointComponent.cs" />
+    <Compile Include="SoapEndpointComponent.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NWheels\NWheels.csproj">
+      <Project>{f0ecf554-bf54-4843-b62f-c67c4deb2764}</Project>
+      <Name>NWheels</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
