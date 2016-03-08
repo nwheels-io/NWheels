@@ -16,6 +16,7 @@ namespace NWheels.UnitTests.DataObjects.Serialization
             public DayOfWeek SystemEnumValue { get; set; }
             public AnAppEnum AppEnumValue { get; set; }
             public TimeSpan TimeSpanValue { get; set; }
+            public DateTime DateTimeValue { get; set; }
             public Guid GuidValue { get; set; }
             public long LongValue { get; set; }
             public float FloatValue { get; set; }

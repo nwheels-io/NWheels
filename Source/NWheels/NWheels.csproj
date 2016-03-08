@@ -225,6 +225,9 @@
     <Compile Include="TypeModel\IMetadataMutation.cs" />
     <Compile Include="TypeModel\ITypeLogicMetadata.cs" />
     <Compile Include="TypeModel\PropertyStorageStyle.cs" />
+    <Compile Include="TypeModel\Serialization\CompactObjectSerializerException.cs" />
+    <Compile Include="TypeModel\Serialization\CompactDeserializationContext.cs" />
+    <Compile Include="TypeModel\Serialization\CompactSerializationContext.cs" />
     <Compile Include="TypeModel\Serialization\IObjectTypeResolver.cs" />
     <Compile Include="TypeModel\Serialization\ObjectCompactSerializer.cs" />
     <Compile Include="TypeModel\Serialization\IObjectSerializer.cs" />

@@ -59,6 +59,45 @@ namespace NWheels.TypeModel.Serialization
 
         public object ReadObject(Type declaredType, CompactBinaryReader input, ObjectCompactSerializerDictionary dictionary)
         {
+            return ReadObject(declaredType, new CompactDeserializationContext(this, dictionary, input));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void WriteObject(Type declaredType, object obj, Stream output, ObjectCompactSerializerDictionary dictionary)
+        {
+            WriteObject(declaredType, obj, new CompactBinaryWriter(output), dictionary);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public byte[] WriteObject(Type declaredType, object obj, ObjectCompactSerializerDictionary dictionary)
+        {
+            byte[] serializedBytes;
+
+            using (var output = new MemoryStream())
+            {
+                WriteObject(declaredType, obj, new CompactBinaryWriter(output), dictionary);
+                serializedBytes = output.ToArray();
+            }
+
+            return serializedBytes;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void WriteObject(Type declaredType, object obj, CompactBinaryWriter output, ObjectCompactSerializerDictionary dictionary)
+        {
+            WriteObject(declaredType, obj, new CompactSerializationContext(this, dictionary, output));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal object ReadObject(Type declaredType, CompactDeserializationContext context)
+        {
+            var input = context.Input;
+            var dictionary = context.Dictionary;
+
             var indicatorByte = input.ReadByte();
             Type serializedType;
 
@@ -92,37 +131,18 @@ namespace NWheels.TypeModel.Serialization
             }
 
             var reader = _readerWriterFactory.GetReader(materializedInstance.GetType());
-            reader(this, input, dictionary, materializedInstance);
+            reader(context, materializedInstance);
 
             return materializedInstance;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void WriteObject(Type declaredType, object obj, Stream output, ObjectCompactSerializerDictionary dictionary)
+        internal void WriteObject(Type declaredType, object obj, CompactSerializationContext context)
         {
-            WriteObject(declaredType, obj, new CompactBinaryWriter(output), dictionary);
-        }
+            var output = context.Output;
+            var dictionary = context.Dictionary;
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public byte[] WriteObject(Type declaredType, object obj, ObjectCompactSerializerDictionary dictionary)
-        {
-            byte[] serializedBytes;
-
-            using (var output = new MemoryStream())
-            {
-                WriteObject(declaredType, obj, new CompactBinaryWriter(output), dictionary);
-                serializedBytes = output.ToArray();
-            }
-
-            return serializedBytes;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void WriteObject(Type declaredType, object obj, CompactBinaryWriter output, ObjectCompactSerializerDictionary dictionary)
-        {
             if (obj == null)
             {
                 output.Write(ObjectIndicatorByte.Null);
@@ -143,7 +163,7 @@ namespace NWheels.TypeModel.Serialization
             }
 
             var writer = _readerWriterFactory.GetWriter(obj.GetType());
-            writer(this, output, dictionary, obj);
+            writer(context, obj);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
