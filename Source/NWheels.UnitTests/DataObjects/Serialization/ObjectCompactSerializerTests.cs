@@ -52,6 +52,7 @@ namespace NWheels.UnitTests.DataObjects.Serialization
             var guid = Guid.NewGuid();
             var original = new Repo.SimpliestFlat() {
                 IntValue = 123,
+                BoolValue = true,
                 StringValue = "ABC",
                 SystemEnumValue = DayOfWeek.Wednesday,
                 AppEnumValue = Repo.AnAppEnum.Second,
@@ -72,7 +73,10 @@ namespace NWheels.UnitTests.DataObjects.Serialization
 
             deserialized.ShouldNotBeNull();
             deserialized.IntValue.ShouldBe(123);
+            deserialized.BoolValue.ShouldBe(true);
+            deserialized.AnotherBoolValue.ShouldBe(false);
             deserialized.StringValue.ShouldBe("ABC");
+            deserialized.AnotherStringValue.ShouldBeNull();
             deserialized.SystemEnumValue.ShouldBe(DayOfWeek.Wednesday);
             deserialized.AppEnumValue.ShouldBe(Repo.AnAppEnum.Second);
             deserialized.TimeSpanValue.ShouldBe(TimeSpan.FromSeconds(123));
@@ -81,6 +85,41 @@ namespace NWheels.UnitTests.DataObjects.Serialization
             deserialized.LongValue.ShouldBe(Int64.MaxValue - 123);
             deserialized.FloatValue.ShouldBe(123.45f);
             deserialized.DecimalValue.ShouldBe(123.45m);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Roundtrip_WithNestedObjects()
+        {
+            //-- arrange
+
+            var serializer = Framework.Components.Resolve<ObjectCompactSerializer>();
+            var dictionary = new ObjectCompactSerializerDictionary();
+
+            var guid = Guid.NewGuid();
+            var original = new Repo.WithNestedObjects() {
+                First = new Repo.SimpliestFlat() {
+                    StringValue = "ABC"
+                },
+                Second = new Repo.AnotherSimpliestFlat() {
+                    StringValue = "DEF"
+                },
+            };
+
+            //-- act
+
+            var serializedBytes = serializer.WriteObject(typeof(Repo.WithNestedObjects), original, dictionary);
+            var deserialized = (Repo.WithNestedObjects)serializer.ReadObject(typeof(Repo.WithNestedObjects), serializedBytes, dictionary);
+
+            //-- assert
+
+            deserialized.ShouldNotBeNull();
+            deserialized.First.ShouldNotBeNull();
+            deserialized.First.StringValue.ShouldBe("ABC");
+            deserialized.Second.ShouldNotBeNull();
+            deserialized.Second.StringValue.ShouldBe("DEF");
+            deserialized.Third.ShouldBeNull();
         }
     }
 }

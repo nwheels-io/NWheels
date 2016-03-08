@@ -11,6 +11,8 @@ namespace NWheels.UnitTests.DataObjects.Serialization
         public class SimpliestFlat
         {
             public int IntValue { get; set; }
+            public bool BoolValue { get; set; }
+            public bool AnotherBoolValue { get; set; }
             public string StringValue { get; set; }
             public string AnotherStringValue { get; set; }
             public DayOfWeek SystemEnumValue { get; set; }
@@ -21,6 +23,22 @@ namespace NWheels.UnitTests.DataObjects.Serialization
             public long LongValue { get; set; }
             public float FloatValue { get; set; }
             public decimal DecimalValue { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class AnotherSimpliestFlat
+        {
+            public string StringValue { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class WithNestedObjects
+        {
+            public SimpliestFlat First { get; set; }
+            public AnotherSimpliestFlat Second { get; set; }
+            public SimpliestFlat Third { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

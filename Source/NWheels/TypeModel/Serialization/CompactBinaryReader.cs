@@ -20,6 +20,24 @@ namespace NWheels.TypeModel.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        #region Overrides of BinaryReader
+
+        public override string ReadString()
+        {
+            var nullIndicator = ReadByte();
+
+            if (nullIndicator > 0)
+            {
+                return base.ReadString();
+            }
+
+            return null;
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public int Read7BitInt()
         {
             return (int)Read7BitLong();
@@ -108,7 +126,7 @@ namespace NWheels.TypeModel.Serialization
             int count = Read7BitInt();
             return (count > 0 ? ReadBytes(count) : null);
         }
-
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         public static List<bool> ULong2BooleanList(ulong encodedBools, int numOfWantedBooleans)
         {

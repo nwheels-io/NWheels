@@ -149,9 +149,9 @@ namespace NWheels.TypeModel.Factories
                             {
                                 parameterLocals[i] = w.Local(initialValue: Static.Func(ResolutionExtensions.Resolve<TT.TArgument>, components));
                             }
-
-                            w.Return(w.New<TT.TImpl>(parameterLocals).CastTo<object>());
                         }
+
+                        w.Return(w.New<TT.TImpl>(parameterLocals).CastTo<object>());
                     }
                 }
             );
@@ -242,6 +242,11 @@ namespace NWheels.TypeModel.Factories
                     target.Prop<TT.TProperty>(prop).Assign(context.Prop(x => x.Input).Func<int>(x => x.Read7BitInt).CastTo<TT.TProperty>())
             },
             {
+                typeof(bool),
+                (w, context, target, prop) =>
+                    target.Prop<bool>(prop).Assign(context.Prop(x => x.Input).Func<bool>(x => x.ReadBoolean))
+            },
+            {
                 typeof(int),
                 (w, context, target, prop) =>
                     target.Prop<int>(prop).Assign(context.Prop(x => x.Input).Func<int>(x => x.Read7BitInt))
@@ -304,6 +309,11 @@ namespace NWheels.TypeModel.Factories
                 typeof(Enum),
                 (w, context, target, prop) =>
                     context.Prop(x => x.Output).Void(x => x.Write7BitInt, target.Prop<TT.TProperty>(prop).CastTo<int>())
+            },
+            {
+                typeof(bool),
+                (w, context, target, prop) =>
+                    context.Prop(x => x.Output).Void(x => x.Write, target.Prop<bool>(prop))
             },
             {
                 typeof(int),

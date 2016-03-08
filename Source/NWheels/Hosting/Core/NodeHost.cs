@@ -46,6 +46,7 @@ using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Configuration.Impls;
 using NWheels.Processing.Commands.Factories;
+using NWheels.TypeModel;
 using NWheels.TypeModel.Factories;
 using NWheels.TypeModel.Serialization;
 

@@ -75,7 +75,15 @@ namespace NWheels.TypeModel.Serialization
 
         public new void Write(string value)
         {
-            base.Write(value ?? "");
+            if (value != null)
+            {
+                base.Write((byte)1);
+                base.Write(value);
+            }
+            else
+            {
+                base.Write((byte)0);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
