@@ -158,6 +158,7 @@
     <Compile Include="Processing\ICommandProcessedEvent.cs" />
     <Compile Include="Processing\IPushEvent.cs" />
     <Compile Include="Processing\IServerCommand.cs" />
+    <Compile Include="TypeModel\Core\Conventions\MutationMetadataConvention.cs" />
     <Compile Include="TypeModel\Core\DomainContextMetadataBuilder.cs" />
     <Compile Include="TypeModel\Core\DomainContextMetadataCache.cs" />
     <Compile Include="TypeModel\Core\StorageTypes\DecimalAsInt64StorageType.cs" />
@@ -216,6 +217,7 @@
     <Compile Include="TypeModel\Core\StorageTypes\MoneyStorageType.cs" />
     <Compile Include="TypeModel\IDomainContextMetadata.cs" />
     <Compile Include="TypeModel\IDomainContextMetadataCache.cs" />
+    <Compile Include="TypeModel\IMetadataMutation.cs" />
     <Compile Include="TypeModel\ITypeLogicMetadata.cs" />
     <Compile Include="TypeModel\PropertyStorageStyle.cs" />
     <Compile Include="TypeModel\Serialization\BinarySerializer.cs" />

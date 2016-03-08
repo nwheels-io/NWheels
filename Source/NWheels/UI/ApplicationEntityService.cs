@@ -369,9 +369,11 @@ namespace NWheels.UI
 
         private void RegisterDomainObjectType(Type contextType, ITypeMetadata metaType, bool explicitlyDeclaredInContext)
         {
-            if ( _handlerByEntityName.ContainsKey(metaType.QualifiedName) )
+            EntityHandler existingHandler;
+
+            if (_handlerByEntityName.TryGetValue(metaType.QualifiedName, out existingHandler))
             {
-                if ( explicitlyDeclaredInContext )
+                if (explicitlyDeclaredInContext && metaType.DefaultContextContract != existingHandler.DomainContextType)
                 {
                     _handlerByEntityName.Remove(metaType.QualifiedName);
                 }

@@ -46,6 +46,7 @@ using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Configuration.Impls;
 using NWheels.Processing.Commands.Factories;
+using NWheels.TypeModel;
 
 namespace NWheels.Hosting.Core
 {
@@ -330,6 +331,8 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<ContractMetadataConvention>().As<IMetadataConvention>().SingleInstance().FirstInPipeline();
             builder.RegisterType<AttributeMetadataConvention>().As<IMetadataConvention>().SingleInstance().LastInPipeline();
             builder.RegisterType<RelationMetadataConvention>().As<IMetadataConvention>().SingleInstance().LastInPipeline();
+            builder.RegisterType<MutationMetadataConvention>().As<IMetadataConvention>().SingleInstance().AnchoredLastInPipeline();
+            builder.RegisterPipeline<IMetadataMutation>().InstancePerDependency(); // avoid caching to allow modules extend convention set
             builder.RegisterInstance(new PascalCaseRelationalMappingConvention(usePluralTableNames: true)).As<IRelationalMappingConvention>();
             builder.RegisterType<MetadataConventionSet>().InstancePerDependency(); // avoid caching because modules can add new registrations
             builder.RegisterType<TypeMetadataCache>().As<ITypeMetadataCache, TypeMetadataCache>().SingleInstance();

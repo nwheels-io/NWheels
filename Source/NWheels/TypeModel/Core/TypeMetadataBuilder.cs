@@ -237,7 +237,7 @@ namespace NWheels.DataObjects.Core
         {
             get { return this.RelationalMapping; }
         }
-        
+
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -254,6 +254,7 @@ namespace NWheels.DataObjects.Core
         public List<PropertyMetadataBuilder> DefaultDisplayProperties { get; private set; }
         public List<PropertyMetadataBuilder> DefaultSortProperties { get; private set; }
         public TypeRelationalMappingBuilder RelationalMapping { get; set; }
+        public Type DefaultContextContract { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

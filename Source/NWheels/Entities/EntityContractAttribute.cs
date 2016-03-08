@@ -33,6 +33,7 @@ namespace NWheels.Entities
             type.Name = this.Name ?? type.Name.TrimSuffix("Entity");
             type.DisplayName = this.DisplayName ?? type.Name;
             type.NamespaceQualifier = GetNamespaceQualifier(type);
+            type.DefaultContextContract = this.DefaultContext;
         }
 
         #endregion
@@ -45,6 +46,7 @@ namespace NWheels.Entities
         public string Namespace { get; set; }
         public string DisplayName { get; set; }
         public bool UseCodeNamespace { get; set; }
+        public Type DefaultContext { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

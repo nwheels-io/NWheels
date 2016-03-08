@@ -19,7 +19,9 @@ namespace NWheels.Extensions
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static int _s_pipelineHeadIndex = 0;
+        private static int _s_pipelineAnchoredHeadIndex = Int32.MinValue;
         private static int _s_pipelineTailIndex = 0;
+        private static int _s_pipelineAnchoredTailIndex = Int32.MaxValue;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -50,6 +52,22 @@ namespace NWheels.Extensions
             this IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> registration)
         {
             return registration.WithMetadata(PipelineIndexMetadataKey, Interlocked.Increment(ref _s_pipelineTailIndex));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> AnchoredFirstInPipeline<TLimit, TActivatorData, TRegistrationStyle>(
+            this IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> registration)
+        {
+            return registration.WithMetadata(PipelineIndexMetadataKey, Interlocked.Increment(ref _s_pipelineAnchoredHeadIndex));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> AnchoredLastInPipeline<TLimit, TActivatorData, TRegistrationStyle>(
+            this IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> registration)
+        {
+            return registration.WithMetadata(PipelineIndexMetadataKey, Interlocked.Decrement(ref _s_pipelineAnchoredTailIndex));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

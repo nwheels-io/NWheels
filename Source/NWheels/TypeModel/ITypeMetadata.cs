@@ -45,6 +45,7 @@ namespace NWheels.DataObjects
         IReadOnlyList<IPropertyMetadata> DefaultDisplayProperties { get; }
         IReadOnlyList<IPropertyMetadata> DefaultSortProperties { get; }
         ITypeRelationalMapping RelationalMapping { get; }
+        Type DefaultContextContract { get; }
     }
 }
 

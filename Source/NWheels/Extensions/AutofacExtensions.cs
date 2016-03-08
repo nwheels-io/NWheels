@@ -33,6 +33,7 @@ using NWheels.Processing.Messages.Impl;
 using NWheels.Processing.Workflows;
 using NWheels.Processing.Workflows.Core;
 using NWheels.Processing.Workflows.Impl;
+using NWheels.TypeModel;
 using NWheels.UI.Uidl;
 
 namespace NWheels.Extensions
@@ -372,6 +373,14 @@ namespace NWheels.Extensions
             public ContractMixinRegistration<TPart> Mix<TPart>() where TPart : class
             {
                 return new ContractMixinRegistration<TPart>(_builder);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RegisterMetaTypeMutation<TContract>(Action<IComponentContext, TypeMetadataCache, TypeMetadataBuilder> onApply) 
+                where TContract : class
+            {
+                _builder.RegisterInstance(new DelegatingMetadataMutation<TContract>(onApply)).As<IMetadataMutation>();
             }
         }
 
