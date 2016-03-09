@@ -11,7 +11,7 @@ namespace NWheels.Processing.Commands
     public interface ICommandActorLogger : IApplicationEventLogger
     {
         [LogDebug]
-        void LookingUpEntity(IEntityId id);
+        void LookingUpEntity(IEntityId id, string contextType);
 
         [LogError]
         EntityNotFoundException EntityNotFound(IEntityId id);

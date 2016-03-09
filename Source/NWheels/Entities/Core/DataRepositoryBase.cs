@@ -593,7 +593,7 @@ namespace NWheels.Entities.Core
 
         private void ExecuteCommitToPersistenceLayer()
         {
-            using ( var activity = _logger.CommittingChangesToPersistenceLayer() )
+            using ( var activity = _logger.CommittingChangesToPersistenceLayer(DomainContextContract.Name) )
             {
                 try
                 {

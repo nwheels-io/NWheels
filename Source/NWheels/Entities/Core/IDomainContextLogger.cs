@@ -37,7 +37,7 @@ namespace NWheels.Entities.Core
         ILogActivity ExecutingAfterSavePhase();
 
         [LogActivity]
-        ILogActivity CommittingChangesToPersistenceLayer();
+        ILogActivity CommittingChangesToPersistenceLayer(string contextType);
 
         [LogActivity]
         ILogActivity ValidateObject(string obj);

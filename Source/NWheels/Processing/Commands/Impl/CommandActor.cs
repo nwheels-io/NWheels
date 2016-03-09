@@ -84,9 +84,10 @@ namespace NWheels.Processing.Commands.Impl
 
             using ( var context = Framework.As<ICoreFramework>().NewUnitOfWork(command.DomainContextContract) )
             {
-                Logger.LookingUpEntity(id: command.EntityId);
+                Logger.LookingUpEntity(id: command.EntityId, contextType: command.DomainContextContract.Name);
 
-                var entityInstance = context.GetEntityRepository(entityContract).TryGetById(command.EntityId);
+                var entityRepo = context.GetEntityRepository(entityContract);
+                var entityInstance = entityRepo.TryGetById(command.EntityId);
 
                 if ( entityInstance != null )
                 {
@@ -95,7 +96,7 @@ namespace NWheels.Processing.Commands.Impl
                     //TODO: fix IsModified to take inherited properties into account - Hapil? inherited properties are not decorated? DomainObjectFactory
                     //if (((IObject)entityInstance).IsModified)
                     //{
-                        ((IActiveRecord)entityInstance).Save();
+                        entityRepo.Save(entityInstance);
                     //}
 
                     context.CommitChanges();

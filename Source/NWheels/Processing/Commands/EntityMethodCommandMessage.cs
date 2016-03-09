@@ -132,7 +132,12 @@ namespace NWheels.Processing.Commands
         {
             get
             {
-                return string.Format("InvokeEntityMethod({0}.{1}, entityId={2})", EntityContract.Name, EntityMethod.Name, EntityId.Value);
+                return string.Format(
+                    "InvokeEntityMethod({0}.{1}, entityId={2}, contextType={3})", 
+                    EntityContract.Name, 
+                    EntityMethod.Name, 
+                    EntityId.Value, 
+                    DomainContextContract.Name);
             }
         }
 
