@@ -64,6 +64,27 @@ namespace NWheels.TypeModel.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public T ReadObject<T>(Stream input, ObjectCompactSerializerDictionary dictionary)
+        {
+            return (T)ReadObject(typeof(T), new CompactBinaryReader(input), dictionary);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public T ReadObject<T>(byte[] input, ObjectCompactSerializerDictionary dictionary)
+        {
+            return (T)ReadObject(typeof(T), new CompactBinaryReader(new MemoryStream(input)), dictionary);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public T ReadObject<T>(CompactBinaryReader input, ObjectCompactSerializerDictionary dictionary)
+        {
+            return (T)ReadObject(typeof(T), new CompactDeserializationContext(this, dictionary, input));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void WriteObject(Type declaredType, object obj, Stream output, ObjectCompactSerializerDictionary dictionary)
         {
             WriteObject(declaredType, obj, new CompactBinaryWriter(output), dictionary);
@@ -89,6 +110,35 @@ namespace NWheels.TypeModel.Serialization
         public void WriteObject(Type declaredType, object obj, CompactBinaryWriter output, ObjectCompactSerializerDictionary dictionary)
         {
             WriteObject(declaredType, obj, new CompactSerializationContext(this, dictionary, output));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void WriteObject<T>(T obj, Stream output, ObjectCompactSerializerDictionary dictionary)
+        {
+            WriteObject(typeof(T), obj, new CompactBinaryWriter(output), dictionary);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public byte[] WriteObject<T>(T obj, ObjectCompactSerializerDictionary dictionary)
+        {
+            byte[] serializedBytes;
+
+            using (var output = new MemoryStream())
+            {
+                WriteObject(typeof(T), obj, new CompactBinaryWriter(output), dictionary);
+                serializedBytes = output.ToArray();
+            }
+
+            return serializedBytes;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void WriteObject<T>(T obj, CompactBinaryWriter output, ObjectCompactSerializerDictionary dictionary)
+        {
+            WriteObject(typeof(T), obj, new CompactSerializationContext(this, dictionary, output));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

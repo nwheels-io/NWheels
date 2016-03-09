@@ -17,13 +17,13 @@ namespace NWheels.UnitTests.DataObjects.Serialization
     public class ObjectCompactSerializerTests : UnitTestBase
     {
         [Test]
-        public void Serialize_SimpliestFlatObject()
+        public void Serialize_PrimitiveTypes()
         {
             //-- arrange
 
             var serializer = Framework.Components.Resolve<ObjectCompactSerializer>();
 
-            var obj = new Repo.SimpliestFlat() {
+            var obj = new Repo.Primitive() {
                 StringValue = "ABC",
                 IntValue = 123,
                 DecimalValue = 123.45m
@@ -31,7 +31,7 @@ namespace NWheels.UnitTests.DataObjects.Serialization
 
             //-- act
 
-            var serializedBytes = serializer.WriteObject(typeof(Repo.SimpliestFlat), obj, new ObjectCompactSerializerDictionary());
+            var serializedBytes = serializer.WriteObject(obj, new ObjectCompactSerializerDictionary());
 
             //-- assert
 
@@ -42,7 +42,7 @@ namespace NWheels.UnitTests.DataObjects.Serialization
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Roundtrip_SimpliestFlatObject()
+        public void Roundtrip_PrimitiveTypes()
         {
             //-- arrange
 
@@ -50,7 +50,7 @@ namespace NWheels.UnitTests.DataObjects.Serialization
             var dictionary = new ObjectCompactSerializerDictionary();
 
             var guid = Guid.NewGuid();
-            var original = new Repo.SimpliestFlat() {
+            var original = new Repo.Primitive() {
                 IntValue = 123,
                 BoolValue = true,
                 StringValue = "ABC",
@@ -66,8 +66,8 @@ namespace NWheels.UnitTests.DataObjects.Serialization
 
             //-- act
 
-            var serializedBytes = serializer.WriteObject(typeof(Repo.SimpliestFlat), original, dictionary);
-            var deserialized = (Repo.SimpliestFlat)serializer.ReadObject(typeof(Repo.SimpliestFlat), serializedBytes, dictionary);
+            var serializedBytes = serializer.WriteObject(original, dictionary);
+            var deserialized = serializer.ReadObject<Repo.Primitive>(serializedBytes, dictionary);
 
             //-- assert
 
@@ -90,7 +90,7 @@ namespace NWheels.UnitTests.DataObjects.Serialization
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Roundtrip_WithNestedObjects()
+        public void Roundtrip_NestedObjects()
         {
             //-- arrange
 
@@ -99,10 +99,10 @@ namespace NWheels.UnitTests.DataObjects.Serialization
 
             var guid = Guid.NewGuid();
             var original = new Repo.WithNestedObjects() {
-                First = new Repo.SimpliestFlat() {
+                First = new Repo.Primitive() {
                     StringValue = "ABC"
                 },
-                Second = new Repo.AnotherSimpliestFlat() {
+                Second = new Repo.AnotherPrimitive() {
                     StringValue = "DEF"
                 },
             };
@@ -120,6 +120,48 @@ namespace NWheels.UnitTests.DataObjects.Serialization
             deserialized.Second.ShouldNotBeNull();
             deserialized.Second.StringValue.ShouldBe("DEF");
             deserialized.Third.ShouldBeNull();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Roundtrip_CollectionsOfPrimitiveTypes()
+        {
+            //-- arrange
+
+            var serializer = Framework.Components.Resolve<ObjectCompactSerializer>();
+            var dictionary = new ObjectCompactSerializerDictionary();
+
+            var original = new Repo.WithCollectionsOfPrimitiveTypes() {
+                EnumArray = new[] { Repo.AnAppEnum.First, Repo.AnAppEnum.Second, Repo.AnAppEnum.Third },
+                StringList = new List<string>() { "AAA", "BBB", "CCC" },
+                DateTimeByIntDictionary = new Dictionary<int, DateTime>() {
+                    { 123, new DateTime(2016, 1, 10) },
+                    { 456, new DateTime(2016, 2, 11) },
+                    { 789, new DateTime(2016, 3, 12) },
+                }
+            };
+
+            //-- act
+
+            var serializedBytes = serializer.WriteObject(original, dictionary);
+            var deserialized = serializer.ReadObject<Repo.WithCollectionsOfPrimitiveTypes>(serializedBytes, dictionary);
+
+            //-- assert
+
+            deserialized.ShouldNotBeNull();
+
+            deserialized.EnumArray.ShouldNotBeNull();
+            deserialized.EnumArray.ShouldBe(new[] { Repo.AnAppEnum.First, Repo.AnAppEnum.Second, Repo.AnAppEnum.Third });
+
+            deserialized.StringList.ShouldNotBeNull();
+            deserialized.StringList.ShouldBe(new[] { "AAA", "BBB", "CCC" });
+
+            deserialized.DateTimeByIntDictionary.ShouldNotBeNull();
+            deserialized.DateTimeByIntDictionary.Count.ShouldBe(3);
+            deserialized.DateTimeByIntDictionary.ShouldContainKeyAndValue(123, new DateTime(2016, 1, 10));
+            deserialized.DateTimeByIntDictionary.ShouldContainKeyAndValue(456, new DateTime(2016, 2, 11));
+            deserialized.DateTimeByIntDictionary.ShouldContainKeyAndValue(789, new DateTime(2016, 3, 12));
         }
     }
 }

@@ -92,7 +92,39 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void Write<T>(this CompactBinaryWriter bw, List<T> list, WriteDataDelegate<T> itemWriter, object context)
+        public static void WriteArray<T>(this CompactBinaryWriter bw, T[] arr, WriteDataDelegate<T> itemWriter, object context)
+        {
+            if (arr != null)
+            {
+                bw.Write7BitInt(arr.Length);
+                for (int i = 0 ; i < arr.Length ; i++)
+                {
+                    itemWriter(bw, arr[i], context);
+                }
+            }
+            else
+            {
+                bw.Write7BitInt(0);
+            }
+        }
+
+        public static T[] ReadArray<T>(this CompactBinaryReader br, ReadDataDelegate<T> itemReader, object context)
+        {
+            int length = br.Read7BitInt();
+            var arr = new T[length];
+            
+            for (int i = 0; i < length; i++)
+            {
+                T item = itemReader(br, context);
+                arr[i] = item;
+            }
+
+            return arr;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void WriteList<T>(this CompactBinaryWriter bw, List<T> list, WriteDataDelegate<T> itemWriter, object context)
         {
             if (list != null)
             {
@@ -108,7 +140,7 @@ namespace NWheels.Extensions
             }
         }
 
-        public static void Read<T>(this CompactBinaryReader br, List<T> list, ReadDataDelegate<T> itemReader, object context)
+        public static void ReadList<T>(this CompactBinaryReader br, List<T> list, ReadDataDelegate<T> itemReader, object context)
         {
             //Clear the list before work starts. In case the list is null it will throw exception
             list.Clear();
@@ -122,7 +154,7 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void Write<TK, TV>(
+        public static void WriteDictionary<TK, TV>(
             this CompactBinaryWriter bw,
             IDictionary<TK, TV> map,
             WriteDataDelegate<TK> keyWriter, object keyContext,
@@ -136,7 +168,7 @@ namespace NWheels.Extensions
             }
         }
 
-        public static void Read<TK, TV>(
+        public static void ReadDictionary<TK, TV>(
             this CompactBinaryReader br,
             IDictionary<TK, TV> map,
             ReadDataDelegate<TK> keyReader, object keyContext,

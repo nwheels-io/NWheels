@@ -8,7 +8,7 @@ namespace NWheels.UnitTests.DataObjects.Serialization
 {
     public static class TestObjectRepository
     {
-        public class SimpliestFlat
+        public class Primitive
         {
             public int IntValue { get; set; }
             public bool BoolValue { get; set; }
@@ -27,7 +27,7 @@ namespace NWheels.UnitTests.DataObjects.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class AnotherSimpliestFlat
+        public class AnotherPrimitive
         {
             public string StringValue { get; set; }
         }
@@ -36,9 +36,27 @@ namespace NWheels.UnitTests.DataObjects.Serialization
 
         public class WithNestedObjects
         {
-            public SimpliestFlat First { get; set; }
-            public AnotherSimpliestFlat Second { get; set; }
-            public SimpliestFlat Third { get; set; }
+            public Primitive First { get; set; }
+            public AnotherPrimitive Second { get; set; }
+            public Primitive Third { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class WithCollectionsOfPrimitiveTypes
+        {
+            public AnAppEnum[] EnumArray { get; set; }
+            public List<string> StringList { get; set; }
+            public Dictionary<int, DateTime> DateTimeByIntDictionary { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class WithCollectionsOfNestedObjects
+        {
+            public Primitive[] FirstArray { get; set; }
+            public List<AnotherPrimitive> SecondList { get; set; }
+            public Dictionary<AnotherPrimitive, Primitive> PrimitiveByAnother { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
