@@ -1369,7 +1369,7 @@ HEAD, JS/CSS LINKS
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}">
             <!-- PASSWORD -->
-            <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Password'" class="m-b">
+            <div ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password')" class="m-b">
                 <div>
                     <input class="form-control"
                            type="password"
@@ -1377,11 +1377,11 @@ HEAD, JS/CSS LINKS
                            id="{{::uniqueFieldId}}"
                            name="{{::uniqueFieldId}}">
                 </div>
-                <div>
+                <div ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password') && hasUidlModifier('Confirm')">
                     <label style="margin:3px 0 3px 0;font-weight:normal;">Confirm:</label>
                 </div>
                 <div>
-                    <input ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Password'"
+                    <input ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password') && hasUidlModifier('Confirm')"
                            class="form-control"
                            type="password"
                            ng-model="hiddenValues[uidl.propertyName]"

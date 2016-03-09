@@ -11,7 +11,8 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.Domains.Security.UI
 {
-    public class UserAccountCrudScreenPart : CrudScreenPart<IUserAccountEntity>
+    public class UserAccountCrudScreenPart<TDerivedEntity> : CrudScreenPart<TDerivedEntity>
+        where TDerivedEntity : class, IUserAccountEntity
     {
         public UserAccountCrudScreenPart(string idName, UidlApplication parent)
             : base(idName, parent)
@@ -20,7 +21,7 @@ namespace NWheels.Domains.Security.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void LimitToAccountsOfType<T>() where T : IUserAccountEntity
+        public void LimitToAccountsOfType<T>() where T : TDerivedEntity
         {
             this.Crud.FilterByType<T>();
         }
@@ -28,13 +29,13 @@ namespace NWheels.Domains.Security.UI
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlCommand ChangePassword { get; set; }
-        public EntityMethodForm<IUserAccountEntity, IChangePasswordInput> ChangePasswordForm { get; set; }
+        public EntityMethodForm<TDerivedEntity, IChangePasswordInput> ChangePasswordForm { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Overrides of CrudScreenPart<IUserAccountEntity>
 
-        protected override void DescribePresenter(PresenterBuilder<CrudScreenPart<IUserAccountEntity>, Empty.Data, IState> presenter)
+        protected override void DescribePresenter(PresenterBuilder<CrudScreenPart<TDerivedEntity>, Empty.Data, IState> presenter)
         {
             base.DescribePresenter(presenter);
             this.GridColumns(x => x.LoginName, x => x.FullName, x => x.AssociatedRoles, x => x.LastLoginAtUtc, x => x.IsLockedOut);
@@ -55,6 +56,7 @@ namespace NWheels.Domains.Security.UI
             ChangePassword.Severity = CommandSeverity.Change;
             ChangePassword.Icon = "lock";
 
+            ChangePasswordForm.InputForm.Field(x => x.NewPassword, modifiers: FormFieldModifiers.Password | FormFieldModifiers.Confirm);
 
             presenter.On(Crud.SelectedEntityChanged).Broadcast(ChangePasswordForm.EntitySetter).WithPayload(vm => vm.Input).TunnelDown();
             ChangePasswordForm.AttachTo(
@@ -74,6 +76,16 @@ namespace NWheels.Domains.Security.UI
         {
             [PropertyContract.Semantic.Password, PropertyContract.Security.Sensitive]
             SecureString NewPassword { get; set; }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class UserAccountCrudScreenPart : UserAccountCrudScreenPart<IUserAccountEntity>
+    {
+        public UserAccountCrudScreenPart(string idName, UidlApplication parent)
+            : base(idName, parent)
+        {
         }
     }
 }
