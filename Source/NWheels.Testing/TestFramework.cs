@@ -461,7 +461,7 @@ namespace NWheels.Testing
             builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
             
             builder.RegisterType<ObjectCompactSerializer>().InstancePerDependency();
-            builder.RegisterType<ObjectCompactReaderWriterFactory>().SingleInstance();
+            builder.RegisterType<CompactTypeSerializerFactory>().SingleInstance();
             builder.RegisterPipeline<IObjectTypeResolver>().SingleInstance();
             
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();

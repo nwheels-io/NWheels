@@ -17,12 +17,12 @@ namespace NWheels.TypeModel.Serialization
     {
         private readonly IComponentContext _components;
         private readonly ITypeMetadataCache _metadataCache;
-        private readonly ObjectCompactReaderWriterFactory _readerWriterFactory;
+        private readonly CompactTypeSerializerFactory _readerWriterFactory;
         private readonly Pipeline<IObjectTypeResolver> _typeResolvers;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ObjectCompactSerializer(IComponentContext components, ITypeMetadataCache metadataCache, ObjectCompactReaderWriterFactory readerWriterFactory)
+        public ObjectCompactSerializer(IComponentContext components, ITypeMetadataCache metadataCache, CompactTypeSerializerFactory readerWriterFactory)
             : this(components, metadataCache, readerWriterFactory, new IObjectTypeResolver[] { new VoidTypeResolver() })
         {
         }
@@ -32,7 +32,7 @@ namespace NWheels.TypeModel.Serialization
         public ObjectCompactSerializer(
             IComponentContext components,
             ITypeMetadataCache metadataCache,
-            ObjectCompactReaderWriterFactory readerWriterFactory,
+            CompactTypeSerializerFactory readerWriterFactory,
             Pipeline<IObjectTypeResolver> typeResolvers)
         {
             _components = components;
@@ -180,7 +180,7 @@ namespace NWheels.TypeModel.Serialization
                 materializedInstance = creator(_components);
             }
 
-            var reader = _readerWriterFactory.GetReader(materializedInstance.GetType());
+            var reader = _readerWriterFactory.GetTypeReader(materializedInstance.GetType());
             reader(context, materializedInstance);
 
             return materializedInstance;
@@ -212,7 +212,7 @@ namespace NWheels.TypeModel.Serialization
                 output.Write(ObjectIndicatorByte.NotNull);
             }
 
-            var writer = _readerWriterFactory.GetWriter(obj.GetType());
+            var writer = _readerWriterFactory.GetTypeWriter(obj.GetType());
             writer(context, obj);
         }
 

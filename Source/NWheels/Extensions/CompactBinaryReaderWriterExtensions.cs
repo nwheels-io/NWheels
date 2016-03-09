@@ -124,12 +124,12 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static void WriteList<T>(this CompactBinaryWriter bw, List<T> list, WriteDataDelegate<T> itemWriter, object context)
+        public static void WriteCollection<T>(this CompactBinaryWriter bw, ICollection<T> collection, WriteDataDelegate<T> itemWriter, object context)
         {
-            if (list != null)
+            if (collection != null)
             {
-                bw.Write7BitInt(list.Count);
-                foreach (T item in list)
+                bw.Write7BitInt(collection.Count);
+                foreach (T item in collection)
                 {
                     itemWriter(bw, item, context);
                 }
@@ -140,15 +140,15 @@ namespace NWheels.Extensions
             }
         }
 
-        public static void ReadList<T>(this CompactBinaryReader br, List<T> list, ReadDataDelegate<T> itemReader, object context)
+        public static void ReadCollection<T>(this CompactBinaryReader br, ICollection<T> collection, ReadDataDelegate<T> itemReader, object context)
         {
             //Clear the list before work starts. In case the list is null it will throw exception
-            list.Clear();
+            collection.Clear();
             int count = br.Read7BitInt();
             for (int i = 0; i < count; i++)
             {
                 T item = itemReader(br, context);
-                list.Add(item);
+                collection.Add(item);
             }
         }
 

@@ -198,12 +198,12 @@ namespace NWheels.UnitTests.Endpoints.Core
         {
             MemoryStream msW = new MemoryStream();
             CompactBinaryWriter bw = new CompactBinaryWriter(msW);
-            bw.WriteList(list, writeDlgt, null);
+            bw.WriteCollection(list, writeDlgt, null);
             //-----------------------------
             MemoryStream msR = new MemoryStream(msW.ToArray());
             CompactBinaryReader br = new CompactBinaryReader(msR);
             List<T> parsedList = new List<T>();
-            br.ReadList(parsedList, readDlgt, null);
+            br.ReadCollection(parsedList, readDlgt, null);
 
             Assert.AreEqual(list.Count, parsedList.Count);
             Assert.True(parsedList.TrueForAll( list.Contains));
