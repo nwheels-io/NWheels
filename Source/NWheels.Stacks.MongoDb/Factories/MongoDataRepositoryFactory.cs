@@ -59,6 +59,8 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private const string MongoNativeConnectioinStringPrefix = "mongodb://";
+
         public override IApplicationDataRepository NewUnitOfWork(
             IResourceConsumerScopeHandle consumerScope, 
             Type repositoryType, 
@@ -66,12 +68,28 @@ namespace NWheels.Stacks.MongoDb.Factories
             UnitOfWorkScopeOption? scopeOption = null,
             string connectionString = null)
         {
-            var resolvedConnectionString = ResolveConnectionString(connectionString, repositoryType);
-            var connectionStringBuilder = new MongoConnectionStringBuilder(resolvedConnectionString);
+            MongoDatabase database;
 
-            var client = new MongoClient(connectionStringBuilder.ConnectionString);
-            var server = client.GetServer();
-            var database = server.GetDatabase(connectionStringBuilder.DatabaseName);
+            if (connectionString != null && connectionString.ToLower().StartsWith(MongoNativeConnectioinStringPrefix))
+            {
+                var connectionStringWithoutPrefix = connectionString.Substring(MongoNativeConnectioinStringPrefix.Length);
+                var slashPosition = connectionStringWithoutPrefix.IndexOf("/");
+                var questionPosition = connectionStringWithoutPrefix.IndexOf("?");
+                var databaseName = connectionStringWithoutPrefix.Substring(slashPosition + 1, questionPosition - slashPosition - 1);
+                
+                var client = new MongoClient(connectionString);
+                var server = client.GetServer();
+                database = server.GetDatabase(databaseName);
+            }
+            else
+            {
+                var resolvedConnectionString = ResolveConnectionString(connectionString, repositoryType);
+                var connectionStringBuilder = new MongoConnectionStringBuilder(resolvedConnectionString);
+
+                var client = new MongoClient(connectionStringBuilder.ConnectionString);
+                var server = client.GetServer();
+                database = server.GetDatabase(connectionStringBuilder.DatabaseName);
+            }
 
             var dataRepository = (MongoDataRepositoryBase)CreateInstanceOf(repositoryType).UsingConstructor(
                 consumerScope,
