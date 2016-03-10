@@ -73,7 +73,7 @@ namespace NWheels.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public new void Write(string value)
+        public void WriteStringOrNull(string value)
         {
             if (value != null)
             {

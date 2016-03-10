@@ -52,7 +52,7 @@ namespace NWheels.Serialization
 
         public object ReadObject(Type declaredType, CompactBinaryReader input, CompactSerializerDictionary dictionary)
         {
-            return ReadObject(declaredType, new CompactDeserializationContext(this, dictionary, input));
+            return ReadObject(declaredType, new CompactDeserializationContext(this, dictionary, input, _components));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ namespace NWheels.Serialization
 
         public T ReadObject<T>(CompactBinaryReader input, CompactSerializerDictionary dictionary)
         {
-            return (T)ReadObject(typeof(T), new CompactDeserializationContext(this, dictionary, input));
+            return (T)ReadObject(typeof(T), new CompactDeserializationContext(this, dictionary, input, _components));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -170,7 +170,7 @@ namespace NWheels.Serialization
             {
                 var materializationType = GetDeserializationType(declaredType, serializedType);
                 var creator = _readerWriterFactory.GetDefaultCreator(materializationType);
-                materializedInstance = creator(_components);
+                materializedInstance = creator(context);
             }
 
             var reader = _readerWriterFactory.GetTypeReader(materializedInstance.GetType());

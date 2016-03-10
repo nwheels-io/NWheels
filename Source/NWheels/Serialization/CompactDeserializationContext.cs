@@ -1,14 +1,20 @@
 ﻿using System;
+using Autofac;
 
 namespace NWheels.Serialization
 {
     public class CompactDeserializationContext
     {
-        public CompactDeserializationContext(CompactSerializer serializer, CompactSerializerDictionary dictionary, CompactBinaryReader input)
+        public CompactDeserializationContext(
+            CompactSerializer serializer, 
+            CompactSerializerDictionary dictionary, 
+            CompactBinaryReader input, 
+            IComponentContext components)
         {
-            Serializer = serializer;
-            Dictionary = dictionary;
-            Input = input;
+            this.Serializer = serializer;
+            this.Dictionary = dictionary;
+            this.Input = input;
+            this.Components = components;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -23,5 +29,6 @@ namespace NWheels.Serialization
         public CompactSerializer Serializer { get; private set; }
         public CompactSerializerDictionary Dictionary { get; private set; }
         public CompactBinaryReader Input { get; private set; }
+        public IComponentContext Components { get; private set; }
     }
 }

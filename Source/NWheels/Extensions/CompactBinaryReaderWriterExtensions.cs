@@ -8,12 +8,12 @@ namespace NWheels.Extensions
     {
         public static string ReadString(this CompactBinaryReader br, object context)
         {
-            return br.ReadString();
+            return br.ReadStringOrNull();
         }
 
         public static void WriteString(this CompactBinaryWriter bw, string val, object context)
         {
-            bw.Write(val);
+            bw.WriteStringOrNull(val);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

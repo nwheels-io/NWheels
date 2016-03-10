@@ -20,9 +20,7 @@ namespace NWheels.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        #region Overrides of BinaryReader
-
-        public override string ReadString()
+        public string ReadStringOrNull()
         {
             var nullIndicator = ReadByte();
 
@@ -33,8 +31,6 @@ namespace NWheels.Serialization
 
             return null;
         }
-
-        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using Autofac;
 using NUnit.Framework;
 using NWheels.Serialization;
@@ -11,31 +13,6 @@ namespace NWheels.UnitTests.Serialization
     [TestFixture]
     public class CompactSerializerTests : DynamicTypeUnitTestBase
     {
-        [Test]
-        public void Serialize_PrimitiveTypes()
-        {
-            //-- arrange
-
-            var serializer = Framework.Components.Resolve<CompactSerializer>();
-
-            var obj = new Repo.Primitive() {
-                StringValue = "ABC",
-                IntValue = 123,
-                DecimalValue = 123.45m
-            };
-
-            //-- act
-
-            var serializedBytes = serializer.GetBytes(obj, new CompactSerializerDictionary());
-
-            //-- assert
-
-            serializedBytes.ShouldNotBeNull();
-            serializedBytes.Length.ShouldBeGreaterThan(10);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         [Test]
         public void Roundtrip_PrimitiveTypes()
         {
@@ -129,7 +106,7 @@ namespace NWheels.UnitTests.Serialization
 
             var original = new Repo.WithCollectionsOfPrimitiveTypes() {
                 EnumArray = new[] { Repo.AnAppEnum.First, Repo.AnAppEnum.Second, Repo.AnAppEnum.Third },
-                //StringList = new List<string>() { "AAA", "BBB", "CCC" },
+                StringList = new List<string>() { "AAA", "BBB", "CCC" },
                 //DateTimeByIntDictionary = new Dictionary<int, DateTime>() {
                 //    { 123, new DateTime(2016, 1, 10) },
                 //    { 456, new DateTime(2016, 2, 11) },
@@ -140,6 +117,7 @@ namespace NWheels.UnitTests.Serialization
             //-- act
 
             var serializedBytes = serializer.GetBytes(original, dictionary);
+            File.WriteAllBytes(@"C:\Temp\serialized1.bin", serializedBytes);
             var deserialized = serializer.GetObject<Repo.WithCollectionsOfPrimitiveTypes>(serializedBytes, dictionary);
 
             //-- assert

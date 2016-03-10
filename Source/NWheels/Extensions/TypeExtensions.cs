@@ -66,6 +66,19 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static bool IsGenericIListType(this Type type)
+        {
+            if (type.IsGenericType && !type.IsGenericTypeDefinition)
+            {
+                var genericDefinition = type.GetGenericTypeDefinition();
+                return (genericDefinition == typeof(IList<>) || genericDefinition == typeof(List<>));
+            }
+
+            return false;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static bool IsAnonymousType(this Type type)
         {
             var hasCompilerGeneratedAttribute = type.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Any();
