@@ -20,6 +20,13 @@ namespace NWheels.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void WriteStruct<T>(T value) where T : struct
+        {
+            Serializer.WriteStruct<T>(ref value, this);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public CompactSerializer Serializer { get; private set; }
         public CompactSerializerDictionary Dictionary { get; private set; }
         public CompactBinaryWriter Output { get; private set; }

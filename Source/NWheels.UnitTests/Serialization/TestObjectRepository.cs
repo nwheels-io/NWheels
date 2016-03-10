@@ -44,7 +44,8 @@ namespace NWheels.UnitTests.Serialization
         {
             public AnAppEnum[] EnumArray { get; set; }
             public List<string> StringList { get; set; }
-            //public Dictionary<int, DateTime> DateTimeByIntDictionary { get; set; }
+            public HashSet<int> IntHashSet { get; set; }
+            public Dictionary<int, string> IntStringDictionary { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

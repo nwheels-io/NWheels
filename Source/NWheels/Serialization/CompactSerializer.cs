@@ -211,6 +211,25 @@ namespace NWheels.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal void WriteStruct<T>(ref T value, CompactSerializationContext context) where T : struct
+        {
+            var writer = _readerWriterFactory.GetTypeWriter<T>();
+            writer(context, ref value);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal T ReadStruct<T>(CompactDeserializationContext context) where T : struct
+        {
+            var reader = _readerWriterFactory.GetTypeReader<T>();
+            var creator = _readerWriterFactory.GetDefaultCreator<T>();
+            T value = creator(context);
+            reader(context, ref value);
+            return value;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private Type GetSerializationType(Type declaredType, object obj)
         {
             for (int i = 0 ; i < _typeResolvers.Count ; i++)

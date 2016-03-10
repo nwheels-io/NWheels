@@ -26,6 +26,13 @@ namespace NWheels.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public T ReadStruct<T>() where T : struct
+        {
+            return Serializer.ReadStruct<T>(this);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public CompactSerializer Serializer { get; private set; }
         public CompactSerializerDictionary Dictionary { get; private set; }
         public CompactBinaryReader Input { get; private set; }

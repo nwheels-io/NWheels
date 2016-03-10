@@ -56,6 +56,30 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public TypeReader<T> GetTypeReader<T>() where T : struct
+        {
+            var serializer = (ITypeSerializer<T>)_serializerByType.GetOrAdd(typeof(T), CreateTypeSerializer);
+            return serializer.ReadObject;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TypeWriter<T> GetTypeWriter<T>() where T : struct
+        {
+            var serializer = (ITypeSerializer<T>)_serializerByType.GetOrAdd(typeof(T), CreateTypeSerializer);
+            return serializer.WriteObject;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public TypeCreator<T> GetDefaultCreator<T>() where T : struct
+        {
+            var serializer = (ITypeSerializer<T>)_serializerByType.GetOrAdd(typeof(T), CreateTypeSerializer);
+            return serializer.CreateObject;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Overrides of ConventionObjectFactory
 
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
@@ -115,6 +139,22 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static ValueWriter GetValueWriter(FieldInfo field)
+        {
+            ValueWriter writer;
+
+            if (TryGetValueWriter(field.FieldType, out writer))
+            {
+                return writer;
+            }
+
+            throw new CompactSerializerException(
+                "Cannot serialize field '{0}.{1}'. Cannot serialize values of type '{2}'.",
+                field.DeclaringType.Name, field.Name, field.FieldType.FriendlyName());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static bool TryGetValueWriter(Type type, out ValueWriter writer)
         {
             var key = GetValueReaderWriterKey(type);
@@ -149,6 +189,22 @@ namespace NWheels.Serialization.Factories
             throw new CompactSerializerException(
                 "Cannot deserialize property '{0}.{1}'. Cannot deserialize values of type '{2}'.",
                 property.DeclaringType.Name, property.Name, property.PropertyType.FriendlyName());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static ValueReader GetValueReader(FieldInfo field)
+        {
+            ValueReader reader;
+
+            if (TryGetValueReader(field.FieldType, out reader))
+            {
+                return reader;
+            }
+
+            throw new CompactSerializerException(
+                "Cannot deserialize field '{0}.{1}'. Cannot deserialize values of type '{2}'.",
+                field.DeclaringType.Name, field.Name, field.FieldType.FriendlyName());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -208,14 +264,19 @@ namespace NWheels.Serialization.Factories
                     )
             },
             {
-                typeof(string),
+                typeof(ValueType),
                 (type, w, context, value) =>
-                    context.Prop(x => x.Output).Void(x => x.WriteStringOrNull, value.CastTo<string>())
+                    context.Prop(x => x.Output).Void(x => x.Write, value.CastTo<KeyValuePair<TT.TKey, TT.TValue>>())
             },
             {
                 typeof(Enum),
                 (type, w, context, value) =>
                     context.Prop(x => x.Output).Void(x => x.Write7BitInt, value.CastTo<int>())
+            },
+            {
+                typeof(string),
+                (type, w, context, value) =>
+                    context.Prop(x => x.Output).Void(x => x.WriteStringOrNull, value.CastTo<string>())
             },
             {
                 typeof(bool),
@@ -271,63 +332,63 @@ namespace NWheels.Serialization.Factories
                 typeof(object),
                 (type, w, context, assignTo) =>
                     assignTo.Assign(
-                        context.Func<Type, object>(x => x.ReadObject, w.Const(type)).CastTo<TT.TValue>()
+                        context.Func<Type, object>(x => x.ReadObject, w.Const(type)).CastTo<TT.TItem>()
                     )
             },
             {
                 typeof(string),
                 (type, w, context, assignTo) =>
-                    assignTo.Assign(context.Prop(x => x.Input).Func<string>(x => x.ReadStringOrNull).CastTo<TT.TValue>())
+                    assignTo.Assign(context.Prop(x => x.Input).Func<string>(x => x.ReadStringOrNull).CastTo<TT.TItem>())
             },
             {
                 typeof(Enum),
                 (type, w, context, assignTo) =>
-                    assignTo.Assign(context.Prop(x => x.Input).Func<int>(x => x.Read7BitInt).CastTo<TT.TValue>())
+                    assignTo.Assign(context.Prop(x => x.Input).Func<int>(x => x.Read7BitInt).CastTo<TT.TItem>())
             },
             {
                 typeof(bool),
                 (type, w, context, assignTo) =>
-                    assignTo.Assign(context.Prop(x => x.Input).Func<bool>(x => x.ReadBoolean).CastTo<TT.TValue>())
+                    assignTo.Assign(context.Prop(x => x.Input).Func<bool>(x => x.ReadBoolean).CastTo<TT.TItem>())
             },
             {
                 typeof(int),
                 (type, w, context, assignTo) =>
-                    assignTo.Assign(context.Prop(x => x.Input).Func<int>(x => x.Read7BitInt).CastTo<TT.TValue>())
+                    assignTo.Assign(context.Prop(x => x.Input).Func<int>(x => x.Read7BitInt).CastTo<TT.TItem>())
             },
             {
                 typeof(long),
                 (type, w, context, assignTo) =>
-                    assignTo.Assign(context.Prop(x => x.Input).Func<long>(x => x.Read7BitLong).CastTo<TT.TValue>())
+                    assignTo.Assign(context.Prop(x => x.Input).Func<long>(x => x.Read7BitLong).CastTo<TT.TItem>())
             },
             {
                 typeof(TimeSpan),
                 (type, w, context, assignTo) =>
-                    assignTo.Assign(context.Prop(x => x.Input).Func<TimeSpan>(x => x.ReadTimeSpan).CastTo<TT.TValue>())
+                    assignTo.Assign(context.Prop(x => x.Input).Func<TimeSpan>(x => x.ReadTimeSpan).CastTo<TT.TItem>())
             },
             {
                 typeof(DateTime),
                 (type, w, context, assignTo) =>
-                    assignTo.Assign(context.Prop(x => x.Input).Func<DateTime>(x => x.ReadDateTime).CastTo<TT.TValue>())
+                    assignTo.Assign(context.Prop(x => x.Input).Func<DateTime>(x => x.ReadDateTime).CastTo<TT.TItem>())
             },
             {
                 typeof(Guid),
                 (type, w, context, assignTo) =>
-                    assignTo.Assign(context.Prop(x => x.Input).Func<Guid>(x => x.ReadGuid).CastTo<TT.TValue>())
+                    assignTo.Assign(context.Prop(x => x.Input).Func<Guid>(x => x.ReadGuid).CastTo<TT.TItem>())
             },
             {
                 typeof(float),
                 (type, w, context, assignTo) =>
-                    assignTo.Assign(context.Prop(x => x.Input).Func<float>(x => x.ReadSingle).CastTo<TT.TValue>())
+                    assignTo.Assign(context.Prop(x => x.Input).Func<float>(x => x.ReadSingle).CastTo<TT.TItem>())
             },
             {
                 typeof(double),
                 (type, w, context, assignTo) =>
-                    assignTo.Assign(context.Prop(x => x.Input).Func<double>(x => x.ReadDouble).CastTo<TT.TValue>())
+                    assignTo.Assign(context.Prop(x => x.Input).Func<double>(x => x.ReadDouble).CastTo<TT.TItem>())
             },
             {
                 typeof(decimal),
                 (type, w, context, assignTo) =>
-                    assignTo.Assign(context.Prop(x => x.Input).Func<decimal>(x => x.ReadDecimal).CastTo<TT.TValue>())
+                    assignTo.Assign(context.Prop(x => x.Input).Func<decimal>(x => x.ReadDecimal).CastTo<TT.TItem>())
             },
         };
 
@@ -339,17 +400,23 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public delegate void TypeReader<T>(CompactDeserializationContext context, ref T obj) where T : struct;
+        public delegate void TypeWriter<T>(CompactSerializationContext context, ref T obj) where T : struct;
+        public delegate T TypeCreator<T>(CompactDeserializationContext context) where T : struct;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public delegate void ValueReader(
             Type type,
             MethodWriterBase method,
             Argument<CompactDeserializationContext> context,
-            MutableOperand<TT.TValue> assignTo);
+            MutableOperand<TT.TItem> assignTo);
 
         public delegate void ValueWriter(
             Type type,
             MethodWriterBase method,
             Argument<CompactSerializationContext> context,
-            IOperand<TT.TValue> value);
+            IOperand<TT.TItem> value);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -365,6 +432,9 @@ namespace NWheels.Serialization.Factories
 
         public interface ITypeSerializer<T>
         {
+            T CreateObject(CompactDeserializationContext context);
+            void ReadObject(CompactDeserializationContext context, T obj);
+            void WriteObject(CompactSerializationContext context, T obj);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -424,7 +494,7 @@ namespace NWheels.Serialization.Factories
 
             protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
             {
-                using (TT.CreateScope<TT.TImpl, TT.TValue>(_forType, _collectionItemType ?? typeof(object)))
+                using (TT.CreateScope<TT.TImpl, TT.TItem>(_forType, _collectionItemType ?? typeof(object)))
                 {
                     writer.DefaultConstructor();
                     writer.ImplementInterface<ITypeSerializer>()
@@ -486,9 +556,9 @@ namespace NWheels.Serialization.Factories
             {
                 var itemReader = GetValueReader(_collectionItemType);
 
-                using (TT.CreateScope<TT.TValue>(_collectionItemType))
+                using (TT.CreateScope<TT.TItem>(_collectionItemType))
                 {
-                    var typedArray = w.Local<TT.TValue[]>(initialValue: obj.CastTo<TT.TValue[]>());
+                    var typedArray = w.Local<TT.TItem[]>(initialValue: obj.CastTo<TT.TItem[]>());
                     var length = w.Local<int>(initialValue: typedArray.Length());
                     
                     w.For(from: 0, to: length).Do((loop, index) => {
@@ -503,45 +573,27 @@ namespace NWheels.Serialization.Factories
             {
                 var itemReader = GetValueReader(_collectionItemType);
 
-                using (TT.CreateScope<TT.TValue>(_collectionItemType))
+                using (TT.CreateScope<TT.TItem>(_collectionItemType))
                 {
-                    var typedCollection = w.Local(initialValue: obj.CastTo<ICollection<TT.TValue>>());
+                    var typedCollection = w.Local(initialValue: obj.CastTo<ICollection<TT.TItem>>());
                     Local<int> count = w.Local<int>();
 
                     if (_forType.IsGenericIListType())
                     {
-                        count.Assign(typedCollection.CastTo<List<TT.TValue>>().Prop(x => x.Capacity));
+                        count.Assign(typedCollection.CastTo<List<TT.TItem>>().Prop(x => x.Capacity));
                     }
                     else
                     {
                         count.Assign(context.Prop(x => x.Input).Func<int>(x => x.Read7BitInt));
                     }
 
-                    var item = w.Local<TT.TValue>();
+                    var item = w.Local<TT.TItem>();
 
                     w.For(from: 0, to: count).Do((loop, index) => {
                         itemReader(_collectionItemType, w, context, assignTo: item);
                         typedCollection.Void(x => x.Add, item);
                     });
                 }
-
-                //Type itemType;
-                //_forType.IsCollectionType(out itemType);
-
-                //using (TT.CreateScope<TT.TValue>(itemType))
-                //{
-                //    var typedCollection = w.Local(initialValue: obj.CastTo<ICollection<TT.TValue>>());
-                //    Static.GenericVoid((x, y, z) => RuntimeHelpers.ReadCollection(x, y, z),
-                //        context,
-                //        typedCollection,
-                //        w.Delegate<CompactDeserializationContext, TT.TValue>((ww, ctx) => {
-                //            var itemReader = GetValueReader(itemType);
-                //            var item = ww.Local<TT.TValue>();
-                //            itemReader(itemType, ww, context, item);
-                //            ww.Return(item);
-                //        })
-                //    );
-                //}
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -552,12 +604,26 @@ namespace NWheels.Serialization.Factories
                 {
                     var typedObj = w.Local<TT.TImpl>(initialValue: obj.CastTo<TT.TImpl>());
                     TypeMemberCache.Of(_forType).SelectAllProperties(@where: IsSerializableProperty).ForEach(p => {
-                        using (TT.CreateScope<TT.TValue>(p.PropertyType))
+                        using (TT.CreateScope<TT.TItem>(p.PropertyType))
                         {
                             var valueReader = GetValueReader(p);
-                            valueReader(p.PropertyType, w, context, assignTo: typedObj.Prop<TT.TValue>(p));
+                            valueReader(p.PropertyType, w, context, assignTo: typedObj.Prop<TT.TItem>(p));
                         }
                     });
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementReadStruct(VoidMethodWriter w, Argument<CompactDeserializationContext> context, Argument<TT.TStruct> value)
+            {
+                foreach (var fieldInfo in _forType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+                {
+                    using (TT.CreateScope<TT.TItem>(fieldInfo.FieldType))
+                    {
+                        var valueReader = GetValueReader(fieldInfo);
+                        valueReader(fieldInfo.FieldType, w, context, assignTo: value.Field<TT.TItem>(fieldInfo));
+                    }
                 }
             }
 
@@ -567,9 +633,9 @@ namespace NWheels.Serialization.Factories
             {
                 var itemWriter = GetValueWriter(_collectionItemType);
 
-                using (TT.CreateScope<TT.TValue>(_collectionItemType))
+                using (TT.CreateScope<TT.TItem>(_collectionItemType))
                 {
-                    var typedArray = w.Local<TT.TValue[]>(initialValue: obj.CastTo<TT.TValue[]>());
+                    var typedArray = w.Local<TT.TItem[]>(initialValue: obj.CastTo<TT.TItem[]>());
                     var length = w.Local<int>(initialValue: typedArray.Length());
 
                     context.Prop(x => x.Output).Void(x => x.Write7BitInt, length);
@@ -586,34 +652,17 @@ namespace NWheels.Serialization.Factories
             {
                 var itemWriter = GetValueWriter(_collectionItemType);
 
-                using (TT.CreateScope<TT.TValue>(_collectionItemType))
+                using (TT.CreateScope<TT.TItem>(_collectionItemType))
                 {
-                    var typedList = w.Local(initialValue: obj.CastTo<IList<TT.TValue>>());
+                    var typedList = w.Local(initialValue: obj.CastTo<IList<TT.TItem>>());
                     var count = w.Local<int>(initialValue: typedList.Count());
 
                     context.Prop(x => x.Output).Void(x => x.Write7BitInt, count);
 
                     w.For(from: 0, to: count).Do((loop, index) => {
-                        itemWriter(_collectionItemType, w, context, value: typedList.Item<int, TT.TValue>(index));
+                        itemWriter(_collectionItemType, w, context, value: typedList.Item<int, TT.TItem>(index));
                     });
                 }
-
-                //Type itemType;
-                //_forType.IsCollectionType(out itemType);
-
-                //using (TT.CreateScope<TT.TValue>(itemType))
-                //{
-                //    var typedCollection = w.Local(initialValue: obj.CastTo<ICollection<TT.TValue>>());
-                //    Static.GenericVoid((x, y, z) => RuntimeHelpers.WriteCollection(x, y, z),
-                //        context,
-                //        typedCollection,
-                //        w.Delegate<CompactSerializationContext, TT.TValue>((ww, ctx, item) => {
-                //            var itemLocal = ww.Local<TT.TValue>(initialValue: item);
-                //            var itemWriter = GetValueWriter(itemType);
-                //            itemWriter(itemType, ww, context, value: itemLocal);
-                //        })
-                //    );
-                //}
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -622,9 +671,9 @@ namespace NWheels.Serialization.Factories
             {
                 var itemWriter = GetValueWriter(_collectionItemType);
 
-                using (TT.CreateScope<TT.TValue>(_collectionItemType))
+                using (TT.CreateScope<TT.TItem>(_collectionItemType))
                 {
-                    var typedCollection = w.Local(initialValue: obj.CastTo<ICollection<TT.TValue>>());
+                    var typedCollection = w.Local(initialValue: obj.CastTo<ICollection<TT.TItem>>());
                     var count = w.Local<int>(initialValue: typedCollection.Count());
 
                     context.Prop(x => x.Output).Void(x => x.Write7BitInt, count);
@@ -633,23 +682,6 @@ namespace NWheels.Serialization.Factories
                         itemWriter(_collectionItemType, w, context, value: item);
                     });
                 }
-
-                //Type itemType;
-                //_forType.IsCollectionType(out itemType);
-
-                //using (TT.CreateScope<TT.TValue>(itemType))
-                //{
-                //    var typedCollection = w.Local(initialValue: obj.CastTo<ICollection<TT.TValue>>());
-                //    Static.GenericVoid((x, y, z) => RuntimeHelpers.WriteCollection(x, y, z),
-                //        context,
-                //        typedCollection,
-                //        w.Delegate<CompactSerializationContext, TT.TValue>((ww, ctx, item) => {
-                //            var itemLocal = ww.Local<TT.TValue>(initialValue: item);
-                //            var itemWriter = GetValueWriter(itemType);
-                //            itemWriter(itemType, ww, context, value: itemLocal);
-                //        })
-                //    );
-                //}
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -658,10 +690,10 @@ namespace NWheels.Serialization.Factories
             {
                 var typedObj = w.Local<TT.TImpl>(initialValue: obj.CastTo<TT.TImpl>());
                 TypeMemberCache.Of(_forType).SelectAllProperties(@where: IsSerializableProperty).ForEach(p => {
-                    using (TT.CreateScope<TT.TValue>(p.PropertyType))
+                    using (TT.CreateScope<TT.TItem>(p.PropertyType))
                     {
                         var valueWriter = GetValueWriter(p);
-                        valueWriter(p.PropertyType, w, context, value: typedObj.Prop<TT.TValue>(p));
+                        valueWriter(p.PropertyType, w, context, value: typedObj.Prop<TT.TItem>(p));
                     }
                 });
             }
@@ -688,9 +720,9 @@ namespace NWheels.Serialization.Factories
 
             private void ImplementCreateArray(FunctionMethodWriter<object> w, Argument<CompactDeserializationContext> context)
             {
-                using (TT.CreateScope<TT.TValue>(_collectionItemType))
+                using (TT.CreateScope<TT.TItem>(_collectionItemType))
                 {
-                    w.Return(w.NewArray<TT.TValue>(context.Prop(x => x.Input).Func<int>(x => x.Read7BitInt)));
+                    w.Return(w.NewArray<TT.TItem>(context.Prop(x => x.Input).Func<int>(x => x.Read7BitInt)));
                 }
             }
 
@@ -698,7 +730,7 @@ namespace NWheels.Serialization.Factories
 
             private void ImplementCreateList(FunctionMethodWriter<object> w, Argument<CompactDeserializationContext> context)
             {
-                using (TT.CreateScope<TT.TValue>(_collectionItemType))
+                using (TT.CreateScope<TT.TItem>(_collectionItemType))
                 {
                     w.Return(w.New<List<TT.TValue>>(context.Prop(x => x.Input).Func<int>(x => x.Read7BitInt)));
                 }

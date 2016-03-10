@@ -107,11 +107,11 @@ namespace NWheels.UnitTests.Serialization
             var original = new Repo.WithCollectionsOfPrimitiveTypes() {
                 EnumArray = new[] { Repo.AnAppEnum.First, Repo.AnAppEnum.Second, Repo.AnAppEnum.Third },
                 StringList = new List<string>() { "AAA", "BBB", "CCC" },
-                //DateTimeByIntDictionary = new Dictionary<int, DateTime>() {
-                //    { 123, new DateTime(2016, 1, 10) },
-                //    { 456, new DateTime(2016, 2, 11) },
-                //    { 789, new DateTime(2016, 3, 12) },
-                //}
+                IntStringDictionary = new Dictionary<int, string>() {
+                    { 123, "ABCD" },
+                    { 456, "EFGH" },
+                    { 789, "IJKL" },
+                }
             };
 
             //-- act
@@ -130,11 +130,11 @@ namespace NWheels.UnitTests.Serialization
             deserialized.StringList.ShouldNotBeNull();
             deserialized.StringList.ShouldBe(new[] { "AAA", "BBB", "CCC" });
 
-            //deserialized.DateTimeByIntDictionary.ShouldNotBeNull();
-            //deserialized.DateTimeByIntDictionary.Count.ShouldBe(3);
-            //deserialized.DateTimeByIntDictionary.ShouldContainKeyAndValue(123, new DateTime(2016, 1, 10));
-            //deserialized.DateTimeByIntDictionary.ShouldContainKeyAndValue(456, new DateTime(2016, 2, 11));
-            //deserialized.DateTimeByIntDictionary.ShouldContainKeyAndValue(789, new DateTime(2016, 3, 12));
+            deserialized.IntStringDictionary.ShouldNotBeNull();
+            deserialized.IntStringDictionary.Count.ShouldBe(3);
+            deserialized.IntStringDictionary.ShouldContainKeyAndValue(123, "ABCD");
+            deserialized.IntStringDictionary.ShouldContainKeyAndValue(456, "EFGH");
+            deserialized.IntStringDictionary.ShouldContainKeyAndValue(789, "IJKL");
         }
     }
 }
