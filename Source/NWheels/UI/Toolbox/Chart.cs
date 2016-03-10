@@ -67,27 +67,12 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
-        public List<SeriesData> Series { get; set; }
+        public List<AbstractSeriesData> Series { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
         public List<SummaryData> Summaries { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-        public class SeriesData
-        {
-            [DataMember]
-            public ChartSeriesType Type { get; set; }
-
-            [DataMember]
-            public string Label { get; set; }
-
-            [DataMember]
-            public List<decimal> Values { get; set; }
-        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -103,14 +88,56 @@ namespace NWheels.UI.Toolbox
             [DataMember]
             public int? Percent { get; set; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+        public abstract class AbstractSeriesData
+        {
+            [DataMember]
+            public string Label { get; set; }
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+        public class CategoricalSeriesData : AbstractSeriesData
+        {
+            [DataMember]
+            public ChartSeriesType Type { get; set; }
+
+            [DataMember]
+            public List<decimal> Values { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+        public class TimestampSeriesData : AbstractSeriesData
+        {
+            [DataMember]
+            public List<TimestampPoint> Points { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+        public class TimestampPoint : AbstractSeriesData
+        {
+            [DataMember]
+            public DateTime UtcTimestamp { get; set; }
+            [DataMember]
+            public decimal Value { get; set; }
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public enum ChartSeriesType
     {
-        Line = 10,
-        Bar = 20,
-        StackedBar = 30
+        Point = 10,
+        Line = 20,
+        Bar = 30,
+        StackedBar = 40
     }
 }
