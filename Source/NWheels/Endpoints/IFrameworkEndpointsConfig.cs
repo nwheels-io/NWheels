@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.Configuration;
 using NWheels.DataObjects;
-using NWheels.TypeModel.Serialization;
+using NWheels.Serialization;
 
 namespace NWheels.Endpoints
 {

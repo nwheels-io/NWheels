@@ -1,27 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autofac;
 using NUnit.Framework;
+using NWheels.Serialization;
 using NWheels.Testing;
-using NWheels.TypeModel.Factories;
-using NWheels.TypeModel.Serialization;
 using Shouldly;
-using Repo = NWheels.UnitTests.DataObjects.Serialization.TestObjectRepository;
+using Repo = NWheels.UnitTests.Serialization.TestObjectRepository;
 
-namespace NWheels.UnitTests.DataObjects.Serialization
+namespace NWheels.UnitTests.Serialization
 {
     [TestFixture]
-    public class ObjectCompactSerializerTests : DynamicTypeUnitTestBase
+    public class CompactSerializerTests : DynamicTypeUnitTestBase
     {
         [Test]
         public void Serialize_PrimitiveTypes()
         {
             //-- arrange
 
-            var serializer = Framework.Components.Resolve<ObjectCompactSerializer>();
+            var serializer = Framework.Components.Resolve<CompactSerializer>();
 
             var obj = new Repo.Primitive() {
                 StringValue = "ABC",
@@ -31,7 +26,7 @@ namespace NWheels.UnitTests.DataObjects.Serialization
 
             //-- act
 
-            var serializedBytes = serializer.GetBytes(obj, new ObjectCompactSerializerDictionary());
+            var serializedBytes = serializer.GetBytes(obj, new CompactSerializerDictionary());
 
             //-- assert
 
@@ -46,8 +41,8 @@ namespace NWheels.UnitTests.DataObjects.Serialization
         {
             //-- arrange
 
-            var serializer = Framework.Components.Resolve<ObjectCompactSerializer>();
-            var dictionary = new ObjectCompactSerializerDictionary();
+            var serializer = Framework.Components.Resolve<CompactSerializer>();
+            var dictionary = new CompactSerializerDictionary();
 
             var guid = Guid.NewGuid();
             var original = new Repo.Primitive() {
@@ -94,8 +89,8 @@ namespace NWheels.UnitTests.DataObjects.Serialization
         {
             //-- arrange
 
-            var serializer = Framework.Components.Resolve<ObjectCompactSerializer>();
-            var dictionary = new ObjectCompactSerializerDictionary();
+            var serializer = Framework.Components.Resolve<CompactSerializer>();
+            var dictionary = new CompactSerializerDictionary();
 
             var guid = Guid.NewGuid();
             var original = new Repo.WithNestedObjects() {
@@ -129,8 +124,8 @@ namespace NWheels.UnitTests.DataObjects.Serialization
         {
             //-- arrange
 
-            var serializer = Framework.Components.Resolve<ObjectCompactSerializer>();
-            var dictionary = new ObjectCompactSerializerDictionary();
+            var serializer = Framework.Components.Resolve<CompactSerializer>();
+            var dictionary = new CompactSerializerDictionary();
 
             var original = new Repo.WithCollectionsOfPrimitiveTypes() {
                 EnumArray = new[] { Repo.AnAppEnum.First, Repo.AnAppEnum.Second, Repo.AnAppEnum.Third },

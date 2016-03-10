@@ -1,38 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autofac;
-using NWheels.Core;
 using NWheels.DataObjects;
-using NWheels.Extensions;
-using NWheels.Processing.Messages;
-using NWheels.TypeModel.Factories;
+using NWheels.Serialization.Factories;
 
-namespace NWheels.TypeModel.Serialization
+namespace NWheels.Serialization
 {
-    public class ObjectCompactSerializer
+    public class CompactSerializer
     {
         private readonly IComponentContext _components;
         private readonly ITypeMetadataCache _metadataCache;
-        private readonly CompactTypeSerializerFactory _readerWriterFactory;
+        private readonly CompactSerializerFactory _readerWriterFactory;
         private readonly Pipeline<IObjectTypeResolver> _typeResolvers;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ObjectCompactSerializer(IComponentContext components, ITypeMetadataCache metadataCache, CompactTypeSerializerFactory readerWriterFactory)
+        public CompactSerializer(IComponentContext components, ITypeMetadataCache metadataCache, CompactSerializerFactory readerWriterFactory)
             : this(components, metadataCache, readerWriterFactory, new IObjectTypeResolver[] { new VoidTypeResolver() })
         {
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ObjectCompactSerializer(
+        public CompactSerializer(
             IComponentContext components,
             ITypeMetadataCache metadataCache,
-            CompactTypeSerializerFactory readerWriterFactory,
+            CompactSerializerFactory readerWriterFactory,
             Pipeline<IObjectTypeResolver> typeResolvers)
         {
             _components = components;
@@ -43,49 +36,49 @@ namespace NWheels.TypeModel.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public object GetObject(Type declaredType, byte[] serializedBytes, ObjectCompactSerializerDictionary dictionary)
+        public object GetObject(Type declaredType, byte[] serializedBytes, CompactSerializerDictionary dictionary)
         {
             return ReadObject(declaredType, new CompactBinaryReader(new MemoryStream(serializedBytes)), dictionary);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public object ReadObject(Type declaredType, Stream input, ObjectCompactSerializerDictionary dictionary)
+        public object ReadObject(Type declaredType, Stream input, CompactSerializerDictionary dictionary)
         {
             return ReadObject(declaredType, new CompactBinaryReader(input), dictionary);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public object ReadObject(Type declaredType, CompactBinaryReader input, ObjectCompactSerializerDictionary dictionary)
+        public object ReadObject(Type declaredType, CompactBinaryReader input, CompactSerializerDictionary dictionary)
         {
             return ReadObject(declaredType, new CompactDeserializationContext(this, dictionary, input));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public T GetObject<T>(byte[] serializedBytes, ObjectCompactSerializerDictionary dictionary)
+        public T GetObject<T>(byte[] serializedBytes, CompactSerializerDictionary dictionary)
         {
             return (T)ReadObject(typeof(T), new CompactBinaryReader(new MemoryStream(serializedBytes)), dictionary);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public T ReadObject<T>(Stream input, ObjectCompactSerializerDictionary dictionary)
+        public T ReadObject<T>(Stream input, CompactSerializerDictionary dictionary)
         {
             return (T)ReadObject(typeof(T), new CompactBinaryReader(input), dictionary);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public T ReadObject<T>(CompactBinaryReader input, ObjectCompactSerializerDictionary dictionary)
+        public T ReadObject<T>(CompactBinaryReader input, CompactSerializerDictionary dictionary)
         {
             return (T)ReadObject(typeof(T), new CompactDeserializationContext(this, dictionary, input));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public byte[] GetBytes(Type declaredType, object obj, ObjectCompactSerializerDictionary dictionary)
+        public byte[] GetBytes(Type declaredType, object obj, CompactSerializerDictionary dictionary)
         {
             byte[] serializedBytes;
 
@@ -100,21 +93,21 @@ namespace NWheels.TypeModel.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void WriteObject(Type declaredType, object obj, Stream output, ObjectCompactSerializerDictionary dictionary)
+        public void WriteObject(Type declaredType, object obj, Stream output, CompactSerializerDictionary dictionary)
         {
             WriteObject(declaredType, obj, new CompactBinaryWriter(output), dictionary);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void WriteObject(Type declaredType, object obj, CompactBinaryWriter output, ObjectCompactSerializerDictionary dictionary)
+        public void WriteObject(Type declaredType, object obj, CompactBinaryWriter output, CompactSerializerDictionary dictionary)
         {
             WriteObject(declaredType, obj, new CompactSerializationContext(this, dictionary, output));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public byte[] GetBytes<T>(T obj, ObjectCompactSerializerDictionary dictionary)
+        public byte[] GetBytes<T>(T obj, CompactSerializerDictionary dictionary)
         {
             byte[] serializedBytes;
 
@@ -129,14 +122,14 @@ namespace NWheels.TypeModel.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void WriteObject<T>(T obj, Stream output, ObjectCompactSerializerDictionary dictionary)
+        public void WriteObject<T>(T obj, Stream output, CompactSerializerDictionary dictionary)
         {
             WriteObject(typeof(T), obj, new CompactBinaryWriter(output), dictionary);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void WriteObject<T>(T obj, CompactBinaryWriter output, ObjectCompactSerializerDictionary dictionary)
+        public void WriteObject<T>(T obj, CompactBinaryWriter output, CompactSerializerDictionary dictionary)
         {
             WriteObject(typeof(T), obj, new CompactSerializationContext(this, dictionary, output));
         }

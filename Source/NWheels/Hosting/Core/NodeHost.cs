@@ -46,9 +46,9 @@ using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Configuration.Impls;
 using NWheels.Processing.Commands.Factories;
+using NWheels.Serialization;
+using NWheels.Serialization.Factories;
 using NWheels.TypeModel;
-using NWheels.TypeModel.Factories;
-using NWheels.TypeModel.Serialization;
 
 namespace NWheels.Hosting.Core
 {
@@ -309,8 +309,8 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
             builder.RegisterPipeline<IDomainContextPopulator>();
 
-            builder.RegisterType<ObjectCompactSerializer>().InstancePerDependency();
-            builder.RegisterType<CompactTypeSerializerFactory>().SingleInstance();
+            builder.RegisterType<CompactSerializer>().InstancePerDependency();
+            builder.RegisterType<CompactSerializerFactory>().SingleInstance();
             builder.RegisterPipeline<IObjectTypeResolver>().SingleInstance();
 
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();

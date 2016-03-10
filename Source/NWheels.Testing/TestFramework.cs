@@ -30,10 +30,10 @@ using NWheels.Entities.Factories;
 using NWheels.Logging.Core;
 using NWheels.Processing.Commands.Factories;
 using NWheels.Processing.Messages;
+using NWheels.Serialization;
+using NWheels.Serialization.Factories;
 using NWheels.Testing.Entities.Impl;
 using NWheels.Testing.Processing.Messages;
-using NWheels.TypeModel.Factories;
-using NWheels.TypeModel.Serialization;
 
 namespace NWheels.Testing
 {
@@ -460,8 +460,8 @@ namespace NWheels.Testing
             builder.RegisterType<PresentationObjectFactory>().As<IPresentationObjectFactory>().SingleInstance();
             builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
             
-            builder.RegisterType<ObjectCompactSerializer>().InstancePerDependency();
-            builder.RegisterType<CompactTypeSerializerFactory>().SingleInstance();
+            builder.RegisterType<CompactSerializer>().InstancePerDependency();
+            builder.RegisterType<CompactSerializerFactory>().SingleInstance();
             builder.RegisterPipeline<IObjectTypeResolver>().SingleInstance();
             
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();

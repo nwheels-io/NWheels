@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace NWheels.TypeModel.Serialization
+namespace NWheels.Serialization
 {
-    public class ObjectCompactSerializerDictionary
+    public class CompactSerializerDictionary
     {
         //private readonly ConcurrentDictionary<int, MemberInfo> _memberByKey;
         //private readonly ConcurrentDictionary<int, Type> _typeByKey;

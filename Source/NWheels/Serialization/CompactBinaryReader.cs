@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace NWheels.TypeModel.Serialization
+namespace NWheels.Serialization
 {
     public class CompactBinaryReader : BinaryReader
     {

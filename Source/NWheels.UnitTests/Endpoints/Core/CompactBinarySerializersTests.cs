@@ -2,8 +2,8 @@
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using NWheels.TypeModel.Serialization;
 using NWheels.Extensions;
+using NWheels.Serialization;
 
 namespace NWheels.UnitTests.Endpoints.Core
 {

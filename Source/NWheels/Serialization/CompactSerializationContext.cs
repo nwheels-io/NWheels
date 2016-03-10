@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace NWheels.TypeModel.Serialization
+namespace NWheels.Serialization
 {
     public class CompactSerializationContext
     {
-        public CompactSerializationContext(ObjectCompactSerializer serializer, ObjectCompactSerializerDictionary dictionary, CompactBinaryWriter output)
+        public CompactSerializationContext(CompactSerializer serializer, CompactSerializerDictionary dictionary, CompactBinaryWriter output)
         {
             Serializer = serializer;
             Dictionary = dictionary;
@@ -24,8 +20,8 @@ namespace NWheels.TypeModel.Serialization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ObjectCompactSerializer Serializer { get; private set; }
-        public ObjectCompactSerializerDictionary Dictionary { get; private set; }
+        public CompactSerializer Serializer { get; private set; }
+        public CompactSerializerDictionary Dictionary { get; private set; }
         public CompactBinaryWriter Output { get; private set; }
     }
 }

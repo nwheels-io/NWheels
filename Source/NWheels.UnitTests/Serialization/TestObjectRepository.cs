@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace NWheels.UnitTests.DataObjects.Serialization
+namespace NWheels.UnitTests.Serialization
 {
     public static class TestObjectRepository
     {

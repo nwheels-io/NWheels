@@ -10,12 +10,11 @@ using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.Extensions;
-using NWheels.TypeModel.Serialization;
 using TT = Hapil.TypeTemplate;
 
-namespace NWheels.TypeModel.Factories
+namespace NWheels.Serialization.Factories
 {
-    public class CompactTypeSerializerFactory : ConventionObjectFactory
+    public class CompactSerializerFactory : ConventionObjectFactory
     {
         private readonly ITypeMetadataCache _metadataCache;
         private readonly DynamicMethodCompiler _compiler;
@@ -23,7 +22,7 @@ namespace NWheels.TypeModel.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CompactTypeSerializerFactory(ITypeMetadataCache metadataCache, DynamicModule dynamicModule)
+        public CompactSerializerFactory(ITypeMetadataCache metadataCache, DynamicModule dynamicModule)
             : base(dynamicModule)
         {
             _metadataCache = metadataCache;
@@ -96,7 +95,7 @@ namespace NWheels.TypeModel.Factories
                 return writer;
             }
 
-            throw new CompactObjectSerializerException(
+            throw new CompactSerializerException(
                 "Value of type '{0}' cannot be serialized ({1}.{2}).",
                 property.PropertyType.FullName,
                 property.DeclaringType.Name,
@@ -115,7 +114,7 @@ namespace NWheels.TypeModel.Factories
                 return reader;
             }
 
-            throw new CompactObjectSerializerException(
+            throw new CompactSerializerException(
                 "Value of type '{0}' cannot be deserialized ({1}.{2}).",
                 property.PropertyType.FullName,
                 property.DeclaringType.Name,
@@ -134,7 +133,7 @@ namespace NWheels.TypeModel.Factories
                 return writer;
             }
 
-            throw new CompactObjectSerializerException("Value of type '{0}' cannot be serialized.", type.FullName);
+            throw new CompactSerializerException("Value of type '{0}' cannot be serialized.", type.FullName);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -149,7 +148,7 @@ namespace NWheels.TypeModel.Factories
                 return reader;
             }
 
-            throw new CompactObjectSerializerException("Value of type '{0}' cannot be deserialized.", type.FullName);
+            throw new CompactSerializerException("Value of type '{0}' cannot be deserialized.", type.FullName);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -546,12 +545,12 @@ namespace NWheels.TypeModel.Factories
 
         private class TypeSerializerConvention : ImplementationConvention
         {
-            private readonly CompactTypeSerializerFactory _factory;
+            private readonly CompactSerializerFactory _factory;
             private readonly Type _forType;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public TypeSerializerConvention(CompactTypeSerializerFactory factory, Type forType)
+            public TypeSerializerConvention(CompactSerializerFactory factory, Type forType)
                 : base(Will.ImplementBaseClass)
             {
                 _factory = factory;
@@ -618,7 +617,7 @@ namespace NWheels.TypeModel.Factories
                 //TODO: consider using FormatterServices.GetSafeUninitializedObject
                 if (constructor == null)
                 {
-                    throw new CompactObjectSerializerException("Type '{0}' cannot be deserialized as it has no public constructors.", _forType.FullName);
+                    throw new CompactSerializerException("Type '{0}' cannot be deserialized as it has no public constructors.", _forType.FullName);
                 }
 
                 var parameters = constructor.GetParameters();
@@ -688,7 +687,7 @@ namespace NWheels.TypeModel.Factories
                 using (TT.CreateScope<TT.TImpl>(_forType))
                 {
                     var typedObj = w.Local<TT.TImpl>(initialValue: obj.CastTo<TT.TImpl>());
-                    TypeMemberCache.Of(_forType).SelectAllProperties(where: IsSerializableProperty).ForEach(p => {
+                    TypeMemberCache.Of(_forType).SelectAllProperties(@where: IsSerializableProperty).ForEach(p => {
                         var propertyReader = GetPropertyReader(p);
                         propertyReader(w, context, typedObj, p);
                     });
@@ -722,7 +721,7 @@ namespace NWheels.TypeModel.Factories
             private void ImplementWritePlainObject(VoidMethodWriter w, Argument<CompactSerializationContext> context, Argument<object> obj)
             {
                 var typedObj = w.Local<TT.TImpl>(initialValue: obj.CastTo<TT.TImpl>());
-                TypeMemberCache.Of(_forType).SelectAllProperties(where: IsSerializableProperty).ForEach(p => {
+                TypeMemberCache.Of(_forType).SelectAllProperties(@where: IsSerializableProperty).ForEach(p => {
                     var propertyWriter = GetPropertyWriter(p);
                     propertyWriter(w, context, typedObj, p);
                 });
