@@ -15,260 +15,73 @@ using TT = Hapil.TypeTemplate;
 
 namespace NWheels.TypeModel.Factories
 {
-    public class CompactTypeSerializerFactory
+    public class CompactTypeSerializerFactory : ConventionObjectFactory
     {
         private readonly ITypeMetadataCache _metadataCache;
         private readonly DynamicMethodCompiler _compiler;
-        private readonly ConcurrentDictionary<Type, TypeReader> _readerByType;
-        private readonly ConcurrentDictionary<Type, TypeWriter> _writerByType;
-        private readonly ConcurrentDictionary<Type, TypeCreator> _defaultCreatorByType;
+        private readonly ConcurrentDictionary<Type, ITypeSerializer> _serializerByType;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public CompactTypeSerializerFactory(ITypeMetadataCache metadataCache, DynamicModule dynamicModule)
+            : base(dynamicModule)
         {
             _metadataCache = metadataCache;
             _compiler = new DynamicMethodCompiler(dynamicModule);
-            _readerByType = new ConcurrentDictionary<Type, TypeReader>();
-            _writerByType = new ConcurrentDictionary<Type, TypeWriter>();
-            _defaultCreatorByType = new ConcurrentDictionary<Type, TypeCreator>();
+            _serializerByType = new ConcurrentDictionary<Type, ITypeSerializer>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TypeReader GetTypeReader(Type type)
         {
-            return _readerByType.GetOrAdd(type, CompileTypeReader);
+            var serializer = _serializerByType.GetOrAdd(type, CreateTypeSerializer);
+            return serializer.ReadObject;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TypeWriter GetTypeWriter(Type type)
         {
-            return _writerByType.GetOrAdd(type, CompileTypeWriter);
+            var serializer = _serializerByType.GetOrAdd(type, CreateTypeSerializer);
+            return serializer.WriteObject;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public TypeCreator GetDefaultCreator(Type type)
         {
-            return _defaultCreatorByType.GetOrAdd(type, k => CompileDefaultCreator(k));
+            var serializer = _serializerByType.GetOrAdd(type, CreateTypeSerializer);
+            return serializer.CreateObject;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public delegate void TypeReader(CompactDeserializationContext context, object obj);
-        public delegate void TypeWriter(CompactSerializationContext context, object obj);
-        public delegate object TypeCreator(IComponentContext components);
+        #region Overrides of ConventionObjectFactory
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public delegate void PropertyReader(
-            MethodWriterBase method,
-            Argument<CompactDeserializationContext> context,
-            Local<TT.TImpl> target,
-            PropertyInfo prop);
-
-        public delegate void PropertyWriter(
-            MethodWriterBase method,
-            Argument<CompactSerializationContext> context,
-            Local<TT.TImpl> target,
-            PropertyInfo prop);
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public delegate void ValueReader(
-            Type type,
-            MethodWriterBase method,
-            Argument<CompactDeserializationContext> context,
-            MutableOperand<TT.TValue> assignTo);
-
-        public delegate void ValueWriter(
-            Type type,
-            MethodWriterBase method,
-            Argument<CompactSerializationContext> context,
-            IOperand<TT.TValue> value);
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private TypeReader CompileTypeReader(Type type)
+        protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
-            if (type.IsArray)
-            {
-                return CompileArrayReader(type);
-            }
-            
-            if (type.IsCollectionType())
-            {
-                return CompileCollectionReader(type);
-            }
+            var forType = context.TypeKey.PrimaryInterface;
 
-            using (TT.CreateScope<TT.TImpl>(type))
-            {
-                var methodDelegate = _compiler.CompileStaticVoidMethod<CompactDeserializationContext, object>(
-                    type.FullName + "_CompactSerializerReader",
-                    (w, context, obj) => {
-                        var typedObj = w.Local<TT.TImpl>(initialValue: obj.CastTo<TT.TImpl>());
-                        TypeMemberCache.Of(type).SelectAllProperties(where: IsSerializableProperty).ForEach(p => {
-                            var propertyReader = GetPropertyReader(p);
-                            propertyReader(w, context, typedObj, p);
-                        });
-                    }
-                );
-                return new TypeReader(methodDelegate);
-            }
+            return new IObjectFactoryConvention[] {
+                new TypeSerializerConvention(this, forType), 
+            };
         }
+
+        #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private TypeWriter CompileTypeWriter(Type type)
+        private ITypeSerializer CreateTypeSerializer(Type type)
         {
-            if (type.IsCollectionType())
-            {
-                return CompileCollectionWriter(type);
-            }
-
-            using ( TT.CreateScope<TT.TImpl>(type) )
-            { 
-                var methodDelegate = _compiler.CompileStaticVoidMethod<CompactSerializationContext, object>(
-                    type.FullName + "_CompactSerializerReader",
-                    (w, context, obj) => {
-                        var typedObj = w.Local<TT.TImpl>(initialValue: obj.CastTo<TT.TImpl>());
-                        TypeMemberCache.Of(type).SelectAllProperties(where: IsSerializableProperty).ForEach(p => {
-                            var propertyWriter = GetPropertyWriter(p);
-                            propertyWriter(w, context, typedObj, p);
-                        });
-                    }
-                );
-                return new TypeWriter(methodDelegate);
-            }
+            return GetOrBuildType(new TypeKey(primaryInterface: type)).CreateInstance<ITypeSerializer>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private TypeWriter CompileCollectionWriter(Type type)
-        {
-            Type itemType;
-            type.IsCollectionType(out itemType);
-
-            using (TT.CreateScope<TT.TImpl, TT.TValue>(type, itemType))
-            {
-                var methodDelegate = _compiler.CompileStaticVoidMethod<CompactSerializationContext, object>(
-                    type.FriendlyName() + "_CompactSerializerReader",
-                    (w, context, obj) => {
-                        var typedCollection = w.Local(initialValue: obj.CastTo<ICollection<TT.TValue>>());
-                        Static.GenericVoid((x, y, z) => RuntimeHelpers.WriteCollection(x, y, z),
-                            context,
-                            typedCollection,
-                            w.Delegate<CompactSerializationContext, TT.TValue>((ww, ctx, item) => {
-                                var itemWriter = GetValueWriter(itemType);
-                                itemWriter(itemType, ww, context, item);
-                            })
-                        );
-                    }
-                );
-                return new TypeWriter(methodDelegate);
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private TypeReader CompileCollectionReader(Type type)
-        {
-            Type itemType;
-            type.IsCollectionType(out itemType);
-
-            using (TT.CreateScope<TT.TImpl, TT.TValue>(type, itemType))
-            {
-                var methodDelegate = _compiler.CompileStaticVoidMethod<CompactDeserializationContext, object>(
-                    type.FriendlyName() + "_CompactSerializerReader",
-                    (w, context, obj) => {
-                        var typedCollection = w.Local(initialValue: obj.CastTo<ICollection<TT.TValue>>());
-                        Static.GenericVoid((x, y, z) => RuntimeHelpers.ReadCollection(x, y, z),
-                            context,
-                            typedCollection,
-                            w.Delegate<CompactDeserializationContext, TT.TValue>((ww, ctx) => {
-                                var itemReader = GetValueReader(itemType);
-                                var item = ww.Local<TT.TValue>();
-                                itemReader(itemType, ww, context, item);
-                                ww.Return(item);
-                            })
-                        );
-                    }
-                );
-                return new TypeReader(methodDelegate);
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private TypeReader CompileArrayReader(Type type)
-        {
-            Type itemType;
-            type.IsCollectionType(out itemType);
-
-            using (TT.CreateScope<TT.TImpl, TT.TValue>(type, itemType))
-            {
-                var methodDelegate = _compiler.CompileStaticVoidMethod<CompactDeserializationContext, object>(
-                    type.FriendlyName() + "_CompactSerializerReader",
-                    (w, context, obj) => {
-                        Static.GenericVoid((x, y) => RuntimeHelpers.ReadArray(x, y),
-                            context,
-                            w.Delegate<CompactDeserializationContext, TT.TValue>((ww, ctx) => {
-                                var itemReader = GetValueReader(itemType);
-                                var item = ww.Local<TT.TValue>();
-                                itemReader(itemType, ww, context, item);
-                                ww.Return(item);
-                            })
-                        );
-                    }
-                );
-                return new TypeReader(methodDelegate);
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private bool IsSerializableProperty(PropertyInfo property)
+        private static bool IsSerializableProperty(PropertyInfo property)
         {
             return (property.CanRead && property.CanWrite && property.GetIndexParameters().Length == 0);
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private TypeCreator CompileDefaultCreator(Type type)
-        {
-            var constructor = type.GetConstructors().OrderBy(c => c.GetParameters().Length).FirstOrDefault();
-
-            //TODO: consider using FormatterServices.GetSafeUninitializedObject
-            if (constructor == null)
-            {
-                throw new CompactObjectSerializerException("Type '{0}' cannot be deserialized as it has no public constructors.", type.FullName);
-            }
-
-            var parameters = constructor.GetParameters();
-
-            var compiledFunc = _compiler.CompileStaticFunction<IComponentContext, object>(
-                type.FullName + "_DefaultCreator",
-                (w, components) => {
-                    using (TT.CreateScope<TT.TImpl>(type))
-                    {
-                        var parameterLocals = new IOperand[parameters.Length];
-
-                        for (int i = 0 ; i < parameters.Length ; i++)
-                        {
-                            using (TT.CreateScope<TT.TArgument>(parameters[i].ParameterType))
-                            {
-                                parameterLocals[i] = w.Local(initialValue: Static.Func(ResolutionExtensions.Resolve<TT.TArgument>, components));
-                            }
-                        }
-
-                        w.Return(w.New<TT.TImpl>(parameterLocals).CastTo<object>());
-                    }
-                }
-            );
-
-            return new TypeCreator(compiledFunc);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -649,6 +462,56 @@ namespace NWheels.TypeModel.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public delegate void TypeReader(CompactDeserializationContext context, object obj);
+        public delegate void TypeWriter(CompactSerializationContext context, object obj);
+        public delegate object TypeCreator(IComponentContext components);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public delegate void PropertyReader(
+            MethodWriterBase method,
+            Argument<CompactDeserializationContext> context,
+            Local<TT.TImpl> target,
+            PropertyInfo prop);
+
+        public delegate void PropertyWriter(
+            MethodWriterBase method,
+            Argument<CompactSerializationContext> context,
+            Local<TT.TImpl> target,
+            PropertyInfo prop);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public delegate void ValueReader(
+            Type type,
+            MethodWriterBase method,
+            Argument<CompactDeserializationContext> context,
+            MutableOperand<TT.TValue> assignTo);
+
+        public delegate void ValueWriter(
+            Type type,
+            MethodWriterBase method,
+            Argument<CompactSerializationContext> context,
+            IOperand<TT.TValue> value);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface ITypeSerializer
+        {
+            object CreateObject(IComponentContext components);
+            void WriteObject(CompactSerializationContext context, object obj);
+            void ReadObject(CompactDeserializationContext context, object obj);
+            Type ForType { get; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface ITypeSerializer<T>
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static class RuntimeHelpers
         {
             public static void WriteCollection<T>(
@@ -676,6 +539,193 @@ namespace NWheels.TypeModel.Factories
                 Func<CompactDeserializationContext, T> onReadItem)
             {
                 return context.Input.ReadArray<T>((br, state) => onReadItem(context), null);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class TypeSerializerConvention : ImplementationConvention
+        {
+            private readonly CompactTypeSerializerFactory _factory;
+            private readonly Type _forType;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TypeSerializerConvention(CompactTypeSerializerFactory factory, Type forType)
+                : base(Will.ImplementBaseClass)
+            {
+                _factory = factory;
+                _forType = forType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of ImplementationConvention
+
+            protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            {
+                using (TT.CreateScope<TT.TImpl>(_forType))
+                {
+                    writer.DefaultConstructor();
+                    writer.ImplementInterface<ITypeSerializer>()
+                        .Method<CompactDeserializationContext, object>(x => x.ReadObject).Implement(ImplementRead)
+                        .Method<CompactSerializationContext, object>(x => x.WriteObject).Implement(ImplementWrite)
+                        .Method<IComponentContext, object>(x => x.CreateObject).Implement(ImplementCreate)
+                        .Property(x => x.ForType).Implement(p => p.Get(w => w.Return(w.Const(_forType))));
+                }
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementRead(VoidMethodWriter w, Argument<CompactDeserializationContext> context, Argument<object> obj)
+            {
+                if (_forType.IsArray)
+                {
+                    ImplementReadArray(w, context, obj);
+                }
+                else if (_forType.IsCollectionType())
+                {
+                    ImpementReadCollection(w, context, obj);
+                }
+                else
+                {
+                    ImplementReadPlainObject(w, context, obj);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementWrite(VoidMethodWriter w, Argument<CompactSerializationContext> context, Argument<object> obj)
+            {
+                if (_forType.IsCollectionType())
+                {
+                    ImplementWriteCollection(w, context, obj);
+                }
+                else
+                {
+                    ImplementWritePlainObject(w, context, obj);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementCreate(FunctionMethodWriter<object> w, Argument<IComponentContext> components)
+            {
+                var constructor = _forType.GetConstructors().OrderBy(c => c.GetParameters().Length).FirstOrDefault();
+
+                //TODO: consider using FormatterServices.GetSafeUninitializedObject
+                if (constructor == null)
+                {
+                    throw new CompactObjectSerializerException("Type '{0}' cannot be deserialized as it has no public constructors.", _forType.FullName);
+                }
+
+                var parameters = constructor.GetParameters();
+
+
+                var parameterLocals = new IOperand[parameters.Length];
+
+                for (int i = 0 ; i < parameters.Length ; i++)
+                {
+                    using (TT.CreateScope<TT.TArgument>(parameters[i].ParameterType))
+                    {
+                        parameterLocals[i] = w.Local(initialValue: Static.Func(ResolutionExtensions.Resolve<TT.TArgument>, components));
+                    }
+                }
+
+                w.Return(w.New<TT.TImpl>(parameterLocals).CastTo<object>());
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementReadArray(VoidMethodWriter w, Argument<CompactDeserializationContext> context, Argument<object> obj)
+            {
+                Type itemType;
+                _forType.IsCollectionType(out itemType);
+
+                using (TT.CreateScope<TT.TValue>(itemType))
+                {
+                    Static.GenericFunc((x, y) => RuntimeHelpers.ReadArray(x, y),
+                        context,
+                        w.Delegate<CompactDeserializationContext, TT.TValue>((ww, ctx) => {
+                            var itemReader = GetValueReader(itemType);
+                            var item = ww.Local<TT.TValue>();
+                            itemReader(itemType, ww, context, item);
+                            ww.Return(item);
+                        })
+                    );
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImpementReadCollection(VoidMethodWriter w, Argument<CompactDeserializationContext> context, Argument<object> obj)
+            {
+                Type itemType;
+                _forType.IsCollectionType(out itemType);
+
+                using (TT.CreateScope<TT.TValue>(itemType))
+                {
+                    var typedCollection = w.Local(initialValue: obj.CastTo<ICollection<TT.TValue>>());
+                    Static.GenericVoid((x, y, z) => RuntimeHelpers.ReadCollection(x, y, z),
+                        context,
+                        typedCollection,
+                        w.Delegate<CompactDeserializationContext, TT.TValue>((ww, ctx) => {
+                            var itemReader = GetValueReader(itemType);
+                            var item = ww.Local<TT.TValue>();
+                            itemReader(itemType, ww, context, item);
+                            ww.Return(item);
+                        })
+                    );
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementReadPlainObject(VoidMethodWriter w, Argument<CompactDeserializationContext> context, Argument<object> obj)
+            {
+                using (TT.CreateScope<TT.TImpl>(_forType))
+                {
+                    var typedObj = w.Local<TT.TImpl>(initialValue: obj.CastTo<TT.TImpl>());
+                    TypeMemberCache.Of(_forType).SelectAllProperties(where: IsSerializableProperty).ForEach(p => {
+                        var propertyReader = GetPropertyReader(p);
+                        propertyReader(w, context, typedObj, p);
+                    });
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementWriteCollection(VoidMethodWriter w, Argument<CompactSerializationContext> context, Argument<object> obj)
+            {
+                Type itemType;
+                _forType.IsCollectionType(out itemType);
+
+                using (TT.CreateScope<TT.TValue>(itemType))
+                {
+                    var typedCollection = w.Local(initialValue: obj.CastTo<ICollection<TT.TValue>>());
+                    Static.GenericVoid((x, y, z) => RuntimeHelpers.WriteCollection(x, y, z),
+                        context,
+                        typedCollection,
+                        w.Delegate<CompactSerializationContext, TT.TValue>((ww, ctx, item) => {
+                            var itemLocal = ww.Local<TT.TValue>(initialValue: item);
+                            var itemWriter = GetValueWriter(itemType);
+                            itemWriter(itemType, ww, context, itemLocal);
+                        })
+                    );
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementWritePlainObject(VoidMethodWriter w, Argument<CompactSerializationContext> context, Argument<object> obj)
+            {
+                var typedObj = w.Local<TT.TImpl>(initialValue: obj.CastTo<TT.TImpl>());
+                TypeMemberCache.Of(_forType).SelectAllProperties(where: IsSerializableProperty).ForEach(p => {
+                    var propertyWriter = GetPropertyWriter(p);
+                    propertyWriter(w, context, typedObj, p);
+                });
             }
         }
     }
