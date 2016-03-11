@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using Autofac;
 using Hapil;
 using Hapil.Members;
@@ -10,6 +11,7 @@ using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.DataObjects;
 using NWheels.Extensions;
+using NWheels.Utilities;
 using TT = Hapil.TypeTemplate;
 
 namespace NWheels.Serialization.Factories
@@ -86,8 +88,10 @@ namespace NWheels.Serialization.Factories
         {
             var forType = context.TypeKey.PrimaryInterface;
 
+            // both conventions below implement ShouldApply in a mutually exclusive way
             return new IObjectFactoryConvention[] {
-                new TypeSerializerConvention(this, forType), 
+                new ReferenceTypeSerializerConvention(this, forType), 
+                new ValueTypeSerializerConvention(this, forType), 
             };
         }
 
@@ -248,6 +252,11 @@ namespace NWheels.Serialization.Factories
                 return typeof(object);
             }
 
+            if (!valueType.IsPrimitive && !_s_valueReaderByType.ContainsKey(valueType))
+            {
+                return typeof(ValueType);
+            }
+
             return valueType;
         }
 
@@ -266,7 +275,10 @@ namespace NWheels.Serialization.Factories
             {
                 typeof(ValueType),
                 (type, w, context, value) =>
-                    context.Prop(x => x.Output).Void(x => x.Write, value.CastTo<KeyValuePair<TT.TKey, TT.TValue>>())
+                    context.Void<TT.TStruct>(
+                        x => x.WriteStruct<TT.TStruct>, 
+                        value.CastTo<TT.TStruct>()
+                    )
             },
             {
                 typeof(Enum),
@@ -336,14 +348,19 @@ namespace NWheels.Serialization.Factories
                     )
             },
             {
-                typeof(string),
+                typeof(ValueType),
                 (type, w, context, assignTo) =>
-                    assignTo.Assign(context.Prop(x => x.Input).Func<string>(x => x.ReadStringOrNull).CastTo<TT.TItem>())
+                    assignTo.Assign(context.Func<TT.TStruct>(x => x.ReadStruct<TT.TStruct>).CastTo<TT.TItem>())
             },
             {
                 typeof(Enum),
                 (type, w, context, assignTo) =>
                     assignTo.Assign(context.Prop(x => x.Input).Func<int>(x => x.Read7BitInt).CastTo<TT.TItem>())
+            },
+            {
+                typeof(string),
+                (type, w, context, assignTo) =>
+                    assignTo.Assign(context.Prop(x => x.Input).Func<string>(x => x.ReadStringOrNull).CastTo<TT.TItem>())
             },
             {
                 typeof(bool),
@@ -433,45 +450,13 @@ namespace NWheels.Serialization.Factories
         public interface ITypeSerializer<T>
         {
             T CreateObject(CompactDeserializationContext context);
-            void ReadObject(CompactDeserializationContext context, T obj);
-            void WriteObject(CompactSerializationContext context, T obj);
+            void ReadObject(CompactDeserializationContext context, ref T obj);
+            void WriteObject(CompactSerializationContext context, ref T obj);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static class RuntimeHelpers
-        {
-            public static void WriteCollection<T>(
-                CompactSerializationContext context, 
-                ICollection<T> collection, 
-                Action<CompactSerializationContext, T> onWriteItem)
-            {
-                context.Output.WriteCollection<T>(collection, (bw, item, state) => onWriteItem(context, item), null);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public static void ReadCollection<T>(
-                CompactDeserializationContext context,
-                ICollection<T> collection,
-                Func<CompactDeserializationContext, T> onReadItem)
-            {
-                context.Input.ReadCollection(collection, (br, state) => onReadItem(context), null);
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public static T[] ReadArray<T>(
-                CompactDeserializationContext context,
-                Func<CompactDeserializationContext, T> onReadItem)
-            {
-                return context.Input.ReadArray<T>((br, state) => onReadItem(context), null);
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class TypeSerializerConvention : ImplementationConvention
+        private class ReferenceTypeSerializerConvention : ImplementationConvention
         {
             private readonly CompactSerializerFactory _factory;
             private readonly Type _forType;
@@ -480,7 +465,7 @@ namespace NWheels.Serialization.Factories
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public TypeSerializerConvention(CompactSerializerFactory factory, Type forType)
+            public ReferenceTypeSerializerConvention(CompactSerializerFactory factory, Type forType)
                 : base(Will.ImplementBaseClass)
             {
                 _factory = factory;
@@ -491,6 +476,13 @@ namespace NWheels.Serialization.Factories
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             #region Overrides of ImplementationConvention
+
+            protected override bool ShouldApply(ObjectFactoryContext context)
+            {
+                return !_forType.IsValueType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
             {
@@ -573,7 +565,7 @@ namespace NWheels.Serialization.Factories
             {
                 var itemReader = GetValueReader(_collectionItemType);
 
-                using (TT.CreateScope<TT.TItem>(_collectionItemType))
+                using (TT.CreateScope<TT.TItem, TT.TStruct>(_collectionItemType, _collectionItemType))
                 {
                     var typedCollection = w.Local(initialValue: obj.CastTo<ICollection<TT.TItem>>());
                     Local<int> count = w.Local<int>();
@@ -610,20 +602,6 @@ namespace NWheels.Serialization.Factories
                             valueReader(p.PropertyType, w, context, assignTo: typedObj.Prop<TT.TItem>(p));
                         }
                     });
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void ImplementReadStruct(VoidMethodWriter w, Argument<CompactDeserializationContext> context, Argument<TT.TStruct> value)
-            {
-                foreach (var fieldInfo in _forType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-                {
-                    using (TT.CreateScope<TT.TItem>(fieldInfo.FieldType))
-                    {
-                        var valueReader = GetValueReader(fieldInfo);
-                        valueReader(fieldInfo.FieldType, w, context, assignTo: value.Field<TT.TItem>(fieldInfo));
-                    }
                 }
             }
 
@@ -671,7 +649,7 @@ namespace NWheels.Serialization.Factories
             {
                 var itemWriter = GetValueWriter(_collectionItemType);
 
-                using (TT.CreateScope<TT.TItem>(_collectionItemType))
+                using (TT.CreateScope<TT.TItem, TT.TStruct>(_collectionItemType, _collectionItemType))
                 {
                     var typedCollection = w.Local(initialValue: obj.CastTo<ICollection<TT.TItem>>());
                     var count = w.Local<int>(initialValue: typedCollection.Count());
@@ -732,7 +710,7 @@ namespace NWheels.Serialization.Factories
             {
                 using (TT.CreateScope<TT.TItem>(_collectionItemType))
                 {
-                    w.Return(w.New<List<TT.TValue>>(context.Prop(x => x.Input).Func<int>(x => x.Read7BitInt)));
+                    w.Return(w.New<List<TT.TItem>>(context.Prop(x => x.Input).Func<int>(x => x.Read7BitInt)));
                 }
             }
 
@@ -762,6 +740,103 @@ namespace NWheels.Serialization.Factories
                 }
 
                 w.Return(w.New<TT.TImpl>(parameterLocals).CastTo<object>());
+
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class ValueTypeSerializerConvention : ImplementationConvention
+        {
+            private readonly CompactSerializerFactory _factory;
+            private readonly Type _forType;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ValueTypeSerializerConvention(CompactSerializerFactory factory, Type forType)
+                : base(Will.ImplementBaseClass)
+            {
+                _factory = factory;
+                _forType = forType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of ImplementationConvention
+
+            protected override bool ShouldApply(ObjectFactoryContext context)
+            {
+                return _forType.IsValueType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            {
+                using (TT.CreateScope<TT.TStruct>(_forType))
+                {
+                    writer.DefaultConstructor();
+                    
+                    writer.ImplementInterface<ITypeSerializer>()
+                        .Method<CompactDeserializationContext, object>(x => x.ReadObject).Throw<NotImplementedException>()
+                        .Method<CompactSerializationContext, object>(x => x.WriteObject).Throw<NotImplementedException>()
+                        .Method<CompactDeserializationContext, object>(x => x.CreateObject).Throw<NotImplementedException>()
+                        .Property(x => x.ForType).Implement(p => p.Get(w => w.Return(w.Const(_forType))));
+
+                    var genericReadMethodInfo = typeof(ITypeSerializer<>).MakeGenericType(_forType).GetMethod("ReadObject");
+                    var genericWriteMethodInfo = typeof(ITypeSerializer<>).MakeGenericType(_forType).GetMethod("WriteObject");
+
+                    writer.ImplementInterface<ITypeSerializer<TT.TStruct>>()
+                        .Method<CompactDeserializationContext, TT.TStruct>(genericReadMethodInfo).Implement(ImplementReadStruct)
+                        .Method<CompactSerializationContext, TT.TStruct>(genericWriteMethodInfo).Implement(ImplementWriteStruct)
+                        .Method<CompactDeserializationContext, TT.TStruct>(x => x.CreateObject).Implement(ImplementCreateStruct);
+                }
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementReadStruct(VoidMethodWriter w, Argument<CompactDeserializationContext> context, Argument<TT.TStruct> value)
+            {
+                using (TT.CreateScope<TT.TStruct>(_forType))
+                {
+                    foreach (var fieldInfo in _forType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+                    {
+                        using (TT.CreateScope<TT.TItem>(fieldInfo.FieldType))
+                        {
+                            var valueReader = GetValueReader(fieldInfo);
+                            valueReader(fieldInfo.FieldType, w, context, assignTo: value.Field<TT.TItem>(fieldInfo));
+                        }
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementWriteStruct(VoidMethodWriter w, Argument<CompactSerializationContext> context, Argument<TT.TStruct> value)
+            {
+                using (TT.CreateScope<TT.TStruct>(_forType))
+                {
+                    foreach (var fieldInfo in _forType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+                    {
+                        using (TT.CreateScope<TT.TItem>(fieldInfo.FieldType))
+                        {
+                            var valueWriter = GetValueWriter(fieldInfo);
+                            valueWriter(fieldInfo.FieldType, w, context, value: value.Field<TT.TItem>(fieldInfo));
+                        }
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void ImplementCreateStruct(FunctionMethodWriter<TT.TStruct> w, Argument<CompactDeserializationContext> context)
+            {
+                using (TT.CreateScope<TT.TStruct>(_forType))
+                {
+                    w.Return(Static.Func<Type, object>(FormatterServices.GetSafeUninitializedObject, w.Const(_forType)).CastTo<TT.TStruct>());
+                }
             }
         }
     }
