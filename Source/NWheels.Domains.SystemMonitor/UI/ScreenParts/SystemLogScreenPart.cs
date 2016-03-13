@@ -99,29 +99,29 @@ namespace NWheels.Domains.SystemMonitor.UI.ScreenParts
                         input.From.AddHours(15).ToString("yyyy-MM-dd HH:mm"),
                         input.From.AddHours(16).ToString("yyyy-MM-dd HH:mm")
                     },
-                    Series = new List<ChartData.SeriesData>() {
-                        new ChartData.SeriesData() {
-                            Type = ChartSeriesType.StackedBar,
-                            Label = "Info",
-                            Values = new List<decimal>() {
-                                1000, 2000, 1500, 1000, 500, 1000, 1400, 1300, 1500, 1200, 900, 1000, 800, 500, 700, 1000
-                            }
-                        },
-                        new ChartData.SeriesData() {
-                            Type = ChartSeriesType.StackedBar,
-                            Label = "Warning",
-                            Values = new List<decimal>() {
-                                200, 400, 300, 200, 100, 200, 280, 260, 300, 240, 180, 200, 160, 100, 140, 200
-                            }
-                        },
-                        new ChartData.SeriesData() {
-                            Type = ChartSeriesType.StackedBar,
-                            Label = "Error",
-                            Values = new List<decimal>() {
-                                100, 200, 150, 100, 50, 100, 140, 130, 150, 120, 90, 100, 80, 50, 70, 100
-                            }
-                        }
-                    }
+                    //Series = new List<ChartData.t>() {
+                    //    new ChartData.SeriesData() {
+                    //        Type = ChartSeriesType.StackedBar,
+                    //        Label = "Info",
+                    //        Values = new List<decimal>() {
+                    //            1000, 2000, 1500, 1000, 500, 1000, 1400, 1300, 1500, 1200, 900, 1000, 800, 500, 700, 1000
+                    //        }
+                    //    },
+                    //    new ChartData.SeriesData() {
+                    //        Type = ChartSeriesType.StackedBar,
+                    //        Label = "Warning",
+                    //        Values = new List<decimal>() {
+                    //            200, 400, 300, 200, 100, 200, 280, 260, 300, 240, 180, 200, 160, 100, 140, 200
+                    //        }
+                    //    },
+                    //    new ChartData.SeriesData() {
+                    //        Type = ChartSeriesType.StackedBar,
+                    //        Label = "Error",
+                    //        Values = new List<decimal>() {
+                    //            100, 200, 150, 100, 50, 100, 140, 130, 150, 120, 90, 100, 80, 50, 70, 100
+                    //        }
+                    //    }
+                    //}
                 };
             }
 
