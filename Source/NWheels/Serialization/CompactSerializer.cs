@@ -138,6 +138,8 @@ namespace NWheels.Serialization
 
         internal object ReadObject(Type declaredType, CompactDeserializationContext context)
         {
+            ValidateReferenceType(declaredType);
+
             var input = context.Input;
             var dictionary = context.Dictionary;
 
@@ -183,6 +185,8 @@ namespace NWheels.Serialization
 
         internal void WriteObject(Type declaredType, object obj, CompactSerializationContext context)
         {
+            ValidateReferenceType(declaredType);
+
             var output = context.Output;
             var dictionary = context.Dictionary;
 
@@ -213,7 +217,7 @@ namespace NWheels.Serialization
 
         internal void WriteStruct<T>(ref T value, CompactSerializationContext context) where T : struct
         {
-            var writer = _readerWriterFactory.GetTypeWriter<T>();
+            var writer = _readerWriterFactory.GetStructTypeWriter<T>();
             writer(context, ref value);
         }
 
@@ -221,8 +225,8 @@ namespace NWheels.Serialization
 
         internal T ReadStruct<T>(CompactDeserializationContext context) where T : struct
         {
-            var reader = _readerWriterFactory.GetTypeReader<T>();
-            var creator = _readerWriterFactory.GetDefaultCreator<T>();
+            var reader = _readerWriterFactory.GetStructTypeReader<T>();
+            var creator = _readerWriterFactory.GetStructDefaultCreator<T>();
             T value = creator(context);
             reader(context, ref value);
             return value;
@@ -276,7 +280,17 @@ namespace NWheels.Serialization
 
             return null;
         }
-        
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ValidateReferenceType(Type declaredType)
+        {
+            if (declaredType.IsValueType)
+            {
+                throw new ArgumentException("Must be a reference type.", "declaredType");
+            }
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private class VoidTypeResolver : IObjectTypeResolver

@@ -65,5 +65,115 @@ namespace NWheels.UnitTests.Serialization
             Second,
             Third
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class AClassWithStructs
+        {
+            public PrimitiveStruct One { get; set; }
+            public AnotherPrimitiveStruct Two { get; set; }
+            public NonPrimitiveStruct Three { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public struct PrimitiveStruct
+        {
+            public PrimitiveStruct(
+                int intValue, 
+                bool boolValue, 
+                bool anotherBoolValue, 
+                string stringValue, 
+                string anotherStringValue, 
+                DayOfWeek systemEnumValue, 
+                TimeSpan timeSpanValue)
+            {
+                IntValue = intValue;
+                BoolValue = boolValue;
+                AnotherBoolValue = anotherBoolValue;
+                StringValue = stringValue;
+                AnotherStringValue = anotherStringValue;
+                SystemEnumValue = systemEnumValue;
+                TimeSpanValue = timeSpanValue;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public readonly int IntValue;
+            public readonly bool BoolValue;
+            public readonly bool AnotherBoolValue;
+            public readonly string StringValue;
+            public readonly string AnotherStringValue;
+            public readonly DayOfWeek SystemEnumValue;
+            public readonly TimeSpan TimeSpanValue;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public struct AnotherPrimitiveStruct
+        {
+            public AnotherPrimitiveStruct(string stringValue)
+            {
+                StringValue = stringValue;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public readonly string StringValue;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public struct NonPrimitiveStruct
+        {
+            private readonly Primitive _first;
+            private readonly PrimitiveStruct _second;
+            private readonly Primitive _third;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public NonPrimitiveStruct(Primitive first, PrimitiveStruct second, Primitive third)
+            {
+                _first = first;
+                _second = second;
+                _third = third;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Primitive First { get { return _first; } }
+            public PrimitiveStruct Second { get { return _second; } }
+            public Primitive Third { get { return _third; } }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class WithPolymorphicObjects
+        {
+            public BaseClass Base { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class BaseClass
+        {
+            public string StringValue { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class DerivedClassOne : BaseClass
+        {
+            public int IntValue { get; set; }
+            public TimeSpan TimeSpanValue { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class DerivedClassTwo : BaseClass
+        {
+            public long LongValue { get; set; }
+            public DateTime DateTimeValue { get; set; }
+        }
     }
 }

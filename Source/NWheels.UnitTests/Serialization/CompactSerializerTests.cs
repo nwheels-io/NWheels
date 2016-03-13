@@ -14,7 +14,7 @@ namespace NWheels.UnitTests.Serialization
     public class CompactSerializerTests : DynamicTypeUnitTestBase
     {
         [Test]
-        public void Roundtrip_PrimitiveTypes()
+        public void Roundtrip_ClassWithPrimitiveMembers()
         {
             //-- arrange
 
@@ -62,7 +62,59 @@ namespace NWheels.UnitTests.Serialization
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Roundtrip_NestedObjects()
+        public void Roundtrip_ClassWithStructs()
+        {
+            //-- arrange
+
+            var serializer = Framework.Components.Resolve<CompactSerializer>();
+            var dictionary = new CompactSerializerDictionary();
+
+            var original = new Repo.AClassWithStructs() {
+                One = new Repo.PrimitiveStruct(
+                    intValue: 123,
+                    boolValue: true,
+                    anotherBoolValue: false,
+                    stringValue: "ABC",
+                    anotherStringValue: null, 
+                    systemEnumValue: DayOfWeek.Wednesday,
+                    timeSpanValue: TimeSpan.FromSeconds(123)),
+                Two = new Repo.AnotherPrimitiveStruct("XYZ"),
+                Three = new Repo.NonPrimitiveStruct(
+                    first: new Repo.Primitive() {
+                        StringValue = "1ST"
+                    },
+                    second: new Repo.PrimitiveStruct(456, false, true, "2ND", "", DayOfWeek.Friday, TimeSpan.FromHours(1)),
+                    third: new Repo.Primitive() {
+                        StringValue = "3RD"
+                    })
+            };
+
+            //-- act
+
+            var serializedBytes = serializer.GetBytes(original, dictionary);
+            var deserialized = serializer.GetObject<Repo.AClassWithStructs>(serializedBytes, dictionary);
+
+            //-- assert
+
+            deserialized.One.IntValue.ShouldBe(123);
+            deserialized.One.BoolValue.ShouldBe(true);
+            deserialized.One.AnotherBoolValue.ShouldBe(false);
+            deserialized.One.StringValue.ShouldBe("ABC");
+            deserialized.One.AnotherStringValue.ShouldBeNull();
+            deserialized.One.SystemEnumValue.ShouldBe(DayOfWeek.Wednesday);
+            deserialized.One.TimeSpanValue.ShouldBe(TimeSpan.FromSeconds(123));
+
+            deserialized.Two.StringValue.ShouldBe("XYZ");
+
+            deserialized.Three.First.StringValue.ShouldBe("1ST");
+            deserialized.Three.Second.StringValue.ShouldBe("2ND");
+            deserialized.Three.Third.StringValue.ShouldBe("3RD");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Roundtrip_ClassWithNestedObjects()
         {
             //-- arrange
 
@@ -97,7 +149,7 @@ namespace NWheels.UnitTests.Serialization
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Roundtrip_CollectionsOfPrimitiveTypes()
+        public void Roundtrip_ClassWithCollectionsOfPrimitiveTypes()
         {
             //-- arrange
 
@@ -135,6 +187,61 @@ namespace NWheels.UnitTests.Serialization
             deserialized.IntStringDictionary.ShouldContainKeyAndValue(123, "ABCD");
             deserialized.IntStringDictionary.ShouldContainKeyAndValue(456, "EFGH");
             deserialized.IntStringDictionary.ShouldContainKeyAndValue(789, "IJKL");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Roundtrip_BaseClass()
+        {
+            //-- arrange
+
+            var serializer = Framework.Components.Resolve<CompactSerializer>();
+            var dictionary = new CompactSerializerDictionary();
+
+            var original = new Repo.BaseClass() {
+                StringValue = "ABC"
+            };
+
+            //-- act
+
+            var serializedBytes = serializer.GetBytes<Repo.BaseClass>(original, dictionary);
+            var deserialized = serializer.GetObject<Repo.BaseClass>(serializedBytes, dictionary);
+
+            //-- assert
+
+            deserialized.ShouldNotBeNull();
+            deserialized.StringValue.ShouldBe("ABC");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Roundtrip_DerivedClassDeclaredAsBase()
+        {
+            //-- arrange
+
+            var serializer = Framework.Components.Resolve<CompactSerializer>();
+            var dictionary = new CompactSerializerDictionary();
+
+            var original = new Repo.DerivedClassTwo() {
+                StringValue = "ABC",
+                LongValue = Int64.MaxValue - 123,
+                DateTimeValue = new DateTime(2016, 10, 10, 12, 45, 50)
+            };
+
+            //-- act
+
+            var serializedBytes = serializer.GetBytes<Repo.BaseClass>(original, dictionary);
+            var deserialized = serializer.GetObject<Repo.BaseClass>(serializedBytes, dictionary);
+
+            //-- assert
+
+            deserialized.ShouldNotBeNull();
+            deserialized.ShouldBeOfType<Repo.DerivedClassTwo>();
+            deserialized.StringValue.ShouldBe("ABC");
+            ((Repo.DerivedClassTwo)deserialized).LongValue.ShouldBe(Int64.MaxValue - 123);
+            ((Repo.DerivedClassTwo)deserialized).DateTimeValue.ShouldBe(new DateTime(2016, 10, 10, 12, 45, 50));
         }
     }
 }

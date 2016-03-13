@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using Autofac;
 using Hapil;
@@ -58,7 +59,7 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeReader<T> GetTypeReader<T>() where T : struct
+        public StructTypeReader<T> GetStructTypeReader<T>() where T : struct
         {
             var serializer = (ITypeSerializer<T>)_serializerByType.GetOrAdd(typeof(T), CreateTypeSerializer);
             return serializer.ReadObject;
@@ -66,7 +67,7 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeWriter<T> GetTypeWriter<T>() where T : struct
+        public StructTypeWriter<T> GetStructTypeWriter<T>() where T : struct
         {
             var serializer = (ITypeSerializer<T>)_serializerByType.GetOrAdd(typeof(T), CreateTypeSerializer);
             return serializer.WriteObject;
@@ -74,7 +75,7 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TypeCreator<T> GetDefaultCreator<T>() where T : struct
+        public StructTypeCreator<T> GetStructDefaultCreator<T>() where T : struct
         {
             var serializer = (ITypeSerializer<T>)_serializerByType.GetOrAdd(typeof(T), CreateTypeSerializer);
             return serializer.CreateObject;
@@ -88,10 +89,8 @@ namespace NWheels.Serialization.Factories
         {
             var forType = context.TypeKey.PrimaryInterface;
 
-            // both conventions below implement ShouldApply in a mutually exclusive way
             return new IObjectFactoryConvention[] {
                 new ReferenceTypeSerializerConvention(this, forType), 
-                new ValueTypeSerializerConvention(this, forType), 
             };
         }
 
@@ -101,7 +100,30 @@ namespace NWheels.Serialization.Factories
 
         private ITypeSerializer CreateTypeSerializer(Type type)
         {
-            return GetOrBuildType(new TypeKey(primaryInterface: type)).CreateInstance<ITypeSerializer>();
+            if (IsNonPrimitiveStructType(type))
+            {
+                var builder = new StructTypeSerializerFactory(this, type);
+                return builder.CompileStructTypeSerializer();
+            }
+            else
+            {
+                var typeEntry = GetOrBuildType(new TypeKey(primaryInterface: type));
+                return typeEntry.CreateInstance<ITypeSerializer>();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private DynamicMethodCompiler Compiler
+        {
+            get { return _compiler; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static bool IsNonPrimitiveStructType(Type type)
+        {
+            return (type.IsValueType && !type.IsPrimitive && !type.IsEnum && !_s_valueReaderByType.ContainsKey(type));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -262,6 +284,24 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static int RegisterDynamicMethod(Delegate methodDelegate)
+        {
+            lock (_s_dynamicMethodsSyncRoot)
+            {
+                var newList = new List<Delegate>(_s_dynamicMethods);
+                newList.Add(methodDelegate);
+                _s_dynamicMethods = newList;
+                return newList.Count - 1;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly object _s_dynamicMethodsSyncRoot = new object();
+        private static List<Delegate> _s_dynamicMethods = new List<Delegate>();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static readonly Dictionary<Type, ValueWriter> _s_valueWriterByType = new Dictionary<Type, ValueWriter>() {
             {
                 typeof(object),
@@ -274,11 +314,15 @@ namespace NWheels.Serialization.Factories
             },
             {
                 typeof(ValueType),
-                (type, w, context, value) =>
-                    context.Void<TT.TStruct>(
-                        x => x.WriteStruct<TT.TStruct>, 
-                        value.CastTo<TT.TStruct>()
-                    )
+                (type, w, context, value) => {
+                    using (TT.CreateScope<TT.TStruct>(type))
+                    {
+                        context.Void<TT.TStruct>(
+                            x => x.WriteStruct<TT.TStruct>, 
+                            value.CastTo<TT.TStruct>()
+                        );
+                    }
+                }
             },
             {
                 typeof(Enum),
@@ -349,8 +393,12 @@ namespace NWheels.Serialization.Factories
             },
             {
                 typeof(ValueType),
-                (type, w, context, assignTo) =>
-                    assignTo.Assign(context.Func<TT.TStruct>(x => x.ReadStruct<TT.TStruct>).CastTo<TT.TItem>())
+                (type, w, context, assignTo) => {
+                    using (TT.CreateScope<TT.TStruct>(type))
+                    {
+                        assignTo.Assign(context.Func<TT.TStruct>(x => x.ReadStruct<TT.TStruct>).CastTo<TT.TItem>());
+                    }
+                }
             },
             {
                 typeof(Enum),
@@ -417,9 +465,9 @@ namespace NWheels.Serialization.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public delegate void TypeReader<T>(CompactDeserializationContext context, ref T obj) where T : struct;
-        public delegate void TypeWriter<T>(CompactSerializationContext context, ref T obj) where T : struct;
-        public delegate T TypeCreator<T>(CompactDeserializationContext context) where T : struct;
+        public delegate void StructTypeReader<T>(CompactDeserializationContext context, ref T obj) where T : struct;
+        public delegate void StructTypeWriter<T>(CompactSerializationContext context, ref T obj) where T : struct;
+        public delegate T StructTypeCreator<T>(CompactDeserializationContext context) where T : struct;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -548,7 +596,7 @@ namespace NWheels.Serialization.Factories
             {
                 var itemReader = GetValueReader(_collectionItemType);
 
-                using (TT.CreateScope<TT.TItem>(_collectionItemType))
+                using (TT.CreateScope<TT.TItem, TT.TStruct>(_collectionItemType, _collectionItemType))
                 {
                     var typedArray = w.Local<TT.TItem[]>(initialValue: obj.CastTo<TT.TItem[]>());
                     var length = w.Local<int>(initialValue: typedArray.Length());
@@ -596,7 +644,7 @@ namespace NWheels.Serialization.Factories
                 {
                     var typedObj = w.Local<TT.TImpl>(initialValue: obj.CastTo<TT.TImpl>());
                     TypeMemberCache.Of(_forType).SelectAllProperties(@where: IsSerializableProperty).ForEach(p => {
-                        using (TT.CreateScope<TT.TItem>(p.PropertyType))
+                        using (TT.CreateScope<TT.TItem, TT.TStruct>(p.PropertyType, p.PropertyType))
                         {
                             var valueReader = GetValueReader(p);
                             valueReader(p.PropertyType, w, context, assignTo: typedObj.Prop<TT.TItem>(p));
@@ -611,7 +659,7 @@ namespace NWheels.Serialization.Factories
             {
                 var itemWriter = GetValueWriter(_collectionItemType);
 
-                using (TT.CreateScope<TT.TItem>(_collectionItemType))
+                using (TT.CreateScope<TT.TItem, TT.TStruct>(_collectionItemType, _collectionItemType))
                 {
                     var typedArray = w.Local<TT.TItem[]>(initialValue: obj.CastTo<TT.TItem[]>());
                     var length = w.Local<int>(initialValue: typedArray.Length());
@@ -630,7 +678,7 @@ namespace NWheels.Serialization.Factories
             {
                 var itemWriter = GetValueWriter(_collectionItemType);
 
-                using (TT.CreateScope<TT.TItem>(_collectionItemType))
+                using (TT.CreateScope<TT.TItem, TT.TStruct>(_collectionItemType, _collectionItemType))
                 {
                     var typedList = w.Local(initialValue: obj.CastTo<IList<TT.TItem>>());
                     var count = w.Local<int>(initialValue: typedList.Count());
@@ -668,7 +716,7 @@ namespace NWheels.Serialization.Factories
             {
                 var typedObj = w.Local<TT.TImpl>(initialValue: obj.CastTo<TT.TImpl>());
                 TypeMemberCache.Of(_forType).SelectAllProperties(@where: IsSerializableProperty).ForEach(p => {
-                    using (TT.CreateScope<TT.TItem>(p.PropertyType))
+                    using (TT.CreateScope<TT.TItem, TT.TStruct>(p.PropertyType, p.PropertyType))
                     {
                         var valueWriter = GetValueWriter(p);
                         valueWriter(p.PropertyType, w, context, value: typedObj.Prop<TT.TItem>(p));
@@ -740,102 +788,147 @@ namespace NWheels.Serialization.Factories
                 }
 
                 w.Return(w.New<TT.TImpl>(parameterLocals).CastTo<object>());
-
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class ValueTypeSerializerConvention : ImplementationConvention
+        private class StructTypeSerializer<T> : ITypeSerializer<T>, ITypeSerializer
+            where T : struct
         {
-            private readonly CompactSerializerFactory _factory;
+            private readonly StructTypeReader<T> _reader;
+            private readonly StructTypeWriter<T> _writer;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public StructTypeSerializer(Delegate reader, Delegate writer)
+            {
+                _reader = (StructTypeReader<T>)reader;
+                _writer = (StructTypeWriter<T>)writer;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public T CreateObject(CompactDeserializationContext context)
+            {
+                return (T)FormatterServices.GetSafeUninitializedObject(typeof(T));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ReadObject(CompactDeserializationContext context, ref T obj)
+            {
+                _reader(context, ref obj);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void WriteObject(CompactSerializationContext context, ref T obj)
+            {
+                _writer(context, ref obj);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            object ITypeSerializer.CreateObject(CompactDeserializationContext context)
+            {
+                return CreateObject(context);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            void ITypeSerializer.ReadObject(CompactDeserializationContext context, object obj)
+            {
+                throw new NotSupportedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            void ITypeSerializer.WriteObject(CompactSerializationContext context, object obj)
+            {
+                throw new NotSupportedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            Type ITypeSerializer.ForType
+            {
+                get { return typeof(T); }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class StructTypeSerializerFactory
+        {
+            private readonly CompactSerializerFactory _owner;
             private readonly Type _forType;
+            private readonly FieldInfo[] _fields;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ValueTypeSerializerConvention(CompactSerializerFactory factory, Type forType)
-                : base(Will.ImplementBaseClass)
+            public StructTypeSerializerFactory(CompactSerializerFactory owner, Type forType)
             {
-                _factory = factory;
+                _owner = owner;
                 _forType = forType;
+                _fields = _forType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             }
-
+            
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            #region Overrides of ImplementationConvention
-
-            protected override bool ShouldApply(ObjectFactoryContext context)
+            public ITypeSerializer CompileStructTypeSerializer()
             {
-                return _forType.IsValueType;
+                var serializerConstructedType = typeof(StructTypeSerializer<>).MakeGenericType(_forType);
+                var reader = ImplementReadStruct();
+                var writer = ImplementWriteStruct();
+                return (ITypeSerializer)Activator.CreateInstance(serializerConstructedType, reader, writer);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
-            {
-                using (TT.CreateScope<TT.TStruct>(_forType))
-                {
-                    writer.DefaultConstructor();
-                    
-                    writer.ImplementInterface<ITypeSerializer>()
-                        .Method<CompactDeserializationContext, object>(x => x.ReadObject).Throw<NotImplementedException>()
-                        .Method<CompactSerializationContext, object>(x => x.WriteObject).Throw<NotImplementedException>()
-                        .Method<CompactDeserializationContext, object>(x => x.CreateObject).Throw<NotImplementedException>()
-                        .Property(x => x.ForType).Implement(p => p.Get(w => w.Return(w.Const(_forType))));
-
-                    var genericReadMethodInfo = typeof(ITypeSerializer<>).MakeGenericType(_forType).GetMethod("ReadObject");
-                    var genericWriteMethodInfo = typeof(ITypeSerializer<>).MakeGenericType(_forType).GetMethod("WriteObject");
-
-                    writer.ImplementInterface<ITypeSerializer<TT.TStruct>>()
-                        .Method<CompactDeserializationContext, TT.TStruct>(genericReadMethodInfo).Implement(ImplementReadStruct)
-                        .Method<CompactSerializationContext, TT.TStruct>(genericWriteMethodInfo).Implement(ImplementWriteStruct)
-                        .Method<CompactDeserializationContext, TT.TStruct>(x => x.CreateObject).Implement(ImplementCreateStruct);
-                }
-            }
-
-            #endregion
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void ImplementReadStruct(VoidMethodWriter w, Argument<CompactDeserializationContext> context, Argument<TT.TStruct> value)
+            private Delegate ImplementReadStruct()
             {
                 using (TT.CreateScope<TT.TStruct>(_forType))
                 {
-                    foreach (var fieldInfo in _forType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-                    {
-                        using (TT.CreateScope<TT.TItem>(fieldInfo.FieldType))
-                        {
-                            var valueReader = GetValueReader(fieldInfo);
-                            valueReader(fieldInfo.FieldType, w, context, assignTo: value.Field<TT.TItem>(fieldInfo));
-                        }
-                    }
+                    var dynamicMethodDelegate = _owner.Compiler
+                        .ForTemplatedDelegate<StructTypeReader<TT.TStruct>>()
+                        .CompileStaticVoidMethod<CompactDeserializationContext, TT.TStruct>("ReadStruct_" + _forType.FriendlyName(),
+                            (w, context, value) => {
+                                foreach (var fieldInfo in _fields)
+                                {
+                                    using (TT.CreateScope<TT.TStruct, TT.TItem>(_forType, fieldInfo.FieldType))
+                                    {
+                                        var valueReader = GetValueReader(fieldInfo);
+                                        valueReader(fieldInfo.FieldType, w, context, assignTo: value.Field<TT.TItem>(fieldInfo));
+                                    }
+                                }
+                            });
+
+                    return dynamicMethodDelegate;
                 }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void ImplementWriteStruct(VoidMethodWriter w, Argument<CompactSerializationContext> context, Argument<TT.TStruct> value)
+            private Delegate ImplementWriteStruct()
             {
                 using (TT.CreateScope<TT.TStruct>(_forType))
                 {
-                    foreach (var fieldInfo in _forType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-                    {
-                        using (TT.CreateScope<TT.TItem>(fieldInfo.FieldType))
-                        {
-                            var valueWriter = GetValueWriter(fieldInfo);
-                            valueWriter(fieldInfo.FieldType, w, context, value: value.Field<TT.TItem>(fieldInfo));
-                        }
-                    }
-                }
-            }
+                    var dynamicMethodDelegate = _owner.Compiler
+                        .ForTemplatedDelegate<StructTypeWriter<TT.TStruct>>()
+                        .CompileStaticVoidMethod<CompactSerializationContext, TT.TStruct>("WriteStruct_" + _forType.FriendlyName(),
+                            (w, context, value) => {
+                                foreach (var fieldInfo in _fields)
+                                {
+                                    using (TT.CreateScope<TT.TStruct, TT.TItem>(_forType, fieldInfo.FieldType))
+                                    {
+                                        var valueWriter = GetValueWriter(fieldInfo);
+                                        valueWriter(fieldInfo.FieldType, w, context, value: value.Field<TT.TItem>(fieldInfo));
+                                    }
+                                }
+                            });
 
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void ImplementCreateStruct(FunctionMethodWriter<TT.TStruct> w, Argument<CompactDeserializationContext> context)
-            {
-                using (TT.CreateScope<TT.TStruct>(_forType))
-                {
-                    w.Return(Static.Func<Type, object>(FormatterServices.GetSafeUninitializedObject, w.Const(_forType)).CastTo<TT.TStruct>());
+                    return dynamicMethodDelegate;
                 }
             }
         }
