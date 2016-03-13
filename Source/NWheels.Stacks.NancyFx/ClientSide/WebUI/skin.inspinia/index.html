@@ -1655,40 +1655,7 @@ HEAD, JS/CSS LINKS
                 </div>                
             </div>
             <div class="ibox-content">
-                <div class="m-t-sm">
-                    <div class="row" ng-controller="chartJsController">
-                        <div class="col-md-10">
-                            <div>
-                                <canvas id="{{uidl.qualifiedName}}_context" width="1000" height="250"></canvas>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <ul class="stat-list m-t-lg">
-                                <li ng-repeat="sum in lineData.summaries">
-                                    <h1 class="no-margins">{{::sum.Value}}</h1>
-                                    <small>{{::translate(sum.Label)}}</small>
-                                    <div ng-if="sum.Percent" class="progress progress-mini">
-                                        <div class="progress-bar" style="width: {{::sum.Percent}}%;"></div>
-                                    </div>
-                                </li>
-                                <li>
-                                    <table>
-                                        <tbody>
-                                            <tr ng-repeat="legend in lineData.datasets">
-                                                <td class="legendColorBox">
-                                                    <div style="border:1px solid #ccc;padding:1px">
-                                                        <div style="width:4px;height:0;border:5px solid {{ legend.fillColor }};overflow:hidden"></div>
-                                                    </div>
-                                                </td>
-                                                <td class="legendLabel">{{::translate(legend.label)}}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                <div id="{{::uidl.elementName}}" class="flot-chart-content" style="padding:0px; position:relative;height:250px;"></div>
                 <!--div class="m-t-md">
                     <small class="pull-right">
                         <i class="fa fa-clock-o"> </i>
@@ -1700,6 +1667,166 @@ HEAD, JS/CSS LINKS
                 </div-->
             </div>
         </div>
+    </script>
+    <script type="text/javascript">
+        function initWidget_Chart($scope) {
+            var demoServerData = {
+                "Labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                "Series": [{
+                    "Mode": 'Time',
+                    "Values": [[getDemoTime(123),10],[getDemoTime(131),20],[getDemoTime(138),15],[getDemoTime(149),25],[getDemoTime(152),30],[getDemoTime(154),40],[getDemoTime(159),20],[getDemoTime(167),10]],
+                    "Label": "Impressions"
+                },
+                {
+                    "Mode": 'Time',
+                    "Values": [[getDemoTime(123),5],[getDemoTime(129),19],[getDemoTime(148),10],[getDemoTime(150),22],[getDemoTime(154),27],[getDemoTime(156),20],[getDemoTime(161),15],[getDemoTime(170),5]],
+                    "Label": "Clicks"
+                }],
+                "Summaries": []
+            };
+            $scope.$timeout(function() {
+                if ($scope.model.State.data) {
+                    buildChart('#' + $scope.uidl.elementName, $scope.model.State.data);
+                    //$('#' + $scope.uidl.elementName).plot(buildChartSeries(/*demoServerData*/$scope.model.State.data), options);
+                }
+                else {
+                    $scope.$watch('model.State.data', function(newValue, oldValue) {
+                        if (newValue) {
+                            buildChart('#' + $scope.uidl.elementName, newValue);
+                            //$('#' + $scope.uidl.elementName).plot(buildChartSeries(/*demoServerData*/$scope.model.State.data), options);
+                        }
+                    });
+                }
+            });
+
+            
+            function buildCategoryChart(elementId, serverData) {
+                var options = buildCategoryOptions(serverData);
+                var series = buildCategorySeries(serverData);
+                $(elementId).plot(series, options);
+            }
+            function buildCategorySeries(serverData) {
+                var chartSeries = [];
+                
+                for (var si = 0; si < serverData.Series.length; si++) {
+                    var series = {
+                        label: serverData.Series[si].Label,
+                        data: []
+                    };
+                    for (var xi = 0; xi < serverData.Series[si].Values.length; xi++) {
+                        series.data.push([xi, serverData.Series[si].Values[xi]]);
+                    }
+                    chartSeries.push(series);
+                }
+                
+                return chartSeries;
+            }
+            function buildCategoryOptions(serverData) {
+                var options = {
+                    series: {
+                        lines: {
+                            show: true,
+                            lineWidth: 2,
+                            fill: true,
+                            fillColor: {
+                                colors: [{
+                                    opacity: 0.1
+                                }, {
+                                    opacity: 0.35
+                                }]
+                            }
+                        }
+                    },
+                    xaxis: {
+                        tickDecimals: 0,
+                        ticks: [], 
+                    },
+                    colors: ["#1ab394"],
+                    grid: {
+                        color: "#999999",
+                        hoverable: true,
+                        clickable: true,
+                        tickColor: "#D4D4D4",
+                        borderWidth:0
+                    },
+                    legend: {
+                        show: true
+                    },
+                    tooltip: true,
+                    tooltipOpts: {
+                        content: "x: %x, y: %y"
+                    }
+                };
+                for (var li = 0; li < serverData.Labels.length; li++) {
+                    options.xaxis.ticks.push([li, serverData.Labels[li]]);
+                }
+                return options;
+            }
+            
+            function buildTimeChart(elementId, serverData) {
+                var options = buildTimeOptions(serverData);
+                var series = buildTimeSeries(serverData);
+                $(elementId).plot(series, options);
+            }
+            function buildTimeSeries(serverData) {
+                var chartSeries = [];
+                
+                for (var si = 0; si < serverData.Series.length; si++) {
+                    var series = {
+                        label: serverData.Series[si].Label,
+                        data: []
+                    };
+                    for (var xi = 0; xi < serverData.Series[si].Points.length; xi++) {
+                        series.data.push([xi, serverData.Series[si].Points[xi]]);
+                    }
+                    chartSeries.push(series);
+                }
+                
+                return chartSeries;
+            }
+            function buildTimeOptions(serverData) {
+                var options = {
+                    series: {
+                        lines: {
+                            show: true,
+                            lineWidth: 2,
+                            fill: true,
+                            fillColor: {
+                                colors: [{
+                                    opacity: 0.1
+                                }, {
+                                    opacity: 0.35
+                                }]
+                            }
+                        }
+                    },
+                    xaxis: {
+                        tickDecimals: 0,
+                        ticks: [], 
+                        mode: "time",
+                    },
+                    colors: ["#1ab394"],
+                    grid: {
+                        color: "#999999",
+                        hoverable: true,
+                        clickable: true,
+                        tickColor: "#D4D4D4",
+                        borderWidth:0
+                    },
+                    legend: {
+                        show: true
+                    },
+                    tooltip: true,
+                    tooltipOpts: {
+                        content: "x: %x, y: %y"
+                    }
+                };
+                for (var li = 0; li < serverData.Labels.length; li++) {
+                    options.xaxis.ticks.push([li, serverData.Labels[li]]);
+                }
+                return options;
+            }
+        }
     </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1963,9 +2090,16 @@ HEAD, JS/CSS LINKS
     <script src="skin/assets/js/plugins/dataTables/dataTables.tableTools.min.js"></script-->
 
     <script src="app/skin/assets/app/angular-1.3.16/angular.min.js"></script>
-    <script src="app/skin/assets/js/plugins/chartJs/Chart.min.js"></script>
+    <!--script src="app/skin/assets/js/plugins/chartJs/Chart.min.js"></script-->
     <script src="app/skin/assets/js/plugins/ui-bootstrap-tpls-0.14.3.min.js"></script>
     <!--script src="app/skin/assets/js/plugins/jquery-ui/jquery-ui.min.js"></script-->
+
+    <!-- Flot -->
+    <script src="app/skin/assets/js/plugins/flot/jquery.flot.js"></script>
+    <script src="app/skin/assets/js/plugins/flot/jquery.flot.tooltip.min.js"></script>
+    <script src="app/skin/assets/js/plugins/flot/jquery.flot.resize.js"></script>
+    <script src="app/skin/assets/js/plugins/flot/jquery.flot.pie.js"></script>
+    <script src="app/skin/assets/js/plugins/flot/jquery.flot.time.js"></script>
 
     <!-- Multiselect -->
     <script src="app/skin/assets/js/plugins/isteven-multi-select/isteven-multi-select.js"></script>

@@ -359,6 +359,7 @@
     <Compile Include="UI\Toolbox\ChartReport.cs" />
     <Compile Include="UI\Toolbox\EntityMethodForm.cs" />
     <Compile Include="UI\Toolbox\ChartTableReport.cs" />
+    <Compile Include="UI\Toolbox\ChartTableReportScreenPart.cs" />
     <Compile Include="UI\Toolbox\TaskPad.cs" />
     <Compile Include="UI\Toolbox\UserProfilePhoto.cs" />
     <Compile Include="UI\Toolbox\ReportScreenPart.cs" />

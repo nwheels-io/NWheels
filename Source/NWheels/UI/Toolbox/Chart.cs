@@ -96,6 +96,11 @@ namespace NWheels.UI.Toolbox
         {
             [DataMember]
             public string Label { get; set; }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            [DataMember]
+            public abstract XAxisMode Mode { get; }
         }
         
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -105,30 +110,53 @@ namespace NWheels.UI.Toolbox
         {
             [DataMember]
             public ChartSeriesType Type { get; set; }
-
             [DataMember]
             public List<decimal> Values { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            [DataMember]
+            public override XAxisMode Mode
+            {
+                get { return XAxisMode.Category; }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-        public class TimestampSeriesData : AbstractSeriesData
+        public class TimeSeriesData : AbstractSeriesData
         {
             [DataMember]
-            public List<TimestampPoint> Points { get; set; }
+            public List<TimeSeriesPoint> Points { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            [DataMember]
+            public override XAxisMode Mode
+            {
+                get { return XAxisMode.Time; }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-        public class TimestampPoint : AbstractSeriesData
+        public class TimeSeriesPoint
         {
             [DataMember]
             public DateTime UtcTimestamp { get; set; }
             [DataMember]
             public decimal Value { get; set; }
         }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum XAxisMode
+    {
+        Category,
+        Time
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
