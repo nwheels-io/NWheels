@@ -1791,7 +1791,7 @@ namespace NWheels.UI
 
             public override EntityCursor QueryCursor(QueryOptions options, IQueryable query = null)
             {
-                using ( var context = Framework.NewUnitOfWork<TContext>() )
+                using (var context = Framework.NewUnitOfWork<TContext>())
                 {
                     var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
                     IQueryable<TEntity> dbQuery = (IQueryable<TEntity>)query ?? repository.AsQueryable();
@@ -1807,6 +1807,8 @@ namespace NWheels.UI
                     }
 
                     var queryContext = QueryContext.Current;
+                    queryContext.Results.ResultSet = queryResults.Cast<IDomainObject>().ToArray();
+
                     var metaCursor = new EntityCursorMetadata(queryContext);
                     return new EntityCursor(metaCursor, queryContext, this, queryResults.Cast<IDomainObject>());
                 }
