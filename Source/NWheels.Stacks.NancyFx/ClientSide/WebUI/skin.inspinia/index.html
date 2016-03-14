@@ -1670,7 +1670,7 @@ HEAD, JS/CSS LINKS
     </script>
     <script type="text/javascript">
         function initWidget_Chart($scope) {
-            var demoServerData = {
+            /*var demoServerData = {
                 "Labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
                 "Series": [{
                     "Mode": 'Time',
@@ -1683,7 +1683,7 @@ HEAD, JS/CSS LINKS
                     "Label": "Clicks"
                 }],
                 "Summaries": []
-            };
+            };*/
             $scope.$timeout(function() {
                 if ($scope.model.State.data) {
                     buildChart('#' + $scope.uidl.elementName, $scope.model.State.data);
@@ -1699,6 +1699,13 @@ HEAD, JS/CSS LINKS
                 }
             });
 
+            function buildChart(elementId, serverData) {
+                if(serverData.Series[0].Mode==='Time') {
+                    buildTimeChart(elementId, serverData);
+                } else {
+                    buildCategoryChart(elementId, serverData);
+                }
+            }
             
             function buildCategoryChart(elementId, serverData) {
                 var options = buildCategoryOptions(serverData);
@@ -1777,7 +1784,8 @@ HEAD, JS/CSS LINKS
                         data: []
                     };
                     for (var xi = 0; xi < serverData.Series[si].Points.length; xi++) {
-                        series.data.push([xi, serverData.Series[si].Points[xi]]);
+                        var point = serverData.Series[si].Points[xi];
+                        series.data.push([point.UnixUtcTimestamp, point.Value]);
                     }
                     chartSeries.push(series);
                 }
@@ -1802,7 +1810,6 @@ HEAD, JS/CSS LINKS
                     },
                     xaxis: {
                         tickDecimals: 0,
-                        ticks: [], 
                         mode: "time",
                     },
                     colors: ["#1ab394"],
@@ -1821,9 +1828,6 @@ HEAD, JS/CSS LINKS
                         content: "x: %x, y: %y"
                     }
                 };
-                for (var li = 0; li < serverData.Labels.length; li++) {
-                    options.xaxis.ticks.push([li, serverData.Labels[li]]);
-                }
                 return options;
             }
         }

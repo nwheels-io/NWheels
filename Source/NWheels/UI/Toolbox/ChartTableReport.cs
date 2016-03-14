@@ -77,8 +77,11 @@ namespace NWheels.UI.Toolbox
                 .Then(b => b.Broadcast(ResultTable.RequestPrepared).WithPayload(vm => vm.Input).TunnelDown()
                 .Then(bb => bb.InvokeTransactionScript<TChartScript>().WaitForReply((script, vm) => script.Execute(vm.State.Criteria))
                 .Then(
-                    onSuccess: bbb => bbb.Broadcast(ChartReady).WithPayload(vm => vm.Input).TunnelDown(),
-                    onFailure: bbb => bbb.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input))));
+                    onSuccess: bbb => bbb.Broadcast(ChartReady).WithPayload(vm => vm.Input).TunnelDown()
+                        .Then(bbbb => bbbb.Broadcast(CriteriaForm.StateResetter).TunnelDown()),
+                    onFailure: bbb => bbb.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input)
+                        .Then(bbbb => bbbb.Broadcast(CriteriaForm.StateResetter).TunnelDown())
+                )));
 
             presenter.On(DownloadExcel)
                 .InvokeTransactionScript<TResultScript>(queryAsEntityType: typeof(TResultRow))

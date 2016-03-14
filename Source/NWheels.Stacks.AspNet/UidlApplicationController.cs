@@ -451,7 +451,7 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            using ( _context.EntityService.NewUnitOfWork(entityName) )
+            using (_context.EntityService.NewUnitOfWork(entityName, TryGetViewModelFrom(command)))
             {
                 try
                 {
@@ -505,7 +505,7 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            using ( _context.EntityService.NewUnitOfWork(entityName) )
+            using (_context.EntityService.NewUnitOfWork(entityName, TryGetViewModelFrom(queryCommand)))
             {
                 DocumentFormatRequestMessage exportCommand = null;
                 
@@ -917,6 +917,25 @@ namespace NWheels.Stacks.AspNet
                 domainContextType, 
                 call, 
                 synchronous);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private object TryGetViewModelFrom(AbstractCommandMessage command)
+        {
+            var haveMethodCall = command as IHaveMethodCall;
+
+            if (haveMethodCall != null)
+            {
+                var call = haveMethodCall.Call;
+
+                if (call.MethodInfo.GetParameters().Length == 1)
+                {
+                    return call.GetParameterValue(index: 0);
+                }
+            }
+
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

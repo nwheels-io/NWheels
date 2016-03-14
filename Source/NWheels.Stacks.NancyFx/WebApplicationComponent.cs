@@ -12,6 +12,7 @@ using NWheels.Authorization;
 using NWheels.DataObjects;
 using NWheels.Endpoints;
 using NWheels.Entities.Core;
+using NWheels.Extensions;
 using NWheels.Globalization;
 using NWheels.Hosting;
 using NWheels.UI;
@@ -73,7 +74,8 @@ namespace NWheels.Stacks.NancyFx
                 components.Resolve<IQueryResultAggregatorObjectFactory>(),
                 components.Resolve<IEnumerable<IJsonSerializationExtension>>(),
                 components.Resolve<IDomainContextLogger>(), 
-                _application.RequiredDomainContexts);
+                _application.RequiredDomainContexts,
+                components.ResolvePipeline<ApplicationEntityService.IEntityHandlerExtension>());
             
             _apiServicesByContractName = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
             _apiDispatchersByContractName = new Dictionary<string, WebApiDispatcherBase>(StringComparer.InvariantCultureIgnoreCase);

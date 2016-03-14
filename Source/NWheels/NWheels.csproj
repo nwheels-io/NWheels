@@ -143,6 +143,7 @@
     <Compile Include="Logging\LogCallsAttribute.cs" />
     <Compile Include="Logging\LogOptions.cs" />
     <Compile Include="Logging\ThreadLogPersistenceLevel.cs" />
+    <Compile Include="Processing\Commands\IHaveMethodCall.cs" />
     <Compile Include="Processing\Commands\Impl\CommandActorBase.cs" />
     <Compile Include="Processing\Documents\Impl\CsvOutputDocumentFormatter.cs" />
     <Compile Include="Processing\Documents\Core\DocumentFormatActor.cs" />

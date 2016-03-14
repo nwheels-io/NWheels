@@ -43,6 +43,7 @@ namespace NWheels.UI
         private readonly IJsonSerializationExtension[] _jsonExtensions;
         private readonly ConcurrentDictionary<string, JsonSerializerSettings> _serializerSettingsCache;
         private readonly JsonSerializerSettings _defaultSerializerSettings;
+        private readonly IEntityHandlerExtension[] _entityHandlerExtensions;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -53,7 +54,8 @@ namespace NWheels.UI
             IQueryResultAggregatorObjectFactory aggregatorFactory,
             IEnumerable<IJsonSerializationExtension> jsonExtensions,
             IDomainContextLogger domainContextLogger,
-            IEnumerable<Type> domainContextTypes)
+            IEnumerable<Type> domainContextTypes,
+            Pipeline<IEntityHandlerExtension> entityHandlerExtensions)
         {
             _framework = framework;
             _metadataCache = metadataCache;
@@ -62,6 +64,7 @@ namespace NWheels.UI
             _domainContextLogger = domainContextLogger;
             _handlerByEntityName = new Dictionary<string, EntityHandler>(StringComparer.InvariantCultureIgnoreCase);
             _jsonExtensions = jsonExtensions.ToArray();
+            _entityHandlerExtensions = entityHandlerExtensions.ToArray();
 
             RegisterDomainObjects(domainContextTypes);
 
@@ -87,10 +90,10 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IUnitOfWork NewUnitOfWork(string entityName)
+        public IUnitOfWork NewUnitOfWork(string entityName, object txViewModel = null)
         {
             var handler = _handlerByEntityName[entityName];
-            return handler.NewUnitOfWork();
+            return handler.NewUnitOfWork(txViewModel);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -383,7 +386,8 @@ namespace NWheels.UI
                 }
             }
 
-            var handler = EntityHandler.Create(this, metaType, contextType);
+            var handlerExtensions = SelectEntityHandlerExtensionsFor(metaType);
+            var handler = EntityHandler.Create(this, metaType, contextType, handlerExtensions);
             _handlerByEntityName[metaType.QualifiedName] = handler;
 
             foreach ( var property in metaType.Properties.Where(p => p.Kind.IsIn(PropertyKind.Part, PropertyKind.Relation)) )
@@ -395,6 +399,15 @@ namespace NWheels.UI
             {
                 RegisterDomainObjectType(contextType, derivedType, explicitlyDeclaredInContext: false);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IEntityHandlerExtension[] SelectEntityHandlerExtensionsFor(ITypeMetadata metaType)
+        {
+            return _entityHandlerExtensions
+                .Where(x => x.EntityContract.IsAssignableFrom(metaType.ContractType))
+                .ToArray();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -437,6 +450,15 @@ namespace NWheels.UI
             }
 
             return metaPropertyPath;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IEntityHandlerExtension
+        {
+            bool CanOpenNewUnitOfWork(object txViewModel);
+            IUnitOfWork OpenNewUnitOfWork(object txViewModel);
+            Type EntityContract { get; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1562,8 +1584,13 @@ namespace NWheels.UI
 
         internal abstract class EntityHandler
         {
-            protected EntityHandler(ApplicationEntityService owner, ITypeMetadata metaType, Type domainContextType)
+            private readonly IEntityHandlerExtension[] _extensions;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected EntityHandler(ApplicationEntityService owner, ITypeMetadata metaType, Type domainContextType, IEntityHandlerExtension[] extensions)
             {
+                _extensions = extensions;
                 this.Owner = owner;
                 this.MetaType = metaType;
                 this.DomainContextType = domainContextType;
@@ -1571,7 +1598,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public abstract IUnitOfWork NewUnitOfWork();
+            public abstract IUnitOfWork NewUnitOfWork(object txViewModel = null);
             public abstract QueryResults Query(QueryOptions options, IQueryable query = null);
             public abstract EntityCursor QueryCursor(QueryOptions options, IQueryable query = null);
             public abstract IEntityId ParseEntityId(string id);
@@ -1637,10 +1664,21 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public static EntityHandler Create(ApplicationEntityService owner, ITypeMetadata metaType, Type domainContextType)
+            public IReadOnlyList<IEntityHandlerExtension> Extensions
+            {
+                get { return _extensions; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static EntityHandler Create(
+                ApplicationEntityService owner, 
+                ITypeMetadata metaType, 
+                Type domainContextType, 
+                IEntityHandlerExtension[] extensions)
             {
                 var concreteClosedType = typeof(EntityHandler<,>).MakeGenericType(domainContextType, metaType.ContractType);
-                return (EntityHandler)Activator.CreateInstance(concreteClosedType, owner, metaType, domainContextType);
+                return (EntityHandler)Activator.CreateInstance(concreteClosedType, owner, metaType, domainContextType, extensions);
             }
         }
 
@@ -1650,14 +1688,18 @@ namespace NWheels.UI
             where TContext : class, IApplicationDataRepository
             where TEntity : class
         {
-            public EntityHandler(ApplicationEntityService owner, ITypeMetadata metaType, Type domainContextType)
-                : base(owner, metaType, domainContextType)
+            public EntityHandler(
+                ApplicationEntityService owner, 
+                ITypeMetadata metaType, 
+                Type domainContextType,
+                IEntityHandlerExtension[] extensions)
+                : base(owner, metaType, domainContextType, extensions)
             {
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override IUnitOfWork NewUnitOfWork()
+            public override IUnitOfWork NewUnitOfWork(object txViewModel = null)
             {
                 //TODO: remove this once we are sure the bug is solved
                 PerContextResourceConsumerScope<TContext> stale;
@@ -1666,6 +1708,13 @@ namespace NWheels.UI
                     DomainContextLogger.StaleUnitOfWorkEncountered(
                         stale.Resource.ToString(),
                         ((DataRepositoryBase)(object)stale.Resource).InitializerThreadText);
+                }
+
+                var extensionToUse = Extensions.FirstOrDefault(x => x.CanOpenNewUnitOfWork(txViewModel));
+
+                if (extensionToUse != null)
+                {
+                    return extensionToUse.OpenNewUnitOfWork(txViewModel);
                 }
 
                 return Framework.NewUnitOfWork<TContext>();

@@ -12,7 +12,7 @@ using NWheels.Processing.Messages;
 
 namespace NWheels.Processing.Commands
 {
-    public class ServiceMethodCommandMessage : AbstractCommandMessage
+    public class ServiceMethodCommandMessage : AbstractCommandMessage, IHaveMethodCall
     {
         private readonly IMethodCallObject _call;
 

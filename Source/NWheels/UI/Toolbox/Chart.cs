@@ -148,6 +148,19 @@ namespace NWheels.UI.Toolbox
             public DateTime UtcTimestamp { get; set; }
             [DataMember]
             public decimal Value { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            [DataMember]
+            public long UnixUtcTimestamp 
+            {
+                get
+                {
+                    TimeSpan baseDate = new System.TimeSpan(new DateTime(1970, 1, 1).Ticks);
+                    DateTime timestamp = UtcTimestamp.Subtract(baseDate);
+                    return (long)(timestamp.Ticks / 10000);                            
+                } 
+            }
         }
     }
 

@@ -46,6 +46,8 @@ namespace NWheels.Stacks.NancyFx
             builder.RegisterAdapter<HttpApiEndpointRegistration, ILifecycleEventListener>((ctx, endpoint) =>
                 ctx.Resolve<HttpApiEndpointComponent>(TypedParameter.From(endpoint))
             );
+
+            builder.RegisterPipeline<ApplicationEntityService.IEntityHandlerExtension>().InstancePerDependency();
         }
     }
 }

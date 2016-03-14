@@ -45,6 +45,8 @@ namespace NWheels.Stacks.AspNet
 
                     return component;
                 });
+
+            builder.RegisterPipeline<ApplicationEntityService.IEntityHandlerExtension>().InstancePerDependency();
         }
     }
 }

@@ -721,6 +721,14 @@ namespace NWheels.Extensions
                 _builder.RegisterType<TApp>().As<TApp, UidlApplication>();
                 return new UIAppEndpointRegistrations<TApp>(_builder);
             }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IRegistrationBuilder<TExtension, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterEntityHandlerExtension<TExtension>() 
+                where TExtension : ApplicationEntityService.IEntityHandlerExtension
+            {
+                return _builder.RegisterType<TExtension>().As<ApplicationEntityService.IEntityHandlerExtension>();
+            }
         }
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------

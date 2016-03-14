@@ -12,7 +12,7 @@ using NWheels.Processing.Messages;
 
 namespace NWheels.Processing.Commands
 {
-    public class EntityMethodCommandMessage : AbstractCommandMessage
+    public class EntityMethodCommandMessage : AbstractCommandMessage, IHaveMethodCall
     {
         private readonly IEntityId _entityId;
         private readonly Type _domainContextContract;
