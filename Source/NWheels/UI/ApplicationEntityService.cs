@@ -140,16 +140,16 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string QueryEntityJson(string entityName, IQueryable query, QueryOptions options)
+        public string QueryEntityJson(string entityName, IQueryable query, QueryOptions options, object txViewModel = null)
         {
             var handler = _handlerByEntityName[entityName];
             string json;
 
             using ( QueryContext.NewQuery(this, options) )
             {
-                using ( handler.NewUnitOfWork() )
+                using (handler.NewUnitOfWork(txViewModel))
                 {
-                    var results = handler.Query(options, query);
+                    var results = handler.Query(options, query, txViewModel);
                     json = JsonConvert.SerializeObject(results, GetCachedSerializerSettings(options));
                 }
             }
@@ -1599,7 +1599,7 @@ namespace NWheels.UI
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public abstract IUnitOfWork NewUnitOfWork(object txViewModel = null);
-            public abstract QueryResults Query(QueryOptions options, IQueryable query = null);
+            public abstract QueryResults Query(QueryOptions options, IQueryable query = null, object txViewModel = null);
             public abstract EntityCursor QueryCursor(QueryOptions options, IQueryable query = null);
             public abstract IEntityId ParseEntityId(string id);
             public abstract IDomainObject GetById(string id);
@@ -1723,15 +1723,24 @@ namespace NWheels.UI
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             //TODO: refactor to reuse QueryCursor(...)
-            public override QueryResults Query(QueryOptions options, IQueryable query = null)
+            public override QueryResults Query(QueryOptions options, IQueryable query = null, object txViewModel = null)
             {
                 var results = QueryContext.Current.Results;
 
-                using ( var context = Framework.NewUnitOfWork<TContext>() )
+                using (var contextOrNull = NewUnitOfWork(txViewModel) as TContext)
                 {
-                    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
-                    IQueryable<TEntity> dbQuery = (IQueryable<TEntity>)query ?? repository.AsQueryable();
-                    
+                    IQueryable<TEntity> dbQuery;
+
+                    if (contextOrNull != null)
+                    {
+                        var repository = contextOrNull.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
+                        dbQuery = (IQueryable<TEntity>)query ?? repository.AsQueryable();
+                    }
+                    else
+                    {
+                        dbQuery = (IQueryable<TEntity>)query;
+                    }
+
                     dbQuery = HandleFilter(options, dbQuery);
 
                     if ( options.NeedCountOperation )

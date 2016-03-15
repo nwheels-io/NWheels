@@ -451,14 +451,16 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            using (_context.EntityService.NewUnitOfWork(entityName, TryGetViewModelFrom(command)))
+            var txViewModel = TryGetViewModelFrom(command);
+
+            using (_context.EntityService.NewUnitOfWork(entityName, txViewModel))
             {
                 try
                 {
                     _serviceBus.DispatchMessageOnCurrentThread(command);
 
                     var query = (IQueryable)command.Result.Result;
-                    var json = _context.EntityService.QueryEntityJson(entityName, query, options);
+                    var json = _context.EntityService.QueryEntityJson(entityName, query, options, txViewModel);
 
                     return ResponseMessage(new HttpResponseMessage() {
                         Content = new StringContent(json, Encoding.UTF8, "application/json")
