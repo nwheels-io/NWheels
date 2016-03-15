@@ -358,6 +358,7 @@
     <Compile Include="UI\IFrameworkUIConfig.cs" />
     <Compile Include="UI\ContentRootAttribute.cs" />
     <Compile Include="UI\Toolbox\ChartReport.cs" />
+    <Compile Include="UI\Toolbox\ChartReportScreenPart.cs" />
     <Compile Include="UI\Toolbox\EntityMethodForm.cs" />
     <Compile Include="UI\Toolbox\ChartTableReport.cs" />
     <Compile Include="UI\Toolbox\ChartTableReportScreenPart.cs" />

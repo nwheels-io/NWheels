@@ -1,24 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.Serialization;
 using NWheels.Extensions;
-using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 using NWheels.Processing;
 
 namespace NWheels.UI.Toolbox
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-    public class ChartReport<TCriteria, TScript> : WidgetBase<ChartReport<TCriteria, TScript>, Empty.Data, ChartReport<TCriteria, TScript>.IReportState>
-        where TScript : ITransactionScript
+    public class ChartReport<TContext, TCriteria, TChartScript, TResultScript, TResultRow> :
+        WidgetBase<ChartReport<TContext, TCriteria, TChartScript, TResultScript, TResultRow>, Empty.Data, ChartReport<TContext, TCriteria, TChartScript, TResultScript, TResultRow>.IReportState>
+        where TChartScript : ITransactionScript<TContext, TCriteria, ChartData>
+        where TResultScript : ITransactionScript<TContext, TCriteria, IQueryable<TResultRow>>
+        where TContext : class
         where TCriteria : class
     {
-        private Expression<Func<TScript, ViewModel<Empty.Data, IReportState, Empty.Payload>, ChartData>> _onExecuteCall;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public ChartReport(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
@@ -28,34 +25,53 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void OnExecute(Expression<Func<TScript, ViewModel<Empty.Data, IReportState, Empty.Payload>, ChartData>> call)
-        {
-            _onExecuteCall = call;
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         [DataMember]
         public Form<TCriteria> CriteriaForm { get; set; }
         [DataMember]
-        public Chart ResultChart { get; set; }
+        public Chart SummaryChart { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlCommand ShowReport { get; set; }
-        public UidlNotification<ChartData> DataReceived { get; set; }
+        public UidlNotification<TContext> ContextSetter { get; set; }
+        public UidlNotification<ChartData> ChartReady { get; set; }
+        public UidlNotification ResultsReady { get; set; }
+        public UidlNotification<IPromiseFailureInfo> ResultsFailed { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<ChartReport<TCriteria, TScript>, Empty.Data, IReportState> presenter)
+        protected override void DescribePresenter(PresenterBuilder<ChartReport<TContext, TCriteria, TChartScript, TResultScript, TResultRow>, Empty.Data, IReportState> presenter)
         {
+            CriteriaForm.UsePascalCase = true;
             CriteriaForm.Commands.Add(ShowReport);
-            ResultChart.BindToModelSetter(DataReceived, x => x);
+            ShowReport.Kind = CommandKind.Submit;
+            SummaryChart.BindToModelSetter(this.ChartReady);
+
+            var attribute = typeof(TResultScript).GetCustomAttribute<TransactionScriptAttribute>();
+
+            if (attribute != null && attribute.SupportsInitializeInput)
+            {
+                presenter.On(ContextSetter)
+                    .InvokeTransactionScript<TResultScript>()
+                    .WaitForReply((script, vm) => script.InitializeInput(vm.Input))
+                    .Then(b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Criteria))
+                    .Then(bb => bb.Broadcast(CriteriaForm.ModelSetter).WithPayload(m => m.Input).TunnelDown()));
+            }
 
             presenter.On(ShowReport)
-                .InvokeTransactionScript<TScript>()
-                .WaitForReply(_onExecuteCall)
-                .Then(b => b.Broadcast(DataReceived).WithPayload(m => m.Input).TunnelDown());
+                .InvokeTransactionScript<TResultScript>(queryAsEntityType: typeof(TResultRow))
+                .PrepareWaitForReply((script, vm) => script.Execute(vm.State.Criteria))
+                .Then(bb => bb.InvokeTransactionScript<TChartScript>().WaitForReply((script, vm) => script.Execute(vm.State.Criteria))
+                .Then(
+                    onSuccess: bbb => bbb.Broadcast(ChartReady).WithPayload(vm => vm.Input).TunnelDown()
+                        .Then(bbbb => bbbb.Broadcast(CriteriaForm.StateResetter).TunnelDown()),
+                    onFailure: bbb => bbb.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input)
+                        .Then(bbbb => bbbb.Broadcast(CriteriaForm.StateResetter).TunnelDown())
+                ));
+
+            presenter.On(ResultsReady)
+                .Broadcast(CriteriaForm.StateResetter).TunnelDown()
+                .Then(b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady()));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -64,7 +80,7 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
-            return base.GetNestedWidgets().Concat(new WidgetUidlNode[] { CriteriaForm, ResultChart });
+            return base.GetNestedWidgets().Concat(new WidgetUidlNode[] { CriteriaForm, SummaryChart });
         }
 
         #endregion
