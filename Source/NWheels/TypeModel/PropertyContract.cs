@@ -339,7 +339,7 @@ namespace NWheels.DataObjects
                     : base(typeof(string), WellKnownSemanticType.LoginName, sem => {
                         sem.DefaultValidation.IsUnique = true;
                         sem.DefaultValidation.MinLength = 5;
-                        sem.DefaultValidation.MaxLength = 20;
+                        sem.DefaultValidation.MaxLength = 100;
                     })
                 {
                 }
