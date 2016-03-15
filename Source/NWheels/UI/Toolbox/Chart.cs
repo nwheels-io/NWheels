@@ -96,9 +96,8 @@ namespace NWheels.UI.Toolbox
         {
             [DataMember]
             public string Label { get; set; }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
+            [DataMember]
+            public ChartSeriesType Type { get; set; }
             [DataMember]
             public abstract XAxisMode Mode { get; }
         }
@@ -108,8 +107,6 @@ namespace NWheels.UI.Toolbox
         [DataContract(Namespace = UidlDocument.DataContractNamespace)]
         public class CategoricalSeriesData : AbstractSeriesData
         {
-            [DataMember]
-            public ChartSeriesType Type { get; set; }
             [DataMember]
             public List<decimal> Values { get; set; }
 
@@ -178,7 +175,8 @@ namespace NWheels.UI.Toolbox
     {
         Point = 10,
         Line = 20,
-        Bar = 30,
-        StackedBar = 40
+        Area = 30,
+        Bar = 40,
+        StackedBar = 50
     }
 }

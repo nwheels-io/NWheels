@@ -1705,6 +1705,11 @@ HEAD, JS/CSS LINKS
                 } else {
                     buildCategoryChart(elementId, serverData);
                 }
+				//$scope.$timeout(function() {
+				//	$('#' + $scope.uidl.elementName + ' a.chart-series-toggle').click(function() {
+				//		alert("Toggling series index " + $(this).data('series-index'));
+				//	});
+				//});
             }
             
             function buildCategoryChart(elementId, serverData) {
@@ -1798,7 +1803,7 @@ HEAD, JS/CSS LINKS
                         lines: {
                             show: true,
                             lineWidth: 2,
-                            fill: true,
+                            fill: serverData.Series[0].Type==='Area',
                             fillColor: {
                                 colors: [{
                                     opacity: 0.1
@@ -1807,6 +1812,7 @@ HEAD, JS/CSS LINKS
                                 }]
                             }
                         }
+
                     },
                     xaxis: {
                         tickDecimals: 0,
@@ -1822,6 +1828,9 @@ HEAD, JS/CSS LINKS
                     },
                     legend: {
                         show: true
+                    //    labelFormatter: function(label, series){
+                    //        return '<a class="chart-series-toggle" href="#" data-series-index="'+series.idx+'">AAA:'+label+'</a>';
+                    //    }
                     },
                     tooltip: true,
                     tooltipOpts: {
