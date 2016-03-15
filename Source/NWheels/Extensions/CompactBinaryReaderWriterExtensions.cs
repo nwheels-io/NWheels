@@ -6,12 +6,12 @@ namespace NWheels.Extensions
 {
     public static class CompactBinaryReaderWriterExtensions
     {
-        public static string ReadString(this CompactBinaryReader br, object context)
+        public static string ReadString(CompactBinaryReader br, object context)
         {
             return br.ReadStringOrNull();
         }
 
-        public static void WriteString(this CompactBinaryWriter bw, string val, object context)
+        public static void WriteString(CompactBinaryWriter bw, string val, object context)
         {
             bw.WriteStringOrNull(val);
         }

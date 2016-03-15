@@ -2,10 +2,10 @@
 
 namespace NWheels.Serialization
 {
-    public interface IObjectTypeResolver
+    public interface ICompactSerializerExtension
     {
         Type GetSerializationType(Type declaredType, object obj);
-        Type GetDeserializationType(Type declaredType, Type serializedType);
+        Type GetMaterializationType(Type declaredType, Type serializedType);
         bool CanMaterialize(Type declaredType, Type serializedType);
         object Materialize(Type declaredType, Type serializedType);
     }

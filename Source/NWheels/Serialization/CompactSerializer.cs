@@ -11,14 +11,7 @@ namespace NWheels.Serialization
         private readonly IComponentContext _components;
         private readonly ITypeMetadataCache _metadataCache;
         private readonly CompactSerializerFactory _readerWriterFactory;
-        private readonly Pipeline<IObjectTypeResolver> _typeResolvers;
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public CompactSerializer(IComponentContext components, ITypeMetadataCache metadataCache, CompactSerializerFactory readerWriterFactory)
-            : this(components, metadataCache, readerWriterFactory, new IObjectTypeResolver[] { new VoidTypeResolver() })
-        {
-        }
+        private readonly Pipeline<ICompactSerializerExtension> _extensions;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -26,12 +19,12 @@ namespace NWheels.Serialization
             IComponentContext components,
             ITypeMetadataCache metadataCache,
             CompactSerializerFactory readerWriterFactory,
-            Pipeline<IObjectTypeResolver> typeResolvers)
+            Pipeline<ICompactSerializerExtension> extensions = null)
         {
             _components = components;
             _metadataCache = metadataCache;
             _readerWriterFactory = readerWriterFactory;
-            _typeResolvers = typeResolvers;
+            _extensions = extensions;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -162,7 +155,7 @@ namespace NWheels.Serialization
             }
 
             object materializedInstance;
-            var materializer = TryFindMaterializingResolver(declaredType, serializedType);
+            var materializer = TryFindMaterializingExtension(declaredType, serializedType);
 
             if (materializer != null)
             {
@@ -170,7 +163,7 @@ namespace NWheels.Serialization
             }
             else
             {
-                var materializationType = GetDeserializationType(declaredType, serializedType);
+                var materializationType = GetMaterializationType(declaredType, serializedType);
                 var creator = _readerWriterFactory.GetDefaultCreator(materializationType);
                 materializedInstance = creator(context);
             }
@@ -236,45 +229,54 @@ namespace NWheels.Serialization
 
         private Type GetSerializationType(Type declaredType, object obj)
         {
-            for (int i = 0 ; i < _typeResolvers.Count ; i++)
+            if (_extensions != null)
             {
-                var serializationType = _typeResolvers[i].GetSerializationType(declaredType, obj);
-
-                if (serializationType != declaredType)
+                for (int i = 0 ; i < _extensions.Count ; i++)
                 {
-                    return serializationType;
+                    var serializationType = _extensions[i].GetSerializationType(declaredType, obj);
+
+                    if (serializationType != obj.GetType())
+                    {
+                        return serializationType;
+                    }
                 }
             }
 
-            return declaredType;
+            return obj.GetType();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private Type GetDeserializationType(Type declaredType, Type serializedType)
+        private Type GetMaterializationType(Type declaredType, Type serializedType)
         {
-            for (int i = 0; i < _typeResolvers.Count; i++)
+            if (_extensions != null)
             {
-                var deserializationType = _typeResolvers[i].GetDeserializationType(declaredType, serializedType);
-
-                if (deserializationType != declaredType)
+                for (int i = 0 ; i < _extensions.Count ; i++)
                 {
-                    return deserializationType;
+                    var materiaizationType = _extensions[i].GetMaterializationType(declaredType, serializedType);
+
+                    if (materiaizationType != serializedType)
+                    {
+                        return materiaizationType;
+                    }
                 }
             }
 
-            return declaredType;
+            return serializedType;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IObjectTypeResolver TryFindMaterializingResolver(Type declaredType, Type serializedType)
+        private ICompactSerializerExtension TryFindMaterializingExtension(Type declaredType, Type serializedType)
         {
-            for (int i = 0; i < _typeResolvers.Count; i++)
+            if (_extensions != null)
             {
-                if (_typeResolvers[i].CanMaterialize(declaredType, serializedType))
+                for (int i = 0 ; i < _extensions.Count ; i++)
                 {
-                    return _typeResolvers[i];
+                    if (_extensions[i].CanMaterialize(declaredType, serializedType))
+                    {
+                        return _extensions[i];
+                    }
                 }
             }
 
@@ -288,37 +290,6 @@ namespace NWheels.Serialization
             if (declaredType.IsValueType)
             {
                 throw new ArgumentException("Must be a reference type.", "declaredType");
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private class VoidTypeResolver : IObjectTypeResolver
-        {
-            public Type GetSerializationType(Type declaredType, object obj)
-            {
-                return declaredType;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public Type GetDeserializationType(Type declaredType, Type serializedType)
-            {
-                return declaredType;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public bool CanMaterialize(Type declaredType, Type serializedType)
-            {
-                return false;
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public object Materialize(Type declaredType, Type serializedType)
-            {
-                throw new NotSupportedException();
             }
         }
     }

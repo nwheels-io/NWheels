@@ -166,6 +166,9 @@
     <Compile Include="Processing\ICommandProcessedEvent.cs" />
     <Compile Include="Processing\IPushEvent.cs" />
     <Compile Include="Processing\IServerCommand.cs" />
+    <Compile Include="Serialization\CompactSerializerExtensionBase.cs" />
+    <Compile Include="Serialization\DynamicCompactSerializerDictionary.cs" />
+    <Compile Include="Serialization\StaticCompactSerializerDictionary.cs" />
     <Compile Include="TypeModel\Core\Conventions\MutationMetadataConvention.cs" />
     <Compile Include="TypeModel\Core\DomainContextMetadataBuilder.cs" />
     <Compile Include="TypeModel\Core\DomainContextMetadataCache.cs" />
@@ -232,7 +235,7 @@
     <Compile Include="Serialization\CompactSerializerException.cs" />
     <Compile Include="Serialization\CompactDeserializationContext.cs" />
     <Compile Include="Serialization\CompactSerializationContext.cs" />
-    <Compile Include="Serialization\IObjectTypeResolver.cs" />
+    <Compile Include="Serialization\ICompactSerializerExtension.cs" />
     <Compile Include="Serialization\CompactSerializer.cs" />
     <Compile Include="Serialization\IObjectSerializer.cs" />
     <Compile Include="Entities\Core\IDomainObject.cs" />

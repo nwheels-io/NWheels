@@ -311,7 +311,7 @@ namespace NWheels.Hosting.Core
 
             builder.RegisterType<CompactSerializer>().InstancePerDependency();
             builder.RegisterType<CompactSerializerFactory>().SingleInstance();
-            builder.RegisterPipeline<IObjectTypeResolver>().SingleInstance();
+            builder.RegisterPipeline<ICompactSerializerExtension>().SingleInstance();
 
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();
 

@@ -462,7 +462,7 @@ namespace NWheels.Testing
             
             builder.RegisterType<CompactSerializer>().InstancePerDependency();
             builder.RegisterType<CompactSerializerFactory>().SingleInstance();
-            builder.RegisterPipeline<IObjectTypeResolver>().SingleInstance();
+            builder.RegisterPipeline<ICompactSerializerExtension>().SingleInstance();
             
             builder.RegisterType<TestIntIdValueGenerator>().SingleInstance();
             builder.RegisterType<TestServiceBus>().As<IServiceBus>().SingleInstance();

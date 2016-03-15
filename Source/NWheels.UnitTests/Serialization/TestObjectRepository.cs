@@ -175,5 +175,174 @@ namespace NWheels.UnitTests.Serialization
             public long LongValue { get; set; }
             public DateTime DateTimeValue { get; set; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class WithCollectionsOfPolymorphicObjects
+        {
+            public BaseClass[] FirstArray { get; set; }
+            public List<BaseClass> SecondList { get; set; }
+            public Dictionary<string, BaseClass> ThirdDictionary { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IApiContract
+        {
+            void VoidOperation();
+            void VoidOperationWithParameters(int n, string s);
+            int NonVoidOperation();
+            TimeSpan NonVoidOperationWithParameters(int n, string s);
+            void VoidOperationWithPolymorphicParameters(int n, BaseClass b, string s);
+            BaseClass NonVoidOperationWithPolymorphicParameters(int n, string s);
+            event EventHandler EventWithNoArgs;
+            event EventHandler<BaseEventArgs> EventWithBaseArgs;
+            event Action CustomDelegateEventWithNoArgs;
+            event Action<BaseEventArgs> CustomDelegateEventWithBaseArgs;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class BaseEventArgs
+        {
+            public int IntValue { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class WithEntityObjects
+        {
+            public IEntityA TheA { get; set; }
+            public List<IEntityB> TheB { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IEntityA
+        {
+            int Id { get; set; }
+            string Name { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IEntityB
+        {
+            string Id { get; set; }
+            IEntityA TheA { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IEntityAOne : IEntityA
+        {
+            int IntValue { get; set; }
+            TimeSpan TimeValue { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface IEntityATwo : IEntityA
+        {
+            DateTime DateValue { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ServerEntityAOne : IEntityAOne
+        {
+            #region Implementation of IEntityA
+
+            public int Id { get; set; }
+            public string Name { get; set; }
+
+            #endregion
+
+            #region Implementation of IEntityAOne
+
+            public int IntValue { get; set; }
+            public TimeSpan TimeValue { get; set; }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ServerEntityATwo : IEntityATwo
+        {
+            #region Implementation of IEntityA
+
+            public int Id { get; set; }
+            public string Name { get; set; }
+
+            #endregion
+
+            #region Implementation of IEntityATwo
+
+            public DateTime DateValue { get; set; }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ServerEntityB : IEntityB
+        {
+            #region Implementation of IEntityB
+
+            public string Id { get; set; }
+            public IEntityA TheA { get; set; }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ClientEntityAOne : IEntityAOne
+        {
+            #region Implementation of IEntityA
+
+            public int Id { get; set; }
+            public string Name { get; set; }
+
+            #endregion
+
+            #region Implementation of IEntityAOne
+
+            public int IntValue { get; set; }
+            public TimeSpan TimeValue { get; set; }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ClientEntityATwo : IEntityATwo
+        {
+            #region Implementation of IEntityA
+
+            public int Id { get; set; }
+            public string Name { get; set; }
+
+            #endregion
+
+            #region Implementation of IEntityATwo
+
+            public DateTime DateValue { get; set; }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ClientEntityB : IEntityB
+        {
+            #region Implementation of IEntityB
+
+            public string Id { get; set; }
+            public IEntityA TheA { get; set; }
+
+            #endregion
+        }
     }
 }
