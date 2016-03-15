@@ -55,6 +55,7 @@ namespace NWheels.Stacks.MongoDb.Factories
                 new BsonIdAttributeConvention(metaType),
                 new BsonStringEnumConvention(),
                 new BsonUtcDateTimeConvention(),
+                //new DebugPropertyConvention(), 
                 //new LazyLoadDomainObjectConvention(metaType)
             };
         }
