@@ -1198,6 +1198,10 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 scope.$emit(command.qualifiedName + ':Executing');
             }
 
+            scope.invokeStaticCommand = function (command) {
+                scope.$emit(command.qualifiedName + ':Executing');
+            }
+
             scope.invokeCommand = function (command) {
                 scope.commandInProgress = true;
                 if (command.kind==='Submit') {

@@ -31,6 +31,8 @@ namespace NWheels.UI.Toolbox
         protected override void DescribePresenter(PresenterBuilder<CrudScreenPart<TEntity>, Empty.Data, IState> presenter)
         {
             ContentRoot = Crud;
+            Crud.StaticCommands.Add(Import);
+            Crud.StaticCommands.Add(Export);
 
             var metaType = base.MetadataCache.GetTypeMetadata(typeof(TEntity));
             this.Text = metaType.Name + "Management";
@@ -41,6 +43,11 @@ namespace NWheels.UI.Toolbox
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Crud<TEntity> Crud { get; set; }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UidlCommand Import { get; set; }
+        public UidlCommand Export { get; set; }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -34,6 +34,7 @@ namespace NWheels.UI.Toolbox
             this.EntityName = MetaType.QualifiedName;
             this.Mode = mode;
             this.EntityCommands = new List<UidlCommand>();
+            this.StaticCommands = new List<UidlCommand>();
 
             CreateForm();
         }
@@ -74,6 +75,13 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void AddStaticCommands(params UidlCommand[] staticCommands)
+        {
+            StaticCommands.AddRange(staticCommands);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void AddEntityCommands(params UidlCommand[] entityCommands)
         {
             EntityCommands.AddRange(entityCommands);
@@ -97,6 +105,8 @@ namespace NWheels.UI.Toolbox
         public Form<TEntity> Form { get; set; }
         [DataMember, ManuallyAssigned]
         public TypeSelector FormTypeSelector { get; set; }
+        [DataMember, ManuallyAssigned]
+        public List<UidlCommand> StaticCommands { get; set; }
         [DataMember, ManuallyAssigned]
         public List<UidlCommand> EntityCommands { get; set; }
 
@@ -161,7 +171,9 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<string> GetTranslatables()
         {
-            return base.GetTranslatables().Concat(EntityCommands.Select(cmd => cmd.Text));
+            return base.GetTranslatables()
+                .Concat(EntityCommands.Select(cmd => cmd.Text))
+                .Concat(StaticCommands.Select(cmd => cmd.Text));
         }
 
         #endregion
