@@ -9,10 +9,9 @@ using NWheels.Processing;
 namespace NWheels.UI.Toolbox
 {
     [DataContract(Namespace = UidlDocument.DataContractNamespace)]
-    public class ChartReport<TContext, TCriteria, TChartScript, TResultScript, TResultRow> :
-        WidgetBase<ChartReport<TContext, TCriteria, TChartScript, TResultScript, TResultRow>, Empty.Data, ChartReport<TContext, TCriteria, TChartScript, TResultScript, TResultRow>.IReportState>
+    public class ChartReport<TContext, TCriteria, TChartScript> :
+        WidgetBase<ChartReport<TContext, TCriteria, TChartScript>, Empty.Data, ChartReport<TContext, TCriteria, TChartScript>.IReportState>
         where TChartScript : ITransactionScript<TContext, TCriteria, ChartData>
-        where TResultScript : ITransactionScript<TContext, TCriteria, IQueryable<TResultRow>>
         where TContext : class
         where TCriteria : class
     {
@@ -40,38 +39,33 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<ChartReport<TContext, TCriteria, TChartScript, TResultScript, TResultRow>, Empty.Data, IReportState> presenter)
+        protected override void DescribePresenter(PresenterBuilder<ChartReport<TContext, TCriteria, TChartScript>, Empty.Data, IReportState> presenter)
         {
             CriteriaForm.UsePascalCase = true;
             CriteriaForm.Commands.Add(ShowReport);
             ShowReport.Kind = CommandKind.Submit;
             SummaryChart.BindToModelSetter(this.ChartReady);
 
-            var attribute = typeof(TResultScript).GetCustomAttribute<TransactionScriptAttribute>();
+            var attribute = typeof(TChartScript).GetCustomAttribute<TransactionScriptAttribute>();
 
             if (attribute != null && attribute.SupportsInitializeInput)
             {
                 presenter.On(ContextSetter)
-                    .InvokeTransactionScript<TResultScript>()
+                    .InvokeTransactionScript<TChartScript>()
                     .WaitForReply((script, vm) => script.InitializeInput(vm.Input))
                     .Then(b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Criteria))
                     .Then(bb => bb.Broadcast(CriteriaForm.ModelSetter).WithPayload(m => m.Input).TunnelDown()));
             }
 
             presenter.On(ShowReport)
-                .InvokeTransactionScript<TResultScript>(queryAsEntityType: typeof(TResultRow))
-                .PrepareWaitForReply((script, vm) => script.Execute(vm.State.Criteria))
-                .Then(bb => bb.InvokeTransactionScript<TChartScript>().WaitForReply((script, vm) => script.Execute(vm.State.Criteria))
+                .InvokeTransactionScript<TChartScript>().WaitForReply((script, vm) => script.Execute(vm.State.Criteria))
                 .Then(
-                    onSuccess: bbb => bbb.Broadcast(ChartReady).WithPayload(vm => vm.Input).TunnelDown()
-                        .Then(bbbb => bbbb.Broadcast(CriteriaForm.StateResetter).TunnelDown()),
-                    onFailure: bbb => bbb.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input)
-                        .Then(bbbb => bbbb.Broadcast(CriteriaForm.StateResetter).TunnelDown())
-                ));
-
-            presenter.On(ResultsReady)
-                .Broadcast(CriteriaForm.StateResetter).TunnelDown()
-                .Then(b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady()));
+                    onSuccess: b => b.Broadcast(ChartReady).WithPayload(vm => vm.Input).TunnelDown()
+                        .Then(bb => bb.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady())
+                        .Then(bbb => bbb.Broadcast(CriteriaForm.StateResetter).TunnelDown())),
+                    onFailure: b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input)
+                        .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown())
+                );
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

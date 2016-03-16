@@ -6,13 +6,11 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.UI.Toolbox
 {
-    public class ChartReportScreenPart<TInput, TCriteria, TChartScript, TRowScript, TRow> :
-        ScreenPartBase<ChartReportScreenPart<TInput, TCriteria, TChartScript, TRowScript, TRow>, TInput, Empty.Data, Empty.State>
+    public class ChartReportScreenPart<TInput, TCriteria, TChartScript> :
+        ScreenPartBase<ChartReportScreenPart<TInput, TCriteria, TChartScript>, TInput, Empty.Data, Empty.State>
         where TChartScript : ITransactionScript<TInput, TCriteria, ChartData>
-        where TRowScript : ITransactionScript<TInput, TCriteria, IQueryable<TRow>>
         where TInput : class
         where TCriteria : class
-        where TRow : class
     {
         public ChartReportScreenPart(string idName, UidlApplication parent)
             : base(idName, parent)
@@ -21,7 +19,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override void DescribePresenter(PresenterBuilder<ChartReportScreenPart<TInput, TCriteria, TChartScript, TRowScript, TRow>, Empty.Data, Empty.State> presenter)
+        protected override void DescribePresenter(PresenterBuilder<ChartReportScreenPart<TInput, TCriteria, TChartScript>, Empty.Data, Empty.State> presenter)
         {
             ContentRoot = Report;
 
@@ -31,6 +29,6 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ChartReport<TInput, TCriteria, TChartScript, TRowScript, TRow> Report { get; set; }
+        public ChartReport<TInput, TCriteria, TChartScript> Report { get; set; }
     }
 }
