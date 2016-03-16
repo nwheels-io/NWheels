@@ -559,7 +559,7 @@ namespace NWheels.UI
 
             private Func<IEnumerable<object>> GetJoinLeftSideFactory(IPropertyMetadata navigationProperty)
             {
-                if ( navigationProperty.DeclaringContract == _entityMetaType )
+                if ( navigationProperty.DeclaringContract.ContractType.IsAssignableFrom(_entityMetaType.ContractType) )
                 {
                     return () => Results.ResultSet;
                 }
