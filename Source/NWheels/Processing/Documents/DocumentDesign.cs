@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Extensions;
+using NWheels.UI.Toolbox;
 
 namespace NWheels.Processing.Documents
 {
@@ -99,6 +101,7 @@ namespace NWheels.Processing.Documents
         {
             public Binding(string expression, string format, string fallback = null)
             {
+                SpecialName = FieldSpecialName.None;
                 Expression = expression;
                 Format = format;
                 Fallback = fallback;
@@ -106,6 +109,17 @@ namespace NWheels.Processing.Documents
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public Binding(FieldSpecialName specialName, string format, string fallback = null)
+            {
+                SpecialName = specialName;
+                Expression = null;
+                Format = format;
+                Fallback = fallback;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public FieldSpecialName SpecialName { get; private set; }
             public string Expression { get; private set; }
             public string Format { get; private set; }
             public string Fallback { get; private set; }
@@ -146,6 +160,20 @@ namespace NWheels.Processing.Documents
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public EntityTableBuilder<TEntity2> NavigateToCollection<TEntity2>(Expression<Func<TEntity, ICollection<TEntity2>>> navigation)
+            {
+                var nextNavigations = navigation.ToNormalizedNavigationStringArray();
+                var nextNavigationPrefix = string.Join(".", nextNavigations) + ".";
+                var newBuilder = new EntityTableBuilder<TEntity2>(_metadataCache);
+
+                newBuilder._element = _element;
+                newBuilder._navigationPrefix = _navigationPrefix + nextNavigationPrefix;
+
+                return newBuilder;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public EntityTableBuilder<TEntity> Column<T>(
                 Expression<Func<TEntity, T>> property, 
                 string title = null, 
@@ -153,9 +181,70 @@ namespace NWheels.Processing.Documents
                 string format = null, 
                 string fallback = null)
             {
-                var propertyInfo = property.GetPropertyInfo();
+                return InternalColumn(property, title, width, format, fallback);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public EntityTableBuilder<TEntity> InheritorColumn<TInheritorEntity>(
+                Expression<Func<TInheritorEntity, object>> property,
+                string title = null,
+                int? width = null,
+                string format = null,
+                string fallback = null)
+                where TInheritorEntity : TEntity
+            {
+                return InternalColumn(property, title, width, format, fallback);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public EntityTableBuilder<TEntity> TypeColumn(
+                string title = null,
+                int? width = null,
+                string format = null,
+                string fallback = null)
+            {
+                var column = new TableElement.Column(
+                    title.OrDefaultIfNullOrWhitespace("Type"),
+                    width,
+                    new Binding(FieldSpecialName.Type, format, fallback));
+
+                _element.Columns.Add(column);
+
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public EntityTableBuilder<TEntity> IdColumn(
+                string title = null,
+                int? width = null,
+                string format = null,
+                string fallback = null)
+            {
+                var column = new TableElement.Column(
+                    title.OrDefaultIfNullOrWhitespace("Id"),
+                    width,
+                    new Binding(FieldSpecialName.Id, format, fallback));
+
+                _element.Columns.Add(column);
+
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private EntityTableBuilder<TEntity> InternalColumn(
+                LambdaExpression propertyExpression,
+                string title = null,
+                int? width = null,
+                string format = null,
+                string fallback = null)
+            {
+                var propertyInfo = propertyExpression.GetPropertyInfo();
                 var metaProperty = _metaType.GetPropertyByDeclaration(propertyInfo);
-                var bindingExpression = _navigationPrefix + string.Join(".", property.ToNormalizedNavigationStringArray());
+                var bindingExpression = _navigationPrefix + string.Join(".", propertyExpression.ToNormalizedNavigationStringArray());
 
                 var column = new TableElement.Column(
                     title.OrDefaultIfNullOrWhitespace(metaProperty.Name),
@@ -163,7 +252,7 @@ namespace NWheels.Processing.Documents
                     new Binding(bindingExpression, format, fallback));
 
                 _element.Columns.Add(column);
-                
+
                 return this;
             }
 
