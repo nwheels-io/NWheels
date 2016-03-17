@@ -181,8 +181,8 @@ namespace NWheels.DataObjects
                 protected SemanticAttributeBase(
                     Type dataType,
                     WellKnownSemanticType wellKnownSemantic,
-                    Action<SemanticType.SemanticDataTypeBuilder> configuration = null)
-                    : this(wellKnownSemantic.ToString(), dataType, wellKnownSemantic, configuration)
+                    Action<SemanticType.SemanticDataTypeBuilder> defaultConfiguration = null)
+                    : this(wellKnownSemantic.ToString(), dataType, wellKnownSemantic, defaultConfiguration)
                 {
                 }
 
@@ -192,14 +192,14 @@ namespace NWheels.DataObjects
                     string name,
                     Type dataType,
                     WellKnownSemanticType wellKnownSemantic = WellKnownSemanticType.None, 
-                    Action<SemanticType.SemanticDataTypeBuilder> configuration = null)
+                    Action<SemanticType.SemanticDataTypeBuilder> defaultConfiguration = null)
                 {
                     _semanticDataType = SemanticType.SemanticDataTypeBuilder.Create(name, dataType);
                     _semanticDataType.WellKnownSemantic = wellKnownSemantic;
 
-                    if ( configuration != null )
+                    if ( defaultConfiguration != null )
                     {
-                        configuration(_semanticDataType);
+                        defaultConfiguration(_semanticDataType);
                     }
                 }
 
@@ -210,10 +210,22 @@ namespace NWheels.DataObjects
                 public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
                 {
                     property.SemanticType = _semanticDataType;
+                    
+                    OnConfigurePropertySemantics(cache, property, _semanticDataType);
+                    
                     property.Validation.MergeWith(_semanticDataType.DefaultValidation);
                 }
 
                 #endregion
+
+                //---------------------------------------------------------------------------------------------------------------------------------------------
+
+                protected virtual void OnConfigurePropertySemantics(
+                    TypeMetadataCache cache,
+                    PropertyMetadataBuilder property, 
+                    SemanticType.SemanticDataTypeBuilder semantics)
+                {
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -297,6 +309,16 @@ namespace NWheels.DataObjects
             {
                 public IPAddressAttribute()
                     : base(typeof(string), WellKnownSemanticType.IPAddress)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public class FileUploadAttribute : SemanticAttributeBase
+            {
+                public FileUploadAttribute()
+                    : base(typeof(byte[]), WellKnownSemanticType.FileUpload)
                 {
                 }
             }

@@ -11,10 +11,13 @@ namespace NWheels.DataObjects
     {
         System.ComponentModel.DataAnnotations.DataType GetDataTypeAnnotation();
         IPropertyValidationMetadata GetDefaultValidation();
-        PropertyAccess? GetDefaultPropertyAccess(); 
+        PropertyAccess? GetDefaultPropertyAccess();
+        object[] GetStandardValues();
         string Name { get; }
         Type ClrType { get; }
         WellKnownSemanticType WellKnownSemantic { get; }
+        bool HasStandardValues { get; }
+        bool StandardValuesExclusive { get; }
         object DefaultValue { get; }
         string DefaultDisplayName { get; }
         string DefaultDisplayFormat { get; }

@@ -101,6 +101,14 @@ namespace NWheels.Extensions
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static string[] ToNormalizedNavigationStringArray(this LambdaExpression navigationExpression)
+        {
+            var expressionString = navigationExpression.ToNormalizedNavigationString();
+            return expressionString.Split('.').Skip(1).ToArray();
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static void ParseNormalizedMethodAndParameters(
             this LambdaExpression expression, 
             out MethodInfo method, 

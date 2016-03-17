@@ -81,6 +81,13 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public EntityHandler GetEntityHandler(string entityName)
+        {
+            return _handlerByEntityName[entityName];
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public AuthorizationCheckResults CheckEntityAuthorization(string entityName)
         {
             var handler = _handlerByEntityName[entityName];
@@ -1582,7 +1589,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal abstract class EntityHandler
+        public abstract class EntityHandler
         {
             private readonly IEntityHandlerExtension[] _extensions;
 

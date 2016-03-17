@@ -78,12 +78,33 @@ namespace NWheels.DataObjects
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public object[] GetStandardValues()
+            {
+                throw new NotSupportedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public WellKnownSemanticType WellKnownSemantic
             {
                 get
                 {
                     return WellKnownSemanticType.None;
                 }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool HasStandardValues
+            {
+                get { return false; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool StandardValuesExclusive
+            {
+                get { return false; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -218,6 +239,8 @@ namespace NWheels.DataObjects
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public WellKnownSemanticType WellKnownSemantic { get; set; }
+            public object[] StandardValues { get; set; }
+            public bool StandardValuesExclusive { get; set; }
             public DataType DataTypeAnnotation { get; set; }
             public PropertyAccess? DefaultPropertyAccess { get; set; }
             public string DefaultDisplayName { get; set; }
@@ -228,6 +251,23 @@ namespace NWheels.DataObjects
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public abstract PropertyValidationMetadataBuilder DefaultValidation { get; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            object[] ISemanticDataType.GetStandardValues()
+            {
+                return this.StandardValues;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            bool ISemanticDataType.HasStandardValues
+            {
+                get
+                {
+                    return (this.StandardValues != null);
+                }
+            }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 

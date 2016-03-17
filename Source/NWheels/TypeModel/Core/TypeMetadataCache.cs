@@ -232,6 +232,13 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal IComponentContext Components
+        {
+            get { return _components; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void EnsureExtensibilityRegistrations()
         {
             if ( _mixinsByPrimaryContract == null || _concretizationsByPrimaryContract == null )

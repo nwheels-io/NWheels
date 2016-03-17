@@ -19,6 +19,7 @@ namespace NWheels.TypeModel
         EmailAddress,
         Html,
         IPAddress,
+        FileUpload,
         ImageUpload,
         ImageUrl,
         Json,
