@@ -47,6 +47,7 @@ using NWheels.Concurrency;
 using NWheels.Configuration.Impls;
 using NWheels.Processing.Commands.Factories;
 using NWheels.TypeModel;
+using NWheels.UI.Impl;
 
 namespace NWheels.Hosting.Core
 {
@@ -340,6 +341,8 @@ namespace NWheels.Hosting.Core
 
             builder.NWheelsFeatures().Logging().RegisterLogger<DatabaseInitializer.ILogger>();
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<DatabaseInitializer>().FirstInPipeline().AsSelf();
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<CrudEntityImportTx>();
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<CrudEntityExportTx>();
 
             builder.RegisterType<VoidLocalizationProvider>().As<ILocalizationProvider>().SingleInstance();
 

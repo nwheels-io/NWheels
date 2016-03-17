@@ -302,8 +302,9 @@ namespace NWheels.UI.Toolbox
             
             internal static string[] ParsePropertyNavigation(LambdaExpression propertyNavigation)
             {
-                var expressionString = propertyNavigation.ToNormalizedNavigationString();
-                return expressionString.Split('.').Skip(1).ToArray();
+                return propertyNavigation.ToNormalizedNavigationStringArray();
+                //var expressionString = propertyNavigation.ToNormalizedNavigationString();
+                //return expressionString.Split('.').Skip(1).ToArray();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

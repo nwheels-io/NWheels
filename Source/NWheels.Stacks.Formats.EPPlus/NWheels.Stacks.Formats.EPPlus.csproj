@@ -48,6 +48,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExcelInputDocumentParser.cs" />
+    <Compile Include="ExcelMetaFormat.cs" />
     <Compile Include="ExcelOutputDocumentFormatter.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

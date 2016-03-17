@@ -145,6 +145,7 @@
     <Compile Include="Logging\ThreadLogPersistenceLevel.cs" />
     <Compile Include="Processing\Commands\IHaveMethodCall.cs" />
     <Compile Include="Processing\Commands\Impl\CommandActorBase.cs" />
+    <Compile Include="Processing\Documents\Core\IInputDocumentParser.cs" />
     <Compile Include="Processing\Documents\Impl\CsvOutputDocumentFormatter.cs" />
     <Compile Include="Processing\Documents\Core\DocumentFormatActor.cs" />
     <Compile Include="Processing\Documents\DocumentFormatRequestType.cs" />
@@ -355,8 +356,12 @@
     <Compile Include="UI\Core\IUidlApplicationEndpoint.cs" />
     <Compile Include="UI\Factories\QueryResultAggregatorObjectFactory.cs" />
     <Compile Include="UI\Core\IQueryResultAggregator.cs" />
+    <Compile Include="UI\EntityExportFormat.cs" />
     <Compile Include="UI\IFrameworkUIConfig.cs" />
     <Compile Include="UI\ContentRootAttribute.cs" />
+    <Compile Include="UI\Impl\CrudEntityExportTx.cs" />
+    <Compile Include="UI\Impl\CrudEntityImportTx.cs" />
+    <Compile Include="UI\Impl\EntityExportFormatSemanticsAttribute.cs" />
     <Compile Include="UI\Toolbox\ChartReport.cs" />
     <Compile Include="UI\Toolbox\ChartReportScreenPart.cs" />
     <Compile Include="UI\Toolbox\EntityMethodForm.cs" />
@@ -388,6 +393,7 @@
     <Compile Include="UI\Uidl\UidlCommandGroup.cs" />
     <Compile Include="UI\Toolbox\ModalUserAlert.cs" />
     <Compile Include="UI\Uidl\UidlUtility.cs" />
+    <Compile Include="UI\UIOperationContext.cs" />
     <Compile Include="UI\ViewModel.cs" />
     <Compile Include="Utilities\AssemblyUtility.cs" />
     <Compile Include="Utilities\EnumerableUtility.cs" />

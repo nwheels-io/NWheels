@@ -44,7 +44,7 @@ namespace NWheels.Stacks.Formats.EPPlus
                 }
 
                 return new FormattedDocument(
-                    new DocumentMetadata(_s_metaFormat, "report.xlsx"),
+                    new DocumentMetadata(ExcelMetaFormat.GetFormat(), "report.xlsx"),
                     package.GetAsByteArray());
             }            
         }
@@ -62,18 +62,10 @@ namespace NWheels.Stacks.Formats.EPPlus
         {
             get
             {
-                return _s_metaFormat;
+                return ExcelMetaFormat.GetFormat();
             }
         }
 
         #endregion
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static readonly DocumentFormat _s_metaFormat = new DocumentFormat(
-            idName: "EXCEL", 
-            contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            fileExtension: "xslx",
-            defaultFileName: "workbook.xlsx");
     }
 }
