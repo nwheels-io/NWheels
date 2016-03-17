@@ -243,7 +243,18 @@ namespace NWheels.Processing.Documents
                 string fallback = null)
             {
                 var propertyInfo = propertyExpression.GetPropertyInfo();
-                var metaProperty = _metaType.GetPropertyByDeclaration(propertyInfo);
+                IPropertyMetadata metaProperty;
+
+                if (propertyInfo.DeclaringType.IsAssignableFrom(_metaType.ContractType))
+                {
+                    metaProperty = _metaType.GetPropertyByDeclaration(propertyInfo);
+                }
+                else
+                {
+                    var inheritorMetaType = _metaType.DerivedTypes.First(t => propertyInfo.DeclaringType.IsAssignableFrom(t.ContractType));
+                    metaProperty = inheritorMetaType.GetPropertyByDeclaration(propertyInfo);
+                }
+
                 var bindingExpression = _navigationPrefix + string.Join(".", propertyExpression.ToNormalizedNavigationStringArray());
 
                 var column = new TableElement.Column(

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.DataObjects;
 using NWheels.Processing.Documents;
 
 namespace NWheels.UI
@@ -19,11 +20,15 @@ namespace NWheels.UI
 
     public abstract class EntityExportFormatBase<TEntity> : IEntityExportFormat
     {
-        protected EntityExportFormatBase(string formatTitle, string documentFormatIdName)
+        private DocumentDesign _documentDesign;
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected EntityExportFormatBase(ITypeMetadataCache metadataCache, string formatTitle, string documentFormatIdName)
         {
+            this.MetadataCache = metadataCache;
             this.FormatTitle = formatTitle;
             this.DocumentFormatIdName = documentFormatIdName;
-            this.DocumentDesign = BuildDocumentDesign();
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -37,10 +42,28 @@ namespace NWheels.UI
 
         public string FormatTitle { get; private set; }
         public string DocumentFormatIdName { get; private set; }
-        public DocumentDesign DocumentDesign { get; private set; }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DocumentDesign DocumentDesign
+        {
+            get
+            {
+                if (_documentDesign == null)
+                {
+                    _documentDesign = BuildDocumentDesign();
+                }
+
+                return _documentDesign;
+            }
+        }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected abstract DocumentDesign BuildDocumentDesign();
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected ITypeMetadataCache MetadataCache { get; private set; }
     }
 }
