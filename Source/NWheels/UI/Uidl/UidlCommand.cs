@@ -45,20 +45,20 @@ namespace NWheels.UI.Uidl
 
     public enum CommandSeverity
     {
-        Read,
-        Change,
-        Loose,
-        Destroy,
-        None
+        None = 0,
+        Read = 10,
+        Change = 20,
+        Loose = 30,
+        Destroy = 40,
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public enum CommandKind
     {
-        Other,
-        Submit,
-        Reject,
-        Navigate
+        Other = 0,
+        Submit = 10,
+        Reject = 20,
+        Navigate = 30
     }
 }

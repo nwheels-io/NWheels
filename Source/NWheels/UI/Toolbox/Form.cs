@@ -682,6 +682,7 @@ namespace NWheels.UI.Toolbox
         bool UsePascalCase { get; set; }
         List<FormField> Fields { get; }
         List<UidlCommand> Commands { get; }
+        bool IsModalPopup { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -702,7 +703,8 @@ namespace NWheels.UI.Toolbox
         Default = 0,
         Label = 10,
         Edit = 20,
-        ImageUpload = 30,
+        FileUpload = 30,
+        ImageUpload = 35,
         Lookup = 40,
         LookupMany = 50,
         InlineGrid = 60,

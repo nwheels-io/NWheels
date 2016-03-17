@@ -1426,6 +1426,28 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
     m_controllerImplementations['TransactionForm'] = {
         implement: function (scope) {
             scope.model.State.Input = { };
+
+            scope.$on(scope.uidl.qualifiedName + ':ShowModal', function(event, data) {
+                scope.commandInProgress = false;
+            });
+            
+            scope.invokeCommand = function (command) {
+                if (command.kind==='Submit') {
+                    scope.commandInProgress = true;
+                    var validationResult = { isValid: true };
+                    scope.$broadcast(':global:FormValidating', validationResult);
+                    $timeout(function() {
+                        if (validationResult.isValid===true) {  
+                            scope.$emit(command.qualifiedName + ':Executing');
+                            scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
+                        } else {
+                            scope.commandInProgress = false;
+                        }
+                    });
+                } else {
+                    scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
+                }
+            };
         }
     };
 

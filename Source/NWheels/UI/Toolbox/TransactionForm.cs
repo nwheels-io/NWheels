@@ -35,6 +35,33 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void AttachAsPopupTo<TController, TControllerData, TControllerState>(
+            PresenterBuilder<TController, TControllerData, TControllerState> controller, 
+            UidlCommand command)
+            where TController : ControlledUidlNode
+            where TControllerData : class
+            where TControllerState : class
+        {
+            SetPopupMode();
+
+            this.Text = command.Text;
+            this.Icon = command.Icon;
+
+            controller.On(command).Broadcast(this.ShowModal).TunnelDown();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void SetPopupMode()
+        {
+            this.TemplateName = "TransactionFormPopupMode";
+            this.InputForm.Commands.Clear();
+            this.InputForm.IsModalPopup = true;
+            this.IsPopupContent = true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
             return base.GetNestedWidgets().ConcatOneIf(InputForm).ConcatOneIf(InputFormTypeSelector);
@@ -48,6 +75,10 @@ namespace NWheels.UI.Toolbox
         public TypeSelector InputFormTypeSelector { get; set; }
         [DataMember]
         public UserAlertDisplayMode UserAlertDisplayMode { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UidlNotification ShowModal { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -73,7 +104,11 @@ namespace NWheels.UI.Toolbox
 
         protected override void DescribePresenter(PresenterBuilder<TransactionForm<TContext, TInput, TScript, TOutput>, Empty.Data, ITransactionFormState> presenter)
         {
-            Icon = "edit";
+            if (string.IsNullOrWhiteSpace(this.Icon))
+            {
+                Icon = "edit";
+            }
+
             Execute.Kind = CommandKind.Submit;
             Execute.Severity = CommandSeverity.Change;
             Reset.Kind = CommandKind.Reject;
@@ -136,7 +171,11 @@ namespace NWheels.UI.Toolbox
         private void ConfigureInputForm(IUidlForm form)
         {
             form.UsePascalCase = true;
-            form.Commands.AddRange(this.Commands);
+
+            if (!form.IsModalPopup)
+            {
+                form.Commands.AddRange(this.Commands);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

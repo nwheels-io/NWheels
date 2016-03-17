@@ -39,6 +39,7 @@ HEAD, JS/CSS LINKS
     <link href="app/skin/assets/css/plugins/clockpicker/clockpicker.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/daterangepicker/daterangepicker-bs3.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/isteven-multi-select/isteven-multi-select.css" rel="stylesheet">
+    <link href="app/skin/assets/css/plugins/dropzone/dropzone.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/jqGrid/ui.jqgrid.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/jQueryUI/jquery-ui-1.10.4.custom.min.css" rel="stylesheet">
     <link href="app/skin/assets/css/animate.css" rel="stylesheet">
@@ -636,12 +637,12 @@ HEAD, JS/CSS LINKS
                         style="margin-right:5px;"
                         ng-disabled="commandInProgress || !selectedEntity"
                         ng-click="invokeEntityCommand(command)"
-                        ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
+                        ng-class="{'btn-default':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
                     ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                     <button 
                         ng-repeat="command in uidl.staticCommands"
                         type="button"
-                        class="btn btn-rounded"
+                        class="btn btn-rounded btn-outline"
                         style="margin-right:5px;"
                         ng-disabled="commandInProgress"
                         ng-click="invokeStaticCommand(command)"
@@ -1194,7 +1195,53 @@ HEAD, JS/CSS LINKS
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
         </div>
     </script>
-    
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - TRANSACTION FORM WITH POPUP MODE
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="app/uidl-element-template/TransactionFormPopupMode">
+        <div class="modal inmodal fade" id="divModal_{{uidl.elementName}}" tabindex="-1" role="dialog"  aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <i class="fa modal-icon fa-{{::uidl.icon}} pull-left" style="margin-top:-20px;"></i>
+                        <h6 class="modal-title" style="padding-right:50px;">
+                            {{translate(uidl.text)}}
+                        </h6>
+                    </div>
+                    <div class="modal-body">
+                        <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
+                    </div>
+                    <div class="modal-footer">
+                        <button 
+                            ng-repeat="command in uidl.commands"
+                            type="button"
+                            class="btn btn-w-m"
+                            style="margin-left:5px;"
+                            ng-disabled="commandInProgress"
+                            ng-click="invokeCommand(command)"
+                            ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
+                        ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/javascript">
+        function initWidget_TransactionForm($scope) {
+            if ($scope.uidl.inputForm.isModalPopup)
+            {
+                $scope.$on($scope.uidl.qualifiedName + ':ShowModal', function () {
+                    $("#divModal_" + $scope.uidl.elementName).modal('show');
+                });
+                $scope.$on($scope.uidl.qualifiedName + ':HideModal', function () {
+                    $("#divModal_" + $scope.uidl.elementName).modal('hide');
+                });
+            }
+        }
+    </script>
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -1463,6 +1510,12 @@ HEAD, JS/CSS LINKS
                 class="form-control m-b"
                 id="{{::uniqueFieldId}}"
                 name="{{::uniqueFieldId}}">
+            <!-- FILE UPLOAD -->
+            <div ng-if="uidl.fieldType==='FileUpload'" class="m-b" style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
+                <div class="dropzone" style="height:100px;color:lightgray;padding:5px;">
+                Drag and drop a file here.
+                </div>
+            </div>
             <!-- IMAGE UPLOAD -->
             <div ng-if="uidl.fieldType==='ImageUpload'" class="col-sm-3">
                 <img ng-src="entity/queryImage/ProfilePhoto/{{::entity[uidl.propertyName]}}/ImageType/ImageContents" class="img-circle circle-border m-b-md" alt="profile">                
@@ -2125,7 +2178,10 @@ HEAD, JS/CSS LINKS
 
     <!-- Multiselect -->
     <script src="app/skin/assets/js/plugins/isteven-multi-select/isteven-multi-select.js"></script>
-    
+
+    <!-- DROPZONE -->
+    <script src="app/skin/assets/js/plugins/dropzone/dropzone.js"></script>
+
     <script src="app/skin/assets/app/linqjs-2.2.0.2/linq.min.js"></script>
     <script src="app/skin/assets/app/toastr/toastr.js"></script>
     <script src="app/base/app.js"></script>
