@@ -437,6 +437,12 @@ namespace NWheels.UI.Toolbox
                 this.StandardValuesExclusive = true;
             }
 
+            if (MetaProperty.SemanticType != null && MetaProperty.SemanticType.HasStandardValues && this.StandardValues == null)
+            {
+                this.StandardValues = MetaProperty.SemanticType.GetStandardValues().Select(v => v.ToString()).ToList();
+                this.StandardValuesExclusive = MetaProperty.SemanticType.StandardValuesExclusive;
+            }
+
             if ( shouldSetDefaults )
             {
                 this.Modifiers |= GetDefaultModifiers(this.FieldType);
@@ -543,7 +549,7 @@ namespace NWheels.UI.Toolbox
                     }
                     else
                     {
-                        return (MetaProperty.ClrType.IsEnum ? FormFieldType.Lookup : FormFieldType.Edit);
+                        return (MetaProperty.ClrType.IsEnum || PropertyHasExclusiveStandardValues() ? FormFieldType.Lookup : FormFieldType.Edit);
                     }
                 case PropertyKind.Part:
                     return (MetaProperty.IsCollection ? FormFieldType.InlineGrid : FormFieldType.InlineForm);
@@ -559,6 +565,13 @@ namespace NWheels.UI.Toolbox
                 default:
                     return FormFieldType.Default;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool PropertyHasExclusiveStandardValues()
+        {
+            return (MetaProperty.SemanticType != null && MetaProperty.SemanticType.HasStandardValues && MetaProperty.SemanticType.StandardValuesExclusive);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

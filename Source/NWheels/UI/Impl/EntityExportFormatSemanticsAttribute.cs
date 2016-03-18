@@ -30,6 +30,7 @@ namespace NWheels.UI.Impl
         {
             var formats = cache.Components.Resolve<IEnumerable<IEntityExportFormat>>();
             semantics.StandardValues = formats.Select(f => f.FormatTitle).Cast<object>().ToArray();
+            semantics.StandardValuesExclusive = true;
         }
 
         #endregion
