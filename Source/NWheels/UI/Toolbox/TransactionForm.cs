@@ -90,6 +90,11 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Type ContextEntityType { get; set; }
+        public string OutputDownloadFormat { get; set; } 
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected internal ITypeMetadata InputMetaType { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -124,37 +129,68 @@ namespace NWheels.UI.Toolbox
                 InputFormTypeSelector.ForEachWidgetOfType<IUidlForm>(ConfigureInputForm);
             }
 
-            var attribute = typeof(TScript).GetCustomAttribute<TransactionScriptAttribute>();
+            var txAttribute = typeof(TScript).GetCustomAttribute<TransactionScriptAttribute>();
+            var shouldInvokeInitializeInput = (txAttribute != null && txAttribute.SupportsInitializeInput);
+            var hasCustomContext = (typeof(TContext) != typeof(Empty.Context));
 
-            if ( attribute != null && attribute.SupportsInitializeInput )
+            if (shouldInvokeInitializeInput && hasCustomContext)
+            {
+                presenter.On(ContextSetter)
+                    .AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Context))
+                    .Then(b => b.InvokeTransactionScript<TScript>(ContextEntityType, ApiCallResultType.Command)
+                        .WaitForReply((script, vm) => script.InitializeInput(vm.Input))
+                        .Then(bb => bb.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Input))
+                        .Then(InvokeFormModelSetter)));
+            }
+
+            if (shouldInvokeInitializeInput && !hasCustomContext)
             {
                 presenter.On(Loaded)
-                    .InvokeTransactionScript<TScript>()
+                    .InvokeTransactionScript<TScript>(ContextEntityType, ApiCallResultType.Command)
                     .WaitForReply((script, vm) => script.InitializeInput(null))
                     .Then(b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Input))
                     .Then(InvokeFormModelSetter));
             }
-            else
+
+            if (!shouldInvokeInitializeInput)
             {
                 presenter.On(Loaded)
                     .QueryModel(vm => vm.State.Input)
                     .Then(InvokeFormModelSetter);
             }
 
-            presenter.On(Execute)
-                .InvokeTransactionScript<TScript>()
-                .WaitForReply((script, vm) => script.Execute(vm.State.Input))
-                .Then(
-                    onSuccess: b => b
-                        .AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Output))
-                        .Then(bb => bb.Broadcast(OutputReady).WithPayload(vm => vm.Input).BubbleUp()
-                        .Then(bbb => InvokeFormStateResetter(bbb)
-                        .Then(bbbb => bbbb.UserAlertFrom<ITransactionUserAlerts>().Show<Empty.Payload>(UserAlertDisplayMode, (alerts, vm) => alerts.SuccessfullyCompleted())))),
-                    onFailure: b => b
-                        .Broadcast(OperationFailed).WithPayload(vm => vm.Input).BubbleUp()
-                        .Then(bb => bb.UserAlertFrom<ITransactionUserAlerts>().Show<TOutput>(UserAlertDisplayMode, (alerts, vm) => alerts.FailedToCompleteRequestedAction(), faultInfo: vm => vm.Input)
-                        .Then(bbb => InvokeFormStateResetter(bbb)))
-                );
+            if (string.IsNullOrWhiteSpace(OutputDownloadFormat))
+            { 
+                presenter.On(Execute)
+                    .InvokeTransactionScript<TScript>(ContextEntityType, ApiCallResultType.Command)
+                    .WaitForReply((script, vm) => script.Execute(vm.State.Input))
+                    .Then(
+                        onSuccess: b => b
+                            .AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Output))
+                            .Then(bb => bb.Broadcast(OutputReady).WithPayload(vm => vm.Input).BubbleUp()
+                            .Then(bbb => InvokeFormStateResetter(bbb)
+                            .Then(bbbb => bbbb.UserAlertFrom<ITransactionUserAlerts>().Show<Empty.Payload>(UserAlertDisplayMode, (alerts, vm) => alerts.SuccessfullyCompleted())))),
+                        onFailure: b => b
+                            .Broadcast(OperationFailed).WithPayload(vm => vm.Input).BubbleUp()
+                            .Then(bb => bb.UserAlertFrom<ITransactionUserAlerts>().Show<TOutput>(UserAlertDisplayMode, (alerts, vm) => alerts.FailedToCompleteRequestedAction(), faultInfo: vm => vm.Input)
+                            .Then(bbb => InvokeFormStateResetter(bbb)))
+                    );
+            }
+            else
+            {
+                presenter.On(Execute)
+                    .InvokeTransactionScript<TScript>(ContextEntityType, ApiCallResultType.Command)
+                    .WaitForResultsDownloadReady((script, vm) => script.Execute(vm.State.Input), exportFormat: "EXCEL")
+                    .Then(
+                        onSuccess: b => b
+                            .BeginDownloadContent(vm => vm.Input)
+                            .Then(bb => bb.Broadcast(InputForm.StateResetter).TunnelDown()
+                            .Then(bbb => bbb.UserAlertFrom<ITransactionUserAlerts>().Show<Empty.Payload>(UserAlertDisplayMode, (alerts, vm) => alerts.SuccessfullyCompleted())),
+                        onFailure: bf => bf
+                            .Broadcast(OperationFailed).WithPayload(vm => vm.Input).BubbleUp()
+                            .Then(bbf => bbf.UserAlertFrom<ITransactionUserAlerts>().Show<TOutput>(UserAlertDisplayMode, (alerts, vm) => alerts.FailedToCompleteRequestedAction(), faultInfo: vm => vm.Input)
+                            .Then(bbbf => InvokeFormStateResetter(bbbf)))));
+            }
 
             if ( InputForm != null )
             {
@@ -213,6 +249,7 @@ namespace NWheels.UI.Toolbox
         [ViewModelContract]
         public interface ITransactionFormState
         {
+            TContext Context { get; set; }
             TInput Input { get; set; }
             TOutput Output { get; set; }
         }

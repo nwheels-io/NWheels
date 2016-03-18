@@ -347,8 +347,8 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("app/api/oneWay/command/{target}/{contractName}/{operationName}")]
-        public IHttpActionResult ApiOneWayCommand(string target, string contractName, string operationName)
+        [Route("app/api/oneWay/command/{target}/{contractName}/{operationName}/{entityName?}")]
+        public IHttpActionResult ApiOneWayCommand(string target, string contractName, string operationName, string entityName = null)
         {
             var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: false);
 
@@ -369,8 +369,8 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("app/api/requestReply/command/{target}/{contractName}/{operationName}")]
-        public IHttpActionResult ApiRequestReplyCommand(string target, string contractName, string operationName)
+        [Route("app/api/requestReply/command/{target}/{contractName}/{operationName}/{entityName?}")]
+        public IHttpActionResult ApiRequestReplyCommand(string target, string contractName, string operationName, string entityName = null)
         {
             var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: true);
 
@@ -379,7 +379,9 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            using (new UIOperationContext(_context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command, target, contractName, operationName))
+            using (new UIOperationContext(
+                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command, 
+                target, contractName, operationName, entity: entityName))
             { 
                 try
                 {
@@ -415,8 +417,8 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost]
-        [Route("app/api/requestReplyAsync/command/{target}/{contractName}/{operationName}")]
-        public IHttpActionResult ApiRequestReplyAsyncCommand(string target, string contractName, string operationName)
+        [Route("app/api/requestReplyAsync/command/{target}/{contractName}/{operationName}/{entityName?}")]
+        public IHttpActionResult ApiRequestReplyAsyncCommand(string target, string contractName, string operationName, string entityName = null)
         {
             var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: false);
 
@@ -526,7 +528,7 @@ namespace NWheels.Stacks.AspNet
                     try
                     {
                         _serviceBus.DispatchMessageOnCurrentThread(queryCommand);
-                        var download = (queryCommand.Result.Result as DocumentFormatReplyMessage);
+                        var download = (queryCommand.Result as DocumentFormatReplyMessage);
 
                         if (download == null)
                         {
@@ -546,16 +548,15 @@ namespace NWheels.Stacks.AspNet
                             download = exportCommand.Result as DocumentFormatReplyMessage;
                         }
 
-                        var downloadId = _framework.NewGuid();
-
                         if ( download != null )
                         {
-                            HttpContext.Current.Session[exportCommand.MessageId.ToString("N")] = download.Document;
+                            HttpContext.Current.Session[download.CommandMessageId.ToString("N")] = download.Document;
+                            return Json(download.TakeSerializableSnapshot(), _context.EntityService.CreateSerializerSettings());
                         }
 
-                        return Json(exportCommand.Result.TakeSerializableSnapshot(), _context.EntityService.CreateSerializerSettings());
+                        throw new Exception("No content was produced for download.");
                     }
-                    catch ( Exception e )
+                    catch (Exception e)
                     {
                         _context.Logger.CommandFailed(this.Request.RequestUri.AbsolutePath, e);
 

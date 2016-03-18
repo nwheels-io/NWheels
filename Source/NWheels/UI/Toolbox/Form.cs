@@ -154,6 +154,29 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Form<TEntity> LookupSource<T>(
+            Expression<Func<TEntity, T>> fieldSelector,
+            Expression<Func<TEntity, ICollection<T>>> lookupSourceSelector)
+        {
+            var metaType = MetadataCache.GetTypeMetadata(typeof(TEntity));
+            var fieldProperty = metaType.GetPropertyByDeclaration(fieldSelector.GetPropertyInfo());
+            var lookupSourceProperty = metaType.GetPropertyByDeclaration(lookupSourceSelector.GetPropertyInfo());
+
+            var field = FindOrAddField((Expression<Func<TEntity, object>>)metaType.MakePropertyAsObjectExpression(fieldProperty));
+            field.FieldType = FormFieldType.Lookup;
+            field.Modifiers = FormFieldModifiers.DropDown | FormFieldModifiers.LookupShowSelectNone;
+            field.LookupSourceProperty = lookupSourceProperty.Name;
+
+            if (!_hiddenFields.Contains(lookupSourceProperty.Name))
+            {
+                _hiddenFields.Add(lookupSourceProperty.Name);
+            }
+
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override IEnumerable<string> GetTranslatables()
         {
             var metaTypeTranslatables = new List<string>();
@@ -357,7 +380,7 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string LookupEntityName { get; set; }
         [DataMember]
-        public string LookupFilterExpression { get; set; }
+        public string LookupSourceProperty { get; set; }
         [DataMember]
         public string LookupValueProperty { get; set; }
         [DataMember]
@@ -611,7 +634,10 @@ namespace NWheels.UI.Toolbox
                     }
                     return FormFieldModifiers.None;
                 case FormFieldType.Lookup:
-                    return (StandardValues != null && StandardValues.Count > 0 ? FormFieldModifiers.DropDown : FormFieldModifiers.Ellipsis);
+                    return (
+                        StandardValues != null && StandardValues.Count > 0 ? 
+                        FormFieldModifiers.DropDown | FormFieldModifiers.LookupShowSelectNone : 
+                        FormFieldModifiers.Ellipsis);
                 case FormFieldType.LookupMany:
                     return FormFieldModifiers.Tab;
                 case FormFieldType.InlineForm:
@@ -721,7 +747,7 @@ namespace NWheels.UI.Toolbox
         Lookup = 40,
         LookupMany = 50,
         InlineGrid = 60,
-        InlineForm = 70,
+        InlineForm = 70
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -741,8 +767,9 @@ namespace NWheels.UI.Toolbox
         Password = 0x100,
         Confirm = 0x200,
         LookupShowSelectAll = 0x400,
-        RangeStart = 0x800,
-        RangeEnd = 0x1000,
+        LookupShowSelectNone = 0x800,
+        RangeStart = 0x1000,
+        RangeEnd = 0x2000,
         System = 0x40000000
     }
 

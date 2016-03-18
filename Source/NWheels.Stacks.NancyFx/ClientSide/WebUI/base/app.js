@@ -552,12 +552,19 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
     m_behaviorImplementations['Broadcast'] = {
         returnsPromise: false,
         execute: function (scope, behavior, input) {
-            console.log('run-behavior > broadcast', behavior.notificationQualifiedName, behavior.direction);
+            console.log('run-behavior > broadcast', behavior.notificationQualifiedName, behavior.direction, input);
+            var payload = input;
+            if (behavior.payloadExpression && !payload) {
+                var context = {
+                    model: scope.model
+                };
+                payload = Enumerable.Return(context).Select('ctx=>ctx.' + behavior.payloadExpression).Single();
+            }
             if (behavior.direction.indexOf('BubbleUp') > -1) {
-                scope.$emit(behavior.notificationQualifiedName, input);
+                scope.$emit(behavior.notificationQualifiedName, payload);
             }
             if (behavior.direction.indexOf('TunnelDown') > -1) {
-                scope.$broadcast(behavior.notificationQualifiedName, input);
+                scope.$broadcast(behavior.notificationQualifiedName, payload);
             }
         },
     };
@@ -581,15 +588,17 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                     null);
                 requestData[behavior.parameterNames[i]] = parameterValue;
             }
+            var entityNameRequired = (behavior.callResultType==='EntityQuery' || behavior.callResultType==='EntityQueryExport');
             var requestPath = 
                 'app/api' + 
                 '/' + behavior.callType +
                 '/' + behavior.callResultType +
-                (behavior.callResultType==='EntityQuery' || behavior.callResultType==='EntityQueryExport' ? '/' + behavior.queryEntityName : '') +
+                (entityNameRequired ? '/' + behavior.entityName : '') +
                 '/' + behavior.callTargetType + 
                 '/' + behavior.contractName + 
-                '/' + behavior.operationName;
-            
+                '/' + behavior.operationName +
+                (behavior.entityName && !entityNameRequired ? '/' + behavior.entityName : '');
+                
             if (behavior.callResultType === 'EntityQueryExport') {
                 requestPath += '/' + behavior.exportFormatId;
             }
@@ -597,7 +606,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 requestPath += '?$entityId=' + encodeURIComponent(scope.model.State.Entity['$id']);
             }
             if (behavior.querySelectList || behavior.queryIncludeList) {
-                var queryBuilder = new EntityQueryBuilder(behavior.queryEntityName, requestPath);
+                var queryBuilder = new EntityQueryBuilder(behavior.entityName, requestPath);
                 if (behavior.querySelectList) {
                     for (var i = 0; i < behavior.querySelectList.length; i++) {
                         queryBuilder.select(behavior.querySelectList[i]);
@@ -678,6 +687,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
     m_behaviorImplementations['AlterModel'] = {
         returnsPromise: false,
         execute: function (scope, behavior, input) {
+            console.log('run-behavior > alertModel', behavior.alterations, input);
             scope.model.Input = input;
             var context = {
                 model: scope.model
@@ -686,13 +696,19 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 var alteration = behavior.alterations[i];
                 switch (alteration.type) {
                     case 'Copy':
-                        var value = (
-                            alteration.sourceExpression==='null' || !alteration.sourceExpression
-                            ? null
-                            : Enumerable.Return(context).Select('ctx=>ctx.' + alteration.sourceExpression).Single());
+                        var value = null;
+                        if (alteration.sourceValue) {
+                            value = alteration.sourceValue;
+                        } else if (alteration.sourceExpression && alteration.sourceExpression!=='null')                         {
+                            value = Enumerable.Return(context).Select('ctx=>ctx.' + alteration.sourceExpression).Single();
+                        }
                         var target = context;
                         for (var j = 0; j < alteration.destinationNavigations.length - 1; j++) {
-                            target = target[alteration.destinationNavigations[j]];
+                            var nextTarget = target[alteration.destinationNavigations[j]];
+                            if (!nextTarget) {
+                                nextTarget = target[alteration.destinationNavigations[j]] = { };
+                            }
+                            target = nextTarget;
                         }
                         var lastNavigation = alteration.destinationNavigations[alteration.destinationNavigations.length-1];
                         target[lastNavigation] = value;
@@ -707,6 +723,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
     m_behaviorImplementations['QueryModel'] = {
         returnsPromise: true,
         execute: function (scope, behavior, input) {
+            console.log('run-behavior > queryModel', behavior.sourceExpression);
             scope.model.Input = input;
             var context = {
                 model: scope.model
@@ -725,6 +742,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
     m_behaviorImplementations['ActivateSessionTimeout'] = {
         returnsPromise: false,
         execute: function (scope, behavior, input) {
+            console.log('run-behavior > activateSessionTimeout', behavior.idleMinutesExpression);
             var timeoutMinutes = 0;
             if (behavior.idleMinutesExpression) {
                 scope.model.Input = input;
@@ -745,6 +763,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
     m_behaviorImplementations['DeactivateSessionTimeout'] = {
         returnsPromise: false,
         execute: function (scope, behavior, input) {
+            console.log('run-behavior > deactivateSessionTimeout');
             sessionService.deactivateExpiry();
         },
     };
@@ -2010,17 +2029,31 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
                             }
                         });
                     }
-                } else if ($scope.uidl.standardValues) {
-                    $scope.lookupValueProperty = 'id';
-                    $scope.lookupTextProperty = 'text';
-                    $scope.lookupForeignKeyProperty = $scope.uidl.propertyName;
-                    $scope.lookupResultSet = [];
+                } else if ($scope.uidl.standardValues || $scope.uidl.lookupSourceProperty) {
+                    var onLookupSourceAvailable = function(source) {
+                        $scope.lookupValueProperty = 'id';
+                        $scope.lookupTextProperty = 'text';
+                        $scope.lookupForeignKeyProperty = $scope.uidl.propertyName;
+                        $scope.lookupResultSet = [];
 
-                    for (var i = 0; i < $scope.uidl.standardValues.length; i++) {
-                        var value = $scope.uidl.standardValues[i];
-                        $scope.lookupResultSet.push({
-                            id: value,
-                            text: uidlService.translate(value)
+                        for (var i = 0; i < source.length; i++) {
+                            var value = source[i];
+                            $scope.lookupResultSet.push({
+                                id: value,
+                                text: uidlService.translate(value)
+                            });
+                        }
+                    }; 
+
+                    if ($scope.uidl.standardValues) {
+                        onLookupSourceAvailable($scope.uidl.standardValues);
+                    } else if($scope.entity) {
+                        onLookupSourceAvailable($scope.entity[$scope.uidl.lookupSourceProperty]);
+                    } else {
+                        $scope.$watch('entity', function(newValue, oldValue) {
+                            if (newValue) {
+                                onLookupSourceAvailable(newValue[$scope.uidl.lookupSourceProperty]);
+                            }
                         });
                     }
                 }

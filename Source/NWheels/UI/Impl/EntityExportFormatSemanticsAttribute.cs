@@ -29,7 +29,7 @@ namespace NWheels.UI.Impl
             SemanticType.SemanticDataTypeBuilder semantics)
         {
             var formats = cache.Components.Resolve<IEnumerable<IEntityExportFormat>>();
-            semantics.StandardValues = formats.Select(f => f.FormatTitle).Cast<object>().ToArray();
+            semantics.StandardValues = formats.Select(f => f.FormatName).Cast<object>().ToArray();
             semantics.StandardValuesExclusive = true;
         }
 

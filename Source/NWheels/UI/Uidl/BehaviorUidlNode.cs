@@ -83,7 +83,7 @@ namespace NWheels.UI.Uidl
         [DataMember]
         public bool PrepareOnly { get; set; }
         [DataMember]
-        public string QueryEntityName { get; set; }
+        public string EntityName { get; set; }
         [DataMember]
         public List<string> QuerySelectList { get; set; }
         [DataMember]
@@ -213,6 +213,8 @@ namespace NWheels.UI.Uidl
         {
             [DataMember]
             public AlterationType Type { get; set; }
+            [DataMember]
+            public string SourceValue { get; set; }
             [DataMember]
             public string SourceExpression { get; set; }
             [DataMember]

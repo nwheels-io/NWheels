@@ -72,7 +72,7 @@ namespace NWheels.UI.Toolbox
             }
 
             presenter.On(ShowReport)
-                .InvokeTransactionScript<TResultScript>(queryAsEntityType: typeof(TResultRow))
+                .InvokeTransactionScript<TResultScript>(entityType: typeof(TResultRow))
                 .PrepareWaitForReply((script, vm) => script.Execute(vm.State.Criteria))
                 .Then(b => b.Broadcast(ResultTable.RequestPrepared).WithPayload(vm => vm.Input).TunnelDown()
                 .Then(bb => bb.InvokeTransactionScript<TChartScript>().WaitForReply((script, vm) => script.Execute(vm.State.Criteria))
@@ -84,7 +84,7 @@ namespace NWheels.UI.Toolbox
                 )));
 
             presenter.On(DownloadExcel)
-                .InvokeTransactionScript<TResultScript>(queryAsEntityType: typeof(TResultRow))
+                .InvokeTransactionScript<TResultScript>(entityType: typeof(TResultRow))
                 .SetupEnityQueryFor(ResultTable)
                 .WaitForResultsDownloadReady((script, vm) => script.Execute(vm.State.Criteria), exportFormat: "EXCEL")
                 .Then(

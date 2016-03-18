@@ -13,7 +13,7 @@ namespace NWheels.UI
         Type EntityContract { get; }
         string DocumentFormatIdName { get; }
         DocumentDesign DocumentDesign { get; }
-        string FormatTitle { get; }
+        string FormatName { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ namespace NWheels.UI
         protected EntityExportFormatBase(ITypeMetadataCache metadataCache, string formatTitle, string documentFormatIdName)
         {
             this.MetadataCache = metadataCache;
-            this.FormatTitle = formatTitle;
+            this.FormatName = formatTitle;
             this.DocumentFormatIdName = documentFormatIdName;
         }
 
@@ -40,7 +40,7 @@ namespace NWheels.UI
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public string FormatTitle { get; private set; }
+        public string FormatName { get; private set; }
         public string DocumentFormatIdName { get; private set; }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

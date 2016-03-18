@@ -11,12 +11,11 @@ using NWheels.UI.Factories;
 namespace NWheels.UI.Impl
 {
     [TransactionScript(SupportsInitializeInput = true)]
-    public class CrudEntityImportTx : ITransactionScript<Empty.Context, CrudEntityImportTx.IInput, Empty.Output>
+    public class CrudEntityImportTx : ITransactionScript<CrudEntityImportTx.IContext, CrudEntityImportTx.IInput, Empty.Output>
     {
         private readonly IFramework _framework;
         private readonly IViewModelObjectFactory _viewModelFactory;
-        private readonly IReadOnlyDictionary<string, IEntityExportFormat> _exportFormatByName;
-        private readonly IReadOnlyDictionary<string, IInputDocumentParser> _parserByFormatIdName;
+        private readonly EntityImportExportFormatSet _formatSet;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -28,22 +27,19 @@ namespace NWheels.UI.Impl
         {
             _framework = framework;
             _viewModelFactory = viewModelFactory;
-            _exportFormatByName = exportFormats.ToDictionary(f => f.FormatTitle);
-            _parserByFormatIdName = inputParsers.ToDictionary(f => f.MetaFormat.IdName);
+            _formatSet = new EntityImportExportFormatSet(exportFormats, inputParsers: inputParsers);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Implementation of ITransactionScript<Context,IInput,Output>
 
-        public IInput InitializeInput(Empty.Context context)
+        public IInput InitializeInput(IContext context)
         {
+            var availableFormats = _formatSet.GetAvailableFormats(UIOperationContext.Current, context.EntityName);
             var input = _viewModelFactory.NewEntity<IInput>();
 
-            if (_exportFormatByName.Count > 0)
-            {
-                input.Format = _exportFormatByName.First().Key;
-            }
+            input.AvailableFormats = availableFormats.Select(f => f.FormatName).ToArray();
 
             return input;
         }
@@ -59,11 +55,12 @@ namespace NWheels.UI.Impl
 
         public Empty.Output Execute(IInput input)
         {
-            var uiContext = UIOperationContext.Current;
-            var exportFormat = _exportFormatByName[input.Format];
-            var inputParser = _parserByFormatIdName[exportFormat.DocumentFormatIdName];
-            var entityHandler = uiContext.EntityService.GetEntityHandler(uiContext.EntityName);
+            IEntityExportFormat importFormat;
 
+            var uiContext = UIOperationContext.Current;
+            var inputParser = _formatSet.GetInputParser(input.Format, out importFormat);
+            var entityHandler = uiContext.EntityService.GetEntityHandler(uiContext.EntityName);
+            
             return new Empty.Output();
         }
 
@@ -72,10 +69,20 @@ namespace NWheels.UI.Impl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [ViewModelContract]
+        public interface IContext
+        {
+            string EntityName { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ViewModelContract]
         public interface IInput
         {
-            [PropertyContract.Required, EntityExportFormatSemantics]
+            [PropertyContract.Required]
             string Format { get; set; }
+
+            ICollection<string> AvailableFormats { get; set; }
 
             [PropertyContract.Required, PropertyContract.Semantic.FileUpload]
             byte[] File { get; set; }

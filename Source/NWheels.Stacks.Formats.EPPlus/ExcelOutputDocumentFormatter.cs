@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.Authorization.Core;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Entities.Core;
 using NWheels.Extensions;
 using NWheels.Processing.Documents;
@@ -19,7 +20,7 @@ namespace NWheels.Stacks.Formats.EPPlus
     {
         #region Implementation of IOutputDocumentFormatter
 
-        public FormattedDocument FormatReportDocument(IDomainObject criteria, ApplicationEntityService.EntityCursor queryResults, DocumentDesign design)
+        public FormattedDocument FormatReportDocument(IObject criteria, ApplicationEntityService.EntityCursor queryResults, DocumentDesign design)
         {
             using ( ExcelPackage package = new ExcelPackage() )
             {
@@ -51,7 +52,7 @@ namespace NWheels.Stacks.Formats.EPPlus
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public FormattedDocument FormatFixedDocument(IDomainObject model, DocumentDesign design)
+        public FormattedDocument FormatFixedDocument(IObject model, DocumentDesign design)
         {
             throw new NotImplementedException();
         }

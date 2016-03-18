@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Entities.Core;
 using NWheels.Processing.Documents.Core;
 using NWheels.UI;
@@ -22,7 +23,7 @@ namespace NWheels.Processing.Documents.Impl
 
         #region Implementation of IOutputDocumentFormatter
 
-        public FormattedDocument FormatReportDocument(IDomainObject criteria, ApplicationEntityService.EntityCursor queryResults, DocumentDesign design)
+        public FormattedDocument FormatReportDocument(IObject criteria, ApplicationEntityService.EntityCursor queryResults, DocumentDesign design)
         {
             var output = new StringBuilder();
 
@@ -59,7 +60,7 @@ namespace NWheels.Processing.Documents.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public FormattedDocument FormatFixedDocument(IDomainObject model, DocumentDesign design)
+        public FormattedDocument FormatFixedDocument(IObject model, DocumentDesign design)
         {
             throw new NotImplementedException();
         }

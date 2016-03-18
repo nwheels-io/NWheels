@@ -362,6 +362,7 @@
     <Compile Include="UI\Impl\CrudEntityExportTx.cs" />
     <Compile Include="UI\Impl\CrudEntityImportTx.cs" />
     <Compile Include="UI\Impl\EntityExportFormatSemanticsAttribute.cs" />
+    <Compile Include="UI\Impl\EntityImportExportFormatSet.cs" />
     <Compile Include="UI\Toolbox\ChartReport.cs" />
     <Compile Include="UI\Toolbox\ChartReportScreenPart.cs" />
     <Compile Include="UI\Toolbox\EntityMethodForm.cs" />

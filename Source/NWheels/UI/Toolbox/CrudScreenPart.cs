@@ -55,10 +55,25 @@ namespace NWheels.UI.Toolbox
                 ImportForm.Reset.Text = "Cancel";
                 ImportForm.InputForm.Field(x => x.Format);
                 ImportForm.InputForm.Field(x => x.File, type: FormFieldType.FileUpload);
+                ImportForm.InputForm.LookupSource(x => x.Format, x => x.AvailableFormats);
+                ImportForm.ContextEntityType = typeof(TEntity);
+                ImportForm.OutputDownloadFormat = "EXCEL";
                 
                 ExportForm.AttachAsPopupTo(presenter, Export);
                 ExportForm.Execute.Text = "Export";
                 ExportForm.Reset.Text = "Cancel";
+                ExportForm.InputForm.LookupSource(x => x.Format, x => x.AvailableFormats);
+                ExportForm.ContextEntityType = typeof(TEntity);
+                ExportForm.OutputDownloadFormat = "EXCEL";
+
+                var entityName = MetadataCache.GetTypeMetadata(typeof(TEntity)).QualifiedName;
+
+                presenter.On(NavigatedHere)
+                    .AlterModel(
+                        alt => alt.Copy(entityName).To(vm => vm.State.ImportContext.EntityName),
+                        alt => alt.Copy(entityName).To(vm => vm.State.ExportContext.EntityName))
+                    .Then(b => b.Broadcast(ImportForm.ContextSetter).WithPayload(vm => vm.State.ImportContext).TunnelDown()
+                    .Then(bb => bb.Broadcast(ExportForm.ContextSetter).WithPayload(vm => vm.State.ExportContext).TunnelDown()));
             }
             else
             {
@@ -82,8 +97,8 @@ namespace NWheels.UI.Toolbox
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TransactionForm<CrudEntityImportTx.IInput, CrudEntityImportTx, Empty.Output> ImportForm { get; set; }
-        public TransactionForm<CrudEntityExportTx.IInput, CrudEntityExportTx, DocumentFormatReplyMessage> ExportForm { get; set; }
+        public TransactionForm<CrudEntityImportTx.IContext, CrudEntityImportTx.IInput, CrudEntityImportTx, Empty.Output> ImportForm { get; set; }
+        public TransactionForm<CrudEntityExportTx.IContext, CrudEntityExportTx.IInput, CrudEntityExportTx, DocumentFormatReplyMessage> ExportForm { get; set; }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -96,6 +111,8 @@ namespace NWheels.UI.Toolbox
         public interface IState
         {
             TEntity Entity { get; set; }
+            CrudEntityImportTx.IContext ImportContext { get; set; }
+            CrudEntityExportTx.IContext ExportContext { get; set; }
         }
     }
 }

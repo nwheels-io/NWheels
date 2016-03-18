@@ -1489,13 +1489,28 @@ HEAD, JS/CSS LINKS
                  </span>
             </div>            
             <!-- DROP DOWN -->
-            <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown')"
+            <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown') && hasUidlModifier('LookupShowSelectAll')"
                     class="form-control m-b"
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
                     id="{{::uniqueFieldId}}"
                     name="{{::uniqueFieldId}}">
-                <option value="" ng-if="hasUidlModifier('LookupShowSelectAll')">All</option>
+                <option value="">All</option>
+            </select>
+            <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown') && hasUidlModifier('LookupShowSelectNone')"
+                    class="form-control m-b"
+                    ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
+                    ng-model="entity[lookupForeignKeyProperty]"
+                    id="{{::uniqueFieldId}}"
+                    name="{{::uniqueFieldId}}">
+                <option value="">- Choose -</option>
+            </select>
+            <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown') && !hasUidlModifier('LookupShowSelectAll') && !hasUidlModifier('LookupShowSelectNone')"
+                    class="form-control m-b"
+                    ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
+                    ng-model="entity[lookupForeignKeyProperty]"
+                    id="{{::uniqueFieldId}}"
+                    name="{{::uniqueFieldId}}">
             </select>
             <!-- TYPEAHEAD -->
             <input ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('TypeAhead')"
