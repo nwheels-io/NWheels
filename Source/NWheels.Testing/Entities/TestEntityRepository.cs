@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
@@ -39,6 +40,13 @@ namespace NWheels.Testing.Entities
         public IQueryable<TEntity> AsQueryable()
         {
             return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IEnumerable IEntityRepository.AsEnumerabe()
+        {
+            return this.AsQueryable();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

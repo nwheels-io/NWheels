@@ -73,6 +73,8 @@ namespace NWheels.UI.Toolbox
                         alt => alt.Copy(entityName).To(vm => vm.State.ExportContext.EntityName))
                     .Then(b => b.Broadcast(ImportForm.ContextSetter).WithPayload(vm => vm.State.ImportContext).TunnelDown()
                     .Then(bb => bb.Broadcast(ExportForm.ContextSetter).WithPayload(vm => vm.State.ExportContext).TunnelDown()));
+
+                presenter.On(ImportForm.OutputReady).Broadcast(Crud.RefreshRequested).TunnelDown();
             }
             else
             {

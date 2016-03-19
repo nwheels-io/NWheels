@@ -1085,6 +1085,10 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 scope.refresh();
             });
 
+            scope.$on(scope.uidl.qualifiedName + ':RefreshRequested', function (event) {
+                scope.refresh();
+            });
+
             scope.$on(scope.uidl.qualifiedName + ':Grid:ObjectSelected', function(event, data) {
                 scope.$apply(function() {
                     scope.selectedEntity = data;

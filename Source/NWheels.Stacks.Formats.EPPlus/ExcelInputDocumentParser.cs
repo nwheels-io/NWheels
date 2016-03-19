@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Exceptions;
 using NWheels.Processing.Documents;
 using NWheels.Processing.Documents.Core;
 using NWheels.UI;
+using NWheels.UI.Impl;
+using OfficeOpenXml;
 
 namespace NWheels.Stacks.Formats.EPPlus
 {
@@ -24,11 +28,8 @@ namespace NWheels.Stacks.Formats.EPPlus
 
         public void ImportDataFromReportDocument(FormattedDocument document, DocumentDesign design, ApplicationEntityService entityService)
         {
-            var tableDesign = (DocumentDesign.TableElement)design.Contents;
-            var entityHandler = entityService.GetEntityHandler(tableDesign.BoundEntityName);
-
-
-
+            var importOperation = new ExcelDataImportOperation(document, design, entityService);
+            importOperation.Execute();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -24,10 +24,10 @@ namespace NWheels.UI
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected EntityExportFormatBase(ITypeMetadataCache metadataCache, string formatTitle, string documentFormatIdName)
+        protected EntityExportFormatBase(ITypeMetadataCache metadataCache, string formatName, string documentFormatIdName)
         {
             this.MetadataCache = metadataCache;
-            this.FormatName = formatTitle;
+            this.FormatName = formatName;
             this.DocumentFormatIdName = documentFormatIdName;
         }
 

@@ -7,19 +7,22 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Extensions;
+using NWheels.UI;
 using NWheels.UI.Toolbox;
 
 namespace NWheels.Processing.Documents
 {
     public class DocumentDesign
     {
-        public DocumentDesign(Element contents)
+        public DocumentDesign(string idName, Element contents)
         {
+            this.IdName = idName;
             this.Contents = contents;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public string IdName { get; private set; }
         public Element Contents { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -81,7 +84,7 @@ namespace NWheels.Processing.Documents
 
             public class Column
             {
-                public Column(string title, int? width, Binding binding)
+                public Column(string title, double? width, Binding binding)
                 {
                     Title = title;
                     Width = width;
@@ -91,7 +94,7 @@ namespace NWheels.Processing.Documents
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
                 public string Title { get; private set; }
-                public int? Width { get; private set; }
+                public double? Width { get; private set; }
                 public Binding Binding { get; private set; }
             }
         }
@@ -100,22 +103,65 @@ namespace NWheels.Processing.Documents
 
         public class Binding
         {
-            public Binding(string expression, string format, string fallback = null)
+            public Binding(string expression, string format, string fallback = null, bool isKey = false)
             {
                 SpecialName = FieldSpecialName.None;
                 Expression = expression;
                 Format = format;
                 Fallback = fallback;
+                IsKey = isKey;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public Binding(FieldSpecialName specialName, string format, string fallback = null)
+            public Binding(FieldSpecialName specialName, string format, string fallback = null, bool isKey = false)
             {
                 SpecialName = specialName;
                 Expression = null;
                 Format = format;
                 Fallback = fallback;
+                IsKey = isKey;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public int TryFindCursorColumnIndex(ApplicationEntityService.EntityCursor cursor)
+            {
+                for (int cursorColumnIndex = 0; cursorColumnIndex < cursor.ColumnCount; cursorColumnIndex++)
+                {
+                    var cursorColumnExpression = string.Join(".", cursor.Columns[cursorColumnIndex].PropertyPath);
+                    
+                    if (cursorColumnExpression == this.Expression)
+                    {
+                        return cursorColumnIndex;
+                    }
+                }
+
+                return -1;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public object ReadValueFromCursor(ApplicationEntityService.EntityCursorRow cursorRow, int columnIndex, bool applyFormat)
+            {
+                if (columnIndex < 0)
+                {
+                    return "#BINDERR";
+                }
+
+                var value = cursorRow[columnIndex];
+
+                if ((value == null || value.Equals(string.Empty)) && Fallback != null)
+                {
+                    return Fallback;
+                }
+
+                if (applyFormat && value != null)
+                {
+                    return string.Format("{0:" + Format + "}", value);
+                }
+
+                return value;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -124,6 +170,7 @@ namespace NWheels.Processing.Documents
             public string Expression { get; private set; }
             public string Format { get; private set; }
             public string Fallback { get; private set; }
+            public bool IsKey { get; private set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -179,11 +226,12 @@ namespace NWheels.Processing.Documents
             public EntityTableBuilder<TEntity> Column<T>(
                 Expression<Func<TEntity, T>> property, 
                 string title = null, 
-                int? width = null, 
+                double? width = null, 
                 string format = null, 
-                string fallback = null)
+                string fallback = null, 
+                bool isKey = false)
             {
-                return InternalColumn(property, title, width, format, fallback);
+                return InternalColumn(property, title, width, format, fallback, isKey);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -191,26 +239,28 @@ namespace NWheels.Processing.Documents
             public EntityTableBuilder<TEntity> InheritorColumn<TInheritorEntity>(
                 Expression<Func<TInheritorEntity, object>> property,
                 string title = null,
-                int? width = null,
+                double? width = null,
                 string format = null,
-                string fallback = null)
+                string fallback = null,
+                bool isKey = false)
                 where TInheritorEntity : TEntity
             {
-                return InternalColumn(property, title, width, format, fallback);
+                return InternalColumn(property, title, width, format, fallback, isKey);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public EntityTableBuilder<TEntity> TypeColumn(
                 string title = null,
-                int? width = null,
+                double? width = null,
                 string format = null,
-                string fallback = null)
+                string fallback = null,
+                bool isKey = false)
             {
                 var column = new TableElement.Column(
                     title.OrDefaultIfNullOrWhitespace("Type"),
                     width,
-                    new Binding(FieldSpecialName.Type, format, fallback));
+                    new Binding(FieldSpecialName.Type, format, fallback, isKey));
 
                 _element.Columns.Add(column);
 
@@ -221,14 +271,14 @@ namespace NWheels.Processing.Documents
 
             public EntityTableBuilder<TEntity> IdColumn(
                 string title = null,
-                int? width = null,
+                double? width = null,
                 string format = null,
                 string fallback = null)
             {
                 var column = new TableElement.Column(
                     title.OrDefaultIfNullOrWhitespace("Id"),
                     width,
-                    new Binding(FieldSpecialName.Id, format, fallback));
+                    new Binding(FieldSpecialName.Id, format, fallback, isKey: true));
 
                 _element.Columns.Add(column);
 
@@ -240,9 +290,10 @@ namespace NWheels.Processing.Documents
             private EntityTableBuilder<TEntity> InternalColumn(
                 LambdaExpression propertyExpression,
                 string title = null,
-                int? width = null,
+                double? width = null,
                 string format = null,
-                string fallback = null)
+                string fallback = null,
+                bool isKey = false)
             {
                 var propertyInfo = propertyExpression.GetPropertyInfo();
                 IPropertyMetadata metaProperty;
@@ -262,7 +313,7 @@ namespace NWheels.Processing.Documents
                 var column = new TableElement.Column(
                     title.OrDefaultIfNullOrWhitespace(metaProperty.Name),
                     width,
-                    new Binding(bindingExpression, format, fallback));
+                    new Binding(bindingExpression, format, fallback, isKey));
 
                 _element.Columns.Add(column);
 

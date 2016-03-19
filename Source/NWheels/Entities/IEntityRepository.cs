@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -11,6 +12,7 @@ namespace NWheels.Entities
 {
     public interface IEntityRepository
     {
+        IEnumerable AsEnumerabe();
         object New();
         object New(Type concreteContract);
         object TryGetById(IEntityId id);
