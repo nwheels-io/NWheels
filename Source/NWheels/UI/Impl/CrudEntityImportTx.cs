@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Processing;
+using NWheels.Processing.Documents;
 using NWheels.Processing.Documents.Core;
 using NWheels.UI.Factories;
 
@@ -59,7 +60,9 @@ namespace NWheels.UI.Impl
 
             var uiContext = UIOperationContext.Current;
             var inputParser = _formatSet.GetInputParser(input.Format, out importFormat);
-            var entityHandler = uiContext.EntityService.GetEntityHandler(uiContext.EntityName);
+            var document = new FormattedDocument(new DocumentMetadata(inputParser.MetaFormat), input.File);
+            
+            inputParser.ImportDataFromReportDocument(document, importFormat.DocumentDesign, uiContext.EntityService);
             
             return new Empty.Output();
         }

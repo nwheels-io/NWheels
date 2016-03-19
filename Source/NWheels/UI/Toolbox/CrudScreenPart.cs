@@ -57,7 +57,6 @@ namespace NWheels.UI.Toolbox
                 ImportForm.InputForm.Field(x => x.File, type: FormFieldType.FileUpload);
                 ImportForm.InputForm.LookupSource(x => x.Format, x => x.AvailableFormats);
                 ImportForm.ContextEntityType = typeof(TEntity);
-                ImportForm.OutputDownloadFormat = "EXCEL";
                 
                 ExportForm.AttachAsPopupTo(presenter, Export);
                 ExportForm.Execute.Text = "Export";
