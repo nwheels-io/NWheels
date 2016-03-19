@@ -74,6 +74,7 @@ namespace NWheels.Processing.Documents
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public string BoundEntityName { get; set; }
             public IList<Column> Columns { get; private set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -141,6 +142,7 @@ namespace NWheels.Processing.Documents
                 _metadataCache = metadataCache;
                 _metaType = metadataCache.GetTypeMetadata(typeof(TEntity));
                 _element = new TableElement();
+                _element.BoundEntityName = _metaType.QualifiedName;
                 _navigationPrefix = "";
             }
 

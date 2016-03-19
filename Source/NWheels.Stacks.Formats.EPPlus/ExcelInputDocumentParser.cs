@@ -5,22 +5,40 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.Processing.Documents;
 using NWheels.Processing.Documents.Core;
+using NWheels.UI;
 
 namespace NWheels.Stacks.Formats.EPPlus
 {
     public class ExcelInputDocumentParser : IInputDocumentParser
     {
+        private readonly IFramework _framework;
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        #region Implementation of IInputDocumentParser
-
-        public void ImportReportDocument(FormattedDocument document, DocumentDesign design)
+        public ExcelInputDocumentParser(IFramework framework)
         {
-            throw new NotImplementedException();
+            _framework = framework;
         }
 
-        public DocumentFormat MetaFormat { get; private set; }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        #endregion
+        public void ImportDataFromReportDocument(FormattedDocument document, DocumentDesign design, ApplicationEntityService entityService)
+        {
+            var tableDesign = (DocumentDesign.TableElement)design.Contents;
+            var entityHandler = entityService.GetEntityHandler(tableDesign.BoundEntityName);
+
+
+
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DocumentFormat MetaFormat
+        {
+            get
+            {
+                return ExcelMetaFormat.GetFormat();
+            }
+        }
     }
 }

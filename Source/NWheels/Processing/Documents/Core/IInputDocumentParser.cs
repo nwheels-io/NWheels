@@ -1,8 +1,10 @@
-﻿namespace NWheels.Processing.Documents.Core
+﻿using NWheels.UI;
+
+namespace NWheels.Processing.Documents.Core
 {
     public interface IInputDocumentParser
     {
-        void ImportReportDocument(FormattedDocument document, DocumentDesign design);
+        void ImportDataFromReportDocument(FormattedDocument document, DocumentDesign design, ApplicationEntityService entityService);
         DocumentFormat MetaFormat { get; }
     }
 }

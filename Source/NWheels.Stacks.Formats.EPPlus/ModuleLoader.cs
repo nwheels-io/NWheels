@@ -13,6 +13,7 @@ namespace NWheels.Stacks.Formats.EPPlus
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<ExcelOutputDocumentFormatter>().As<IOutputDocumentFormatter>();
+            builder.RegisterType<ExcelInputDocumentParser>().As<IInputDocumentParser>();
         }
 
         #endregion
