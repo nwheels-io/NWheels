@@ -39,7 +39,8 @@ HEAD, JS/CSS LINKS
     <link href="app/skin/assets/css/plugins/clockpicker/clockpicker.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/daterangepicker/daterangepicker-bs3.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/isteven-multi-select/isteven-multi-select.css" rel="stylesheet">
-    <link href="app/skin/assets/css/plugins/dropzone/dropzone.css" rel="stylesheet">
+    <link href="app/skin/assets/css/plugins/dropzone/basic.css" rel="stylesheet">
+    <!--link href="app/skin/assets/css/plugins/dropzone/dropzone.css" rel="stylesheet"-->
     <link href="app/skin/assets/css/plugins/jqGrid/ui.jqgrid.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/jQueryUI/jquery-ui-1.10.4.custom.min.css" rel="stylesheet">
     <link href="app/skin/assets/css/animate.css" rel="stylesheet">
@@ -1526,10 +1527,14 @@ HEAD, JS/CSS LINKS
                 id="{{::uniqueFieldId}}"
                 name="{{::uniqueFieldId}}">
             <!-- FILE UPLOAD -->
-            <div ng-if="uidl.fieldType==='FileUpload'" class="m-b" style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
-                <div class="dropzone" style="height:100px;color:lightgray;padding:5px;">
-                Drag and drop a file here.
-                </div>
+            <div ng-if="uidl.fieldType==='FileUpload'" 
+                 id="{{::uniqueFieldId}}"
+                 class="dropzone" 
+                 style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
+                 <div class="dropzone-previews"></div>
+            </div>
+            <div ng-if="uidl.fieldType==='FileUpload'" class="m-b">
+                <a href="" ng-click="clearDropzone()">Clear</a>
             </div>
             <!-- IMAGE UPLOAD -->
             <div ng-if="uidl.fieldType==='ImageUpload'" class="col-sm-3">
@@ -1655,6 +1660,35 @@ HEAD, JS/CSS LINKS
                 $scope.$watch('timeRangePresets', function(newValue, oldValue) {
                     $scope.createDateTimeRangePicker();
                 });
+            }
+            if ($scope.uidl.fieldType==='FileUpload') {
+                $scope.dropzone = new Dropzone('#' + $scope.uniqueFieldId, {
+                    url: 'app/uploadContent',
+                    maxFiles: 1,
+                    maxFilesize: 5,
+                    //acceptedFiles: '*.xslx',
+                    autoProcessQueue: true,
+                    clickable: true,
+                    addRemoveLinks: true,
+                    dictDefaultMessage: 'Drop a file here, or click to choose',
+                    dictResponseError: 'Upload failed',
+                    init: function() {
+                        this.on('error', function(file, response) {
+                            //var errorMessage = response.errorMessage;
+                            $(file.previewElement).find('.dz-error-message').text('Upload failed.');
+                        });
+                    },
+                    accept: function(file, done) {
+                        if (file.type==='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                            done();
+                        } else {
+                            done('Invalid file type.');
+                        }
+                    },
+                });
+                $scope.clearDropzone = function() {
+                    $scope.dropzone.removeAllFiles(true);
+                };
             }
         }
     </script>

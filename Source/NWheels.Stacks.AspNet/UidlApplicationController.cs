@@ -21,14 +21,18 @@ using System.Reflection;
 using System.Web;
 using NWheels.Processing;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using NWheels.Authorization.Core;
 using NWheels.Concurrency;
+using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
 using NWheels.Endpoints.Core;
 using NWheels.Entities.Core;
 using NWheels.Processing.Documents;
+using NWheels.TypeModel;
 using NWheels.UI;
 using NWheels.UI.Toolbox;
 
@@ -36,9 +40,14 @@ namespace NWheels.Stacks.AspNet
 {
     public class UidlApplicationController : ApiController
     {
+        private const string UploadSessionKey = "UPLOAD";
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private readonly IFramework _framework;
         private readonly IComponentContext _components;
         private readonly IWebModuleContext _context;
+        private readonly ITypeMetadataCache _metadataCache;
         private readonly IServiceBus _serviceBus;
         private readonly IMethodCallObjectFactory _callFactory;
         private readonly ISessionManager _sessionManager;
@@ -55,6 +64,7 @@ namespace NWheels.Stacks.AspNet
             IFramework framework,
             IComponentContext components,
             IWebModuleContext context, 
+            ITypeMetadataCache metadataCache,
             IServiceBus serviceBus, 
             IMethodCallObjectFactory callFactory,
             ISessionManager sessionManager,
@@ -64,6 +74,7 @@ namespace NWheels.Stacks.AspNet
             _components = components;
             _context = context;
             _serviceBus = serviceBus;
+            _metadataCache = metadataCache;
             _callFactory = callFactory;
             _sessionManager = sessionManager;
             _uiConfig = uiConfig;
@@ -605,6 +616,26 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [HttpPost]
+        [Route("app/uploadContent")]
+        public IHttpActionResult UploadContent()
+        {
+            var httpContext = HttpContext.Current;
+
+            if (httpContext.Request.Files.Count != 1)
+            {
+                return StatusCode(HttpStatusCode.BadRequest);
+            }
+
+            var buffer = new MemoryStream();
+            httpContext.Request.Files[0].InputStream.CopyTo(buffer);
+            httpContext.Session[UploadSessionKey] = buffer.ToArray();
+
+            return StatusCode(HttpStatusCode.OK);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [HttpGet]
         [Route("app/takeMessages")]
         public IHttpActionResult TakePendingPushMessages()
@@ -894,6 +925,8 @@ namespace NWheels.Stacks.AspNet
             var serializerSettings = _context.EntityService.CreateSerializerSettings();
             JsonConvert.PopulateObject(jsonString, call, serializerSettings);
 
+            TryInjectUploadedFile(call);
+
             return new TransactionScriptCommandMessage(_framework, _sessionManager.CurrentSession, scriptEntry.TransactionScriptType, call, synchronous);
         }
 
@@ -932,7 +965,8 @@ namespace NWheels.Stacks.AspNet
             var serializerSettings = _context.EntityService.CreateSerializerSettings();
             
             JsonConvert.PopulateObject(jsonString, call, serializerSettings);
-            
+            TryInjectUploadedFile(call);
+
             return new EntityMethodCommandMessage(
                 _framework, 
                 _sessionManager.CurrentSession, 
@@ -944,21 +978,67 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private object TryGetViewModelFrom(AbstractCommandMessage command)
+        private IObject TryGetViewModelFrom(AbstractCommandMessage command)
         {
             var haveMethodCall = command as IHaveMethodCall;
 
             if (haveMethodCall != null)
             {
-                var call = haveMethodCall.Call;
+                return TryGetViewModelFrom(haveMethodCall.Call);
+            }
 
-                if (call.MethodInfo.GetParameters().Length == 1)
+            return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private IObject TryGetViewModelFrom(IMethodCallObject call)
+        {
+            var parameters = call.MethodInfo.GetParameters();
+
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var viewModel = call.GetParameterValue(index: i) as IObject;
+
+                if (viewModel != null)
                 {
-                    return call.GetParameterValue(index: 0);
+                    return viewModel;
                 }
             }
 
             return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void TryInjectUploadedFile(IMethodCallObject call)
+        {
+            var viewModel = TryGetViewModelFrom(call);
+
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            var metaType = _metadataCache.GetTypeMetadata(viewModel.ContractType);
+            var fileUploadProperty = metaType.Properties.FirstOrDefault(p =>
+                p.ClrType == typeof(byte[]) &&
+                p.SemanticType != null &&
+                p.SemanticType.WellKnownSemantic.IsIn(WellKnownSemanticType.FileUpload, WellKnownSemanticType.ImageUpload));
+
+            if (fileUploadProperty == null)
+            {
+                return;
+            }
+
+            var httpContextSession = HttpContext.Current.Session;
+            var uploadContents = httpContextSession[UploadSessionKey] as byte[];
+
+            if (uploadContents != null)
+            {
+                fileUploadProperty.WriteValue(viewModel, uploadContents);
+                httpContextSession.Remove(UploadSessionKey);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
