@@ -250,6 +250,36 @@ namespace NWheels.Processing.Documents
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public EntityTableBuilder<TEntity> MemberInheritorColumn<TAncestor, TInheritor>(
+                Expression<Func<TEntity, TAncestor>> pathToAncestor,
+                Expression<Func<TInheritor, object>> pathWithinInheritor,
+                string title = null,
+                double? width = null,
+                string format = null,
+                string fallback = null,
+                bool isKey = false)
+                where TInheritor : TAncestor
+            {
+                var pathWithinAncestorArray = pathWithinInheritor.ToNormalizedNavigationStringArray();
+
+                var bindingExpression = 
+                    _navigationPrefix +
+                    string.Join(".", pathToAncestor.ToNormalizedNavigationStringArray()) + 
+                    "." +
+                    string.Join(".", pathWithinAncestorArray);
+
+                var column = new TableElement.Column(
+                    title.OrDefaultIfNullOrWhitespace(pathWithinAncestorArray.Last()),
+                    width,
+                    new Binding(bindingExpression, format, fallback, isKey));
+
+                _element.Columns.Add(column);
+
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public EntityTableBuilder<TEntity> TypeColumn(
                 string title = null,
                 double? width = null,
@@ -296,17 +326,7 @@ namespace NWheels.Processing.Documents
                 bool isKey = false)
             {
                 var propertyInfo = propertyExpression.GetPropertyInfo();
-                IPropertyMetadata metaProperty;
-
-                if (propertyInfo.DeclaringType.IsAssignableFrom(_metaType.ContractType))
-                {
-                    metaProperty = _metaType.GetPropertyByDeclaration(propertyInfo);
-                }
-                else
-                {
-                    var inheritorMetaType = _metaType.DerivedTypes.First(t => propertyInfo.DeclaringType.IsAssignableFrom(t.ContractType));
-                    metaProperty = inheritorMetaType.GetPropertyByDeclaration(propertyInfo);
-                }
+                var metaProperty = GetPropertyMetadata(propertyInfo);
 
                 var bindingExpression = _navigationPrefix + string.Join(".", propertyExpression.ToNormalizedNavigationStringArray());
 
@@ -318,6 +338,25 @@ namespace NWheels.Processing.Documents
                 _element.Columns.Add(column);
 
                 return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IPropertyMetadata GetPropertyMetadata(PropertyInfo propertyInfo)
+            {
+                IPropertyMetadata metaProperty;
+            
+                if (propertyInfo.DeclaringType.IsAssignableFrom(_metaType.ContractType))
+                {
+                    metaProperty = _metaType.GetPropertyByDeclaration(propertyInfo);
+                }
+                else
+                {
+                    var inheritorMetaType = _metaType.DerivedTypes.First(t => propertyInfo.DeclaringType.IsAssignableFrom(t.ContractType));
+                    metaProperty = inheritorMetaType.GetPropertyByDeclaration(propertyInfo);
+                }
+                
+                return metaProperty;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
