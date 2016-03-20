@@ -236,6 +236,35 @@ namespace NWheels.Processing.Documents
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public EntityTableBuilder<TEntity> ColumnWithNavigationTo<TTargetEntity>(
+                Expression<Func<TEntity, object>> pathToEntityId,
+                Expression<Func<TTargetEntity, object>> pathWithinTargetEntity,
+                string title = null,
+                double? width = null,
+                string format = null,
+                string fallback = null,
+                bool isKey = false)
+            {
+                var pathWithinTargetEntityArray = pathWithinTargetEntity.ToNormalizedNavigationStringArray();
+
+                var bindingExpression = 
+                    _navigationPrefix +
+                    string.Join(".", pathToEntityId.ToNormalizedNavigationStringArray()) + 
+                    "." +
+                    string.Join(".", pathWithinTargetEntityArray);
+
+                var column = new TableElement.Column(
+                    title.OrDefaultIfNullOrWhitespace(pathWithinTargetEntityArray.Last()),
+                    width,
+                    new Binding(bindingExpression, format, fallback, isKey));
+
+                _element.Columns.Add(column);
+
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public EntityTableBuilder<TEntity> InheritorColumn<TInheritorEntity>(
                 Expression<Func<TInheritorEntity, object>> property,
                 string title = null,
