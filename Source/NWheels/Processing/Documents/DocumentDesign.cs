@@ -144,6 +144,16 @@ namespace NWheels.Processing.Documents
 
             public object ReadValueFromCursor(ApplicationEntityService.EntityCursorRow cursorRow, int columnIndex, bool applyFormat)
             {
+                if (SpecialName == FieldSpecialName.Id)
+                {
+                    return cursorRow.Metadata.EntityMetaType.EntityIdProperty.ReadValue(cursorRow.Record);
+                }
+
+                if (SpecialName == FieldSpecialName.Type)
+                {
+                    return cursorRow.Metadata.EntityMetaType.QualifiedName;
+                }
+
                 if (columnIndex < 0)
                 {
                     return "#BINDERR";
