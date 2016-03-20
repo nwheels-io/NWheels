@@ -655,7 +655,7 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
             
-            <div ng-show="uiShowCrudForm" class="col-lg-12">
+            <div ng-if="uiShowCrudForm" class="col-lg-12">
                 <div class="ibox-title">
                     <h2 class="clearfix">
                         <i class="fa text-muted" ng-class="{'fa-asterisk':model.isNew, 'fa-edit':!model.isNew}"></i>

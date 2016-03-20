@@ -1114,15 +1114,14 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
 
                 scope.model.entity = entity;
                 scope.model.isNew = false;
-
-                if (scope.uidl.formTypeSelector) {
-                    scope.$broadcast(scope.uidl.formTypeSelector.qualifiedName + ':ModelSetter', scope.model.entity);
-                } else {
-                    scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelSetter', scope.model.entity);
-                }
+                scope.uiShowCrudForm = true;
 
                 $timeout(function() {
-                    scope.uiShowCrudForm = true;
+                    if (scope.uidl.formTypeSelector) {
+                        scope.$broadcast(scope.uidl.formTypeSelector.qualifiedName + ':ModelSetter', scope.model.entity);
+                    } else {
+                        scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelSetter', scope.model.entity);
+                    }
                 });
             };
 
