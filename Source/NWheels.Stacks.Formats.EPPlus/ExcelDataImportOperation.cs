@@ -97,7 +97,7 @@ namespace NWheels.Stacks.Formats.EPPlus
                 _entityHandler.MetaType.QualifiedName, 
                 queryParams: new Dictionary<string, string>());
 
-            foreach (var column in _tableDesign.Columns)
+            foreach (var column in _tableDesign.Columns.Where(c => c.Binding.Expression != null))
             {
                 queryOptions.SelectPropertyNames.Add(new ApplicationEntityService.QuerySelectItem(column.Binding.Expression)); 
             }

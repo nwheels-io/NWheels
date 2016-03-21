@@ -67,10 +67,12 @@ namespace NWheels.UI.Impl
             var queryOptions = new ApplicationEntityService.QueryOptions(uiContext.EntityName, new Dictionary<string, string>());
             
             var tableDesign = ((DocumentDesign.TableElement)exportFormat.DocumentDesign.Contents);
+            
             foreach (var column in tableDesign.Columns.Where(c => c.Binding.Expression != null))
             {
                 queryOptions.SelectPropertyNames.Add(new ApplicationEntityService.QuerySelectItem(column.Binding.Expression));
             }
+            
             using (ApplicationEntityService.QueryContext.NewQuery(uiContext.EntityService, queryOptions))
             {
                 using (entityHandler.NewUnitOfWork())
