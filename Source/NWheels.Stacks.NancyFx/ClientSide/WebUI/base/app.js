@@ -1145,19 +1145,19 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             scope.newEntityCreated = function(newObj) {
                 scope.model.entity = newObj;
                 scope.model.isNew = true;
-                
-                if (scope.uidl.mode === 'Inline' && scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
-                    newObj[scope.uidl.inverseNavigationProperty] = scope.parentEntityId;
-                }
-                
-                if (scope.uidl.form) {
-                    scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelSetter', scope.model.entity);
-                } else if (scope.uidl.formTypeSelector) {
-                    scope.$broadcast(scope.uidl.formTypeSelector.qualifiedName + ':ModelSetter', scope.model.entity);
-                }
+
+                scope.uiShowCrudForm = true;
 
                 $timeout(function () {
-                    scope.uiShowCrudForm = true;
+                    if (scope.uidl.mode === 'Inline' && scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
+                        newObj[scope.uidl.inverseNavigationProperty] = scope.parentEntityId;
+                    }
+                    
+                    if (scope.uidl.form) {
+                        scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelSetter', scope.model.entity);
+                    } else if (scope.uidl.formTypeSelector) {
+                        scope.$broadcast(scope.uidl.formTypeSelector.qualifiedName + ':ModelSetter', scope.model.entity);
+                    }
                 });
             };
 
