@@ -332,7 +332,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<ContractMetadataConvention>().As<IMetadataConvention>().SingleInstance().FirstInPipeline();
             builder.RegisterType<AttributeMetadataConvention>().As<IMetadataConvention>().SingleInstance().LastInPipeline();
             builder.RegisterType<RelationMetadataConvention>().As<IMetadataConvention>().SingleInstance().LastInPipeline();
-            builder.RegisterType<MutationMetadataConvention>().As<IMetadataConvention>().SingleInstance().AnchoredLastInPipeline();
+            builder.RegisterType<MutationMetadataConvention>().As<IMetadataConvention>().InstancePerDependency().AnchoredLastInPipeline();
             builder.RegisterPipeline<IMetadataMutation>().InstancePerDependency(); // avoid caching to allow modules extend convention set
             builder.RegisterInstance(new PascalCaseRelationalMappingConvention(usePluralTableNames: true)).As<IRelationalMappingConvention>();
             builder.RegisterType<MetadataConventionSet>().InstancePerDependency(); // avoid caching because modules can add new registrations
