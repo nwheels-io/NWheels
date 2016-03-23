@@ -187,6 +187,13 @@ namespace NWheels.Domains.Security.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected bool HaveUserRole(IUserRoleEntity userRole)
+        {
+            return AssociatedRoles.Any(r => EntityId.ValueOf(r) == EntityId.ValueOf(userRole));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void DeactivateCurrentPassword()
         {
             using ( var context = Framework.NewUnitOfWork<IUserAccountDataRepository>() )
