@@ -96,6 +96,9 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public int[] PageSizeOptions { get; set; }
 
+        [DataMember]
+        public int? DefaultPageSize { get; set; }
+
         //[DataMember]
         //public string DetailPaneStaticTemplateName { get; set; }
 
@@ -484,6 +487,15 @@ namespace NWheels.UI.Toolbox
             //this.DetailPaneStaticTemplateName = null;
             //this.DetailPaneTemplateNameProperty = null;
             this.DetailPaneExpanded = expanded;
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DataGrid<TDataRow> PageSize(int defaultSize, int[] pageSizeOptions)
+        {
+            this.DefaultPageSize = defaultSize;
+            this.PageSizeOptions = pageSizeOptions;
             return this;
         }
 
