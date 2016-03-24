@@ -7,7 +7,7 @@ using NWheels.Extensions;
 
 namespace NWheels.Testing.BehaviorDriven
 {
-    public abstract class Story : ExecutableSpecification
+    public abstract class UserStory : ExecutableSpecification
     {
         #region Overrides of Object
 
