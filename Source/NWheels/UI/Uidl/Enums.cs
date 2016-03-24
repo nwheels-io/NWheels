@@ -87,6 +87,7 @@ namespace NWheels.UI.Uidl
 
     public enum ApiCallTargetType
     {
+        None = 0,
         TransactionScript = 10,
         ServiceMethod = 20,
         EntityMethod = 30,

@@ -21,10 +21,10 @@ namespace NWheels.UI
             string entity = null,
             ApplicationEntityService.QueryOptions query = null)
         {
-            if (_s_current != null)
-            {
-                throw new InvalidOperationException("Another UIOperationContext instance is already attached to the current thread.");
-            }
+            //if (_s_current != null)
+            //{
+            //    throw new InvalidOperationException("Another UIOperationContext instance is already attached to the current thread.");
+            //}
 
             _s_current = this;
 
@@ -32,7 +32,7 @@ namespace NWheels.UI
 
             this.ApiCallType = callType;
             this.ApiResultType = resultType;
-            this.ApiTargetType = ParseUtility.Parse<ApiCallTargetType>(target);
+            this.ApiTargetType = (string.IsNullOrEmpty(target) ? ApiCallTargetType.None : ParseUtility.Parse<ApiCallTargetType>(target));
 
             this.ContractName = contract;
             this.OperationName = operation;

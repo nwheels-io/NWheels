@@ -670,8 +670,13 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            var checkResults = _context.EntityService.CheckEntityAuthorization(entityName);
-            return Json(checkResults, _context.EntityService.CreateSerializerSettings());
+            using (new UIOperationContext(
+                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command, 
+                target: null, contract: "ApplicationEntityService", operation: "CheckAuth", entity: entityName))
+            { 
+                var checkResults = _context.EntityService.CheckEntityAuthorization(entityName);
+                return Json(checkResults, _context.EntityService.CreateSerializerSettings());
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -685,11 +690,16 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            var json = _context.EntityService.NewEntityJson(entityName);
+            using (new UIOperationContext(
+                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command, 
+                target: null, contract: "ApplicationEntityService", operation: "New", entity: entityName))
+            { 
+                var json = _context.EntityService.NewEntityJson(entityName);
 
-            return ResponseMessage(new HttpResponseMessage() {
-                Content = new StringContent(json, Encoding.UTF8, "application/json")
-            });
+                return ResponseMessage(new HttpResponseMessage() {
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
+                });
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -703,14 +713,19 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            var queryParameters = this.Request.GetQueryString();
+            using (new UIOperationContext(
+                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command, 
+                target: null, contract: "ApplicationEntityService", operation: "QueryEntity", entity: entityName))
+            { 
+                var queryParameters = this.Request.GetQueryString();
 
-            var options = _context.EntityService.ParseQueryOptions(entityName, queryParameters);
-            var json = _context.EntityService.QueryEntityJson(entityName, options);
+                var options = _context.EntityService.ParseQueryOptions(entityName, queryParameters);
+                var json = _context.EntityService.QueryEntityJson(entityName, options);
 
-            return ResponseMessage(new HttpResponseMessage() {
-                Content = new StringContent(json, Encoding.UTF8, "application/json")
-            });
+                return ResponseMessage(new HttpResponseMessage() {
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
+                });
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -724,21 +739,26 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            IDomainObject entity;
-            if ( !_context.EntityService.TryGetEntityObjectById(entityName, entityId, out entity) )
+            using (new UIOperationContext(
+                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.EntityQuery,
+                target: null, contract: "ApplicationEntityService", operation: "QueryImage", entity: entityName))
             {
-                return StatusCode(HttpStatusCode.NotFound);
+                IDomainObject entity;
+                if (!_context.EntityService.TryGetEntityObjectById(entityName, entityId, out entity))
+                {
+                    return StatusCode(HttpStatusCode.NotFound);
+                }
+
+                var imageType = (string)entity.GetType().GetProperty(imageTypeProperty).GetValue(entity);
+                var imageContents = (byte[])entity.GetType().GetProperty(imageContentProperty).GetValue(entity);
+
+                var response = new HttpResponseMessage() {
+                    Content = new ByteArrayContent(imageContents)
+                };
+                response.Content.Headers.ContentType = new MediaTypeHeaderValue("image/" + imageType);
+
+                return ResponseMessage(response);
             }
-
-            var imageType = (string)entity.GetType().GetProperty(imageTypeProperty).GetValue(entity);
-            var imageContents = (byte[])entity.GetType().GetProperty(imageContentProperty).GetValue(entity);
-
-            var response = new HttpResponseMessage() {
-                Content = new ByteArrayContent(imageContents)
-            };
-            response.Content.Headers.ContentType = new MediaTypeHeaderValue("image/" + imageType);
-
-            return ResponseMessage(response);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -752,35 +772,40 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            var queryString = Request.GetQueryString();
-            var entityStateString = queryString.GetValueOrDefault("EntityState", EntityState.NewModified.ToString());
-            var entityIdString = queryString.GetValueOrDefault("EntityId", null);
-            var entityState = ParseUtility.Parse<EntityState>(entityStateString);
-            var session = Session.Current;
-
-            using (var activity = _context.Logger.StoreEntity(
-                entityName, entityState, entityIdString, session.UserIdentity.LoginName, session.Endpoint, session.UserPrincipal))
+            using (new UIOperationContext(
+                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command,
+                target: null, contract: "ApplicationEntityService", operation: "StoreEntity", entity: entityName))
             {
-                try
-                {
-                    var jsonString = Request.Content.ReadAsStringAsync().Result;
-                    var json = _context.EntityService.StoreEntityJson(entityName, entityState, entityIdString, jsonString);
+                var queryString = Request.GetQueryString();
+                var entityStateString = queryString.GetValueOrDefault("EntityState", EntityState.NewModified.ToString());
+                var entityIdString = queryString.GetValueOrDefault("EntityId", null);
+                var entityState = ParseUtility.Parse<EntityState>(entityStateString);
+                var session = Session.Current;
 
-                    if (json != null)
-                    {
-                        return ResponseMessage(new HttpResponseMessage() {
-                            Content = new StringContent(json, Encoding.UTF8, "application/json")
-                        });
-                    }
-                    else
-                    {
-                        return StatusCode(HttpStatusCode.OK);
-                    }
-                }
-                catch (Exception e)
+                using (var activity = _context.Logger.StoreEntity(
+                    entityName, entityState, entityIdString, session.UserIdentity.LoginName, session.Endpoint, session.UserPrincipal))
                 {
-                    activity.Fail(e);
-                    throw;
+                    try
+                    {
+                        var jsonString = Request.Content.ReadAsStringAsync().Result;
+                        var json = _context.EntityService.StoreEntityJson(entityName, entityState, entityIdString, jsonString);
+
+                        if (json != null)
+                        {
+                            return ResponseMessage(new HttpResponseMessage() {
+                                Content = new StringContent(json, Encoding.UTF8, "application/json")
+                            });
+                        }
+                        else
+                        {
+                            return StatusCode(HttpStatusCode.OK);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        activity.Fail(e);
+                        throw;
+                    }
                 }
             }
         }
@@ -805,19 +830,24 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
-            var session = Session.Current;
-
-            using (var activity = _context.Logger.DeleteEntity(entityName, entityId, session.UserIdentity.LoginName, session.Endpoint, session.UserPrincipal))
+            using (new UIOperationContext(
+                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.EntityQuery,
+                target: null, contract: "ApplicationEntityService", operation: "QueryImage", entity: entityName))
             {
-                try
+                var session = Session.Current;
+
+                using (var activity = _context.Logger.DeleteEntity(entityName, entityId, session.UserIdentity.LoginName, session.Endpoint, session.UserPrincipal))
                 {
-                    _context.EntityService.DeleteEntity(entityName, entityId);
-                    return StatusCode(HttpStatusCode.OK);
-                }
-                catch (Exception e)
-                {
-                    activity.Fail(e);
-                    throw;
+                    try
+                    {
+                        _context.EntityService.DeleteEntity(entityName, entityId);
+                        return StatusCode(HttpStatusCode.OK);
+                    }
+                    catch (Exception e)
+                    {
+                        activity.Fail(e);
+                        throw;
+                    }
                 }
             }
         }
