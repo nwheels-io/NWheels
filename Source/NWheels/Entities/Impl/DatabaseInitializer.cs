@@ -22,7 +22,9 @@ namespace NWheels.Entities.Impl
         private readonly IStorageInitializer _storageInitializer;
         private readonly IEnumerable<DataRepositoryRegistration> _contextRegistrations;
         private readonly IEnumerable<DatabaseInitializationCheckRegistration> _initializationCheckRegistrations;
+        private readonly IEnumerable<IDbConnectionStringResolver> _connectionStringResolvers;
         private readonly Pipeline<IDomainContextPopulator> _populators;
+        private readonly Pipeline<SchemaMigrationCollection> _migrations;
         private readonly ISessionManager _sessionManager;
         private readonly UnitOfWorkFactory _unitOfWorkFactory;
         private readonly ILogger _logger;
@@ -35,7 +37,9 @@ namespace NWheels.Entities.Impl
             IStorageInitializer storageInitializer,
             IEnumerable<DataRepositoryRegistration> contextRegistrations,
             IEnumerable<DatabaseInitializationCheckRegistration> initializationCheckRegistrations,
+            IEnumerable<IDbConnectionStringResolver> connectionStringResolvers,
             Pipeline<IDomainContextPopulator> populators, 
+            Pipeline<SchemaMigrationCollection> migrations,
             ISessionManager sessionManager,
             UnitOfWorkFactory unitOfWorkFactory,
             ILogger logger)
@@ -44,7 +48,9 @@ namespace NWheels.Entities.Impl
             _storageInitializer = storageInitializer;
             _contextRegistrations = contextRegistrations;
             _initializationCheckRegistrations = initializationCheckRegistrations;
+            _connectionStringResolvers = connectionStringResolvers;
             _populators = populators;
+            _migrations = migrations;
             _sessionManager = sessionManager;
             _unitOfWorkFactory = unitOfWorkFactory;
             _logger = logger;
@@ -56,14 +62,14 @@ namespace NWheels.Entities.Impl
         {
             _configuration = _components.Resolve<IFrameworkDatabaseConfig>();
 
-            foreach ( var registration in _contextRegistrations )
+            foreach (var registration in _contextRegistrations.OrderBy(r => r.HasMultipleDatabases))
             {
-                if ( ShouldInitializeStorageOnStartup(registration) )
+                if (ShouldInitializeStorageOnStartup(registration))
                 {
                     _logger.RunningStorageInitializationCheck(contextType: registration.DataRepositoryType);
 
                     bool newDatabaseCreated;
-                    RunStorageInitializationCheck(out newDatabaseCreated, registration.DataRepositoryType, connectionStringOverride: null);
+                    RunStorageInitializationCheck(out newDatabaseCreated, registration.DataRepositoryType);
                 }
                 else
                 {
@@ -74,34 +80,71 @@ namespace NWheels.Entities.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void RunStorageInitializationCheck(out bool newDatabaseCreated, Type contextType, string connectionStringOverride = null)
+        public void RunStorageInitializationCheck(out bool newDatabaseCreated, Type contextType)
+        {
+            var connectionConfig = _configuration.GetContextConnectionConfig(contextType);
+            newDatabaseCreated = false;
+
+            if (!connectionConfig.IsWildcard)
+            {
+                RunStorageInitializationCheck(out newDatabaseCreated, contextType, connectionStringOverride: null);
+            }
+            else
+            {
+                var resolver = _connectionStringResolvers.FirstOrDefault(r => r.DomainContextType == contextType);
+
+                if (resolver != null)
+                {
+                    foreach (var connectionString in resolver.GetAllConnectionStrings(_storageInitializer))
+                    {
+                        bool singleDatabaseCreated;
+                        RunStorageInitializationCheck(out singleDatabaseCreated, contextType, connectionStringOverride: connectionString);
+                        newDatabaseCreated |= singleDatabaseCreated;
+                    }
+                }
+                else
+                {
+                    _logger.StorageInitializationNotConfiguredSkipping(contextType);
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void RunStorageInitializationCheck(out bool newDatabaseCreated, Type contextType, string connectionStringOverride)
         {
             var connectionString = connectionStringOverride ?? GetConfiguredContextConnectionString(contextType);
 
-            if ( _storageInitializer.StorageSchemaExists(connectionString) )
+            if (_storageInitializer.StorageSchemaExists(connectionString))
             {
                 _logger.FoundDatabase(contextType, connectionString);
                 newDatabaseCreated = false;
-                return;
+
+                if (ShouldMigrateStorageSchemaOnStartup(contextType))
+                {
+                    MigrateExistingDatabase(contextType, connectionString);
+                }
             }
-
-            _logger.DatabaseNotFound(contextType, connectionString);
-
-            using ( var dbActivity = _logger.InitializingNewDatabase(contextType, connectionString) )
+            else
             {
-                try
-                {
-                    InitializeNewDatabase(contextType, connectionString);
-                    _logger.NewDatabaseInitialized(contextType, connectionString);
-                }
-                catch ( Exception e )
-                {
-                    dbActivity.Fail(e);
-                    throw _logger.DatabaseInitializationFailed(contextType, connectionString, e);
-                }
-            }
+                _logger.DatabaseNotFound(contextType, connectionString);
 
-            newDatabaseCreated = true;
+                using (var dbActivity = _logger.InitializingNewDatabase(contextType, connectionString))
+                {
+                    try
+                    {
+                        InitializeNewDatabase(contextType, connectionString);
+                        _logger.NewDatabaseInitialized(contextType, connectionString);
+                    }
+                    catch (Exception e)
+                    {
+                        dbActivity.Fail(e);
+                        throw _logger.DatabaseInitializationFailed(contextType, connectionString, e);
+                    }
+                }
+
+                newDatabaseCreated = true;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -118,6 +161,20 @@ namespace NWheels.Entities.Impl
             if ( contextConfig != null )
             {
                 return contextConfig.AutoCreateDatabase;
+            }
+
+            return false;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private bool ShouldMigrateStorageSchemaOnStartup(Type contextType)
+        {
+            var contextConfig = _configuration.GetContextConnectionConfig(contextType);
+
+            if (contextConfig != null)
+            {
+                return contextConfig.AutoMigrateDatabase;
             }
 
             return false;
@@ -160,6 +217,40 @@ namespace NWheels.Entities.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private void MigrateExistingDatabase(Type contextType, string connectionString)
+        {
+            using (var activity = _logger.MigratingExistingDatabase(contextType, connectionString))
+            {
+                var migrationCollections = _migrations.Where(m => m.DomainContextType.IsAssignableFrom(contextType)).ToArray();
+
+                using (_sessionManager.JoinGlobalSystem())
+                {
+                    try
+                    {
+                        using (var context = _unitOfWorkFactory.NewUnitOfWork(contextType, connectionString: connectionString))
+                        {
+                            foreach (var collection in migrationCollections)
+                            {
+                                _storageInitializer.MigrateStorageSchema(connectionString, context.As<DataRepositoryBase>(), collection);
+                            }
+
+                            if (context.UnitOfWorkState != UnitOfWorkState.Committed)
+                            {
+                                context.CommitChanges();
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        activity.Fail(e);
+                        throw;
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private string GetConfiguredContextConnectionString(Type contextType)
         {
             var configuredConnectionString = _configuration.GetContextConnectionString(contextType);
@@ -181,6 +272,9 @@ namespace NWheels.Entities.Impl
 
             [LogVerbose]
             void StorageInitializationTurnedOffSkipping(Type contextType);
+
+            [LogWarning]
+            void StorageInitializationNotConfiguredSkipping(Type contextType);
 
             [LogError]
             ConfigurationErrorsException ConnectionStringNotConfigured(Type contextType);
@@ -205,6 +299,9 @@ namespace NWheels.Entities.Impl
 
             [LogActivity]
             ILogActivity InvokingContextPopulator(Type contextType, Type populatorType);
+
+            [LogActivity]
+            ILogActivity MigratingExistingDatabase(Type contextType, string connectionString);
         }
     }
 }

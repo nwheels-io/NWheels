@@ -329,6 +329,7 @@ namespace NWheels.Hosting.Core
 
             builder.RegisterPipeline<IMetadataConvention>().InstancePerDependency(); // avoid caching to allow modules extend convention set
             builder.RegisterPipeline<IRelationalMappingConvention>().InstancePerDependency(); // avoid caching to allow modules extend convention set
+            builder.RegisterPipeline<SchemaMigrationCollection>().InstancePerDependency(); // avoid caching to allow modules extend migration set
             builder.RegisterType<ContractMetadataConvention>().As<IMetadataConvention>().SingleInstance().FirstInPipeline();
             builder.RegisterType<AttributeMetadataConvention>().As<IMetadataConvention>().SingleInstance().LastInPipeline();
             builder.RegisterType<RelationMetadataConvention>().As<IMetadataConvention>().SingleInstance().LastInPipeline();

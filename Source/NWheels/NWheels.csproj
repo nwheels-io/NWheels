@@ -138,7 +138,11 @@
     <Compile Include="Conventions\Core\StaticStringDecorator.cs" />
     <Compile Include="Core\PipelineObjectFactory.cs" />
     <Compile Include="Entities\Core\DatabaseInitializationCheckRegistration.cs" />
+    <Compile Include="Entities\Migrations\MigrationBase.cs" />
+    <Compile Include="Entities\Migrations\StorageScriptMigration.cs" />
+    <Compile Include="Entities\Migrations\SchemaVersionAttribute.cs" />
     <Compile Include="Entities\UnitOfWorkScopeOption.cs" />
+    <Compile Include="Exceptions\ConventionException.cs" />
     <Compile Include="Logging\Factories\CallLoggingAspectConvention.cs" />
     <Compile Include="Logging\LogCallsAttribute.cs" />
     <Compile Include="Logging\LogOptions.cs" />

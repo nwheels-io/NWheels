@@ -11,6 +11,7 @@ namespace NWheels.Core
     public interface IDbConnectionStringResolver
     {
         string ResolveConnectionString(string configuredValue, IStorageInitializer storage, IAccessControlContext context);
+        string[] GetAllConnectionStrings(IStorageInitializer storage);
         Type DomainContextType { get; }
     }
 }

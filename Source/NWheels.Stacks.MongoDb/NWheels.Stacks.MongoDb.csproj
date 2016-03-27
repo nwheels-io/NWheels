@@ -86,7 +86,7 @@
     <Compile Include="Factories\LazyLoadDocumentByForeignKeyStrategy.cs" />
     <Compile Include="IMongoDbLogger.cs" />
     <Compile Include="IMongoEntityRepository.cs" />
-    <Compile Include="Factories\MongoDatabaseInitializer.cs" />
+    <Compile Include="Factories\MongoStorageInitializer.cs" />
     <Compile Include="Factories\MongoDataRepositoryFactory.cs" />
     <Compile Include="JsonSerializationExtension.cs" />
     <Compile Include="Logging\DailySummaryRecord.cs" />
@@ -95,6 +95,7 @@
     <Compile Include="Logging\MongoDbThreadLogPersistor.cs" />
     <Compile Include="Logging\ThreadLogBatchPersistor.cs" />
     <Compile Include="Logging\ThreadLogRecord.cs" />
+    <Compile Include="MongoDatabaseMigrator.cs" />
     <Compile Include="MongoDataRepositoryBase.cs" />
     <Compile Include="Factories\MongoEntityObjectFactory.cs" />
     <Compile Include="Factories\MongoEntityObjectFactory.Old.cs" />

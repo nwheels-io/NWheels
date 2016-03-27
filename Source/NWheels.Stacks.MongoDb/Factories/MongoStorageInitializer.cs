@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using NWheels.Entities;
@@ -7,15 +8,17 @@ using NWheels.Entities.Core;
 
 namespace NWheels.Stacks.MongoDb.Factories
 {
-    public class MongoDatabaseInitializer : IStorageInitializer
+    public class MongoStorageInitializer : IStorageInitializer
     {
         private readonly Pipeline<IDomainContextPopulator> _populators;
+        private readonly IMongoDbLogger _logger;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public MongoDatabaseInitializer(Pipeline<IDomainContextPopulator> populators)
+        public MongoStorageInitializer(Pipeline<IDomainContextPopulator> populators, IMongoDbLogger logger)
         {
             _populators = populators;
+            _logger = logger;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -59,20 +62,30 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         public void MigrateStorageSchema(string connectionString, DataRepositoryBase context, SchemaMigrationCollection migrations)
         {
-            throw new NotImplementedException();
+            var database = ConnectToDatabase(connectionString);
+
+            using (var activity = _logger.ExecutingMigrationCollection(collectionType: migrations.GetType()))
+            {
+                try
+                {
+                    var migrator = new MongoDatabaseMigrator(database, migrations, _logger);
+                    migrator.ExecuteMigrations();
+                }
+                catch (Exception e)
+                {
+                    activity.Fail(e);
+                    throw;
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void CreateStorageSchema(string connectionString)
         {
-            var client = new MongoClient(connectionString);
-            var server = client.GetServer();
-            var connectionParams = new MongoConnectionStringBuilder(connectionString);
-            
-            var database = server.GetDatabase(connectionParams.DatabaseName);
-
-            database.GetCollection<MigrationLogEntry>("SystemMigrationLog").Insert(new MigrationLogEntry() { CurrentVersion = 1 });
+            var database = ConnectToDatabase(connectionString);
+            var migrator = new MongoDatabaseMigrator(database, new EmptySchemaMigrationCollection(), _logger);
+            migrator.ExecuteMigrations();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -103,10 +116,15 @@ namespace NWheels.Stacks.MongoDb.Factories
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public class MigrationLogEntry
+        
+        private static MongoDatabase ConnectToDatabase(string connectionString)
         {
-            public int CurrentVersion { get; set; }
+            var client = new MongoClient(connectionString);
+            var server = client.GetServer();
+            var connectionParams = new MongoConnectionStringBuilder(connectionString);
+
+            var database = server.GetDatabase(connectionParams.DatabaseName);
+            return database;
         }
     }
 }

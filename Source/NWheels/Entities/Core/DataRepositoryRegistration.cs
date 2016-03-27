@@ -7,6 +7,7 @@ namespace NWheels.Entities.Core
     public abstract class DataRepositoryRegistration
     {
         public abstract Type DataRepositoryType { get; }
+        public bool HasMultipleDatabases { get; protected set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -28,6 +29,14 @@ namespace NWheels.Entities.Core
         ContainerBuilder AutofacExtensions.IHaveContainerBuilder.Builder
         {
             get { return _builder; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DataRepositoryRegistration<TRepo> WithMultipleDatabases()
+        {
+            HasMultipleDatabases = true;
+            return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

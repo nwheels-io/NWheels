@@ -55,5 +55,11 @@ namespace NWheels.Stacks.MongoDb
 
         [LogActivity]
         ILogActivity MigratingDatabase(string name);
+
+        [LogActivity]
+        ILogActivity ExecutingMigrationCollection(Type collectionType);
+
+        [LogActivity]
+        ILogActivity ExecutingMigration(int version, string name);
     }
 }

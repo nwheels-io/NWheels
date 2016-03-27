@@ -9,7 +9,7 @@ using NWheels.Extensions;
 
 namespace NWheels.Exceptions
 {
-    public class ContractConventionException : Exception
+    public class ContractConventionException : ConventionException
     {
         public ContractConventionException(string message, params object[] formatArgs)
             : base(message.FormatIf(formatArgs))

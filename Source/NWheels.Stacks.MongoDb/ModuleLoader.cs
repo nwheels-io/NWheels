@@ -26,7 +26,7 @@ namespace NWheels.Stacks.MongoDb
         {
             builder.RegisterType<MongoEntityObjectFactory>().As<MongoEntityObjectFactory, EntityObjectFactory, IEntityObjectFactory>().SingleInstance();
             builder.RegisterType<MongoDataRepositoryFactory>().As<DataRepositoryFactoryBase, IDataRepositoryFactory, IAutoObjectFactory>().SingleInstance();
-            builder.RegisterType<MongoDatabaseInitializer>().As<IStorageInitializer>().SingleInstance();
+            builder.RegisterType<MongoStorageInitializer>().As<IStorageInitializer>().SingleInstance();
             builder.RegisterType<AutoIncrementIntegerIdGenerator>().AsSelf().SingleInstance();
             builder.NWheelsFeatures().Entities().UseDefaultIdsOfType<ObjectId>();
             builder.NWheelsFeatures().Logging().RegisterLogger<IMongoDbLogger>();
