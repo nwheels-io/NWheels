@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.Entities.Migrations;
 using NWheels.Exceptions;
 
-namespace NWheels.Entities.Core
+namespace NWheels.Entities.Migrations
 {
     public abstract class SchemaMigrationCollection
     {

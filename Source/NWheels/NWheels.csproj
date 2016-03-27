@@ -179,7 +179,7 @@
     <Compile Include="Endpoints\IAbstractNetwrokTransportConfig.cs" />
     <Compile Include="Endpoints\INetworkProtocolConfigContainer.cs" />
     <Compile Include="Entities\Core\IPartitionedObject.cs" />
-    <Compile Include="Entities\Core\SchemaMigrationCollection.cs" />
+    <Compile Include="Entities\Migrations\SchemaMigrationCollection.cs" />
     <Compile Include="Entities\DomainContextPopulatorBase.cs" />
     <Compile Include="Entities\EntityChangeMessage.cs" />
     <Compile Include="Entities\Factories\ImplementIPartitionedObjectConvention.cs" />

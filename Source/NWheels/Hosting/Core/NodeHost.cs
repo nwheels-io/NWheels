@@ -45,6 +45,7 @@ using NWheels.Entities.Factories;
 using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Configuration.Impls;
+using NWheels.Entities.Migrations;
 using NWheels.Processing.Commands.Factories;
 using NWheels.TypeModel;
 using NWheels.UI.Impl;

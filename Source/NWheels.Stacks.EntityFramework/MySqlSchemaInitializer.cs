@@ -5,6 +5,7 @@ using System.Security;
 using MySql.Data.MySqlClient;
 using NWheels.Entities;
 using NWheels.Entities.Core;
+using NWheels.Entities.Migrations;
 using NWheels.Stacks.EntityFramework.Factories;
 
 namespace NWheels.Stacks.EntityFramework

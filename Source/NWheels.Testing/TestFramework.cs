@@ -27,6 +27,7 @@ using NWheels.DataObjects.Core.Conventions;
 using NWheels.Endpoints;
 using NWheels.Entities.Core;
 using NWheels.Entities.Factories;
+using NWheels.Entities.Migrations;
 using NWheels.Logging.Core;
 using NWheels.Processing.Commands.Factories;
 using NWheels.Processing.Messages;

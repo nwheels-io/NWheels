@@ -5,6 +5,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using NWheels.Entities;
 using NWheels.Entities.Core;
+using NWheels.Entities.Migrations;
 
 namespace NWheels.Stacks.MongoDb.Factories
 {

@@ -15,6 +15,7 @@ using NUnit.Framework;
 using NWheels.DataObjects.Core.Conventions;
 using NWheels.Entities;
 using NWheels.Entities.Core;
+using NWheels.Entities.Migrations;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Hosting.Core;

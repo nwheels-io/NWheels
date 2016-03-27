@@ -10,6 +10,7 @@ using NWheels.Authorization;
 using NWheels.Core;
 using NWheels.Entities;
 using NWheels.Entities.Core;
+using NWheels.Entities.Migrations;
 using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Logging;
