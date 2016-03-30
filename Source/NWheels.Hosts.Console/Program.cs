@@ -1,4 +1,6 @@
-﻿using Microsoft.Win32;
+﻿using System;
+using Microsoft.Win32;
+using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Logging.Core;
 using NWheels.Stacks.Nlog;
@@ -14,6 +16,7 @@ namespace NWheels.Hosts.Console
         private static string _s_instanceName;
         private static string _s_serviceName;
         private static ProgramConfig _s_programConfig;
+        private static IPlainLog _s_log;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -25,54 +28,109 @@ namespace NWheels.Hosts.Console
 
         public static void Main()
         {
-            CrashLog.RegisterUnhandledExceptionHandler();
-            _s_programConfig = new ProgramConfig();
-            
-            HostFactory.Run(x => {
-                x.UseNLog();
-                x.Service(s => {
-                    _s_programConfig.HostSettings = s;
-                    return new NodeHostControl(_s_programConfig);
-                });
+            try
+            {
+                CrashLog.RegisterUnhandledExceptionHandler();
+                _s_log = NLogBasedPlainLog.Instance;
+                _s_programConfig = new ProgramConfig();
 
-                x.AddCommandLineDefinition(BootFileParamKey, v => {
-                    if ( _s_programConfig.BootConfig == null )
-                    {
-                        _s_programConfig.BootConfigFilePath = v;
-                    }
-                });
-                x.AddCommandLineDefinition(BatchjobParamKey, v => {
-                    _s_programConfig.IsBatchJob = true;
-                });
-                x.AddCommandLineDefinition(ConfigParamKey, v => {
-                    _s_programConfig.CommandLineConfigValues.Add(v);
-                });
-                x.ApplyCommandLine();
+                var exitCode = HostFactory.Run(
+                    x => {
+                        try
+                        {
+                            ConfigureHost(x);
+                        }
+                        catch (Exception e)
+                        {
+                            _s_log.Critical("Failed to configure host: {0}", e.ToString());
+                            WriteFatalErrorToConsole(e, "Failed to configure host");
+                        }
+                    });
 
-                if ( string.IsNullOrEmpty(_s_programConfig.BootConfigFilePath) )
+                if (exitCode != TopshelfExitCode.Ok)
                 {
-                    _s_programConfig.BootConfigFilePath = BootConfiguration.DefaultBootConfigFileName;
+                    _s_log.Error("Host failed, exit code: {0}", exitCode.ToString());
+                    WriteFatalErrorToConsole(null, "Host failed, exit code: {0}", exitCode.ToString());
                 }
 
-                _s_programConfig.BootConfig = LoadBootConfig(_s_programConfig.BootConfigFilePath, hostConfig: x);
-                
-                x.RunAsLocalSystem();
-                //x.BeforeInstall(BeforeInstall);
-                x.AfterInstall(AfterInstall);
-                
-                //x.BeforeUninstall(BeforeUninstall);
-                //x.AfterUninstall(AfterUninstall);
+                // Fix commandline of service
+                if (_s_isAfterInstallCalled)
+                {
+                    FixServiceCommandLineAfterInstall();
+                }
+            }
+            catch (Exception e)
+            {
+                _s_log.Error("Host failed with exception: {0}", e.ToString());
+                WriteFatalErrorToConsole(e, "Host failed with exception");
+            }
+        }
 
-                //x.SetDescription("Sample Topshelf Host"); // Optional - deaults to service name
-                //x.SetDisplayName("Sample Topshelf Host");  // Sets the Console window header (if exists); Display name in the services list. Optional, defaults to service name.
-                //x.SetServiceName("SampleTopshelfHost");  // Unique per instance - Can be sent by InstanceName command-line option
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void WriteFatalErrorToConsole(Exception error, string message, params object[] args)
+        {
+            var saveConsoleColor = System.Console.ForegroundColor;
+
+            System.Console.ForegroundColor = ConsoleColor.Red;
+            System.Console.WriteLine("--- FATAL ERROR ---");
+
+            if (error != null)
+            {
+                System.Console.WriteLine("{0}{1}{2}", message.FormatIf(args), System.Environment.NewLine, error.Message);
+            }
+            else
+            {
+                System.Console.WriteLine(message.FormatIf(args));
+            }
+            
+            System.Console.ForegroundColor = saveConsoleColor;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void ConfigureHost(HostConfigurator x)
+        {
+            x.UseNLog();
+            x.Service(s => {
+                _s_programConfig.HostSettings = s;
+                return new NodeHostControl(_s_programConfig);
             });
 
-            // Fix commandline of service
-            if ( _s_isAfterInstallCalled )
+            x.AddCommandLineDefinition(BootFileParamKey, v => {
+                if (_s_programConfig.BootConfig == null)
+                {
+                    _s_programConfig.BootConfigFilePath = v;
+                }
+            });
+            
+            x.AddCommandLineDefinition(BatchjobParamKey, v => {
+                _s_programConfig.IsBatchJob = true;
+            });
+            
+            x.AddCommandLineDefinition(ConfigParamKey, v => {
+                _s_programConfig.CommandLineConfigValues.Add(v);
+            });
+            
+            x.ApplyCommandLine();
+
+            if (string.IsNullOrEmpty(_s_programConfig.BootConfigFilePath))
             {
-                FixServiceCommandLineAfterInstall();
+                _s_programConfig.BootConfigFilePath = BootConfiguration.DefaultBootConfigFileName;
             }
+
+            _s_programConfig.BootConfig = LoadBootConfig(_s_programConfig.BootConfigFilePath, hostConfig: x);
+
+            x.RunAsLocalSystem();
+            //x.BeforeInstall(BeforeInstall);
+            x.AfterInstall(AfterInstall);
+
+            //x.BeforeUninstall(BeforeUninstall);
+            //x.AfterUninstall(AfterUninstall);
+
+            //x.SetDescription("Sample Topshelf Host"); // Optional - deaults to service name
+            //x.SetDisplayName("Sample Topshelf Host");  // Sets the Console window header (if exists); Display name in the services list. Optional, defaults to service name.
+            //x.SetServiceName("SampleTopshelfHost");  // Unique per instance - Can be sent by InstanceName command-line option
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -150,25 +208,23 @@ namespace NWheels.Hosts.Console
 
         private static BootConfiguration LoadBootConfig(string filePath, HostConfigurator hostConfig)
         {
-            IPlainLog log = NLogBasedPlainLog.Instance;
-
-            log.Debug("Loading configuration from: {0}", filePath);
+            _s_log.Debug("Loading configuration from: {0}", filePath);
 
             //load boot config from path
             BootConfiguration bootConfig = BootConfiguration.LoadFromFile(filePath);
             bootConfig.Validate();
 
-            log.Debug("> Application Name   - {0}", bootConfig.ApplicationName);
-            log.Debug("> Node Name          - {0}", bootConfig.NodeName);
+            _s_log.Debug("> Application Name   - {0}", bootConfig.ApplicationName);
+            _s_log.Debug("> Node Name          - {0}", bootConfig.NodeName);
 
             foreach ( var module in bootConfig.FrameworkModules )
             {
-                log.Debug("> Framework Module   - {0}", module.Name);
+                _s_log.Debug("> Framework Module   - {0}", module.Name);
             }
 
             foreach ( var module in bootConfig.ApplicationModules )
             {
-                log.Debug("> Application Module - {0}", module.Name);
+                _s_log.Debug("> Application Module - {0}", module.Name);
             }
 
             //hostConfig.SetDescription("Late Sample Topshelf Host"); // Optional - deaults to service name

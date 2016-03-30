@@ -90,9 +90,11 @@ namespace NWheels.Stacks.Nlog
 
             LogManager.Configuration.AddTarget(PlainTextConsoleTargetName, consoleTarget);
 
-            var consoleRule = new LoggingRule(PlainTextLoggerName, LogLevel.Info, consoleTarget);
+            var consoleRule1 = new LoggingRule(PlainTextLoggerName, LogLevel.Info, consoleTarget);
+            var consoleRule2 = new LoggingRule(BootTextLoggerName, LogLevel.Info, consoleTarget);
 
-            LogManager.Configuration.LoggingRules.Add(consoleRule);
+            LogManager.Configuration.LoggingRules.Add(consoleRule1);
+            LogManager.Configuration.LoggingRules.Add(consoleRule2);
             LogManager.ReconfigExistingLoggers();
         }
 
