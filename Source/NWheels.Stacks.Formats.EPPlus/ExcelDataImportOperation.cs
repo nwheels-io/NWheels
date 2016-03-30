@@ -32,6 +32,20 @@ namespace NWheels.Stacks.Formats.EPPlus
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public class CustomImportParameter
+        {
+            public DocumentDesign Design { get; set; }
+            public ExcelPackage Package { get; set; }
+            public ExcelWorksheet Worksheet { get; set; }
+            public ApplicationEntityService EntityService { get; set; }
+            public ApplicationEntityService.EntityHandler EntityHandler { get; set; }
+            public IApplicationDataRepository DomainContext { get; set; }
+            public ApplicationEntityService.EntityCursorMetadata MetaCursor { get; set; }
+            public ApplicationEntityService.EntityCursorRow[] CursorBuffer { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public ExcelDataImportOperation(FormattedDocument document, DocumentDesign design, ApplicationEntityService entityService)
         {
             if (document == null)
@@ -116,7 +130,7 @@ namespace NWheels.Stacks.Formats.EPPlus
         {
             if (_design.CustomImport != null)
             {
-                _design.CustomImport(new {
+                _design.CustomImport(new CustomImportParameter {
                     Design = _design,
                     Package = _package,
                     Worksheet = _worksheet,

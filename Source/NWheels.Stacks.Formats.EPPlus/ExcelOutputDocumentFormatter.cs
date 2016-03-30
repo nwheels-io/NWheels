@@ -19,6 +19,16 @@ namespace NWheels.Stacks.Formats.EPPlus
 {
     public class ExcelOutputDocumentFormatter : IOutputDocumentFormatter
     {
+        public class CustomExportParameter
+        {
+            public ApplicationEntityService.EntityCursor Cursor { get; set; }
+            public DocumentDesign Design { get; set; }
+            public ExcelPackage Package { get; set; }
+            public ExcelWorksheet Worksheet { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #region Implementation of IOutputDocumentFormatter
 
         public FormattedDocument FormatReportDocument(IObject criteria, ApplicationEntityService.EntityCursor queryResults, DocumentDesign design)
@@ -71,7 +81,7 @@ namespace NWheels.Stacks.Formats.EPPlus
 
             if (design.CustomExport != null)
             {
-                design.CustomExport(new {
+                design.CustomExport(new CustomExportParameter {
                     Cursor = cursor,
                     Design = design,
                     Package = package,
