@@ -111,6 +111,11 @@ namespace NWheels.Configuration.Core
                     throw;
                 }
             }
+            else if (xml.Attribute(attributeName + XmlConfigurationLoader.NullPropertyValueAttributeSuffix) != null)
+            {
+                value = default(T);
+                _overrideHistory.PushPropertyOverride(propertyName, "(NULL)", lineInfo: xml);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

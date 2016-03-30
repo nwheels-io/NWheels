@@ -22,6 +22,7 @@ namespace NWheels.Configuration.Core
         public const string EnvironmentAttributeName = "environment"; // same as EnvironmentNameAttributeName
         public const string EnvironmentNameAttributeName = "environment-name"; // same sa EnvironmentAttributeName
         public const string EnvironmentTypeAttributeName = "environment-type";
+        public const string NullPropertyValueAttributeSuffix = ".null"; // myValue.null attribute can be used in place of myValue to set value to null
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
