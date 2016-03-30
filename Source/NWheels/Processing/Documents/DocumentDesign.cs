@@ -22,8 +22,24 @@ namespace NWheels.Processing.Documents
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public DocumentDesign(
+            string idName, 
+            Action<object> customImport,
+            Action<object> customExport, 
+            Element contents)
+        {
+            this.IdName = idName;
+            this.CustomImport = customImport;
+            this.CustomExport = customExport;
+            this.Contents = contents;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public string IdName { get; private set; }
         public Element Contents { get; private set; }
+        public Action<object> CustomImport { get; private set; }
+        public Action<object> CustomExport { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

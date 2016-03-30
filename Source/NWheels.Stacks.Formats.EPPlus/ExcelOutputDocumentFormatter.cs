@@ -67,8 +67,20 @@ namespace NWheels.Stacks.Formats.EPPlus
 
         private void FormatReportDocumentByDesign(ApplicationEntityService.EntityCursor cursor, DocumentDesign design, ExcelPackage package)
         {
-            var table = (DocumentDesign.TableElement)design.Contents;
             var worksheet = package.Workbook.Worksheets.Add(cursor.PrimaryEntity.QualifiedName);
+
+            if (design.CustomExport != null)
+            {
+                design.CustomExport(new {
+                    Cursor = cursor,
+                    Design = design,
+                    Package = package,
+                    Worksheet = worksheet
+                });
+                return;
+            }
+
+            var table = (DocumentDesign.TableElement)design.Contents;
             var cursorColumnIndex = new int[table.Columns.Count];
 
             worksheet.Row(2).Style.Font.Bold = true;

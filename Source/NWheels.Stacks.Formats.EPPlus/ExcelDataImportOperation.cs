@@ -114,6 +114,21 @@ namespace NWheels.Stacks.Formats.EPPlus
 
         private void ImportDataRows()
         {
+            if (_design.CustomImport != null)
+            {
+                _design.CustomImport(new {
+                    Design = _design,
+                    Package = _package,
+                    Worksheet = _worksheet,
+                    EntityService = _entityService,
+                    EntityHandler = _entityHandler,
+                    DomainContext = _domainContext,
+                    MetaCursor = _metaCursor,
+                    CursorBuffer = _cursorBuffer
+                });
+                return;
+            }
+
             for (int rowNumber = 3 ; !RowIsEmpty(rowNumber) ; rowNumber++)
             {
                 ApplicationEntityService.EntityCursorRow existingCursorRow;
