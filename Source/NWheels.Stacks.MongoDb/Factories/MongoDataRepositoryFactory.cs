@@ -136,7 +136,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
                 if ( contextConfiguration == null || contextConfiguration.AutoMigrateDatabase )
                 {
-                    using ( var activity = _logger.MigratingDatabase(repository.Database.Name) )
+                    using ( var activity = _logger.InitializingDatabaseIndexes(repository.Database.Name) )
                     {
                         try
                         {

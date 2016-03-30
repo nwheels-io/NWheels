@@ -37,6 +37,8 @@ namespace NWheels.Stacks.MongoDb
             var currentVersion = (lastMigration != null ? lastMigration.Version : 1);
             var migrationsToExecute = _migrations.GetMigrations().Where(m => m.SchemaVersion > currentVersion).OrderBy(m => m.SchemaVersion).ToArray();
 
+            _logger.MigratingDatabaseSchema(name: _db.Name, dbVersion: currentVersion, appVersion: _migrations.SchemaVersion);
+
             if (lastMigration == null)
             {
                 _migrationLogCollection.Insert(new MigrationLogEntry() {
@@ -61,6 +63,15 @@ namespace NWheels.Stacks.MongoDb
                     }
                 }
             }
+
+            if (migrationsToExecute.Length > 0)
+            {
+                _logger.DatabaseMigrationCompleted(name: _db.Name, newVersion: _migrations.SchemaVersion);
+            }
+            else
+            {
+                _logger.DatabaseIsUpToDate(name: _db.Name, currentVersion: currentVersion);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -76,18 +87,22 @@ namespace NWheels.Stacks.MongoDb
                 
                 var resultValue = _db.Eval(args);
 
-                if (resultValue.AsBoolean == true)
+                //TODO: should check resultValue for errors?
+                _migrationLogCollection.Insert(new MigrationLogEntry()
                 {
-                    _migrationLogCollection.Insert(new MigrationLogEntry() {
-                        Name = migration.GetType().Name,
-                        Version = migration.SchemaVersion,
-                        ExecutedAtUtc = DateTime.UtcNow
-                    });
-                }
-                else
-                {
-                    throw new Exception("Failure while executing migration script on the DB.");
-                }
+                    Name = migration.GetType().Name,
+                    Version = migration.SchemaVersion,
+                    ExecutedAtUtc = DateTime.UtcNow
+                });
+
+                //TODO: better understand result values from script execution
+                //if (resultValue.AsBoolean == true)
+                //{
+                //}
+                //else
+                //{
+                //    throw new Exception("Failure while executing migration script on the DB.");
+                //}
             }
         }
 

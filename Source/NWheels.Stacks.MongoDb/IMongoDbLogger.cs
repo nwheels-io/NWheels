@@ -54,12 +54,21 @@ namespace NWheels.Stacks.MongoDb
         void BulkWriteResult(string entity, string operation, int size, long inserted, long deleted, long modified, long matched);
 
         [LogActivity]
-        ILogActivity MigratingDatabase(string name);
+        ILogActivity InitializingDatabaseIndexes(string name);
 
         [LogActivity]
         ILogActivity ExecutingMigrationCollection(Type collectionType);
 
         [LogActivity]
         ILogActivity ExecutingMigration(int version, string name);
+
+        [LogInfo]
+        void MigratingDatabaseSchema(string name, int dbVersion, int appVersion);
+
+        [LogInfo]
+        void DatabaseMigrationCompleted(string name, int newVersion);
+
+        [LogInfo]
+        void DatabaseIsUpToDate(string name, int currentVersion);
     }
 }
