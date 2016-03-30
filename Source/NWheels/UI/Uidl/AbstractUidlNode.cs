@@ -5,8 +5,11 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using Hapil;
 using NWheels.DataObjects;
+using NWheels.DataObjects.Core;
+using NWheels.Extensions;
 
 namespace NWheels.UI.Uidl
 {
@@ -23,6 +26,13 @@ namespace NWheels.UI.Uidl
         public ITypeMetadataCache GetMetadataCache()
         {
             return this.MetadataCache;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public T ResolveComponent<T>()
+        {
+            return this.MetadataCache.As<TypeMetadataCache>().Components.Resolve<T>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
