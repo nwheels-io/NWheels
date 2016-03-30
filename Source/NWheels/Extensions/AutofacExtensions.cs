@@ -22,6 +22,7 @@ using NWheels.Endpoints.Core.Wcf;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Entities.Impl;
+using NWheels.Entities.Migrations;
 using NWheels.Exceptions;
 using NWheels.Hosting;
 using NWheels.Logging;
@@ -478,6 +479,14 @@ namespace NWheels.Extensions
                 {
                     registration.InstancePerDependency();
                 }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IRegistrationBuilder<TCollection, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterStorageSchemaMigrations<TCollection>()
+                where TCollection : SchemaMigrationCollection
+            {
+                return _builder.RegisterType<TCollection>().As<SchemaMigrationCollection>();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
