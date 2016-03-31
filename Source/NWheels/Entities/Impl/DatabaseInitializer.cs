@@ -86,6 +86,8 @@ namespace NWheels.Entities.Impl
             var connectionConfig = _configuration.GetContextConnectionConfig(contextType);
             newDatabaseCreated = false;
 
+            if (connectionConfig == null) return;
+
             if (!connectionConfig.IsWildcard)
             {
                 RunStorageInitializationCheck(out newDatabaseCreated, contextType, connectionStringOverride: null);
