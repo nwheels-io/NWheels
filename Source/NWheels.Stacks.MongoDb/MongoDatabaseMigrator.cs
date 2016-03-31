@@ -31,6 +31,17 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void InitializeMigrationLog(int schemaVersion)
+        {
+            _migrationLogCollection.Insert(new MigrationLogEntry() {
+                Name = "INITIAL DEPLOY",
+                Version = schemaVersion,
+                ExecutedAtUtc = DateTime.UtcNow
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public void ExecuteMigrations()
         {
             var lastMigration =  _migrationLogCollection.AsQueryable().OrderByDescending(x => x.Version).FirstOrDefault();

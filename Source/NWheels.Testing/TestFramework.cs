@@ -599,7 +599,7 @@ namespace NWheels.Testing
                 throw new NotSupportedException();
             }
 
-            public void CreateStorageSchema(string connectionString)
+            public void CreateStorageSchema(string connectionString, int schemaVersion)
             {
                 throw new NotSupportedException();
             }

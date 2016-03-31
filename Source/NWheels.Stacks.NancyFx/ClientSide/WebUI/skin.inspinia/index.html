@@ -380,7 +380,7 @@ HEAD, JS/CSS LINKS
                             IN+
                         </div>
                     </li>
-                    <li ng-repeat="item in uidl.mainMenu.items" ng-include="'app/uidl-element-template/ManagementConsole-menu-item'"></li>
+                    <li ng-repeat="item in uidl.mainMenu.items" ng-if="isUidlAuthorized(item)" ng-include="'app/uidl-element-template/ManagementConsole-menu-item'"></li>
                 </ul>
             </div>
         </nav>
@@ -539,7 +539,7 @@ HEAD, JS/CSS LINKS
             <span class="fa arrow"></span>
         </a>
         <ul class="nav nav-second-level collapse">
-            <li ng-repeat="item in item.subItems" ng-include="'app/uidl-element-template/ManagementConsole-menu-item'"></li>
+            <li ng-repeat="item in item.subItems" ng-if="isUidlAuthorized(item)" ng-include="'app/uidl-element-template/ManagementConsole-menu-item'"></li>
         </ul>
     </script>
     
@@ -625,6 +625,9 @@ HEAD, JS/CSS LINKS
                     <button class="btn btn-success btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="editEntity(selectedEntity)" ng-disabled="commandInProgress || !selectedEntity" ng-show="entityAuth.update" title="Edit Selected">
                         <i class="fa fa-edit"></i>
                     </button>
+                    <button class="btn btn-default btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="editEntity(selectedEntity)" ng-disabled="commandInProgress || !selectedEntity" ng-hide="entityAuth.update" title="View Details of Selected">
+                        <i class="fa fa-search-plus"></i>
+                    </button>
                     <button class="btn btn-danger btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="deleteEntity(selectedEntity)" ng-disabled="commandInProgress || !selectedEntity" ng-show="entityAuth.delete" title="Delete Selected">
                         <i class="fa fa-times"></i>
                     </button>
@@ -658,7 +661,7 @@ HEAD, JS/CSS LINKS
             <div ng-if="uiShowCrudForm" class="col-lg-12">
                 <div class="ibox-title">
                     <h2 class="clearfix">
-                        <i class="fa text-muted" ng-class="{'fa-asterisk':model.isNew, 'fa-edit':!model.isNew}"></i>
+                        <i class="fa text-muted" ng-class="{'fa-asterisk':model.isNew, 'fa-edit':!model.isNew && entityAuth.update, 'fa-search-plus':!model.isNew && !entityAuth.update}"></i>
                         &nbsp;{{translate(uidl.entityName)}}
                     </h2>
                 </div>
@@ -672,6 +675,7 @@ HEAD, JS/CSS LINKS
                         type="button"
                         class="btn btn-rounded"
                         style="margin-right:5px;"
+                        ng-show="isCommandAuthorized(command)"
                         ng-disabled="commandInProgress"
                         ng-click="invokeCommand(command)"
                         ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
@@ -699,6 +703,9 @@ HEAD, JS/CSS LINKS
         function initWidget_DataGrid($scope) {
             var columnsModel = [];
             $scope.gridColumns.forEach(function (metaColumn, idx) {
+                if (!$scope.isUidlAuthorized(metaColumn)) {
+                    return;
+                }
                 var colWidthPx = (metaColumn.size==='Large' ? 360 : (metaColumn.size==='Small' ? 90 : 180));
                 var modelItem = {
                     name: metaColumn.expression,
@@ -1409,13 +1416,14 @@ HEAD, JS/CSS LINKS
                 <input type="checkbox" 
                        class="onoffswitch-checkbox" 
                        ng-model="entity[uidl.propertyName]" 
+                       ng-disabled="!editAuthorized"
                        id="{{::uniqueFieldId}}"
                        name="{{::uniqueFieldId}}">
                 <label class="onoffswitch-label" 
                        for="{{::uniqueFieldId}}" 
                        style="margin: 5px 0px 5px 0px;">
-                    <span class="onoffswitch-inner"></span>
-                    <span class="onoffswitch-switch"></span>
+                    <span class="onoffswitch-inner" ng-disabled="!editAuthorized"></span>
+                    <span class="onoffswitch-switch" ng-disabled="!editAuthorized"></span>
                 </label>
             </div>
             <!-- TEXT -->
@@ -1423,6 +1431,7 @@ HEAD, JS/CSS LINKS
                    class="form-control m-b"
                    type="text"
                    ng-model="entity[uidl.propertyName]"
+                   ng-disabled="!editAuthorized"
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}">
             <!-- PASSWORD -->
@@ -1431,6 +1440,7 @@ HEAD, JS/CSS LINKS
                     <input class="form-control"
                            type="password"
                            ng-model="entity[uidl.propertyName]"
+                           ng-disabled="!editAuthorized"
                            id="{{::uniqueFieldId}}"
                            name="{{::uniqueFieldId}}">
                 </div>
@@ -1442,16 +1452,19 @@ HEAD, JS/CSS LINKS
                            class="form-control"
                            type="password"
                            ng-model="hiddenValues[uidl.propertyName]"
+                           ng-disabled="!editAuthorized"
                            id="{{::uniqueFieldId + '__confirm'}}"
                            name="{{::uniqueFieldId + '__confirm'}}">
                  </div>
             </div>
             <!-- DATE-TIME PICKER -->
             <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='DateTimePicker'"
-                 class="input-group date m-b">
+                 class="input-group date m-b"
+                 ng-disabled="!editAuthorized">
                 <input type="text"
                        class="form-control"
                        ng-model="entity[uidl.propertyName]"
+                       ng-disabled="!editAuthorized"
                        id="{{::uniqueFieldId}}"
                        name="{{::uniqueFieldId}}">
                 <div class="input-group-addon">
@@ -1462,13 +1475,15 @@ HEAD, JS/CSS LINKS
             <div ng-if="uidl.fieldType==='Edit' && hasUidlModifier('DateTimePicker') && hasUidlModifier('RangeStart')"
                  class="form-control m-b"
                  id="{{::uniqueFieldId}}"
-                 name="{{::uniqueFieldId}}">
+                 name="{{::uniqueFieldId}}"
+                 ng-disabled="!editAuthorized">
                 <i class="fa fa-calendar"></i>
                 <span></span> <b class="caret"></b>
             </div>
             <!-- LOOKUP ELLIPSIS -->
             <div ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('Ellipsis')"
-                 class="input-group m-b">
+                 class="input-group m-b"
+                 ng-disabled="!editAuthorized">
                  <span ng-show ="entity && entity[uidl.propertyName]" class="input-group-addon">{{entity[uidl.propertyName]}}</span>
                  <input type="text" 
                         class="form-control"
@@ -1482,7 +1497,7 @@ HEAD, JS/CSS LINKS
                  <span class="input-group-btn"> 
                      <button type="button" 
                              class="btn" 
-                             ng-disabled="hasUidlModifier('ReadOnly')"
+                             ng-disabled="hasUidlModifier('ReadOnly') || !editAuthorized"
                              ng-class="{'btn-primary':isNowFocused, 'btn-white':!isNowFocused}"
                              ng-click="ellipsisClicked()">
                         <i class="fa fa-search"></i>
@@ -1494,6 +1509,7 @@ HEAD, JS/CSS LINKS
                     class="form-control m-b"
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
+                    ng-disabled="!editAuthorized"
                     id="{{::uniqueFieldId}}"
                     name="{{::uniqueFieldId}}">
                 <option value="">All</option>
@@ -1502,6 +1518,7 @@ HEAD, JS/CSS LINKS
                     class="form-control m-b"
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
+                    ng-disabled="!editAuthorized"
                     id="{{::uniqueFieldId}}"
                     name="{{::uniqueFieldId}}">
                 <option value="">- Choose -</option>
@@ -1510,6 +1527,7 @@ HEAD, JS/CSS LINKS
                     class="form-control m-b"
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
+                    ng-disabled="!editAuthorized"
                     id="{{::uniqueFieldId}}"
                     name="{{::uniqueFieldId}}">
             </select>
@@ -1517,6 +1535,7 @@ HEAD, JS/CSS LINKS
             <input ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('TypeAhead')"
                 type="text" 
                 ng-model="entity[lookupForeignKeyProperty]" 
+                ng-disabled="!editAuthorized"
                 placeholder="None Selected" 
                 typeahead="item as item for item in loadTypeAhead($viewValue)" 
                 typeahead-input-formatter="formatTypeAheadItem($model)"
@@ -1531,17 +1550,17 @@ HEAD, JS/CSS LINKS
                  id="{{::uniqueFieldId}}"
                  class="dropzone" 
                  style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
-                 <div class="dropzone-previews"></div>
+                 <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
             </div>
             <div ng-if="uidl.fieldType==='FileUpload'" class="m-b">
-                <a href="" ng-click="clearDropzone()">Clear</a>
+                <a href="" ng-click="clearDropzone()" ng-disabled="!editAuthorized">Clear</a>
             </div>
             <!-- IMAGE UPLOAD -->
             <div ng-if="uidl.fieldType==='ImageUpload'" class="col-sm-3">
                 <img ng-src="entity/queryImage/ProfilePhoto/{{::entity[uidl.propertyName]}}/ImageType/ImageContents" class="img-circle circle-border m-b-md" alt="profile">                
             </div>
             <div ng-if="uidl.fieldType==='ImageUpload'" class="col-sm-5">
-                <div class="dropzone-previews"></div>
+                <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
                 <div class="dz-default dz-message">
                     <span>Drop photo image file here to upload</span>
                 </div>

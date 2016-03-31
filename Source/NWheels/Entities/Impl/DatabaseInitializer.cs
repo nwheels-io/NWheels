@@ -185,7 +185,9 @@ namespace NWheels.Entities.Impl
 
         private void InitializeNewDatabase(Type contextType, string connectionString)
         {
-            _storageInitializer.CreateStorageSchema(connectionString);
+            var schemaVersion = GetCurrentSchemaVersionInApplication(contextType);
+
+            _storageInitializer.CreateStorageSchema(connectionString, schemaVersion);
             _logger.DatabaseSchemaCreated(connectionString);
 
             using ( _sessionManager.JoinGlobalSystem() )
@@ -214,6 +216,17 @@ namespace NWheels.Entities.Impl
                     }
                 }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private int GetCurrentSchemaVersionInApplication(Type contextType)
+        {
+            return _migrations
+                .Where(m => m.DomainContextType.IsAssignableFrom(contextType))
+                .Select(c => c.SchemaVersion)
+                .DefaultIfEmpty(defaultValue: 1)
+                .Max();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

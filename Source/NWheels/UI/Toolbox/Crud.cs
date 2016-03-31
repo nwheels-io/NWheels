@@ -216,6 +216,7 @@ namespace NWheels.UI.Toolbox
         private void ConfigureForm(IUidlForm form)
         {
             form.UsePascalCase = true;
+            form.NeedsAuthorize = true;
 
             foreach ( var field in form.Fields )
             {

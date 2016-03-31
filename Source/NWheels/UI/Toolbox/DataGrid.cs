@@ -247,6 +247,8 @@ namespace NWheels.UI.Toolbox
             public bool IsFilterSupported { get; set; }
             [DataMember]
             public string RelatedEntityName { get; set; }
+            [DataMember, ManuallyAssigned]
+            public UidlAuthorization Authorization { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -389,9 +391,17 @@ namespace NWheels.UI.Toolbox
             string title = null, 
             FieldSize size = FieldSize.Medium,
             bool includeInTotal = false,
-            GridColumnType? columnType = null)
+            GridColumnType? columnType = null,
+            Action<GridColumn> setup = null)
         {
-            this.DisplayColumns.Add(new GridColumn(MetaType, propertySelector, title, size, null, includeInTotal, columnType));
+            var column = new GridColumn(MetaType, propertySelector, title, size, null, includeInTotal, columnType);
+
+            if (setup != null)
+            {
+                setup(column);
+            }
+
+            this.DisplayColumns.Add(column);
             return this;
         }
 
@@ -402,19 +412,37 @@ namespace NWheels.UI.Toolbox
             string title = null, 
             FieldSize size = FieldSize.Medium,
             bool includeInTotal = false,
-            GridColumnType? columnType = null)
+            GridColumnType? columnType = null,
+            Action<GridColumn> setup = null)
             where TDerivedDataRow : TDataRow
         {
             var derivedMetaType = MetadataCache.GetTypeMetadata(typeof(TDerivedDataRow));
-            this.DisplayColumns.Add(new GridColumn(derivedMetaType, propertySelector, title, size, null, includeInTotal, columnType));
+            var column = new GridColumn(derivedMetaType, propertySelector, title, size, null, includeInTotal, columnType);
+
+            if (setup != null)
+            {
+                setup(column);
+            }
+
+            this.DisplayColumns.Add(column);
             return this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DataGrid<TDataRow> ColumnForType(string title = "Type", FieldSize size = FieldSize.Medium)
+        public DataGrid<TDataRow> ColumnForType(
+            string title = "Type", 
+            FieldSize size = FieldSize.Medium,
+            Action<GridColumn> setup = null)
         {
-            this.DisplayColumns.Add(new GridColumn(MetaType, FieldSpecialName.Type, title, size));
+            var column = new GridColumn(MetaType, FieldSpecialName.Type, title, size);
+
+            if (setup != null)
+            {
+                setup(column);
+            }
+
+            this.DisplayColumns.Add(column);
             return this;
         }
 
@@ -425,14 +453,22 @@ namespace NWheels.UI.Toolbox
             Expression<Func<TDestinationEntity, object>> destinationPropertySelector,
             string title = null,
             FieldSize size = FieldSize.Medium,
-            GridColumnType? columnType = null)
+            GridColumnType? columnType = null,
+            Action<GridColumn> setup = null)
         {
             var navigations =
                 GridColumn.ParsePropertyNavigation(sourcePropertySelector)
                 .Concat(GridColumn.ParsePropertyNavigation(destinationPropertySelector))
                 .ToArray();
 
-            this.DisplayColumns.Add(new GridColumn(MetaType, navigations, FieldSpecialName.None, title, size, columnType: columnType));
+            var column = new GridColumn(MetaType, navigations, FieldSpecialName.None, title, size, columnType: columnType);
+
+            if (setup != null)
+            {
+                setup(column);
+            }
+
+            this.DisplayColumns.Add(column);
             return this;
         }
 
@@ -443,14 +479,22 @@ namespace NWheels.UI.Toolbox
             Expression<Func<TDestinationEntity, object>> destinationPropertySelector,
             string title = null,
             FieldSize size = FieldSize.Medium,
-            GridColumnType? columnType = null)
+            GridColumnType? columnType = null,
+            Action<GridColumn> setup = null)
         {
             var navigations =
                 GridColumn.ParsePropertyNavigation(sourcePropertySelector)
                 .Concat(GridColumn.ParsePropertyNavigation(destinationPropertySelector))
                 .ToArray();
 
-            this.DisplayColumns.Add(new GridColumn(MetaType, navigations, FieldSpecialName.None, title, size, columnType: columnType));
+            var column = new GridColumn(MetaType, navigations, FieldSpecialName.None, title, size, columnType: columnType);
+
+            if (setup != null)
+            {
+                setup(column);
+            }
+
+            this.DisplayColumns.Add(column);
             return this;
         }
 

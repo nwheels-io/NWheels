@@ -205,6 +205,8 @@ namespace NWheels.UI.Toolbox
         public bool UsePascalCase { get; set; }
         [DataMember]
         public bool IsModalPopup { get; set; }
+        [DataMember]
+        public bool NeedsAuthorize { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -403,6 +405,8 @@ namespace NWheels.UI.Toolbox
         public WellKnownSemanticType Semantic { get; set; }
         [DataMember, ManuallyAssigned]
         public IPropertyValidationMetadata Validation { get; set; }
+        [DataMember, ManuallyAssigned]
+        public UidlAuthorization Authorization { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -722,6 +726,7 @@ namespace NWheels.UI.Toolbox
         List<FormField> Fields { get; }
         List<UidlCommand> Commands { get; }
         bool IsModalPopup { get; }
+        bool NeedsAuthorize { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

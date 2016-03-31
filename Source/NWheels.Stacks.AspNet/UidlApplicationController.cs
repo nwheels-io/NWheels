@@ -662,8 +662,8 @@ namespace NWheels.Stacks.AspNet
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpGet]
-        [Route("app/entity/checkAuth/{entityName}")]
-        public IHttpActionResult CheckEntityAuthorization(string entityName)
+        [Route("app/entity/checkAuth/{entityName}/{entityId?}")]
+        public IHttpActionResult CheckEntityAuthorization(string entityName, string entityId = null)
         {
             if ( !_context.EntityService.IsEntityNameRegistered(entityName) )
             {
@@ -674,7 +674,7 @@ namespace NWheels.Stacks.AspNet
                 _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command, 
                 target: null, contract: "ApplicationEntityService", operation: "CheckAuth", entity: entityName))
             { 
-                var checkResults = _context.EntityService.CheckEntityAuthorization(entityName);
+                var checkResults = _context.EntityService.CheckEntityAuthorization(entityName, entityId);
                 return Json(checkResults, _context.EntityService.CreateSerializerSettings());
             }
         }
@@ -1100,7 +1100,7 @@ namespace NWheels.Stacks.AspNet
             };
 
             jsonSettings.Converters.Add(new StringEnumConverter());
-            
+
             return jsonSettings;
         }
 

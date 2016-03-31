@@ -82,11 +82,11 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void CreateStorageSchema(string connectionString)
+        public void CreateStorageSchema(string connectionString, int schemaVersion)
         {
             var database = ConnectToDatabase(connectionString);
             var migrator = new MongoDatabaseMigrator(database, new EmptySchemaMigrationCollection(), _logger);
-            migrator.ExecuteMigrations();
+            migrator.InitializeMigrationLog(schemaVersion);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

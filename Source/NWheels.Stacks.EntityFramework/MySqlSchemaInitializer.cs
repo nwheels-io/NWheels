@@ -78,7 +78,7 @@ namespace NWheels.Stacks.EntityFramework
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void CreateStorageSchema(string connectionString)
+        public void CreateStorageSchema(string connectionString, int schemaVersion)
         {
             var stringBuilder = new MySqlConnectionStringBuilder(connectionString);
             var sqlStatement = string.Format("create schema `{0}`", SanitizeSchemaName(stringBuilder.Database));

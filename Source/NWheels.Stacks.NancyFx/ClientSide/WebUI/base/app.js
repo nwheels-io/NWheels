@@ -1027,14 +1027,16 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 scope.queryEntities();
             };
 
-            scope.requestAuthorization = function () {
-                scope.entityService.checkAuthorization(scope.uidl.grid.entityName).then(
+            scope.requestAuthorization = function (optionalEntityId) {
+                return scope.entityService.checkAuthorization(scope.uidl.grid.entityName, optionalEntityId).then(
                     function(response) {
                         scope.entityAuth = response;
+                        return response;
                     },
                     function(fault) {
                         scope.entityAuth = null;
                         scope.$emit(scope.uidl.qualifiedName + ':QueryEntityFailed', commandService.createFaultInfo(fault));
+                        return $q.reject(fault);
                     }
                 );
             }
@@ -1073,6 +1075,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 scope.uiShowCrudForm = false;
                 scope.selectedEntity = null;
                 scope.entity = null;
+                scope.entityAuth = null;
                 scope.commandInProgress = false;
             };
 
@@ -1114,7 +1117,18 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
 
                 scope.model.entity = entity;
                 scope.model.isNew = false;
+                scope.entityAuth = null;
                 scope.uiShowCrudForm = true;
+
+                scope.requestAuthorization(entity['$id']).then(function(response) {
+                    if (response.update===true) {
+                        if (scope.uidl.formTypeSelector) {
+                            scope.$broadcast(scope.uidl.formTypeSelector.qualifiedName + ':EditAuthorized');
+                        } else {
+                            scope.$broadcast(scope.uidl.form.qualifiedName + ':EditAuthorized');
+                        }
+                    }
+                });
 
                 $timeout(function() {
                     if (scope.uidl.formTypeSelector) {
@@ -1155,8 +1169,10 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                     
                     if (scope.uidl.form) {
                         scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelSetter', scope.model.entity);
+                        scope.$broadcast(scope.uidl.form.qualifiedName + ':EditAuthorized');
                     } else if (scope.uidl.formTypeSelector) {
                         scope.$broadcast(scope.uidl.formTypeSelector.qualifiedName + ':ModelSetter', scope.model.entity);
+                        scope.$broadcast(scope.uidl.formTypeSelector.qualifiedName + ':EditAuthorized');
                     }
                 });
             };
@@ -1216,13 +1232,27 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 scope.refresh();
             };
 
+            scope.isCommandAuthorized = function (command) {
+                if (command.kind !== 'Submit') {
+                    return true;
+                }
+                if (!scope.entityAuth) {
+                    return false;
+                }
+                if (scope.model.isNew) {
+                    return (scope.entityAuth.create===true);
+                } else {
+                    return (scope.entityAuth.update===true);
+                }
+            };
+            
             scope.invokeEntityCommand = function (command) {
                 scope.$emit(command.qualifiedName + ':Executing');
-            }
+            };
 
             scope.invokeStaticCommand = function (command) {
                 scope.$emit(command.qualifiedName + ':Executing');
-            }
+            };
 
             scope.invokeCommand = function (command) {
                 scope.commandInProgress = true;
@@ -1240,7 +1270,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 } else {
                     scope.$emit(command.qualifiedName + ':Executing');
                 }
-            }
+            };
             
             scope.resetFormState = function(state) {
                 if (scope.uidl.form) {
@@ -1351,13 +1381,22 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             
             scope.metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
             scope.tabSetIndex = 0;
-            scope.plainFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers!='Tab' && $.modifiers!='Section'").Where(function(f) {
-                return !fieldHasModifier(f, 'RangeEnd');
-            }).ToArray();
-            scope.sectionFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Section'").ToArray();
-            scope.tabSetFields = Enumerable.From(scope.uidl.fields).Where("$.modifiers=='Tab'").ToArray();
+            scope.plainFields = Enumerable.From(scope.uidl.fields)
+                .Where("$.modifiers!='Tab' && $.modifiers!='Section'")
+                .Where(function(f) { return !fieldHasModifier(f, 'RangeEnd'); })
+                .Where(function(f) { return scope.isUidlAuthorized(f); })
+                .ToArray();
+            scope.sectionFields = Enumerable.From(scope.uidl.fields)
+                .Where("$.modifiers=='Section'")
+                .Where(function(f) { return scope.isUidlAuthorized(f); })
+                .ToArray();
+            scope.tabSetFields = Enumerable.From(scope.uidl.fields)
+                .Where("$.modifiers=='Tab'")
+                .Where(function(f) { return scope.isUidlAuthorized(f); })
+                .ToArray();
 
             scope.commandInProgress = false;
+            scope.editAuthorized = (scope.uidl.needsAuthorize ? false : true);
 
 			if (scope.uidl.mode === 'StandaloneCreate') {
 				scope.parentModel = {
@@ -1420,6 +1459,15 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 });
             });
 
+            scope.$on(scope.uidl.qualifiedName + ':EditAuthorized', function(event, data) {
+                scope.editAuthorized = true;
+                Enumerable.From(scope.uidl.fields)
+                    .Where("$.fieldType=='InlineGrid' || $.fieldType=='InlineForm' || $.fieldType=='LookupMany'")
+                    .ForEach(function (field) {
+                        scope.$broadcast(field.nestedWidget.qualifiedName + ':EditAuthorized');
+                    });
+            });
+            
             scope.$on(scope.uidl.qualifiedName + ':StateResetter', function (event, data) {
                 if (data && data.commandInProgress) {
                     scope.commandInProgress = data.commandInProgress;
@@ -1851,6 +1899,21 @@ function (uidlService, entityService, commandService, $timeout, $http, $compile,
             $scope.entityService = entityService;
             $scope.commandService = commandService;
             $scope.inlineUserAlert = { current: null };
+            
+            $scope.isUidlAuthorized = function(uidlElement) {
+                if (!uidlElement.authorization || uidlElement.authorization.requiredClaims.length == 0) {
+                    return true;
+                }
+                var userClaims = $scope.appScope.model.State.LoggedInUser.LoginResult.AllClaims;
+                for (var i = 0 ; i < uidlElement.authorization.requiredClaims.length; i++) {
+                    var claim = uidlElement.authorization.requiredClaims[i];
+                    if (userClaims.indexOf(claim) >= 0) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+            
             //console.log('uidlWidget::controller', $scope.uidl.qualifiedName);
             //uidlService.implementController($scope);
             $scope.$watch('uidl', function (newValue, oldValue) {
@@ -2066,6 +2129,13 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
             $scope.$on($scope.parentUidl.qualifiedName + ':ModelSetter', function(event, data) {
                 $scope.hiddenValues = { };
             });
+            
+            $scope.editAuthorized = ($scope.parentUidl.needsAuthorize ? false : true);
+            if (!$scope.editAuthorized) {
+                $scope.$on($scope.parentUidl.qualifiedName + ':EditAuthorized', function(event, data) {
+                    $scope.editAuthorized = true;
+                });
+            }
             
             $timeout(function () {
                 var initFuncName = 'initWidget_FormField';

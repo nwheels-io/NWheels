@@ -38,8 +38,9 @@ function ($http, $q, $timeout) {
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    function checkAuthorization(typeName) {
-        return $http.get('app/entity/checkAuth/' + typeName).then(
+    function checkAuthorization(typeName, optionalId) {
+        var url = 'app/entity/checkAuth/' + typeName + (optionalId ? '/' + optionalId : '');
+        return $http.get(url).then(
             function (response) {
                 return {
                     create: response.data.CanCreate,

@@ -172,7 +172,7 @@ namespace NWheels.Testing
                 databaseConfig.Instance.ConnectionString = _ownerTest.StorageConnectionString;
 
                 storageInitializer.DropStorageSchema(databaseConfig.Instance.ConnectionString);
-                storageInitializer.CreateStorageSchema(databaseConfig.Instance.ConnectionString);
+                storageInitializer.CreateStorageSchema(databaseConfig.Instance.ConnectionString, schemaVersion: 1);
 
                 _ownerTest.OnInitializedStorage();
             }

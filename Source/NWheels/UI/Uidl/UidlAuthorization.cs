@@ -19,6 +19,13 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public UidlAuthorization(params string[] requiredClaims)
+        {
+            this.RequiredClaims = new HashSet<string>(requiredClaims);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public UidlAuthorization(IEnumerable<AuthorizationContract.AuthorizationAttribute> attributes)
             : this()
         {

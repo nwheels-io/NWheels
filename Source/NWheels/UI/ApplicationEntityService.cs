@@ -22,6 +22,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NWheels.Authorization;
+using NWheels.Authorization.Core;
 using NWheels.DataObjects.Core;
 using NWheels.Entities.Factories;
 using NWheels.TypeModel;
@@ -88,10 +89,10 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public AuthorizationCheckResults CheckEntityAuthorization(string entityName)
+        public AuthorizationCheckResults CheckEntityAuthorization(string entityName, string entityId = null)
         {
             var handler = _handlerByEntityName[entityName];
-            var checkResults = handler.CheckAuthorization();
+            var checkResults = handler.CheckAuthorization(entityId);
             return checkResults;
         }
 
@@ -476,6 +477,25 @@ namespace NWheels.UI
             public bool CanCreate { get; set; }
             public bool CanUpdate { get; set; }
             public bool CanDelete { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static AuthorizationCheckResults AllTrue()
+            {
+                return new AuthorizationCheckResults() {
+                    CanRetrieve = true,
+                    CanCreate = true,
+                    CanUpdate = true,
+                    CanDelete = true
+                };
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static AuthorizationCheckResults AllFalse()
+            {
+                return new AuthorizationCheckResults();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1641,30 +1661,27 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public AuthorizationCheckResults CheckAuthorization()
+            public AuthorizationCheckResults CheckAuthorization(string entityId = null)
             {
                 if ( !MetaType.IsEntity )
                 {
-                    return new AuthorizationCheckResults() {
-                        CanRetrieve = true,
-                        CanCreate = true,
-                        CanUpdate = true,
-                        CanDelete = true
-                    };
+                    return AuthorizationCheckResults.AllTrue();
                 }
-
-                var accessControl = Framework.CurrentIdentity.GetAccessControlList().GetEntityAccessControl(MetaType.ContractType);
 
                 using ( var domainContext = NewUnitOfWork() )
                 {
+                    var accessControl = Framework.CurrentIdentity.GetAccessControlList().GetEntityAccessControl(MetaType.ContractType);
                     var authorizationContext = (IAccessControlContext)domainContext;
+                    AuthorizationCheckResults checkResults;
 
-                    var checkResults = new AuthorizationCheckResults() {
-                        CanRetrieve = accessControl.CanRetrieve(authorizationContext).GetValueOrDefault(false),
-                        CanCreate = accessControl.CanInsert(authorizationContext).GetValueOrDefault(false),
-                        CanUpdate = accessControl.CanUpdate(authorizationContext).GetValueOrDefault(false),
-                        CanDelete = accessControl.CanDelete(authorizationContext).GetValueOrDefault(false),
-                    };
+                    if (entityId != null)
+                    {
+                        checkResults = CheckAuthorizationForEntityInstance(entityId, accessControl, authorizationContext);
+                    }
+                    else
+                    {
+                        checkResults = CheckAuthorizationForEntityType(accessControl, authorizationContext);
+                    }
 
                     return checkResults;
                 }
@@ -1695,6 +1712,46 @@ namespace NWheels.UI
             public IReadOnlyList<IEntityHandlerExtension> Extensions
             {
                 get { return _extensions; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private AuthorizationCheckResults CheckAuthorizationForEntityType(IEntityAccessControl accessControl, IAccessControlContext authorizationContext)
+            {
+                var checkResults = new AuthorizationCheckResults() {
+                    CanRetrieve = accessControl.CanRetrieve(authorizationContext).GetValueOrDefault(false),
+                    CanCreate = accessControl.CanInsert(authorizationContext).GetValueOrDefault(false),
+                    CanUpdate = accessControl.CanUpdate(authorizationContext).GetValueOrDefault(false),
+                    CanDelete = accessControl.CanDelete(authorizationContext).GetValueOrDefault(false),
+                };
+                return checkResults;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private AuthorizationCheckResults CheckAuthorizationForEntityInstance(
+                string entityId,
+                IEntityAccessControl accessControl,
+                IAccessControlContext authorizationContext)
+            {
+                AuthorizationCheckResults checkResults;
+                IDomainObject entity;
+
+                if (TryGetById(entityId, out entity))
+                {
+                    checkResults = new AuthorizationCheckResults() {
+                        CanRetrieve = accessControl.CanRetrieve(authorizationContext, entity).GetValueOrDefault(false),
+                        CanCreate = accessControl.CanInsert(authorizationContext, entity).GetValueOrDefault(false),
+                        CanUpdate = accessControl.CanUpdate(authorizationContext, entity).GetValueOrDefault(false),
+                        CanDelete = accessControl.CanDelete(authorizationContext, entity).GetValueOrDefault(false),
+                    };
+                }
+                else
+                {
+                    checkResults = AuthorizationCheckResults.AllFalse();
+                }
+
+                return checkResults;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
