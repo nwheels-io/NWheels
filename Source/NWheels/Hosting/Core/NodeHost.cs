@@ -246,7 +246,7 @@ namespace NWheels.Hosting.Core
             _dynamicModule = new DynamicModule(
                 simpleName: DynamicAssemblyName,
                 allowSave: true,
-                saveDirectory: PathUtility.HostBinPath());
+                saveDirectory: PathUtility.DynamicArtifactPath());
 
             _baseContainer = BuildBaseContainer(_registerHostComponents);
 
@@ -881,7 +881,9 @@ namespace NWheels.Hosting.Core
 
                 var loggingConfiguration = OwnerLifetime.LifetimeContainer.Resolve<IFrameworkLoggingConfiguration>();
                 _suppressDynamicArtifacts = loggingConfiguration.SuppressDynamicArtifacts;
-                
+
+                Directory.CreateDirectory(PathUtility.DynamicArtifactPath());
+
                 WriteEffectiveConfigurationXml(loader);
             }
 
@@ -941,7 +943,8 @@ namespace NWheels.Hosting.Core
                     return;
                 }
 
-                var filePath = PathUtility.HostBinPath("effective-config-dump.xml");
+
+                var filePath = PathUtility.DynamicArtifactPath("effective-config-dump.xml");
                 _logger.WritingEffectiveConfigurationToDisk(filePath);
 
                 var effectiveConfigurationXml = new XDocument();
@@ -1001,7 +1004,7 @@ namespace NWheels.Hosting.Core
 
                 var dynamicModule = OwnerLifetime.LifetimeContainer.Resolve<DynamicModule>();
 
-                var filePath = PathUtility.HostBinPath(dynamicModule.SimpleName + ".dll");
+                var filePath = PathUtility.DynamicArtifactPath(dynamicModule.SimpleName + ".dll");
                 _logger.SavingDynamicModuleToAssembly(filePath);
 
                 dynamicModule.SaveAssembly();

@@ -60,6 +60,13 @@ namespace NWheels.Utilities
             return Path.Combine(Path.Combine(moduleDirectory, subFolder), fileName);
         }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string DynamicArtifactPath(string fileName = null)
+        {
+            return Path.Combine(_s_binFolderPath, @"..\Logs\Artifacts", fileName ?? "");
+        }
+
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public static string GetAbsolutePath(string relativePath, string relativeTo, bool isRelativeToFile = false)
