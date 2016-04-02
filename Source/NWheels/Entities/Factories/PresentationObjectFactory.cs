@@ -89,7 +89,7 @@ namespace NWheels.Entities.Factories
                 new PresentationObjectPropertyImplementationConvention(presentationFactoryContext), 
                 new ImplementIPresentationObjectConvention(presentationFactoryContext),
                 new ImplementIObjectConvention(),
-                new NestedObjectsConvention(presentationFactoryContext.PropertyMap),
+                new NestedObjectsConvention(metaType, presentationFactoryContext.PropertyMap),
                 new PresentationObjectMethodsConvention(presentationFactoryContext),
             };
         }

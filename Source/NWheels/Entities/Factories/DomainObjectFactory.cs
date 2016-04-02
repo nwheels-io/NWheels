@@ -111,7 +111,7 @@ namespace NWheels.Entities.Factories
                 new DomainObjectPropertyImplementationConvention(domainFactoryContext), 
                 new ImplementIDomainObjectConvention(domainFactoryContext),
                 new ImplementIObjectConvention(),
-                new NestedObjectsConvention(domainFactoryContext.PropertyMap),
+                new NestedObjectsConvention(metaType, domainFactoryContext.PropertyMap),
                 new ActiveRecordConvention(domainFactoryContext),
                 new DomainObjectModifiedVectorConvention(domainFactoryContext), 
                 new DomainObjectOperationMethodsConvention(domainFactoryContext),

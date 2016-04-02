@@ -45,7 +45,7 @@ namespace NWheels.Testing.Entities.Impl
                 new ImplementIEntityPartObjectConvention(metaType), 
                 new EnsureDomainObjectConvention(metaType), 
                 new DependencyInjectionConvention(metaType, propertyMap, forceApply: true), 
-                new NestedObjectsConvention(propertyMap), 
+                new NestedObjectsConvention(metaType, propertyMap), 
                 new TestIdGeneratorConvention(metaType), 
             };
         }

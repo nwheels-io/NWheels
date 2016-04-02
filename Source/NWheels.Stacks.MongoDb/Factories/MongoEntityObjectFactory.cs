@@ -47,7 +47,7 @@ namespace NWheels.Stacks.MongoDb.Factories
                 new EnsureDomainObjectConvention(metaType), 
                 new DependencyInjectionConvention(metaType, propertyMap, forceApply: true),
                 new ContextImplTypeInjectionConvention(conventionContext),
-                new NestedObjectsConvention(propertyMap), 
+                new NestedObjectsConvention(metaType, propertyMap), 
                 new ObjectIdGeneratorConvention(propertyMap, metaType), 
                 new BsonIgnoreConvention(MetadataCache, metaType),
                 new BsonDiscriminatorConvention(context, MetadataCache, metaType),
