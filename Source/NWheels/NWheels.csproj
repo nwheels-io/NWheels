@@ -168,6 +168,7 @@
     <Compile Include="TypeModel\Core\Conventions\MutationMetadataConvention.cs" />
     <Compile Include="TypeModel\Core\DomainContextMetadataBuilder.cs" />
     <Compile Include="TypeModel\Core\DomainContextMetadataCache.cs" />
+    <Compile Include="TypeModel\Core\Factories\DebugEx.cs" />
     <Compile Include="TypeModel\Core\StorageTypes\DecimalAsInt64StorageType.cs" />
     <Compile Include="TypeModel\IDomainContextEntityMetadata.cs" />
     <Compile Include="Core\ICoreFramework.cs" />

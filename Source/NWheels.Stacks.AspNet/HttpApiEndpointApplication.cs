@@ -18,6 +18,7 @@ using System.Web.Routing;
 using System.Web.SessionState;
 using Autofac;
 using Autofac.Integration.WebApi;
+using Hapil;
 using NWheels.Authorization;
 using NWheels.Endpoints.Core;
 using NWheels.Hosting;
@@ -214,6 +215,11 @@ namespace NWheels.Stacks.AspNet
 
                 ((IDisposable)activity).Dispose();
             }
+
+            //if (HttpContext.Current.Request.QueryString.Get("savertdll") != null)
+            //{
+            //    _s_nodeHost.Components.Resolve<DynamicModule>().SaveAssembly();
+            //}
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

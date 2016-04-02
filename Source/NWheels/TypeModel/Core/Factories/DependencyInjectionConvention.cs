@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -96,6 +97,14 @@ namespace NWheels.TypeModel.Core.Factories
             protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
             {
                 writer.ImplementInterfaceVirtual<IHaveDependencies>().Method<IComponentContext>(x => x.InjectDependencies).Implement((m, components) => {
+                    //Static.Void(DebugEx.WriteLine,
+                    //    m.Const<string>("{0}->InjectDependencies(components={1})"),
+                    //    m.NewArray<object>(
+                    //        m.This<object>().FuncToString(),
+                    //        m.Iif(components.IsNull(), m.Const<string>("NULL"), components.FuncToString()).CastTo<object>()
+                    //    )
+                    //);
+                    
                     writer.DependencyField<IComponentContext>("$components").Assign(components);
 
                     _propertyStrategyMap.InvokeStrategies(
