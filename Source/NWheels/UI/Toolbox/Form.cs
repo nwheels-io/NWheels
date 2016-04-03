@@ -824,5 +824,6 @@ namespace NWheels.UI.Toolbox
         ThisQuarter,
         ThisYear,
         LastYear,
+        AllTime
     }
 }

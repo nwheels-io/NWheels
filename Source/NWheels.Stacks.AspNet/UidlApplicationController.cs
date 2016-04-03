@@ -340,7 +340,8 @@ namespace NWheels.Stacks.AspNet
                 { TimeRangePreset.LastMonth, new Interval<DateTime>(now.StartOfMonth().AddMonths(-1), now.StartOfMonth().AddSeconds(-1)) },
                 { TimeRangePreset.ThisQuarter, new Interval<DateTime>(now.StartOfQuarter(), now.StartOfQuarter().AddMonths(3).AddSeconds(-1)) },
                 { TimeRangePreset.ThisYear, new Interval<DateTime>(now.StartOfyear(), now.StartOfyear().AddYears(1).AddSeconds(-1)) },
-                { TimeRangePreset.LastYear, new Interval<DateTime>(now.StartOfyear().AddYears(-1), now.StartOfyear().AddSeconds(-1)) }
+                { TimeRangePreset.LastYear, new Interval<DateTime>(now.StartOfyear().AddYears(-1), now.StartOfyear().AddSeconds(-1)) },
+                { TimeRangePreset.AllTime, new Interval<DateTime>(DateTime.MinValue, now) },
             };
 
             return Json(presetValues.Select(
