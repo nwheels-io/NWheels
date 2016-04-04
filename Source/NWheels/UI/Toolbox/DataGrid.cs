@@ -390,11 +390,12 @@ namespace NWheels.UI.Toolbox
             Expression<Func<TDataRow, T>> propertySelector, 
             string title = null, 
             FieldSize size = FieldSize.Medium,
+            string format = null,
             bool includeInTotal = false,
             GridColumnType? columnType = null,
             Action<GridColumn> setup = null)
         {
-            var column = new GridColumn(MetaType, propertySelector, title, size, null, includeInTotal, columnType);
+            var column = new GridColumn(MetaType, propertySelector, title, size, format, includeInTotal, columnType);
 
             if (setup != null)
             {
@@ -411,13 +412,14 @@ namespace NWheels.UI.Toolbox
             Expression<Func<TDerivedDataRow, T>> propertySelector, 
             string title = null, 
             FieldSize size = FieldSize.Medium,
+            string format = null,
             bool includeInTotal = false,
             GridColumnType? columnType = null,
             Action<GridColumn> setup = null)
             where TDerivedDataRow : TDataRow
         {
             var derivedMetaType = MetadataCache.GetTypeMetadata(typeof(TDerivedDataRow));
-            var column = new GridColumn(derivedMetaType, propertySelector, title, size, null, includeInTotal, columnType);
+            var column = new GridColumn(derivedMetaType, propertySelector, title, size, format, includeInTotal, columnType);
 
             if (setup != null)
             {
@@ -453,6 +455,7 @@ namespace NWheels.UI.Toolbox
             Expression<Func<TDestinationEntity, object>> destinationPropertySelector,
             string title = null,
             FieldSize size = FieldSize.Medium,
+            string format = null,
             GridColumnType? columnType = null,
             Action<GridColumn> setup = null)
         {
@@ -461,7 +464,7 @@ namespace NWheels.UI.Toolbox
                 .Concat(GridColumn.ParsePropertyNavigation(destinationPropertySelector))
                 .ToArray();
 
-            var column = new GridColumn(MetaType, navigations, FieldSpecialName.None, title, size, columnType: columnType);
+            var column = new GridColumn(MetaType, navigations, FieldSpecialName.None, title, size, format, columnType: columnType);
 
             if (setup != null)
             {
@@ -479,6 +482,7 @@ namespace NWheels.UI.Toolbox
             Expression<Func<TDestinationEntity, object>> destinationPropertySelector,
             string title = null,
             FieldSize size = FieldSize.Medium,
+            string format = null,
             GridColumnType? columnType = null,
             Action<GridColumn> setup = null)
         {
@@ -487,7 +491,7 @@ namespace NWheels.UI.Toolbox
                 .Concat(GridColumn.ParsePropertyNavigation(destinationPropertySelector))
                 .ToArray();
 
-            var column = new GridColumn(MetaType, navigations, FieldSpecialName.None, title, size, columnType: columnType);
+            var column = new GridColumn(MetaType, navigations, FieldSpecialName.None, title, size, format, columnType: columnType);
 
             if (setup != null)
             {
