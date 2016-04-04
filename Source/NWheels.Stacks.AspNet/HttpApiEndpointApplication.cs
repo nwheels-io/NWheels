@@ -158,6 +158,7 @@ namespace NWheels.Stacks.AspNet
         private void SessionModule_OnStart(object sender, EventArgs eventArgs)
         {
             var sessionId = Session.SessionID;
+            Session.Timeout = 40;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
