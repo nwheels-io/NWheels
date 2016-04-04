@@ -628,9 +628,14 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.BadRequest);
             }
 
+            var file = httpContext.Request.Files[0];
             var buffer = new MemoryStream();
-            httpContext.Request.Files[0].InputStream.CopyTo(buffer);
-            httpContext.Session[UploadSessionKey] = buffer.ToArray();
+            file.InputStream.CopyTo(buffer);
+            var document = new FormattedDocument(
+                metadata: new DocumentMetadata(new DocumentFormat("UPLOAD", file.ContentType, Path.GetExtension(file.FileName), file.FileName)),
+                contents: buffer.ToArray());
+
+            httpContext.Session[UploadSessionKey] = document;
 
             return StatusCode(HttpStatusCode.OK);
         }
@@ -1048,12 +1053,13 @@ namespace NWheels.Stacks.AspNet
 
             if (viewModel == null)
             {
+                TryInjectUploadedFileWithoutViewModel(call);
                 return;
             }
 
             var metaType = _metadataCache.GetTypeMetadata(viewModel.ContractType);
             var fileUploadProperty = metaType.Properties.FirstOrDefault(p =>
-                p.ClrType == typeof(byte[]) &&
+                (p.ClrType == typeof(byte[]) || p.ClrType == typeof(FormattedDocument)) &&
                 p.SemanticType != null &&
                 p.SemanticType.WellKnownSemantic.IsIn(WellKnownSemanticType.FileUpload, WellKnownSemanticType.ImageUpload));
 
@@ -1063,13 +1069,46 @@ namespace NWheels.Stacks.AspNet
             }
 
             var httpContextSession = HttpContext.Current.Session;
-            var uploadContents = httpContextSession[UploadSessionKey] as byte[];
+            var uploadDocument = httpContextSession[UploadSessionKey] as FormattedDocument;
 
-            if (uploadContents != null)
+            if (uploadDocument != null)
             {
-                fileUploadProperty.WriteValue(viewModel, uploadContents);
+                if (fileUploadProperty.ClrType == typeof(FormattedDocument))
+                {
+                    fileUploadProperty.WriteValue(viewModel, uploadDocument);
+                }
+                else
+                {
+                    fileUploadProperty.WriteValue(viewModel, uploadDocument.Contents);
+                }
+                
                 httpContextSession.Remove(UploadSessionKey);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void TryInjectUploadedFileWithoutViewModel(IMethodCallObject call)
+        {
+            var httpContextSession = HttpContext.Current.Session;
+            var uploadDocument = httpContextSession[UploadSessionKey] as FormattedDocument;
+
+            if (uploadDocument == null)
+            {
+                return;
+            }
+
+            var parameters = call.MethodInfo.GetParameters();
+
+            for (int i = 0 ; i < parameters.Length ; i++)
+            {
+                if (parameters[i].ParameterType == typeof(FormattedDocument))
+                {
+                    call.SetParameterValue(i, uploadDocument);
+                }
+            }
+            
+            httpContextSession.Remove(UploadSessionKey);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

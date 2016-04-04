@@ -242,6 +242,20 @@ namespace NWheels.Processing.Commands.Factories
                             }
                             w.Throw<ArgumentOutOfRangeException>("Argument index was out of range.");
                         })
+                        .Method<int, object>(intf => intf.SetParameterValue).Implement((w, index, value) => {
+                            var switchStatement = w.Switch(index);
+                            for (int i = 0; i < callArguments.Length; i++)
+                            {
+                                using (TT.CreateScope<TT.TProperty>(_context.Parameters[i].ParameterType))
+                                {
+                                    var argumentIndex = i;
+                                    switchStatement.Case(i).Do(() => {
+                                        ((Field<TT.TProperty>)callArguments[argumentIndex]).Assign(value.CastTo<TT.TProperty>());
+                                    });
+                                }
+                            }
+                            switchStatement.Default(() => w.Throw<ArgumentOutOfRangeException>("Argument index was out of range."));
+                        })
                         .Property(intf => intf.MethodInfo).Implement(p =>
                             p.Get(gw => {
                                 gw.Return(gw.Const<MethodInfo>(_context.Method));                        

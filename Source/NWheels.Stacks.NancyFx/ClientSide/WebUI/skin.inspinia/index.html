@@ -682,6 +682,9 @@ HEAD, JS/CSS LINKS
                     ><i ng-if="command.icon" class="fa fa-{{commandInProgress ? 'spinner' : command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                 </div>
             </div>
+            <div ng-if="uidl.popupContents">
+                <uidl-widget ng-repeat="popup in uidl.popupContents" uidl="popup"></uidl-widget>
+            </div>
         </div>
     </script>
     <script type="text/javascript">
@@ -1702,11 +1705,12 @@ HEAD, JS/CSS LINKS
                         });
                     },
                     accept: function(file, done) {
-                        if (file.type==='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-                            done();
-                        } else {
-                            done('Invalid file type.');
-                        }
+                        done();
+                        //if (file.type==='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                        //    done();
+                        //} else {
+                        //    done('Invalid file type.');
+                        //}
                     },
                 });
                 $scope.clearDropzone = function() {
