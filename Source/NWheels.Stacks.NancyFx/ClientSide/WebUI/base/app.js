@@ -1123,7 +1123,9 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 scope.requestAuthorization(entity['$id']).then(function(response) {
                     if (response.update===true) {
                         if (scope.uidl.formTypeSelector) {
-                            scope.$broadcast(scope.uidl.formTypeSelector.qualifiedName + ':EditAuthorized');
+                            for (var i = 0; i < scope.uidl.formTypeSelector.selections.length ; i++) {
+                                scope.$broadcast(scope.uidl.formTypeSelector.selections[i].widget.qualifiedName + ':EditAuthorized');
+                            }
                         } else {
                             scope.$broadcast(scope.uidl.form.qualifiedName + ':EditAuthorized');
                         }

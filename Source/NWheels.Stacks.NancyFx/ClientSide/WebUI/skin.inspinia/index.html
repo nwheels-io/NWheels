@@ -834,7 +834,9 @@ HEAD, JS/CSS LINKS
                                 $scope.preparedRequest.data
                             ).then(
                                 function(response){
-                                    grid[0].grid.endReq();
+                                    if (grid[0].grid) {
+                                        grid[0].grid.endReq();
+                                    }
                                     $scope.ResultSet = response.data.ResultSet;
                                     $scope.entityService.trackRetrievedEntities(response.data.ResultSet);
                                     var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
@@ -842,7 +844,9 @@ HEAD, JS/CSS LINKS
                                     $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data.ResultSet);
                                 },
                                 function(faultResponse){
-                                    grid[0].grid.endReq();
+                                    if (grid[0].grid) {
+                                        grid[0].grid.endReq();
+                                    }
                                     $scope.ResultSet = null;
                                     var faultInfo = $scope.commandService.createFaultInfo(faultResponse);
                                     $scope.$emit($scope.uidl.qualifiedName + ':QueryFailed', faultInfo);
