@@ -25,10 +25,21 @@ namespace NWheels.UI
             base.ModelStateType = builder.RegisterMetaType(typeof(TState));
 
             var childNodesToBuild = new HashSet<AbstractUidlNode>();
-            childNodesToBuild.UnionWith(builder.GetDeclaredMemberNodes(this));
+            var declaredMemberNodes = builder.GetDeclaredMemberNodes(this);
+            childNodesToBuild.UnionWith(declaredMemberNodes);
             childNodesToBuild.UnionWith(this.GetNestedWidgets());
             
             builder.BuildNodes(childNodesToBuild.ToArray());
+            
+            var popups = declaredMemberNodes.OfType<WidgetUidlNode>().Where(widget => widget.IsPopupContent).ToArray();
+            if (popups.Length > 0)
+            {
+                if (base.PopupContents == null)
+                {
+                    base.PopupContents = new List<WidgetUidlNode>();
+                }
+                base.PopupContents.AddRange(popups);
+            }
 
             OnBuild(builder);
         }
@@ -41,6 +52,12 @@ namespace NWheels.UI
             
             DescribePresenter(presenter);
             builder.DescribeNodePresenters(this.GetNestedWidgets().Cast<AbstractUidlNode>().ToArray());
+            
+            if (this.PopupContents != null)
+            {
+                builder.DescribeNodePresenters(this.PopupContents.Cast<AbstractUidlNode>().ToArray());
+            }
+
             PostDescribePresenter(presenter);
         }
 

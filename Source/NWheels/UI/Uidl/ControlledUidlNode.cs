@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.UI.Core;
 
 namespace NWheels.UI.Uidl
 {
@@ -36,6 +37,8 @@ namespace NWheels.UI.Uidl
         public List<BehaviorUidlNode> Behaviors { get; set; }
         [DataMember]
         public List<DataBindingUidlNode> DataBindings { get; set; }
+        [DataMember, ManuallyAssigned]
+        public List<WidgetUidlNode> PopupContents { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -28,9 +28,13 @@ namespace NWheels.UI
 
             var declaredMemberNodes = builder.GetDeclaredMemberNodes(this);
 
+            if (base.PopupContents == null)
+            {
+                base.PopupContents = new List<WidgetUidlNode>();
+            }
             base.PopupContents.AddRange(declaredMemberNodes.OfType<WidgetUidlNode>().Where(widget => widget.IsPopupContent));
+            
             builder.BuildNodes(declaredMemberNodes);
-
             OnBuild(builder);
         }
 
