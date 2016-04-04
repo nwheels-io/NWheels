@@ -104,6 +104,13 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static CommunicationFeature Communication(this NWheelsFeatureRegistrations features)
+        {
+            return new CommunicationFeature(((IHaveContainerBuilder)features).Builder);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static ObjectContractFeature ObjectContracts(this NWheelsFeatureRegistrations features)
         {
             return new ObjectContractFeature(((IHaveContainerBuilder)features).Builder);
@@ -346,6 +353,28 @@ namespace NWheels.Extensions
             {
                 _builder.RegisterType<ConfigSectionRegistration<TSection>>().As<IConfigSectionRegistration>().InstancePerDependency();
                 _builder.Register(ctx => ctx.Resolve<ConfigurationObjectFactory>().CreateService<TSection>()).As<TSection>().SingleInstance();
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class CommunicationFeature
+        {
+            private readonly ContainerBuilder _builder;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public CommunicationFeature(ContainerBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void UseHttpBot()
+            {
+                _builder.RegisterType<HttpBot>().InstancePerDependency();
+                _builder.NWheelsFeatures().Logging().RegisterLogger<IHttpBotLogger>();
             }
         }
 

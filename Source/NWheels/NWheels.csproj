@@ -137,6 +137,8 @@
     <Compile Include="Configuration\Impls\XmlFileConfigurationSource.cs" />
     <Compile Include="Conventions\Core\StaticStringDecorator.cs" />
     <Compile Include="Core\PipelineObjectFactory.cs" />
+    <Compile Include="Endpoints\HttpBot.cs" />
+    <Compile Include="Endpoints\IHttpBotLogger.cs" />
     <Compile Include="Entities\Core\DatabaseInitializationCheckRegistration.cs" />
     <Compile Include="Entities\Migrations\MigrationBase.cs" />
     <Compile Include="Entities\Migrations\StorageScriptMigration.cs" />
