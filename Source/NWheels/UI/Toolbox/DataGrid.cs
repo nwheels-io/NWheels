@@ -219,6 +219,11 @@ namespace NWheels.UI.Toolbox
                 {
                     this.RelatedEntityName = MetaProperty.Relation.RelatedPartyType.QualifiedName;
                 }
+
+                if (format == null && MetaProperty != null)
+                {
+                    this.Format = GetColumnDefaultFormatString(MetaProperty);
+                }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -350,6 +355,29 @@ namespace NWheels.UI.Toolbox
                 }
 
                 return GridColumnType.Text;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal static string GetColumnDefaultFormatString(IPropertyMetadata property)
+            {
+                if (property.SemanticType != null)
+                {
+                    switch (property.SemanticType.WellKnownSemantic)
+                    {
+                        case WellKnownSemanticType.Date:
+                            return "d";
+                        case WellKnownSemanticType.Currency:
+                            return "c";
+                    }
+                }
+
+                if (property.ClrType == typeof(decimal))
+                {
+                    return "#,##0.00";
+                }
+
+                return null;
             }
         }
     }
