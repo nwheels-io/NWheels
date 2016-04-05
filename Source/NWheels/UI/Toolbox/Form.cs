@@ -72,6 +72,55 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Form<TEntity> Field<TDerivedEntity>(
+            Expression<Func<TDerivedEntity, object>> propertySelector,
+            string label = null,
+            FormFieldType type = FormFieldType.Default,
+            FormFieldModifiers modifiers = FormFieldModifiers.None,
+            Action<FormField> setup = null)
+            where TDerivedEntity : TEntity
+        {
+            var field = new FormField(this, propertySelector.GetPropertyInfo().Name) {
+                Label = label,
+                FieldType = type,
+                Modifiers = modifiers
+            };
+
+            if (setup != null)
+            {
+                field.OnSetup += setup;
+            }
+
+            Fields.Add(field);
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IUidlForm IUidlForm.Field<TDerivedEntity>(
+            Expression<Func<TDerivedEntity, object>> propertySelector,
+            string label,
+            FormFieldType type,
+            FormFieldModifiers modifiers,
+            Action<FormField> setup)
+        {
+            var field = new FormField(this, propertySelector.GetPropertyInfo().Name) {
+                Label = label,
+                FieldType = type,
+                Modifiers = modifiers
+            };
+
+            if (setup != null)
+            {
+                field.OnSetup += setup;
+            }
+
+            Fields.Add(field);
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Form<TEntity> Range<T>(
             string label,
             Expression<Func<TEntity, T>> startPropertySelector,
@@ -736,6 +785,12 @@ namespace NWheels.UI.Toolbox
     {
         void ShowFields(params string[] propertyNames);
         void HideFields(params string[] propertyNames);
+        IUidlForm Field<TEntity>(
+            Expression<Func<TEntity, object>> propertySelector,
+            string label = null,
+            FormFieldType type = FormFieldType.Default,
+            FormFieldModifiers modifiers = FormFieldModifiers.None,
+            Action<FormField> setup = null);
         bool UsePascalCase { get; set; }
         List<FormField> Fields { get; }
         List<UidlCommand> Commands { get; }
