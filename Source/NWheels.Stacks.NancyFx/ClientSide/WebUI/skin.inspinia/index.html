@@ -732,12 +732,14 @@ HEAD, JS/CSS LINKS
                         };
                         break;
                     case 'c':
+                        modelItem.align = 'right';
                         modelItem.formatter = function(cellvalue, options, rowObject) {
                             return (cellvalue ? '$' + parseFloat(cellvalue).formatMoney(2, '.', ',') : '');
                         };
                         break;
                     case '0.00':
                     case '#,##0.00':
+                        modelItem.align = 'right';
                         modelItem.formatter = function(cellvalue, options, rowObject) {
                             return (cellvalue ? parseFloat(cellvalue).formatMoney(2, '.', ',') : '');
                         };
