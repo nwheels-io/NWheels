@@ -1657,10 +1657,14 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             };
 
             scope.sendModelToSelectedWidget = function () {
+                if (!scope.selectedType || !scope.selectedType.name) {
+                    return;
+                }
                 var selection = Enumerable.From(scope.uidl.selections).Where("$.typeName=='" + scope.selectedType.name + "'").First();
                 var selectedWidgetQualifiedName = selection.widget.qualifiedName;
                 $timeout(function() {
                     scope.$broadcast(selectedWidgetQualifiedName + ':ModelSetter', scope.model.entity);
+                    scope.$broadcast(selectedWidgetQualifiedName + ':EditAuthorized');
                 });
             };
 
@@ -1716,7 +1720,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 }
             });
 
-            if (scope.model.entity) {
+            if (scope.model.entity && scope.model.entity['$type']) {
                 scope.selectedType.name = scope.model.entity['$type'];
                 scope.selectTabByType(scope.selectedType.name);
                 scope.sendModelToSelectedWidget();
