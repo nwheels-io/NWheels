@@ -1402,11 +1402,11 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 .Where(function(f) { return scope.isUidlAuthorized(f); })
                 .ToArray();
             scope.sectionFields = Enumerable.From(scope.uidl.fields)
-                .Where("$.modifiers=='Section'")
+                .Where(function(f) { return fieldHasModifier(f, 'Section') })
                 .Where(function(f) { return scope.isUidlAuthorized(f); })
                 .ToArray();
             scope.tabSetFields = Enumerable.From(scope.uidl.fields)
-                .Where("$.modifiers=='Tab'")
+                .Where(function(f) { return fieldHasModifier(f, 'Tab') })
                 .Where(function(f) { return scope.isUidlAuthorized(f); })
                 .ToArray();
 

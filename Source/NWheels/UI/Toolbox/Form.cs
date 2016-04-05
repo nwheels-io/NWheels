@@ -114,6 +114,20 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Form<TEntity> HideIdField()
+        {
+            var metaType = MetadataCache.GetTypeMetadata(typeof(TEntity));
+
+            if (metaType.EntityIdProperty != null)
+            {
+                _hiddenFields.Add(metaType.EntityIdProperty.Name);
+            }
+
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Form<TEntity> Lookup<TLookupEntity>(
             Expression<Func<TEntity, object>> fieldSelector,
             Expression<Func<TLookupEntity, object>> lookupValueProperty,
