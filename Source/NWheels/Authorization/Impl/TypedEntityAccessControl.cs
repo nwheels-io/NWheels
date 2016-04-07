@@ -252,24 +252,28 @@ namespace NWheels.Authorization.Impl
 
         public override bool? CanInsert(IAccessControlContext context, object entity)
         {
-            if ( base.CanInsert(context, entity) == false )
+            var baseResult = base.CanInsert(context, entity);
+            
+            if (baseResult == false)
             {
                 return false;
             }
 
-            if ( _entityInsert != null )
+            if (_entityInsert != null)
             {
                 return _entityInsert(context, (TEntity)entity);
             }
 
-            return null;
+            return baseResult;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override bool? CanUpdate(IAccessControlContext context, object entity)
         {
-            if ( base.CanUpdate(context, entity) == false )
+            var baseResult = base.CanUpdate(context, entity);
+
+            if (baseResult == false)
             {
                 return false;
             }
@@ -279,24 +283,26 @@ namespace NWheels.Authorization.Impl
                 return _entityUpdate(context, (TEntity)entity);
             }
 
-            return null;
+            return baseResult;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override bool? CanDelete(IAccessControlContext context, object entity)
         {
-            if ( base.CanDelete(context, entity) == false )
+            var baseResult = base.CanDelete(context, entity);
+
+            if (baseResult == false)
             {
                 return false;
             }
 
-            if ( _entityDelete != null )
+            if (_entityDelete != null)
             {
                 return _entityDelete(context, (TEntity)entity);
             }
 
-            return null;
+            return baseResult;
         }
 
         #endregion
