@@ -33,6 +33,7 @@ namespace NWheels.Domains.Security
 
             builder.NWheelsFeatures().ObjectContracts().Concretize<IUserAccountEntity>().With<UserAccountEntity>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<IAllowAllEntityAccessRuleEntity>().With<AllowAllEntityAccessRuleEntity>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IProfilePhotoEntity>().With<ProfilePhotoEntity>();
         }
     }
 }

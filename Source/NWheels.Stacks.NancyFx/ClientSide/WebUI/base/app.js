@@ -2306,6 +2306,20 @@ theApp.directive('applyAutoFillFix', ['$timeout', function ($timeout) {
 
 //---------------------------------------------------------------------------------------------------------------------
 
+theApp.directive('errSrc', function() {
+    return {
+        link: function(scope, element, attrs) {
+            element.bind('error', function() {
+                if (attrs.src != attrs.errSrc) {
+                    attrs.$set('src', attrs.errSrc);
+                }
+            });
+        }
+    }
+});
+
+//---------------------------------------------------------------------------------------------------------------------
+
 theApp.filter('localized', ['$scope', function ($scope) {
     return function (stringId) {
         var localizedString = $scope.currentLocale.translations[stringId];
@@ -2352,4 +2366,3 @@ theApp.filter('translated', ['uidlService', function(uidlService) {
         return uidlService.translate(s);
     };
 }]);
-

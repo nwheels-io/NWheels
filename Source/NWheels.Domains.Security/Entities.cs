@@ -9,6 +9,7 @@ using NWheels.Authorization.Core;
 using NWheels.DataObjects;
 using NWheels.Domains.Security.Core;
 using NWheels.Entities;
+using NWheels.Processing.Documents;
 
 namespace NWheels.Domains.Security
 {
@@ -294,5 +295,38 @@ namespace NWheels.Domains.Security
         string ImageType { get; set; }
         int PixelWidth { get; set; }
         int PixelHeight { get; set; }
+        FormattedDocument ToFormattedDocument();
+        void ImportFormattedDocument(FormattedDocument document);
+    }
+
+    public abstract class ProfilePhotoEntity : IProfilePhotoEntity
+    {
+        #region Implementation of IProfilePhotoEntity
+
+        public abstract byte[] ImageContents { get; set; }
+        public abstract string ImageType { get; set; }
+        public abstract int PixelWidth { get; set; }
+        public abstract int PixelHeight { get; set; }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual FormattedDocument ToFormattedDocument()
+        {
+            return new FormattedDocument(
+                new DocumentMetadata(new DocumentFormat(null, ImageType, null, null)), 
+                ImageContents);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual void ImportFormattedDocument(FormattedDocument document)
+        {
+            this.ImageType = document.Metadata.Format.ContentType;
+            this.ImageContents = document.Contents;
+            this.PixelWidth = 0;
+            this.PixelHeight = 0;
+        }
     }
 }

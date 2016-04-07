@@ -87,6 +87,9 @@ HEAD, JS/CSS LINKS
             background-color: #EEEEEE;
             border-radius: 5px;            
         }
+        .panel-heading i.fa {
+            margin-right: 3px;
+        }
         .alert .glyphicon{
             display:table-cell;
         }
@@ -1066,8 +1069,8 @@ HEAD, JS/CSS LINKS
                         shrinkToFit: false,
                         rownumWidth: 45,
                         width: null,
-                        rowNum: 5,
-                        rowList: [5, 10, 20],
+                        rowNum: 50,
+                        rowList: [50, 100, 200],
                         colModel: columnsModel,
                         pager: "#rdtpager_" + $scope.uniqueWidgetId,
                         viewrecords: true,
@@ -1587,18 +1590,18 @@ HEAD, JS/CSS LINKS
             <div ng-if="uidl.fieldType==='FileUpload'" class="m-b">
                 <a href="" ng-click="clearDropzone()" ng-disabled="!editAuthorized">Clear</a>
             </div>
-            <!-- IMAGE UPLOAD -->
-            <div ng-if="uidl.fieldType==='ImageUpload'" class="col-sm-3">
-                <img ng-src="entity/queryImage/ProfilePhoto/{{::entity[uidl.propertyName]}}/ImageType/ImageContents" class="img-circle circle-border m-b-md" alt="profile">                
-            </div>
-            <div ng-if="uidl.fieldType==='ImageUpload'" class="col-sm-5">
-                <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
-                <div class="dz-default dz-message">
-                    <span>Drop photo image file here to upload</span>
+            <!-- IMAGE + UPLOAD -->
+            <div class="row">
+                <div ng-if="uidl.fieldType==='ImageUpload'" class="col-sm-3">
+                    <img ng-show="entity[uidl.propertyName]" ng-src="{{entity[uidl.propertyName]}}" err-src="app/skin/assets/img/avatar_missing.jpg" class="img-circle circle-border m-b-md" width="128" height="128" alt="profile photo">
+                    <img ng-hide="entity[uidl.propertyName]" ng-src="app/skin/assets/img/avatar_missing.jpg" class="img-circle circle-border m-b-md" width="128" height="128" alt="profile photo missing">
                 </div>
-            </div>
-            <div ng-if="uidl.fieldType==='ImageUpload'" class="col-sm-5">
-                <button type="submit" class="btn btn-primary pull-right" disabled="">Use New Photo</button>
+                <div ng-if="uidl.fieldType==='ImageUpload'" 
+                     class="col-sm-5 dropzone m-l" 
+                     id="{{::uniqueFieldId}}"
+                     style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
+                     <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
+                </div>
             </div>
         </div>
     </script>
@@ -1712,7 +1715,7 @@ HEAD, JS/CSS LINKS
                     $scope.createDateTimeRangePicker();
                 });
             }
-            if ($scope.uidl.fieldType==='FileUpload') {
+            if ($scope.uidl.fieldType==='FileUpload' || $scope.uidl.fieldType==='ImageUpload') {
                 $scope.dropzone = new Dropzone('#' + $scope.uniqueFieldId, {
                     url: 'app/uploadContent',
                     maxFiles: 1,
@@ -1741,6 +1744,9 @@ HEAD, JS/CSS LINKS
                 $scope.clearDropzone = function() {
                     $scope.dropzone.removeAllFiles(true);
                 };
+                $scope.$watch('entity[uidl.propertyName]', function(newValue, oldValue) {
+                    $scope.clearDropzone();
+                });
             }
         }
     </script>

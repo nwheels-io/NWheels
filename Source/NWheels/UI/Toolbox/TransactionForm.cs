@@ -91,7 +91,8 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public Type ContextEntityType { get; set; }
-        public string OutputDownloadFormat { get; set; } 
+        public string OutputDownloadFormat { get; set; }
+        public bool RefreshUponCompletion { get; set; } 
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -169,7 +170,12 @@ namespace NWheels.UI.Toolbox
                             .AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Output))
                             .Then(bb => bb.Broadcast(OutputReady).WithPayload(vm => vm.Input).BubbleUp()
                             .Then(bbb => InvokeFormStateResetter(bbb)
-                            .Then(bbbb => bbbb.UserAlertFrom<ITransactionUserAlerts>().Show<Empty.Payload>(UserAlertDisplayMode, (alerts, vm) => alerts.SuccessfullyCompleted())))),
+                            .Then(bbbb => bbbb.UserAlertFrom<ITransactionUserAlerts>().Show<Empty.Payload>(UserAlertDisplayMode, (alerts, vm) => alerts.SuccessfullyCompleted())
+                            .ThenIf(this.RefreshUponCompletion, bbbbb => bbbbb
+                                .InvokeTransactionScript<TScript>(ContextEntityType, ApiCallResultType.Command)
+                                .WaitForReply((script, vm) => script.InitializeInput(null))
+                                .Then(b6 => b6.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Input))
+                                .Then(InvokeFormModelSetter)))))),
                         onFailure: b => b
                             .Broadcast(OperationFailed).WithPayload(vm => vm.Input).BubbleUp()
                             .Then(bb => bb.UserAlertFrom<ITransactionUserAlerts>().Show<TOutput>(UserAlertDisplayMode, (alerts, vm) => alerts.FailedToCompleteRequestedAction(), faultInfo: vm => vm.Input)
@@ -185,11 +191,15 @@ namespace NWheels.UI.Toolbox
                         onSuccess: b => b
                             .BeginDownloadContent(vm => vm.Input)
                             .Then(bb => bb.Broadcast(InputForm.StateResetter).TunnelDown()
-                            .Then(bbb => bbb.UserAlertFrom<ITransactionUserAlerts>().Show<Empty.Payload>(UserAlertDisplayMode, (alerts, vm) => alerts.SuccessfullyCompleted())),
+                            .Then(bbb => bbb.UserAlertFrom<ITransactionUserAlerts>().Show<Empty.Payload>(UserAlertDisplayMode, (alerts, vm) => alerts.SuccessfullyCompleted())
+                            .ThenIf(this.RefreshUponCompletion, bbbbb => bbbbb
+                                .InvokeTransactionScript<TScript>(ContextEntityType, ApiCallResultType.Command)
+                                .WaitForReply((script, vm) => script.InitializeInput(null))
+                                .Then(b6 => b6.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Input))),
                         onFailure: bf => bf
                             .Broadcast(OperationFailed).WithPayload(vm => vm.Input).BubbleUp()
                             .Then(bbf => bbf.UserAlertFrom<ITransactionUserAlerts>().Show<TOutput>(UserAlertDisplayMode, (alerts, vm) => alerts.FailedToCompleteRequestedAction(), faultInfo: vm => vm.Input)
-                            .Then(bbbf => InvokeFormStateResetter(bbbf)))));
+                            .Then(bbbf => InvokeFormStateResetter(bbbf)))))));
             }
 
             if ( InputForm != null )

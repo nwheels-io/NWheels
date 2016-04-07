@@ -25,6 +25,7 @@ using NWheels.Authorization;
 using NWheels.Authorization.Core;
 using NWheels.DataObjects.Core;
 using NWheels.Entities.Factories;
+using NWheels.Processing.Documents;
 using NWheels.TypeModel;
 using NWheels.UI.Core;
 using NWheels.UI.Factories;
@@ -309,6 +310,7 @@ namespace NWheels.UI
             settings.Converters.Add(new StringEnumConverter());
             settings.Converters.Add(new DomainObjectConverter(this, queryOptions));
             settings.Converters.Add(new ViewModelObjectConverter(this, _viewModelFactory));
+            settings.Converters.Add(new FormattedDocumentConverter());
 
             foreach ( var extension in _jsonExtensions )
             {
@@ -3228,6 +3230,61 @@ namespace NWheels.UI
             public override bool CanWrite
             {
                 get { return false; }
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class FormattedDocumentConverter : JsonConverter
+        {
+            #region Overrides of JsonConverter
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                var document = (FormattedDocument)value;
+                string dataString;
+
+                if (document != null)
+                {
+                    dataString = string.Format("data:{0};base64,{1}", document.Metadata.Format.ContentType, Convert.ToBase64String(document.Contents));
+                }
+                else
+                {
+                    dataString = null;
+                }
+                
+                var token = JToken.FromObject(dataString);
+                token.WriteTo(writer);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                return null;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanConvert(Type objectType)
+            {
+                return objectType == typeof(FormattedDocument);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanRead
+            {
+                get { return true; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanWrite
+            {
+                get { return true; }
             }
 
             #endregion

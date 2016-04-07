@@ -1182,6 +1182,20 @@ namespace NWheels.UI
                     _behaviorToComplete.OnFailure = builder.Behavior;
                 }
             }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ThenIf(
+                bool condition,
+                Action<BehaviorBuilder<TOutput>> onSuccess,
+                Action<BehaviorBuilder<IPromiseFailureInfo>> onFailure = null
+                /*TBD: , Action<IBehaviorBuilder<TOutput, TData, TState>> onProgress = null*/)
+            {
+                if (condition)
+                {
+                    Then(onSuccess, onFailure);
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
