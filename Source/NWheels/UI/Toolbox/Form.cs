@@ -121,6 +121,13 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        IUidlForm IUidlForm.HideIdField()
+        {
+            return this.HideIdField();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Form<TEntity> Range<T>(
             string label,
             Expression<Func<TEntity, T>> startPropertySelector,
@@ -785,6 +792,7 @@ namespace NWheels.UI.Toolbox
     {
         void ShowFields(params string[] propertyNames);
         void HideFields(params string[] propertyNames);
+        IUidlForm HideIdField();
         IUidlForm Field<TEntity>(
             Expression<Func<TEntity, object>> propertySelector,
             string label = null,

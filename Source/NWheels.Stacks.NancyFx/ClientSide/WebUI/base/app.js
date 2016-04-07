@@ -1632,7 +1632,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
     m_controllerImplementations['TypeSelector'] = {
         implement: function (scope) {
             scope.selectedType = { name: null };
-            scope.parentModelProperty = toCamelCase(scope.uidl.parentModelProperty);
+            scope.parentModelProperty = scope.uidl.parentModelProperty; //toCamelCase(scope.uidl.parentModelProperty);
             
             scope.selectedTypeChanged = function (type) {
                 scope.entityService.newDomainObject(type).then(function (newObj) {

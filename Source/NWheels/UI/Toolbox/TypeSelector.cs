@@ -28,7 +28,7 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<string> GetTranslatables()
         {
-            return base.GetTranslatables().Concat(Selections.Select(s => s.Text));
+            return base.GetTranslatables().Concat(Selections.Select(s => s.Text)).ConcatOneIf(EmptySelectionText);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -143,6 +143,8 @@ namespace NWheels.UI.Toolbox
         public string DefaultTypeName { get; set; }
         [DataMember]
         public string ParentModelProperty { get; set; }
+        [DataMember]
+        public string EmptySelectionText { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

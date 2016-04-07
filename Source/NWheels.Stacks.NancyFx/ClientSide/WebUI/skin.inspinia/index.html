@@ -1273,8 +1273,7 @@ HEAD, JS/CSS LINKS
     </script>
     <script type="text/javascript">
         function initWidget_TransactionForm($scope) {
-            if ($scope.uidl.inputForm.isModalPopup)
-            {
+            if ($scope.uidl.inputForm && $scope.uidl.inputForm.isModalPopup) {
                 $scope.$on($scope.uidl.qualifiedName + ':ShowModal', function () {
                     $("#divModal_" + $scope.uidl.elementName).modal('show');
                 });
@@ -2070,6 +2069,9 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/TypeSelectorWithAccordion">
         <div class="panel panel-default" style="border:0;margin:0;" id="{{::uidl.elementName}}">
+            <div class="panel-body" ng-show="uidl.emptySelectionText && !selectedType.name">
+                {{::translate(uidl.emptySelectionText)}}
+            </div>
             <div ng-repeat-start="selection in uidl.selections" class="panel-heading" style="cursor:pointer" ng-click="selectedTypeChanged(selection.typeName)">
                 <div class="pull-right">
                     <i ng-if="selection.widget.icon" class="fa fa-{{::selection.widget.icon}} text-success"></i>
@@ -2079,7 +2081,7 @@ HEAD, JS/CSS LINKS
                 </h5>
             </div>
             <div ng-repeat-end id="{{::selection.widget.elementName}}" style="padding:0;margin:0">
-                <div ng-if="selectedTabIndex===$index" class="row" style="padding:30px 20px;">
+                <div ng-if="selection.typeName===selectedType.name" class="row" style="padding:30px 20px;">
                     <div class="col-md-12">
                         <uidl-widget uidl="selection.widget"></uidl-widget>
                     </div>
