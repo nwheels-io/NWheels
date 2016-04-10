@@ -21,5 +21,20 @@ namespace NWheels.Domains.Security
         {
             return (TUserAccount)((UserAccountIdentity)identityInfo).GetUserAccount();
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static TUserAccount GetUserAccountAs<TUserAccount>(this ISession session)
+            where TUserAccount : class, IUserAccountEntity
+        {
+            return (TUserAccount)((UserAccountIdentity)session.UserIdentity).GetUserAccount();
+        }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static TUserAccount TryGetUserAccountAs<TUserAccount>(this ISession session) 
+            where TUserAccount : class, IUserAccountEntity
+        {
+            return (((UserAccountIdentity)session.UserIdentity).GetUserAccount() as TUserAccount);
+        }
     }
 }

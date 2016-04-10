@@ -6,7 +6,6 @@ namespace NWheels.Authorization
 {
     public interface ISession
     {
-        TUser UserAccountAs<TUser>() where TUser : class;
         string Id { get; }
         IPrincipal UserPrincipal { get; }
         IIdentityInfo UserIdentity { get; }
