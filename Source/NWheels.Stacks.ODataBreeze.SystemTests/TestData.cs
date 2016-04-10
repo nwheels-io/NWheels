@@ -125,8 +125,8 @@ namespace NWheels.Stacks.ODataBreeze.SystemTests
                             canInsert: false, 
                             canDelete: false)
                         .IsDefinedByPredicate(
-                            canRetrieve: (context, user) => context.Session.UserAccountAs<IUserAccountEntity>() == user,
-                            canUpdate: (context, user) => context.Session.UserAccountAs<IUserAccountEntity>() == user);
+                            canRetrieve: (context, user) => context.Session.GetUserAccountAs<IUserAccountEntity>() == user,
+                            canUpdate: (context, user) => context.Session.GetUserAccountAs<IUserAccountEntity>() == user);
                 }
 
                 #endregion
