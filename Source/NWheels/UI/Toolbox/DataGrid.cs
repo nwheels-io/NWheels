@@ -615,6 +615,7 @@ namespace NWheels.UI.Toolbox
         {
             return (
                 (metaProperty.Role == PropertyRole.None && metaProperty.Kind == PropertyKind.Scalar) ||
+                (metaProperty == metaProperty.DeclaringContract.DisplayNameProperty) ||
                 (metaProperty.Role == PropertyRole.Key && ShouldDisplayKeyPropertyOfType(metaProperty)));
         }
 
