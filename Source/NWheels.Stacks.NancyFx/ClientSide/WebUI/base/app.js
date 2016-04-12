@@ -1458,8 +1458,18 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 } else {
                     scope.$emit(command.qualifiedName + ':Executing');
                 }
-            }
+            };
 
+            scope.autoSubmitForm = function() {
+                for (var i = 0; i < scope.uidl.commands.length ; i++) {
+                    var command = scope.uidl.commands[i];
+                    if (command.kind === 'Submit') {
+                        scope.invokeCommand(command);
+                        break;
+                    }
+                }
+            };
+            
             scope.validate = function(deferred) {
                 var result = true;
 
@@ -1478,6 +1488,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
 
             scope.$on(scope.uidl.qualifiedName + ':ModelSetter', function(event, data) {
                 scope.model.Data.entity = data;
+                scope.suppressAutoSubmitOnce = true;
                 scope.commandInProgress = false;
                 scope.tabSetIndex = 0;
 
@@ -1491,6 +1502,16 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                                 scope.$broadcast(field.nestedWidget.qualifiedName + ':ModelSetter', data[field.propertyName]);
                             }
                         });
+                    
+                    if (scope.uidl.autoSubmitOnChange) {
+                        scope.$watch('model.Data.entity', function(newValue, oldValue) {
+                            if (scope.suppressAutoSubmitOnce) {
+                                scope.suppressAutoSubmitOnce = false;
+                            } else {
+                                scope.autoSubmitForm();
+                            }
+                        }, true);
+                    }
                 });
             });
 
@@ -1776,6 +1797,19 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
         selectValue: selectValue
     };
 
+}]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
+theApp.controller('cloneUidlWithUniqueId',
+['$scope', 'uidlService',
+function ($scope, uidlService) {
+    $scope.cloneUidl = function(uidl, idSuffix) {
+        $scope.thisUidl = jQuery.extend({}, uidl);
+        $scope.thisUidl.idName = $scope.thisUidl.idName + '_' + idSuffix;
+        $scope.thisUidl.qualifiedName = $scope.thisUidl.qualifiedName + '_' + idSuffix;
+        $scope.thisUidl.elementName = $scope.thisUidl.elementName + '_' + idSuffix;
+    };
 }]);
 
 //---------------------------------------------------------------------------------------------------------------------

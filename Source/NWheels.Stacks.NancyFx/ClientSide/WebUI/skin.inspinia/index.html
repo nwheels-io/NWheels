@@ -641,13 +641,16 @@ HEAD, JS/CSS LINKS
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr ng-repeat="row in ::ResultSet">
-                                    <td ng-repeat="column in ::uidl.displayColumns" ng-class="{'text-center':column.columnType!='Number', 'text-right':column.columnType=='Number'}">
+                                <tr ng-repeat="row in ::ResultSet" ng-init="thisRowIndex=$index;">
+                                    <td ng-repeat="column in ::uidl.displayColumns" ng-class="{'text-left':column.columnType!='Number', 'text-right':column.columnType=='Number'}">
                                         <span ng-if="column.columnType==='Text'||column.columnType==='Enum'">{{::row[column.expression]}}</span>
-                                        <span ng-if="column.columnType==='Number'">{{::formatValue(row[column.expression])}}</span>
-                                        <span ng-if="column.nestedWidget">
-                                            <uidl-widget uidl="column.nestedWidget"></uidl-widget>
-                                        </span>
+                                        <!--<span ng-if="column.columnType==='Number'">{{::formatValue(row[column.expression], column.format)}}</span>-->
+                                        <span ng-if="column.columnType==='Number'">{{::row[column.expression]}}</span>
+                                        <div ng-if="column.nestedWidget" ng-controller="cloneUidlWithUniqueId">
+                                            <div ng-init="cloneUidl(column.nestedWidget, thisRowIndex)">
+                                                <uidl-widget ng-if="thisUidl" uidl="thisUidl" parent-uidl="column" parent-model="row[column.expression]"></uidl-widget>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -659,8 +662,8 @@ HEAD, JS/CSS LINKS
     </script>
     <script type="text/javascript">
         function initWidget_StaticTable($scope) {
-            $scope.$on($sope.uidl.qualifiedName + ':DataReceived', function (event, data) {
-                $scope.ResultSet = data;
+            $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
+                $scope.ResultSet = data.Rows;
             });
         }
     </script>
@@ -1269,10 +1272,6 @@ HEAD, JS/CSS LINKS
             <uidl-widget ng-if="uidl.inputFormTypeSelector" uidl="uidl.inputFormTypeSelector" parent-model="model.State"></uidl-widget>
         </div>
     </script>
-    
-    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    UIDL WIDGET - TRANSACTION FORM WITH LOGIN STYLE
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/TransactionFormLoginStyle">
         <div class="middle-box text-center loginscreen animated fadeInDown">
             <div>
@@ -1288,10 +1287,12 @@ HEAD, JS/CSS LINKS
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
         </div>
     </script>
-
-    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    UIDL WIDGET - TRANSACTION FORM WITH POPUP MODE
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="app/uidl-element-template/TransactionFormInline">
+        <div>
+            <uidl-widget ng-if="uidl.inputForm" uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
+            <uidl-widget ng-if="uidl.inputFormTypeSelector" uidl="uidl.inputFormTypeSelector" parent-model="model.State"></uidl-widget>
+        </div>
+    </script>
     <script type="text/ng-template" id="app/uidl-element-template/TransactionFormPopupMode">
         <div class="modal inmodal fade" id="divModal_{{uidl.elementName}}" tabindex="-1" role="dialog"  aria-hidden="true">
             <div class="modal-dialog">
@@ -1380,7 +1381,7 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
             <!-- COMMAND BUTTONS -->
-            <div ng-if="uidl.commands.length" class="form-group">
+            <div ng-if="uidl.commands.length && !uidl.autoSubmitOnChange" class="form-group">
                 <div class="col-lg-5 clearfix">
                     <button ng-repeat="command in uidl.commands | reverse"
                             type="button"
@@ -1394,6 +1395,25 @@ HEAD, JS/CSS LINKS
             </fieldset>
         </form>
     </script>
+    <script type="text/ng-template" id="app/uidl-element-template/FormInline">
+        <form class="form-inline" id="{{::uidl.elementName}}">
+            <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
+            <div class="form-group" ng-repeat="field in plainFields" style="margin-bottom:0">
+                <label for="{{::uidl.elementName + '_' + field.propertyName}}" style="position:relative;top:-5px;margin-right:5px;">{{::translate(field.label, { upperCase: true })}}</label>
+                <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
+            </div>
+            <!-- COMMAND BUTTONS -->
+            <div ng-if="uidl.commands.length && !uidl.autoSubmitOnChange" class="form-group m-l">
+                <button ng-repeat="command in uidl.commands | reverse"
+                        type="button"
+                        class="btn btn-rounded btn-lg pull-right"
+                        style="margin-right:5px;"
+                        ng-disabled="commandInProgress"
+                        ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy'}"
+                        ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+            </div>
+        </form>
+    </script>
     <script type="text/ng-template" id="app/uidl-element-template/FormBigFrontEnd">
         <form class="form-horizontal" id="{{::uidl.elementName}}">
             <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
@@ -1404,7 +1424,7 @@ HEAD, JS/CSS LINKS
             </div>
             <div ng-repeat-end class="hr-line-dashed"></div>
             <!-- COMMAND BUTTONS -->
-            <div ng-if="uidl.commands.length" class="form-group">
+            <div ng-if="uidl.commands.length && !uidl.autoSubmitOnChange" class="form-group">
                 <div class="col-sm-8 col-sm-offset-4">
                     <button ng-repeat="command in uidl.commands"
                             type="button"
@@ -1486,7 +1506,7 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - FORM FIELD
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/FormField">
-        <div>
+        <div ng-style="{display: parentUidl.isInlineStyle ? 'inline' : 'block'}">
             <!-- LABEL -->
             <input ng-if="uidl.fieldType==='Label'" 
                    readonly="" 
@@ -1754,6 +1774,9 @@ HEAD, JS/CSS LINKS
                         $scope.entity[$scope.uidl.propertyName] = start.format('YYYY-MM-DD HH:mm:ss');
                         $scope.entity[$scope.groupFields[0].propertyName] = end.format('YYYY-MM-DD HH:mm:ss');
                     });
+                    $('#' + $scope.uniqueFieldId).on('apply.daterangepicker', function(ev, picker) {
+                        $scope.$apply();
+                    });
                     $scope.dateTimeRangePickerCreated = true;
                 };
                 $scope.$watch('entity', function(newValue, oldValue) {
@@ -1886,6 +1909,9 @@ HEAD, JS/CSS LINKS
             </div>
         </div>
     </script>
+    <script type="text/ng-template" id="app/uidl-element-template/ChartInline">
+        <div id="{{::uidl.elementName}}" class="flot-chart-content" style="padding:0px; position:relative;height:80px;"></div>
+    </script>
     <script type="text/javascript">
         function initWidget_Chart($scope) {
             /*var demoServerData = {
@@ -1902,6 +1928,10 @@ HEAD, JS/CSS LINKS
                 }],
                 "Summaries": []
             };*/
+            if ($scope.parentModel) {
+                $scope.model.State.data = $scope.parentModel;
+            }
+
             $scope.$timeout(function() {
                 if ($scope.model.State.data) {
                     buildChart('#' + $scope.uidl.elementName, $scope.model.State.data);
@@ -2201,10 +2231,7 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/Dashboard">
         <div class="row">
-            <div class="col-lg-10">
-
-            </div>
-            <div class="col-lg-2" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType=='TransactionForm'" style="vertical-align:top;">
+            <div class="col-lg-12" ng-repeat="widget in uidl.widgets" ng-if="widget.widgetType=='TransactionForm'" style="text-align:right">
                 <uidl-widget uidl="widget"></uidl-widget>
             </div>
         </div>

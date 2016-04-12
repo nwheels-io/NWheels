@@ -276,7 +276,11 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public bool IsModalPopup { get; set; }
         [DataMember]
+        public bool IsInlineStyle { get; set; }
+        [DataMember]
         public bool NeedsAuthorize { get; set; }
+        [DataMember]
+        public bool AutoSubmitOnChange { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

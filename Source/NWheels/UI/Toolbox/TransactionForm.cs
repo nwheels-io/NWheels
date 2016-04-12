@@ -62,6 +62,16 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void UseInlineStyle()
+        {
+            this.TemplateName = "TransactionFormInline";
+            this.InputForm.IsInlineStyle = true;
+            this.InputForm.TemplateName = "FormInline";
+            this.InputForm.AutoSubmitOnChange = true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
             return base.GetNestedWidgets().ConcatOneIf(InputForm).ConcatOneIf(InputFormTypeSelector);
