@@ -23,6 +23,26 @@ Number.prototype.formatMoney = function(c, d, t){
 
 //-----------------------------------------------------------------------------------------------------------------
 
+function formatValue(format, value) {
+    switch (format) {
+        case 'd':
+            return moment.utc(value, 'YYYY-MM-DD HH:mm:ss').format('DD MMM YYYY');
+        case 'y':
+            return moment.utc(value, 'YYYY-MM-DD HH:mm:ss').format('MMMM YYYY');
+        case 'c':
+            return (value ? '$' + parseFloat(value).formatMoney(2, '.', ',') : '');
+        case '0.00':
+        case '#,##0.00':
+            return (value ? parseFloat(value).formatMoney(2, '.', ',') : '');
+        case '0.0000':
+        case '#,##0.0000':
+            return (value ? parseFloat(value).formatMoney(4, '.', ',') : '');
+    }
+    return value;
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
 theApp.factory('appHttpInterceptor', ['$rootScope', '$q', 'sessionService', function ($rootScope, $q, sessionService) {
     return {
         'response': function(response) {

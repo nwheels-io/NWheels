@@ -254,6 +254,8 @@ namespace NWheels.UI.Toolbox
             public string RelatedEntityName { get; set; }
             [DataMember, ManuallyAssigned]
             public UidlAuthorization Authorization { get; set; }
+            [DataMember, ManuallyAssigned]
+            public WidgetUidlNode NestedWidget { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -339,6 +341,11 @@ namespace NWheels.UI.Toolbox
                 if ( metaProperty.ClrType.IsEnum )
                 {
                     return GridColumnType.Enum;
+                }
+
+                if (metaProperty.ClrType == typeof(ChartData))
+                {
+                    return GridColumnType.Chart;
                 }
 
                 if ( metaProperty.SemanticType != null )
@@ -678,6 +685,7 @@ namespace NWheels.UI.Toolbox
         Number = 20,
         Enum = 30,
         Image = 40,
+        Chart = 45,
         Link = 50,
         Key = 60,
         Hidden = 100

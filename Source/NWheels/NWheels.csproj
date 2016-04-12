@@ -367,6 +367,7 @@
     <Compile Include="UI\EntityExportFormat.cs" />
     <Compile Include="UI\IFrameworkUIConfig.cs" />
     <Compile Include="UI\ContentRootAttribute.cs" />
+    <Compile Include="UI\IUidlMutation.cs" />
     <Compile Include="UI\Impl\CrudEntityExportTx.cs" />
     <Compile Include="UI\Impl\CrudEntityImportTx.cs" />
     <Compile Include="UI\Impl\EntityExportFormatSemanticsAttribute.cs" />
@@ -377,6 +378,7 @@
     <Compile Include="UI\Toolbox\EntityMethodForm.cs" />
     <Compile Include="UI\Toolbox\ChartTableReport.cs" />
     <Compile Include="UI\Toolbox\ChartTableReportScreenPart.cs" />
+    <Compile Include="UI\Toolbox\StaticTable.cs" />
     <Compile Include="UI\Toolbox\TaskPad.cs" />
     <Compile Include="UI\Toolbox\UserProfilePhoto.cs" />
     <Compile Include="UI\Toolbox\ReportScreenPart.cs" />
