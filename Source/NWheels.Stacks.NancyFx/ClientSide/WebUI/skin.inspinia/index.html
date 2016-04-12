@@ -2071,17 +2071,17 @@ HEAD, JS/CSS LINKS
                     </a>
                 </div>                
             </div>
-            <div class="ibox-content">
+            <div class="ibox-content ui-widget-content" id="{{::uidl.elementName}}_container">
                 <div id="{{::uidl.elementName}}" class="flot-chart-content" style="padding:0px; position:relative;height:250px;"></div>
                 <!--div class="m-t-md">
-                    <small class="pull-right">
-                        <i class="fa fa-clock-o"> </i>
-                        Update on 16.07.2015
-                    </small>
-                    <small>
-                        <strong>Analysis of sales:</strong> The value has been changed over time, and last month reached a level over $50,000.
-                    </small>
-                </div-->
+            <small class="pull-right">
+                <i class="fa fa-clock-o"> </i>
+                Update on 16.07.2015
+            </small>
+            <small>
+                <strong>Analysis of sales:</strong> The value has been changed over time, and last month reached a level over $50,000.
+            </small>
+        </div-->
             </div>
         </div>
     </script>
@@ -2203,6 +2203,11 @@ HEAD, JS/CSS LINKS
                 var options = buildTimeOptions(serverData);
                 var series = buildTimeSeries(serverData);
                 $(elementId).plot(series, options);
+                $(elementId + '_container').resizable({
+                    maxHeight: 2000,
+                    minWidth: 500,
+                    minHeight: 250
+                });
             }
             function buildTimeSeries(serverData) {
                 var chartSeries = [];
@@ -2468,6 +2473,7 @@ HEAD, JS/CSS LINKS
     
     <!-- Javascript frameworks -->
     <script src="app/skin/assets/js/jquery-2.1.1.js"></script>
+    <script src="app/skin/assets/js/jquery-ui-1.10.4.min.js"></script>
     <script src="app/skin/assets/js/bootstrap.js"></script>
 
     <!-- Custom and plugin javascript -->
