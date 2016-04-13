@@ -16,6 +16,7 @@ function ($http, $q, $timeout) {
         checkAuthorization: checkAuthorization,
         queryEntity: queryEntity,
         storeEntity: storeEntity,
+        recalcEntity: recalcEntity,
         deleteEntity: deleteEntity,
         trackRetrievedEntities: trackRetrievedEntities,
     };
@@ -99,6 +100,28 @@ function ($http, $q, $timeout) {
 
         var url = 
             'app/entity/store/' + entityName + 
+            '?EntityId=' + encodeURIComponent(entityId) + 
+            '&EntityState=' + encodeURIComponent(entityState);
+
+        return $http.post(url, entity).then(
+            function (response) {
+                return response.data;
+            },
+            function (fault) {
+                return $q.reject(fault);
+            }
+        );
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function recalcEntity(entity) {
+        var entityName = entity['$type'];
+        var entityId = entity['$id'];
+        var entityState = entity['$state'];
+
+        var url = 
+            'app/entity/recalc/' + entityName + 
             '?EntityId=' + encodeURIComponent(entityId) + 
             '&EntityState=' + encodeURIComponent(entityState);
 

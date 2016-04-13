@@ -23,26 +23,6 @@ Number.prototype.formatMoney = function(c, d, t){
 
 //-----------------------------------------------------------------------------------------------------------------
 
-function formatValue(format, value) {
-    switch (format) {
-        case 'd':
-            return moment.utc(value, 'YYYY-MM-DD HH:mm:ss').format('DD MMM YYYY');
-        case 'y':
-            return moment.utc(value, 'YYYY-MM-DD HH:mm:ss').format('MMMM YYYY');
-        case 'c':
-            return (value ? '$' + parseFloat(value).formatMoney(2, '.', ',') : '');
-        case '0.00':
-        case '#,##0.00':
-            return (value ? parseFloat(value).formatMoney(2, '.', ',') : '');
-        case '0.0000':
-        case '#,##0.0000':
-            return (value ? parseFloat(value).formatMoney(4, '.', ',') : '');
-    }
-    return value;
-}
-
-//-----------------------------------------------------------------------------------------------------------------
-
 theApp.factory('appHttpInterceptor', ['$rootScope', '$q', 'sessionService', function ($rootScope, $q, sessionService) {
     return {
         'response': function(response) {
@@ -310,6 +290,31 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
     }
 
     //-----------------------------------------------------------------------------------------------------------------
+
+    function formatValue(format, value) {
+        if (!format || value=='0') {
+            return value;
+        }
+        switch (format) {
+            case 'd':
+                return moment.utc(value, 'YYYY-MM-DD HH:mm:ss').format('DD MMM YYYY');
+            case 'y':
+                return moment.utc(value, 'YYYY-MM-DD HH:mm:ss').format('MMMM YYYY');
+            case 'c':
+                return (value ? '$' + parseFloat(value).formatMoney(2, '.', ',') : '');
+            case '#,##0':
+                return (value ? parseFloat(value).formatMoney(0, '.', ',') : '');
+            case '0.00':
+            case '#,##0.00':
+                return (value ? parseFloat(value).formatMoney(2, '.', ',') : '');
+            case '0.0000':
+            case '#,##0.0000':
+                return (value ? parseFloat(value).formatMoney(4, '.', ',') : '');
+        }
+        return value;
+    }
+    
+    //-----------------------------------------------------------------------------------------------------------------
     /*
     function executeNotification(scope, notification, direction) {
         if (direction.indexOf('BubbleUp') > -1) {
@@ -407,6 +412,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
 
     function implementController(scope) {
         scope.translate = translate;
+        scope.formatValue = formatValue;
         scope.appScope = $rootScope.appScope;
         scope.model = {
             Data: {},
@@ -1262,6 +1268,19 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 }
             };
 
+            scope.recalcAfterChange = function (entity) {
+                if (scope.uidl.mode !== 'Inline' || scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
+                    scope.entityService.recalcEntity(entity).then(
+                        function(newEntity) {
+                            scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelRefreshed', newEntity);
+                        },
+                        function(fault) {
+                            scope.$emit(scope.uidl.qualifiedName + ':RecalculateEntityFailed', commandService.createFaultInfo(fault));
+                        }
+                    );
+                }
+            };
+            
             scope.rejectChanges = function (entity) {
                 scope.commandInProgress = false;
                 scope.refresh();
@@ -1330,6 +1349,11 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 }
             });
 
+            if (scope.uidl.form && scope.uidl.form.autoRecalculateOnChange) {
+                scope.$on(scope.uidl.form.qualifiedName + ':Changed', function (event) {
+                    scope.recalcAfterChange(scope.model.entity);
+                });
+            }
             scope.$on(scope.uidl.qualifiedName + ':Save:Executing', function (event) {
                 scope.saveChanges(scope.model.entity);
             });
@@ -1371,7 +1395,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                     scope.$broadcast(scope.uidl.qualifiedName + ':RequestPrepared', preparedRequest);
                 });
             }
-            
+
             //for (var i = 0; i < scope.gridColumns.length; i++) {
             //    var column = scope.gridColumns[i];
             //    column.metaType = scope.uidlService.getMetaType(column.declaringTypeName);
@@ -1503,12 +1527,14 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                             }
                         });
                     
-                    if (scope.uidl.autoSubmitOnChange) {
+                    if (scope.uidl.autoSubmitOnChange || scope.uidl.autoRecalculateOnChange) {
                         scope.$watch('model.Data.entity', function(newValue, oldValue) {
                             if (scope.suppressAutoSubmitOnce) {
                                 scope.suppressAutoSubmitOnce = false;
-                            } else {
+                            } else if (scope.uidl.autoSubmitOnChange) {
                                 scope.autoSubmitForm();
+                            } else if (scope.uidl.autoRecalculateOnChange) {
+                                scope.$emit(scope.uidl.qualifiedName + ':Changed');
                             }
                         }, true);
                     }
@@ -1793,6 +1819,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
         //takeMessagesFromServer: takeMessagesFromServer,
         implementController: implementController,
         translate: translate,
+        formatValue: formatValue,
         loadTemplateById: loadTemplateById,
         selectValue: selectValue
     };

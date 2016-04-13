@@ -214,15 +214,15 @@ namespace NWheels.UI
             var handler = _handlerByEntityName[entityName];
             IDomainObject domainObject = null;
 
-            using ( var context = handler.NewUnitOfWork() )
+            using (var context = handler.NewUnitOfWork())
             {
-                if ( entityState.IsNew() )
+                if (entityState.IsNew())
                 {
                     domainObject = handler.CreateNew();
                     JsonConvert.PopulateObject(json, domainObject, _defaultSerializerSettings);
                     handler.Insert(domainObject);
                 }
-                else if ( entityState.IsModified() )
+                else if (entityState.IsModified())
                 {
                     var traceWriter = new MemoryTraceWriter();
                     var populationSerializerSettings = CreateSerializerSettings();
@@ -235,7 +235,7 @@ namespace NWheels.UI
 
                     handler.Update(domainObject);
                 }
-                else if ( entityState.IsDeleted() )
+                else if (entityState.IsDeleted())
                 {
                     handler.Delete(entityId);
                     return null;
@@ -246,7 +246,38 @@ namespace NWheels.UI
                 }
 
                 context.CommitChanges();
-                
+
+                var resultJson = (domainObject != null ? JsonConvert.SerializeObject(domainObject, _defaultSerializerSettings) : null);
+                return resultJson;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public string RecalculateEntityJson(string entityName, EntityState entityState, string entityId, string json)
+        {
+            var handler = _handlerByEntityName[entityName];
+            IDomainObject domainObject = null;
+
+            using ( handler.NewUnitOfWork() )
+            {
+                if ( entityState.IsNew() )
+                {
+                    domainObject = handler.CreateNew();
+                    JsonConvert.PopulateObject(json, domainObject, _defaultSerializerSettings);
+                    handler.Insert(domainObject);
+                }
+                else if ( entityState.IsModified() )
+                {
+                    var populationSerializerSettings = CreateSerializerSettings();
+                    domainObject = handler.GetById(entityId);
+                    JsonConvert.PopulateObject(json, domainObject, populationSerializerSettings); //_serializerSettings);
+                }
+                else
+                {
+                    throw new ArgumentException("Unexpected value of entity state: " + entityState);
+                }
+
                 var resultJson = (domainObject != null ? JsonConvert.SerializeObject(domainObject, _defaultSerializerSettings) : null);
                 return resultJson;
             }

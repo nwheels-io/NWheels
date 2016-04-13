@@ -339,8 +339,8 @@ namespace NWheels.Stacks.AspNet
                 { TimeRangePreset.ThisMonth, new Interval<DateTime>(now.StartOfMonth(), now.StartOfMonth().AddMonths(1).AddSeconds(-1)) },
                 { TimeRangePreset.LastMonth, new Interval<DateTime>(now.StartOfMonth().AddMonths(-1), now.StartOfMonth().AddSeconds(-1)) },
                 { TimeRangePreset.ThisQuarter, new Interval<DateTime>(now.StartOfQuarter(), now.StartOfQuarter().AddMonths(3).AddSeconds(-1)) },
-                { TimeRangePreset.ThisYear, new Interval<DateTime>(now.StartOfyear(), now.StartOfyear().AddYears(1).AddSeconds(-1)) },
-                { TimeRangePreset.LastYear, new Interval<DateTime>(now.StartOfyear().AddYears(-1), now.StartOfyear().AddSeconds(-1)) },
+                { TimeRangePreset.ThisYear, new Interval<DateTime>(now.StartOfYear(), now.StartOfYear().AddYears(1).AddSeconds(-1)) },
+                { TimeRangePreset.LastYear, new Interval<DateTime>(now.StartOfYear().AddYears(-1), now.StartOfYear().AddSeconds(-1)) },
                 { TimeRangePreset.AllTime, new Interval<DateTime>(DateTime.MinValue, now) },
             };
 
@@ -806,6 +806,46 @@ namespace NWheels.Stacks.AspNet
                         {
                             return StatusCode(HttpStatusCode.OK);
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        activity.Fail(e);
+                        throw;
+                    }
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [HttpPost]
+        [Route("app/entity/recalc/{entityName}")]
+        public IHttpActionResult RecalculateEntity(string entityName)
+        {
+            if (!_context.EntityService.IsEntityNameRegistered(entityName))
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
+
+            using (new UIOperationContext(
+                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command,
+                target: null, contract: "ApplicationEntityService", operation: "RecalculateEntity", entity: entityName))
+            {
+                var queryString = Request.GetQueryString();
+                var entityStateString = queryString.GetValueOrDefault("EntityState", EntityState.NewModified.ToString());
+                var entityIdString = queryString.GetValueOrDefault("EntityId", null);
+                var entityState = ParseUtility.Parse<EntityState>(entityStateString);
+                
+                using (var activity = _context.Logger.RecalculateEntity(entityName, entityState, entityIdString))
+                {
+                    try
+                    {
+                        var jsonString = Request.Content.ReadAsStringAsync().Result;
+                        var json = _context.EntityService.RecalculateEntityJson(entityName, entityState, entityIdString, jsonString);
+
+                        return ResponseMessage(new HttpResponseMessage() {
+                            Content = new StringContent(json, Encoding.UTF8, "application/json")
+                        });
                     }
                     catch (Exception e)
                     {

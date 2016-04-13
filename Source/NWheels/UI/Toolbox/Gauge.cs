@@ -154,6 +154,8 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string ValueProperty { get; set; }
         [DataMember]
+        public string ValueFormat { get; set; }
+        [DataMember]
         public UserAlertType? AlertType { get; set; }
         [DataMember]
         public object AlertValue { get; set; }
@@ -195,6 +197,14 @@ namespace NWheels.UI.Toolbox
             {
                 _value.Value = value;
                 _value.ValueProperty = Gauge.GetExpressionString(property);
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Builder<TModel> Format(string formatString)
+            {
+                _value.ValueFormat = formatString;
                 return this;
             }
 

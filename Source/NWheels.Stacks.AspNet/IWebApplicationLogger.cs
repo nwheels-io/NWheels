@@ -43,6 +43,12 @@ namespace NWheels.Stacks.AspNet
             [Detail] IEndpoint endpoint, 
             [Detail] IPrincipal principal);
 
+        [LogActivity(LogLevel.Verbose)]
+        ILogActivity RecalculateEntity(
+            [Detail(IncludeInSingleLineText = true, Indexed = true)] string entityName,
+            [Detail(IncludeInSingleLineText = true, Indexed = true)] EntityState entityState,
+            [Detail(IncludeInSingleLineText = true, Indexed = true)] string entityId);
+
         [LogActivity(LogLevel.Audit)]
         ILogActivity DeleteEntity(
             [Detail(IncludeInSingleLineText = true, Indexed = true)] string entityName,

@@ -599,9 +599,9 @@ HEAD, JS/CSS LINKS
                     <!--span class="label label-success">{{::translate(value.title)}}</span-->
                     <span ng-if="value.alertType" class="label label-warning"><i class="fa fa-warning"></i>&nbsp;{{::translate(value.alertText)}}</span>
                 </h3>
-                <h1 ng-if="$first" class="no-margins">{{::value.value}}</h1>
+                <h1 ng-if="$first" class="no-margins">{{::formatValue(uidl.values[$index].valueFormat, value.value)}}</h1>
                 <!--span ng-if="!$first" class="label label-success pull-left">{{::translate(value.title)}}</span-->
-                <h3 ng-if="!$first" class="no-margins">{{::value.value}}</h3>
+                <h3 ng-if="!$first" class="no-margins">{{::formatValue(uidl.values[$index].valueFormat, value.value)}}</h3>
                 <small>{{::translate(value.title)}}</small>
             </div>
             <!--div class="ibox-content text-right">
@@ -637,15 +637,15 @@ HEAD, JS/CSS LINKS
                         <table class="table table-hover margin bottom" ng-if="ResultSet">
                             <thead>
                                 <tr>
-                                    <th ng-repeat="column in ::uidl.displayColumns" class="text-center">{{::translate(column.title)}}</th>
+                                    <th ng-repeat="column in ::uidl.displayColumns" class="text-center" ng-attr-width="{{column.nestedWidget ? '50%' : undefined}}">{{::translate(column.title)}}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr ng-repeat="row in ::ResultSet" ng-init="thisRowIndex=$index;">
-                                    <td ng-repeat="column in ::uidl.displayColumns" ng-class="{'text-left':column.columnType!='Number', 'text-right':column.columnType=='Number'}">
-                                        <span ng-if="column.columnType==='Text'||column.columnType==='Enum'">{{::row[column.expression]}}</span>
-                                        <!--<span ng-if="column.columnType==='Number'">{{::formatValue(row[column.expression], column.format)}}</span>-->
-                                        <span ng-if="column.columnType==='Number'">{{::row[column.expression]}}</span>
+                                    <td ng-repeat="column in ::uidl.displayColumns" ng-class="{'text-left':column.columnType!='Number', 'text-center':column.columnType=='Number'}">
+                                        <span ng-if="column.columnType==='Text'||column.columnType==='Enum'"><strong>{{::translate(row[column.expression])}}</strong></span>
+                                        <span ng-if="column.columnType==='Number'"><strong>{{::uidlService.formatValue(column.format, row[column.expression])}}</strong></span>
+                                        <!--span ng-if="column.columnType==='Number'"><strong>{{::row[column.expression]}}</strong></span-->
                                         <div ng-if="column.nestedWidget" ng-controller="cloneUidlWithUniqueId">
                                             <div ng-init="cloneUidl(column.nestedWidget, thisRowIndex)">
                                                 <uidl-widget ng-if="thisUidl" uidl="thisUidl" parent-uidl="column" parent-model="row[column.expression]"></uidl-widget>

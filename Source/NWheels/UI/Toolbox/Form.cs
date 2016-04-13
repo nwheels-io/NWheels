@@ -281,6 +281,8 @@ namespace NWheels.UI.Toolbox
         public bool NeedsAuthorize { get; set; }
         [DataMember]
         public bool AutoSubmitOnChange { get; set; }
+        [DataMember]
+        public bool AutoRecalculateOnChange { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -376,6 +378,8 @@ namespace NWheels.UI.Toolbox
 
             builder.BuildNodes(this.Fields.SelectMany(f => f.GetNestedWidgets()).Cast<AbstractUidlNode>().ToArray());
             builder.BuildNodes(this.Commands.Cast<AbstractUidlNode>().ToArray());
+
+            this.AutoRecalculateOnChange = Fields.Any(f => f.MetaProperty != null && f.MetaProperty.IsCalculated);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -473,6 +477,8 @@ namespace NWheels.UI.Toolbox
         public bool StandardValuesExclusive { get; set; }
         [DataMember]
         public bool StandardValuesMultiple { get; set; }
+        [DataMember]
+        public bool IsCalculated { get; set; }
         [DataMember, ManuallyAssigned]
         public WidgetUidlNode NestedWidget { get; set; }
         [DataMember, ManuallyAssigned]
@@ -557,6 +563,8 @@ namespace NWheels.UI.Toolbox
             {
                 OnSetup(this);
             }
+
+            IsCalculated = (MetaProperty != null && MetaProperty.IsCalculated);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

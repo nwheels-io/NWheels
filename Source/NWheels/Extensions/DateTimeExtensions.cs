@@ -37,7 +37,7 @@ namespace NWheels.Extensions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static DateTime StartOfyear(this DateTime dt)
+        public static DateTime StartOfYear(this DateTime dt)
         {
             return new DateTime(dt.Year, 1, 1, 0, 0, 0, dt.Kind);
         }
