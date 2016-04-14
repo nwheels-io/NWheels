@@ -1272,7 +1272,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 if (scope.uidl.mode !== 'Inline' || scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
                     scope.entityService.recalcEntity(entity).then(
                         function(newEntity) {
-                            scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelRefreshed', newEntity);
+                            scope.$broadcast(scope.uidl.form.qualifiedName + ':ModelUpdater', newEntity);
                         },
                         function(fault) {
                             scope.$emit(scope.uidl.qualifiedName + ':RecalculateEntityFailed', commandService.createFaultInfo(fault));
@@ -1350,8 +1350,8 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             });
 
             if (scope.uidl.form && scope.uidl.form.autoRecalculateOnChange) {
-                scope.$on(scope.uidl.form.qualifiedName + ':Changed', function (event) {
-                    scope.recalcAfterChange(scope.model.entity);
+                scope.$on(scope.uidl.form.qualifiedName + ':Changed', function (event, changedEntity) {
+                    scope.recalcAfterChange(changedEntity);
                 });
             }
             scope.$on(scope.uidl.qualifiedName + ':Save:Executing', function (event) {
@@ -1453,6 +1453,9 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 .Where(function(f) { return fieldHasModifier(f, 'Tab') })
                 .Where(function(f) { return scope.isUidlAuthorized(f); })
                 .ToArray();
+            scope.calculatedFields = Enumerable.From(scope.uidl.fields)
+                .Where(function(f) { return f.isCalculated; })
+                .ToArray();
 
             scope.commandInProgress = false;
             scope.editAuthorized = (scope.uidl.needsAuthorize ? false : true);
@@ -1534,11 +1537,24 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                             } else if (scope.uidl.autoSubmitOnChange) {
                                 scope.autoSubmitForm();
                             } else if (scope.uidl.autoRecalculateOnChange) {
-                                scope.$emit(scope.uidl.qualifiedName + ':Changed');
+                                if (!scope.autoRecalculateTimer) {
+                                    scope.autoRecalculateTimer = $timeout(function() {
+                                        scope.autoRecalculateTimer = null;
+                                        scope.suppressAutoSubmitOnce = true; // ignore watcher invocation after setting new values on calculated properties
+                                        scope.$emit(scope.uidl.qualifiedName + ':Changed', scope.model.Data.entity);
+                                    }, 500);
+                                }
                             }
                         }, true);
                     }
                 });
+            });
+            
+            scope.$on(scope.uidl.qualifiedName + ':ModelUpdater', function(event, updatedEntity) {
+                for (var i = 0 ; i < scope.calculatedFields.length ; i++) {
+                    var field = scope.calculatedFields[i];
+                    scope.model.Data.entity[field.propertyName] = updatedEntity[field.propertyName];
+                }
             });
 
             scope.$on(scope.uidl.qualifiedName + ':EditAuthorized', function(event, data) {
