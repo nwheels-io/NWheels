@@ -2711,7 +2711,16 @@ namespace NWheels.UI
                 if ( value != null )
                 {
                     var handler = _ownerService._handlerByEntityName[_relatedMetaType.QualifiedName];
-                    relatedEntityObject = handler.GetById(value.ToString());
+
+                    //TODO: remove this workaround - handle entities belonging to multiple contexts
+                    try
+                    {
+                        relatedEntityObject = handler.GetById(value.ToString());
+                    }
+                    catch
+                    {
+                        return;
+                    }
                 }
                 else
                 {

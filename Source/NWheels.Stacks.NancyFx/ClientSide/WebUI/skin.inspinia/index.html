@@ -128,6 +128,10 @@ HEAD, JS/CSS LINKS
             height: 100%;
             width: 100%;
         }        
+        .ui-state-highlight .editable {
+            color: black;
+            background-color: #C6F4DE;
+        }        
     </style>
 </head>
 
@@ -770,7 +774,7 @@ HEAD, JS/CSS LINKS
                     name: metaColumn.expression,
                     label: $scope.translate(metaColumn.title),
                     index: metaColumn.expression,
-                    editable: false,
+                    editable: $scope.uidl.enableEditInline===true,
                     width: colWidthPx,
                     search: metaColumn.isFilterSupported===true,
                     sortable: metaColumn.isSortSupported===true,
@@ -963,11 +967,30 @@ HEAD, JS/CSS LINKS
                         //toppager: true,
                         //clonetotop: true,
                         onSelectRow: function (rowId) {
+                            var rowObject = $scope.ResultSet[rowId - 1];
                             if ($scope.uidl.enableAutonomousQuery) {
-                                var rowObject = $scope.ResultSet[rowId - 1];
                                 $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelected', rowObject);
                             } else {
                                 $scope.$emit($scope.uidl.qualifiedName + ':ObjectSelectedByIndex', rowId - 1);
+                            }
+                            
+                            if ($scope.uidl.enableEditInline) {
+                                var gridObj = $("#rdt_" + $scope.uniqueWidgetId);
+                                if (rowId && rowId!==$scope.lastSelectedRowId) { 
+                                    gridObj.restoreRow($scope.lastSelectedRowId); 
+                                }
+                                $scope.lastSelectedRowId = rowId;
+                                gridObj.editRow(rowId, true, null, null, 'clientArray', null, function(saveRowId, saveIsOK) {
+                                    var editedRowData = gridObj.getRowData(rowId);
+                                    for (var i = 0; i < $scope.gridColumns.length ; i++) {
+                                        var column = $scope.gridColumns[i];
+                                        var value = editedRowData[column.expression];
+                                        $scope.uidlService.writeValueByNavigationPath(rowObject, column.navigations, value);
+                                    }
+                                    $scope.$apply(function() {
+                                        $scope.$emit($scope.uidl.qualifiedName + ':InlineSave:Executing', rowObject);
+                                    });
+                                }); 
                             }
                         },
                         subGrid: ($scope.uidl.enableDetailPane===true),
@@ -1067,6 +1090,8 @@ HEAD, JS/CSS LINKS
                     grid.jqGrid(gridOptions);
                     grid.jqGrid('filterToolbar',{ stringResult: true, searchOnEnter: false, defaultSearch: "cn" });
                     grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
+                    
+                    $scope.lastSelectedRowId = null;
                 });
             };
             $scope.$on($scope.uidl.qualifiedName + ':RequestPrepared', $scope.onRequestPrepared);

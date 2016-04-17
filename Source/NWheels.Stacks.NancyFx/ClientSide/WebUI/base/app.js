@@ -512,6 +512,36 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
     };
     
     //-----------------------------------------------------------------------------------------------------------------
+
+    function writeValueByNavigationPath(obj, navigations, value) {
+        var target = obj;
+        for (var j = 0; j < navigations.length - 1; j++) {
+            var nextTarget = target[navigations[j]];
+            if (!nextTarget) {
+                nextTarget = target[navigations[j]] = { };
+            }
+            target = nextTarget;
+        }
+        var lastNavigation = navigations[navigations.length-1];
+        target[lastNavigation] = value;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function readValueByNavigationPath(obj, navigations) {
+        var target = obj;
+        for (var j = 0; j < navigations.length - 1; j++) {
+            var nextTarget = target[navigations[j]];
+            if (!nextTarget) {
+                return null;
+            }
+            target = nextTarget;
+        }
+        var lastNavigation = navigations[navigations.length-1];
+        return target[lastNavigation];
+    }
+    
+    //-----------------------------------------------------------------------------------------------------------------
     
     /*
         function takeMessagesFromServer() {
@@ -1357,6 +1387,9 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             scope.$on(scope.uidl.qualifiedName + ':Save:Executing', function (event) {
                 scope.saveChanges(scope.model.entity);
             });
+            scope.$on(scope.uidl.grid.qualifiedName + ':InlineSave:Executing', function (event, entity) {
+                scope.saveChanges(entity);
+            });
             scope.$on(scope.uidl.qualifiedName + ':Cancel:Executing', function (event) {
                 scope.rejectChanges(scope.model.entity);
             });
@@ -1837,7 +1870,9 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
         translate: translate,
         formatValue: formatValue,
         loadTemplateById: loadTemplateById,
-        selectValue: selectValue
+        selectValue: selectValue,
+        readValueByNavigationPath: readValueByNavigationPath,
+        writeValueByNavigationPath: writeValueByNavigationPath
     };
 
 }]);

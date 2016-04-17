@@ -79,6 +79,9 @@ namespace NWheels.UI.Toolbox
         public bool EnableAutonomousQuery { get; set; }
 
         [DataMember]
+        public bool EnableEditInline { get; set; }
+
+        [DataMember]
         public bool EnableDetailPane { get; set; }
 
         [DataMember]
