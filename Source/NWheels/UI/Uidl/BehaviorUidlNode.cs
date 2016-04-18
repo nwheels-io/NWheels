@@ -258,6 +258,22 @@ namespace NWheels.UI.Uidl
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    [DataContract(Name = "QueryAppState", Namespace = UidlDocument.DataContractNamespace)]
+    public class UidlQueryAppStateBehavior : BehaviorUidlNode
+    {
+        public UidlQueryAppStateBehavior(string idName, ControlledUidlNode parent)
+            : base(idName, BehaviorType.QueryAppState, parent)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public string SourceExpression { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
     [DataContract(Name = "ActivateSessionTimeoutBehavior", Namespace = UidlDocument.DataContractNamespace)]
     public class UidlActivateSessionTimeoutBehavior : BehaviorUidlNode
     {

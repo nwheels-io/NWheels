@@ -49,6 +49,7 @@ namespace NWheels.UI.Uidl
         Broadcast = 40,
         InvokeCommand = 50,
         QueryModel = 60,
+        QueryAppState = 65,
         AlterModel = 70,
         BranchByRule = 80,
         ActivateSessionTimeout = 90,

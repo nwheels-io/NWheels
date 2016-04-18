@@ -232,6 +232,16 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public PromiseBuilder<TValue> QueryAppState<TAppState, TValue>(Expression<Func<TAppState, TValue>> source)
+            {
+                var behavior = new UidlQueryAppStateBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                SetAndSubscribeBehavior(behavior);
+                behavior.SourceExpression = source.ToNormalizedNavigationString("appState");
+                return new PromiseBuilder<TValue>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public PromiseBuilder<TInput> AlterModel(params Action<AlterModelBehaviorBuilder<TInput>>[] alterations)
             {
                 var behavior = new UidlAlterModelBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);

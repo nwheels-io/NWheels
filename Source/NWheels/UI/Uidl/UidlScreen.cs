@@ -14,5 +14,21 @@ namespace NWheels.UI.Uidl
             : base(UidlNodeType.Screen, idName, parent)
         {
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public ScreenKind ScreenKind { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum ScreenKind
+    {
+        Unspecified,
+        LandingPage,
+        PublicPage,
+        SignInSignUp,
+        DashboardAdmin
     }
 }

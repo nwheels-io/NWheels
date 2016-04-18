@@ -57,6 +57,9 @@ HEAD, JS/CSS LINKS
                 float: right;
             }
         }
+        .middle-box {
+            max-width:500px;
+        }
         .btn-md.btn-circle {
             width: 36px;
             height: 36px;
@@ -132,10 +135,27 @@ HEAD, JS/CSS LINKS
             color: black;
             background-color: #C6F4DE;
         }        
+        a.commandLink {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        h2.logo-name {
+            color: #e0e0e0;
+            font-size: 50px;
+            font-weight: 800;
+            letter-spacing: 0px;
+            margin-bottom: 0px;
+            margin-top: -10px;
+        }
+        body {
+            background-color: #f3f3f4;
+        }
     </style>
 </head>
-
-<body class="pace-done">
+<body ng-class="{
+    'pace-done': currentScreen && currentScreen.screenKind != 'SignInSignUp',
+    'gray-bg': currentScreen && currentScreen.screenKind == 'SignInSignUp'
+}">
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     PAGE BODY
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -293,7 +313,11 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - SPLASH
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/Splash">
-        <uidl-widget uidl="uidl.insideContent"></uidl-widget>
+        <div>
+            <h1 class="logo-name" style="text-align:center">{{::translate(uidl.text)}}</h1>
+            <h2 class="logo-name" style="text-align:center;margin-bottom:40px;">{{::translate(uidl.helpText)}}</h2>
+            <uidl-widget uidl="uidl.insideContent"></uidl-widget>
+        </div>
     </script>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1298,15 +1322,27 @@ HEAD, JS/CSS LINKS
         </div>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/TransactionFormLoginStyle">
-        <div class="middle-box text-center loginscreen animated fadeInDown">
+        <div class="middle-box text-center loginscreen animated fadeInDown" style="padding-top:0;">
             <div>
-                <div>
-                    <h1 class="logo-name">AFP</h1>
-                </div>
                 <h2>{{::translate(uidl.text)}}</h2>
                 <p ng-if="uidl.helpText">{{::translate(uidl.helpText)}}</p>
                 
                 <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
+            </div>                
+            <p class="m-t"> <small>Powered by BitWize</small> </p>
+            <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
+        </div>
+    </script>
+    <script type="text/ng-template" id="app/uidl-element-template/TransactionFormSignUpStyle">
+        <div class="middle-box text-center loginscreen animated fadeInDown" style="width:500px;padding-top:0px;">
+            <div style="width:500px;">
+                <div class="ibox-title" style="text-align:center">    
+                    <h2>{{::translate(uidl.text)}}</h2>
+                    <p ng-if="uidl.helpText" class="pull-right">{{::translate(uidl.helpText)}}</p>
+                </div>
+                <div class="ibox-content">
+                    <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
+                </div>
             </div>                
             <p class="m-t"> <small>Powered by BitWize</small> </p>
             <uidl-user-alert-inline alert="inlineUserAlert"></uidl-user-alert-inline>
@@ -1485,11 +1521,43 @@ HEAD, JS/CSS LINKS
             <div class="form-group" ng-repeat="field in plainFields">
                 <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" template-name="FormFieldLoginStyle"></uidl-form-field>
             </div>
-            <button ng-repeat="command in uidl.commands"
-                    class="btn block full-width m-b"
-                    ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"                    
-                    ng-disabled="commandInProgress"
-                    ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+            <div ng-repeat="command in uidl.commands">
+                <button ng-if="command.uiStyle != 'Link'"
+                        class="btn block full-width m-b"
+                        ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"                    
+                        ng-disabled="commandInProgress"
+                        ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                <a ng-if="command.uiStyle == 'Link'"
+                   ng-disabled="commandInProgress" 
+                   ng-click="invokeCommand(command)"
+                   class="commandLink"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</a>
+            </div>
+        </form>
+    </script>
+    <script type="text/ng-template" id="app/uidl-element-template/FormSignUpStyle">
+        <form class="m-t" role="form" id="{{::uidl.elementName}}" novalidate autocomplete="off">
+            <div class="form-group m-b clearfix" ng-repeat="field in plainFields">
+                <label class="control-label col-sm-4"
+                       style="padding-top:8px;text-align:right"
+                       for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.label)}}</label>
+                <div class="col-sm-8" style="padding:0">
+                    <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" template-name="FormFieldSignUpStyle"></uidl-form-field>
+                </div>
+            </div>
+            <div class="form-group m-b clearfix" ng-repeat="command in uidl.commands">
+                <div class="col-sm-4">&nbsp;</div>
+                <div ng-if="command.uiStyle != 'Link'" class="col-sm-8" style="padding:0">
+                    <button class="btn block full-width"
+                            ng-class="{'btn-primary':command.severity!='None', 'btn-white':command.severity=='None'}"                    
+                            ng-disabled="commandInProgress"
+                            ng-click="invokeCommand(command)"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                </div>
+                <div ng-if="command.uiStyle == 'Link'" class="col-sm-8" style="padding:0;text-align:left">
+                    <a ng-disabled="commandInProgress" 
+                       ng-click="invokeCommand(command)"
+                       class="commandLink"><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</a>
+                </div>
+            </div>
         </form>
     </script>
     <script type="text/javascript">
@@ -1728,6 +1796,62 @@ HEAD, JS/CSS LINKS
         <div>
             <!-- LABEL -->
             <h3 ng-if="uidl.fieldType==='Label'" ng-bind="entity[uidl.propertyName]"></h3>
+            <!-- TEXT -->
+            <input ng-if="uidl.fieldType==='Edit' && (uidl.modifiers==='None' || !uidl.modifiers)"
+                   class="form-control"
+                   type="text"
+                   placeholder="{{::translate(uidl.label)}}"
+                   ng-model="$parent.entity[uidl.propertyName]"
+                   id="{{::uniqueFieldId}}"
+                   name="{{::uniqueFieldId}}"
+                   apply-auto-fill-fix>
+            <!-- PASSWORD -->
+            <input ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password')"
+                   class="form-control"
+                   type="password"
+                   placeholder="{{::translate(uidl.label)}}"
+                   ng-model="$parent.entity[uidl.propertyName]"
+                   id="{{::uniqueFieldId}}"
+                   name="{{::uniqueFieldId}}"
+                   apply-auto-fill-fix>
+            <input ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password') && hasUidlModifier('Confirm')"
+                   class="form-control"
+                   style="margin-top:15px;"
+                   type="password"
+                   placeholder="Confirm password"
+                   ng-model="$parent.hiddenValues[uidl.propertyName]"
+                   id="{{::uniqueFieldId + '__confirm'}}"
+                   name="{{::uniqueFieldId + '__confirm'}}"
+                   apply-auto-fill-fix>
+            <!-- DROP DOWN -->
+            <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown')"
+                    class="form-control m-b"
+                    ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
+                    ng-model="entity[lookupForeignKeyProperty]"
+                    id="{{::uniqueFieldId}}"
+                    name="{{::uniqueFieldId}}">
+                <option value="">- {{::translate(uidl.label)}} -</option>
+            </select>
+            <!-- TYPEAHEAD -->
+            <input ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('TypeAhead')"
+                type="text" 
+                ng-model="entity[lookupForeignKeyProperty]" 
+                placeholder="None Selected" 
+                typeahead="item in loadTypeAhead($viewValue)" 
+                typeahead-input-formatter="formatTypeAheadItem($model)"
+                typeahead-loading="isLoadingTypeAhead" 
+                typeahead-no-results="isTypeAheadResultSetEmpty" 
+                typeahead-on-select="entity[lookupForeignKeyProperty]=$item['$id']"
+                class="form-control m-b"
+                id="{{::uniqueFieldId}}"
+                name="{{::uniqueFieldId}}">
+        </div>
+    </script>
+    <script type="text/ng-template" id="app/uidl-element-template/FormFieldSignUpStyle">
+        <div>
+            <!-- LABEL -->
+            <h3 ng-if="uidl.fieldType==='Label' && uidl.label" ng-bind="entity[uidl.propertyName]"></h3>
+            <h2 ng-if="uidl.fieldType==='Label' && !uidl.label" ng-bind="entity[uidl.propertyName]" style="text-align:left;"></h2>
             <!-- TEXT -->
             <input ng-if="uidl.fieldType==='Edit' && (uidl.modifiers==='None' || !uidl.modifiers)"
                    class="form-control"

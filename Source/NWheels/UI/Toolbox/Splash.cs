@@ -39,5 +39,9 @@ namespace NWheels.UI.Toolbox
 
         [DataMember, ManuallyAssigned]
         public WidgetUidlNode InsideContent { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
     }
 }

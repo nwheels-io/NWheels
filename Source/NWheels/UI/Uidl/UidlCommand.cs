@@ -34,6 +34,8 @@ namespace NWheels.UI.Uidl
         public CommandKind Kind { get; set; }
         [DataMember]
         public CommandSeverity Severity { get; set; }
+        [DataMember]
+        public CommandUIStyle UIStyle { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -60,5 +62,14 @@ namespace NWheels.UI.Uidl
         Submit = 10,
         Reject = 20,
         Navigate = 30
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum CommandUIStyle
+    {
+        Unspecified = 0,
+        Button = 10,
+        Link = 20
     }
 }

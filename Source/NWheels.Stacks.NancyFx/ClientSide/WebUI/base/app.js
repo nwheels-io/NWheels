@@ -808,6 +808,25 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    m_behaviorImplementations['QueryAppState'] = {
+        returnsPromise: true,
+        execute: function (scope, behavior, input) {
+            console.log('run-behavior > queryAppState', behavior.sourceExpression);
+            scope.model.Input = input;
+            var context = {
+                state: scope.appScope.model.state
+            };
+            
+            var value = (
+                behavior.sourceExpression==='null' || !behavior.sourceExpression
+                ? behavior.constantValue
+                : Enumerable.Return(context).Select('ctx=>ctx.' + behavior.sourceExpression).Single());
+            return $q.when(value);
+        },
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     m_behaviorImplementations['ActivateSessionTimeout'] = {
         returnsPromise: false,
         execute: function (scope, behavior, input) {
