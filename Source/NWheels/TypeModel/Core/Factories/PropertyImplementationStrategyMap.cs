@@ -148,7 +148,10 @@ namespace NWheels.DataObjects.Core.Factories
 
             if  ( metaType.BaseType != null )
             {
-                baseProperties.UnionWith(metaType.BaseType.Properties.Select(p => p.ContractPropertyInfo));
+                for (var currentBaseMetaType = metaType.BaseType ; currentBaseMetaType != null ; currentBaseMetaType = currentBaseMetaType.BaseType)
+                {
+                    baseProperties.UnionWith(currentBaseMetaType.Properties.Select(p => p.ContractPropertyInfo));
+                }
             }
 
             return baseProperties;
