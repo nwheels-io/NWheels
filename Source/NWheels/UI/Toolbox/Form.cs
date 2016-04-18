@@ -22,6 +22,7 @@ namespace NWheels.UI.Toolbox
         private readonly List<string> _hiddenFields;
         private UidlBuilder _uidlBuilder;
         private int _nextFieldGroupId;
+        private bool _sectionsInsteadOfTabs;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -184,6 +185,14 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Form<TEntity> UseSectionsInsteadOfTabs()
+        {
+            _sectionsInsteadOfTabs = true;
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Form<TEntity> Lookup<TLookupEntity>(
             Expression<Func<TEntity, object>> fieldSelector,
             Expression<Func<TLookupEntity, object>> lookupValueProperty,
@@ -288,6 +297,13 @@ namespace NWheels.UI.Toolbox
 
         public UidlNotification<TEntity> ModelSetter { get; set; }
         public UidlNotification StateResetter { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        bool IUidlForm.UseSectionsInsteadOfTabs
+        {
+            get { return _sectionsInsteadOfTabs; }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -725,11 +741,9 @@ namespace NWheels.UI.Toolbox
                         FormFieldModifiers.DropDown | FormFieldModifiers.LookupShowSelectNone : 
                         FormFieldModifiers.Ellipsis);
                 case FormFieldType.LookupMany:
-                    return FormFieldModifiers.Tab;
                 case FormFieldType.InlineForm:
-                    return FormFieldModifiers.Tab;
                 case FormFieldType.InlineGrid:
-                    return FormFieldModifiers.Tab;
+                    return (_ownerForm.UseSectionsInsteadOfTabs ? FormFieldModifiers.Section : FormFieldModifiers.Tab);
                 default:
                     return FormFieldModifiers.None;
             }
@@ -812,6 +826,7 @@ namespace NWheels.UI.Toolbox
             FormFieldModifiers modifiers = FormFieldModifiers.None,
             Action<FormField> setup = null);
         bool UsePascalCase { get; set; }
+        bool UseSectionsInsteadOfTabs { get; }
         List<FormField> Fields { get; }
         List<UidlCommand> Commands { get; }
         bool IsModalPopup { get; }
@@ -864,6 +879,7 @@ namespace NWheels.UI.Toolbox
         LookupShowSelectNone = 0x800,
         RangeStart = 0x1000,
         RangeEnd = 0x2000,
+        Memo = 0x4000,
         System = 0x40000000
     }
 

@@ -1471,6 +1471,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 return (field.modifiers && field.modifiers.indexOf(modifier) > -1);
             };
             
+            scope.fieldHasModifier = fieldHasModifier;
             scope.metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
             scope.tabSetIndex = 0;
             scope.plainFields = Enumerable.From(scope.uidl.fields)

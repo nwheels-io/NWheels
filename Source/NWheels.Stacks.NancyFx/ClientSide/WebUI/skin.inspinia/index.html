@@ -1371,7 +1371,7 @@ HEAD, JS/CSS LINKS
                 <label class="control-label"
                        ng-class="{'col-lg-2':!uidl.isModalPopup, 'col-lg-4':uidl.isModalPopup}"
                        for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.label)}}</label>
-                <div ng-class="{'col-lg-3':!uidl.isModalPopup, 'col-lg-6':uidl.isModalPopup}">
+                <div ng-class="{'col-lg-3':!uidl.isModalPopup && !fieldHasModifier(field, 'Memo'), 'col-lg-6':uidl.isModalPopup || fieldHasModifier(field, 'Memo')}">
                     <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
@@ -1390,6 +1390,24 @@ HEAD, JS/CSS LINKS
                 <div ng-if="field['$nextCol']" class="col-lg-3">
                     <uidl-form-field parent-uidl="uidl" uidl="field['$nextCol']" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
+                </div>
+            </div>
+            <!-- SECTIONS -->
+            <div ng-if="sectionFields.length" class="panel-group"  style="margin-top:20px;">
+                <div class="panel panel-default" ng-repeat="field in sectionFields">
+                    <div class="panel-heading" ng-init="isExpanded=$first;">
+                        <h5 class="panel-title">
+                            <a data-toggle="collapse" 
+                               data-parent="#accordion" 
+                               href="{{::('#' + uidl.elementName + '_section' + $index)}}"
+                               ng-click="isExpanded=!isExpanded">{{::translate(field.label, { upperCase: true })}}</a>
+                        </h5>
+                    </div>
+                    <div id="{{::(uidl.elementName + '_section' + $index)}}" class="panel-collapse collapse" ng-class="{in: $first}">
+                        <div class="panel-body">
+                            <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="model.Data.entity"></uidl-widget>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- TABS -->
@@ -1533,15 +1551,22 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="app/uidl-element-template/FormField">
         <div ng-style="{display: parentUidl.isInlineStyle ? 'inline' : 'block'}">
             <!-- LABEL -->
-            <input ng-if="uidl.fieldType==='Label'" 
+            <input ng-if="uidl.fieldType==='Label' && !hasUidlModifier('Memo')" 
                    readonly="" 
                    class="form-control m-b" 
                    type="text" 
                    ng-model="entity[uidl.propertyName]" 
                    id="{{::uniqueFieldId}}" 
                    name="{{::uniqueFieldId}}">
+            <textarea ng-if="uidl.fieldType==='Label' && hasUidlModifier('Memo')"
+                      readonly="" 
+                      class="form-control m-b" 
+                      ng-model="entity[uidl.propertyName]" 
+                      id="{{::uniqueFieldId}}" 
+                      name="{{::uniqueFieldId}}"
+                      style="width:100%;height:100px;resize:vertical;font-family: Consolas, Courier New;font-size: 10pt;"></textarea>
             <!-- CHECKBOX -->
-            <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'" class="onoffswitch">
+            <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'" class="onoffswitch m-b">
                 <input type="checkbox" 
                        class="onoffswitch-checkbox" 
                        ng-model="entity[uidl.propertyName]" 
