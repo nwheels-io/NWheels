@@ -806,29 +806,20 @@ HEAD, JS/CSS LINKS
                     sortable: metaColumn.isSortSupported===true,
                     //sorttype: column.dataType,
                 };
+                if (metaColumn.format) {
+                    modelItem.formatter = function (cellvalue, options, rowObject) {
+                        return $scope.uidlService.formatValue(metaColumn.format, cellvalue);
+                    };
+                }
                 switch (metaColumn.format) {
-                    case 'd':
-                        modelItem.formatter = function(cellvalue, options, rowObject) {
-                            return moment.utc(cellvalue, 'YYYY-MM-DD HH:mm:ss').format('DD MMM YYYY');
-                        };
-                        break;
-                    case 'y':
-                        modelItem.formatter = function(cellvalue, options, rowObject) {
-                            return moment.utc(cellvalue, 'YYYY-MM-DD HH:mm:ss').format('MMMM YYYY');
-                        };
-                        break;
                     case 'c':
-                        modelItem.align = 'right';
-                        modelItem.formatter = function(cellvalue, options, rowObject) {
-                            return (cellvalue ? '$' + parseFloat(cellvalue).formatMoney(2, '.', ',') : '');
-                        };
-                        break;
                     case '0.00':
                     case '#,##0.00':
+                    case '0.0000':
+                    case '#,##0.0000':
+                    case '0.00000':
+                    case '#,##0.00000':
                         modelItem.align = 'right';
-                        modelItem.formatter = function(cellvalue, options, rowObject) {
-                            return (cellvalue ? parseFloat(cellvalue).formatMoney(2, '.', ',') : '');
-                        };
                         break;
                 }
                 switch (metaColumn.columnType) {

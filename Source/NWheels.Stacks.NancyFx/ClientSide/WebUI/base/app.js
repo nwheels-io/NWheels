@@ -310,6 +310,9 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             case '0.0000':
             case '#,##0.0000':
                 return (value ? parseFloat(value).formatMoney(4, '.', ',') : '');
+            case '0.00000':
+            case '#,##0.00000':
+                return (value ? parseFloat(value).formatMoney(5, '.', ',') : '');
         }
         return value;
     }

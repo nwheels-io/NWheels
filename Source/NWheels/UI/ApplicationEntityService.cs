@@ -333,7 +333,7 @@ namespace NWheels.UI
         {
             var settings = new JsonSerializerSettings() {
                 ContractResolver = new DomainObjectContractResolver(_metadataCache, this, queryOptions),
-                DateFormatString = "yyyy-MM-dd HH:mm:ss",
+                DateFormatString = "yyyy-MM-dd HH:mm:ss.fff",
                 MaxDepth = 10,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
