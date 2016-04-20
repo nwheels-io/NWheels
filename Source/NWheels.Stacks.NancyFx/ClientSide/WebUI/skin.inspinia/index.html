@@ -147,15 +147,17 @@ HEAD, JS/CSS LINKS
             margin-bottom: 0px;
             margin-top: -10px;
         }
-        body {
-            background-color: #f3f3f4;
-        }
     </style>
 </head>
-<body ng-class="{
-    'pace-done': currentScreen && currentScreen.screenKind != 'SignInSignUp',
-    'gray-bg': currentScreen && currentScreen.screenKind == 'SignInSignUp'
-}">
+<body 
+    ng-class="{
+        'pace-done': currentScreen && currentScreen.screenKind != 'SignInSignUp',
+        'gray-bg': currentScreen && currentScreen.screenKind == 'SignInSignUp'
+    }" 
+    ng-style="{
+        'background-color': (currentScreen && currentScreen.screenKind == 'SignInSignUp' ? '#f3f3f4' : undefined)
+    }"
+>
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     PAGE BODY
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
