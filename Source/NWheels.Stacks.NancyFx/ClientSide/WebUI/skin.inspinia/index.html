@@ -2255,9 +2255,12 @@ HEAD, JS/CSS LINKS
                     //        return '<a class="chart-series-toggle" href="#" data-series-index="'+series.idx+'">AAA:'+label+'</a>';
                     //    }
                     },
-                    tooltip: true,
+                    tooltip: {
+                        show: true,
+                        xDateFormat: "HH:mm:ss.sss"
+                    },
                     tooltipOpts: {
-                        content: "x: %x, y: %y"
+                        content: "(%s): %x, %y.5"
                     }
                 };
                 return options;
