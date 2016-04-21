@@ -191,6 +191,11 @@ namespace NWheels.UI.Toolbox
 
             this.Form = formOrTypeSelector as Form<TEntity>;
             this.FormTypeSelector = formOrTypeSelector as TypeSelector;
+
+            if (FormTypeSelector != null)
+            {
+                FormTypeSelector.ParentModelProperty = "entity";
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
