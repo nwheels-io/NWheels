@@ -2257,10 +2257,12 @@ HEAD, JS/CSS LINKS
                     },
                     tooltip: {
                         show: true,
-                        xDateFormat: "HH:mm:ss.sss"
+                        xDateFormat: "HH:mm:ss.SSS"
                     },
                     tooltipOpts: {
-                        content: "(%s): %x, %y.5"
+                        content: function(label, xval, yval, flotItem) {
+							return '<strong>' + label + '</strong>: <span style="color:blue">' + moment(xval).format('HH:mm:ss.SSS') + '</span>, <span style="color:green">' + parseFloat(yval).formatMoney(5, '.', ',') + '</span>';
+						}
                     }
                 };
                 return options;
