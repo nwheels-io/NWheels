@@ -1215,10 +1215,10 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                     if (response.update===true) {
                         if (scope.uidl.formTypeSelector) {
                             for (var i = 0; i < scope.uidl.formTypeSelector.selections.length ; i++) {
-                                scope.$broadcast(scope.uidl.formTypeSelector.selections[i].widget.qualifiedName + ':EditAuthorized');
+                                scope.$broadcast(scope.uidl.formTypeSelector.selections[i].widget.qualifiedName + ':EditAuthorized', response);
                             }
                         } else {
-                            scope.$broadcast(scope.uidl.form.qualifiedName + ':EditAuthorized');
+                            scope.$broadcast(scope.uidl.form.qualifiedName + ':EditAuthorized', response);
                         }
                     }
                 });
@@ -1617,6 +1617,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 scope.editAuthorized = true;
                 Enumerable.From(scope.uidl.fields)
                     .Where("$.fieldType=='InlineGrid' || $.fieldType=='InlineForm' || $.fieldType=='LookupMany'")
+                    .Where(function(f) { return (!data || !data.restrictedEntryProperties || data.restrictedEntryProperties[f.propertyName]); })
                     .ForEach(function (field) {
                         scope.$broadcast(field.nestedWidget.qualifiedName + ':EditAuthorized');
                     });
@@ -2307,7 +2308,7 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
             $scope.editAuthorized = ($scope.parentUidl.needsAuthorize ? false : true);
             if (!$scope.editAuthorized) {
                 $scope.$on($scope.parentUidl.qualifiedName + ':EditAuthorized', function(event, data) {
-                    $scope.editAuthorized = true;
+                    $scope.editAuthorized = (!data || !data.restrictedEntryProperties || data.restrictedEntryProperties[$scope.uidl.propertyName]);
                 });
             }
             

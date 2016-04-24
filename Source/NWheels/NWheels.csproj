@@ -140,6 +140,8 @@
     <Compile Include="Endpoints\HttpBot.cs" />
     <Compile Include="Endpoints\IHttpBotLogger.cs" />
     <Compile Include="Entities\Core\DatabaseInitializationCheckRegistration.cs" />
+    <Compile Include="Authorization\IEntityPropertyAccessControl.cs" />
+    <Compile Include="Entities\IEntitySelfAccessControl.cs" />
     <Compile Include="Entities\Migrations\MigrationBase.cs" />
     <Compile Include="Entities\Migrations\StorageScriptMigration.cs" />
     <Compile Include="Entities\Migrations\SchemaVersionAttribute.cs" />

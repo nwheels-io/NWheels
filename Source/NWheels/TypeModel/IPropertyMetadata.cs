@@ -40,6 +40,7 @@ namespace NWheels.DataObjects
         PropertyAccess Access { get; }
         bool IsSensitive { get; }
         bool IsCollection { get; }
+        bool IsReadOnly { get; }
         bool IsCalculated { get; }
         bool IsPartition { get; }
         int? NumericPrecision { get; }

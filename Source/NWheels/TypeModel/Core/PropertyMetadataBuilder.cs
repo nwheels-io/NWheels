@@ -258,6 +258,19 @@ namespace NWheels.DataObjects.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool IsReadOnly
+        {
+            get
+            {
+                return (
+                    this.IsCalculated || 
+                    ((this.Access & PropertyAccess.Write) == 0) ||
+                    (this.ContractPropertyInfo != null && !this.ContractPropertyInfo.CanWrite));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         ITypeMetadata IPropertyMetadata.DeclaringContract
         {
             get { return this.DeclaringContract; }
@@ -582,7 +595,7 @@ namespace NWheels.DataObjects.Core
                 return Expression.Lambda<Func<TEntity, bool>>(binary, new[] { parameter });
             }
 
-
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private void BuildNavigationTargetExpression<TEntity>(
                 IPropertyMetadata[] navigationPath, 

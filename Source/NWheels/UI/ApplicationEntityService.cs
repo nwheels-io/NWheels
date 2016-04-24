@@ -510,6 +510,8 @@ namespace NWheels.UI
             public bool CanCreate { get; set; }
             public bool CanUpdate { get; set; }
             public bool CanDelete { get; set; }
+            public bool IsRestrictedEntry { get; set; }
+            public List<string> RestrictedEntryProperties { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -519,7 +521,8 @@ namespace NWheels.UI
                     CanRetrieve = true,
                     CanCreate = true,
                     CanUpdate = true,
-                    CanDelete = true
+                    CanDelete = true,
+                    IsRestrictedEntry = false
                 };
             }
 
@@ -1778,6 +1781,23 @@ namespace NWheels.UI
                         CanUpdate = accessControl.CanUpdate(authorizationContext, entity).GetValueOrDefault(false),
                         CanDelete = accessControl.CanDelete(authorizationContext, entity).GetValueOrDefault(false),
                     };
+
+                    var selfAccessControl = (entity as IEntitySelfAccessControl);
+
+                    if (selfAccessControl != null)
+                    {
+                        checkResults.CanUpdate &= selfAccessControl.CanUpdateEntity.GetValueOrDefault(true);
+                        checkResults.CanDelete &= selfAccessControl.CanDeleteEntity.GetValueOrDefault(true);
+
+                        if (checkResults.CanUpdate)
+                        {
+                            var instanceMetaType = this.Owner._metadataCache.GetTypeMetadata(entity.ContractType);
+                            var propertyAccessControl = new OutputEntityPropertyAccessControl(instanceMetaType);
+                            selfAccessControl.SetPropertyAccessControl(propertyAccessControl);
+                            checkResults.IsRestrictedEntry = true;
+                            checkResults.RestrictedEntryProperties = propertyAccessControl.GetPropertiesAllowedToChange();
+                        }
+                    }
                 }
                 else
                 {
@@ -2229,6 +2249,48 @@ namespace NWheels.UI
                 }
 
                 return dbQuery;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class OutputEntityPropertyAccessControl : IEntityPropertyAccessControl
+        {
+            private readonly ITypeMetadata _metaType;
+            private readonly HashSet<IPropertyMetadata> _propertiesAllowedToChange;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public OutputEntityPropertyAccessControl(ITypeMetadata metaType)
+            {
+                _metaType = metaType;
+                _propertiesAllowedToChange = new HashSet<IPropertyMetadata>();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            void IEntityPropertyAccessControl.AllowChangeAllProperties()
+            {
+                _propertiesAllowedToChange.UnionWith(_metaType.Properties.Where(p => !p.IsReadOnly));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            void IEntityPropertyAccessControl.AllowChangeProperties(params Expression<Func<object>>[] properties)
+            {
+                foreach (var propertyExpression in properties)
+                {
+                    var declaration = propertyExpression.GetPropertyInfo();
+                    var metaProperty = _metaType.GetPropertyByName(declaration.Name);
+                    _propertiesAllowedToChange.Add(metaProperty);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public List<string> GetPropertiesAllowedToChange()
+            {
+                return _propertiesAllowedToChange.Select(p => p.Name).ToList();
             }
         }
 

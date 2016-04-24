@@ -43,12 +43,24 @@ function ($http, $q, $timeout) {
         var url = 'app/entity/checkAuth/' + typeName + (optionalId ? '/' + optionalId : '');
         return $http.get(url).then(
             function (response) {
-                return {
+                var auth = {
                     create: response.data.CanCreate,
                     retrieve: response.data.CanRetrieve,
                     update: response.data.CanUpdate,
                     'delete': response.data.CanDelete,
+                    isRestrictedEntry: response.data.IsRestrictedEntry,
+                    restrictedEntryProperties: null,
                 };
+                
+                if (response.data.RestrictedEntryProperties) {
+                    auth.restrictedEntryProperties = { };
+                    
+                    for (var i = 0 ; i < response.data.RestrictedEntryProperties.length ; i++) {
+                        auth.restrictedEntryProperties[response.data.RestrictedEntryProperties[i]] = true;
+                    }
+                }
+                
+                return auth;
             },
             function(fault) {
                 return $q.reject(fault);
