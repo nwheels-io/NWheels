@@ -915,7 +915,11 @@ HEAD, JS/CSS LINKS
                     $scope.totalsRowDisplayed = false;
                     var gridOptions = {
                         datatype: function(postData) {
-                            var queryBuilder = (request.query ? request.query.clone() : new EntityQueryBuilder($scope.uidl.entityName, request.url));
+							if ($scope.dataGridQueryInProgress) {
+								return;
+							}
+							$scope.dataGridQueryInProgress = true;
+                            var queryBuilder = ($scope.preparedRequest.query ? $scope.preparedRequest.query.clone() : new EntityQueryBuilder($scope.uidl.entityName, $scope.preparedRequest.url));
                             if (postData.sidx) {
                                 queryBuilder.orderBy(postData.sidx, postData.sord==='asc');
                             }
@@ -939,6 +943,7 @@ HEAD, JS/CSS LINKS
                                 $scope.preparedRequest.data
                             ).then(
                                 function(response){
+									$scope.dataGridQueryInProgress = false;
                                     if (grid[0].grid) {
                                         grid[0].grid.endReq();
                                     }
@@ -949,6 +954,7 @@ HEAD, JS/CSS LINKS
                                     $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data.ResultSet);
                                 },
                                 function(faultResponse){
+									$scope.dataGridQueryInProgress = false;
                                     if (grid[0].grid) {
                                         grid[0].grid.endReq();
                                     }

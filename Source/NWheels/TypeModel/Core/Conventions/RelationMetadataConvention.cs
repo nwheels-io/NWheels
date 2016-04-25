@@ -126,10 +126,7 @@ namespace NWheels.DataObjects.Core.Conventions
             property.Relation.ThisPartyKind = RelationPartyKind.Dependent;
             property.Relation.RelatedPartyKind = RelationPartyKind.Principal;
             property.Relation.RelatedPartyKey = FindOrAddPrimaryKey(property.Relation.RelatedPartyType);
-
-            property.Relation.InverseProperty =
-                property.Relation.RelatedPartyType.Properties
-                    .FirstOrDefault(p => p.Relation != null && p.Relation.RelatedPartyType != null && p.Relation.RelatedPartyType.ContractType == type.ContractType);
+            property.Relation.InverseProperty = TryFindInverseProperty(type, property);
 
             CompleteInversePropertyRelation(property);
         }
@@ -150,10 +147,7 @@ namespace NWheels.DataObjects.Core.Conventions
             property.Relation.ThisPartyKind = RelationPartyKind.Principal;
             property.Relation.RelatedPartyKind = RelationPartyKind.Dependent;
             property.Relation.RelatedPartyKey = relatedKey;
-
-            property.Relation.InverseProperty =
-                property.Relation.RelatedPartyType.Properties
-                    .FirstOrDefault(p => p.Relation != null && p.Relation.RelatedPartyType != null && p.Relation.RelatedPartyType.ContractType == type.ContractType);
+            property.Relation.InverseProperty = TryFindInverseProperty(type, property);
 
             CompleteInversePropertyRelation(property);
         }
@@ -171,6 +165,16 @@ namespace NWheels.DataObjects.Core.Conventions
                     property.Relation.InverseProperty.Relation.RelatedPartyKey = property.Relation.ThisPartyKey;
                 }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static PropertyMetadataBuilder TryFindInverseProperty(TypeMetadataBuilder type, PropertyMetadataBuilder property)
+        {
+            return property.Relation.RelatedPartyType.Properties.FirstOrDefault(p =>
+                p.Relation != null &&
+                p.Relation.RelatedPartyType != null &&
+                p.Relation.RelatedPartyType.ContractType.IsAssignableFrom(type.ContractType));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
