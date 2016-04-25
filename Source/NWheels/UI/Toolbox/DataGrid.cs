@@ -231,6 +231,14 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public void SetWidget(WidgetUidlNode widget)
+            {
+                this.ColumnType = GridColumnType.Widget;
+                this.NestedWidget = widget;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             [DataMember]
             public FieldSpecialName SpecialName { get; set; }
             [DataMember]
@@ -348,7 +356,7 @@ namespace NWheels.UI.Toolbox
 
                 if (metaProperty.ClrType == typeof(ChartData))
                 {
-                    return GridColumnType.Chart;
+                    return GridColumnType.Widget;
                 }
 
                 if ( metaProperty.SemanticType != null )
@@ -688,9 +696,9 @@ namespace NWheels.UI.Toolbox
         Number = 20,
         Enum = 30,
         Image = 40,
-        Chart = 45,
         Link = 50,
         Key = 60,
+        Widget = 70,
         Hidden = 100
     }
 }

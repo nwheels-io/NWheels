@@ -197,7 +197,8 @@ namespace NWheels.UI.Toolbox
             Expression<Func<TEntity, object>> fieldSelector,
             Expression<Func<TLookupEntity, object>> lookupValueProperty,
             Expression<Func<TLookupEntity, object>> lookupDisplayProperty,
-            Expression<Func<ViewModel<IFormData, Empty.State, Empty.Input>, bool>> filterExpression = null,
+            Expression<Func<TLookupEntity, object>> lookupFilterProperty = null,
+            object lookupFilterValue = null,
             bool applyDistinctToResults = true)
         {
             var field = FindOrAddField(fieldSelector);
@@ -211,6 +212,16 @@ namespace NWheels.UI.Toolbox
 
             field.FieldType = FormFieldType.Lookup;
             field.Modifiers = FormFieldModifiers.DropDown;
+
+            if (lookupFilterProperty != null)
+            {
+                field.LookupQueryFilter = new List<FormFieldLookupFilter>() {
+                    new FormFieldLookupFilter(
+                        lookupFilterProperty.GetPropertyInfo().Name, 
+                        ApplicationEntityService.QueryOptions.EqualOperator.TrimLead(":"), 
+                        lookupFilterValue.ToStringOrDefault())
+                };
+            }
 
             return this;
         }
@@ -466,6 +477,8 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string Label { get; set; }
         [DataMember]
+        public string Icon { get; set; }
+        [DataMember]
         public FormFieldType FieldType { get; set; }
         [DataMember]
         public FormFieldModifiers Modifiers { get; set; }
@@ -474,6 +487,8 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public int? GroupIndex { get; set; }
         [DataMember]
+        public bool HiddenIfEmpty { get; set; }
+        [DataMember]
         public string LookupEntityName { get; set; }
         [DataMember]
         public string LookupSourceProperty { get; set; }
@@ -481,6 +496,8 @@ namespace NWheels.UI.Toolbox
         public string LookupValueProperty { get; set; }
         [DataMember]
         public string LookupDisplayProperty { get; set; }
+        [DataMember]
+        public List<FormFieldLookupFilter> LookupQueryFilter { get; set; }
         [DataMember]
         public string ImageTypeProperty { get; set; }
         [DataMember]
@@ -846,6 +863,28 @@ namespace NWheels.UI.Toolbox
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+    public class FormFieldLookupFilter
+    {
+        public FormFieldLookupFilter(string propertyName, string @operator, string stringValue)
+        {
+            PropertyName = propertyName;
+            Operator = @operator;
+            StringValue = stringValue;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public string PropertyName { get; set; }
+        [DataMember]
+        public string Operator { get; set; }
+        [DataMember]
+        public string StringValue { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
     public enum FormFieldType
     {
         Default = 0,
@@ -880,6 +919,7 @@ namespace NWheels.UI.Toolbox
         RangeStart = 0x1000,
         RangeEnd = 0x2000,
         Memo = 0x4000,
+        FlatStyle = 0x8000,
         System = 0x40000000
     }
 

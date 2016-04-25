@@ -678,7 +678,7 @@ HEAD, JS/CSS LINKS
                                         <!--span ng-if="column.columnType==='Number'"><strong>{{::row[column.expression]}}</strong></span-->
                                         <div ng-if="column.nestedWidget" ng-controller="cloneUidlWithUniqueId">
                                             <div ng-init="cloneUidl(column.nestedWidget, thisRowIndex)">
-                                                <uidl-widget ng-if="thisUidl" uidl="thisUidl" parent-uidl="column" parent-model="row[column.expression]"></uidl-widget>
+                                                <uidl-widget ng-if="thisUidl" uidl="thisUidl" parent-uidl="column" parent-model="(column.expression ? row[column.expression] : row)"></uidl-widget>
                                             </div>
                                         </div>
                                     </td>
@@ -725,7 +725,7 @@ HEAD, JS/CSS LINKS
                         type="button"
                         class="btn btn-rounded"
                         style="margin-right:5px;"
-                        ng-disabled="commandInProgress || !selectedEntity"
+                        ng-disabled="commandInProgress || !selectedEntity || !isEntityCommandEnabled(command)"
                         ng-click="invokeEntityCommand(command)"
                         ng-class="{'btn-default':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
                     ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
@@ -850,6 +850,13 @@ HEAD, JS/CSS LINKS
                         break;
                     case 'Link':
                         modelItem.searchoptions = {sopt: ['cn']};
+                        modelItem.formatter = function(cellvalue, options, rowObject) {
+                            return '<a target="_blank" href="' + cellvalue + '" style="text-decoration:underline;">' + cellvalue + '</a>';
+                        };
+                        break;
+                    case 'Widget':
+                        modelItem.editable = false;
+                        modelItem.search = false;
                         modelItem.formatter = function(cellvalue, options, rowObject) {
                             return '<a target="_blank" href="' + cellvalue + '" style="text-decoration:underline;">' + cellvalue + '</a>';
                         };
@@ -1406,7 +1413,7 @@ HEAD, JS/CSS LINKS
                 <label class="control-label"
                        ng-class="{'col-lg-2':!uidl.isModalPopup, 'col-lg-4':uidl.isModalPopup}"
                        for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.label)}}</label>
-                <div ng-class="{'col-lg-3':!uidl.isModalPopup && !fieldHasModifier(field, 'Memo'), 'col-lg-6':uidl.isModalPopup || fieldHasModifier(field, 'Memo')}">
+                <div ng-class="{'col-lg-3':!uidl.isModalPopup && !fieldHasModifier(field, 'Memo') && !fieldHasModifier(field, 'FlatStyle'), 'col-lg-6':uidl.isModalPopup || fieldHasModifier(field, 'Memo') || fieldHasModifier(field, 'FlatStyle')}">
                     <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
@@ -1618,13 +1625,18 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="app/uidl-element-template/FormField">
         <div ng-style="{display: parentUidl.isInlineStyle ? 'inline' : 'block'}">
             <!-- LABEL -->
-            <input ng-if="uidl.fieldType==='Label' && !hasUidlModifier('Memo')" 
+            <input ng-if="uidl.fieldType==='Label' && !hasUidlModifier('Memo') && !hasUidlModifier('FlatStyle')" 
                    readonly="" 
                    class="form-control m-b" 
                    type="text" 
                    ng-model="entity[uidl.propertyName]" 
                    id="{{::uniqueFieldId}}" 
                    name="{{::uniqueFieldId}}">
+            <span  ng-if="uidl.fieldType==='Label' && !hasUidlModifier('Memo') && hasUidlModifier('FlatStyle')" 
+                   class="m-b" 
+                   id="{{::uniqueFieldId}}" 
+                   ng-show="entity[uidl.propertyName] || !uidl.hiddenIfEmpty"
+                   name="{{::uniqueFieldId}}"><strong><i ng-if="uidl.icon" class="fa fa-{{::uidl.icon}}"></i>&nbsp;{{::entity[uidl.propertyName]}}</strong></span>
             <textarea ng-if="uidl.fieldType==='Label' && hasUidlModifier('Memo')"
                       readonly="" 
                       class="form-control m-b" 

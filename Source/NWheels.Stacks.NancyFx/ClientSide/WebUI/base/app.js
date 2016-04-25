@@ -1130,7 +1130,24 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                         return $q.reject(fault);
                     }
                 );
-            }
+            };
+            
+            scope.updateSelectedEntityCommands = function () {
+                if (scope.uidl.entityCommands && 
+                    scope.uidl.entityCommands.length > 0 && 
+                    scope.uidl.updateCommandsOnSelection && 
+                    scope.selectedEntity && scope.selectedEntity['$id']) 
+                {
+                    scope.requestAuthorization(scope.selectedEntity['$id']);
+                }
+            };
+
+            scope.isEntityCommandEnabled = function (command) {
+                if (command.authorization.operationName && scope.entityAuth && scope.entityAuth.enabledOperations) {
+                    return (scope.entityAuth.enabledOperations[command.authorization.operationName] === true);
+                }
+                return true;
+            };
             
             scope.queryEntities = function () {
                 scope.selectedEntity = null;
@@ -1186,18 +1203,21 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             scope.$on(scope.uidl.qualifiedName + ':Grid:ObjectSelected', function(event, data) {
                 scope.$apply(function() {
                     scope.selectedEntity = data;
+                    scope.updateSelectedEntityCommands();
                 });
             });
 
             scope.$on(scope.uidl.qualifiedName + ':Grid:ObjectSelectedById', function (event, id) {
                 scope.$apply(function() {
                     scope.selectedEntity = Enumerable.From(scope.resultSet).Where("$.$id == '" + id + "'").First();
+                    scope.updateSelectedEntityCommands();
                 });
             });
 
             scope.$on(scope.uidl.qualifiedName + ':Grid:ObjectSelectedByIndex', function (event, index) {
                 scope.$apply(function() {
                     scope.selectedEntity = scope.resultSet[index];
+                    scope.updateSelectedEntityCommands();
                 });
             });
 
@@ -2233,7 +2253,14 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
                     };
  
                     if ($scope.hasUidlModifier('DropDown') && !$scope.hasUidlModifier('TypeAhead')) {
-                        $scope.entityService.queryEntity($scope.uidl.lookupEntityName).then(function(data) {
+                        $scope.entityService.queryEntity($scope.uidl.lookupEntityName, function(query) {
+                            if ($scope.uidl.lookupQueryFilter) {
+                                for (var i = 0; i < $scope.uidl.lookupQueryFilter.length ; i++) {
+                                    var filterItem = $scope.uidl.lookupQueryFilter[i];
+                                    query.where(filterItem.propertyName, filterItem.stringValue, filterItem.operator);
+                                }
+                            }
+                        }).then(function(data) {
                             $scope.lookupResultSet = data.ResultSet;
 
                             if ($scope.uidl.applyDistinctToLookup) {
