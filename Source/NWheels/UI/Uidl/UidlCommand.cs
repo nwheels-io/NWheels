@@ -36,6 +36,8 @@ namespace NWheels.UI.Uidl
         public CommandSeverity Severity { get; set; }
         [DataMember]
         public CommandUIStyle UIStyle { get; set; }
+        [DataMember]
+        public bool HiddenIfDisabled { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

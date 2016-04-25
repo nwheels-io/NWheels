@@ -265,7 +265,7 @@ namespace NWheels.DataObjects.Core
                 return (
                     this.IsCalculated || 
                     ((this.Access & PropertyAccess.Write) == 0) ||
-                    (this.ContractPropertyInfo != null && !this.ContractPropertyInfo.CanWrite));
+                    (this.Kind == PropertyKind.Scalar && this.ContractPropertyInfo != null && !this.ContractPropertyInfo.CanWrite));
             }
         }
 

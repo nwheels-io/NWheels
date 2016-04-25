@@ -10,7 +10,7 @@ namespace NWheels.Entities
 {
     public interface IEntitySelfAccessControl
     {
-        void SetPropertyAccessControl(IEntityPropertyAccessControl access);
+        void SetMemberAccessControl(IEntityMemberAccessControl access);
         bool? CanUpdateEntity { get; }
         bool? CanDeleteEntity { get; }
     }

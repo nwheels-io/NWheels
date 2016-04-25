@@ -8,9 +8,11 @@ using NWheels.DataObjects;
 
 namespace NWheels.Authorization
 {
-    public interface IEntityPropertyAccessControl
+    public interface IEntityMemberAccessControl
     {
         void AllowChangeAllProperties();
         void AllowChangeProperties(params Expression<Func<object>>[] properties);
+        void AllowInvokeAllMethods();
+        void AllowInvokeMethods(params Expression<Action>[] methods);
     }
 }

@@ -109,6 +109,8 @@ namespace NWheels.UI.Toolbox
         public List<UidlCommand> StaticCommands { get; set; }
         [DataMember, ManuallyAssigned]
         public List<UidlCommand> EntityCommands { get; set; }
+        [DataMember]
+        public bool UpdateCommandsOnSelection { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

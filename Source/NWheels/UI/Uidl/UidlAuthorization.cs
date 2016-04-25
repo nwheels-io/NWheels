@@ -82,5 +82,10 @@ namespace NWheels.UI.Uidl
 
         [DataMember]
         public HashSet<string> RequiredClaims { get; private set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public string OperationName { get; set; }
     }
 }

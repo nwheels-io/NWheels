@@ -50,16 +50,23 @@ function ($http, $q, $timeout) {
                     'delete': response.data.CanDelete,
                     isRestrictedEntry: response.data.IsRestrictedEntry,
                     restrictedEntryProperties: null,
+                    enabledOperations: null,
                 };
                 
                 if (response.data.RestrictedEntryProperties) {
                     auth.restrictedEntryProperties = { };
-                    
                     for (var i = 0 ; i < response.data.RestrictedEntryProperties.length ; i++) {
                         auth.restrictedEntryProperties[response.data.RestrictedEntryProperties[i]] = true;
                     }
                 }
                 
+                if (response.data.EnabledOperations) {
+                    auth.enabledOperations = { };
+                    for (var i = 0 ; i < response.data.EnabledOperations.length ; i++) {
+                        auth.enabledOperations[response.data.EnabledOperations[i]] = true;
+                    }
+                }
+
                 return auth;
             },
             function(fault) {

@@ -512,6 +512,7 @@ namespace NWheels.UI
             public bool CanDelete { get; set; }
             public bool IsRestrictedEntry { get; set; }
             public List<string> RestrictedEntryProperties { get; set; }
+            public List<string> EnabledOperations { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1786,17 +1787,15 @@ namespace NWheels.UI
 
                     if (selfAccessControl != null)
                     {
+                        var instanceMetaType = this.Owner._metadataCache.GetTypeMetadata(entity.ContractType);
+                        var memberAccessControl = new OutputEntityPropertyAccessControl(instanceMetaType);
+                        selfAccessControl.SetMemberAccessControl(memberAccessControl);
+
                         checkResults.CanUpdate &= selfAccessControl.CanUpdateEntity.GetValueOrDefault(true);
                         checkResults.CanDelete &= selfAccessControl.CanDeleteEntity.GetValueOrDefault(true);
-
-                        if (checkResults.CanUpdate)
-                        {
-                            var instanceMetaType = this.Owner._metadataCache.GetTypeMetadata(entity.ContractType);
-                            var propertyAccessControl = new OutputEntityPropertyAccessControl(instanceMetaType);
-                            selfAccessControl.SetPropertyAccessControl(propertyAccessControl);
-                            checkResults.IsRestrictedEntry = true;
-                            checkResults.RestrictedEntryProperties = propertyAccessControl.GetPropertiesAllowedToChange();
-                        }
+                        checkResults.IsRestrictedEntry = true;
+                        checkResults.RestrictedEntryProperties = memberAccessControl.GetPropertiesAllowedToChange();
+                        checkResults.EnabledOperations = memberAccessControl.GetMethodsAllowedToInvoke();
                     }
                 }
                 else
@@ -2254,10 +2253,11 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class OutputEntityPropertyAccessControl : IEntityPropertyAccessControl
+        private class OutputEntityPropertyAccessControl : IEntityMemberAccessControl
         {
             private readonly ITypeMetadata _metaType;
             private readonly HashSet<IPropertyMetadata> _propertiesAllowedToChange;
+            private readonly HashSet<MethodInfo> _methodsAllowedToInvoke;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -2265,18 +2265,19 @@ namespace NWheels.UI
             {
                 _metaType = metaType;
                 _propertiesAllowedToChange = new HashSet<IPropertyMetadata>();
+                _methodsAllowedToInvoke = new HashSet<MethodInfo>();
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            void IEntityPropertyAccessControl.AllowChangeAllProperties()
+            void IEntityMemberAccessControl.AllowChangeAllProperties()
             {
                 _propertiesAllowedToChange.UnionWith(_metaType.Properties.Where(p => !p.IsReadOnly));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            void IEntityPropertyAccessControl.AllowChangeProperties(params Expression<Func<object>>[] properties)
+            void IEntityMemberAccessControl.AllowChangeProperties(params Expression<Func<object>>[] properties)
             {
                 foreach (var propertyExpression in properties)
                 {
@@ -2287,10 +2288,36 @@ namespace NWheels.UI
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            void IEntityMemberAccessControl.AllowInvokeAllMethods()
+            {
+                //TODO: add information on entity methods to ITypeMetadata + TypeMetadataBuilder
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            void IEntityMemberAccessControl.AllowInvokeMethods(params Expression<Action>[] methods)
+            {
+                foreach (var methodExpression in methods)
+                {
+                    var declaration = methodExpression.GetMethodInfo();
+                    _methodsAllowedToInvoke.Add(declaration);
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public List<string> GetPropertiesAllowedToChange()
             {
                 return _propertiesAllowedToChange.Select(p => p.Name).ToList();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public List<string> GetMethodsAllowedToInvoke()
+            {
+                return _methodsAllowedToInvoke.Select(m => m.Name).ToList();
             }
         }
 

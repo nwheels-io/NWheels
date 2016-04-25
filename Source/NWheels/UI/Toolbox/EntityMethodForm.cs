@@ -66,6 +66,7 @@ namespace NWheels.UI.Toolbox
             this.Text = command.Text;
             this.Icon = command.Icon;
             _methodCallExpression = onExecute;
+            command.Authorization.OperationName = _methodCallExpression.GetMethodInfo().Name;
             controller.On(command).Broadcast(this.ShowModal).TunnelDown();
         }
 
@@ -82,6 +83,7 @@ namespace NWheels.UI.Toolbox
             this.Text = command.Text;
             this.Icon = command.Icon;
             _methodCallExpression = onExecute;
+            command.Authorization.OperationName = _methodCallExpression.GetMethodInfo().Name;
             controller.On(command).Broadcast(this.ShowModal).TunnelDown();
         }
 
