@@ -88,9 +88,11 @@ namespace NWheels.Processing.Messages
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public List<Recipient> To { get; private set; }
-        public List<Recipient> Cc { get; private set; }
-        public List<Recipient> Bcc { get; private set; }
+        public SenderRecipient From { get; set; }
+        public List<SenderRecipient> To { get; private set; }
+        public List<SenderRecipient> Cc { get; private set; }
+        public List<SenderRecipient> Bcc { get; private set; }
+        public List<SenderRecipient> ReplyTo { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -153,9 +155,10 @@ namespace NWheels.Processing.Messages
 
         private void Initialize()
         {
-            this.To = new List<Recipient>();
-            this.Cc = new List<Recipient>();
-            this.Bcc = new List<Recipient>();
+            this.To = new List<SenderRecipient>();
+            this.Cc = new List<SenderRecipient>();
+            this.Bcc = new List<SenderRecipient>();
+            this.ReplyTo = new List<SenderRecipient>();
             this.Attachments = new List<Attachment>();
         }
 
@@ -171,17 +174,17 @@ namespace NWheels.Processing.Messages
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class Recipient
+        public class SenderRecipient
         {
-            public Recipient(string personName, string emailAddress)
+            public SenderRecipient(string displayName, string emailAddress)
             {
-                PersonName = personName;
+                DisplayName = displayName;
                 EmailAddress = emailAddress;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public string PersonName { get; private set; }
+            public string DisplayName { get; private set; }
             public string EmailAddress { get; private set; }
         }
 
@@ -223,11 +226,18 @@ namespace NWheels.Processing.Messages
 
     public static class OutgoingEmailMessageExtensions
     {
-        public static void AddRecipient(this List<OutgoingEmailMessage.Recipient> recipients, string personName, string emailAddress)
+        public static void From(this OutgoingEmailMessage email, string displayName, string emailAddress)
+        {
+            email.From = new OutgoingEmailMessage.SenderRecipient(displayName, emailAddress);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void AddRecipient(this List<OutgoingEmailMessage.SenderRecipient> recipients, string displayName, string emailAddress)
         {
             if ( !string.IsNullOrEmpty(emailAddress) )
             {
-                recipients.Add(new OutgoingEmailMessage.Recipient(personName, emailAddress));
+                recipients.Add(new OutgoingEmailMessage.SenderRecipient(displayName, emailAddress));
             }
         }
     }

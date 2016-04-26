@@ -279,6 +279,7 @@ namespace NWheels.UI.Toolbox
             return base.GetTranslatables()
                 .Concat(metaTypeTranslatables)
                 .Concat(Fields.Select(f => f.PropertyName))
+                .Concat(Fields.Select(f => f.Label))
                 .Concat(Fields.Where(f => f.StandardValues != null && f.StandardValuesExclusive).SelectMany(f => f.StandardValues))
                 .Concat(Commands.Select(c => c.Text)); 
         }

@@ -60,7 +60,7 @@ namespace NWheels.Testing.Processing.Messages
 
         public static IEnumerable<OutgoingEmailMessage> To(this IEnumerable<OutgoingEmailMessage> source, string recipientEmail, string recipientName)
         {
-            return source.Where(e => e.To.Any(r => r.EmailAddress == recipientEmail && r.PersonName == recipientName));
+            return source.Where(e => e.To.Any(r => r.EmailAddress == recipientEmail && r.DisplayName == recipientName));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

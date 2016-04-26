@@ -35,9 +35,10 @@ namespace NWheels.Testing.Processing.Messages
             var output = new StringBuilder();
 
             output.AppendFormat("-- UTC DATE/TIME\r\n{0:yyyy-MM-dd HH:mm:ss}\r\n", DateTime.UtcNow);
-            output.AppendFormat("-- TO\r\n{0}", string.Join("", message.To.Select(r => r.PersonName + " <" + r.EmailAddress + ">\r\n")));
-            output.AppendFormat("-- CC\r\n{0}", string.Join("", message.Cc.Select(r => r.PersonName + " <" + r.EmailAddress + ">\r\n")));
-            output.AppendFormat("-- BCC\r\n{0}", string.Join("", message.Bcc.Select(r => r.PersonName + " <" + r.EmailAddress + ">\r\n")));
+            output.AppendFormat("-- FROM\r\n{0}\r\n", message.From != null ? message.From.DisplayName + " <" + message.From.EmailAddress + ">" : "(none)");
+            output.AppendFormat("-- TO\r\n{0}", string.Join("", message.To.Select(r => r.DisplayName + " <" + r.EmailAddress + ">\r\n")));
+            output.AppendFormat("-- CC\r\n{0}", string.Join("", message.Cc.Select(r => r.DisplayName + " <" + r.EmailAddress + ">\r\n")));
+            output.AppendFormat("-- BCC\r\n{0}", string.Join("", message.Bcc.Select(r => r.DisplayName + " <" + r.EmailAddress + ">\r\n")));
             output.AppendFormat("-- SUBJECT\r\n{0}\r\n", subject);
             output.AppendFormat("-- BODY\r\n{0}\r\n", body);
 
