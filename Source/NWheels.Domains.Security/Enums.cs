@@ -20,4 +20,11 @@ namespace NWheels.Domains.Security
     {
         NotLoggedIn
     }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum EmailVerificationFault
+    {
+        InvalidVerificationLink
+    }
 }

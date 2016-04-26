@@ -22,7 +22,8 @@ namespace NWheels.Domains.Security.Core
                 passwordMinDigitChars: 1,
                 passwordMinSpecialChars: 1,
                 duplicateCheckLastPasswordCount: 4,
-                passwordHistoryRetention: TimeSpan.FromDays(1095));
+                passwordHistoryRetention: TimeSpan.FromDays(1095),
+                emailVerificationLinkExpiry: TimeSpan.FromHours(72));
         }
     }
 }

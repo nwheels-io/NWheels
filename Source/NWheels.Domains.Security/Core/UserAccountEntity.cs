@@ -9,6 +9,8 @@ using NWheels.Exceptions;
 using NWheels.Domains.Security.Impl;
 using NWheels.Entities;
 using NWheels.Extensions;
+using NWheels.Processing.Messages;
+using NWheels.Processing.Messages.Impl;
 using NWheels.Utilities;
 
 namespace NWheels.Domains.Security.Core
@@ -28,6 +30,55 @@ namespace NWheels.Domains.Security.Core
 
             this.Passwords.Add(password);
             this.IsLockedOut = false;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void SendEmail(object emailContentType, object data)
+        {
+            var email = new OutgoingEmailMessage(Framework, TemplateProvider);
+
+            email.LoadTemplate(emailContentType, subjectAtFirstLine: true);
+            email.TemplateData = data;
+
+            SetUserEmailRecipients(email);
+            ServiceBus.EnqueueMessage(email);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void SendEmailVerification(object emailContentType)
+        {
+            var policy = PolicySet.GetPolicy(this);
+            var now = Framework.UtcNow;
+
+            this.EmailVerification.EmailVerificationLinkSentAtUtc = now;
+            this.EmailVerification.EmailVerificationLinkValidUntil = now.Add(policy.EmailVerificationLinkExpiry);
+            this.EmailVerification.EmailVerificationLinkUniqueId = GenerateEmailVerificationLinkId();
+
+            SendEmail(emailContentType, this);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void VerifyEmail(string linkUniqueId)
+        {
+            var now = Framework.UtcNow;
+
+            if (string.IsNullOrWhiteSpace(linkUniqueId) || linkUniqueId != this.EmailVerification.EmailVerificationLinkUniqueId)
+            {
+                throw new DomainFaultException<EmailVerificationFault>(EmailVerificationFault.InvalidVerificationLink);
+            }
+
+            if (now > this.EmailVerification.EmailVerificationLinkValidUntil.GetValueOrDefault(DateTime.MinValue))
+            {
+                throw new DomainFaultException<EmailVerificationFault>(EmailVerificationFault.InvalidVerificationLink);
+            }
+
+            if (!this.EmailVerification.EmailVerifiedAtUtc.HasValue)
+            {
+                this.EmailVerification.EmailVerifiedAtUtc = now;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,6 +108,20 @@ namespace NWheels.Domains.Security.Core
         public void AutoGenerateLoginName(string baseText)
         {
             this.LoginName = CreateLoginName(baseText);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual string GenerateEmailVerificationLinkId()
+        {
+            return Framework.NewGuid().ToString("N");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void SetUserEmailRecipients(OutgoingEmailMessage email)
+        {
+            email.To.AddRecipient(this.FullName, this.EmailAddress);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -142,12 +207,29 @@ namespace NWheels.Domains.Security.Core
 
         #region Dependencies
 
+        [EntityImplementation.DependencyProperty]
         protected IFramework Framework { get; set; }
+        
+        [EntityImplementation.DependencyProperty]
         protected ISecurityDomainLogger Logger { get; set; }
+        
+        [EntityImplementation.DependencyProperty]
         protected ICryptoProvider CryptoProvider { get; set; }
+        
+        [EntityImplementation.DependencyProperty]
         protected ClaimFactory ClaimFactory { get; set; }
+        
+        [EntityImplementation.DependencyProperty]
         protected AccessControlListCache AccessControlCache { get; set; }
+
+        [EntityImplementation.DependencyProperty]
         protected UserAccountPolicySet PolicySet { get; set; }
+
+        [EntityImplementation.DependencyProperty]
+        protected IContentTemplateProvider TemplateProvider { get; set; }
+
+        [EntityImplementation.DependencyProperty]
+        protected IServiceBus ServiceBus { get; set; }
 
         #endregion
 
@@ -168,12 +250,22 @@ namespace NWheels.Domains.Security.Core
         public abstract string LoginName { get; set; }
         public abstract string FullName { get; set; }
         public abstract string EmailAddress { get; set; }
-        public abstract DateTime? EmailVerifiedAtUtc { get; set; }
+        public abstract IEmailVerificationEntityPart EmailVerification { get; }
         public abstract ICollection<IPasswordEntityPart> Passwords { get; protected set; }
         public abstract DateTime CreatedAtUtc { get; set; }
         public abstract DateTime? LastLoginAtUtc { get; set; }
         public abstract int FailedLoginCount { get; set; }
         public abstract bool IsLockedOut { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsEmailVerified
+        {
+            get
+            {
+                return EmailVerification.EmailVerifiedAtUtc.HasValue;
+            }
+        }
 
         #endregion
 

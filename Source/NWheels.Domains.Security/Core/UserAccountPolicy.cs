@@ -20,7 +20,8 @@ namespace NWheels.Domains.Security.Core
             int passwordMinDigitChars, 
             int passwordMinSpecialChars, 
             int duplicateCheckLastPasswordCount, 
-            TimeSpan passwordHistoryRetention)
+            TimeSpan passwordHistoryRetention,
+            TimeSpan emailVerificationLinkExpiry)
         {
             LoginMinLength = loginMinLength;
             LoginMaxLength = loginMaxLength;
@@ -34,6 +35,7 @@ namespace NWheels.Domains.Security.Core
             PasswordMinSpecialChars = passwordMinSpecialChars;
             DuplicateCheckLastPasswordCount = duplicateCheckLastPasswordCount;
             PasswordHistoryRetention = passwordHistoryRetention;
+            EmailVerificationLinkExpiry = emailVerificationLinkExpiry;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,5 +52,6 @@ namespace NWheels.Domains.Security.Core
         public int PasswordMinSpecialChars { get; private set; }
         public int DuplicateCheckLastPasswordCount { get; private set; }
         public TimeSpan PasswordHistoryRetention { get; private set; }
+        public TimeSpan EmailVerificationLinkExpiry { get; private set; }
     }
 }

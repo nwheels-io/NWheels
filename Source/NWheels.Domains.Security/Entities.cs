@@ -10,6 +10,7 @@ using NWheels.DataObjects;
 using NWheels.Domains.Security.Core;
 using NWheels.Entities;
 using NWheels.Processing.Documents;
+using NWheels.Processing.Messages;
 
 namespace NWheels.Domains.Security
 {
@@ -31,6 +32,9 @@ namespace NWheels.Domains.Security
     public interface IUserAccountEntity : IEntityPartClaimsContainer
     {
         void SetPassword(SecureString passwordString);
+        void SendEmail(object emailContentType, object data);
+        void SendEmailVerification(object emailContentType);
+        void VerifyEmail(string linkUniqueId);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -50,7 +54,7 @@ namespace NWheels.Domains.Security
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [PropertyContract.ReadOnly]
-        DateTime? EmailVerifiedAtUtc { get; set; }
+        IEmailVerificationEntityPart EmailVerification { get; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -76,6 +80,11 @@ namespace NWheels.Domains.Security
 
         [PropertyContract.ReadOnly]
         bool IsLockedOut { get; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [PropertyContract.Calculated]
+        bool IsEmailVerified { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -165,6 +174,24 @@ namespace NWheels.Domains.Security
     [EntityContract(UseCodeNamespace = true)]
     public interface IOperationPermissionEntity : IEntityPartUniqueDisplayName, IEntityPartClaim
     {
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [EntityPartContract]
+    public interface IEmailVerificationEntityPart
+    {
+        [PropertyContract.ReadOnly]
+        DateTime? EmailVerificationLinkSentAtUtc { get; set; }
+
+        [PropertyContract.ReadOnly]
+        DateTime? EmailVerificationLinkValidUntil { get; set; }
+
+        [PropertyContract.ReadOnly]
+        string EmailVerificationLinkUniqueId { get; set; }
+
+        [PropertyContract.ReadOnly]
+        DateTime? EmailVerifiedAtUtc { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

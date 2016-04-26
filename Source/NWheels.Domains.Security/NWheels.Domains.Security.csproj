@@ -64,6 +64,7 @@
     <Compile Include="Core\UserAccountPolicy.cs" />
     <Compile Include="Core\UserAccountPolicySet.cs" />
     <Compile Include="Core\UserAccountPrincipal.cs" />
+    <Compile Include="Core\VerifyUserAccountEmailTx.cs" />
     <Compile Include="IdentityInfoExtensions.cs" />
     <Compile Include="ISecurityDomainLogger.cs" />
     <Compile Include="LoggedInUserInfo.cs" />
