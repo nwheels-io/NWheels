@@ -428,6 +428,57 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [HttpGet]
+        [Route("app/api/redirect/command/{target}/{contractName}/{operationName}/{entityName?}")]
+        public IHttpActionResult ApiRedirectCommand(string target, string contractName, string operationName, string entityName = null)
+        {
+            var command = TryCreateCommandMessage(target, contractName, operationName, Request.GetQueryString(), synchronous: true);
+
+            if (command == null)
+            {
+                return StatusCode(HttpStatusCode.NotFound);
+            }
+
+            using (new UIOperationContext(
+                _context.EntityService, ApiCallType.Redirect, ApiCallResultType.Command,
+                target, contractName, operationName, entity: entityName))
+            {
+                try
+                {
+                    _serviceBus.DispatchMessageOnCurrentThread(command);
+
+                    if (command.Result.RedirectUrl != null)
+                    {
+                        return Redirect(command.Result.RedirectUrl);
+                    }
+                    else
+                    {
+                        return StatusCode(HttpStatusCode.OK);
+                    }
+                }
+                catch (Exception e)
+                {
+                    _context.Logger.CommandFailed(this.Request.RequestUri.AbsolutePath, e);
+
+                    if (!command.HasFaultResult())
+                    {
+                        throw;
+                    }
+                }
+
+                var responseJsonString = JsonConvert.SerializeObject(
+                    command.Result.TakeSerializableSnapshot(),
+                    _context.EntityService.CreateSerializerSettings());
+
+                return ResponseMessage(new HttpResponseMessage() {
+                    StatusCode = (command.HasFaultResult() ? HttpStatusCode.InternalServerError : HttpStatusCode.OK),
+                    Content = new StringContent(responseJsonString, Encoding.UTF8, "application/json")
+                });
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [HttpPost]
         [Route("app/api/requestReplyAsync/command/{target}/{contractName}/{operationName}/{entityName?}")]
         public IHttpActionResult ApiRequestReplyAsyncCommand(string target, string contractName, string operationName, string entityName = null)
@@ -997,11 +1048,18 @@ namespace NWheels.Stacks.AspNet
             var scriptEntry = _transactionScriptByName[contractName];
             var call = _callFactory.NewMessageCallObject(scriptEntry.MethodInfoByName[operationName]);
 
-            var jsonString = Request.Content.ReadAsStringAsync().Result;
-            var serializerSettings = _context.EntityService.CreateSerializerSettings();
-            JsonConvert.PopulateObject(jsonString, call, serializerSettings);
-
-            TryInjectUploadedFile(call);
+            if (Request.Method == HttpMethod.Get)
+            {
+                SetCallParametersFromQueryString(call);
+            }
+            else
+            {
+                var jsonString = Request.Content.ReadAsStringAsync().Result;
+                var serializerSettings = _context.EntityService.CreateSerializerSettings();
+                JsonConvert.PopulateObject(jsonString, call, serializerSettings);
+                
+                TryInjectUploadedFile(call);
+            }
 
             return new TransactionScriptCommandMessage(_framework, _sessionManager.CurrentSession, scriptEntry.TransactionScriptType, call, synchronous);
         }
@@ -1083,6 +1141,24 @@ namespace NWheels.Stacks.AspNet
             }
 
             return null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void SetCallParametersFromQueryString(IMethodCallObject call)
+        {
+            var parameterByName = call.MethodInfo.GetParameters().ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var keyValue in Request.GetQueryNameValuePairs())
+            {
+                ParameterInfo parameter;
+
+                if (parameterByName.TryGetValue(keyValue.Key, out parameter))
+                {
+                    object parsedValue = ParseUtility.Parse(keyValue.Value, parameter.ParameterType);
+                    call.SetParameterValue(parameter.Name, parsedValue);
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -18,8 +18,9 @@ namespace NWheels.Processing.Commands
             ISession toSession,
             Guid commandMessageId,
             object result,
-            bool success, 
+            bool success,
             string newSessionId = null,
+            string redirectUrl = null,
             string faultCode = null, 
             string faultSubCode = null, 
             string faultReason = null, 
@@ -30,6 +31,7 @@ namespace NWheels.Processing.Commands
             this.Result = result;
             this.Success = success;
             this.NewSessionId = newSessionId;
+            this.RedirectUrl = redirectUrl;
             this.FaultCode = faultCode;
             this.FaultSubCode = faultSubCode;
             this.FaultReason = faultReason;
@@ -49,6 +51,7 @@ namespace NWheels.Processing.Commands
         public object Result { get; private set; }
         public bool Success { get; private set; }
         public string NewSessionId { get; private set; }
+        public string RedirectUrl { get; private set; }
         public string FaultCode { get; private set; }
         public string FaultSubCode { get; private set; }
         public string FaultReason { get; private set; }

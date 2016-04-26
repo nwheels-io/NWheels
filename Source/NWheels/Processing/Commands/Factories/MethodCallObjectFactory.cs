@@ -242,6 +242,16 @@ namespace NWheels.Processing.Commands.Factories
                             }
                             w.Throw<ArgumentOutOfRangeException>("Argument index was out of range.");
                         })
+                        .Method<string, object>(intf => intf.GetParameterValue).Implement((w, name) => {
+                            for (int i = 0; i < callArguments.Length; i++)
+                            {
+                                var argumentIndex = i;
+                                w.If(Static.Func(NWheels.Extensions.StringExtensions.EqualsIgnoreCase, name, w.Const(_context.Parameters[argumentIndex].Name))).Then(() => {
+                                    w.Return(callArguments[argumentIndex].CastTo<object>());
+                                });
+                            }
+                            w.Throw<ArgumentOutOfRangeException>("Argument index was out of range.");
+                        })
                         .Method<int, object>(intf => intf.SetParameterValue).Implement((w, index, value) => {
                             if (callArguments.Length > 0)
                             {
@@ -256,6 +266,20 @@ namespace NWheels.Processing.Commands.Factories
                                             w.Return();
                                         });
                                     }
+                                }
+                            }
+                            w.Throw<ArgumentOutOfRangeException>("Argument index was out of range.");
+                        })
+                        .Method<string, object>(intf => intf.SetParameterValue).Implement((w, name, value) => {
+                            for (int i = 0; i < callArguments.Length; i++)
+                            {
+                                using (TT.CreateScope<TT.TProperty>(_context.Parameters[i].ParameterType))
+                                {
+                                    var argumentIndex = i;
+                                    w.If(Static.Func(NWheels.Extensions.StringExtensions.EqualsIgnoreCase, name, w.Const(_context.Parameters[argumentIndex].Name))).Then(() => {
+                                        ((Field<TT.TProperty>)callArguments[argumentIndex]).Assign(value.CastTo<TT.TProperty>());
+                                        w.Return();
+                                    });
                                 }
                             }
                             w.Throw<ArgumentOutOfRangeException>("Argument index was out of range.");
