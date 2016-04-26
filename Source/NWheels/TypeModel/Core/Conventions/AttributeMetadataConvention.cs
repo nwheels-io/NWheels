@@ -159,7 +159,6 @@ namespace NWheels.DataObjects.Core.Conventions
                 prop.SemanticType = _cache.GetSemanticTypeInstance(typeof(SemanticType.DefaultOf<DateTime>), prop.ClrType));
             AddPropertyAttribute<PropertyContract.Storage.StorageTypeAttribute>((attr, prop) =>
                 prop.SafeGetRelationalMapping().StorageType = _cache.GetStorageTypeInstance(attr.Type, prop.ClrType));
-            AddPropertyAttribute<PropertyContract.Storage.RelationalMappingAttribute>((attr, prop) => attr.ApplyTo(prop));
             AddPropertyAttribute<PropertyContract.Validation.LengthAttribute>((attr, prop) => {
                 prop.Validation.MinLength = attr.Min;
                 prop.Validation.MaxLength = attr.Max;

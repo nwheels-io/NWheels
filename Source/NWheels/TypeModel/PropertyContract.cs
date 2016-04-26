@@ -525,26 +525,32 @@ namespace NWheels.DataObjects
 
             public class RelationalMappingAttribute : PropertyContractAttribute
             {
-                public void ApplyTo(PropertyMetadataBuilder metadata)
+                public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
                 {
-                    var mapping = metadata.SafeGetRelationalMapping();
+                    var mapping = property.SafeGetRelationalMapping();
 
-                    if ( !string.IsNullOrWhiteSpace(Table) )
+                    if (!string.IsNullOrWhiteSpace(Table))
                     {
                         mapping.TableName = Table;
                     }
-                    if ( !string.IsNullOrWhiteSpace(Column) )
+                    if (!string.IsNullOrWhiteSpace(Column))
                     {
                         mapping.ColumnName = Column;
                     }
-                    if ( !string.IsNullOrWhiteSpace(ColumnType) )
+                    if (!string.IsNullOrWhiteSpace(ColumnType))
                     {
                         mapping.ColumnType = ColumnType;
                     }
+                    if (StorageStyle != PropertyStorageStyle.Undefined)
+                    {
+                        mapping.StorageStyle = this.StorageStyle;
+                    }
                 }
+             
                 public string Table { get; set; }
                 public string Column { get; set; }
                 public string ColumnType { get; set; }
+                public PropertyStorageStyle StorageStyle { get; set; }
             }
 
             public class EmbeddedInParentAttribute : PropertyContractAttribute
@@ -842,6 +848,14 @@ namespace NWheels.DataObjects
                 }
 
                 public Type ContextType { get; private set; }
+            }
+
+            public class NoInverseProperty : PropertyContractAttribute
+            {
+                public override void ApplyTo(PropertyMetadataBuilder metadata, TypeMetadataCache cache)
+                {
+                    metadata.SafeGetRelation().InversePropertySuppressed = true;
+                }
             }
         }
 

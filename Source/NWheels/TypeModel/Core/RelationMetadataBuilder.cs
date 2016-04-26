@@ -79,6 +79,10 @@ namespace NWheels.DataObjects.Core
         public PropertyMetadataBuilder InverseProperty { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public bool InversePropertySuppressed { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void AcceptVisitor(ITypeMetadataVisitor visitor)
         {

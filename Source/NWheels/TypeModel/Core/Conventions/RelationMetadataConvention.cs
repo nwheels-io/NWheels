@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using NWheels.TypeModel;
 
 namespace NWheels.DataObjects.Core.Conventions
 {
@@ -171,6 +172,11 @@ namespace NWheels.DataObjects.Core.Conventions
 
         private static PropertyMetadataBuilder TryFindInverseProperty(TypeMetadataBuilder type, PropertyMetadataBuilder property)
         {
+            if (property.Relation.InversePropertySuppressed)
+            {
+                return null;
+            }
+
             return property.Relation.RelatedPartyType.Properties.FirstOrDefault(p =>
                 p.Relation != null &&
                 p.Relation.RelatedPartyType != null &&
