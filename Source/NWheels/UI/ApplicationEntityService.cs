@@ -3178,7 +3178,7 @@ namespace NWheels.UI
                 }
 
                 var existingCollection = (ICollection<TObject>)existingValue;
-                int arrayItemIndex = 0;
+                var removedItems = new HashSet<TObject>(existingCollection);
 
                 while ( reader.Read() && reader.TokenType != JsonToken.EndArray )
                 {
@@ -3195,11 +3195,19 @@ namespace NWheels.UI
                     else
                     {
                         var existingItemIndexToken = jo["$index"];
-                        var itemIndex = (existingItemIndexToken != null ? Int32.Parse(existingItemIndexToken.Value<string>()) : arrayItemIndex);
-                        itemToPopulate = existingCollection.Skip(itemIndex).Take(1).FirstOrDefault();
+
+                        if (existingItemIndexToken != null)
+                        {
+                            var itemIndex = Int32.Parse(existingItemIndexToken.Value<string>());
+                            itemToPopulate = existingCollection.Skip(itemIndex).Take(1).FirstOrDefault();
+                        }
                     }
 
-                    if ( itemToPopulate == null )
+                    if (itemToPopulate != null)
+                    {
+                        removedItems.ExceptWith(new[] { itemToPopulate });
+                    }
+                    else
                     {
                         itemToPopulate = (TObject)_relatedEntityHandler.CreateNew();
                         existingCollection.Add(itemToPopulate);
@@ -3210,41 +3218,15 @@ namespace NWheels.UI
                     jObjectReader.DateParseHandling = reader.DateParseHandling;
                     jObjectReader.DateTimeZoneHandling = reader.DateTimeZoneHandling;
                     jObjectReader.FloatParseHandling = reader.FloatParseHandling;
-
                     serializer.Populate(jObjectReader, itemToPopulate);
+                }
 
-                    arrayItemIndex++;
+                foreach (var itemToRemove in removedItems)
+                {
+                    existingCollection.Remove(itemToRemove);
                 }
 
                 return existingValue;
-
-
-                //if ( reader.TokenType == JsonToken.Null )
-                //{
-                //    return null;
-                //}
-
-                //object relatedDomainObject;
-
-                //if ( LoadRelatedDomainObjectByForeignKey(reader, objectType, out relatedDomainObject) )
-                //{
-                //    return relatedDomainObject;
-                //}
-
-                //JObject jo = JObject.Load(reader);
-
-                //var typeName = jo["$type"].Value<string>();
-                //var handler = _ownerService._handlerByEntityName[typeName];
-                //var target = handler.CreateNew();
-
-                //JsonReader jObjectReader = jo.CreateReader();
-                //jObjectReader.Culture = reader.Culture;
-                //jObjectReader.DateParseHandling = reader.DateParseHandling;
-                //jObjectReader.DateTimeZoneHandling = reader.DateTimeZoneHandling;
-                //jObjectReader.FloatParseHandling = reader.FloatParseHandling;
-
-                //serializer.Populate(jObjectReader, target);
-                //return target;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
