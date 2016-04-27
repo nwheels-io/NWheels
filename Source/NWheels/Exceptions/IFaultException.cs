@@ -12,6 +12,13 @@ namespace NWheels.Exceptions
     public interface IFaultException
     {
         /// <summary>
+        /// Required. This is the string id of error category.
+        /// </summary>
+        string FaultType { get; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
         /// Required. This is the top-level string id of the error.
         /// </summary>
         string FaultCode { get; }

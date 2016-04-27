@@ -10,7 +10,21 @@ function toCamelCase(s) {
 
 //-----------------------------------------------------------------------------------------------------------------
 
-Number.prototype.formatMoney = function(c, d, t){
+function getQueryStringValue(name) {
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i=0;i<vars.length;i++) {
+        var pair = vars[i].split("=");
+        if(pair[0] == name){
+            return pair[1];
+        }
+    }
+    return(false);
+}
+
+//-----------------------------------------------------------------------------------------------------------------
+
+Number.prototype.formatMoney = function(c, d, t) {
     var n = this, 
         c = isNaN(c = Math.abs(c)) ? 2 : c, 
         d = d == undefined ? "." : d, 
@@ -216,8 +230,8 @@ function ($timeout, $rootScope) {
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.service('uidlService',
-['$q', '$http', '$rootScope', '$timeout', '$templateCache', 'commandService', 'sessionService',
-function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessionService) {
+['$q', '$http', '$rootScope', '$timeout', '$location', '$templateCache', 'commandService', 'sessionService',
+function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandService, sessionService) {
 
     var m_uidl = null;
     var m_app = null;
@@ -226,6 +240,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
         screenParts: {},
     };
     var m_currentScreen = null;
+    var m_initialScreenInput = null;
     var m_behaviorImplementations = {};
     var m_dataBindingImplementations = {};
     var m_controllerImplementations = {};
@@ -248,7 +263,21 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
             }
         }
 
-        m_currentScreen = m_index.screens[m_app.initialScreenQualifiedName];
+        var screenQueryValue = $location.search().screen;
+        
+        if (screenQueryValue) {
+            m_currentScreen = m_index.screens[screenQueryValue];
+            m_initialScreenInput = $location.search();
+            $location.search({ });
+
+            for (var p in m_initialScreenInput){
+                if (m_initialScreenInput.hasOwnProperty(p) && p.length > 0){
+                    m_initialScreenInput[p.charAt(0).toUpperCase() + p.slice(1)] = m_initialScreenInput[p];
+                }
+            }
+        } else {
+            m_currentScreen = m_index.screens[m_app.initialScreenQualifiedName];
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -457,6 +486,12 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
         return m_currentScreen;
     }
 
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function getInitialScreenInput() {
+        return m_initialScreenInput;
+    }
+    
     //-----------------------------------------------------------------------------------------------------------------
 
     function getCurrentLocale() {
@@ -964,6 +999,30 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
                 scope.alert.answer(choice);
                 scope.alert = null;
             }
+        }
+    };
+    
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_controllerImplementations['UserAlertBox'] = {
+        implement: function (scope) {
+            scope.invokeAction = function() {
+                if (scope.model.State.ActionUrl) {
+                    window.location.href = scope.model.State.ActionUrl;
+                } else {
+                    window.location.reload();
+                }
+            };
+            
+            scope.$on(scope.uidl.qualifiedName + ':StateSetter', function(event, data) {
+                scope.model = { 
+                    State: data 
+                };
+                
+                if (data.Details && data.Details.constructor != Array) {
+                    data.Details = [ data.Details ];
+                }
+            });
         }
     };
     
@@ -1905,6 +1964,7 @@ function ($q, $http, $rootScope, $timeout, $templateCache, commandService, sessi
     return {
         setDocument: setDocument,
         getApp: getApp,
+        getInitialScreenInput: getInitialScreenInput,
         getCurrentScreen: getCurrentScreen,
         getCurrentLocale: getCurrentLocale,
         getMetaType: getMetaType,
@@ -1937,8 +1997,8 @@ function ($scope, uidlService) {
 //---------------------------------------------------------------------------------------------------------------------
 
 theApp.controller('appStart',
-['$http', '$scope', '$rootScope', 'uidlService', 'entityService', 'commandService',
-function ($http, $scope, $rootScope, uidlService, entityService, commandService) {
+['$http', '$scope', '$rootScope', '$timeout', 'uidlService', 'entityService', 'commandService',
+function ($http, $scope, $rootScope, $timeout, uidlService, entityService, commandService) {
 
     $scope.pageTitle = 'LOADING . . .';
 
@@ -1967,6 +2027,10 @@ function ($http, $scope, $rootScope, uidlService, entityService, commandService)
                 }
             );
         }
+        
+        $timeout(function() {
+            $rootScope.$broadcast($rootScope.currentScreen.qualifiedName + ':NavigatedHere', uidlService.getInitialScreenInput());
+        });
         
         //commandService.startPollingMessages();
     });

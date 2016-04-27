@@ -21,6 +21,7 @@ namespace NWheels.Processing.Commands
             bool success,
             string newSessionId = null,
             string redirectUrl = null,
+            string faultType = null,
             string faultCode = null, 
             string faultSubCode = null, 
             string faultReason = null, 
@@ -32,6 +33,7 @@ namespace NWheels.Processing.Commands
             this.Success = success;
             this.NewSessionId = newSessionId;
             this.RedirectUrl = redirectUrl;
+            this.FaultType = faultType;
             this.FaultCode = faultCode;
             this.FaultSubCode = faultSubCode;
             this.FaultReason = faultReason;
@@ -52,6 +54,7 @@ namespace NWheels.Processing.Commands
         public bool Success { get; private set; }
         public string NewSessionId { get; private set; }
         public string RedirectUrl { get; private set; }
+        public string FaultType { get; private set; }
         public string FaultCode { get; private set; }
         public string FaultSubCode { get; private set; }
         public string FaultReason { get; private set; }
@@ -67,6 +70,7 @@ namespace NWheels.Processing.Commands
                 this.CommandMessageId = source.CommandMessageId;
                 this.Result = source.Result;
                 this.Success = source.Success;
+                this.FaultType = source.FaultType;
                 this.FaultCode = source.FaultCode;
                 this.FaultSubCode = source.FaultSubCode;
                 this.FaultReason = source.FaultReason;
@@ -85,6 +89,8 @@ namespace NWheels.Processing.Commands
 
             public bool Success { get; private set; }
 
+            public string FaultType { get; private set; }
+
             public string FaultCode { get; private set; }
 
             public string FaultSubCode { get; private set; }
@@ -98,6 +104,9 @@ namespace NWheels.Processing.Commands
 
             [JsonProperty(PropertyName = "success")]
             public bool SuccessLowercase { get { return this.Success; } }
+
+            [JsonProperty(PropertyName = "faultType")]
+            public string FaultTypeLowercase { get { return this.FaultType; } }
 
             [JsonProperty(PropertyName = "faultCode")]
             public string FaultCodeLowercase { get { return this.FaultCode; } }

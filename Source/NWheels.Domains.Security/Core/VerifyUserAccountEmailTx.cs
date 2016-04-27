@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NWheels.Exceptions;
 using NWheels.Processing;
+using NWheels.Processing.Commands;
 
 namespace NWheels.Domains.Security.Core
 {

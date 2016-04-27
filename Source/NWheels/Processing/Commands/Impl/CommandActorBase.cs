@@ -105,17 +105,35 @@ namespace NWheels.Processing.Commands.Impl
 
         private void EnqueueSuccessfulCommandResult(AbstractCommandMessage command, object resultValue, string newSessionId)
         {
-            var resultMessage = (
-                (resultValue as CommandResultMessage) ??
-                new CommandResultMessage(
+            var returnValueResultMessage = (resultValue as CommandResultMessage);
+            CommandResultMessage resultMessage;
+
+            if (returnValueResultMessage != null)
+            {
+                resultMessage = new CommandResultMessage(
+                    _framework, 
+                    command.Session, 
+                    command.MessageId,
+                    result: returnValueResultMessage.Result,
+                    success: returnValueResultMessage.Success,
+                    newSessionId: returnValueResultMessage.NewSessionId,
+                    redirectUrl: returnValueResultMessage.RedirectUrl,
+                    faultType: returnValueResultMessage.FaultType,
+                    faultCode: returnValueResultMessage.FaultCode,
+                    faultSubCode: returnValueResultMessage.FaultSubCode,
+                    faultReason: returnValueResultMessage.FaultReason,
+                    technicalInfo: returnValueResultMessage.TechnicalInfo);
+            }
+            else
+            { 
+                resultMessage = new CommandResultMessage(
                     _framework,
                     command.Session,
                     command.MessageId,
                     resultValue,
                     success: true,
-                    newSessionId: newSessionId
-                )
-            );
+                    newSessionId: newSessionId);
+            }
 
             ReturnResultMessage(command, resultMessage);
         }
@@ -131,8 +149,9 @@ namespace NWheels.Processing.Commands.Impl
                 command.Session,
                 command.MessageId,
                 result: null,
-                success: false, 
-                faultCode: fault != null ? fault.FaultCode : "InternalError",
+                success: false,
+                faultType: fault != null ? fault.FaultType: "InternalError",
+                faultCode: fault != null ? fault.FaultCode : "Exception",
                 faultSubCode: fault != null ? fault.FaultSubCode : string.Empty,
                 faultReason: fault != null ? fault.FaultReason : "Request failed due to an internal error.");
 

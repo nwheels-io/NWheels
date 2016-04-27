@@ -383,6 +383,7 @@
     <Compile Include="UI\Toolbox\ChartTableReportScreenPart.cs" />
     <Compile Include="UI\Toolbox\StaticTable.cs" />
     <Compile Include="UI\Toolbox\TaskPad.cs" />
+    <Compile Include="UI\Toolbox\UserAlertBox.cs" />
     <Compile Include="UI\Toolbox\UserProfilePhoto.cs" />
     <Compile Include="UI\Toolbox\ReportScreenPart.cs" />
     <Compile Include="UI\Toolbox\LookupGrid.cs" />
