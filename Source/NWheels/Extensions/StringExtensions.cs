@@ -88,7 +88,48 @@ namespace NWheels.Extensions
 
         public static bool EqualsIgnoreCase(this string s, string other)
         {
+            if (s == null)
+            {
+                return (other == null);
+            }
+
             return s.Equals(other, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool ContainsIgnoreCase(this string s, string value)
+        {
+            if (s == null || value == null)
+            {
+                return false;
+            }
+
+            return s.ToLower().Contains(value.ToLower());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool StartsWithIgnoreCase(this string s, string value)
+        {
+            if (s == null || value == null)
+            {
+                return false;
+            }
+
+            return s.ToLower().StartsWith(value.ToLower());
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool EndsWithIgnoreCase(this string s, string value)
+        {
+            if (s == null || value == null)
+            {
+                return false;
+            }
+
+            return s.ToLower().EndsWith(value.ToLower());
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1482,6 +1482,23 @@ namespace NWheels.UI
             private static readonly MethodInfo _s_stringContainsMethod =
                 ExpressionUtility.GetMethodInfo<Expression<Func<string, string, bool>>>((s, value) => s.Contains(value));
 
+            private static readonly MethodInfo _s_stringToLowerMethod =
+                ExpressionUtility.GetMethodInfo<Expression<Func<string, string>>>(s => s.ToLower());
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static readonly MethodInfo _s_stringExtensionsStartsWithIgnoreCaseMethod =
+                ExpressionUtility.GetMethodInfo<Expression<Func<string, string, bool>>>((s, value) => 
+                    NWheels.Extensions.StringExtensions.StartsWithIgnoreCase(s, value));
+
+            private static readonly MethodInfo _s_stringExtensionsEndsWithIgnoreCaseMethod =
+                ExpressionUtility.GetMethodInfo<Expression<Func<string, string, bool>>>((s, value) =>
+                    NWheels.Extensions.StringExtensions.EndsWithIgnoreCase(s, value));
+
+            private static readonly MethodInfo _s_stringExtensionsContainsIgnoreCaseMethod =
+                ExpressionUtility.GetMethodInfo<Expression<Func<string, string, bool>>>((s, value) =>
+                    NWheels.Extensions.StringExtensions.ContainsIgnoreCase(s, value));
+
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private static readonly Dictionary<string, Func<Expression, Expression, Expression>> _s_binaryExpressionFactoryByStorageOperator =
@@ -1507,15 +1524,10 @@ namespace NWheels.UI
                     { QueryOptions.GreaterThanOrEqualOperator, Expression.GreaterThanOrEqual },
                     { QueryOptions.LessThanOperator, Expression.LessThan },
                     { QueryOptions.LessThanOrEqualOperator, Expression.LessThanOrEqual },
-                    { QueryOptions.StringContainsOperator, (left, right) => Expression.Condition(
-                        test: Expression.NotEqual(left, Expression.Constant(null, typeof(string))),
-                        ifTrue: Expression.Call(left, _s_stringContainsMethod, right), 
-                        ifFalse: Expression.Constant(false))
-                    },
-                    { QueryOptions.StringStartsWithOperator, (left, right) => Expression.Call(left, _s_stringStartsWithMethod, right) },
-                    { QueryOptions.StringEndsWithOperator, (left, right) => Expression.Call(left, _s_stringEndsWithMethod, right) },
+                    { QueryOptions.StringContainsOperator, (left, right) => Expression.Call(_s_stringExtensionsContainsIgnoreCaseMethod, left, right) },
+                    { QueryOptions.StringStartsWithOperator, (left, right) => Expression.Call(_s_stringExtensionsStartsWithIgnoreCaseMethod, left, right) },
+                    { QueryOptions.StringEndsWithOperator, (left, right) => Expression.Call(_s_stringExtensionsEndsWithIgnoreCaseMethod, left, right) },
                 };
-
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
