@@ -1428,14 +1428,17 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public Expression<Func<TEntity, bool>> MakePredicateExpression<TEntity>()
+            public Expression<Func<TEntity, bool>> MakePredicateExpression<TEntity>(bool inMemory)
             {
                 if ( MetaProperty == null )
                 {
                     throw new InvalidOperationException("MetaProperty must be set before calling this method.");
                 }
 
-                var expressionFactory = _s_binaryExpressionFactoryByOperator[Operator];
+                var expressionFactory = (
+                    inMemory
+                    ? _s_binaryExpressionFactoryByInMemoryOperator[Operator] 
+                    : _s_binaryExpressionFactoryByStorageOperator[Operator]);
 
                 if ( MetaProperty.Kind == PropertyKind.Scalar )
                 {
@@ -1470,7 +1473,18 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private static readonly Dictionary<string, Func<Expression, Expression, Expression>> _s_binaryExpressionFactoryByOperator =
+            private static readonly MethodInfo _s_stringStartsWithMethod =
+                ExpressionUtility.GetMethodInfo<Expression<Func<string, string, bool>>>((s, value) => s.StartsWith(value));
+
+            private static readonly MethodInfo _s_stringEndsWithMethod =
+                ExpressionUtility.GetMethodInfo<Expression<Func<string, string, bool>>>((s, value) => s.EndsWith(value));
+
+            private static readonly MethodInfo _s_stringContainsMethod =
+                ExpressionUtility.GetMethodInfo<Expression<Func<string, string, bool>>>((s, value) => s.Contains(value));
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static readonly Dictionary<string, Func<Expression, Expression, Expression>> _s_binaryExpressionFactoryByStorageOperator =
                 new Dictionary<string, Func<Expression, Expression, Expression>>(StringComparer.InvariantCultureIgnoreCase) {
                     { QueryOptions.EqualOperator, Expression.Equal },
                     { QueryOptions.NotEqualOperator, Expression.NotEqual },
@@ -1485,14 +1499,23 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private static readonly MethodInfo _s_stringStartsWithMethod =
-                ExpressionUtility.GetMethodInfo<Expression<Func<string, string, bool>>>((s, value) => s.StartsWith(value));
+            private static readonly Dictionary<string, Func<Expression, Expression, Expression>> _s_binaryExpressionFactoryByInMemoryOperator =
+                new Dictionary<string, Func<Expression, Expression, Expression>>(StringComparer.InvariantCultureIgnoreCase) {
+                    { QueryOptions.EqualOperator, Expression.Equal },
+                    { QueryOptions.NotEqualOperator, Expression.NotEqual },
+                    { QueryOptions.GreaterThanOperator, Expression.GreaterThan },
+                    { QueryOptions.GreaterThanOrEqualOperator, Expression.GreaterThanOrEqual },
+                    { QueryOptions.LessThanOperator, Expression.LessThan },
+                    { QueryOptions.LessThanOrEqualOperator, Expression.LessThanOrEqual },
+                    { QueryOptions.StringContainsOperator, (left, right) => Expression.Condition(
+                        test: Expression.NotEqual(left, Expression.Constant(null, typeof(string))),
+                        ifTrue: Expression.Call(left, _s_stringContainsMethod, right), 
+                        ifFalse: Expression.Constant(false))
+                    },
+                    { QueryOptions.StringStartsWithOperator, (left, right) => Expression.Call(left, _s_stringStartsWithMethod, right) },
+                    { QueryOptions.StringEndsWithOperator, (left, right) => Expression.Call(left, _s_stringEndsWithMethod, right) },
+                };
 
-            private static readonly MethodInfo _s_stringEndsWithMethod =
-                ExpressionUtility.GetMethodInfo<Expression<Func<string, string, bool>>>((s, value) => s.EndsWith(value));
-
-            private static readonly MethodInfo _s_stringContainsMethod =
-                ExpressionUtility.GetMethodInfo<Expression<Func<string, string, bool>>>((s, value) => s.Contains(value));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1983,7 +2006,7 @@ namespace NWheels.UI
 
                 foreach ( var filterItem in options.InMemoryFilter )
                 {
-                    inMemoryQuery = inMemoryQuery.Where(filterItem.MakePredicateExpression<TEntity>());
+                    inMemoryQuery = inMemoryQuery.Where(filterItem.MakePredicateExpression<TEntity>(inMemory: true));
                 }
 
                 for ( int i = 0 ; i < options.InMemoryOrderBy.Count ; i++ )
@@ -2201,7 +2224,7 @@ namespace NWheels.UI
                     }
                     else
                     {
-                        var predicateExpression = filterItem.MakePredicateExpression<TEntity>();
+                        var predicateExpression = filterItem.MakePredicateExpression<TEntity>(inMemory: false);
                         dbQuery = dbQuery.Where(predicateExpression);
                         i++;
                     }
