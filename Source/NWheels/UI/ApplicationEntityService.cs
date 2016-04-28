@@ -1509,9 +1509,12 @@ namespace NWheels.UI
                     { QueryOptions.GreaterThanOrEqualOperator, Expression.GreaterThanOrEqual },
                     { QueryOptions.LessThanOperator, Expression.LessThan },
                     { QueryOptions.LessThanOrEqualOperator, Expression.LessThanOrEqual },
-                    { QueryOptions.StringContainsOperator, (left, right) => Expression.Call(left, _s_stringContainsMethod, right) },
-                    { QueryOptions.StringStartsWithOperator, (left, right) => Expression.Call(left, _s_stringStartsWithMethod, right) },
-                    { QueryOptions.StringEndsWithOperator, (left, right) => Expression.Call(left, _s_stringEndsWithMethod, right) },
+                    { QueryOptions.StringContainsOperator, (left, right) => 
+                        Expression.Call(Expression.Call(left, _s_stringToLowerMethod), _s_stringContainsMethod, right) },
+                    { QueryOptions.StringStartsWithOperator, (left, right) => 
+                        Expression.Call(Expression.Call(left, _s_stringToLowerMethod), _s_stringStartsWithMethod, right) },
+                    { QueryOptions.StringEndsWithOperator, (left, right) => 
+                        Expression.Call(Expression.Call(left, _s_stringToLowerMethod), _s_stringEndsWithMethod, right) },
                 };
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
