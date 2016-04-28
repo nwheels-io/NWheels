@@ -33,7 +33,8 @@ namespace NWheels.Domains.Security.Impl
             SecureString password, 
             out IUserAccountEntity userAccount)
         {
-            userAccount = userAccounts.FirstOrDefault(u => u.LoginName == loginName);
+            var lowercaseLoginName = loginName.ToLower();
+            userAccount = userAccounts.FirstOrDefault(u => u.LoginName.ToLower() == lowercaseLoginName);
 
             if ( userAccount == null )
             {
