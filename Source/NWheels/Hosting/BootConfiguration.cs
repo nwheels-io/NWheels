@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Runtime.InteropServices;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Text;
-using System.Threading.Tasks;
 using Hapil;
 using NWheels.Exceptions;
-using NWheels.Utilities;
 using System.IO;
 
 namespace NWheels.Hosting
@@ -118,6 +114,8 @@ namespace NWheels.Hosting
             text.AppendFormat("Environment Name   - {0}", this.EnvironmentName);
             text.AppendLine();
             text.AppendFormat("Environment Type   - {0}", string.IsNullOrEmpty(this.EnvironmentType) ? "(unspecified)" : this.EnvironmentType);
+            text.AppendLine();
+            text.AppendFormat("Process ID         - {0}", Process.GetCurrentProcess().Id);
             text.AppendLine();
 
             foreach ( var module in this.FrameworkModules )
