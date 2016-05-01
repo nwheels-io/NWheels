@@ -33,6 +33,18 @@ namespace NWheels.Processing.Documents
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override CommandResultMessage Mutate(IFramework framework, ISession toSession, Guid commandMessageId)
+        {
+            return new DocumentFormatReplyMessage(
+                framework,
+                toSession,
+                commandMessageId,
+                document: this.Document);
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public FormattedDocument Document { get; set; }
     }
 }

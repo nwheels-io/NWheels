@@ -110,19 +110,7 @@ namespace NWheels.Processing.Commands.Impl
 
             if (returnValueResultMessage != null)
             {
-                resultMessage = new CommandResultMessage(
-                    _framework, 
-                    command.Session, 
-                    command.MessageId,
-                    result: returnValueResultMessage.Result,
-                    success: returnValueResultMessage.Success,
-                    newSessionId: returnValueResultMessage.NewSessionId,
-                    redirectUrl: returnValueResultMessage.RedirectUrl,
-                    faultType: returnValueResultMessage.FaultType,
-                    faultCode: returnValueResultMessage.FaultCode,
-                    faultSubCode: returnValueResultMessage.FaultSubCode,
-                    faultReason: returnValueResultMessage.FaultReason,
-                    technicalInfo: returnValueResultMessage.TechnicalInfo);
+                resultMessage = returnValueResultMessage.Mutate(_framework, command.Session, command.MessageId);
             }
             else
             { 

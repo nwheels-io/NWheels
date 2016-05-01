@@ -42,6 +42,25 @@ namespace NWheels.Processing.Commands
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public virtual CommandResultMessage Mutate(IFramework framework, ISession toSession, Guid commandMessageId)
+        {
+            return new CommandResultMessage(
+                framework,
+                toSession,
+                commandMessageId,
+                result: this.Result,
+                success: this.Success,
+                newSessionId: this.NewSessionId,
+                redirectUrl: this.RedirectUrl,
+                faultType: this.FaultType,
+                faultCode: this.FaultCode,
+                faultSubCode: this.FaultSubCode,
+                faultReason: this.FaultReason,
+                technicalInfo: this.TechnicalInfo);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public override object TakeSerializableSnapshot()
         {
             return new Snapshot(this);
