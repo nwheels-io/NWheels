@@ -48,9 +48,18 @@ namespace NWheels.Entities.Factories
                         base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
 
                         var persistableObjectLocal = gw.Local<object>();
-                        persistableObjectLocal.Assign(
-                            _context.PersistableObjectField
-                            .Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo));
+
+                        if (MetaProperty.ContractPropertyInfo.CanRead)
+                        {
+                            persistableObjectLocal.Assign(
+                                _context.PersistableObjectField
+                                .Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo));
+                        }
+                        else
+                        {
+                            var readerMethodInfo = _context.PersistableObjectMembers.Methods.First(m => m.Name == GetReadAccessorMethodName(MetaProperty));
+                            persistableObjectLocal.Assign(_context.PersistableObjectField.Func<TT.TProperty>(readerMethodInfo));
+                        }
 
                         gw.Return(Static.GenericFunc((o, f) => RuntimeEntityModelHelpers.GetNestedDomainObject<TT.TProperty>(o, f), 
                             persistableObjectLocal, 
@@ -62,14 +71,22 @@ namespace NWheels.Entities.Factories
                         base.ImplementedContractProperty = p.OwnerProperty.PropertyBuilder;
 
                         sw.If(value.IsNotNull()).Then(() => {
-                            _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(
+                            value.Assign(                                
                                 value
                                 .CastTo<IContain<IPersistableObject>>()
                                 .Func<IPersistableObject>(x => x.GetContainedObject)
                                 .CastTo<TT.TProperty>());
-                        }).Else(() => {
-                            _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(sw.Const<TT.TProperty>(null));
                         });
+
+                        if (MetaProperty.ContractPropertyInfo.CanWrite)
+                        {
+                            _context.PersistableObjectField.Prop<TT.TProperty>(MetaProperty.ContractPropertyInfo).Assign(value);
+                        }
+                        else
+                        {
+                            var writerMethodInfo = _context.PersistableObjectMembers.Methods.First(m => m.Name == GetWriteAccessorMethodName(MetaProperty));
+                            _context.PersistableObjectField.Void(writerMethodInfo, value);
+                        }
                     })
                     : null
             );
