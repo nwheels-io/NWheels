@@ -478,7 +478,7 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string Label { get; set; }
         [DataMember]
-        public string Icon { get; set; }
+        public UserAlertType AlertType { get; set; }
         [DataMember]
         public string Format { get; set; }
         [DataMember]
@@ -489,6 +489,8 @@ namespace NWheels.UI.Toolbox
         public int? GroupId { get; set; }
         [DataMember]
         public int? GroupIndex { get; set; }
+        [DataMember]
+        public object InitialValue { get; set; }
         [DataMember]
         public bool HiddenIfEmpty { get; set; }
         [DataMember]
@@ -892,6 +894,7 @@ namespace NWheels.UI.Toolbox
     {
         Default = 0,
         Label = 10,
+        Alert = 15,
         Edit = 20,
         FileUpload = 30,
         ImageUpload = 35,

@@ -172,6 +172,21 @@ HEAD, JS/CSS LINKS
             padding-bottom: 10px;
             border-bottom: 1px solid #F3F3F4;
         }
+        i.alert-field-icon {
+            float: left;
+            padding-top: 4px;
+        }
+        div.alert-field-contents {
+            padding: 10px 15px 10px 15px;
+            margin: 0;
+        }
+        div.modal-body-alert {
+            padding:0;
+        }
+        .modal-body-alert h2 {
+            padding:0;
+            margin:0;
+        }
     </style>
 </head>
 <body 
@@ -1346,7 +1361,7 @@ HEAD, JS/CSS LINKS
                             {{translate(uidl.text)}}
                         </h6>
                     </div>
-                    <div class="modal-body">
+                    <div ng-class="{'modal-body': uidl.inputForm.templateName!='FormAlert', 'modal-body-alert': uidl.inputForm.templateName==='FormAlert' }">
                         <uidl-widget uidl="uidl.inputForm"></uidl-widget>
                     </div>
                     <div class="modal-footer">
@@ -1475,7 +1490,10 @@ HEAD, JS/CSS LINKS
                 <label class="control-label"
                        ng-class="{'col-lg-2':!uidl.isModalPopup, 'col-lg-4':uidl.isModalPopup}"
                        for="{{::uidl.elementName + '_' + field.propertyName}}">{{::translate(field.label)}}</label>
-                <div ng-class="{'col-lg-3':!uidl.isModalPopup && !fieldHasModifier(field, 'Memo') && !fieldHasModifier(field, 'FlatStyle'), 'col-lg-6':uidl.isModalPopup || fieldHasModifier(field, 'Memo') || fieldHasModifier(field, 'FlatStyle')}">
+                <div ng-class="{
+                    'col-lg-3':!uidl.isModalPopup && field.fieldType!='Alert' && !fieldHasModifier(field, 'Memo') && !fieldHasModifier(field, 'FlatStyle'), 
+                    'col-lg-6':uidl.isModalPopup || field.fieldType==='Alert' || fieldHasModifier(field, 'Memo') || fieldHasModifier(field, 'FlatStyle')}"
+                >
                     <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
                     <!--span class="help-block m-b-none">Example block-level help text here.</span-->
                 </div>
@@ -1540,6 +1558,14 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
             </fieldset>
+        </form>
+    </script>
+    <script type="text/ng-template" id="app/uidl-element-template/FormAlert">
+        <form class="form-inline" id="{{::uidl.elementName}}">
+            <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
+            <div class="form-group" ng-repeat="field in plainFields" style="margin-bottom:0;display:block;">
+                <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" template-name="FormFieldAlertStyle" />
+            </div>
         </form>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/FormInline">
@@ -1707,6 +1733,25 @@ HEAD, JS/CSS LINKS
                       id="{{::uniqueFieldId}}" 
                       name="{{::uniqueFieldId}}"
                       style="width:100%;height:100px;resize:vertical;font-family: Consolas, Courier New;font-size: 10pt;"></textarea>
+            <!-- ALERT -->
+            <div ng-if="uidl.fieldType==='Alert'"
+                 ng-show="entity[uidl.propertyName] || uidl.label || !uidl.hiddenIfEmpty"
+                 class="alert alert-field-contents clearfix"
+                 ng-class="{
+                    'alert-danger': uidl.alertType==='Error', 
+                    'alert-warning': uidl.alertType==='Warning',
+                    'alert-info': uidl.alertType==='Info',
+                    'alert-success': uidl.alertType==='Success'                   
+                 }"
+            >
+                <i ng-if="uidl.alertType" class="fa alert-field-icon" ng-class="{
+                    'fa-info':uidl.alertType==='Info',
+                    'fa-check-square':uidl.alertType==='Success',
+                    'fa-exclamation-triangle':uidl.alertType==='Warning',
+                    'fa-times-circle':uidl.alertType==='Error'
+                }"></i>
+                <span>{{entity[uidl.propertyName] || translate(uidl.label)}}</span>
+            </div>
             <!-- CHECKBOX -->
             <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'" class="onoffswitch m-b">
                 <input type="checkbox" 
@@ -1975,6 +2020,33 @@ HEAD, JS/CSS LINKS
                 class="form-control m-b"
                 id="{{::uniqueFieldId}}"
                 name="{{::uniqueFieldId}}">
+        </div>
+    </script>
+    <script type="text/ng-template" id="app/uidl-element-template/FormFieldAlertStyle">
+        <div>
+            <!-- ALERT -->
+            <div ng-if="uidl.fieldType==='Alert'"
+                 class="row"
+                 style="margin:0;padding:30px;"
+                 ng-class="{
+                    'alert-danger': uidl.alertType==='Error', 
+                    'alert-warning': uidl.alertType==='Warning',
+                    'alert-info': uidl.alertType==='Info',
+                    'alert-success': uidl.alertType==='Success'                   
+                 }"
+            >
+                <div class="col-xs-1" style="text-align:right">
+                    <h2><i ng-if="uidl.alertType" class="fa" ng-class="{
+                        'fa-info':uidl.alertType==='Info',
+                        'fa-check-square':uidl.alertType==='Success',
+                        'fa-exclamation-triangle':uidl.alertType==='Warning',
+                        'fa-times-circle':uidl.alertType==='Error'
+                    }"></i></h2>
+                </div>
+                <div class="col-xs-11">
+                    <span>{{entity[uidl.propertyName] || translate(uidl.label)}}</span>
+                </div>
+            </div>
         </div>
     </script>
     <script type="text/javascript">

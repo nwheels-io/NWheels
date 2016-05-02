@@ -2394,6 +2394,9 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
             $scope.hiddenValues = { };
             $scope.$on($scope.parentUidl.qualifiedName + ':ModelSetter', function(event, data) {
                 $scope.hiddenValues = { };
+                if ($scope.uidl.initialValue && data && !data[$scope.uidl.propertyName]) {
+                    data[$scope.uidl.propertyName] = $scope.uidl.initialValue;
+                }
             });
             
             $scope.editAuthorized = ($scope.parentUidl.needsAuthorize ? false : true);
