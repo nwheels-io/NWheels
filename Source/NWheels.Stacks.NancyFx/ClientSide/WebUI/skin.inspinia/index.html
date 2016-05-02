@@ -1693,7 +1693,8 @@ HEAD, JS/CSS LINKS
                    type="text" 
                    ng-model="entity[uidl.propertyName]" 
                    id="{{::uniqueFieldId}}" 
-                   name="{{::uniqueFieldId}}">
+                   name="{{::uniqueFieldId}}"
+                   uidl-display-format>
             <span  ng-if="uidl.fieldType==='Label' && !hasUidlModifier('Memo') && hasUidlModifier('FlatStyle')" 
                    class="m-b" 
                    id="{{::uniqueFieldId}}" 

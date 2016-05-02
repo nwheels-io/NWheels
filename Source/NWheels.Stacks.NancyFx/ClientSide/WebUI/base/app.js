@@ -2567,6 +2567,32 @@ theApp.directive('errSrc', function() {
 
 //---------------------------------------------------------------------------------------------------------------------
 
+theApp.directive('uidlDisplayFormat', ['uidlService', function (uidlService) {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function (scope, element, attrs, ngModel) {
+            ngModel.$formatters.push(formatter);
+            ngModel.$parsers.push(parser);
+
+            //element.on('change', function (e) {
+            //    var target = e.target;
+            //    target.value = formatter(ngModel.$modelValue);
+            //});
+
+            function parser(value) {
+                return value;
+            }
+
+            function formatter(value) {
+                return uidlService.formatValue(scope.uidl.format, value);
+            }
+        }
+    };
+}]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
 theApp.filter('localized', ['$scope', function ($scope) {
     return function (stringId) {
         var localizedString = $scope.currentLocale.translations[stringId];

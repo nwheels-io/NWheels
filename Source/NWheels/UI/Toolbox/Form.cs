@@ -480,6 +480,8 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string Icon { get; set; }
         [DataMember]
+        public string Format { get; set; }
+        [DataMember]
         public FormFieldType FieldType { get; set; }
         [DataMember]
         public FormFieldModifiers Modifiers { get; set; }
