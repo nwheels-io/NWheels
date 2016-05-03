@@ -15,6 +15,7 @@ namespace NWheels.UI.Toolbox
             : base(idName, parent)
         {
             this.MainMenu = new Menu("MainMenu", this);
+            this.UtilityCommands = new List<UidlCommand>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -44,10 +45,20 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ManagementConsole Utilities(params UidlCommand[] commands)
+        {
+            UtilityCommands.AddRange(commands);
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public Menu MainMenu { get; set; }
         [DataMember]
         public Container StatusBar { get; set; }
+        [DataMember]
+        public List<UidlCommand> UtilityCommands { get; set; }
         [DataMember]
         public UserProfilePhoto ProfilePhoto { get; set; }
         [DataMember]
@@ -55,6 +66,10 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string DashboardScreenPartQualifiedName { get; set; }
 
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UidlNotification UtilityCommandCompleted { get; set; }
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()

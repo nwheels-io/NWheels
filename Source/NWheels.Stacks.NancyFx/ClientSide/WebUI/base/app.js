@@ -1049,6 +1049,23 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 			    window.appInit();
             }
 
+			scope.invokeUtilityCommand = function(command) {
+				scope.utilityCommandInProgress = true;
+				if (scope.$parent) {
+					scope.$parent.$emit(command.qualifiedName + ':Executing');
+				}
+				scope.$broadcast(command.qualifiedName + ':Executing');
+			};
+			
+			scope.isUtilityCommandEnabled = function(command) {
+				return true;
+			};
+			
+            scope.$on(scope.uidl.qualifiedName + ':UtilityCommandCompleted', function (event, data) {
+                scope.utilityCommandInProgress = false;
+            });
+			
+			
             scope.$on(scope.uidl.qualifiedName + ':MainContent:ScreenPartLoaded', function (event, data) {
                 scope.mainContentScreenPart = data;
             });

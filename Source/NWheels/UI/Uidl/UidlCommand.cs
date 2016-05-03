@@ -30,6 +30,13 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public override IEnumerable<string> GetTranslatables()
+        {
+            return base.GetTranslatables().ConcatOneIf(this.Warning);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public CommandKind Kind { get; set; }
         [DataMember]
@@ -38,6 +45,8 @@ namespace NWheels.UI.Uidl
         public CommandUIStyle UIStyle { get; set; }
         [DataMember]
         public bool HiddenIfDisabled { get; set; }
+        [DataMember]
+        public string Warning { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

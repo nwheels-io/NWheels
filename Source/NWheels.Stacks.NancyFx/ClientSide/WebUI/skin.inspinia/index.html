@@ -605,6 +605,16 @@ HEAD, JS/CSS LINKS
                                 </li>
                             </ul>
                         </li-->                        
+                        <li ng-repeat="command in uidl.utilityCommands">
+							<button 
+								type="button"
+								class="btn btn-rounded"
+								style="margin-right:5px;"
+								ng-disabled="utilityCommandInProgress || !isUtilityCommandEnabled(command)"
+								ng-click="invokeUtilityCommand(command)"
+								ng-class="{'btn-default':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
+							><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                        </li>
                         <li ng-repeat="widget in uidl.statusBar.containedWidgets">
                             <uidl-widget uidl="widget"></uidl-widget>
                         </li>
