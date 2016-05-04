@@ -217,6 +217,7 @@ namespace NWheels.UI.Toolbox
 
                 this.IsFilterSupported = (specialName == FieldSpecialName.None && !isManualJoinRequired);
                 this.IsSortSupported = this.IsFilterSupported;
+                this.IsEditSupported = (specialName == FieldSpecialName.None && MetaProperty.Kind == PropertyKind.Scalar && !isManualJoinRequired);
 
                 if ( MetaProperty != null && MetaProperty.Relation != null )
                 {
@@ -261,6 +262,8 @@ namespace NWheels.UI.Toolbox
             public bool IsSortSupported { get; set; }
             [DataMember]
             public bool IsFilterSupported { get; set; }
+            [DataMember]
+            public bool IsEditSupported { get; set; }
             [DataMember]
             public string RelatedEntityName { get; set; }
             [DataMember, ManuallyAssigned]

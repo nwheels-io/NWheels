@@ -887,7 +887,7 @@ HEAD, JS/CSS LINKS
                     name: metaColumn.expression,
                     label: $scope.translate(metaColumn.title),
                     index: metaColumn.expression,
-                    editable: $scope.uidl.enableEditInline===true,
+                    editable: ($scope.uidl.enableEditInline===true && metaColumn.isEditSupported===true),
                     width: colWidthPx,
                     search: metaColumn.isFilterSupported===true,
                     sortable: metaColumn.isSortSupported===true,
@@ -1101,8 +1101,10 @@ HEAD, JS/CSS LINKS
                                     var editedRowData = gridObj.getRowData(rowId);
                                     for (var i = 0; i < $scope.gridColumns.length ; i++) {
                                         var column = $scope.gridColumns[i];
-                                        var value = editedRowData[column.expression];
-                                        $scope.uidlService.writeValueByNavigationPath(rowObject, column.navigations, value);
+										if (column.isEditSupported===true) {
+											var value = editedRowData[column.expression];
+											$scope.uidlService.writeValueByNavigationPath(rowObject, column.navigations, value);
+										}
                                     }
                                     $scope.$apply(function() {
                                         $scope.$emit($scope.uidl.qualifiedName + ':InlineSave:Executing', rowObject);
