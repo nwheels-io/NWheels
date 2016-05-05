@@ -59,6 +59,8 @@ namespace NWheels.UI.Toolbox
 
             if ( attribute != null && attribute.SupportsInitializeInput )
             {
+                CriteriaForm.NeedsInitialModel = true;
+                
                 presenter.On(ContextSetter)
                     .InvokeTransactionScript<TScript>()
                     .WaitForReply((script, vm) => script.InitializeInput(vm.Input))

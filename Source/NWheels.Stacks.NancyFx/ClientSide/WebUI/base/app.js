@@ -1079,9 +1079,11 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.model.State.criteria = {};
             scope.model.State.reportInProgress = false;
             
-            $timeout(function() {
-                scope.$broadcast(scope.uidl.qualifiedName + ':CriteriaForm:ModelSetter', scope.model.State.criteria);
-            });
+            if (!scope.uidl.criteriaForm.needsInitialModel) {
+                $timeout(function() {
+                    scope.$broadcast(scope.uidl.qualifiedName + ':CriteriaForm:ModelSetter', scope.model.State.criteria);
+                });
+            }
 
             scope.$on(scope.uidl.qualifiedName + ':ShowReport:Executing', function(event, data) {
                 scope.model.State.reportInProgress = true;
@@ -1614,7 +1616,8 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 .Where(function(f) { return f.isCalculated; })
                 .ToArray();
 
-            scope.commandInProgress = false;
+            scope.waitingForInitialModel = (scope.uidl.needsInitialModel ? true : false);
+            scope.commandInProgress = scope.waitingForInitialModel;
             scope.editAuthorized = (scope.uidl.needsAuthorize ? false : true);
 
 			if (scope.uidl.mode === 'StandaloneCreate') {
@@ -1674,6 +1677,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 scope.model.Data.entity = data;
                 scope.suppressAutoSubmitOnce = true;
                 scope.commandInProgress = false;
+                scope.waitingForInitialModel = false;
                 scope.tabSetIndex = 0;
 
                 $timeout(function() {

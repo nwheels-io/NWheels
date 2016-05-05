@@ -2097,7 +2097,7 @@ HEAD, JS/CSS LINKS
                     $('#' + $scope.uniqueFieldId + ' span').html(start.format('YYYY-MM-DD') + ' - ' + end.format('YYYY-MM-DD'));
                 };
                 $scope.createDateTimeRangePicker = function() {
-                    if ($scope.dateTimeRangePickerCreated || !$scope.entity[$scope.uidl.propertyName] || !$scope.timeRangePresets) {
+                    if ($scope.dateTimeRangePickerCreated || !$scope.entity || !$scope.entity[$scope.uidl.propertyName] || !$scope.timeRangePresets) {
                         return;
                     }
                     $('#' + $scope.uniqueFieldId).daterangepicker({
@@ -2115,8 +2115,10 @@ HEAD, JS/CSS LINKS
                     $scope.dateTimeRangePickerCreated = true;
                 };
                 $scope.$watch('entity', function(newValue, oldValue) {
-                    $scope.displayDateRange(moment($scope.entity[$scope.uidl.propertyName]), moment($scope.entity[$scope.groupFields[0].propertyName]));
-                    $scope.createDateTimeRangePicker();
+                    if ($scope.entity) {
+                        $scope.displayDateRange(moment($scope.entity[$scope.uidl.propertyName]), moment($scope.entity[$scope.groupFields[0].propertyName]));
+                        $scope.createDateTimeRangePicker();
+                    }
                 });
                 $scope.$watch('timeRangePresets', function(newValue, oldValue) {
                     $scope.createDateTimeRangePicker();

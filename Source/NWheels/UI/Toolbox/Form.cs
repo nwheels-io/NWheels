@@ -299,6 +299,8 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public bool IsInlineStyle { get; set; }
         [DataMember]
+        public bool NeedsInitialModel { get; set; }
+        [DataMember]
         public bool NeedsAuthorize { get; set; }
         [DataMember]
         public bool AutoSubmitOnChange { get; set; }
@@ -852,6 +854,7 @@ namespace NWheels.UI.Toolbox
         List<FormField> Fields { get; }
         List<UidlCommand> Commands { get; }
         bool IsModalPopup { get; }
+        bool NeedsInitialModel { get; set; }
         bool NeedsAuthorize { get; set; }
     }
 

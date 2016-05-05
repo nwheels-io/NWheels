@@ -130,19 +130,19 @@ namespace NWheels.UI.Toolbox
             Reset.Kind = CommandKind.Reject;
             Reset.Severity = CommandSeverity.None;
 
-            if ( InputForm != null )
+            var txAttribute = typeof(TScript).GetCustomAttribute<TransactionScriptAttribute>();
+            var shouldInvokeInitializeInput = (txAttribute != null && txAttribute.SupportsInitializeInput);
+            var hasCustomContext = (typeof(TContext) != typeof(Empty.Context));
+
+            if (InputForm != null)
             {
-                ConfigureInputForm(InputForm);
+                ConfigureInputForm(InputForm, shouldInvokeInitializeInput);
             }
             else
             {
                 InputFormTypeSelector.ParentModelProperty = "Input";
-                InputFormTypeSelector.ForEachWidgetOfType<IUidlForm>(ConfigureInputForm);
+                InputFormTypeSelector.ForEachWidgetOfType<IUidlForm>(form => ConfigureInputForm(form, shouldInvokeInitializeInput));
             }
-
-            var txAttribute = typeof(TScript).GetCustomAttribute<TransactionScriptAttribute>();
-            var shouldInvokeInitializeInput = (txAttribute != null && txAttribute.SupportsInitializeInput);
-            var hasCustomContext = (typeof(TContext) != typeof(Empty.Context));
 
             if (shouldInvokeInitializeInput && hasCustomContext)
             {
@@ -224,9 +224,10 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void ConfigureInputForm(IUidlForm form)
+        private void ConfigureInputForm(IUidlForm form, bool needsInitialModel)
         {
             form.UsePascalCase = true;
+            form.NeedsInitialModel = needsInitialModel;
 
             if (!form.IsModalPopup)
             {
