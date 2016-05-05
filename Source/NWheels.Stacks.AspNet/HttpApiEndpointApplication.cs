@@ -21,6 +21,7 @@ using Autofac.Integration.WebApi;
 using Hapil;
 using NWheels.Authorization;
 using NWheels.Endpoints.Core;
+using NWheels.Extensions;
 using NWheels.Hosting;
 using NWheels.Hosting.Core;
 using NWheels.Logging;
@@ -42,6 +43,15 @@ namespace NWheels.Stacks.AspNet
         private static readonly IPlainLog _s_log;
         private static NodeHost _s_nodeHost;
         private static string _s_bootConfigFilePath;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly IReadOnlyList<string> _s_writableSessionRequestPathPrefixes = new[] {
+            "/app/api/",
+            "/app/entity/",
+            "/app/downloadContent/",
+            "/app/uploadContent",
+        };
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -167,10 +177,16 @@ namespace NWheels.Stacks.AspNet
         {
             try
             {
+                var context = HttpContext.Current;
+
                 if ( RequestLogger != null )
                 {
-                    var context = HttpContext.Current;
                     context.Items[RequestLogger] = RequestLogger.IncomingRequest(context.Request.HttpMethod, context.Request.Path);
+                }
+
+                if (!_s_writableSessionRequestPathPrefixes.Any(prefix => context.Request.Path.StartsWithIgnoreCase(prefix)))
+                {
+                    context.SetSessionStateBehavior(SessionStateBehavior.ReadOnly);
                 }
             }
             catch ( Exception exc )
