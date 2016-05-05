@@ -895,7 +895,11 @@ HEAD, JS/CSS LINKS
                 };
                 if (metaColumn.format) {
                     modelItem.formatter = function (cellvalue, options, rowObject) {
-                        return $scope.uidlService.formatValue(metaColumn.format, cellvalue);
+                        if (cellvalue!='Total:') {
+                            return $scope.uidlService.formatValue(metaColumn.format, cellvalue);
+                        } else {
+                            return cellvalue;
+                        }
                     };
                 }
                 switch (metaColumn.format) {
