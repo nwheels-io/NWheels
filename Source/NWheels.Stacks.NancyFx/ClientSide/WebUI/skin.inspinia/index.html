@@ -2435,7 +2435,7 @@ HEAD, JS/CSS LINKS
                     },
                     tooltipOpts: {
                         content: function(label, xval, yval, flotItem) {
-							return '<strong>' + label + '</strong>: <span style="color:blue">' + moment(xval).format('HH:mm:ss.SSS') + '</span>, <span style="color:green">' + parseFloat(yval).formatMoney(5, '.', ',') + '</span>';
+							return '<strong>' + label + '</strong>: <span style="color:blue">' + moment.utc(xval).format('HH:mm:ss.SSS') + '</span>, <span style="color:green">' + parseFloat(yval).formatMoney(5, '.', ',') + '</span>';
 						}
                     }
                 };
