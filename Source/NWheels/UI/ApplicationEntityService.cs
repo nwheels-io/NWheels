@@ -99,10 +99,10 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public IUnitOfWork NewUnitOfWork(string entityName, object txViewModel = null)
+        public IUnitOfWork NewUnitOfWork(string entityName, object txViewModel = null, bool debugPerformStaleCheck = false)
         {
             var handler = _handlerByEntityName[entityName];
-            return handler.NewUnitOfWork(txViewModel);
+            return handler.NewUnitOfWork(txViewModel, debugPerformStaleCheck);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ namespace NWheels.UI
             var handler = _handlerByEntityName[entityName];
             string json;
 
-            using ( handler.NewUnitOfWork() )
+            using (handler.NewUnitOfWork(debugPerformStaleCheck: true))
             {
                 var newEntity = handler.CreateNew();
                 json = JsonConvert.SerializeObject(newEntity, _defaultSerializerSettings);
@@ -135,9 +135,9 @@ namespace NWheels.UI
             var handler = _handlerByEntityName[entityName];
             string json;
 
-            using ( QueryContext.NewQuery(this, options) )
+            using (QueryContext.NewQuery(this, options))
             {
-                using ( handler.NewUnitOfWork() )
+                using (handler.NewUnitOfWork(debugPerformStaleCheck: true))
                 {
                     var results = handler.Query(options);
                     json = JsonConvert.SerializeObject(results, GetCachedSerializerSettings(options));
@@ -214,7 +214,7 @@ namespace NWheels.UI
             var handler = _handlerByEntityName[entityName];
             IDomainObject domainObject = null;
 
-            using (var context = handler.NewUnitOfWork())
+            using (var context = handler.NewUnitOfWork(debugPerformStaleCheck: true))
             {
                 if (entityState.IsNew())
                 {
@@ -259,15 +259,15 @@ namespace NWheels.UI
             var handler = _handlerByEntityName[entityName];
             IDomainObject domainObject = null;
 
-            using ( handler.NewUnitOfWork() )
+            using (handler.NewUnitOfWork(debugPerformStaleCheck: true))
             {
-                if ( entityState.IsNew() )
+                if (entityState.IsNew())
                 {
                     domainObject = handler.CreateNew();
                     JsonConvert.PopulateObject(json, domainObject, _defaultSerializerSettings);
                     handler.Insert(domainObject);
                 }
-                else if ( entityState.IsModified() )
+                else if (entityState.IsModified())
                 {
                     var populationSerializerSettings = CreateSerializerSettings();
                     domainObject = handler.GetById(entityId);
@@ -289,7 +289,7 @@ namespace NWheels.UI
         {
             var handler = _handlerByEntityName[entityName];
 
-            using ( var context = handler.NewUnitOfWork() )
+            using (var context = handler.NewUnitOfWork(debugPerformStaleCheck: true))
             {
                 handler.Delete(entityId);
                 context.CommitChanges();
@@ -1721,7 +1721,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public abstract IUnitOfWork NewUnitOfWork(object txViewModel = null);
+            public abstract IUnitOfWork NewUnitOfWork(object txViewModel = null, bool debugPerformStaleCheck = false);
             public abstract QueryResults Query(QueryOptions options, IQueryable query = null, object txViewModel = null);
             public abstract EntityCursor QueryCursor(QueryOptions options, IQueryable query = null);
             public abstract IEntityId ParseEntityId(string id);
@@ -1743,7 +1743,7 @@ namespace NWheels.UI
                     return AuthorizationCheckResults.AllTrue();
                 }
 
-                using ( var domainContext = NewUnitOfWork() )
+                using ( var domainContext = NewUnitOfWork(debugPerformStaleCheck: true) )
                 {
                     var accessControl = Framework.CurrentIdentity.GetAccessControlList().GetEntityAccessControl(MetaType.ContractType);
                     var authorizationContext = (IAccessControlContext)domainContext;
@@ -1874,15 +1874,23 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override IUnitOfWork NewUnitOfWork(object txViewModel = null)
+            public override IUnitOfWork NewUnitOfWork(object txViewModel = null, bool debugPerformStaleCheck = false)
             {
-                //TODO: remove this once we are sure the bug is solved
-                PerContextResourceConsumerScope<TContext> stale;
-                if ( (stale = new ThreadStaticAnchor<PerContextResourceConsumerScope<TContext>>().Current) != null )
+                //TODO: remove once solid test coverage is provided
+                if (debugPerformStaleCheck)
                 {
-                    DomainContextLogger.StaleUnitOfWorkEncountered(
-                        stale.Resource.ToString(),
-                        ((DataRepositoryBase)(object)stale.Resource).InitializerThreadText);
+                    //TODO: remove this once we are sure the bug is solved
+                    var ahcnor = new ThreadStaticAnchor<PerContextResourceConsumerScope<TContext>>();
+                    var stale = ahcnor.Current;
+
+                    if (stale != null)
+                    {
+                        DomainContextLogger.StaleUnitOfWorkEncountered(
+                            stale.Resource.ToString(),
+                            ((DataRepositoryBase)(object)stale.Resource).InitializerThreadText);
+
+                        //ahcnor.Clear(); //!!!dangerous - if false positive, the scopes will be messed up
+                    }
                 }
 
                 var extensionToUse = Extensions.FirstOrDefault(x => x.CanOpenNewUnitOfWork(txViewModel));

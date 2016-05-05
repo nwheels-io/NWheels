@@ -524,8 +524,8 @@ namespace NWheels.Stacks.AspNet
             using (new UIOperationContext(
                 _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.EntityQuery, 
                 target, contractName, operationName, entity: entityName, query: options))
-            { 
-                using (_context.EntityService.NewUnitOfWork(entityName, txViewModel))
+            {
+                using (_context.EntityService.NewUnitOfWork(entityName, txViewModel, debugPerformStaleCheck: true))
                 {
                     try
                     {
@@ -583,8 +583,8 @@ namespace NWheels.Stacks.AspNet
             using (new UIOperationContext(
                 _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.EntityQuery, 
                 target, contractName, operationName, entity: entityName, query: options, format: outputFormat))
-            { 
-                using (_context.EntityService.NewUnitOfWork(entityName, TryGetViewModelFrom(queryCommand)))
+            {
+                using (_context.EntityService.NewUnitOfWork(entityName, TryGetViewModelFrom(queryCommand), debugPerformStaleCheck: true))
                 {
                     DocumentFormatRequestMessage exportCommand = null;
                 
