@@ -1430,8 +1430,13 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             };
             
             scope.rejectChanges = function (entity) {
-                scope.commandInProgress = false;
-                scope.refresh();
+                if (scope.uidl.mode !== 'Inline' || scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
+                    scope.commandInProgress = false;
+                    scope.uiShowCrudForm = false;
+                    scope.$broadcast(scope.uidl.grid.qualifiedName + ':PageRefreshRequested', entity);
+                } else {
+                    scope.refresh();
+                }
             };
 
             scope.isCommandAuthorized = function (command) {

@@ -1211,6 +1211,9 @@ HEAD, JS/CSS LINKS
                     grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
                     
                     $scope.lastSelectedRowId = null;
+                    $scope.$on($scope.uidl.qualifiedName + ':PageRefreshRequested', function (event, data) {
+                        grid.trigger('reloadGrid');
+                    });
                 });
             };
             $scope.$on($scope.uidl.qualifiedName + ':RequestPrepared', $scope.onRequestPrepared);
