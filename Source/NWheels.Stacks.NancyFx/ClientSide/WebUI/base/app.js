@@ -1196,6 +1196,13 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 scope.queryEntities();
             };
 
+            scope.softRefresh = function() {
+                scope.uiShowCrudForm = false;
+                scope.selectedEntity = null;
+                scope.entity = null;
+                scope.$broadcast(scope.uidl.grid.qualifiedName + ':PageRefreshRequested');
+            };
+            
             scope.requestAuthorization = function (optionalEntityId) {
                 return scope.entityService.checkAuthorization(scope.uidl.grid.entityName, optionalEntityId).then(
                     function(response) {
@@ -1402,7 +1409,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     scope.entityService.storeEntity(entity).then(
                         function() {
                             scope.$emit(scope.uidl.qualifiedName + ':StoreEntityCompleted');
-                            scope.refresh();
+                            scope.softRefresh();
                         },
                         function (fault) {
                             scope.$emit(scope.uidl.qualifiedName + ':StoreEntityFailed', commandService.createFaultInfo(fault));
@@ -1434,8 +1441,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.rejectChanges = function (entity) {
                 if (scope.uidl.mode !== 'Inline' || scope.uidl.inlineStorageStyle === 'InverseForeignKey') {
                     scope.commandInProgress = false;
-                    scope.uiShowCrudForm = false;
-                    scope.$broadcast(scope.uidl.grid.qualifiedName + ':PageRefreshRequested', entity);
+                    scope.softRefresh();
                 } else {
                     scope.refresh();
                 }

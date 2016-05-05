@@ -1006,6 +1006,7 @@ HEAD, JS/CSS LINKS
                 $scope.preparedRequest = request;
                 $scope.$timeout(function () {
                     $("#rdt_" + $scope.uniqueWidgetId).jqGrid('GridUnload');
+                    $scope.lastSelectedRowId = null;
                     $scope.totalsRowDisplayed = false;
                     var gridOptions = {
                         datatype: function(postData) {
@@ -1202,7 +1203,7 @@ HEAD, JS/CSS LINKS
                             if ($(this).jqGrid('getGridParam', 'reccount') == 0)
                             {         
                                 $(".jqgfirstrow").css("height","1px");
-                            }                            
+                            }
                         }
                     };
                     var grid = $("#rdt_" + $scope.uniqueWidgetId);
@@ -1210,7 +1211,6 @@ HEAD, JS/CSS LINKS
                     grid.jqGrid('filterToolbar',{ stringResult: true, searchOnEnter: false, defaultSearch: "cn" });
                     grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
                     
-                    $scope.lastSelectedRowId = null;
                     $scope.$on($scope.uidl.qualifiedName + ':PageRefreshRequested', function (event, data) {
                         grid.trigger('reloadGrid');
                     });
