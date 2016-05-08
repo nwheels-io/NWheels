@@ -14,6 +14,7 @@ using NWheels.Entities.Core;
 using NWheels.Extensions;
 using System.Reflection;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -218,8 +219,15 @@ namespace NWheels.UI
             {
                 if (entityState.IsNew())
                 {
+                    var traceWriter = new MemoryTraceWriter();
+                    var populationSerializerSettings = CreateSerializerSettings();
+                    populationSerializerSettings.TraceWriter = traceWriter;
+
                     domainObject = handler.CreateNew();
-                    JsonConvert.PopulateObject(json, domainObject, _defaultSerializerSettings);
+                    JsonConvert.PopulateObject(json, domainObject, populationSerializerSettings);
+
+                    Debug.WriteLine(traceWriter.ToString());
+                    
                     handler.Insert(domainObject);
                 }
                 else if (entityState.IsModified())
@@ -231,7 +239,7 @@ namespace NWheels.UI
                     domainObject = handler.GetById(entityId);
                     JsonConvert.PopulateObject(json, domainObject, populationSerializerSettings); //_serializerSettings);
 
-                    Console.WriteLine(traceWriter.ToString());
+                    Debug.WriteLine(traceWriter.ToString());
 
                     handler.Update(domainObject);
                 }
@@ -3146,7 +3154,16 @@ namespace NWheels.UI
 
             public override bool CanConvert(Type objectType)
             {
-                return (objectType.IsEntityContract() || objectType.IsEntityPartContract());
+                if (objectType.IsInterface)
+                {
+                    return (objectType.IsEntityContract() || objectType.IsEntityPartContract());
+                }
+
+                return objectType.GetInterfaces().Any(intf => intf.IsEntityContract() || intf.IsEntityPartContract());
+                
+                //var objectTypeFullname = objectType.FullName;
+                //var result = (objectType.IsEntityContract() || objectType.IsEntityPartContract());
+                //return (objectType.IsEntityContract() || objectType.IsEntityPartContract());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

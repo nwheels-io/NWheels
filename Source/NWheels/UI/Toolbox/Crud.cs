@@ -51,6 +51,11 @@ namespace NWheels.UI.Toolbox
             {
                 this.InlineStorageStyle = parentEntityNavigation.RelationalMapping.StorageStyle;
                 this.InverseNavigationProperty = parentEntityNavigation.Relation.InverseProperty.Name;
+
+                if (this.FormTypeSelector != null)
+                {
+                    this.FormTypeSelector.ParentInverseNavigationProperty = this.InverseNavigationProperty;
+                }
             }
         }
 

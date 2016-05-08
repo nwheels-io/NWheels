@@ -1685,6 +1685,10 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 scope.commandInProgress = false;
                 scope.waitingForInitialModel = false;
                 scope.tabSetIndex = 0;
+                
+                if (!data) {
+                    return;
+                }
 
                 $timeout(function() {
                     Enumerable.From(scope.uidl.fields)
@@ -1900,6 +1904,10 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                             scope.parentModel[scope.parentUidl.propertyName] = newObj;
                         } else {
                             // parent is CRUD
+                            if (scope.uidl.parentInverseNavigationProperty) { // preserve foreign key value
+                                var foreignKeyValue = scope.parentModel[scope.parentModelProperty][scope.uidl.parentInverseNavigationProperty];
+                                newObj[scope.uidl.parentInverseNavigationProperty] = foreignKeyValue;
+                            }
                             scope.parentModel[scope.parentModelProperty] = newObj;
                         }
                         scope.sendModelToSelectedWidget();

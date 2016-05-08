@@ -144,6 +144,8 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public string ParentModelProperty { get; set; }
         [DataMember]
+        public string ParentInverseNavigationProperty { get; set; }
+        [DataMember]
         public string EmptySelectionText { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
