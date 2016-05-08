@@ -1535,9 +1535,10 @@ HEAD, JS/CSS LINKS
             </div>
             <!-- SECTIONS -->
             <div ng-if="sectionFields.length" class="panel-group"  style="margin-top:20px;">
-                <div class="panel panel-default" ng-repeat="field in sectionFields">
+                <div class="panel panel-default" ng-repeat="field in sectionFields" ng-controller="formNestedObject">
                     <div class="panel-heading" ng-init="isExpanded=$first;">
                         <h5 class="panel-title">
+                            <input type="checkbox" ng-if="isNullable" ng-model="nestedObjectExists" ng-model-options="{ getterSetter: true }" />
                             <a data-toggle="collapse" 
                                data-parent="#accordion" 
                                href="{{::('#' + uidl.elementName + '_section' + $index)}}"
@@ -1546,7 +1547,12 @@ HEAD, JS/CSS LINKS
                     </div>
                     <div id="{{::(uidl.elementName + '_section' + $index)}}" class="panel-collapse collapse" ng-class="{in: $first}">
                         <div class="panel-body">
-                            <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="model.Data.entity"></uidl-widget>
+                            <div ng-hide="nestedObjectExists()">
+                                Turned off. Toggle checkbox above to turn on.
+                            </div>
+                            <div ng-show="nestedObjectExists()">
+                                <uidl-widget ng-if="field.nestedWidget" uidl="field.nestedWidget" parent-uidl="field" parent-model="model.Data.entity"></uidl-widget>
+                            </div>
                         </div>
                     </div>
                 </div>

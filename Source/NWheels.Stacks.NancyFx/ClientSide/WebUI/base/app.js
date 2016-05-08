@@ -2507,6 +2507,51 @@ function ($timeout, $rootScope, uidlService, entityService) {
 
 //---------------------------------------------------------------------------------------------------------------------
 
+theApp.controller('formNestedObject',
+['$scope', 'entityService', 'commandService', 'uidlService',
+function ($scope, entityService, commandService, uidlService) {
+    
+    $scope.isNullable = (
+        $scope.fieldHasModifier($scope.field, 'Nullable') && 
+        $scope.field.fieldType === 'InlineForm' && 
+        $scope.field.nestedWidget &&
+        $scope.field.nestedWidget.widgetType === 'Form' && 
+        $scope.field.nestedWidget.entityName 
+        ? true
+        : false);
+    
+    $scope.nestedObjectExists = function(toggle) {
+        if (!$scope.isNullable) {
+            return true;
+        }
+        
+        if (!$scope.model.Data.entity) {
+            return false;
+        }
+
+        if (arguments.length) {
+            if (toggle === true) {
+                entityService.newDomainObject($scope.field.nestedWidget.entityName).then(
+                    function (newObj) {
+                        $scope.model.Data.entity[$scope.field.propertyName] = newObj;
+                        $scope.$broadcast($scope.field.nestedWidget.qualifiedName + ':ModelSetter', newObj);
+                        $scope.$broadcast($scope.field.nestedWidget.qualifiedName + ':EditAuthorized');
+                    },
+                    function (fault) {
+                        scope.$emit($scope.uidl.qualifiedName + ':NewDomainObjectFailed', commandService.createFaultInfo(fault));
+                    }
+                );
+            } else if (toggle === false) {
+                $scope.model.Data.entity[$scope.field.propertyName] = null;
+            }
+        }
+        
+        return ($scope.model.Data.entity[$scope.field.propertyName] ? true : false);
+    };
+}]);
+
+//---------------------------------------------------------------------------------------------------------------------
+
 theApp.directive('uidlUserAlertInline', ['uidlService', 'entityService', function (uidlService, entityService) {
     return {
         scope: {

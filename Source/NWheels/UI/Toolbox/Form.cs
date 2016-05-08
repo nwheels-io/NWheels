@@ -929,6 +929,7 @@ namespace NWheels.UI.Toolbox
         RangeEnd = 0x2000,
         Memo = 0x4000,
         FlatStyle = 0x8000,
+        Nullable = 0x10000,
         System = 0x40000000
     }
 
