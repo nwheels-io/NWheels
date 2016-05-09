@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Extensions;
 
 namespace NWheels.Utilities
 {
@@ -84,6 +85,28 @@ namespace NWheels.Utilities
         {
             var relativePath = new Uri(relativeTo).MakeRelativeUri(new Uri(absolutePath)).ToString().Replace("/", "\\");
             return relativePath;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool PathEquals(this string path, string otherPath)
+        {
+            if (path == null || otherPath == null)
+            {
+                return false;
+            }
+
+            if (!path.EndsWith("\\"))
+            {
+                path = path + '\\';
+            }
+
+            if (!otherPath.EndsWith("\\"))
+            {
+                otherPath = otherPath + '\\';
+            }
+
+            return path.EqualsIgnoreCase(otherPath);
         }
     }
 }

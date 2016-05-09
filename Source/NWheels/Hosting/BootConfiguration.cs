@@ -6,6 +6,7 @@ using System.Text;
 using Hapil;
 using NWheels.Exceptions;
 using System.IO;
+using NWheels.Extensions;
 
 namespace NWheels.Hosting
 {
@@ -17,14 +18,12 @@ namespace NWheels.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private string _environmentInitLog = "";
+        private EnvironmentConfiguration.LookupResult _environmentLookupLog = EnvironmentConfiguration.LookupResult.NotFound;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void Validate()
         {
-            //init environments from environments.config
-
             LoadEnvironmentConfig();
 
             if ( string.IsNullOrEmpty(ApplicationName) )
@@ -71,29 +70,26 @@ namespace NWheels.Hosting
         {
             var envConfig = EnvironmentConfiguration.LoadFromFile(Path.Combine(LoadedFromDirectory, EnvironmentConfiguration.DefaultEnvironmentConfigFileName));
 
-            if ( envConfig != null )
+            if (envConfig != null)
             {
-                foreach ( var env in envConfig.Environments )
+                foreach (var env in envConfig.Environments)
                 {
-                    if ( env.MachineName.ToLower() == Environment.MachineName.ToLower() )
+                    _environmentLookupLog = env.Match(Environment.MachineName, LoadedFromDirectory);
+                    
+                    if (_environmentLookupLog != EnvironmentConfiguration.LookupResult.NotFound)
                     {
                         this.EnvironmentName = env.Name;
                         this.EnvironmentType = env.Type;
-                        _environmentInitLog = "from MachineName section";
-                        return;
-                    }
-                    if ( env.MachineName.ToLower() == "default" )
-                    {
-                        this.EnvironmentName = env.Name;
-                        this.EnvironmentType = env.Type;
-                        _environmentInitLog = "from default section";
+                        break;
                     }
                 }
             }
             else
             {
-                _environmentInitLog = "environment file not exist";
+                _environmentLookupLog = EnvironmentConfiguration.LookupResult.EnvironmentConfigFileDoesNotExist;
             }
+
+            _environmentLookupLog = EnvironmentConfiguration.LookupResult.NotFound;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -103,17 +99,19 @@ namespace NWheels.Hosting
             var text = new StringBuilder();
 
             text.AppendLine();
-            text.AppendFormat("MachineName        - {0}", Environment.MachineName);
+            text.AppendFormat("Boot configuration - {0}", this.LoadedFromFile ?? "(not from a file source)");
             text.AppendLine();
             text.AppendFormat("Application Name   - {0}", this.ApplicationName);
             text.AppendLine();
             text.AppendFormat("Node Name          - {0}", this.NodeName);
             text.AppendLine();
-            text.AppendFormat("Init Environment   - {0}", _environmentInitLog);
+            text.AppendFormat("Environment Lookup - {0}", _environmentLookupLog);
             text.AppendLine();
             text.AppendFormat("Environment Name   - {0}", this.EnvironmentName);
             text.AppendLine();
             text.AppendFormat("Environment Type   - {0}", string.IsNullOrEmpty(this.EnvironmentType) ? "(unspecified)" : this.EnvironmentType);
+            text.AppendLine();
+            text.AppendFormat("MachineName        - {0}", Environment.MachineName);
             text.AppendLine();
             text.AppendFormat("Process ID         - {0}", Process.GetCurrentProcess().Id);
             text.AppendLine();
@@ -139,17 +137,6 @@ namespace NWheels.Hosting
             }
 
             return text.ToString();
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void FeatureListToLogString(List<FeatureConfig> featureList, StringBuilder text)
-        {
-            foreach ( var feature in featureList )
-            {
-                text.AppendLine();
-                text.AppendFormat("++ Feature           - {0}", feature.Name);
-            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -187,6 +174,17 @@ namespace NWheels.Hosting
         public string InstanceId { get; set; }
         public string LoadedFromDirectory { get; set; }
         public string LoadedFromFile { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void FeatureListToLogString(List<FeatureConfig> featureList, StringBuilder text)
+        {
+            foreach (var feature in featureList)
+            {
+                text.AppendLine();
+                text.AppendFormat("++ Feature           - {0}", feature.Name);
+            }
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
