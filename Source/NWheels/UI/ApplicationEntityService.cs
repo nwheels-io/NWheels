@@ -219,27 +219,27 @@ namespace NWheels.UI
             {
                 if (entityState.IsNew())
                 {
-                    var traceWriter = new MemoryTraceWriter();
-                    var populationSerializerSettings = CreateSerializerSettings();
-                    populationSerializerSettings.TraceWriter = traceWriter;
+                    //var traceWriter = new MemoryTraceWriter();
+                    //var populationSerializerSettings = CreateSerializerSettings();
+                    //populationSerializerSettings.TraceWriter = traceWriter;
 
                     domainObject = handler.CreateNew();
-                    JsonConvert.PopulateObject(json, domainObject, populationSerializerSettings);
+                    JsonConvert.PopulateObject(json, domainObject, _defaultSerializerSettings);// populationSerializerSettings);
 
-                    Debug.WriteLine(traceWriter.ToString());
+                    //Debug.WriteLine(traceWriter.ToString());
                     
                     handler.Insert(domainObject);
                 }
                 else if (entityState.IsModified())
                 {
-                    var traceWriter = new MemoryTraceWriter();
-                    var populationSerializerSettings = CreateSerializerSettings();
-                    populationSerializerSettings.TraceWriter = traceWriter;
+                    //var traceWriter = new MemoryTraceWriter();
+                    //var populationSerializerSettings = CreateSerializerSettings();
+                    //populationSerializerSettings.TraceWriter = traceWriter;
 
                     domainObject = handler.GetById(entityId);
-                    JsonConvert.PopulateObject(json, domainObject, populationSerializerSettings); //_serializerSettings);
+                    JsonConvert.PopulateObject(json, domainObject, _defaultSerializerSettings);// populationSerializerSettings);
 
-                    Debug.WriteLine(traceWriter.ToString());
+                    //Debug.WriteLine(traceWriter.ToString());
 
                     handler.Update(domainObject);
                 }
