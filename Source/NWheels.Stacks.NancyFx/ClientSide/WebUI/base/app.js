@@ -1606,7 +1606,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             scope.metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
             scope.tabSetIndex = 0;
             scope.plainFields = Enumerable.From(scope.uidl.fields)
-                .Where("$.modifiers!='Tab' && $.modifiers!='Section'")
+                .Where(function(f) { return !fieldHasModifier(f, 'Tab') && !fieldHasModifier(f, 'Section'); })
                 .Where(function(f) { return !fieldHasModifier(f, 'RangeEnd'); })
                 .Where(function(f) { return scope.isUidlAuthorized(f); })
                 .ToArray();
