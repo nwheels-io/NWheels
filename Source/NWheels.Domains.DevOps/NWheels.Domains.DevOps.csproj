@@ -7,8 +7,8 @@
     <ProjectGuid>{50958672-45AF-42B5-957D-84AB15A2EAFF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NWheels.Domains.SystemMonitor</RootNamespace>
-    <AssemblyName>NWheels.Domains.SystemMonitor</AssemblyName>
+    <RootNamespace>NWheels.Domains.DevOps</RootNamespace>
+    <AssemblyName>NWheels.Domains.DevOps</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -53,16 +53,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Contracts\ILogDailySummaryEntity.cs" />
-    <Compile Include="Contracts\IKeyValueIndexEntity.cs" />
-    <Compile Include="Contracts\ILogMessageEntity.cs" />
-    <Compile Include="Contracts\ISystemMonitorContext.cs" />
-    <Compile Include="Contracts\IThreadLogEntity.cs" />
+    <Compile Include="Logging\Entities\IBaseLogDimensionsEntity.cs" />
+    <Compile Include="Logging\Entities\ILogExplorerContext.cs" />
+    <Compile Include="Logging\Entities\ILogLevelDailySummaryEntity.cs" />
+    <Compile Include="Logging\Entities\ILogMessageDailySummaryEntity.cs" />
+    <Compile Include="Logging\Entities\ILogMessageEntity.cs" />
+    <Compile Include="Logging\Entities\IThreadLogEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\ScreenParts\SystemLogScreenPart.cs" />
+    <Compile Include="UI\ScreenParts\LogLevelSummaryScreenPart.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Logic\" />
+    <Folder Include="Logging\Transactions\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels\NWheels.csproj">

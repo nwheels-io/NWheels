@@ -7,8 +7,8 @@
     <ProjectGuid>{17C6B360-014D-43FC-9260-D9EF473334A2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NWheels.Domains.SystemMonitor.Tests</RootNamespace>
-    <AssemblyName>NWheels.Domains.SystemMonitor.Tests</AssemblyName>
+    <RootNamespace>NWheels.Domains.DevOps.Tests</RootNamespace>
+    <AssemblyName>NWheels.Domains.DevOps.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

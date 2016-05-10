@@ -2,20 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
-using NWheels.Domains.SystemMonitor.Contracts;
+using NWheels.Domains.DevOps.Logging.Entities;
 using NWheels.Extensions;
-using NWheels.Logging;
 using NWheels.Processing;
 using NWheels.UI;
 using NWheels.UI.Factories;
 using NWheels.UI.Toolbox;
 using NWheels.UI.Uidl;
 
-namespace NWheels.Domains.SystemMonitor.UI.ScreenParts
+namespace NWheels.Domains.DevOps.UI.ScreenParts
 {
-    public class SystemLogScreenPart : ScreenPartBase<SystemLogScreenPart, Empty.Context, Empty.Data, Empty.State>
+    public class LogLevelSummaryScreenPart : ScreenPartBase<LogLevelSummaryScreenPart, Empty.Context, Empty.Data, Empty.State>
     {
-        public SystemLogScreenPart(string idName, UidlApplication parent)
+        public LogLevelSummaryScreenPart(string idName, UidlApplication parent)
             : base(idName, parent)
         {
         }
@@ -24,7 +23,7 @@ namespace NWheels.Domains.SystemMonitor.UI.ScreenParts
 
         #region Overrides of ScreenPartBase<SystemLogScreenPart,Input,Data,State>
 
-        protected override void DescribePresenter(PresenterBuilder<SystemLogScreenPart, Empty.Data, Empty.State> presenter)
+        protected override void DescribePresenter(PresenterBuilder<LogLevelSummaryScreenPart, Empty.Data, Empty.State> presenter)
         {
             ContentRoot = Report;
 
@@ -170,20 +169,20 @@ namespace NWheels.Domains.SystemMonitor.UI.ScreenParts
             {
                 var messages = Enumerable.Range(0, 5).Select(x => _framework.NewDomainObject<ILogMessageEntity>()).ToArray();
 
-                messages[0].Timestamp = input.From.AddMilliseconds(1234);
-                messages[0].MessageId = "LoggerA.FirstMessage";
+                //messages[0].Timestamp = input.From.AddMilliseconds(1234);
+                //messages[0].MessageId = "LoggerA.FirstMessage";
 
-                messages[1].Timestamp = input.From.AddMilliseconds(12345);
-                messages[1].MessageId = "LoggerA.SecondMessage";
+                //messages[1].Timestamp = input.From.AddMilliseconds(12345);
+                //messages[1].MessageId = "LoggerA.SecondMessage";
 
-                messages[2].Timestamp = input.From.AddMilliseconds(123456);
-                messages[2].MessageId = "LoggerB.ThirdMessage";
+                //messages[2].Timestamp = input.From.AddMilliseconds(123456);
+                //messages[2].MessageId = "LoggerB.ThirdMessage";
 
-                messages[3].Timestamp = input.From.AddMilliseconds(1234567);
-                messages[3].MessageId = "LoggerC.FourthMessage";
+                //messages[3].Timestamp = input.From.AddMilliseconds(1234567);
+                //messages[3].MessageId = "LoggerC.FourthMessage";
 
-                messages[4].Timestamp = input.From.AddMilliseconds(12345678);
-                messages[4].MessageId = "LoggerD.FifthMessage";
+                //messages[4].Timestamp = input.From.AddMilliseconds(12345678);
+                //messages[4].MessageId = "LoggerD.FifthMessage";
 
                 return messages.AsQueryable();
             }

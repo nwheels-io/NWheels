@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Logging;
 
-namespace NWheels.Domains.SystemMonitor.Contracts
+namespace NWheels.Domains.DevOps.Logging.Entities
 {
     [EntityContract]
     public interface IThreadLogEntity
