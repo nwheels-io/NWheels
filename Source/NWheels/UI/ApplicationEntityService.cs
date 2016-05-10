@@ -232,14 +232,14 @@ namespace NWheels.UI
                 }
                 else if (entityState.IsModified())
                 {
-                    //var traceWriter = new MemoryTraceWriter();
-                    //var populationSerializerSettings = CreateSerializerSettings();
-                    //populationSerializerSettings.TraceWriter = traceWriter;
+                    var traceWriter = new MemoryTraceWriter();
+                    var populationSerializerSettings = CreateSerializerSettings();
+                    populationSerializerSettings.TraceWriter = traceWriter;
 
                     domainObject = handler.GetById(entityId);
-                    JsonConvert.PopulateObject(json, domainObject, _defaultSerializerSettings);// populationSerializerSettings);
+                    JsonConvert.PopulateObject(json, domainObject, populationSerializerSettings);//_defaultSerializerSettings);// populationSerializerSettings);
 
-                    //Debug.WriteLine(traceWriter.ToString());
+                    Debug.WriteLine(traceWriter.ToString());
 
                     handler.Update(domainObject);
                 }
@@ -505,9 +505,57 @@ namespace NWheels.UI
 
         public interface IEntityHandlerExtension
         {
+            EntityHandler CreateEntityHandler(
+                ApplicationEntityService owner,
+                ITypeMetadata metaType,
+                Type domainContextType,
+                IEntityHandlerExtension[] extensions);
             bool CanOpenNewUnitOfWork(object txViewModel);
             IUnitOfWork OpenNewUnitOfWork(object txViewModel);
             Type EntityContract { get; }
+            bool CanCreateEntityHandler { get; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public abstract class EntityHandlerExtension<TEntity> : IEntityHandlerExtension
+        {
+            public virtual EntityHandler CreateEntityHandler(
+                ApplicationEntityService owner, 
+                ITypeMetadata metaType, 
+                Type domainContextType, 
+                IEntityHandlerExtension[] extensions)
+            {
+                throw new NotSupportedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual bool CanOpenNewUnitOfWork(object txViewModel)
+            {
+                return false;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual IUnitOfWork OpenNewUnitOfWork(object txViewModel)
+            {
+                throw new NotSupportedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual Type EntityContract
+            {
+                get { return typeof(TEntity); }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual bool CanCreateEntityHandler 
+            {
+                get { return false; }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1860,14 +1908,56 @@ namespace NWheels.UI
                 Type domainContextType, 
                 IEntityHandlerExtension[] extensions)
             {
+                EntityHandler handler;
+                
+                if (!TryCreateFromExtensions(owner, metaType, domainContextType, extensions, out handler))
+                {
+                    handler = CreateDefault(owner, metaType, domainContextType, extensions);
+                }
+
+                return handler;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static EntityHandler CreateDefault(
+                ApplicationEntityService owner,
+                ITypeMetadata metaType,
+                Type domainContextType,
+                IEntityHandlerExtension[] extensions)
+            {
                 var concreteClosedType = typeof(EntityHandler<,>).MakeGenericType(domainContextType, metaType.ContractType);
                 return (EntityHandler)Activator.CreateInstance(concreteClosedType, owner, metaType, domainContextType, extensions);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private static bool TryCreateFromExtensions(
+                ApplicationEntityService owner,
+                ITypeMetadata metaType,
+                Type domainContextType,
+                IEntityHandlerExtension[] extensions,
+                out EntityHandler handler)
+            {
+                for (int i = 0 ; i < extensions.Length ; i++)
+                {
+                    if (extensions[i].CanCreateEntityHandler)
+                    {
+                        {
+                            handler = extensions[i].CreateEntityHandler(owner, metaType, domainContextType, extensions);
+                            return true;
+                        }
+                    }
+                }
+
+                handler = null;
+                return false;
             }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class EntityHandler<TContext, TEntity> : EntityHandler
+        public class EntityHandler<TContext, TEntity> : EntityHandler
             where TContext : class, IApplicationDataRepository
             where TEntity : class
         {
@@ -2006,7 +2096,7 @@ namespace NWheels.UI
                     }
 
                     var queryContext = QueryContext.Current;
-                    queryContext.Results.ResultSet = queryResults.Cast<IDomainObject>().ToArray();
+                    queryContext.Results.ResultSet = queryResults.Cast<object>().ToArray();
 
                     var metaCursor = new EntityCursorMetadata(queryContext);
                     return new EntityCursor(metaCursor, queryContext, this, queryResults.Cast<IDomainObject>());
@@ -3155,7 +3245,16 @@ namespace NWheels.UI
 
                 var typeName = jo["$type"].Value<string>();
                 var handler = _ownerService._handlerByEntityName[typeName];
-                var target = handler.CreateNew();
+                IDomainObject target;
+
+                if (existingValue != null && handler.MetaType.ContractType.IsInstanceOfType(existingValue))
+                {
+                    target = (IDomainObject)existingValue;
+                }
+                else
+                {
+                    target = handler.CreateNew();
+                }
 
                 JsonReader jObjectReader = jo.CreateReader();
                 jObjectReader.Culture = reader.Culture;
