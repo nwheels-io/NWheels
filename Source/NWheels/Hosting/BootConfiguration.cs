@@ -68,28 +68,24 @@ namespace NWheels.Hosting
 
         private void LoadEnvironmentConfig()
         {
-            var envConfig = EnvironmentConfiguration.LoadFromFile(Path.Combine(LoadedFromDirectory, EnvironmentConfiguration.DefaultEnvironmentConfigFileName));
+            var envConfigFilePath = Path.Combine(LoadedFromDirectory, EnvironmentConfiguration.DefaultEnvironmentConfigFileName);
+            var envConfigFile = EnvironmentConfiguration.LoadFromFile(envConfigFilePath);
 
-            if (envConfig != null)
+            if (envConfigFile != null)
             {
-                foreach (var env in envConfig.Environments)
+                EnvironmentConfiguration.Environment environment;
+                _environmentLookupLog = envConfigFile.TryGetEnvironment(_s_machineName, this.LoadedFromDirectory, out environment);
+
+                if (environment != null && _environmentLookupLog != EnvironmentConfiguration.LookupResult.NotFound)
                 {
-                    _environmentLookupLog = env.Match(Environment.MachineName, LoadedFromDirectory);
-                    
-                    if (_environmentLookupLog != EnvironmentConfiguration.LookupResult.NotFound)
-                    {
-                        this.EnvironmentName = env.Name;
-                        this.EnvironmentType = env.Type;
-                        break;
-                    }
+                    this.EnvironmentName = environment.Name;
+                    this.EnvironmentType = environment.Type;
                 }
             }
             else
             {
                 _environmentLookupLog = EnvironmentConfiguration.LookupResult.EnvironmentConfigFileDoesNotExist;
             }
-
-            _environmentLookupLog = EnvironmentConfiguration.LookupResult.NotFound;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -111,7 +107,7 @@ namespace NWheels.Hosting
             text.AppendLine();
             text.AppendFormat("Environment Type   - {0}", string.IsNullOrEmpty(this.EnvironmentType) ? "(unspecified)" : this.EnvironmentType);
             text.AppendLine();
-            text.AppendFormat("MachineName        - {0}", Environment.MachineName);
+            text.AppendFormat("MachineName        - {0}", _s_machineName);
             text.AppendLine();
             text.AppendFormat("Process ID         - {0}", Process.GetCurrentProcess().Id);
             text.AppendLine();
