@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NWheels.Authorization;
+using NWheels.DataObjects.Core;
 using NWheels.Entities.Core;
 using NWheels.Processing.Commands;
 using NWheels.Processing.Messages;
@@ -20,7 +21,7 @@ namespace NWheels.Processing.Documents
             ISession session, 
             bool isSynchronous,
             ApplicationEntityService entityService,
-            IDomainObject documentModel, 
+            IObject documentModel, 
             DocumentDesign documentDesign, 
             string outputFormatIdName)
             : base(framework, session, isSynchronous)
@@ -39,7 +40,7 @@ namespace NWheels.Processing.Documents
             ISession session,
             bool isSynchronous,
             ApplicationEntityService entityService,
-            IDomainObject reportCriteria,
+            IObject reportCriteria,
             IQueryable reportQuery,
             ApplicationEntityService.QueryOptions reportQueryOptions,
             DocumentDesign documentDesign,
@@ -77,8 +78,8 @@ namespace NWheels.Processing.Documents
 
         public DocumentFormatRequestType RequestType { get; private set; }
         public ApplicationEntityService EntityService { get; private set; }
-        public IDomainObject DocumentModel { get; private set; }
-        public IDomainObject ReportCriteria { get; private set; }
+        public IObject DocumentModel { get; private set; }
+        public IObject ReportCriteria { get; private set; }
         public IQueryable ReportQuery { get; private set; }
         public ApplicationEntityService.QueryOptions ReportQueryOptions { get; private set; }
         public DocumentDesign DocumentDesign { get; private set; }

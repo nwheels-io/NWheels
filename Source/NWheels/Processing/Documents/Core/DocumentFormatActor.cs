@@ -66,7 +66,8 @@ namespace NWheels.Processing.Documents.Core
                         message.ReportQueryOptions,
                         cursor => {
                             document = formatter.FormatReportDocument(message.ReportCriteria, cursor, message.DocumentDesign);
-                        });
+                        },
+                        txViewModel: message.ReportCriteria);
                     break;
                 default:
                     throw new ArgumentException("Request type not recognized: " + message.RequestType);

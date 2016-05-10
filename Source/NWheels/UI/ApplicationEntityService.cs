@@ -169,15 +169,15 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void ProcessEntityCursor(string entityName, IQueryable query, QueryOptions options, Action<EntityCursor> action)
+        public void ProcessEntityCursor(string entityName, IQueryable query, QueryOptions options, Action<EntityCursor> action, object txViewModel = null)
         {
             var handler = _handlerByEntityName[entityName];
 
-            using ( QueryContext.NewQuery(this, options) )
+            using (QueryContext.NewQuery(this, options))
             {
-                using ( handler.NewUnitOfWork() )
+                using (handler.NewUnitOfWork(txViewModel))
                 {
-                    var cursor = handler.QueryCursor(options, query);
+                    var cursor = handler.QueryCursor(options, query, txViewModel);
                     action(cursor);
                 }
             }
@@ -1731,7 +1731,7 @@ namespace NWheels.UI
 
             public abstract IUnitOfWork NewUnitOfWork(object txViewModel = null, bool debugPerformStaleCheck = false);
             public abstract QueryResults Query(QueryOptions options, IQueryable query = null, object txViewModel = null);
-            public abstract EntityCursor QueryCursor(QueryOptions options, IQueryable query = null);
+            public abstract EntityCursor QueryCursor(QueryOptions options, IQueryable query = null, object txViewModel = null);
             public abstract IEntityId ParseEntityId(string id);
             public abstract IDomainObject GetById(string id);
             public abstract IDomainObject[] GetByIdList(object[] idList);
@@ -1989,12 +1989,11 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public override EntityCursor QueryCursor(QueryOptions options, IQueryable query = null)
+            public override EntityCursor QueryCursor(QueryOptions options, IQueryable query = null, object txViewModel = null)
             {
-                using (var context = Framework.NewUnitOfWork<TContext>())
+                using (var context = NewUnitOfWork(txViewModel) as TContext)
                 {
-                    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
-                    IQueryable<TEntity> dbQuery = (IQueryable<TEntity>)query ?? repository.AsQueryable();
+                    var dbQuery = GetCursorDbQuery(query, context);
 
                     dbQuery = HandleFilter(options, dbQuery);
                     dbQuery = HandleOrderBy(options, dbQuery);
@@ -2190,6 +2189,24 @@ namespace NWheels.UI
                     repository.Delete((TEntity)entity);
                     context.CommitChanges();
                 }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private IQueryable<TEntity> GetCursorDbQuery(IQueryable query, TContext context)
+            {
+                IQueryable<TEntity> dbQuery;
+
+                if (query != null)
+                {
+                    dbQuery = (IQueryable<TEntity>)query;
+                }
+                else
+                {
+                    var repository = context.GetEntityRepository(typeof(TEntity)).As<IEntityRepository<TEntity>>();
+                    dbQuery = repository.AsQueryable();
+                }
+                return dbQuery;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

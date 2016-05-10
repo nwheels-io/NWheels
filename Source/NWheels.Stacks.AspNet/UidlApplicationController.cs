@@ -580,6 +580,8 @@ namespace NWheels.Stacks.AspNet
                 return StatusCode(HttpStatusCode.NotFound);
             }
 
+            var txViewModel = TryGetViewModelFrom(queryCommand);
+
             using (new UIOperationContext(
                 _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.EntityQuery, 
                 target, contractName, operationName, entity: entityName, query: options, format: outputFormat))
@@ -601,7 +603,7 @@ namespace NWheels.Stacks.AspNet
                                 Session.Current,
                                 isSynchronous: true,
                                 entityService: _context.EntityService,
-                                reportCriteria: null,
+                                reportCriteria: txViewModel,
                                 reportQuery: query,
                                 reportQueryOptions: options,
                                 documentDesign: null,
