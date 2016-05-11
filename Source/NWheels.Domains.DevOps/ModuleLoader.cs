@@ -4,18 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
-using Autofac.Core;
-using NWheels.Extensions;
 
-namespace NWheels.Stacks.MongoDb.Logging
+namespace NWheels.Domains.DevOps
 {
-    public class LogPersistorFeatureLoader : Autofac.Module
+    public class ModuleLoader : Autofac.Module
     {
         #region Overrides of Module
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<MongoDbThreadLogPersistor>().LastInPipeline();
+            // nothing
         }
 
         #endregion

@@ -27,6 +27,7 @@ using NWheels.Hosting.Core;
 using NWheels.Logging;
 using NWheels.Logging.Core;
 using NWheels.Stacks.Nlog;
+using NWheels.UI;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 using NWheels.Utilities;
@@ -43,6 +44,8 @@ namespace NWheels.Stacks.AspNet
         private static readonly IPlainLog _s_log;
         private static NodeHost _s_nodeHost;
         private static string _s_bootConfigFilePath;
+        private static UidlApplication _s_uidlApplication;
+        private static bool _s_requireHttps;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -137,6 +140,12 @@ namespace NWheels.Stacks.AspNet
 
         public bool TryGetUidlApplication(out UidlApplication application)
         {
+            if (_s_uidlApplication != null)
+            {
+                application = _s_uidlApplication;
+                return true;
+            }
+
             if ( _s_nodeHost != null )
             {
                 return _s_nodeHost.Components.TryResolve<UidlApplication>(out application);
@@ -303,6 +312,8 @@ namespace NWheels.Stacks.AspNet
                         });
 
                     _s_nodeHost.LoadAndActivate();
+                    _s_nodeHost.Components.TryResolve<UidlApplication>(out _s_uidlApplication);
+                    _s_requireHttps = _s_nodeHost.Components.Resolve<IFrameworkUIConfig>().EnforceWebContentSecurity;
                 }
             }
             finally

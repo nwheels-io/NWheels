@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Autofac;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 using NWheels.Concurrency;
 using NWheels.Core;
 using NWheels.Extensions;
@@ -15,7 +8,7 @@ using NWheels.Hosting;
 using NWheels.Logging;
 using NWheels.Logging.Core;
 
-namespace NWheels.Stacks.MongoDb.Logging
+namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 {
     public class MongoDbThreadLogPersistor : LifecycleEventListenerBase, IThreadPostMortem
     {

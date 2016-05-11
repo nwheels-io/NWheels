@@ -3,7 +3,7 @@ using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Logging;
 
-namespace NWheels.Domains.DevOps.Logging.Entities
+namespace NWheels.Domains.DevOps.SystemLogs.Entities
 {
     [EntityContract]
     public interface ILogMessageEntity : IBaseLogDimensionsEntity

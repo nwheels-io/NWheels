@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using NWheels.Logging;
-using NWheels.Stacks.MongoDb.Logging;
+using NWheels.Stacks.MongoDb.SystemLogs;
+using NWheels.Stacks.MongoDb.SystemLogs.Persistence;
 using NWheels.Testing.Controllers;
 
 namespace NWheels.Tools.TestBoard.Modules.LogViewer

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Options;
@@ -11,7 +8,7 @@ using MongoDB.Driver.Builders;
 using NWheels.Extensions;
 using NWheels.Logging;
 
-namespace NWheels.Stacks.MongoDb.Logging
+namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 {
     public class DailySummaryRecord
     {

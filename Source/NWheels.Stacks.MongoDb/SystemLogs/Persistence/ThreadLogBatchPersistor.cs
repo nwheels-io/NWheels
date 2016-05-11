@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 using NWheels.Extensions;
 using NWheels.Logging;
 
-namespace NWheels.Stacks.MongoDb.Logging
+namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 {
     internal class ThreadLogBatchPersistor
     {

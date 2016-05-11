@@ -89,12 +89,13 @@
     <Compile Include="Factories\MongoStorageInitializer.cs" />
     <Compile Include="Factories\MongoDataRepositoryFactory.cs" />
     <Compile Include="JsonSerializationExtension.cs" />
-    <Compile Include="Logging\DailySummaryRecord.cs" />
-    <Compile Include="Logging\LogMessageRecord.cs" />
-    <Compile Include="Logging\LogPersistorFeatureLoader.cs" />
-    <Compile Include="Logging\MongoDbThreadLogPersistor.cs" />
-    <Compile Include="Logging\ThreadLogBatchPersistor.cs" />
-    <Compile Include="Logging\ThreadLogRecord.cs" />
+    <Compile Include="SystemLogs\Persistence\DailySummaryRecord.cs" />
+    <Compile Include="SystemLogs\Domain\Entities\LogLevelSummaryEntity.cs" />
+    <Compile Include="SystemLogs\Persistence\LogMessageRecord.cs" />
+    <Compile Include="SystemLogs\Persistence\LogPersistorFeatureLoader.cs" />
+    <Compile Include="SystemLogs\Persistence\MongoDbThreadLogPersistor.cs" />
+    <Compile Include="SystemLogs\Persistence\ThreadLogBatchPersistor.cs" />
+    <Compile Include="SystemLogs\Persistence\ThreadLogRecord.cs" />
     <Compile Include="MongoDatabaseMigrator.cs" />
     <Compile Include="MongoDataRepositoryBase.cs" />
     <Compile Include="Factories\MongoEntityObjectFactory.cs" />
@@ -110,6 +111,10 @@
     <Compile Include="UnsignedNumericOverflowConvention.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NWheels.Domains.DevOps\NWheels.Domains.DevOps.csproj">
+      <Project>{50958672-45af-42b5-957d-84ab15a2eaff}</Project>
+      <Name>NWheels.Domains.DevOps</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NWheels\NWheels.csproj">
       <Project>{f0ecf554-bf54-4843-b62f-c67c4deb2764}</Project>
       <Name>NWheels</Name>
@@ -121,7 +126,9 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="SystemLogs\Domain\Transactions\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
