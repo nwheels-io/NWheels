@@ -207,12 +207,12 @@ namespace NWheels.Stacks.AspNet
 
         private void WebApiApplication_EndRequest(object sender, EventArgs e)
         {
-            if ( RequestLogger != null )
+            if (RequestLogger != null)
             {
                 var context = HttpContext.Current;
                 var activity = (ActivityLogNode)context.Items[RequestLogger];
 
-                if ( context.Response.StatusCode < 400 )
+                if (context.Response.StatusCode < 400)
                 {
                     RequestLogger.RequestCompleted(
                         (context != null && context.Request != null ? context.Request.HttpMethod : "N/A"),
@@ -230,7 +230,10 @@ namespace NWheels.Stacks.AspNet
                         (context != null && context.Error != null ? context.Error : new Exception("Error is not available")));
                 }
 
-                ((IDisposable)activity).Dispose();
+                if (activity != null)
+                {
+                    ((IDisposable)activity).Dispose();
+                }
             }
 
             //if (HttpContext.Current.Request.QueryString.Get("savertdll") != null)
