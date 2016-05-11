@@ -28,4 +28,25 @@ namespace NWheels.Processing
         public bool SupportsPreview { get; set; }
         public string AuditName { get; set; }
     }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public abstract class TransactionScript<TContext, TInput, TOutput> : ITransactionScript<TContext, TInput, TOutput>
+    {
+        public virtual TInput InitializeInput(TContext context)
+        {
+            return default(TInput);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public virtual TOutput Preview(TInput input)
+        {
+            return default(TOutput);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public abstract TOutput Execute(TInput input);
+    }
 }
