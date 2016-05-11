@@ -655,7 +655,7 @@ namespace NWheels.Hosting.Core
             {
                 using ( _logger.LoadingModules() )
                 {
-                    foreach ( var module in _nodeConfig.FrameworkModules.Concat(_nodeConfig.ApplicationModules) )
+                    foreach ( var module in _nodeConfig.FrameworkModules.Concat(_nodeConfig.ApplicationModules).Concat(_nodeConfig.IntegrationModules) )
                     {
                         _logger.RegisteringModule(module.Name);
 

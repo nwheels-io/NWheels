@@ -6,6 +6,8 @@ using System.Text;
 using Hapil;
 using NWheels.Exceptions;
 using System.IO;
+using System.Linq;
+using NWheels.Configuration.Core;
 using NWheels.Extensions;
 
 namespace NWheels.Hosting
@@ -36,56 +38,11 @@ namespace NWheels.Hosting
                 throw new NodeHostConfigException("NodeName is not specified");
             }
 
-            if ( FrameworkModules == null )
-            {
-                FrameworkModules = new List<ModuleConfig>();
-            }
-            else
-            {
-                FrameworkModules.ForEach(ValidateModule);
-            }
-
-            if ( ApplicationModules == null )
-            {
-                ApplicationModules = new List<ModuleConfig>();
-            }
-            else
-            {
-                ApplicationModules.ForEach(ValidateModule);
-            }
-
-            if ( ConfigFiles == null )
-            {
-                ConfigFiles = new List<ConfigFile>();
-            }
-            else
-            {
-                ConfigFiles.ForEach(f => ValidateConfigFile(this.LoadedFromDirectory, f));
-            }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        private void LoadEnvironmentConfig()
-        {
-            var envConfigFilePath = Path.Combine(LoadedFromDirectory, EnvironmentConfiguration.DefaultEnvironmentConfigFileName);
-            var envConfigFile = EnvironmentConfiguration.LoadFromFile(envConfigFilePath);
-
-            if (envConfigFile != null)
-            {
-                EnvironmentConfiguration.Environment environment;
-                _environmentLookupLog = envConfigFile.TryGetEnvironment(_s_machineName, this.LoadedFromDirectory, out environment);
-
-                if (environment != null && _environmentLookupLog != EnvironmentConfiguration.LookupResult.NotFound)
-                {
-                    this.EnvironmentName = environment.Name;
-                    this.EnvironmentType = environment.Type;
-                }
-            }
-            else
-            {
-                _environmentLookupLog = EnvironmentConfiguration.LookupResult.EnvironmentConfigFileDoesNotExist;
-            }
+            FrameworkModules = ValidateModuleList(FrameworkModules);
+            ApplicationModules = ValidateModuleList(ApplicationModules);
+            IntegrationModules = ValidateModuleList(IntegrationModules);
+            
+            ValidateConfigFiles();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -156,6 +113,9 @@ namespace NWheels.Hosting
         public List<ModuleConfig> ApplicationModules { get; set; }
 
         [DataMember(Order = 7, IsRequired = false, EmitDefaultValue = false)]
+        public List<ModuleConfig> IntegrationModules { get; set; }
+
+        [DataMember(Order = 8, IsRequired = false, EmitDefaultValue = false)]
         public List<ConfigFile> ConfigFiles { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -173,6 +133,63 @@ namespace NWheels.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private void LoadEnvironmentConfig()
+        {
+            var envConfigFilePath = Path.Combine(LoadedFromDirectory, EnvironmentConfiguration.DefaultEnvironmentConfigFileName);
+            var envConfigFile = EnvironmentConfiguration.LoadFromFile(envConfigFilePath);
+
+            if (envConfigFile != null)
+            {
+                EnvironmentConfiguration.Environment environment;
+                _environmentLookupLog = envConfigFile.TryGetEnvironment(_s_machineName, this.LoadedFromDirectory, out environment);
+
+                if (environment != null && _environmentLookupLog != EnvironmentConfiguration.LookupResult.NotFound)
+                {
+                    this.EnvironmentName = environment.Name;
+                    this.EnvironmentType = environment.Type;
+                }
+            }
+            else
+            {
+                _environmentLookupLog = EnvironmentConfiguration.LookupResult.EnvironmentConfigFileDoesNotExist;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private List<ModuleConfig> ValidateModuleList(List<ModuleConfig> configuredList)
+        {
+            List<ModuleConfig> validatedList;
+
+            if (configuredList == null)
+            {
+                validatedList = new List<ModuleConfig>();
+            }
+            else
+            {
+                validatedList = configuredList.Where(module => module.ShouldLoad(node: this)).ToList();
+                validatedList.ForEach(ValidateModule);
+            }
+
+            return validatedList;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void ValidateConfigFiles()
+        {
+            if (ConfigFiles == null)
+            {
+                ConfigFiles = new List<ConfigFile>();
+            }
+            else
+            {
+                ConfigFiles.ForEach(f => ValidateConfigFile(this.LoadedFromDirectory, f));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void FeatureListToLogString(List<FeatureConfig> featureList, StringBuilder text)
         {
             foreach (var feature in featureList)
@@ -181,7 +198,7 @@ namespace NWheels.Hosting
                 text.AppendFormat("++ Feature           - {0}", feature.Name);
             }
         }
-
+        
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private static readonly string _s_machineName = System.Environment.MachineName;
@@ -283,18 +300,63 @@ namespace NWheels.Hosting
         [DataContract(Namespace = "NWheels.Hosting", Name = "Module")]
         public class ModuleConfig
         {
+            public bool ShouldLoad(INodeConfiguration node)
+            {
+                if (this.Condition != null)
+                {
+                    return this.Condition.Evaluate(node);
+                }
+
+                return true;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             [DataMember(Order = 1, IsRequired = false, EmitDefaultValue = false)]
             public string Name { get; set; }
 
-            [DataMember(Order = 2, IsRequired = true)]
+            [DataMember(Order = 2, IsRequired = false, EmitDefaultValue = false)]
+            public ConditionConfig Condition { get; set; }
+
+            [DataMember(Order = 3, IsRequired = true)]
             public string Assembly { get; set; }
 
-            [DataMember(Order = 3, IsRequired = false, EmitDefaultValue = false)]
+            [DataMember(Order = 4, IsRequired = false, EmitDefaultValue = false)]
             public string LoaderClass { get; set; }
 
-            [DataMember(Order = 4, IsRequired = false, EmitDefaultValue = false)]
+            [DataMember(Order = 5, IsRequired = false, EmitDefaultValue = false)]
             public List<FeatureConfig> Features { get; set; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataContract(Namespace = "NWheels.Hosting", Name = "Condition")]
+        public class ConditionConfig
+        {
+            public bool Evaluate(INodeConfiguration node)
+            {
+                if (!XmlConfigurationLoader.Match(node.EnvironmentName, this.EnvironmentNames))
+                {
+                    return false;
+                }
+
+                if (!XmlConfigurationLoader.Match(node.EnvironmentType, this.EnvironmentTypes))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            [DataMember(Order = 1, IsRequired = false, EmitDefaultValue = false)]
+            public string EnvironmentTypes { get; set; }
+
+            [DataMember(Order = 2, IsRequired = false, EmitDefaultValue = false)]
+            public string EnvironmentNames { get; set; }
+        }
+
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
