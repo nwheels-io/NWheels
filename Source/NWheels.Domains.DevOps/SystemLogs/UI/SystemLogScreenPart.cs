@@ -21,9 +21,10 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
         {
             ContentRoot = LogLevelSummary;
 
+            LogLevelSummary.AutoSubmitOnLoad = true;
             LogLevelSummary.SummaryChart.TemplateName = "ChartInline";
             LogLevelSummary.SummaryChart.Height = WidgetSize.Large;
-
+            LogLevelSummary.CriteriaForm.AutoSubmitOnChange = true;
             LogLevelSummary.CriteriaForm.TemplateName = "FormInline";
             LogLevelSummary.CriteriaForm.IsInlineStyle = true;
             LogLevelSummary.CriteriaForm.Range(

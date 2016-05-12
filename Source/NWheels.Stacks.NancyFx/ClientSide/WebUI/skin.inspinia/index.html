@@ -2483,7 +2483,7 @@ HEAD, JS/CSS LINKS
             function setupSeriesType(serverObj, clientObj) {
                 switch (serverObj.Type) {
                     case 'Bar': 
-                        clientObj.bars = { show: true, align: 'center' };
+                        clientObj.bars = { show: true, align: 'left' };
                         clientObj.lines = { show: false };
                         if (serverObj.MillisecondStepSize && serverObj.MillisecondStepSize > 0) {
                             clientObj.bars.barWidth = serverObj.MillisecondStepSize;

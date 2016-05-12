@@ -34,6 +34,8 @@ namespace NWheels.UI.Toolbox
         public Chart SummaryChart { get; set; }
         [DataMember]
         public DataGrid<TResultRow> ResultTable { get; set; }
+        [DataMember]
+        public bool AutoSubmitOnLoad { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -70,7 +72,8 @@ namespace NWheels.UI.Toolbox
                     .InvokeTransactionScript<TResultScript>()
                     .WaitForReply((script, vm) => script.InitializeInput(vm.Input))
                     .Then(b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Criteria))
-                    .Then(bb => bb.Broadcast(CriteriaForm.ModelSetter).WithPayload(m => m.Input).TunnelDown()));
+                    .Then(bb => bb.Broadcast(CriteriaForm.ModelSetter).WithPayload(m => m.Input).TunnelDown()
+                    .ThenIf(this.AutoSubmitOnLoad, bbb => bbb.Broadcast(ShowReport.Executing).BubbleUp())));
             }
 
             presenter.On(ShowReport)
