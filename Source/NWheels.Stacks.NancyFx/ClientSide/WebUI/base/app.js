@@ -1127,6 +1127,25 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 $rootScope.$broadcast(':global:CommandCheckChanged', command);
             }
 
+            scope.calculateHeight = function(mediumValue) {
+                if (!scope.uidl.height) {
+                    return mediumValue;
+                }
+                
+                var factor = 1;
+                
+                switch (scope.uidl.height) {
+                    case 'ExtraSmall': factor = 0.25; break;
+                    case 'Small': factor = 0.5; break;
+                    case 'MediumSmall': factor = 0.75; break;
+                    case 'MediumLarge': factor = 1.5; break;
+                    case 'Large': factor = 2; break;
+                    case 'ExtraLarge': factor = 4; break;
+                };
+                
+                return parseInt(mediumValue * factor);
+            };
+            
 			scope.$on(':global:CommandCheckChanged', function (event, data) {
 			    var command = Enumerable.From(scope.uidl.commands).FirstOrDefault('c=>c.qualifiedName=="' + data.qualifiedName + '"');
                 if (command) {

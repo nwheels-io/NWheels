@@ -2257,7 +2257,10 @@ HEAD, JS/CSS LINKS
         </div>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/ChartInline">
-        <div id="{{::uidl.elementName}}" class="flot-chart-content" style="padding:0px; position:relative;height:80px;"></div>
+        <div id="{{::uidl.elementName}}" 
+             class="flot-chart-content" 
+             style="padding:0px; position:relative;"
+             ng-style="{ height: calculateHeight(80) }"></div>
     </script>
     <script type="text/javascript">
         function initWidget_Chart($scope) {
@@ -2388,6 +2391,7 @@ HEAD, JS/CSS LINKS
                         label: serverData.Series[si].Label,
                         data: []
                     };
+                    setupSeriesType(serverData.Series[si], series);
                     for (var xi = 0; xi < serverData.Series[si].Points.length; xi++) {
                         var point = serverData.Series[si].Points[xi];
                         series.data.push([point.UnixUtcTimestamp, point.Value]);
@@ -2446,6 +2450,17 @@ HEAD, JS/CSS LINKS
                     }
                 };
                 return options;
+            }
+            function setupSeriesType(serverObj, clientObj) {
+                switch (serverObj.Type) {
+                    case 'Bar': 
+                        clientObj.bars = { show: true, align: 'center' };
+                        clientObj.lines = { show: false };
+                        if (serverObj.MillisecondStepSize && serverObj.MillisecondStepSize > 0) {
+                            clientObj.bars.barWidth = serverObj.MillisecondStepSize;
+                        }
+                        break;
+                }
             }
         }
     </script>

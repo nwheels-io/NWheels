@@ -45,7 +45,6 @@ namespace NWheels.Stacks.AspNet
         private static NodeHost _s_nodeHost;
         private static string _s_bootConfigFilePath;
         private static UidlApplication _s_uidlApplication;
-        private static bool _s_requireHttps;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -313,7 +312,6 @@ namespace NWheels.Stacks.AspNet
 
                     _s_nodeHost.LoadAndActivate();
                     _s_nodeHost.Components.TryResolve<UidlApplication>(out _s_uidlApplication);
-                    _s_requireHttps = _s_nodeHost.Components.Resolve<IFrameworkUIConfig>().EnforceWebContentSecurity;
                 }
             }
             finally

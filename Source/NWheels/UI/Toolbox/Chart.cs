@@ -44,6 +44,8 @@ namespace NWheels.UI.Toolbox
         public string DataExpression { get; set; }
         [DataMember]
         public string ModelSetterQualifiedName { get; set; }
+        [DataMember]
+        public WidgetSize Height { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -124,8 +126,21 @@ namespace NWheels.UI.Toolbox
         [DataContract(Namespace = UidlDocument.DataContractNamespace)]
         public class TimeSeriesData : AbstractSeriesData
         {
+            public TimeSeriesData StepSize(TimeSpan value)
+            {
+                this.MillisecondStepSize = (int)value.TotalMilliseconds;
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             [DataMember]
             public List<TimeSeriesPoint> Points { get; set; }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            [DataMember]
+            public long MillisecondStepSize { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
