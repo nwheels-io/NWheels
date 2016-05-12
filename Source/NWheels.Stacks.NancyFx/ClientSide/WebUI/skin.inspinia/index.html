@@ -2093,28 +2093,57 @@ HEAD, JS/CSS LINKS
             if ($scope.hasUidlModifier('DateTimePicker') && $scope.hasUidlModifier('RangeStart')) {
                 $scope.timeRangePresets = null;
                 $scope.dateTimeRangePickerCreated = false;
+                $scope.displayFormatString = 'YYYY-MM-DD';
                 $scope.$http.get('app/timeRangePresets').then(function (response) {
                     var presetDictionary = { };
                     for (var i = 0; i < response.data.length ; i++) {
                         var preset = response.data[i];
                         if ($.inArray(preset.name, $scope.uidl.standardValues) >= 0) {
                             presetDictionary[$scope.translate(preset.name)] = [moment(preset.start, 'YYYY-MM-DD HH:mm:ss'), moment(preset.end, 'YYYY-MM-DD HH:mm:ss')];
+                            if (preset.name.indexOf('Hour') > -1 || preset.name.indexOf('Minute') > -1) {
+                                $scope.shouldHaveTimePart = true;
+                                $scope.displayFormatString = 'YYYY-MM-DD HH:mm:ss';
+                            }
                         }
                     }
                     $scope.timeRangePresets = presetDictionary;
                 });
                 $scope.displayDateRange = function(start, end) {
-                    $('#' + $scope.uniqueFieldId + ' span').html(start.format('YYYY-MM-DD') + ' - ' + end.format('YYYY-MM-DD'));
+                    var label = $scope.tryFindRangePreset(start, end);
+                    if (label) {
+                        $('#' + $scope.uniqueFieldId + ' span').html(label);
+                    } else {
+                        $('#' + $scope.uniqueFieldId + ' span').html(start.format($scope.displayFormatString) + ' - ' + end.format($scope.displayFormatString));
+                    }
+                };
+                $scope.tryFindRangePreset = function(start, end) {
+                    var precision = ($scope.shouldHaveTimePart ? 'second' : 'day');
+                    for (var label in $scope.timeRangePresets){
+                        if ($scope.timeRangePresets.hasOwnProperty(label) && label.length > 0){
+                            var range = $scope.timeRangePresets[label];
+                            if (range[0].isSame(start, precision) && range[1].isSame(end, precision)) {
+                                return label;
+                            }
+                        }
+                    }
+                    return null;
                 };
                 $scope.createDateTimeRangePicker = function() {
                     if ($scope.dateTimeRangePickerCreated || !$scope.entity || !$scope.entity[$scope.uidl.propertyName] || !$scope.timeRangePresets) {
                         return;
                     }
-                    $('#' + $scope.uniqueFieldId).daterangepicker({
+                    var rangePickerOptions = {
                         startDate: moment($scope.entity[$scope.uidl.propertyName], 'YYYY-MM-DD HH:mm:ss'),
                         endDate: moment($scope.entity[$scope.groupFields[0].propertyName], 'YYYY-MM-DD HH:mm:ss'),
-                        ranges: $scope.timeRangePresets,
-                    }, function(start, end, label) {
+                        ranges: $scope.timeRangePresets
+                    };
+                    if ($scope.shouldHaveTimePart) {
+                        rangePickerOptions.timePicker = true;
+                        rangePickerOptions.timePickerSeconds = true;
+                        rangePickerOptions.timePicker24Hour = true;
+                        rangePickerOptions.timePickerIncrement = 1;
+                    };
+                    $('#' + $scope.uniqueFieldId).daterangepicker(rangePickerOptions, function(start, end, label) {
                         $scope.displayDateRange(start, end);
                         $scope.entity[$scope.uidl.propertyName] = start.format('YYYY-MM-DD HH:mm:ss');
                         $scope.entity[$scope.groupFields[0].propertyName] = end.format('YYYY-MM-DD HH:mm:ss');
