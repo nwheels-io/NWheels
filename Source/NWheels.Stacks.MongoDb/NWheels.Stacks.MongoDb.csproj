@@ -89,10 +89,13 @@
     <Compile Include="Factories\MongoStorageInitializer.cs" />
     <Compile Include="Factories\MongoDataRepositoryFactory.cs" />
     <Compile Include="JsonSerializationExtension.cs" />
+    <Compile Include="SystemLogs\Domain\Entities\LogLevelSummaryEntityHandlerExtension.cs" />
+    <Compile Include="SystemLogs\Domain\Transactions\LogLevelSummaryChartTx.cs" />
+    <Compile Include="SystemLogs\Domain\Transactions\LogLevelSummaryListTx.cs" />
     <Compile Include="SystemLogs\Persistence\DailySummaryRecord.cs" />
     <Compile Include="SystemLogs\Domain\Entities\LogLevelSummaryEntity.cs" />
     <Compile Include="SystemLogs\Persistence\LogMessageRecord.cs" />
-    <Compile Include="SystemLogs\Persistence\LogPersistorFeatureLoader.cs" />
+    <Compile Include="SystemLogs\SystemLogUIFeatureLoader.cs" />
     <Compile Include="SystemLogs\Persistence\MongoDbThreadLogPersistor.cs" />
     <Compile Include="SystemLogs\Persistence\ThreadLogBatchPersistor.cs" />
     <Compile Include="SystemLogs\Persistence\ThreadLogRecord.cs" />
@@ -126,9 +129,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="SystemLogs\Domain\Transactions\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

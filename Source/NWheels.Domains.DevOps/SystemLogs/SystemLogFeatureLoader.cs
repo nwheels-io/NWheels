@@ -10,8 +10,7 @@ namespace NWheels.Domains.DevOps.SystemLogs
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.NWheelsFeatures().Processing().RegisterTransactionScript<LogLevelSummaryChartTx>();
-            builder.NWheelsFeatures().Processing().RegisterTransactionScript<LogLevelSummaryListTx>();
+            // nothing
         }
 
         #endregion

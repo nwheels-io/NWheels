@@ -7,21 +7,21 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
     public interface ILogLevelSummaryEntity : IBaseLogDimensionsEntity
     {
         [PropertyContract.Calculated]
-        int DebugCount { get; set; }
+        int DebugCount { get; }
 
         [PropertyContract.Calculated]
-        int VerboseCount { get; set; }
+        int VerboseCount { get; }
 
         [PropertyContract.Calculated]
-        int InfoCount { get; set; }
+        int InfoCount { get; }
 
         [PropertyContract.Calculated]
-        int WarningCount { get; set; }
+        int WarningCount { get; }
 
         [PropertyContract.Calculated]
-        int ErrorCount { get; set; }
+        int ErrorCount { get; }
 
         [PropertyContract.Calculated]
-        int CriticalCount { get; set; }
+        int CriticalCount { get; }
     }
 }

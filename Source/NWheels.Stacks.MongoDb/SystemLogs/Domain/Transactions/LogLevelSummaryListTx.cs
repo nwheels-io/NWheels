@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using NWheels.Domains.DevOps.SystemLogs.Entities;
+using NWheels.Domains.DevOps.SystemLogs.Transactions;
+using NWheels.Extensions;
 using NWheels.Processing;
+using NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities;
 using NWheels.UI;
 
-namespace NWheels.Domains.DevOps.SystemLogs.Transactions
+namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
 {
-    [TransactionScript(SupportsInitializeInput = false, SupportsPreview = false)]
-    public class LogLevelSummaryListTx : TransactionScript<Empty.Context, ILogTimeRangeCriteria, IQueryable<ILogLevelSummaryEntity>>
+    public class LogLevelSummaryListTx : AbstractLogLevelSummaryListTx
     {
         private readonly IFramework _framework;
 
@@ -26,7 +28,6 @@ namespace NWheels.Domains.DevOps.SystemLogs.Transactions
         public override IQueryable<ILogLevelSummaryEntity> Execute(ILogTimeRangeCriteria input)
         {
             var random = new Random();
-            var today = DateTime.UtcNow.Date;
             var results = new List<ILogLevelSummaryEntity>();
 
             foreach (var node in new[] { "BackEnd", "ETL", "WebApp1", "WebApp2" })
@@ -35,18 +36,14 @@ namespace NWheels.Domains.DevOps.SystemLogs.Transactions
                 {
                     foreach (var replica in new[] { "1", "2", "3" })
                     {
-                        var result = _framework.NewDomainObject<ILogLevelSummaryEntity>();
+                        var result = _framework.NewDomainObject<ILogLevelSummaryEntity>().As<LogLevelSummaryEntity>();
 
-                        result.Environment = "PROD";
-                        result.Machine = "QWESVR123" + random.Next(10);
-                        result.Node = node;
-                        result.Instance = instance;
-                        result.Replica = replica;
-                        result.DebugCount = random.Next(1000);
-                        result.VerboseCount = result.DebugCount / 2;
-                        result.InfoCount = result.DebugCount / 3;
-                        result.WarningCount = result.DebugCount / 4;
-                        result.ErrorCount = result.DebugCount / 5;
+                        result.Randomize(
+                            machine: "QWESVR123" + random.Next(10),
+                            environment: "PROD",
+                            node: node,
+                            instance: instance,
+                            replica: replica);
 
                         results.Add(result);
                     }

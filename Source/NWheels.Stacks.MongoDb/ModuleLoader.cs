@@ -16,6 +16,7 @@ using NWheels.Conventions.Core;
 using NWheels.Entities.Core;
 using NWheels.Logging.Core;
 using NWheels.Stacks.MongoDb.Factories;
+using NWheels.Stacks.MongoDb.SystemLogs;
 using NWheels.Stacks.MongoDb.SystemLogs.Persistence;
 
 namespace NWheels.Stacks.MongoDb

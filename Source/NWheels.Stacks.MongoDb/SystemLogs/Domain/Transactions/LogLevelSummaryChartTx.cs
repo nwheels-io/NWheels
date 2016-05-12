@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using NWheels.Domains.DevOps.SystemLogs.Entities;
+using NWheels.Domains.DevOps.SystemLogs.Transactions;
 using NWheels.Processing;
 using NWheels.UI;
 using NWheels.UI.Toolbox;
 
-namespace NWheels.Domains.DevOps.SystemLogs.Transactions
+namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
 {
     [TransactionScript(SupportsInitializeInput = false, SupportsPreview = false)]
-    public class LogLevelSummaryChartTx : TransactionScript<Empty.Context, ILogTimeRangeCriteria, ChartData>
+    public class LogLevelSummaryChartTx : AbstractLogLevelSummaryChartTx
     {
         #region Overrides of TransactionScript<Input,ILogTimeRangeCriteria,ChartData>
 
@@ -20,6 +21,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.Transactions
                 Series = new List<ChartData.AbstractSeriesData>() {
                     new ChartData.TimeSeriesData() {
                         Type = ChartSeriesType.Bar,
+                        MillisecondStepSize = (long)TimeSpan.FromHours(1).TotalMilliseconds,
                         Label = "Info",
                         Points = new List<ChartData.TimeSeriesPoint>() {
                             new ChartData.TimeSeriesPoint() { UtcTimestamp = today.AddHours(0), Value = 10 },
@@ -50,6 +52,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.Transactions
                     new ChartData.TimeSeriesData() {
                         Type = ChartSeriesType.Bar,
                         Label = "Warning",
+                        MillisecondStepSize = (long)TimeSpan.FromHours(1).TotalMilliseconds,
                         Points = new List<ChartData.TimeSeriesPoint>() {
                             new ChartData.TimeSeriesPoint() { UtcTimestamp = today.AddHours(0), Value = 5 },
                             new ChartData.TimeSeriesPoint() { UtcTimestamp = today.AddHours(2), Value = 10 },
@@ -79,6 +82,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.Transactions
                     new ChartData.TimeSeriesData() {
                         Type = ChartSeriesType.Bar,
                         Label = "Error",
+                        MillisecondStepSize = (long)TimeSpan.FromHours(1).TotalMilliseconds,
                         Points = new List<ChartData.TimeSeriesPoint>() {
                             new ChartData.TimeSeriesPoint() { UtcTimestamp = today.AddHours(0), Value = 2 },
                             new ChartData.TimeSeriesPoint() { UtcTimestamp = today.AddHours(2), Value = 5 },

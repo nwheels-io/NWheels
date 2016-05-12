@@ -6,9 +6,9 @@ using NWheels.UI.Uidl;
 
 namespace NWheels.Domains.DevOps.SystemLogs.UI
 {
-    public class LogExplorerScreenPart : ScreenPartBase<LogExplorerScreenPart, Empty.Context, Empty.Data, Empty.State>
+    public class SystemLogScreenPart : ScreenPartBase<SystemLogScreenPart, Empty.Context, Empty.Data, Empty.State>
     {
-        public LogExplorerScreenPart(string idName, UidlApplication parent)
+        public SystemLogScreenPart(string idName, UidlApplication parent)
             : base(idName, parent)
         {
         }
@@ -17,9 +17,12 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
 
         #region Overrides of ScreenPartBase<SystemLogScreenPart,Input,Data,State>
 
-        protected override void DescribePresenter(PresenterBuilder<LogExplorerScreenPart, Empty.Data, Empty.State> presenter)
+        protected override void DescribePresenter(PresenterBuilder<SystemLogScreenPart, Empty.Data, Empty.State> presenter)
         {
             ContentRoot = LogLevelSummary;
+
+            LogLevelSummary.SummaryChart.TemplateName = "ChartInline";
+            LogLevelSummary.SummaryChart.Height = WidgetSize.Large;
 
             presenter.On(base.NavigatedHere)
                 .Broadcast(LogLevelSummary.ContextSetter).WithPayload(vm => vm.Input).TunnelDown();
@@ -32,8 +35,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
         public ChartTableReport<
             Empty.Context, 
             ILogTimeRangeCriteria, 
-            LogLevelSummaryChartTx, 
-            LogLevelSummaryListTx, 
+            AbstractLogLevelSummaryChartTx, 
+            AbstractLogLevelSummaryListTx, 
             ILogLevelSummaryEntity> LogLevelSummary { get; set; }
     }
 }
