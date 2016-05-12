@@ -4,11 +4,11 @@ using NWheels.Domains.DevOps.SystemLogs.Entities;
 using NWheels.Domains.DevOps.SystemLogs.Transactions;
 using NWheels.Processing;
 using NWheels.UI;
+using NWheels.UI.Factories;
 using NWheels.UI.Toolbox;
 
 namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
 {
-    [TransactionScript(SupportsInitializeInput = false, SupportsPreview = false)]
     public class LogLevelSummaryChartTx : AbstractLogLevelSummaryChartTx
     {
         #region Overrides of TransactionScript<Input,ILogTimeRangeCriteria,ChartData>

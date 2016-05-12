@@ -7,6 +7,7 @@ using NWheels.Extensions;
 using NWheels.Processing;
 using NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities;
 using NWheels.UI;
+using NWheels.UI.Factories;
 
 namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
 {
@@ -16,7 +17,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public LogLevelSummaryListTx(IFramework framework)
+        public LogLevelSummaryListTx(IFramework framework, IViewModelObjectFactory viewModelFactory)
+            : base(framework, viewModelFactory)
         {
             _framework = framework;
         }

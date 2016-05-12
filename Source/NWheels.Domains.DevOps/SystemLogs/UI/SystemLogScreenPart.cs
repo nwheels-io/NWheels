@@ -24,6 +24,23 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
             LogLevelSummary.SummaryChart.TemplateName = "ChartInline";
             LogLevelSummary.SummaryChart.Height = WidgetSize.Large;
 
+            LogLevelSummary.CriteriaForm.TemplateName = "FormInline";
+            LogLevelSummary.CriteriaForm.IsInlineStyle = true;
+            LogLevelSummary.CriteriaForm.Range(
+                "TimeRange",
+                x => x.From,
+                x => x.Until,
+                TimeRangePreset.Today,
+                TimeRangePreset.Yesterday,
+                TimeRangePreset.ThisWeek,
+                TimeRangePreset.LastHour,
+                TimeRangePreset.Last3Hours,
+                TimeRangePreset.Last6Hours,
+                TimeRangePreset.Last12Hours,
+                TimeRangePreset.Last24Hours,
+                TimeRangePreset.Last3Days,
+                TimeRangePreset.Last7Days);
+
             presenter.On(base.NavigatedHere)
                 .Broadcast(LogLevelSummary.ContextSetter).WithPayload(vm => vm.Input).TunnelDown();
         }
