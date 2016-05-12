@@ -42,6 +42,19 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
                 TimeRangePreset.Last3Days,
                 TimeRangePreset.Last7Days);
 
+            LogLevelSummary.ResultTable
+                .Column(x => x.Machine)
+                .Column(x => x.Environment)
+                .Column(x => x.Node)
+                .Column(x => x.Instance, size: FieldSize.Small)
+                .Column(x => x.Replica, size: FieldSize.Small)
+                .Column(x => x.CriticalCount, title: "Critical", size: FieldSize.Small, format: "#,##0")
+                .Column(x => x.ErrorCount, title: "Errors", size: FieldSize.Small, format: "#,##0")
+                .Column(x => x.WarningCount, title: "Warnings", size: FieldSize.Small, format: "#,##0")
+                .Column(x => x.InfoCount, title: "Info", size: FieldSize.Small, format: "#,##0")
+                .Column(x => x.VerboseCount, title: "Verbose", size: FieldSize.Small, format: "#,##0")
+                .Column(x => x.DebugCount, title: "Debug", size: FieldSize.Small, format: "#,##0");
+
             presenter.On(base.NavigatedHere)
                 .Broadcast(LogLevelSummary.ContextSetter).WithPayload(vm => vm.Input).TunnelDown();
         }

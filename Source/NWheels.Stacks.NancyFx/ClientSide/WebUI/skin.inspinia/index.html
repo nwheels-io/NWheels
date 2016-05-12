@@ -902,20 +902,10 @@ HEAD, JS/CSS LINKS
                         }
                     };
                 }
-                switch (metaColumn.format) {
-                    case 'c':
-                    case '0.00':
-                    case '#,##0.00':
-                    case '0.0000':
-                    case '#,##0.0000':
-                    case '0.00000':
-                    case '#,##0.00000':
-                        modelItem.align = 'right';
-                        break;
-                }
                 switch (metaColumn.columnType) {
                     case 'Number':
                     case 'Key':
+                        modelItem.align = 'right';
                         modelItem.searchoptions = {sopt: ['eq']};
                         //modelItem.stype = 'select';
                         //modelItem.searchoptions = {
