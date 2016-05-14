@@ -125,6 +125,7 @@
     <Compile Include="Concurrency\IScopedConsumptionResource.cs" />
     <Compile Include="Concurrency\ITimeoutHandle.cs" />
     <Compile Include="Concurrency\IResourceConsumerScopeHandle.cs" />
+    <Compile Include="Concurrency\MapReduceTask.cs" />
     <Compile Include="Concurrency\PerContextResourceConsumerScope.cs" />
     <Compile Include="Concurrency\ShuttleService.cs" />
     <Compile Include="Configuration\ConfiguredComponentAttribute.cs" />
