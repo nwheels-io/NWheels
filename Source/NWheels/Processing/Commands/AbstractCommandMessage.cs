@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Principal;
 using NWheels.Authorization;
 using NWheels.Processing.Messages;
+using NWheels.UI;
 
 namespace NWheels.Processing.Commands
 {
@@ -19,7 +20,20 @@ namespace NWheels.Processing.Commands
         {
             Principal = session.UserPrincipal;
             Session = session;
+            UIContext = UIOperationContext.Current;
             IsSynchronous = isSynchronous;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public IDisposable UseOptionalUIContextOnCurrentThread()
+        {
+            if (this.UIContext != null)
+            {
+                return this.UIContext.UseOnCurrentThread();
+            }
+
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,6 +69,7 @@ namespace NWheels.Processing.Commands
 
         public IPrincipal Principal { get; private set; }
         public ISession Session { get; private set; }
+        public UIOperationContext UIContext { get; private set; }
         public bool IsSynchronous { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

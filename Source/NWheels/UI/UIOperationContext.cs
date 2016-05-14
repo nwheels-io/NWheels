@@ -55,6 +55,24 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IDisposable UseOnCurrentThread()
+        {
+            if (ReferenceEquals(_s_current, this))
+            {
+                return null;
+            }
+
+            if (_s_current != null)
+            {
+                throw new InvalidOperationException("Another UIOperationContext instance is already attached to the current thread.");
+            }
+
+            _s_current = this;
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public ApplicationEntityService EntityService { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

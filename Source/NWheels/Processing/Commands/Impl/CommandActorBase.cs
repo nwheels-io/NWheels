@@ -44,7 +44,10 @@ namespace NWheels.Processing.Commands.Impl
 
                     using ( _sessionManager.JoinSession(command.Session.Id) )
                     {
-                        resultValue = concreteExecutor(command);
+                        using (command.UseOptionalUIContextOnCurrentThread())
+                        {
+                            resultValue = concreteExecutor(command);
+                        }
 
                         if ( _sessionManager.CurrentSession.Id != command.Session.Id )
                         {
