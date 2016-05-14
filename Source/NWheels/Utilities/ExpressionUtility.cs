@@ -18,9 +18,23 @@ namespace NWheels.Utilities
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static MethodInfo GetPropertyInfoFrom<TObject>(Expression<Action<TObject>> method)
+        {
+            return method.GetMethodInfo();
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static PropertyInfo GetPropertyInfo<TLambda>(TLambda lambda) where TLambda : LambdaExpression
         {
             return lambda.GetPropertyInfo();
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static PropertyInfo GetPropertyInfoFrom<TObject>(Expression<Func<TObject, object>> property)
+        {
+            return property.GetPropertyInfo();
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

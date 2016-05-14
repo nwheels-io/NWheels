@@ -29,6 +29,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs
 
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<AbstractLogLevelSummaryChartTx, LogLevelSummaryChartTx>();
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<AbstractLogLevelSummaryListTx, LogLevelSummaryListTx>();
+
+            builder.RegisterType<MongoDbThreadLogQueryService>().AsSelf().SingleInstance();
         }
 
         #endregion

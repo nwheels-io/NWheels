@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Autofac;
 using MongoDB.Driver;
 using NWheels.Concurrency;
@@ -103,23 +104,30 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         private void ConnectToDatabase()
         {
-            var connectionString = new MongoConnectionStringBuilder(_loggingConfig.ThreadLogDbConnectionString ?? "server=localhost;database=nwheels_log");
-            var client = new MongoClient(connectionString.ConnectionString);
-            var server = client.GetServer();
-            
-            _database = server.GetDatabase(connectionString.DatabaseName);
+            _database = ConnectToDatabase(_loggingConfig);
 
-            var collectionPrefix = string.Format("System.Logs.{0}.", _framework.CurrentNode.EnvironmentName);
-
-            _logMessageCollection = _database.GetCollection(collectionPrefix + "LogMessage");
-            _threadLogCollection = _database.GetCollection(collectionPrefix + "ThreadLog");
-            _dailySummaryCollection = _database.GetCollection(collectionPrefix + "DailySummary");
+            _logMessageCollection = _database.GetCollection(DbNamingConvention.GetLogMessageCollectionName(_framework.CurrentNode.EnvironmentName));
+            _threadLogCollection = _database.GetCollection(DbNamingConvention.GetThreadLogCollectionName(_framework.CurrentNode.EnvironmentName));
+            _dailySummaryCollection = _database.GetCollection(DbNamingConvention.GetDailySummaryCollectionName(_framework.CurrentNode.EnvironmentName));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static readonly int _s_processId = Process.GetCurrentProcess().Id;
         private static readonly string _s_machineName = System.Environment.MachineName;
-        private static readonly int _s_processId = System.Diagnostics.Process.GetCurrentProcess().Id;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static MongoDatabase ConnectToDatabase(IFrameworkLoggingConfiguration configuration)
+        {
+            var connectionStringValue = (configuration.ThreadLogDbConnectionString ?? "server=localhost;database=" + DbNamingConvention.DefaultDatabaseName);
+            var connectionString = new MongoConnectionStringBuilder(connectionStringValue);
+            var client = new MongoClient(connectionString.ConnectionString);
+            var server = client.GetServer();
+            var database = server.GetDatabase(connectionString.DatabaseName);
+            
+            return database;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
