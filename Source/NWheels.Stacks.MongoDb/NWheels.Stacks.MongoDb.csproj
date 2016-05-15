@@ -79,6 +79,7 @@
     <Compile Include="Factories\BsonIgnoreConvention.cs" />
     <Compile Include="Factories\BsonIdAttributeConvention.cs" />
     <Compile Include="Factories\BsonIgnoreExtraElementsConvention.cs" />
+    <Compile Include="Factories\BsonDecimalCompatibilityConvention.cs" />
     <Compile Include="Factories\BsonUtcDateTimeConvention.cs" />
     <Compile Include="Factories\BsonStringEnumConvention.cs" />
     <Compile Include="Factories\DebugPropertyConvention.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="PolymorphicDiscriminatorConvention.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RuntimeHelpers.cs" />
+    <Compile Include="DecimalAsInt64StringCompatibleSerializer.cs" />
     <Compile Include="UnsignedNumericOverflowConvention.cs" />
   </ItemGroup>
   <ItemGroup>
