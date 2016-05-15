@@ -4,34 +4,47 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Domains.DevOps.SystemLogs.Entities;
+using NWheels.Logging;
 using NWheels.Stacks.MongoDb.SystemLogs.Persistence;
 
 namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 {
     public abstract class LogLevelSummaryEntity : ILogLevelSummaryEntity
     {
-        public void Increment(DailySummaryRecord record, DateTime from, DateTime until)
+        public void SetKey(string environment, string machine, string node, string instance, string replica)
         {
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public void Randomize(string machine, string environment, string node, string instance, string replica)
-        {
-            this.Machine = machine;
             this.Environment = environment;
+            this.Machine = machine;
             this.Node = node;
             this.Instance = instance;
             this.Replica = replica;
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            var random = new Random();
-
-            this.DebugCount = random.Next(1000);
-            this.VerboseCount = this.DebugCount / 2;
-            this.InfoCount = this.DebugCount / 3;
-            this.WarningCount = this.DebugCount / 4;
-            this.ErrorCount = this.DebugCount / 5;
-            this.CriticalCount = this.DebugCount / 10;
+        public void Increment(LogLevel level, int count)
+        {
+            switch (level)
+            {
+                case LogLevel.Debug:
+                    this.DebugCount += count;
+                    break;
+                case LogLevel.Verbose:
+                    this.VerboseCount += count;
+                    break;
+                case LogLevel.Info:
+                    this.InfoCount += count;
+                    break;
+                case LogLevel.Warning:
+                    this.WarningCount += count;
+                    break;
+                case LogLevel.Error:
+                    this.ErrorCount += count;
+                    break;
+                case LogLevel.Critical:
+                    this.CriticalCount += count;
+                    break;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -10,7 +10,7 @@ using NWheels.Logging;
 
 namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 {
-    public class DailySummaryRecord
+    public class DailySummaryRecord : LogRecordBase
     {
         public DailySummaryRecord()
         {
@@ -119,18 +119,6 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         [BsonDateTimeOptions(DateOnly = true, Kind = DateTimeKind.Utc)]
         public DateTime Date { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string MachineName { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string NodeName { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string NodeInstance { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -33,6 +33,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
 
         public override ChartData Execute(ILogTimeRangeCriteria input)
         {
+            MongoDbThreadLogQueryService.NormalizeTimeRange(input);
+            
             var operation = new QueryOperation(_queryService, input);
             return operation.Execute();
         }

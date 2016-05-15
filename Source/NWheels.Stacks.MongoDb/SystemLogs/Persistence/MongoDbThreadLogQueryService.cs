@@ -56,10 +56,21 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
                 environments,
                 queryFunc: (db, environmentName) => {
                     var collection = db.GetCollection<DailySummaryRecord>(DbNamingConvention.GetDailySummaryCollectionName(environmentName));
-                    return collection.FindAll();
+                    return collection.Find(Query.And(
+                        Query<DailySummaryRecord>.GTE(x => x.Date, timeRange.From.Date),
+                        Query<DailySummaryRecord>.LT(x => x.Date, timeRange.Until.Date)
+                    ));
                 },
                 cancellation: cancellation);
         }
+
+        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        //private IMongoQuery GetDbQuery<TRecord>(ApplicationEntityService.QueryOptions query)
+        //    where TRecord : LogRecordBase
+        //{
+        //    var dbQuery = Query<TRecord>.
+        //}
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -95,6 +106,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             string[] environments,
             Func<MongoDatabase, string, IEnumerable<TRecord>> queryFunc,
             CancellationToken cancellation)
+            where TRecord : LogRecordBase
         {
             var db = SafeGetDatabase();
             var environmentNamesToSearch = SafeGetEnvironmentList();
@@ -107,7 +119,10 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             return MapReduceTask.StartNew<string, IEnumerable<TRecord>, IEnumerable<TRecord>>(
                 map: (environmentName) => {
                     var partialResult = queryFunc(db, environmentName);
-                    return partialResult;
+                    return partialResult.Select(r => {
+                        r.EnvironmentName = environmentName;
+                        return r;
+                    });
                 },
                 reduce: (partialResults) => {
                     var results = partialResults.SelectMany(r => r);
@@ -205,5 +220,21 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             ExpressionUtility.GetPropertyInfoFrom<IBaseLogDimensionsEntity>(x => x.Instance);
         private static readonly PropertyInfo _s_queryReplicaProperty =
             ExpressionUtility.GetPropertyInfoFrom<IBaseLogDimensionsEntity>(x => x.Replica);
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static void NormalizeTimeRange(ILogTimeRangeCriteria timeRange)
+        {
+            timeRange.From = new DateTime(timeRange.From.Ticks, DateTimeKind.Utc);
+
+            if (timeRange.Until.TimeOfDay == TimeSpan.FromHours(24).Subtract(TimeSpan.FromSeconds(1)))
+            {
+                timeRange.Until = new DateTime(timeRange.From.Date.AddDays(1).Ticks, DateTimeKind.Utc);
+            }
+            else
+            {
+                timeRange.Until = new DateTime(timeRange.Until.Ticks, DateTimeKind.Utc);
+            }
+        }
     }
 }

@@ -99,6 +99,7 @@
     <Compile Include="SystemLogs\Persistence\DailySummaryRecord.cs" />
     <Compile Include="SystemLogs\Domain\Entities\LogLevelSummaryEntity.cs" />
     <Compile Include="SystemLogs\Persistence\LogMessageRecord.cs" />
+    <Compile Include="SystemLogs\Persistence\LogRecordBase.cs" />
     <Compile Include="SystemLogs\Persistence\MongoDbThreadLogQueryService.cs" />
     <Compile Include="SystemLogs\Persistence\DbNamingConvention.cs" />
     <Compile Include="SystemLogs\SystemLogUIFeatureLoader.cs" />
