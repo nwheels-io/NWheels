@@ -58,6 +58,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NWheels.Domains.DevOps\NWheels.Domains.DevOps.csproj">
+      <Project>{50958672-45af-42b5-957d-84ab15a2eaff}</Project>
+      <Name>NWheels.Domains.DevOps</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NWheels.Stacks.Nlog\NWheels.Stacks.Nlog.csproj">
       <Project>{8ec79d0a-b99d-4ed1-9494-7756f29916c7}</Project>
       <Name>NWheels.Stacks.Nlog</Name>

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Autofac;
 using CommandLine;
 using CommandLine.Text;
+using NWheels.Domains.DevOps.UtilityTools;
 using NWheels.Logging.Core;
 using NWheels.Stacks.Nlog;
 using NWheels.Tools.DevFlow;
@@ -94,7 +95,10 @@ namespace NWheels.Tools.Cmd
             var builder = new ContainerBuilder();
 
             builder.RegisterInstance(_s_log).As<IPlainLog>();
+            
             builder.RegisterType<MergeSolutionTool>().Named<UtilityToolBase>(MergeSolutionTool.ToolName).InstancePerDependency();
+            builder.RegisterType<ZipTool>().Named<UtilityToolBase>(ZipTool.ToolName).InstancePerDependency();
+            builder.RegisterType<UnzipTool>().Named<UtilityToolBase>(UnzipTool.ToolName).InstancePerDependency();
 
             _s_container = builder.Build();
         }
@@ -113,6 +117,12 @@ namespace NWheels.Tools.Cmd
             [VerbOption(MergeSolutionTool.ToolName, HelpText = "Merge/unmerge projects of one solution into another solution")]
             public MergeSolutionTool.Options MergeSolutionToolOptions { get; set; }
 
+            [VerbOption(ZipTool.ToolName, HelpText = "Zip a folder")]
+            public ZipTool.Options ZipToolOptions { get; set; }
+
+            [VerbOption(UnzipTool.ToolName, HelpText = "Extract a zip")]
+            public UnzipTool.Options UnzipToolOptions { get; set; }
+
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
             [ParserState]
@@ -124,8 +134,16 @@ namespace NWheels.Tools.Cmd
             public string GetUsage(string verb)
             {
                 var effectiveVerb = verb ?? (_s_args.Length >= 2 ? _s_args[1] : null);
-                _s_help = HelpText.AutoBuild(this, effectiveVerb);
-                
+
+                if (effectiveVerb != null)
+                {
+                    _s_help = HelpText.AutoBuild(this, effectiveVerb);
+                }
+                else
+                {
+                    _s_help = HelpText.AutoBuild(this, null, verbsIndex: true);
+                }
+
                 _s_help.AddPreOptionsLine("\r\nUsage:");
 
                 if ( effectiveVerb == null )
