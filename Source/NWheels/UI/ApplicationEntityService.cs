@@ -1624,14 +1624,14 @@ namespace NWheels.UI
 
             public IQueryable<TEntity> ApplyToQuery<TEntity>(IQueryable<TEntity> query, bool first)
             {
-                throw new NotSupportedException();
+                //throw new NotSupportedException();
 
-                //if ( MetaProperty == null )
-                //{
-                //    throw new InvalidOperationException("MetaProperty must be set before calling this method.");
-                //}
+                if (MetaProperty == null)
+                {
+                    throw new InvalidOperationException("MetaProperty must be set before calling this method.");
+                }
 
-                //return MetaProperty.MakeOrderBy(query, first, ascending: this.Ascending);
+                return MetaProperty.MakeOrderBy(this.NavigationMetaPath, query, first, ascending: this.Ascending);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -2324,6 +2324,9 @@ namespace NWheels.UI
                     var orderItem = options.OrderBy[i];
                     var navigationMetaPath = BuildNavigationMetaPath(MetaType, orderItem.PropertyName);
                     var metaProperty = navigationMetaPath.Last();
+
+                    orderItem.NavigationMetaPath = navigationMetaPath;
+                    orderItem.MetaProperty = metaProperty;
 
                     if ( metaProperty.IsCalculated )
                     {
