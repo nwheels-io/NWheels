@@ -5,18 +5,19 @@ using NWheels.Domains.DevOps.SystemLogs.Entities;
 using NWheels.Processing;
 using NWheels.UI;
 using NWheels.UI.Factories;
+using NWheels.UI.Toolbox;
 
 namespace NWheels.Domains.DevOps.SystemLogs.Transactions
 {
     [TransactionScript(SupportsInitializeInput = true, SupportsPreview = false)]
-    public abstract class AbstractLogLevelSummaryListTx : TransactionScript<Empty.Context, ILogTimeRangeCriteria, IQueryable<ILogLevelSummaryEntity>>
+    public abstract class AbstractLogLevelSummaryTx : TransactionScript<Empty.Context, ILogTimeRangeCriteria, IQueryable<ILogLevelSummaryEntity>>
     {
         private readonly IFramework _framework;
         private readonly IViewModelObjectFactory _viewModelFactory;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected AbstractLogLevelSummaryListTx(IFramework framework, IViewModelObjectFactory viewModelFactory)
+        protected AbstractLogLevelSummaryTx(IFramework framework, IViewModelObjectFactory viewModelFactory)
         {
             _framework = framework;
             _viewModelFactory = viewModelFactory;

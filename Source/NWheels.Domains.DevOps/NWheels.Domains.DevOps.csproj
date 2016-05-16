@@ -62,7 +62,7 @@
     <Compile Include="SystemLogs\Entities\IThreadLogEntity.cs" />
     <Compile Include="SystemLogs\SystemLogFeatureLoader.cs" />
     <Compile Include="SystemLogs\Transactions\AbstractLogLevelSummaryChartTx.cs" />
-    <Compile Include="SystemLogs\Transactions\AbstractLogLevelSummaryListTx.cs" />
+    <Compile Include="SystemLogs\Transactions\AbstractLogLevelSummaryTx.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemLogs\UI\SystemLogScreenPart.cs" />

@@ -22,8 +22,9 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
             ContentRoot = LogLevelSummary;
 
             LogLevelSummary.AutoSubmitOnLoad = true;
-            LogLevelSummary.SummaryChart.TemplateName = "ChartInline";
-            LogLevelSummary.SummaryChart.Height = WidgetSize.Large;
+            LogLevelSummary.EnableVisualization();
+            LogLevelSummary.VisualizationChart.TemplateName = "ChartInline";
+            LogLevelSummary.VisualizationChart.Height = WidgetSize.Large;
             LogLevelSummary.CriteriaForm.AutoSubmitOnChange = true;
             LogLevelSummary.CriteriaForm.TemplateName = "FormInline";
             LogLevelSummary.CriteriaForm.IsInlineStyle = true;
@@ -63,11 +64,10 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ChartTableReport<
+        public Report<
             Empty.Context, 
             ILogTimeRangeCriteria, 
-            AbstractLogLevelSummaryChartTx, 
-            AbstractLogLevelSummaryListTx, 
+            AbstractLogLevelSummaryTx, 
             ILogLevelSummaryEntity> LogLevelSummary { get; set; }
     }
 }
