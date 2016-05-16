@@ -27,17 +27,30 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void EnableVisualization()
+        {
+            this.VisualizationChart = new Chart("VisualizationChart", this);
+            this.VisualizationChart.BindToModelSetter(this.VisualizationReady);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public Form<TCriteria> CriteriaForm { get; set; }
         [DataMember]
         public DataGrid<TResultRow> ResultTable { get; set; }
+        [DataMember, ManuallyAssigned]
+        public Chart VisualizationChart { get; set; }
+        [DataMember]
+        public bool AutoSubmitOnLoad { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlCommand ShowReport { get; set; }
         public UidlCommand DownloadExcel { get; set; }
         public UidlNotification<TContext> ContextSetter { get; set; }
-        public UidlNotification ReportReady { get; set; }
+        public UidlNotification<ApplicationEntityService.QueryResults> ReportReady { get; set; }
+        public UidlNotification<ChartData> VisualizationReady { get; set; }
         public UidlNotification<IPromiseFailureInfo> ReportFailed { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,7 +78,8 @@ namespace NWheels.UI.Toolbox
                     .InvokeTransactionScript<TScript>()
                     .WaitForReply((script, vm) => script.InitializeInput(vm.Input))
                     .Then(b => b.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Criteria))
-                    .Then(bb => bb.Broadcast(CriteriaForm.ModelSetter).WithPayload(m => m.Input).TunnelDown()));
+                    .Then(bb => bb.Broadcast(CriteriaForm.ModelSetter).WithPayload(m => m.Input).TunnelDown()
+                    .ThenIf(this.AutoSubmitOnLoad, bbb => bbb.Broadcast(ShowReport.Executing).BubbleUp())));
             }
 
             presenter.On(ShowReport)
@@ -87,8 +101,9 @@ namespace NWheels.UI.Toolbox
                         .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown()));
 
             presenter.On(ReportReady)
-                .Broadcast(CriteriaForm.StateResetter).TunnelDown()
-                .Then(b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady()));
+                .Broadcast(this.VisualizationReady).WithPayload(vm => vm.Input.Visualization).TunnelDown()
+                .Then(b => b.Broadcast(CriteriaForm.StateResetter).TunnelDown()
+                .Then(bb => bb.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady())));
 
             presenter.On(ResultTable.QueryFailed)
                 .Broadcast(CriteriaForm.StateResetter).TunnelDown()
@@ -101,7 +116,7 @@ namespace NWheels.UI.Toolbox
 
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
-            return base.GetNestedWidgets().Concat(new WidgetUidlNode[] { CriteriaForm, ResultTable });
+            return base.GetNestedWidgets().Concat(new WidgetUidlNode[] { CriteriaForm, ResultTable }).ConcatOneIf(VisualizationChart);
         }
 
         #endregion

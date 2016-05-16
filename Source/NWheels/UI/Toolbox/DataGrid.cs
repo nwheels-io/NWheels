@@ -599,7 +599,7 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlNotification<IEnumerable<TDataRow>> DataReceived { get; set; }
-        public UidlNotification<IEnumerable<TDataRow>> QueryCompleted { get; set; }
+        public UidlNotification<ApplicationEntityService.QueryResults> QueryCompleted { get; set; }
         public UidlNotification<IPromiseFailureInfo> QueryFailed { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

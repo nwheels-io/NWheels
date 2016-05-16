@@ -780,7 +780,7 @@ HEAD, JS/CSS LINKS
     <script type="text/javascript">
         function initWidget_StaticTable($scope) {
             $scope.$on($scope.uidl.qualifiedName + ':DataReceived', function (event, data) {
-                $scope.ResultSet = data.Rows;
+                $scope.ResultSet = data;
             });
         }
     </script>
@@ -1040,7 +1040,7 @@ HEAD, JS/CSS LINKS
                                     $scope.entityService.trackRetrievedEntities(response.data.ResultSet);
                                     var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
                                     thegrid[0].addJSONData(response.data);
-                                    $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data.ResultSet);
+                                    $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data);
                                 },
                                 function(faultResponse){
 									$scope.dataGridQueryInProgress = false;
@@ -2587,6 +2587,7 @@ HEAD, JS/CSS LINKS
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <uidl-widget uidl="uidl.criteriaForm"></uidl-widget>
+                <uidl-widget ng-if="uidl.visualizationChart" uidl="uidl.visualizationChart"></uidl-widget>
                 <uidl-widget uidl="uidl.resultTable"></uidl-widget>
             </div>
         </div>

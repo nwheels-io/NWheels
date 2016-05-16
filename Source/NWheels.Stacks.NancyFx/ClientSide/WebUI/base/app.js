@@ -661,10 +661,17 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         execute: function (scope, behavior, input) {
             console.log('run-behavior > broadcast', behavior.notificationQualifiedName, behavior.direction, input);
             var payload = input;
-            if (behavior.payloadExpression && !payload) {
-                var context = {
-                    model: scope.model
-                };
+            if (behavior.payloadExpression) {
+                var context = { };
+                if (input) {
+                    context.model = {
+                        Data: scope.model.Data,
+                        State: scope.model.State,
+                        Input: input
+                    };
+                } else {
+                    context.model = scope.model;
+                }
                 payload = Enumerable.Return(context).Select('ctx=>ctx.' + behavior.payloadExpression).Single();
             }
             if (behavior.direction.indexOf('BubbleUp') > -1) {
@@ -1292,7 +1299,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             };
 
             scope.$on(scope.uidl.grid.qualifiedName + ':QueryCompleted', function (event, data) {
-                scope.resultSet = data;
+                scope.resultSet = data.ResultSet;
                 scope.commandInProgress = false;
             });
 

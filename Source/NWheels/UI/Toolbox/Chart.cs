@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -9,6 +10,7 @@ using NWheels.Extensions;
 using NWheels.TypeModel;
 using NWheels.UI.Core;
 using NWheels.UI.Uidl;
+using NWheels.Utilities;
 
 namespace NWheels.UI.Toolbox
 {
@@ -36,6 +38,14 @@ namespace NWheels.UI.Toolbox
                 dataProperty != null ? 
                 dataProperty.ToNormalizedNavigationString("input").TrimLead("input.") : 
                 null);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void BindToVisualizedQueryResults(UidlNotification modelSetter)
+        {
+            ModelSetterQualifiedName = modelSetter.QualifiedName;
+            DataExpression = ExpressionUtility.GetPropertyInfoFrom<ApplicationEntityService.QueryResults>(x => x.Visualization).Name;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -173,6 +183,80 @@ namespace NWheels.UI.Toolbox
                     return (long)(timestamp.Ticks / 10000);                            
                 } 
             }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public interface IVisualizedQueryable : IQueryable
+    {
+        ChartData Visualization { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [DataContract(Namespace = UidlDocument.DataContractNamespace)]
+    public class VisualizedQueryable<TResultRow> : IQueryable<TResultRow>, IVisualizedQueryable
+    {
+        private readonly IQueryable<TResultRow> _queryable;
+        private readonly ChartData _visualization;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public VisualizedQueryable(IQueryable<TResultRow> queryable, ChartData visualization)
+        {
+            _queryable = queryable;
+            _visualization = visualization;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Implementation of IEnumerable
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _queryable.GetEnumerator();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IEnumerator<TResultRow> IEnumerable<TResultRow>.GetEnumerator()
+        {
+            return _queryable.GetEnumerator();
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Implementation of IQueryable
+
+        Expression IQueryable.Expression
+        {
+            get { return _queryable.Expression; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        Type IQueryable.ElementType
+        {
+            get { return _queryable.ElementType; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        IQueryProvider IQueryable.Provider
+        {
+            get { return _queryable.Provider; }
+        }
+
+        #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ChartData Visualization
+        {
+            get { return _visualization; }
         }
     }
 

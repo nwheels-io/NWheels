@@ -722,6 +722,7 @@ namespace NWheels.UI
             public long? ResultCount { get; set; }
             public bool? MoreAvailable { get; set; }
             public object[] ResultSet { get; set; }
+            public ChartData Visualization { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -2007,6 +2008,7 @@ namespace NWheels.UI
             public override QueryResults Query(QueryOptions options, IQueryable query = null, object txViewModel = null)
             {
                 var results = QueryContext.Current.Results;
+                results.Visualization = TryGetVisualizationFrom(query);
 
                 using (var contextOrNull = NewUnitOfWork(txViewModel) as TContext)
                 {
@@ -2412,6 +2414,20 @@ namespace NWheels.UI
                 }
 
                 return dbQuery;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private ChartData TryGetVisualizationFrom(IQueryable query)
+            {
+                var visualized = query as IVisualizedQueryable;
+                
+                if (visualized != null)
+                {
+                    return visualized.Visualization;
+                }
+
+                return null;
             }
         }
 
