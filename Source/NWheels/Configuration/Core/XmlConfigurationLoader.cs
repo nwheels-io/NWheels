@@ -275,8 +275,22 @@ namespace NWheels.Configuration.Core
                 expectedValueList = expression.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
             }
 
-            var valueFound = expectedValueList.Any(v => v.EqualsIgnoreCase(value));
+            var valueFound = expectedValueList.Any(pattern => ValueMatchesPattern(value, pattern));
             return (valueFound ^ inverse);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static bool ValueMatchesPattern(string value, string pattern)
+        {
+            if (pattern[pattern.Length - 1] == '*' && value != null)
+            {
+                return value.StartsWithIgnoreCase(pattern.Substring(0, pattern.Length - 1));
+            }
+            else
+            {
+                return pattern.EqualsIgnoreCase(value);
+            }
         }
     }
 }

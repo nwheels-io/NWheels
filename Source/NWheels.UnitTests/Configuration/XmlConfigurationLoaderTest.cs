@@ -47,6 +47,26 @@ namespace NWheels.UnitTests.Configuration
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [TestCase("dev", "*", true)]
+        [TestCase("dev_abc", "dev_*", true)]
+        [TestCase("DEV_ABC", "dev_*", true)]
+        [TestCase("PROD_1", "DEV_*", false)]
+        [TestCase("DEV1", "DEV_*", false)]
+        [TestCase("DEV", "DEV*", true)]
+        [TestCase("PROD_1", "!DEV_*", true)]
+        [TestCase("DEV_1", "!DEV_*", false)]
+        [TestCase("DEV_A_1", "DEV_A_*, PROD", true)]
+        [TestCase("DEV_A_1", "PROD, DEV_A_*, ", true)]
+        [TestCase("DEV_B_1", "PROD, DEV_A_*, ", false)]
+        [TestCase("DEV_B_1", "!PROD, DEV_A_*, ", true)]
+        public void TestMatchScopeExpressionWithWildcard(string value, string expression, bool shouldMatch)
+        {
+            var actualMatch = XmlConfigurationLoader.Match(value, expression);
+            Assert.AreEqual(shouldMatch, actualMatch, "ShouldMatch");
+        }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [TestCase("dev", "backend", "1-DEV", "2-BACKEND", "3-BACKEND", "4-DEV")]
         [TestCase("dev", "webApp", "1-DEV", "2-NOT-BACKEND", "3-NOT-BACKEND", "4-DEV")]
         [TestCase("prod", "backend", "1-PROD", "2-BACKEND", "3-BACKEND", "4-PROD")]

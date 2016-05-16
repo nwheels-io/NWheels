@@ -52,36 +52,26 @@ namespace NWheels.Hosting
             var text = new StringBuilder();
 
             text.AppendLine();
-            text.AppendFormat("Boot configuration - {0}", this.LoadedFromFile ?? "(not from a file source)");
+            text.AppendFormat("Boot configuration   - {0}", this.LoadedFromFile ?? "(not from a file source)");
             text.AppendLine();
-            text.AppendFormat("Application Name   - {0}", this.ApplicationName);
+            text.AppendFormat("Application Name     - {0}", this.ApplicationName);
             text.AppendLine();
-            text.AppendFormat("Node Name          - {0}", this.NodeName);
+            text.AppendFormat("Node Name            - {0}", this.NodeName);
             text.AppendLine();
-            text.AppendFormat("Environment Lookup - {0}", _environmentLookupLog);
+            text.AppendFormat("Environment Lookup   - {0}", _environmentLookupLog);
             text.AppendLine();
-            text.AppendFormat("Environment Name   - {0}", this.EnvironmentName);
+            text.AppendFormat("Environment Name     - {0}", this.EnvironmentName);
             text.AppendLine();
-            text.AppendFormat("Environment Type   - {0}", string.IsNullOrEmpty(this.EnvironmentType) ? "(unspecified)" : this.EnvironmentType);
+            text.AppendFormat("Environment Type     - {0}", string.IsNullOrEmpty(this.EnvironmentType) ? "(unspecified)" : this.EnvironmentType);
             text.AppendLine();
-            text.AppendFormat("MachineName        - {0}", _s_machineName);
+            text.AppendFormat("MachineName          - {0}", _s_machineName);
             text.AppendLine();
-            text.AppendFormat("Process ID         - {0}", Process.GetCurrentProcess().Id);
+            text.AppendFormat("Process ID           - {0}", Process.GetCurrentProcess().Id);
             text.AppendLine();
 
-            foreach ( var module in this.FrameworkModules )
-            {
-                text.AppendFormat("+ Framework Module   - {0}", module.Assembly);
-                FeatureListToLogString(module.Features, text);
-                text.AppendLine();
-            }
-
-            foreach ( var module in this.ApplicationModules )
-            {
-                text.AppendFormat("+ Application Module - {0}", module.Assembly);
-                FeatureListToLogString(module.Features, text);
-                text.AppendLine();
-            }
+            ModuleListToLogString(this.FrameworkModules, "Framework Module", text);
+            ModuleListToLogString(this.ApplicationModules, "Application Module", text);
+            ModuleListToLogString(this.IntegrationModules, "Integration Module", text);
 
             foreach ( var configFile in this.ConfigFiles )
             {
@@ -190,12 +180,24 @@ namespace NWheels.Hosting
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private void ModuleListToLogString(List<ModuleConfig> moduleList, string title, StringBuilder text)
+        {
+            foreach (var module in moduleList)
+            {
+                text.AppendFormat("+ {0,-18} - {1}", title, module.Assembly);
+                FeatureListToLogString(module.Features, text);
+                text.AppendLine();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void FeatureListToLogString(List<FeatureConfig> featureList, StringBuilder text)
         {
             foreach (var feature in featureList)
             {
                 text.AppendLine();
-                text.AppendFormat("++ Feature           - {0}", feature.Name);
+                text.AppendFormat("  + Feature            + {0}", feature.Name);
             }
         }
         
