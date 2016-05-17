@@ -83,7 +83,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
         public static TimeSpan GetTimeboxSize(ILogTimeRangeCriteria timeRange)
         {
             var rangeLength = timeRange.Until.Subtract(timeRange.From);
-            var timebox = TimeSpan.FromTicks(rangeLength.Ticks / 24);
+            var timebox = TimeSpan.FromTicks(rangeLength.Ticks / 48);
 
             return SnapTimeboxToGrid(timebox);
         }

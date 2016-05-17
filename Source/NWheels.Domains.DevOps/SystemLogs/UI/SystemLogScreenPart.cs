@@ -58,6 +58,11 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
 
             presenter.On(base.NavigatedHere)
                 .Broadcast(LogLevelSummary.ContextSetter).WithPayload(vm => vm.Input).TunnelDown();
+
+            LogLevelSummary.EnableVisualRangeSelection(b => 
+                b.AlterModel(
+                    alt => alt.Copy(vm => vm.Input.From).To(vm => vm.State.Criteria.From),
+                    alt => alt.Copy(vm => vm.Input.To).To(vm => vm.State.Criteria.Until)));
         }
 
         #endregion

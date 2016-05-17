@@ -44,10 +44,13 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
             task.Wait();
 
             var resultSetBuilder = new ResultSetBuilder(_framework, input);
-            resultSetBuilder.AddRecords(task.Result);
-
             var chartBuilder = new ChartBuilder(input);
-            chartBuilder.AddRecords(task.Result);
+
+            if (task.Result != null)
+            {
+                resultSetBuilder.AddRecords(task.Result);
+                chartBuilder.AddRecords(task.Result);
+            }
 
             return new VisualizedQueryable<ILogLevelSummaryEntity>(
                 resultSetBuilder.GetResultRows().AsQueryable(),
@@ -97,6 +100,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
             {
                 return _resultByRecordKey.Values;
             }
+
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             private void IncrementByWholeRecord(LogLevelSummaryEntity result, DailySummaryRecord record)

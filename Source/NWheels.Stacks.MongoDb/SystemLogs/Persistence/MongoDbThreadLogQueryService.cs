@@ -5,8 +5,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using NWheels.Concurrency;
@@ -30,7 +32,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
         private readonly IFrameworkLoggingConfiguration _loggingConfig;
         private readonly ITypeMetadata _baseMetaEntity;
         private MongoDatabase _database;
-        private ImmutableHashSet<string> _environmentList;
+        private ImmutableArray<string> _environmentList;
         private long _environmentListTimestamp;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,30 +49,87 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         public Task<IEnumerable<DailySummaryRecord>> QueryDailySummaryAsync(
             ILogTimeRangeCriteria timeRange,
-            ApplicationEntityService.QueryOptions query,
+            ApplicationEntityService.QueryOptions options,
             CancellationToken cancellation)
         {
-            var environments = GetPropertyFilterValuesFromQuery(query, _s_queryEnvironmentProperty);
+            var environmentFilter = TryTakePropertyFilter(options, _s_queryEnvironmentProperty);
+
+            var dbCriteria = new List<IMongoQuery>();
+
+            if (timeRange.From.Date != timeRange.Until.Date)
+            {
+                dbCriteria.Add(Query<DailySummaryRecord>.GTE(x => x.Date, timeRange.From.Date));
+                dbCriteria.Add(Query<DailySummaryRecord>.LT(x => x.Date, timeRange.Until.Date));
+            }
+            else
+            {
+                dbCriteria.Add(Query<DailySummaryRecord>.EQ(x => x.Date, timeRange.From.Date));
+            }
+
+            if (options != null)
+            {
+                RefineDbQuery<DailySummaryRecord>(dbCriteria, options);
+            }
+
+            var dbQuery = Query.And(dbCriteria);
 
             return RunEnvironmentMapReduceQuery<DailySummaryRecord>(
-                environments,
+                environmentFilter,
                 queryFunc: (db, environmentName) => {
                     var collection = db.GetCollection<DailySummaryRecord>(DbNamingConvention.GetDailySummaryCollectionName(environmentName));
-                    return collection.Find(Query.And(
-                        Query<DailySummaryRecord>.GTE(x => x.Date, timeRange.From.Date),
-                        Query<DailySummaryRecord>.LT(x => x.Date, timeRange.Until.Date)
-                    ));
+                    return collection.Find(dbQuery);
                 },
                 cancellation: cancellation);
         }
 
-        ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //private IMongoQuery GetDbQuery<TRecord>(ApplicationEntityService.QueryOptions query)
-        //    where TRecord : LogRecordBase
-        //{
-        //    var dbQuery = Query<TRecord>.
-        //}
+        private void RefineDbQuery<TRecord>(List<IMongoQuery> criteria, ApplicationEntityService.QueryOptions options)
+            where TRecord : LogRecordBase
+        {
+            RefineDbQueryProperty<DailySummaryRecord>(criteria, x => x.MachineName, TryTakePropertyFilter(options, _s_queryMachineProperty));
+            RefineDbQueryProperty<DailySummaryRecord>(criteria, x => x.EnvironmentName, TryTakePropertyFilter(options, _s_queryEnvironmentProperty));
+            RefineDbQueryProperty<DailySummaryRecord>(criteria, x => x.NodeName, TryTakePropertyFilter(options, _s_queryNodeProperty));
+            RefineDbQueryProperty<DailySummaryRecord>(criteria, x => x.NodeInstance, TryTakePropertyFilter(options, _s_queryInstanceProperty));
+            RefineDbQueryProperty<DailySummaryRecord>(criteria, x => x.NodeInstanceReplica, TryTakePropertyFilter(options, _s_queryReplicaProperty));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void RefineDbQueryProperty<TRecord>(
+            List<IMongoQuery> criteria,
+            Expression<Func<TRecord, object>> propertySelector,  
+            ApplicationEntityService.QueryFilterItem filter)
+            where TRecord : LogRecordBase
+        {
+            if (filter != null && filter.Operator.EqualsIgnoreCase(ApplicationEntityService.QueryOptions.StringContainsOperator))
+            {
+                criteria.Add(Query.Matches(
+                    propertySelector.GetPropertyInfo().Name, 
+                    BsonRegularExpression.Create(new Regex(filter.StringValue, RegexOptions.IgnoreCase))
+                ));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private ApplicationEntityService.QueryFilterItem TryTakePropertyFilter(
+            ApplicationEntityService.QueryOptions query, 
+            PropertyInfo property)
+        {
+            if (query != null)
+            {
+                var filter = query.Filter.FirstOrDefault(f => f.PropertyName.EqualsIgnoreCase(property.Name));
+                
+                if (filter != null)
+                {
+                    query.Filter.Remove(filter);
+                    return filter;
+                }
+            }
+
+            return null;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -103,17 +162,17 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private Task<IEnumerable<TRecord>> RunEnvironmentMapReduceQuery<TRecord>(
-            string[] environments,
+            ApplicationEntityService.QueryFilterItem environmentFilter,
             Func<MongoDatabase, string, IEnumerable<TRecord>> queryFunc,
             CancellationToken cancellation)
             where TRecord : LogRecordBase
         {
             var db = SafeGetDatabase();
-            var environmentNamesToSearch = SafeGetEnvironmentList();
+            IEnumerable<string> environmentNamesToSearch = SafeGetEnvironmentList();
 
-            if (environments != null && environments.Length > 0)
+            if (environmentFilter != null)
             {
-                environmentNamesToSearch = environmentNamesToSearch.Intersect(environments);
+                environmentNamesToSearch = environmentNamesToSearch.Where(name => name.ContainsIgnoreCase(environmentFilter.StringValue));
             }
 
             return MapReduceTask.StartNew<string, IEnumerable<TRecord>, IEnumerable<TRecord>>(
@@ -134,7 +193,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private ImmutableHashSet<string> SafeGetEnvironmentList()
+        private ImmutableArray<string> SafeGetEnvironmentList()
         {
             if (ShouldReloadEnvironmentList(_framework.UtcNow))
             {
@@ -158,7 +217,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
                                 .TrimTail(DbNamingConvention.DailySummaryCollectionNameSuffix)
                                 .TrimTail(DbNamingConvention.LogMessageCollectionNameSuffix)
                                 .TrimTail(DbNamingConvention.ThreadLogCollectionNameSuffix))
-                             .ToImmutableHashSet(StringComparer.CurrentCultureIgnoreCase);
+                            .ToImmutableArray();
                         
                         _environmentListTimestamp = Interlocked.Exchange(ref _environmentListTimestamp, now.Ticks);
                     }

@@ -33,7 +33,7 @@ namespace NWheels.UI.Toolbox
 
         public void EnableVisualization()
         {
-            //this.VisualizationChart = new Chart("VisualizationChart", this);
+            this.VisualizationChart = new Chart("VisualizationChart", this);
             this.VisualizationChart.BindToModelSetter(this.VisualizationReady);
         }
 
@@ -50,7 +50,7 @@ namespace NWheels.UI.Toolbox
         public Form<TCriteria> CriteriaForm { get; set; }
         [DataMember]
         public DataGrid<TResultRow> ResultTable { get; set; }
-        [DataMember]
+        [DataMember, ManuallyAssigned]
         public Chart VisualizationChart { get; set; }
         [DataMember]
         public bool AutoSubmitOnLoad { get; set; }
@@ -128,6 +128,16 @@ namespace NWheels.UI.Toolbox
             {
                 _visualRangeSelectionHandler(presenter.On(VisualizationChart.RangeSelected))
                     .Then(b => b.InvokeCommand(ShowReport));
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnBuild(UidlBuilder builder)
+        {
+            if (VisualizationChart != null)
+            {
+                builder.BuildManuallyInstantiatedNodes(VisualizationChart);
             }
         }
 
