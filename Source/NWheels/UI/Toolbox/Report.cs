@@ -18,6 +18,7 @@ namespace NWheels.UI.Toolbox
         where TContext : class
         where TCriteria : class
     {
+        private UidlBuilder _builder;
         private VisualRangeSelectionHandler _visualRangeSelectionHandler;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -68,6 +69,11 @@ namespace NWheels.UI.Toolbox
 
         protected override void DescribePresenter(PresenterBuilder<Report<TContext, TCriteria, TScript, TResultRow>, Empty.Data, IReportState> presenter)
         {
+            if (VisualizationChart != null)
+            {
+                _builder.BuildManuallyInstantiatedNodes(VisualizationChart);
+            }
+
             CriteriaForm.UsePascalCase = true;
             CriteriaForm.Commands.Add(ShowReport);
             CriteriaForm.Commands.Add(DownloadExcel);
@@ -135,10 +141,7 @@ namespace NWheels.UI.Toolbox
 
         protected override void OnBuild(UidlBuilder builder)
         {
-            if (VisualizationChart != null)
-            {
-                builder.BuildManuallyInstantiatedNodes(VisualizationChart);
-            }
+            _builder = builder;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
