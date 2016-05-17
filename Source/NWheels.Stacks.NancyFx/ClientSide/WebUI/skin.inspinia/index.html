@@ -2411,9 +2411,9 @@ HEAD, JS/CSS LINKS
                         data: []
                     };
                     setupSeriesType(serverData.Series[si], series);
-                    for (var xi = 0; xi < serverData.Series[si].Points.length; xi++) {
-                        var point = serverData.Series[si].Points[xi];
-                        series.data.push([point.UnixUtcTimestamp, point.Value]);
+					var pointArray = serverData.Series[si].Points;
+                    for (var xi = 0; xi < pointArray.length - 1 ; xi += 2) {
+                        series.data.push([pointArray[xi], pointArray[xi+1]]);
                     }
                     chartSeries.push(series);
                 }

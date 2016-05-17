@@ -350,6 +350,7 @@ namespace NWheels.UI
             settings.Converters.Add(new DomainObjectConverter(this, queryOptions));
             settings.Converters.Add(new ViewModelObjectConverter(this, _viewModelFactory));
             settings.Converters.Add(new FormattedDocumentConverter());
+            settings.Converters.Add(new TimeSeriesPointListConverter());
 
             foreach ( var extension in _jsonExtensions )
             {
@@ -3222,6 +3223,63 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public class TimeSeriesPointListConverter : JsonConverter
+        {
+            #region Overrides of JsonConverter
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                if (value == null)
+                {
+                    writer.WriteNull();
+                    return;
+                }
+
+                JArray array = new JArray();
+                var points = (List<ChartData.TimeSeriesPoint>)value;
+
+                for (int i = 0 ; i < points.Count ; i++)
+                {
+                    array.Add(new JValue(points[i].UnixUtcTimestamp));
+                    array.Add(new JValue(points[i].Value));
+                }
+
+                array.WriteTo(writer);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanConvert(Type objectType)
+            {
+                return (objectType == typeof(List<ChartData.TimeSeriesPoint>));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanRead
+            {
+                get { return false; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanWrite
+            {
+                get { return true; }
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class DomainObjectConverter : JsonConverter
         {
             private readonly ApplicationEntityService _ownerService;
@@ -3248,14 +3306,14 @@ namespace NWheels.UI
 
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
             {
-                if ( reader.TokenType == JsonToken.Null )
+                if (reader.TokenType == JsonToken.Null)
                 {
                     return null;
                 }
 
                 object relatedDomainObject;
 
-                if ( LoadRelatedDomainObjectByForeignKey(reader, objectType, out relatedDomainObject) )
+                if (LoadRelatedDomainObjectByForeignKey(reader, objectType, out relatedDomainObject))
                 {
                     return relatedDomainObject;
                 }
@@ -3295,7 +3353,7 @@ namespace NWheels.UI
                 }
 
                 return objectType.GetInterfaces().Any(intf => intf.IsEntityContract() || intf.IsEntityPartContract());
-                
+
                 //var objectTypeFullname = objectType.FullName;
                 //var result = (objectType.IsEntityContract() || objectType.IsEntityPartContract());
                 //return (objectType.IsEntityContract() || objectType.IsEntityPartContract());
@@ -3321,7 +3379,7 @@ namespace NWheels.UI
 
             private bool LoadRelatedDomainObjectByForeignKey(JsonReader reader, Type objectType, out object relatedDomainObject)
             {
-                if ( reader.TokenType == JsonToken.StartObject )
+                if (reader.TokenType == JsonToken.StartObject)
                 {
                     // JSON contains object contents - proceed and populate it
                     relatedDomainObject = null;
@@ -3336,6 +3394,7 @@ namespace NWheels.UI
                 return true;
             }
         }
+
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
