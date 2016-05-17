@@ -2147,6 +2147,9 @@ HEAD, JS/CSS LINKS
                     if ($scope.entity) {
                         $scope.displayDateRange(moment($scope.entity[$scope.uidl.propertyName]), moment($scope.entity[$scope.groupFields[0].propertyName]));
                         $scope.createDateTimeRangePicker();
+                        $scope.$watch('entity.' + $scope.uidl.propertyName, function() {
+                            $scope.displayDateRange(moment($scope.entity[$scope.uidl.propertyName]), moment($scope.entity[$scope.groupFields[0].propertyName]));
+                        });
                     }
                 });
                 $scope.$watch('timeRangePresets', function(newValue, oldValue) {
@@ -2297,6 +2300,7 @@ HEAD, JS/CSS LINKS
                 }],
                 "Summaries": []
             };*/
+           
             if ($scope.parentModel) {
                 $scope.model.State.data = $scope.parentModel;
             }
@@ -2317,6 +2321,9 @@ HEAD, JS/CSS LINKS
             });
 
             function buildChart(elementId, serverData) {
+                $(elementId).unbind();
+                $(elementId).empty();
+
                 if(serverData.Series[0].Mode==='Time') {
                     buildTimeChart(elementId, serverData);
                 } else {
@@ -2401,7 +2408,19 @@ HEAD, JS/CSS LINKS
                     minWidth: 500,
                     minHeight: 250
                 });
+                $(elementId).bind('plotselected', function (event, ranges) {
+                    event.stopPropagation();
+                    var selectionData = {
+                        From: moment.utc(parseInt(ranges.xaxis.from)).format('YYYY-MM-DD HH:mm:ss'),
+                        To: moment.utc(parseInt(ranges.xaxis.to)).format('YYYY-MM-DD HH:mm:ss')
+                    };
+                    $scope.$emit($scope.uidl.qualifiedName + ':RangeSelected', selectionData);
+                });
+                $scope.$on("$destroy", function() {
+                    $(elementId).unbind();
+                });
             }
+            
             function buildTimeSeries(serverData) {
                 var chartSeries = [];
                 
@@ -2436,7 +2455,6 @@ HEAD, JS/CSS LINKS
                             }
                         },
                         shadowSize: 0
-
                     },
                     xaxis: {
                         tickDecimals: 0,
@@ -2466,6 +2484,9 @@ HEAD, JS/CSS LINKS
                         content: function(label, xval, yval, flotItem) {
 							return '<strong>' + label + '</strong>: <span style="color:blue">' + moment.utc(xval).format('HH:mm:ss.SSS') + '</span>, <span style="color:green">' + parseFloat(yval).formatMoney(5, '.', ',') + '</span>';
 						}
+                    },
+                    selection: {
+                        mode: "x"
                     }
                 };
                 return options;
@@ -2587,7 +2608,9 @@ HEAD, JS/CSS LINKS
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <uidl-widget uidl="uidl.criteriaForm"></uidl-widget>
-                <uidl-widget ng-if="uidl.visualizationChart" uidl="uidl.visualizationChart"></uidl-widget>
+                <div ng-if="uidl.visualizationChart" class="m-b">
+                    <uidl-widget uidl="uidl.visualizationChart"></uidl-widget>
+                </div>
                 <uidl-widget uidl="uidl.resultTable"></uidl-widget>
             </div>
         </div>
@@ -2760,11 +2783,12 @@ HEAD, JS/CSS LINKS
     <!--script src="app/skin/assets/js/plugins/jquery-ui/jquery-ui.min.js"></script-->
 
     <!-- Flot -->
-    <script src="app/skin/assets/js/plugins/flot/jquery.flot.js"></script>
+    <script src="app/skin/assets/js/plugins/flot/jquery.flot.min.js"></script>
     <script src="app/skin/assets/js/plugins/flot/jquery.flot.tooltip.min.js"></script>
-    <script src="app/skin/assets/js/plugins/flot/jquery.flot.resize.js"></script>
-    <script src="app/skin/assets/js/plugins/flot/jquery.flot.pie.js"></script>
+    <script src="app/skin/assets/js/plugins/flot/jquery.flot.resize.min.js"></script>
+    <script src="app/skin/assets/js/plugins/flot/jquery.flot.pie.min.js"></script>
     <script src="app/skin/assets/js/plugins/flot/jquery.flot.time.js"></script>
+    <script src="app/skin/assets/js/plugins/flot/jquery.flot.selection.min.js"></script>
 
     <!-- Multiselect -->
     <script src="app/skin/assets/js/plugins/isteven-multi-select/isteven-multi-select.js"></script>

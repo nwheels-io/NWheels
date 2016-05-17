@@ -18,6 +18,10 @@ namespace NWheels.UI.Toolbox
         where TContext : class
         where TCriteria : class
     {
+        private VisualRangeSelectionHandler _visualRangeSelectionHandler;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Report(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
@@ -29,8 +33,15 @@ namespace NWheels.UI.Toolbox
 
         public void EnableVisualization()
         {
-            this.VisualizationChart = new Chart("VisualizationChart", this);
+            //this.VisualizationChart = new Chart("VisualizationChart", this);
             this.VisualizationChart.BindToModelSetter(this.VisualizationReady);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void EnableVisualRangeSelection(VisualRangeSelectionHandler handler)
+        {
+            _visualRangeSelectionHandler = handler;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -39,7 +50,7 @@ namespace NWheels.UI.Toolbox
         public Form<TCriteria> CriteriaForm { get; set; }
         [DataMember]
         public DataGrid<TResultRow> ResultTable { get; set; }
-        [DataMember, ManuallyAssigned]
+        [DataMember]
         public Chart VisualizationChart { get; set; }
         [DataMember]
         public bool AutoSubmitOnLoad { get; set; }
@@ -101,13 +112,23 @@ namespace NWheels.UI.Toolbox
                         .Then(bb => bb.Broadcast(CriteriaForm.StateResetter).TunnelDown()));
 
             presenter.On(ReportReady)
-                .Broadcast(this.VisualizationReady).WithPayload(vm => vm.Input.Visualization).TunnelDown()
-                .Then(b => b.Broadcast(CriteriaForm.StateResetter).TunnelDown()
-                .Then(bb => bb.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady())));
+                .Broadcast(CriteriaForm.StateResetter).TunnelDown()
+                .Then(b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.ReportIsReady()));
+
+            if (VisualizationChart != null)
+            {
+                presenter.On(ResultTable.QueryCompleted).Broadcast(this.VisualizationReady).WithPayload(vm => vm.Input.Visualization).TunnelDown();
+            }
 
             presenter.On(ResultTable.QueryFailed)
                 .Broadcast(CriteriaForm.StateResetter).TunnelDown()
                 .Then(b => b.UserAlertFrom<IReportUserAlerts>().ShowPopup((x, vm) => x.FailedToPrepareReport(), faultInfo: vm => vm.Input));
+
+            if (VisualizationChart != null && _visualRangeSelectionHandler != null)
+            {
+                _visualRangeSelectionHandler(presenter.On(VisualizationChart.RangeSelected))
+                    .Then(b => b.InvokeCommand(ShowReport));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -128,6 +149,14 @@ namespace NWheels.UI.Toolbox
         {
             TCriteria Criteria { get; set; }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public delegate 
+            PresenterBuilder<Report<TContext, TCriteria, TScript, TResultRow>, Empty.Data, IReportState>.PromiseBuilder<Chart.RangeSelection> 
+            VisualRangeSelectionHandler(
+                PresenterBuilder<Report<TContext, TCriteria, TScript, TResultRow>, Empty.Data, IReportState>.BehaviorBuilder<Chart.RangeSelection> behavior
+            );
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

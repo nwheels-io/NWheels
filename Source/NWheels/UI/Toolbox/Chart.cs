@@ -60,11 +60,20 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlNotification<string> ModeChanged { get; set; }
+        public UidlNotification<RangeSelection> RangeSelected { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void DescribePresenter(PresenterBuilder<Chart, Empty.Data, Empty.State> presenter)
         {
+        }
+    
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class RangeSelection
+        {
+            public object From { get; set; }
+            public object To { get; set; }
         }
     }
 
