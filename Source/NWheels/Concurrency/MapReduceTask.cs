@@ -15,6 +15,11 @@ namespace NWheels.Concurrency
             TInput[] inputs,
             CancellationToken cancellation)
         {
+            if (inputs.Length == 0)
+            {
+                return Task.FromResult<TResult>(default(TResult));
+            }
+
             var mapTasks = CreateMapTasks(map, inputs, cancellation);
             var reduceTask = CreateReduceTask(reduce, mapTasks, cancellation);
 
