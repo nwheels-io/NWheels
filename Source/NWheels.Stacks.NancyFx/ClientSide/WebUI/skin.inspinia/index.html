@@ -2130,7 +2130,9 @@ HEAD, JS/CSS LINKS
                     var rangePickerOptions = {
                         startDate: moment($scope.entity[$scope.uidl.propertyName], 'YYYY-MM-DD HH:mm:ss'),
                         endDate: moment($scope.entity[$scope.groupFields[0].propertyName], 'YYYY-MM-DD HH:mm:ss'),
-                        ranges: $scope.timeRangePresets
+                        ranges: $scope.timeRangePresets,
+						linkedCalendars: false,
+						showDropdowns: true
                     };
                     if ($scope.shouldHaveTimePart) {
                         rangePickerOptions.timePicker = true;
@@ -2273,7 +2275,10 @@ HEAD, JS/CSS LINKS
                 </div>                
             </div>
             <div class="ibox-content ui-widget-content" id="{{::uidl.elementName}}_container">
-                <div id="{{::uidl.elementName}}" class="flot-chart-content" style="padding:0px; position:relative;height:250px;"></div>
+                <div id="{{::uidl.elementName}}" 
+				     class="flot-chart-content" 
+					 style="padding:0px; position:relative;"
+					 ng-style="{ height: calculateHeight(100) }"></div>
                 <!--div class="m-t-md">
             <small class="pull-right">
                 <i class="fa fa-clock-o"> </i>
