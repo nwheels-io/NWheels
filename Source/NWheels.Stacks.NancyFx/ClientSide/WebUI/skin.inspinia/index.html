@@ -16,7 +16,6 @@ HEAD, JS/CSS LINKS
     <link href="app/skin/assets/font-awesome/css/font-awesome.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/datetimepicker/bootstrap-datetimepicker.min.css" rel="stylesheet">
-    <link href="app/skin/assets/css/plugins/daterangepicker/daterangepicker-bs3.css" rel="stylesheet">
 
     <!-- Toastr style -->
     <link href="app/skin/assets/css/plugins/toastr/toastr.min.css" rel="stylesheet">
@@ -37,8 +36,7 @@ HEAD, JS/CSS LINKS
     <link href="app/skin/assets/css/plugins/ionRangeSlider/ion.rangeSlider.skinFlat.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/clockpicker/clockpicker.css" rel="stylesheet">
-    <link href="app/skin/assets/css/plugins/daterangepicker/daterangepicker-bs3.css" rel="stylesheet">
-    <link href="app/skin/assets/css/plugins/isteven-multi-select/isteven-multi-select.css" rel="stylesheet">
+    <link href="app/skin/assets/css/plugins/daterangepicker/daterangepicker.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/dropzone/basic.css" rel="stylesheet">
     <!--link href="app/skin/assets/css/plugins/dropzone/dropzone.css" rel="stylesheet"-->
     <link href="app/skin/assets/css/plugins/jqGrid/ui.jqgrid.css" rel="stylesheet">
@@ -2118,6 +2116,13 @@ HEAD, JS/CSS LINKS
                     }
                     return null;
                 };
+                $scope.updateViewFromModel = function() {
+                    var startValue = moment($scope.entity[$scope.uidl.propertyName]);
+                    var endValue = moment($scope.entity[$scope.groupFields[0].propertyName]);
+                    $scope.displayDateRange(startValue, endValue);
+                    $('#' + $scope.uniqueFieldId).data('daterangepicker').setStartDate(startValue);
+                    $('#' + $scope.uniqueFieldId).data('daterangepicker').setEndDate(endValue);
+                };
                 $scope.createDateTimeRangePicker = function() {
                     if ($scope.dateTimeRangePickerCreated || !$scope.entity || !$scope.entity[$scope.uidl.propertyName] || !$scope.timeRangePresets) {
                         return;
@@ -2148,7 +2153,10 @@ HEAD, JS/CSS LINKS
                         $scope.displayDateRange(moment($scope.entity[$scope.uidl.propertyName]), moment($scope.entity[$scope.groupFields[0].propertyName]));
                         $scope.createDateTimeRangePicker();
                         $scope.$watch('entity.' + $scope.uidl.propertyName, function() {
-                            $scope.displayDateRange(moment($scope.entity[$scope.uidl.propertyName]), moment($scope.entity[$scope.groupFields[0].propertyName]));
+                            $scope.updateViewFromModel();
+                        });
+                        $scope.$watch('entity.' + $scope.groupFields[0].propertyName, function() {
+                            $scope.updateViewFromModel();
                         });
                     }
                 });
