@@ -1980,8 +1980,8 @@ namespace NWheels.UI
                 if (debugPerformStaleCheck)
                 {
                     //TODO: remove this once we are sure the bug is solved
-                    var ahcnor = new ThreadStaticAnchor<PerContextResourceConsumerScope<TContext>>();
-                    var stale = ahcnor.Current;
+                    var anchor = new ThreadStaticAnchor<PerContextResourceConsumerScope<TContext>>();
+                    var stale = anchor.Current;
 
                     if (stale != null)
                     {
