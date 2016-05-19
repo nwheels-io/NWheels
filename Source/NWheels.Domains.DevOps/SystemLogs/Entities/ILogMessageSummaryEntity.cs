@@ -8,7 +8,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
     public interface ILogMessageSummaryEntity : IBaseLogDimensionsEntity
     {
         [PropertyContract.Calculated]
-        LogLevel Level { get; }
+        LogLevel? Level { get; }
         
         [PropertyContract.Calculated]
         string Logger { get; }
@@ -21,5 +21,14 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
 
         [PropertyContract.Calculated]
         int Count { get; }
+
+        [PropertyContract.Calculated]
+        int WarningCount { get; }
+
+        [PropertyContract.Calculated]
+        int ErrorCount { get; }
+
+        [PropertyContract.Calculated]
+        int CriticalCount { get; }
     }
 }

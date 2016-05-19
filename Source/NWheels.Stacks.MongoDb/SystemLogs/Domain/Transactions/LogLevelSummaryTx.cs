@@ -61,7 +61,52 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class ResultSetBuilder
+        private class ResultSetBuilder : SummaryResultSetBuilderBase<RecordKey, LogLevelSummaryEntity>
+        {
+            public ResultSetBuilder(IFramework framework, ILogTimeRangeCriteria input)
+                : base(framework, input)
+            {
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of SummaryResultSetBuilderBase<Tuple<string,string,string,string,string>,LogLevelSummaryEntity>
+
+            protected override RecordKey GetRecordKey(DailySummaryRecord record)
+            {
+                return new RecordKey(record.EnvironmentName, record.MachineName, record.NodeName, record.NodeInstance, record.NodeInstanceReplica);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override LogLevelSummaryEntity CreateResult(RecordKey key)
+            {
+                var result = Framework.NewDomainObject<ILogLevelSummaryEntity>().As<LogLevelSummaryEntity>();
+
+                result.SetKey(
+                    environment: key.Item1,
+                    machine: key.Item2,
+                    node: key.Item3,
+                    instance: key.Item4,
+                    replica: key.Item5);
+
+                return result;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected override void IncrementResult(LogLevelSummaryEntity result, DailySummaryRecord record, int count)
+            {
+                result.Increment(record.Level, count);
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+#if false
+        private class OldResultSetBuilder
         {
             private readonly Dictionary<RecordKey, LogLevelSummaryEntity> _resultByRecordKey = new Dictionary<RecordKey, LogLevelSummaryEntity>();
             private readonly IFramework _framework;
@@ -69,7 +114,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ResultSetBuilder(IFramework framework, ILogTimeRangeCriteria input)
+            public OldResultSetBuilder(IFramework framework, ILogTimeRangeCriteria input)
             {
                 _framework = framework;
                 _input = input;
@@ -188,80 +233,30 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
                 return result;
             }
         }
+#endif
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private class ChartBuilder
+        private class ChartBuilder : ChartBuilderBase<DailySummaryRecord, LogLevel>
         {
-            private readonly ILogTimeRangeCriteria _input;
-            private readonly TimeSpan _timeboxSize;
-            private readonly ApplicationEntityService.QueryOptions _query;
-            private readonly Dictionary<LogLevel, ChartData.TimeSeriesData> _seriesByLogLevel;
-            private readonly ImmutableArray<DateTime> _timeboxGrid;
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public ChartBuilder(ILogTimeRangeCriteria input)
+            public ChartBuilder(ILogTimeRangeCriteria input) 
+                : base(input)
             {
-                _input = input;
-
-                _query = (UIOperationContext.Current != null ? UIOperationContext.Current.Query : null);
-                _timeboxSize = VisualizationHelpers.GetTimeboxSize(_input);
-                _seriesByLogLevel = new Dictionary<LogLevel, ChartData.TimeSeriesData>() {
-                    { LogLevel.Info, VisualizationHelpers.CreateChartSeries(_timeboxSize, "Info") },
-                    { LogLevel.Warning, VisualizationHelpers.CreateChartSeries(_timeboxSize, "Warning") },
-                    { LogLevel.Error, VisualizationHelpers.CreateChartSeries(_timeboxSize, "Error") },
-                    { LogLevel.Critical, VisualizationHelpers.CreateChartSeries(_timeboxSize, "Critical") }
-                };
-
-                _timeboxGrid = BuildTimeboxGrid();
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public void AddRecords(IEnumerable<DailySummaryRecord> records)
-            {
-                Action<DailySummaryRecord> accumulator;
-
-                if (_timeboxSize.TotalHours < 1)
-                {
-                    accumulator = AccumulateWithMinutePrecision;
-                }
-                else
-                {
-                    accumulator = AccumulateWithHourPrecision;
-                }
-
-                foreach (var record in records)
-                {
-                    accumulator(record);
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public ChartData GetChart()
-            {
-                return new ChartData() {
-                    Series = _seriesByLogLevel.Values.Cast<ChartData.AbstractSeriesData>().ToList()
-                };
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void AccumulateWithHourPrecision(DailySummaryRecord record)
+            protected override IEnumerable<LogLevel> GetSeries()
             {
-                foreach (var kvp in record.Hour.Where(kvp => kvp.Value > 0))
-                {
-                    var hour = Int32.Parse(kvp.Key);
-                    var timestamp = record.Date.Add(TimeSpan.FromHours(hour));
-                    IncrementSeriesTimebox(record.Level, timestamp, kvp.Value);
-                }
+                yield return LogLevel.Info;
+                yield return LogLevel.Warning;
+                yield return LogLevel.Error;
+                yield return LogLevel.Critical;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void AccumulateWithMinutePrecision(DailySummaryRecord record)
+            protected override void Accumulate(DailySummaryRecord record)
             {
                 foreach (var hourKvp in record.Minute)
                 {
@@ -275,63 +270,6 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
                         IncrementSeriesTimebox(record.Level, timestamp, minuteKvp.Value);
                     }
                 }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private void IncrementSeriesTimebox(LogLevel level, DateTime timestamp, int count)
-            {
-                ChartData.TimeSeriesData series;
-
-                if (_seriesByLogLevel.TryGetValue(level, out series))
-                {
-                    var timeboxIndex = TryGetTimeboxIndex(timestamp);
-
-                    if (timeboxIndex >= 0)
-                    {
-                        series.Points[timeboxIndex].Value += count;
-                    }
-                }
-            }
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private int TryGetTimeboxIndex(DateTime timestamp)
-            {
-                var timeboxIndex = _timeboxGrid.BinarySearch(timestamp);
-
-                if (timeboxIndex < 0)
-                {
-                    timeboxIndex = ~timeboxIndex - 1;
-                }
-
-                if (timeboxIndex < 0 || timeboxIndex >= _timeboxGrid.Length)
-                {
-                    return -1;
-                }
-
-                return timeboxIndex;
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            private ImmutableArray<DateTime> BuildTimeboxGrid()
-            {
-                var timeboxGridBuilder = ImmutableArray.CreateBuilder<DateTime>();
-                var timeboxGridStart = VisualizationHelpers.SnapPointToTimebox(_input.From, _timeboxSize);
-
-                for (var timebox = timeboxGridStart; timebox < _input.Until; VisualizationHelpers.MoveToNextTimebox(ref timebox, _timeboxSize))
-                {
-                    var utcTimestamp = timebox;
-                    timeboxGridBuilder.Add(utcTimestamp);
-
-                    _seriesByLogLevel.Values.ForEach((series, index) => series.Points.Add(new ChartData.TimeSeriesPoint() {
-                        UtcTimestamp = utcTimestamp,
-                        Value = 0
-                    }));
-                }
-
-                return timeboxGridBuilder.ToImmutable();
             }
         }
     }

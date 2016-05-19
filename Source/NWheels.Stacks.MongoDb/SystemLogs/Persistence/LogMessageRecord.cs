@@ -6,7 +6,7 @@ using NWheels.Logging;
 
 namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 {
-    public class LogMessageRecord
+    public class LogMessageRecord : LogRecordBase
     {
         public LogMessageRecord(LogNode node)
         {
@@ -56,18 +56,6 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime Timestamp { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string MachineName { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string NodeName { get; set; }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public string NodeInstance { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

@@ -94,9 +94,13 @@
     <Compile Include="Factories\MongoStorageInitializer.cs" />
     <Compile Include="Factories\MongoDataRepositoryFactory.cs" />
     <Compile Include="JsonSerializationExtension.cs" />
-    <Compile Include="SystemLogs\Domain\Entities\LogLevelSummaryEntityHandlerExtension.cs" />
-    <Compile Include="SystemLogs\Domain\Transactions\LogLevelSummaryChartTx.cs" />
+    <Compile Include="SystemLogs\Domain\Entities\LogMessageEntity.cs" />
+    <Compile Include="SystemLogs\Domain\Entities\LogMessageSummaryEntity.cs" />
+    <Compile Include="SystemLogs\Domain\Transactions\ChartBuilderBase.cs" />
+    <Compile Include="SystemLogs\Domain\Transactions\LogMessageSummaryTx.cs" />
+    <Compile Include="SystemLogs\Domain\Transactions\LogMessageListTx.cs" />
     <Compile Include="SystemLogs\Domain\Transactions\LogLevelSummaryTx.cs" />
+    <Compile Include="SystemLogs\Domain\Transactions\SummaryResultSetBuilderBase.cs" />
     <Compile Include="SystemLogs\Domain\Transactions\VisualizationHelpers.cs" />
     <Compile Include="SystemLogs\Persistence\DailySummaryRecord.cs" />
     <Compile Include="SystemLogs\Domain\Entities\LogLevelSummaryEntity.cs" />

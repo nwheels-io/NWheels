@@ -16,6 +16,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs
         protected override void Load(ContainerBuilder builder)
         {
             builder.NWheelsFeatures().ObjectContracts().Concretize<ILogLevelSummaryEntity>().With<LogLevelSummaryEntity>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<ILogMessageSummaryEntity>().With<LogMessageSummaryEntity>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<ILogMessageEntity>().With<LogMessageEntity>();
 
             //builder.Register(
             //    c => (AbstractLogLevelSummaryChartTx)new LogLevelSummaryChartTx()
@@ -25,10 +27,11 @@ namespace NWheels.Stacks.MongoDb.SystemLogs
             //    c => (AbstractLogLevelSummaryListTx)new LogLevelSummaryListTx(c.Resolve<IFramework>())
             //).As<AbstractLogLevelSummaryListTx, ITransactionScript>();
 
-            builder.NWheelsFeatures().UI().RegisterEntityHandlerExtension<LogLevelSummaryEntityHandlerExtension>();
+            builder.NWheelsFeatures().UI().RegisterEntityHandlerExtension<LogLevelSummaryEntity.HandlerExtension>();
 
-            builder.NWheelsFeatures().Processing().RegisterTransactionScript<AbstractLogLevelSummaryChartTx, LogLevelSummaryChartTx>();
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<AbstractLogLevelSummaryTx, LogLevelSummaryTx>();
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<AbstractLogMessageSummaryTx, LogMessageSummaryTx>();
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<AbstractLogMessageListTx, LogMessageListTx>();
 
             builder.RegisterType<MongoDbThreadLogQueryService>().AsSelf().SingleInstance();
         }

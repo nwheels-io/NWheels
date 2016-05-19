@@ -7,7 +7,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
     public interface IBaseLogDimensionsEntity
     {
         [PropertyContract.EntityId]
-        string Id { get; }
+        string Id { get; set; }
 
         [PropertyContract.Calculated]
         string Machine { get; }

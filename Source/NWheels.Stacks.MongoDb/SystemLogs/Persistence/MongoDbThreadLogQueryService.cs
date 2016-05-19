@@ -84,6 +84,16 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Task<IEnumerable<LogMessageRecord>> QueryLogMessagesAsync(
+            ILogTimeRangeCriteria timeRange,
+            ApplicationEntityService.QueryOptions options,
+            CancellationToken cancellation)
+        {
+            throw new NotImplementedException();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void RefineDbQuery<TRecord>(List<IMongoQuery> criteria, ApplicationEntityService.QueryOptions options)
             where TRecord : LogRecordBase
         {
