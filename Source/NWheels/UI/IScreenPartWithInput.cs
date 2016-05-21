@@ -8,5 +8,6 @@ namespace NWheels.UI
 {
     public interface IScreenPartWithInput<TInput>
     {
+        string QualifiedName { get; }
     }
 }

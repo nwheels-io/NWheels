@@ -18,6 +18,13 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public void SetInitialScreenPart<TInput>(IScreenPartWithInput<TInput> screenPart)
+        {
+            this.InitalScreenPartQualifiedName = screenPart.QualifiedName;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public string InitalScreenPartQualifiedName { get; set; }
     }

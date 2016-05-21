@@ -28,6 +28,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs
             //).As<AbstractLogLevelSummaryListTx, ITransactionScript>();
 
             builder.NWheelsFeatures().UI().RegisterEntityHandlerExtension<LogLevelSummaryEntity.HandlerExtension>();
+            builder.NWheelsFeatures().UI().RegisterEntityHandlerExtension<LogMessageSummaryEntity.HandlerExtension>();
+            builder.NWheelsFeatures().UI().RegisterEntityHandlerExtension<LogMessageEntity.HandlerExtension>();
 
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<AbstractLogLevelSummaryTx, LogLevelSummaryTx>();
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<AbstractLogMessageSummaryTx, LogMessageSummaryTx>();

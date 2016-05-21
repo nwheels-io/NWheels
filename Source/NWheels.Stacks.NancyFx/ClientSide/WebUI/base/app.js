@@ -647,10 +647,24 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         returnsPromise: false,
         execute: function (scope, behavior, input) {
             console.log('run-behavior > invokeCommand', behavior.commandQualifiedName);
-            if (scope.$parent) {
-                scope.$parent.$emit(behavior.commandQualifiedName + ':Executing', input);
+            var payload = input;
+            if (behavior.argumentExpression) {
+                var context = { };
+                if (input) {
+                    context.model = {
+                        Data: scope.model.Data,
+                        State: scope.model.State,
+                        Input: input
+                    };
+                } else {
+                    context.model = scope.model;
+                }
+                payload = Enumerable.Return(context).Select('ctx=>ctx.' + behavior.argumentExpression).Single();
             }
-            scope.$broadcast(behavior.commandQualifiedName + ':Executing', input);
+            if (scope.$parent) {
+                scope.$parent.$emit(behavior.commandQualifiedName + ':Executing', payload);
+            }
+            scope.$broadcast(behavior.commandQualifiedName + ':Executing', payload);
         },
     };
 

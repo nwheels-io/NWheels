@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Domains.DevOps.SystemLogs.Entities;
+using NWheels.Entities;
 using NWheels.Extensions;
 using NWheels.Logging;
+using NWheels.UI;
 
 namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 {
@@ -72,5 +74,22 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
         public int WarningCount { get; private set; }
         public int ErrorCount { get; private set; }
         public int CriticalCount { get; private set; }
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class HandlerExtension : ApplicationEntityService.EntityHandlerExtension<ILogMessageSummaryEntity>
+        {
+            public override bool CanOpenNewUnitOfWork(object txViewModel)
+            {
+                return true;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override IUnitOfWork OpenNewUnitOfWork(object txViewModel)
+            {
+                return null;
+            }
+        }
     }
 }

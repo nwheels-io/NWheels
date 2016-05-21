@@ -702,6 +702,6 @@ namespace NWheels.UI.Toolbox
         Link = 50,
         Key = 60,
         Widget = 70,
-        Hidden = 100
+        Hidden = 1000
     }
 }

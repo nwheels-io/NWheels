@@ -7,24 +7,11 @@ using NWheels.Extensions;
 namespace NWheels.UI.Uidl
 {
     [DataContract(Name = "Command", Namespace = UidlDocument.DataContractNamespace)]
-    public class UidlCommand : InteractiveUidlNode
+    public abstract class UidlCommandBase : InteractiveUidlNode
     {
-        public UidlCommand(string idName, AbstractUidlNode parent)
-            : this(UidlNodeType.Command, idName, parent)
-        {
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected UidlCommand(UidlNodeType nodeType, string idName, AbstractUidlNode parent)
+        protected UidlCommandBase(UidlNodeType nodeType, string idName, AbstractUidlNode parent)
             : base(nodeType, idName, parent)
         {
-            this.Executing = new UidlNotification("Executing", this);
-            this.Updating = new UidlNotification("Updating", this);
-
-            base.Notifications.Add(this.Executing);
-            base.Notifications.Add(this.Updating);
-
             this.Severity = CommandSeverity.Change;
         }
 
@@ -47,11 +34,52 @@ namespace NWheels.UI.Uidl
         public bool HiddenIfDisabled { get; set; }
         [DataMember]
         public string Warning { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [DataContract(Name = "Command", Namespace = UidlDocument.DataContractNamespace)]
+    public class UidlCommand<TArgument> : UidlCommandBase
+    {
+        public UidlCommand(string idName, AbstractUidlNode parent)
+            : this(UidlNodeType.Command, idName, parent)
+        {
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public UidlNotification Executing { get; private set; }
-        public UidlNotification Updating { get; private set; }
+        protected UidlCommand(UidlNodeType nodeType, string idName, AbstractUidlNode parent)
+            : base(nodeType, idName, parent)
+        {
+            this.Executing = new UidlNotification<TArgument>("Executing", this);
+            this.Updating = new UidlNotification<TArgument>("Updating", this);
+
+            base.Notifications.Add(this.Executing);
+            base.Notifications.Add(this.Updating);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UidlNotification<TArgument> Executing { get; private set; }
+        public UidlNotification<TArgument> Updating { get; private set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [DataContract(Name = "Command", Namespace = UidlDocument.DataContractNamespace)]
+    public class UidlCommand : UidlCommand<Empty.Payload>
+    {
+        public UidlCommand(string idName, AbstractUidlNode parent)
+            : base(idName, parent)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected UidlCommand(UidlNodeType nodeType, string idName, AbstractUidlNode parent)
+            : base(nodeType, idName, parent)
+        {
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

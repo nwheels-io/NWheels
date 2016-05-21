@@ -852,7 +852,7 @@ namespace NWheels.UI.Toolbox
         bool UsePascalCase { get; set; }
         bool UseSectionsInsteadOfTabs { get; }
         List<FormField> Fields { get; }
-        List<UidlCommand> Commands { get; }
+        List<UidlCommandBase> Commands { get; }
         bool IsModalPopup { get; }
         bool NeedsInitialModel { get; set; }
         bool NeedsAuthorize { get; set; }

@@ -89,7 +89,26 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             ApplicationEntityService.QueryOptions options,
             CancellationToken cancellation)
         {
-            throw new NotImplementedException();
+            var environmentFilter = TryTakePropertyFilter(options, _s_queryEnvironmentProperty);
+
+            var dbCriteria = new List<IMongoQuery>();
+            dbCriteria.Add(Query<LogMessageRecord>.GTE(x => x.Timestamp, timeRange.From));
+            dbCriteria.Add(Query<LogMessageRecord>.LT(x => x.Timestamp, timeRange.Until));
+
+            if (options != null)
+            {
+                RefineDbQuery<LogMessageRecord>(dbCriteria, options);
+            }
+
+            var dbQuery = Query.And(dbCriteria);
+
+            return RunEnvironmentMapReduceQuery<LogMessageRecord>(
+                environmentFilter,
+                queryFunc: (db, environmentName) => {
+                    var collection = db.GetCollection<LogMessageRecord>(DbNamingConvention.GetLogMessageCollectionName(environmentName));
+                    return collection.Find(dbQuery);
+                },
+                cancellation: cancellation);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -97,11 +116,11 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
         private void RefineDbQuery<TRecord>(List<IMongoQuery> criteria, ApplicationEntityService.QueryOptions options)
             where TRecord : LogRecordBase
         {
-            RefineDbQueryProperty<DailySummaryRecord>(criteria, x => x.MachineName, TryTakePropertyFilter(options, _s_queryMachineProperty));
-            RefineDbQueryProperty<DailySummaryRecord>(criteria, x => x.EnvironmentName, TryTakePropertyFilter(options, _s_queryEnvironmentProperty));
-            RefineDbQueryProperty<DailySummaryRecord>(criteria, x => x.NodeName, TryTakePropertyFilter(options, _s_queryNodeProperty));
-            RefineDbQueryProperty<DailySummaryRecord>(criteria, x => x.NodeInstance, TryTakePropertyFilter(options, _s_queryInstanceProperty));
-            RefineDbQueryProperty<DailySummaryRecord>(criteria, x => x.NodeInstanceReplica, TryTakePropertyFilter(options, _s_queryReplicaProperty));
+            RefineDbQueryProperty<TRecord>(criteria, x => x.MachineName, TryTakePropertyFilter(options, _s_queryMachineProperty));
+            RefineDbQueryProperty<TRecord>(criteria, x => x.EnvironmentName, TryTakePropertyFilter(options, _s_queryEnvironmentProperty));
+            RefineDbQueryProperty<TRecord>(criteria, x => x.NodeName, TryTakePropertyFilter(options, _s_queryNodeProperty));
+            RefineDbQueryProperty<TRecord>(criteria, x => x.NodeInstance, TryTakePropertyFilter(options, _s_queryInstanceProperty));
+            RefineDbQueryProperty<TRecord>(criteria, x => x.NodeInstanceReplica, TryTakePropertyFilter(options, _s_queryReplicaProperty));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

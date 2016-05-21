@@ -109,6 +109,18 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public InvokeCommandBehaviorBuilder<TInput, TArgument> InvokeCommand<TArgument>(UidlCommand<TArgument> command)
+            {
+                var behavior = new UidlInvokeCommandBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode) {
+                    CommandQualifiedName = command.QualifiedName
+                };
+
+                SetAndSubscribeBehavior(behavior);
+                return new InvokeCommandBehaviorBuilder<TInput, TArgument>(_ownerNode, behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public CallApiBehaviorBuilder<TInput, TContract> CallApi<TContract>()
             {
                 var behavior = new UidlCallApiBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
@@ -184,6 +196,16 @@ namespace NWheels.UI
             //-------------------------------------------------------------------------------------------------------------------------------------------------
             
             public BroadcastBehaviorBuilder4<TInput> Broadcast(UidlNotification notification)
+            {
+                var behavior = new UidlBroadcastBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                SetAndSubscribeBehavior(behavior);
+                behavior.NotificationQualifiedName = notification.QualifiedName;
+                return new BroadcastBehaviorBuilder4<TInput>(_ownerNode, behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public BroadcastBehaviorBuilder4<TInput> Broadcast(UidlNotification<Empty.Payload> notification)
             {
                 var behavior = new UidlBroadcastBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
                 SetAndSubscribeBehavior(behavior);
@@ -781,6 +803,32 @@ namespace NWheels.UI
             {
                 _behavior.InputExpression = targetInputSelector.ToString();
                 return new PromiseBuilder<ModalResult>(_ownerNode, _behavior, _uidl);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class InvokeCommandBehaviorBuilder<TInput, TArgument>
+        {
+            private readonly ControlledUidlNode _ownerNode;
+            private readonly UidlInvokeCommandBehavior _behavior;
+            private readonly UidlBuilder _uidl;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public InvokeCommandBehaviorBuilder(ControlledUidlNode ownerNode, UidlInvokeCommandBehavior behavior, UidlBuilder uidl)
+            {
+                _ownerNode = ownerNode;
+                _behavior = behavior;
+                _uidl = uidl;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public PromiseBuilder<TInput> WithArgument(Expression<Func<ViewModel<TData, TState, TInput>, TArgument>> argumentSelector)
+            {
+                _behavior.ArgumentExpression = (argumentSelector != null ? argumentSelector.ToNormalizedNavigationString("model") : "null");
+                return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
             }
         }
 

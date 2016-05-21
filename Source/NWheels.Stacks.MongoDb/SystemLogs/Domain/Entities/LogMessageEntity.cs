@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Domains.DevOps.SystemLogs.Entities;
+using NWheels.Entities;
 using NWheels.Logging;
 using NWheels.Stacks.MongoDb.SystemLogs.Persistence;
+using NWheels.UI;
 
 namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 {
@@ -62,5 +64,22 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
         public string[] AdditionalDetails { get; private set; }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class HandlerExtension : ApplicationEntityService.EntityHandlerExtension<ILogMessageEntity>
+        {
+            public override bool CanOpenNewUnitOfWork(object txViewModel)
+            {
+                return true;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override IUnitOfWork OpenNewUnitOfWork(object txViewModel)
+            {
+                return null;
+            }
+        }
     }
 }

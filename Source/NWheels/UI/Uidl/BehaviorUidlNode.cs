@@ -116,6 +116,8 @@ namespace NWheels.UI.Uidl
 
         [DataMember]
         public string CommandQualifiedName { get; set; }
+        [DataMember]
+        public string ArgumentExpression { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

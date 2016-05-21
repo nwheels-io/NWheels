@@ -52,6 +52,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -76,6 +77,7 @@
     <Compile Include="SystemLogs\UI\LogMessageSummaryScreenPart.cs" />
     <Compile Include="SystemLogs\UI\LogMessageListScreenPart.cs" />
     <Compile Include="SystemLogs\UI\SystemLogScreenPart.cs" />
+    <Compile Include="SystemLogs\UI\LogLevelSummaryScreenPart.cs" />
     <Compile Include="UtilityTools\UnzipTool.cs" />
     <Compile Include="UtilityTools\ZipTool.cs" />
   </ItemGroup>

@@ -14,7 +14,7 @@ namespace NWheels.UI.Uidl
         protected ControlledUidlNode(UidlNodeType nodeType, string idName, ControlledUidlNode parent)
             : base(nodeType, idName, parent)
         {
-            this.Commands = new List<UidlCommand>();
+            this.Commands = new List<UidlCommandBase>();
             this.Behaviors = new List<BehaviorUidlNode>();
             this.DataBindings = new List<DataBindingUidlNode>();
 
@@ -32,7 +32,7 @@ namespace NWheels.UI.Uidl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
-        public List<UidlCommand> Commands { get; set; } 
+        public List<UidlCommandBase> Commands { get; set; } 
         [DataMember]
         public List<BehaviorUidlNode> Behaviors { get; set; }
         [DataMember]

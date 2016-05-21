@@ -378,6 +378,8 @@
     <Compile Include="UI\Impl\EntityExportFormatSemanticsAttribute.cs" />
     <Compile Include="UI\Impl\EntityImportExportFault.cs" />
     <Compile Include="UI\Impl\EntityImportExportFormatSet.cs" />
+    <Compile Include="UI\Toolbox\TabbedScreenPartSet.cs" />
+    <Compile Include="UI\Toolbox\TabSet.cs" />
     <Compile Include="UI\Toolbox\BadgeSet.cs" />
     <Compile Include="UI\Toolbox\ChartReport.cs" />
     <Compile Include="UI\Toolbox\ChartReportScreenPart.cs" />
