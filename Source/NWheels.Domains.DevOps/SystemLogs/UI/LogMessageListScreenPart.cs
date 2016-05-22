@@ -31,18 +31,20 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
             Report.CriteriaForm.ConfigureLogTimeRange();
 
             Report.ResultTable
-                .Column(x => x.Machine)
+                .Column(x => x.Timestamp)
+                .Column(x => x.Machine, size: FieldSize.Small)
                 .Column(x => x.Environment)
-                .Column(x => x.Node)
+                .Column(x => x.Node, size: FieldSize.Small)
                 .Column(x => x.Instance, size: FieldSize.Small)
-                .Column(x => x.Replica, size: FieldSize.Small)
+                //.Column(x => x.Replica, size: FieldSize.Small)
                 .Column(x => x.Logger)
-                .Column(x => x.MessageId)
-                .Column(x => x.ExceptionType)
-                .Column(x => x.ThreadLogId)
-                .Column(x => x.CorrelationId)
-                .Column(x => x.KeyValues, size: FieldSize.Large)
-                .Column(x => x.AdditionalDetails, size: FieldSize.Large);
+                .Column(x => x.MessageId, size: FieldSize.Large)
+                .Column(x => x.ExceptionType, size: FieldSize.Large)
+                //.Column(x => x.ThreadLogId)
+                //.Column(x => x.CorrelationId)
+                .Column(x => x.KeyValues, size: FieldSize.Large);
+
+            Report.ResultTable.UseDetailPane(MessageJson, expanded: false);
 
             presenter.On(base.NavigatedHere)
                 .Broadcast(Report.ContextSetter).WithPayload(vm => vm.Input).TunnelDown();
@@ -62,5 +64,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
             ILogTimeRangeCriteria, 
             AbstractLogMessageListTx, 
             ILogMessageEntity> Report { get; set; }
+
+        public JsonText MessageJson { get; set; }
     }
 }

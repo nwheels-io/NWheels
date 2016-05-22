@@ -38,7 +38,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 
         #region Implementation of IBaseLogDimensionsEntity
 
-        public string Id { get; set; }
+        public abstract string Id { get; set; }
+
         public string Machine { get; private set; }
         public string Environment { get; private set; }
         public string Node { get; private set; }

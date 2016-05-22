@@ -185,6 +185,14 @@ HEAD, JS/CSS LINKS
             padding:0;
             margin:0;
         }
+        pre.jsonText {
+            border: 0;
+            margin: 0;
+        }
+        pre.jsonText span.key { font-weight: bold; }
+        pre.jsonText span.string { color: red; }
+        pre.jsonText span.number { color: blue; }
+        pre.jsonText span.null { color: gray; }
     </style>
 </head>
 <body 
@@ -701,6 +709,13 @@ HEAD, JS/CSS LINKS
     </script>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - JSON TEXT
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="app/uidl-element-template/JsonText">
+        <pre class="jsonText" ng-bind-html="::formattedHtml"></pre>
+    </script>
+    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - GAUGE
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/Gauge">
@@ -1140,7 +1155,7 @@ HEAD, JS/CSS LINKS
                         subGridRowColapsed: function(subgrid_id, row_id) {
                             //var rowData = $scope.ResultSet[row_id - 1];
                             //var childScope = rowData.$detailPaneScope = childScope;
-                            return false;
+                            return !($scope.uidl.detailPaneExpanded===true);
                         },
                         gridComplete: function () {
                             var grid = $('#rdt_' + $scope.uniqueWidgetId);
@@ -2134,8 +2149,11 @@ HEAD, JS/CSS LINKS
                     var startValue = moment($scope.entity[$scope.uidl.propertyName]);
                     var endValue = moment($scope.entity[$scope.groupFields[0].propertyName]);
                     $scope.displayDateRange(startValue, endValue);
-                    $('#' + $scope.uniqueFieldId).data('daterangepicker').setStartDate(startValue);
-                    $('#' + $scope.uniqueFieldId).data('daterangepicker').setEndDate(endValue);
+                    var picker = $('#' + $scope.uniqueFieldId).data('daterangepicker');
+                    if (picker) {
+                        picker.setStartDate(startValue);
+                        picker.setEndDate(endValue);
+                    }
                 };
                 $scope.createDateTimeRangePicker = function() {
                     if ($scope.dateTimeRangePickerCreated || !$scope.entity || !$scope.entity[$scope.uidl.propertyName] || !$scope.timeRangePresets) {
@@ -2807,6 +2825,7 @@ HEAD, JS/CSS LINKS
     <script src="skin/assets/js/plugins/dataTables/dataTables.tableTools.min.js"></script-->
 
     <script src="app/skin/assets/app/angular-1.3.16/angular.min.js"></script>
+    <script src="app/skin/assets/app/angular-1.3.16/angular-sanitize.min.js"></script>
     <!--script src="app/skin/assets/js/plugins/chartJs/Chart.min.js"></script-->
     <script src="app/skin/assets/js/plugins/ui-bootstrap-tpls-0.14.3.min.js"></script>
     <!--script src="app/skin/assets/js/plugins/jquery-ui/jquery-ui.min.js"></script-->

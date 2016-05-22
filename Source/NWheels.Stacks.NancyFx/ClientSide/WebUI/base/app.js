@@ -1,6 +1,6 @@
 'use strict';
 
-var theApp = angular.module('theApp', []);
+var theApp = angular.module('theApp', ['ngSanitize']);
 
 //-----------------------------------------------------------------------------------------------------------------
 
@@ -1803,6 +1803,49 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    m_controllerImplementations['JsonText'] = {
+        implement: function (scope) {
+            function valueTransform(key, value) {
+                if (key && key.length > 0 && key.charAt(0) == '$') {
+                    return undefined;
+                }
+                //if (typeof value === "string") {
+                //    return value;
+                //}
+                return value;
+            }            
+            function syntaxHighlight(json) {
+                if (typeof json != 'string') {
+                     json = JSON.stringify(json, valueTransform, 4);
+                }
+                json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                var result = json.replace(
+                    /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, 
+                    function (match) {
+                        var cls = 'number';
+                        if (/^"/.test(match)) {
+                            if (/:$/.test(match)) {
+                                cls = 'key';
+                            } else {
+                                cls = 'string';
+                            }
+                        } else if (/true|false/.test(match)) {
+                            cls = 'boolean';
+                        } else if (/null/.test(match)) {
+                            cls = 'null';
+                        }
+                        return '<span class="' + cls + '">' + match + '</span>';
+                    }
+                );
+                return result;
+            }
+
+            scope.formattedHtml = syntaxHighlight(scope.parentModel);
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
     m_controllerImplementations['TransactionForm'] = {
         implement: function (scope) {
             scope.model.State.Input = { };
@@ -2243,22 +2286,21 @@ function (uidlService, entityService, commandService, $timeout, $http, $compile,
                 if (!uidlElement.authorization || uidlElement.authorization.requiredClaims.length == 0) {
                     return true;
                 }
-                var userClaims = $scope.appScope.model.State.LoggedInUser.LoginResult.AllClaims;
-                for (var i = 0 ; i < uidlElement.authorization.requiredClaims.length; i++) {
-                    var claim = uidlElement.authorization.requiredClaims[i];
-                    if (userClaims.indexOf(claim) >= 0) {
-                        return true;
+                try {
+                    var userClaims = $scope.appScope.model.State.LoggedInUser.LoginResult.AllClaims;
+                    for (var i = 0 ; i < uidlElement.authorization.requiredClaims.length; i++) {
+                        var claim = uidlElement.authorization.requiredClaims[i];
+                        if (userClaims.indexOf(claim) >= 0) {
+                            return true;
+                        }
                     }
-                }
+                } catch(ex) { }
+                
                 return false;
             };
             
-            //console.log('uidlWidget::controller', $scope.uidl.qualifiedName);
-            //uidlService.implementController($scope);
-            $scope.$watch('uidl', function (newValue, oldValue) {
-                console.log('uidlWidget::watch(uidl)', oldValue ? oldValue.qualifiedName : '0', '->', $scope.uidl ? $scope.uidl.qualifiedName : '0');
-
-                if ($scope.uidl) {
+            $scope.implementUidl = function() {
+                if ($scope.uidl && !$scope.uidlWasImplemented) {
                     uidlService.implementController($scope);
 
                     var initFuncName = 'initWidget_' + $scope.uidl.widgetType;
@@ -2270,8 +2312,23 @@ function (uidlService, entityService, commandService, $timeout, $http, $compile,
                     $timeout(function() {
                         $scope.$emit($scope.uidl.qualifiedName + ':Loaded');
                     });
+                    
+                    $scope.uidlWasImplemented = true;
                 }
-            });
+            };
+            
+            //console.log('uidlWidget::controller', $scope.uidl.qualifiedName);
+            //uidlService.implementController($scope);
+            
+            if ($scope.uidl) {
+                $scope.implementUidl();
+            } else {
+                $scope.$watch('uidl', function (newValue, oldValue) {
+                    console.log('uidlWidget::watch(uidl)', oldValue ? oldValue.qualifiedName : '0', '->', $scope.uidl ? $scope.uidl.qualifiedName : '0');
+                    $scope.implementUidl();
+                });
+            }
+
             if ($scope.controllerInitCount) {
                 $scope.controllerInitCount = $scope.controllerInitCount+1;
             } else {
