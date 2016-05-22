@@ -18,6 +18,11 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [DataMember]
+        public bool ExpandedByDefault { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override void DescribePresenter(PresenterBuilder<JsonText, Empty.Data, Empty.State> presenter)
         {
         }

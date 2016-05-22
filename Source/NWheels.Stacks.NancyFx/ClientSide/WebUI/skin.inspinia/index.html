@@ -2930,8 +2930,12 @@ HEAD, JS/CSS LINKS
             return {
                 link: function ($scope, elem, attrs, ctrl) {
                     $scope.$timeout(function() {
+                        var options = { 
+                            collapsed: !$scope.uidl.expandedByDefault,
+                            nl2br: true
+                        };
                         var obj = $scope.parentModel;
-                        elem.JSONView(obj);
+                        elem.JSONView(obj, options);
                     });
                 }
             }

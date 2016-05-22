@@ -275,6 +275,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
                                 .TrimTail(DbNamingConvention.DailySummaryCollectionNameSuffix)
                                 .TrimTail(DbNamingConvention.LogMessageCollectionNameSuffix)
                                 .TrimTail(DbNamingConvention.ThreadLogCollectionNameSuffix))
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
                             .ToImmutableArray();
                         
                         _environmentListTimestamp = Interlocked.Exchange(ref _environmentListTimestamp, now.Ticks);

@@ -31,6 +31,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
             Report.CriteriaForm.ConfigureLogTimeRange();
 
             Report.ResultTable
+                .Column(x => x.Id)
                 .Column(x => x.Timestamp)
                 .Column(x => x.Machine, size: FieldSize.Small)
                 .Column(x => x.Environment)
@@ -41,9 +42,9 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
                 .Column(x => x.RootActivity, size: FieldSize.Large)
                 .Column(x => x.DurationMs, size: FieldSize.Small, format: "#,##0")
                 .Column(x => x.Level, title: "Result", size: FieldSize.Small)
-                .Column(x => x.ExceptionType, size: FieldSize.Large);
+                .Column(x => x.ExceptionType, size: FieldSize.Large)
                 //.Column(x => x.ThreadLogId)
-                //.Column(x => x.CorrelationId)
+                .Column(x => x.CorrelationId);
 
             Report.ResultTable.UseDetailPane(ThreadLogJson, expanded: false);
 

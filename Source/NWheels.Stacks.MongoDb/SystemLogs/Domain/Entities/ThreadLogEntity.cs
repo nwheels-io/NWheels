@@ -28,6 +28,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             this.DurationMs = record.Snapshot.RootActivity.Duration;
             this.ExceptionType = record.Snapshot.RootActivity.ExceptionTypeName;
             this.CorrelationId = record.CorrelationId;
+            this.Snapshot = record.Snapshot;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,6 +56,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
         public long DurationMs { get; private set; }
         public LogLevel Level { get; private set; }
         public string ExceptionType { get; private set; }
+        public ThreadLogSnapshot Snapshot { get; private set; }
 
         #endregion
 

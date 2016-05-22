@@ -28,5 +28,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
 
         [PropertyContract.Calculated]
         string CorrelationId { get; }
+
+        [PropertyContract.Calculated]
+        ThreadLogSnapshot Snapshot { get; }
     }
 }

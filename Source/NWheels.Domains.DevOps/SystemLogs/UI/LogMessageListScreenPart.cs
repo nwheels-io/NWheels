@@ -53,6 +53,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
                 b.AlterModel(
                     alt => alt.Copy(vm => vm.Input.From).To(vm => vm.State.Criteria.From),
                     alt => alt.Copy(vm => vm.Input.To).To(vm => vm.State.Criteria.Until)));
+
+            MessageJson.ExpandedByDefault = true;
         }
 
         #endregion
