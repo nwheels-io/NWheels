@@ -41,6 +41,7 @@ HEAD, JS/CSS LINKS
     <!--link href="app/skin/assets/css/plugins/dropzone/dropzone.css" rel="stylesheet"-->
     <link href="app/skin/assets/css/plugins/jqGrid/ui.jqgrid.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/jQueryUI/jquery-ui-1.10.4.custom.min.css" rel="stylesheet">
+    <link href="app/skin/assets/css/plugins/jquery-jsonview/jquery.jsonview.min.css" rel="stylesheet">
     <link href="app/skin/assets/css/animate.css" rel="stylesheet">
     <link href="app/skin/assets/css/style.css" rel="stylesheet">
 
@@ -129,6 +130,12 @@ HEAD, JS/CSS LINKS
             height: 100%;
             width: 100%;
         }        
+        .ui-state-highlight,
+        .ui-widget-content .ui-state-highlight,        
+        .ui-widget-header .ui-state-highlight {
+            color: white;
+            background: #47617A;
+        }        
         .ui-state-highlight .editable {
             color: black;
             background-color: #C6F4DE;
@@ -185,14 +192,22 @@ HEAD, JS/CSS LINKS
             padding:0;
             margin:0;
         }
-        pre.jsonText {
-            border: 0;
-            margin: 0;
+        .jsonText {
+            background-color: #FDFDFD;
+            padding: 5px;
         }
-        pre.jsonText span.key { font-weight: bold; }
-        pre.jsonText span.string { color: red; }
-        pre.jsonText span.number { color: blue; }
-        pre.jsonText span.null { color: gray; }
+        .jsonview .prop {
+            font-weight: normal;
+            text-decoration: none;
+            color: #808080;
+        }
+        .jsonview .prop {
+            font-weight: normal;
+            color: #808080;
+        }
+        .jsonview .string {
+            color: #0C7963;
+        }
     </style>
 </head>
 <body 
@@ -712,7 +727,7 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - JSON TEXT
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/JsonText">
-        <pre class="jsonText" ng-bind-html="::formattedHtml"></pre>
+        <div id="{{::uidl.elementName}}" class="jsonText" json-view></div>
     </script>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1132,6 +1147,9 @@ HEAD, JS/CSS LINKS
                             var template = '<uidl-widget uidl="uidl" parent-model="data"></uidl-widget>';
                             element.html(template);
                             $scope.$compile(element.contents())(childScope);
+                            if (!$scope.uidl.detailPaneExpanded) {
+                                $scope.$digest();
+                            }
                             //var compiledDom = $scope.$compile(template)(childScope);
                             //element.html(compiledDom);
                             //console.log(element.scope());
@@ -2761,6 +2779,7 @@ HEAD, JS/CSS LINKS
     <script src="app/skin/assets/js/inspinia.js"></script>
     <script src="app/skin/assets/js/plugins/pace/pace.min.js"></script>
     <script src="app/skin/assets/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="app/skin/assets/js/plugins/jquery-jsonview/jquery.jsonview.min.js"></script>
 
     <!-- Chosen -->
     <script src="app/skin/assets/js/plugins/chosen/chosen.jquery.js"></script>
@@ -2905,6 +2924,17 @@ HEAD, JS/CSS LINKS
             $rootScope.beginBrowserDownload = function(url) {
                 document.getElementById('iframe_content_download').src = url;
             };
+        }]);
+
+        angular.module('theApp').directive('jsonView', ['$timeout', function ($timeout) {
+            return {
+                link: function ($scope, elem, attrs, ctrl) {
+                    $scope.$timeout(function() {
+                        var obj = $scope.parentModel;
+                        elem.JSONView(obj);
+                    });
+                }
+            }
         }]);
 
         /*

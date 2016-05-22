@@ -1813,7 +1813,8 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 //    return value;
                 //}
                 return value;
-            }            
+            }
+            
             function syntaxHighlight(json) {
                 if (typeof json != 'string') {
                      json = JSON.stringify(json, valueTransform, 4);
@@ -1840,7 +1841,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 return result;
             }
 
-            scope.formattedHtml = syntaxHighlight(scope.parentModel);
+            //scope.formattedHtml = syntaxHighlight(scope.parentModel);
         }
     };
 
