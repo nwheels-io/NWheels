@@ -113,6 +113,35 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Task<IEnumerable<ThreadLogRecord>> QueryThreadLogsAsync(
+            ILogTimeRangeCriteria timeRange,
+            ApplicationEntityService.QueryOptions options,
+            CancellationToken cancellation)
+        {
+            var environmentFilter = TryTakePropertyFilter(options, _s_queryEnvironmentProperty);
+
+            var dbCriteria = new List<IMongoQuery>();
+            dbCriteria.Add(Query<ThreadLogRecord>.GTE(x => x.Timestamp, timeRange.From));
+            dbCriteria.Add(Query<ThreadLogRecord>.LT(x => x.Timestamp, timeRange.Until));
+
+            if (options != null)
+            {
+                RefineDbQuery<ThreadLogRecord>(dbCriteria, options);
+            }
+
+            var dbQuery = Query.And(dbCriteria);
+
+            return RunEnvironmentMapReduceQuery<ThreadLogRecord>(
+                environmentFilter,
+                queryFunc: (db, environmentName) => {
+                    var collection = db.GetCollection<ThreadLogRecord>(DbNamingConvention.GetThreadLogCollectionName(environmentName));
+                    return collection.Find(dbQuery);
+                },
+                cancellation: cancellation);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void RefineDbQuery<TRecord>(List<IMongoQuery> criteria, ApplicationEntityService.QueryOptions options)
             where TRecord : LogRecordBase
         {

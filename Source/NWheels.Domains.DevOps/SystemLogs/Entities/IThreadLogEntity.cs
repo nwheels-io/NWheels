@@ -8,22 +8,25 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
     [EntityContract]
     public interface IThreadLogEntity : IBaseLogDimensionsEntity
     {
-        [PropertyContract.EntityId]
-        string LogId { get; set; }
-        
         [PropertyContract.Calculated]
-        DateTime Timestamp { get; set; }
+        DateTime Timestamp { get; }
 
         [PropertyContract.Calculated]
-        ThreadTaskType TaskType { get; set; }
+        ThreadTaskType TaskType { get; }
 
         [PropertyContract.Calculated]
-        string CorrelationId { get; set; }
+        string RootActivity { get; }
 
         [PropertyContract.Calculated]
-        LogLevel Level { get; set; }
+        long DurationMs { get; }
 
         [PropertyContract.Calculated]
-        ThreadLogSnapshot Snapshot { get; set; }
+        LogLevel Level { get; }
+
+        [PropertyContract.Calculated]
+        string ExceptionType { get; }
+
+        [PropertyContract.Calculated]
+        string CorrelationId { get; }
     }
 }

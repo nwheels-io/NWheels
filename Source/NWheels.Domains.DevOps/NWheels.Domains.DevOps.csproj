@@ -68,12 +68,14 @@
     <Compile Include="SystemLogs\Entities\ILogMessageEntity.cs" />
     <Compile Include="SystemLogs\Entities\IThreadLogEntity.cs" />
     <Compile Include="SystemLogs\SystemLogFeatureLoader.cs" />
+    <Compile Include="SystemLogs\Transactions\AbstractThreadLogListTx.cs" />
     <Compile Include="SystemLogs\Transactions\AbstractLogMessageSummaryTx.cs" />
     <Compile Include="SystemLogs\Transactions\AbstractLogMessageListTx.cs" />
     <Compile Include="SystemLogs\Transactions\AbstractLogLevelSummaryTx.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemLogs\UI\Helpers.cs" />
+    <Compile Include="SystemLogs\UI\ThreadLogListScreenPart.cs" />
     <Compile Include="SystemLogs\UI\LogMessageSummaryScreenPart.cs" />
     <Compile Include="SystemLogs\UI\LogMessageListScreenPart.cs" />
     <Compile Include="SystemLogs\UI\SystemLogScreenPart.cs" />
