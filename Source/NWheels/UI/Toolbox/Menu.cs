@@ -136,14 +136,21 @@ namespace NWheels.UI.Toolbox
         {
             public static ItemAction Goto<TInput>(IScreenWithInput<TInput> screen, TInput value = default(TInput))
             {
-                return Describe(b => b.Navigate().ToScreen(screen).WithInput((payload, data, state) => value));
+                return Describe(b => b.Navigate().ToScreen(screen).WithInput(vm => value));
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public static ItemAction PopupScreen<TInput>(IScreenWithInput<TInput> screen, TInput value = default(TInput))
+            {
+                return Describe(b => b.Navigate().ToScreen(screen, NavigationType.Popup).WithInput(vm => value));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
             public static ItemAction Goto<TInput>(IScreenPartWithInput<TInput> screenPart, ScreenPartContainer targetContainer, TInput value = default(TInput))
             {
-                return Describe(b => b.Navigate().FromContainer(targetContainer).ToScreenPart(screenPart).WithInput((payload, data, state) => value));
+                return Describe(b => b.Navigate().FromContainer(targetContainer).ToScreenPart(screenPart).WithInput(vm => value));
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

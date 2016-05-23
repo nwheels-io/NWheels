@@ -614,18 +614,37 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         returnsPromise: false,
         execute: function (scope, behavior, input) {
             console.log('run-behavior > navigate', behavior.targetType, behavior.targetQualifiedName);
+            
+            if (behavior.navigationType == 'Popup' && behavior.targetType == 'Screen') {
+                var url = 
+                    $location.protocol() + '://' + 
+                    $location.host() + ':' + $location.port() + 
+                    '/#/?screen=' + behavior.targetQualifiedName;
+                
+                var h = parseInt(screen.height * 0.9);
+                var w = parseInt(screen.width * 0.95);
+                var x = parseInt((screen.width - w) / 2);
+                var y = parseInt((screen.height - h) / 4);
+                var windowOptions = 
+                    'toolbar=no,titlebar=no,menubar=no,scrollbars=yes,resizable=yes,' +
+                    'top=' + y + ',left=' + x + ',width=' + w + ',height=' + h;
+                    
+                window.open(url, '_blank', windowOptions);
+                return;
+            }
+            
             switch (behavior.targetType) {
                 case 'Screen':
-                    var screen = m_index.screens[behavior.targetQualifiedName];
+                    var screenUidl = m_index.screens[behavior.targetQualifiedName];
                     $rootScope.currentScreen = null;
                     $timeout(function() {
-                        $rootScope.currentScreen = screen;
-                        location.hash = screen.qualifiedName;
+                        $rootScope.currentScreen = screenUidl;
+                        location.hash = screenUidl.qualifiedName;
                         $timeout(function() {
                             //if (oldScreen) {
                             //    $rootScope.$broadcast(oldScreen.qualifiedName + ':NavigatingAway', input);
                             //}
-                            $rootScope.$broadcast(screen.qualifiedName + ':NavigatedHere', input);
+                            $rootScope.$broadcast(screenUidl.qualifiedName + ':NavigatedHere', input);
                         });
                     });
                     break;
@@ -2075,6 +2094,34 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    m_controllerImplementations['TabbedScreenPartSet'] = {
+        implement: function (scope) {
+            scope.selectedTabIndex = -1;
+            scope.initializedTabIndexes = { };
+            
+            scope.selectTabByIndex = function(index) {
+                if (index !== scope.selectedTabIndex) {
+                    scope.selectedTabIndex = index;
+                    
+                    if (!scope.initializedTabIndexes[index]) {
+                        scope.initializedTabIndexes[index] = true;
+                        $timeout(function() {
+                            scope.$broadcast(scope.uidl.tabs[index].qualifiedName + ':NavigatedHere');
+                        });
+                    }
+                }
+            }
+            
+            if (scope.uidl.tabs.length > 0) {
+                scope.$timeout(function() {
+                    scope.selectTabByIndex(0);
+                });
+            }
+        }
+    };
+    
+    //-----------------------------------------------------------------------------------------------------------------
+
     m_controllerImplementations['TaskPadItem'] = {
         implement: function (scope) {
             scope.performTask = function(command) {
@@ -2269,8 +2316,8 @@ function (uidlService, entityService, commandService, $timeout, $http, $compile,
         },
         restrict: 'E',
         replace: true,
-        link: function (scope, elem, attrs) {
-            scope.uniqueWidgetId = 'uidlWidget' + uniqueWidgetId++;
+        link: function ($scope, elem, attrs) {
+            $scope.uniqueWidgetId = 'uidlWidget' + uniqueWidgetId++;
         },
         template: '<ng-include src="\'app/uidl-element-template/\' + uidl.templateName"></ng-include>',
         controller: function ($scope) {

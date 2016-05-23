@@ -208,6 +208,15 @@ HEAD, JS/CSS LINKS
         .jsonview .string {
             color: #0C7963;
         }
+        .full-height {
+            height:100vh;
+        }
+        .tabs-container.full-height > .nav-tabs > li.active > a:hover {
+            color: black;
+        }
+        .tabs-container.full-height > .nav-tabs > li > a:hover {
+            color: white;
+        }
     </style>
 </head>
 <body 
@@ -1090,7 +1099,7 @@ HEAD, JS/CSS LINKS
                         //height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
                         shrinkToFit: false,
                         width: null,
-                        height: ($scope.uidl.mode === 'Standalone' ? document.documentElement.clientHeight - $("#rdt_" + $scope.uniqueWidgetId).offset().top - 150 : '100%'),
+                        height: ($scope.uidl.mode === 'Standalone' ? document.documentElement.clientHeight - $("#rdt_" + $scope.uniqueWidgetId).offset().top - 140 : '100%'),
                         rownumWidth: 45,
                         rowNum: ($scope.uidl.defaultPageSize || ($scope.uidl.pageSizeOptions && $scope.uidl.pageSizeOptions.length ? $scope.uidl.pageSizeOptions[0] : ($scope.uidl.mode === 'Standalone' ? 50 : 5))),
                         rowList: $scope.uidl.pageSizeOptions || [10, 20, 50],
@@ -2648,6 +2657,45 @@ HEAD, JS/CSS LINKS
     </script>	
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - TABBED SCREEN PART SET
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="app/uidl-element-template/TabbedScreenPartSet">
+        <div id="{{::uidl.elementName}}" class="full-height" style="padding:0">
+            <div class="tabs-container full-height" style="padding:5px 0 0 0;">
+                <ul class="nav nav-tabs" style="padding:0 0 0 5px;">
+                    <li ng-class="{active: selectedTabIndex===$index}" 
+                        ng-repeat="tab in uidl.tabs"
+                        ><a ng-click="selectTabByIndex($index)">{{translate(tab.text)}}</a></li>
+                </ul>
+                <div class="tab-content" style="position:absolute;top:45px;left:0;right:0;bottom:0;">
+                    <div ng-repeat="tab in uidl.tabs" ng-class="{active: selectedTabIndex===$index}" 
+                         class="tab-pane" 
+                         style="margin:0;padding:15px 0 0 0;position:absolute;top:0;left:0;right:0;bottom:0;background-color:white;">
+                            <uidl-screen-part uidl="tab"></uidl-screen-part>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>	
+    <script type="text/javascript">
+        function initWidget_TabbedScreenPartSet($scope) {
+/*         
+         function resizeToWindow(elem) {
+                var h = $(window).height() - 30;
+                elem.css({ height: h + 'px' });
+            };
+            $scope.$timeout(function() {
+                var elem = $('#' + $scope.uidl.elementName + ' div.tab-content');
+                resizeToWindow(elem);
+                $(window).resize(function() {
+                    resizeToWindow(elem);
+                });
+            });
+        }
+*/        
+    </script>
+    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - FILTER FORM
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/FilterForm">
@@ -2671,7 +2719,7 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/Report">
         <div class="col-lg-12">
-            <div class="ibox float-e-margins">
+            <div class="ibox float-e-margins" style="padding-bottom:0;">
                 <uidl-widget uidl="uidl.criteriaForm"></uidl-widget>
                 <div ng-if="uidl.visualizationChart" class="m-b">
                     <uidl-widget uidl="uidl.visualizationChart"></uidl-widget>

@@ -640,22 +640,26 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<TInput> ToScreen(IScreenWithInput<Empty.Input> screen)
+            public PromiseBuilder<TInput> ToScreen(
+                IScreenWithInput<Empty.Input> screen, 
+                NavigationType navigationType = NavigationType.LoadInline)
             {
                 _behavior.TargetType = UidlNodeType.Screen;
                 _behavior.TargetQualifiedName = ((UidlScreen)screen).QualifiedName;
-                _behavior.NavigationType = NavigationType.LoadInline;
+                _behavior.NavigationType = navigationType;
 
                 return new PromiseBuilder<TInput>(_ownerNode, _behavior, _uidl);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public NavigateBehaviorInputBuilder<TInput, TScreenInput> ToScreen<TScreenInput>(IScreenWithInput<TScreenInput> screen)
+            public NavigateBehaviorInputBuilder<TInput, TScreenInput> ToScreen<TScreenInput>(
+                IScreenWithInput<TScreenInput> screen, 
+                NavigationType navigationType = NavigationType.LoadInline)
             {
                 _behavior.TargetType = UidlNodeType.Screen;
                 _behavior.TargetQualifiedName = ((UidlScreen)screen).QualifiedName;
-                _behavior.NavigationType = NavigationType.LoadInline;
+                _behavior.NavigationType = navigationType;
 
                 return new NavigateBehaviorInputBuilder<TInput, TScreenInput>(_ownerNode, _behavior, _uidl);
             }
@@ -773,9 +777,9 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public PromiseBuilder<TTargetInput> WithInput(Expression<Func<TInput, TData, TState, TTargetInput>> targetInputSelector)
+            public PromiseBuilder<TTargetInput> WithInput(Expression<Func<ViewModel<TData, TState,  TInput>, TTargetInput>> targetInputSelector)
             {
-                _behavior.InputExpression = targetInputSelector.ToString();
+                _behavior.InputExpression = targetInputSelector.ToNormalizedNavigationString("model");
                 return new PromiseBuilder<TTargetInput>(_ownerNode, _behavior, _uidl);
             }
         }
