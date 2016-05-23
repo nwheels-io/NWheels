@@ -211,11 +211,18 @@ HEAD, JS/CSS LINKS
         .full-height {
             height:100vh;
         }
+        .tabs-container.full-height > .nav-tabs > li > a {
+            padding: 5px 10px 7px 10px;
+            border-radius:0;
+        }
         .tabs-container.full-height > .nav-tabs > li.active > a:hover {
             color: black;
         }
         .tabs-container.full-height > .nav-tabs > li > a:hover {
             color: white;
+        }
+        .compensateZeroPadding {
+            padding: 5px 10px 5px 10px;
         }
     </style>
 </head>
@@ -985,21 +992,31 @@ HEAD, JS/CSS LINKS
                 columnsModel.push(modelItem);
             });
             
+            $scope.uidl.calculateHeight = function() {
+                if ($scope.uidl.mode === 'Standalone') {
+                    var delta = ($scope.uidl.$skin.deltaWindowHeight || 140);
+                    var height = document.documentElement.clientHeight - $('#' + $scope.tableElementId).offset().top - delta;
+                    return height;
+                } else {
+                    return '100%';
+                }                
+            };
+            
             $scope.onDataReceived = function (event, data) {
+                $scope.tableElementId = 'rdt_' + $scope.uniqueWidgetId;
                 $scope.ResultSet = data;
                 for (var  i = 0; i < data.length; i++) {
                     data[i]['$index'] = i;
                 }
                 $scope.$timeout(function () {
-                    $('#rdt_' + $scope.uniqueWidgetId).jqGrid('GridUnload');
-                    $("#rdt_" + $scope.uniqueWidgetId).jqGrid({
+                    $('#' + $scope.tableElementId).jqGrid('GridUnload');
+                    $('#' + $scope.tableElementId).jqGrid({
                         datatype: 'local',
                         localReader: {
                            id: "$index",
                         },
                         data: data,
                         loadonce: true,
-                        //height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
                         rownumWidth: 45,
                         shrinkToFit: false,
                         width: null,
@@ -1023,7 +1040,7 @@ HEAD, JS/CSS LINKS
                             }
                         }
                     });
-                    var grid = $("#rdt_" + $scope.uniqueWidgetId);
+                    var grid = $('#' + $scope.tableElementId);
                     grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
                     if ($scope.uidl.mode === 'Standalone') {
                         grid.jqGrid('filterToolbar',{ searchOnEnter: false, defaultSearch: "cn" });
@@ -1032,11 +1049,11 @@ HEAD, JS/CSS LINKS
                 });
             };
             $scope.$on($scope.uidl.qualifiedName + ':DataReceived', $scope.onDataReceived);
-
             $scope.onRequestPrepared = function (event, request) {
+                $scope.tableElementId = 'rdt_' + $scope.uniqueWidgetId;
                 $scope.preparedRequest = request;
                 $scope.$timeout(function () {
-                    $("#rdt_" + $scope.uniqueWidgetId).jqGrid('GridUnload');
+                    $('#' + $scope.tableElementId).jqGrid('GridUnload');
                     $scope.lastSelectedRowId = null;
                     $scope.totalsRowDisplayed = false;
                     var gridOptions = {
@@ -1062,7 +1079,7 @@ HEAD, JS/CSS LINKS
                             queryBuilder.take(postData.rows);
                             queryBuilder.page(postData.page);
                             var requestUrl = queryBuilder.getQueryUrl();
-                            var grid = $("#rdt_" + $scope.uniqueWidgetId);
+                            var grid = $('#' + $scope.tableElementId);
                             grid[0].grid.beginReq();
                             $scope.$http.post(
                                 requestUrl,
@@ -1075,7 +1092,7 @@ HEAD, JS/CSS LINKS
                                     }
                                     $scope.ResultSet = response.data.ResultSet;
                                     $scope.entityService.trackRetrievedEntities(response.data.ResultSet);
-                                    var thegrid = $("#rdt_" + $scope.uniqueWidgetId);
+                                    var thegrid = $('#' + $scope.tableElementId);
                                     thegrid[0].addJSONData(response.data);
                                     $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data);
                                 },
@@ -1099,7 +1116,7 @@ HEAD, JS/CSS LINKS
                         //height: ($scope.uidl.mode === 'Standalone' ? 350 : 150),
                         shrinkToFit: false,
                         width: null,
-                        height: ($scope.uidl.mode === 'Standalone' ? document.documentElement.clientHeight - $("#rdt_" + $scope.uniqueWidgetId).offset().top - 140 : '100%'),
+                        height: $scope.uidl.calculateHeight(),
                         rownumWidth: 45,
                         rowNum: ($scope.uidl.defaultPageSize || ($scope.uidl.pageSizeOptions && $scope.uidl.pageSizeOptions.length ? $scope.uidl.pageSizeOptions[0] : ($scope.uidl.mode === 'Standalone' ? 50 : 5))),
                         rowList: $scope.uidl.pageSizeOptions || [10, 20, 50],
@@ -1113,8 +1130,6 @@ HEAD, JS/CSS LINKS
                         hidegrid: false,
                         loadui: 'block',
                         ignoreCase: true,
-                        //toppager: true,
-                        //clonetotop: true,
                         onSelectRow: function (rowId) {
                             var rowObject = $scope.ResultSet[rowId - 1];
                             if ($scope.uidl.enableAutonomousQuery) {
@@ -1124,7 +1139,7 @@ HEAD, JS/CSS LINKS
                             }
                             
                             if ($scope.uidl.enableEditInline) {
-                                var gridObj = $("#rdt_" + $scope.uniqueWidgetId);
+                                var gridObj = $('#' + $scope.tableElementId);
                                 if (rowId && rowId!==$scope.lastSelectedRowId) { 
                                     gridObj.restoreRow($scope.lastSelectedRowId); 
                                 }
@@ -1185,9 +1200,9 @@ HEAD, JS/CSS LINKS
                             return !($scope.uidl.detailPaneExpanded===true);
                         },
                         gridComplete: function () {
-                            var grid = $('#rdt_' + $scope.uniqueWidgetId);
+                            var grid = $('#' + $scope.tableElementId);
                             if ($scope.uidl.enableDetailPane && $scope.uidl.detailPaneExpanded) {
-                                var rowIds = $('#rdt_' + $scope.uniqueWidgetId).getDataIDs();
+                                var rowIds = $('#' + $scope.tableElementId).getDataIDs();
                                 $.each(rowIds, function (index, rowId) {
                                     grid.expandSubGridRow(rowId); 
                                 });
@@ -1240,10 +1255,32 @@ HEAD, JS/CSS LINKS
                             }
                         }
                     };
-                    var grid = $("#rdt_" + $scope.uniqueWidgetId);
+                    var grid = $('#' + $scope.tableElementId);
                     grid.jqGrid(gridOptions);
-                    grid.jqGrid('filterToolbar',{ stringResult: true, searchOnEnter: false, defaultSearch: "cn" });
+                    grid.jqGrid('filterToolbar', { stringResult: true, searchOnEnter: false, defaultSearch: "cn" });
                     grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
+                    
+                    $scope.$on($scope.uidl.qualifiedName + ':PageRefreshRequested', function (event, data) {
+                        grid.trigger('reloadGrid');
+                    });
+
+                    if ($scope.uidl.$skin.deltaWindowHeight) {
+                        $scope.resizeTimer = null;
+                        $scope.resizeHandler = function() {
+                            clearTimeout($scope.resizeTimer);
+                            $scope.resizeTimer = setTimeout(function() {
+                                var newHeight = $scope.uidl.calculateHeight();
+                                $('#' + $scope.tableElementId).setGridHeight(newHeight + 46);
+                            }, 100);
+                        };
+                        $(window).bind('resize', $scope.resizeHandler);
+                        $scope.$on("$destroy", function() {
+                            if ($scope.resizeTimer) {
+                                clearTimeout($scope.resizeTimer);
+                            }
+                            $(window).unbind('resize', $scope.resizeHandler);
+                        });            
+                    }
                     
                     $scope.$on($scope.uidl.qualifiedName + ':PageRefreshRequested', function (event, data) {
                         grid.trigger('reloadGrid');
@@ -1627,7 +1664,9 @@ HEAD, JS/CSS LINKS
         <form class="form-inline" id="{{::uidl.elementName}}">
             <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
             <div class="form-group" ng-repeat="field in plainFields" style="margin-bottom:0">
-                <label for="{{::uidl.elementName + '_' + field.propertyName}}" style="position:relative;top:-5px;margin-right:5px;">{{::translate(field.label, { upperCase: true })}}</label>
+                <label for="{{::uidl.elementName + '_' + field.propertyName}}" 
+                       style="position:relative;margin-right:5px;"
+                       ng-style="{top: (uidl.$skin.zeroPadding ? '3px' : '-5px')}">{{::translate(field.label, { upperCase: true })}}</label>
                 <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
             </div>
             <!-- COMMAND BUTTONS -->
@@ -1770,20 +1809,22 @@ HEAD, JS/CSS LINKS
             <!-- LABEL -->
             <input ng-if="uidl.fieldType==='Label' && !hasUidlModifier('Memo') && !hasUidlModifier('FlatStyle')" 
                    readonly="" 
-                   class="form-control m-b" 
+                   class="form-control" 
+                   ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                    type="text" 
                    ng-model="entity[uidl.propertyName]" 
                    id="{{::uniqueFieldId}}" 
                    name="{{::uniqueFieldId}}"
                    uidl-display-format>
             <span  ng-if="uidl.fieldType==='Label' && !hasUidlModifier('Memo') && hasUidlModifier('FlatStyle')" 
-                   class="m-b" 
+                   ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                    id="{{::uniqueFieldId}}" 
                    ng-show="entity[uidl.propertyName] || !uidl.hiddenIfEmpty"
                    name="{{::uniqueFieldId}}"><strong><i ng-if="uidl.icon" class="fa fa-{{::uidl.icon}}"></i>&nbsp;{{::entity[uidl.propertyName]}}</strong></span>
             <textarea ng-if="uidl.fieldType==='Label' && hasUidlModifier('Memo')"
                       readonly="" 
-                      class="form-control m-b" 
+                      class="form-control" 
+                      ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                       ng-model="entity[uidl.propertyName]" 
                       id="{{::uniqueFieldId}}" 
                       name="{{::uniqueFieldId}}"
@@ -1808,7 +1849,7 @@ HEAD, JS/CSS LINKS
                 <span>{{entity[uidl.propertyName] || translate(uidl.label)}}</span>
             </div>
             <!-- CHECKBOX -->
-            <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'" class="onoffswitch m-b">
+            <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='Checkbox'" class="onoffswitch" ng-class="{'m-b': !uidl.$skin.zeroPadding}">
                 <input type="checkbox" 
                        class="onoffswitch-checkbox" 
                        ng-model="entity[uidl.propertyName]" 
@@ -1824,14 +1865,15 @@ HEAD, JS/CSS LINKS
             </div>
             <!-- TEXT -->
             <input ng-if="uidl.fieldType==='Edit' && (uidl.modifiers==='None' || !uidl.modifiers)"
-                   class="form-control m-b"
+                   class="form-control"
+                   ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                    type="text"
                    ng-model="entity[uidl.propertyName]"
                    ng-disabled="!editAuthorized"
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}">
             <!-- PASSWORD -->
-            <div ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password')" class="m-b">
+            <div ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password')" ng-class="{'m-b': !uidl.$skin.zeroPadding}">
                 <div>
                     <input class="form-control"
                            type="password"
@@ -1855,7 +1897,8 @@ HEAD, JS/CSS LINKS
             </div>
             <!-- DATE-TIME PICKER -->
             <div ng-if="uidl.fieldType==='Edit' && uidl.modifiers==='DateTimePicker'"
-                 class="input-group date m-b"
+                 class="input-group date"
+                 ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                  ng-disabled="!editAuthorized">
                 <input type="text"
                        class="form-control"
@@ -1869,7 +1912,8 @@ HEAD, JS/CSS LINKS
             </div>
             <!-- DATE-TIME RANGE PICKER -->
             <div ng-if="uidl.fieldType==='Edit' && hasUidlModifier('DateTimePicker') && hasUidlModifier('RangeStart')"
-                 class="form-control m-b"
+                 class="form-control"
+                 ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                  id="{{::uniqueFieldId}}"
                  name="{{::uniqueFieldId}}"
                  ng-disabled="!editAuthorized">
@@ -1878,7 +1922,8 @@ HEAD, JS/CSS LINKS
             </div>
             <!-- LOOKUP ELLIPSIS -->
             <div ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('Ellipsis')"
-                 class="input-group m-b"
+                 class="input-group"
+                 ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                  ng-disabled="!editAuthorized">
                  <span ng-show ="entity && entity[uidl.propertyName]" class="input-group-addon">{{entity[uidl.propertyName]}}</span>
                  <input type="text" 
@@ -1902,7 +1947,8 @@ HEAD, JS/CSS LINKS
             </div>            
             <!-- DROP DOWN -->
             <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown') && hasUidlModifier('LookupShowSelectAll')"
-                    class="form-control m-b"
+                    class="form-control"
+                    ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
                     ng-disabled="!editAuthorized"
@@ -1911,7 +1957,8 @@ HEAD, JS/CSS LINKS
                 <option value="">All</option>
             </select>
             <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown') && hasUidlModifier('LookupShowSelectNone')"
-                    class="form-control m-b"
+                    class="form-control"
+                    ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
                     ng-disabled="!editAuthorized"
@@ -1920,7 +1967,8 @@ HEAD, JS/CSS LINKS
                 <option value="">- Choose -</option>
             </select>
             <select ng-if="uidl.fieldType==='Lookup' && hasUidlModifier('DropDown') && !hasUidlModifier('LookupShowSelectAll') && !hasUidlModifier('LookupShowSelectNone')"
-                    class="form-control m-b"
+                    class="form-control"
+                    ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                     ng-options="item[lookupValueProperty] as item[lookupTextProperty] for item in lookupResultSet"
                     ng-model="entity[lookupForeignKeyProperty]"
                     ng-disabled="!editAuthorized"
@@ -1938,7 +1986,8 @@ HEAD, JS/CSS LINKS
                 typeahead-loading="isLoadingTypeAhead" 
                 typeahead-no-results="isTypeAheadResultSetEmpty" 
                 typeahead-on-select="entity[lookupForeignKeyProperty]=$item['$id']"
-                class="form-control m-b"
+                class="form-control"
+                ng-class="{'m-b': !uidl.$skin.zeroPadding}"
                 id="{{::uniqueFieldId}}"
                 name="{{::uniqueFieldId}}">
             <!-- FILE UPLOAD -->
@@ -1948,7 +1997,7 @@ HEAD, JS/CSS LINKS
                  style="border-radius:2px;border: 2px lightgray dotted;background-color:white;">
                  <div class="dropzone-previews" ng-disabled="!editAuthorized"></div>
             </div>
-            <div ng-if="uidl.fieldType==='FileUpload'" class="m-b">
+            <div ng-if="uidl.fieldType==='FileUpload'" ng-class="{'m-b': !uidl.$skin.zeroPadding}">
                 <a href="" ng-click="clearDropzone()" ng-disabled="!editAuthorized">Clear</a>
             </div>
             <!-- IMAGE + UPLOAD -->
@@ -2667,11 +2716,11 @@ HEAD, JS/CSS LINKS
                         ng-repeat="tab in uidl.tabs"
                         ><a ng-click="selectTabByIndex($index)">{{translate(tab.text)}}</a></li>
                 </ul>
-                <div class="tab-content" style="position:absolute;top:45px;left:0;right:0;bottom:0;">
+                <div class="tab-content" style="position:absolute;top:37px;left:0;right:0;bottom:0;">
                     <div ng-repeat="tab in uidl.tabs" ng-class="{active: selectedTabIndex===$index}" 
                          class="tab-pane" 
                          style="margin:0;padding:15px 0 0 0;position:absolute;top:0;left:0;right:0;bottom:0;background-color:white;">
-                            <uidl-screen-part uidl="tab"></uidl-screen-part>
+                         <uidl-screen-part uidl="tab"></uidl-screen-part>
                     </div>
                 </div>
             </div>
@@ -2679,20 +2728,25 @@ HEAD, JS/CSS LINKS
     </script>	
     <script type="text/javascript">
         function initWidget_TabbedScreenPartSet($scope) {
-/*         
-         function resizeToWindow(elem) {
-                var h = $(window).height() - 30;
-                elem.css({ height: h + 'px' });
-            };
-            $scope.$timeout(function() {
-                var elem = $('#' + $scope.uidl.elementName + ' div.tab-content');
-                resizeToWindow(elem);
-                $(window).resize(function() {
-                    resizeToWindow(elem);
-                });
-            });
+            var tabSkinData = { deltaWindowHeight: 80, zeroPadding: true };
+            for (var i = 0; i < $scope.uidl.tabs.length ; i++) {
+                $scope.uidl.tabs[i].$skin = tabSkinData;
+            }
         }
-*/        
+        /*         
+                 function resizeToWindow(elem) {
+                        var h = $(window).height() - 30;
+                        elem.css({ height: h + 'px' });
+                    };
+                    $scope.$timeout(function() {
+                        var elem = $('#' + $scope.uidl.elementName + ' div.tab-content');
+                        resizeToWindow(elem);
+                        $(window).resize(function() {
+                            resizeToWindow(elem);
+                        });
+                    });
+                }
+        */        
     </script>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2718,10 +2772,12 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - REPORT
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/Report">
-        <div class="col-lg-12">
-            <div class="ibox float-e-margins" style="padding-bottom:0;">
-                <uidl-widget uidl="uidl.criteriaForm"></uidl-widget>
-                <div ng-if="uidl.visualizationChart" class="m-b">
+        <div class="col-lg-12" style="margin:0;padding:0;">
+            <div class="ibox float-e-margins" style="padding-bottom:0;margin:0;">
+                <div ng-class="{'compensateZeroPadding': uidl.$skin.zeroPadding}">
+                    <uidl-widget uidl="uidl.criteriaForm"></uidl-widget>
+                </div>
+                <div ng-if="uidl.visualizationChart" class="m-b" ng-class="{'compensateZeroPadding': uidl.$skin.zeroPadding}">
                     <uidl-widget uidl="uidl.visualizationChart"></uidl-widget>
                 </div>
                 <uidl-widget uidl="uidl.resultTable"></uidl-widget>

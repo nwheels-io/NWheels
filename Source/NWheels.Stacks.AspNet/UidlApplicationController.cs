@@ -316,33 +316,7 @@ namespace NWheels.Stacks.AspNet
         public IHttpActionResult CalculateTimeRangePresets()
         {
             var now = _framework.UtcNow;
-            var presetValues = new Dictionary<TimeRangePreset, Interval<DateTime>>() {
-                { TimeRangePreset.Last5Minutes, new Interval<DateTime>(now.AddMinutes(-5), now) },
-                { TimeRangePreset.Last15Minutes, new Interval<DateTime>(now.AddMinutes(-15), now) },
-                { TimeRangePreset.Last30Minutes, new Interval<DateTime>(now.AddMinutes(-30), now) },
-                { TimeRangePreset.LastHour, new Interval<DateTime>(now.AddHours(-1), now) },
-                { TimeRangePreset.Last3Hours, new Interval<DateTime>(now.AddHours(-3), now) },
-                { TimeRangePreset.Last4Hours, new Interval<DateTime>(now.AddHours(-4), now) },
-                { TimeRangePreset.Last6Hours, new Interval<DateTime>(now.AddHours(-6), now) },
-                { TimeRangePreset.Last12Hours, new Interval<DateTime>(now.AddHours(-12), now) },
-                { TimeRangePreset.Last24Hours, new Interval<DateTime>(now.AddHours(-24), now) },
-                { TimeRangePreset.Last3Days, new Interval<DateTime>(now.AddDays(-3), now) },
-                { TimeRangePreset.Last7Days, new Interval<DateTime>(now.AddDays(-7), now) },
-                { TimeRangePreset.Last30Days, new Interval<DateTime>(now.AddDays(-30), now) },
-                { TimeRangePreset.Last3Months, new Interval<DateTime>(now.AddMonths(-3), now) },
-                { TimeRangePreset.Last6Months, new Interval<DateTime>(now.AddMonths(-6), now) },
-                { TimeRangePreset.Last12Months, new Interval<DateTime>(now.AddMonths(-12), now) },
-                { TimeRangePreset.Today, new Interval<DateTime>(now.Date, now.Date.AddDays(1).AddSeconds(-1)) },
-                { TimeRangePreset.Yesterday, new Interval<DateTime>(now.Date.AddDays(-1), now.Date.AddSeconds(-1)) },
-                { TimeRangePreset.ThisWeek, new Interval<DateTime>(now.StartOfWeek(DayOfWeek.Sunday), now.StartOfWeek(DayOfWeek.Sunday).AddDays(7).AddSeconds(-1)) },
-                { TimeRangePreset.LastWeek, new Interval<DateTime>(now.StartOfWeek(DayOfWeek.Sunday), now.StartOfWeek(DayOfWeek.Sunday).AddDays(7).AddSeconds(-1)) },
-                { TimeRangePreset.ThisMonth, new Interval<DateTime>(now.StartOfMonth(), now.StartOfMonth().AddMonths(1).AddSeconds(-1)) },
-                { TimeRangePreset.LastMonth, new Interval<DateTime>(now.StartOfMonth().AddMonths(-1), now.StartOfMonth().AddSeconds(-1)) },
-                { TimeRangePreset.ThisQuarter, new Interval<DateTime>(now.StartOfQuarter(), now.StartOfQuarter().AddMonths(3).AddSeconds(-1)) },
-                { TimeRangePreset.ThisYear, new Interval<DateTime>(now.StartOfYear(), now.StartOfYear().AddYears(1).AddSeconds(-1)) },
-                { TimeRangePreset.LastYear, new Interval<DateTime>(now.StartOfYear().AddYears(-1), now.StartOfYear().AddSeconds(-1)) },
-                { TimeRangePreset.AllTime, new Interval<DateTime>(DateTime.MinValue, now) },
-            };
+            var presetValues = TimeRangePresetExtensions.AllValues().ToDictionary(preset => preset, preset => preset.GetIntervalRelativeTo(now));
 
             return Json(presetValues.Select(
                 kvp => new {

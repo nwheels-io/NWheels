@@ -621,8 +621,8 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     $location.host() + ':' + $location.port() + 
                     '/#/?screen=' + behavior.targetQualifiedName;
                 
-                var h = parseInt(screen.height * 0.9);
-                var w = parseInt(screen.width * 0.95);
+                var h = parseInt(screen.height * 0.8);
+                var w = parseInt(screen.width * 0.9);
                 var x = parseInt((screen.width - w) / 2);
                 var y = parseInt((screen.height - h) / 4);
                 var windowOptions = 
@@ -1116,6 +1116,12 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 
     m_controllerImplementations['Report'] = {
         implement: function (scope) {
+            scope.uidl.criteriaForm.$skin = scope.uidl.$skin;
+            scope.uidl.resultTable.$skin = scope.uidl.$skin;
+            if (scope.uidl.visualizationChart) {
+                scope.uidl.visualizationChart.$skin = scope.uidl.$skin;
+            }
+
             scope.model.State.criteria = {};
             scope.model.State.reportInProgress = false;
             
@@ -1660,6 +1666,12 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             function fieldHasModifier(field, modifier) {
                 return (field.modifiers && field.modifiers.indexOf(modifier) > -1);
             };
+            
+            if (scope.uidl.$skin) {
+                for (var i = 0; i < scope.uidl.fields.length ; i++) {
+                    scope.uidl.fields[i].$skin = scope.uidl.$skin;
+                }
+            }
             
             scope.fieldHasModifier = fieldHasModifier;
             scope.metaType = scope.uidlService.getMetaType(scope.uidl.entityName);
@@ -2288,6 +2300,10 @@ theApp.directive('uidlScreenPart', ['uidlService', 'entityService', function (ui
                 console.log('uidlScreenPart::watch(uidl)', oldValue.qualifiedName, '->', $scope.uidl.qualifiedName);
                 uidlService.implementController($scope);
                 
+                if ($scope.uidl.$skin) {
+                    $scope.uidl.contentRoot.$skin  = $scope.uidl.$skin;
+                }
+                
                 var initFuncName = 'initWidget_ScreenPart';
                 var initFunc = window[initFuncName];
                 if (typeof initFunc === 'function') {
@@ -2349,6 +2365,14 @@ function (uidlService, entityService, commandService, $timeout, $http, $compile,
             
             $scope.implementUidl = function() {
                 if ($scope.uidl && !$scope.uidlWasImplemented) {
+                    if (!$scope.uidl.$skin) {
+                        if ($scope.parentUidl && $scope.parentUidl.$skin) {
+                            $scope.uidl.$skin = $scope.parentUidl.$skin;
+                        } else {
+                            $scope.uidl.$skin = { };
+                        }
+                    }
+                    
                     uidlService.implementController($scope);
 
                     var initFuncName = 'initWidget_' + $scope.uidl.widgetType;

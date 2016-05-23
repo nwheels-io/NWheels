@@ -981,4 +981,55 @@ namespace NWheels.UI.Toolbox
         LastYear,
         AllTime
     }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class TimeRangePresetExtensions
+    {
+        private static readonly IReadOnlyList<TimeRangePreset> _s_allValues = 
+            Enum.GetValues(typeof(TimeRangePreset)).Cast<TimeRangePreset>().ToArray();
+
+        private static readonly IReadOnlyDictionary<TimeRangePreset, Func<DateTime, Interval<DateTime>>> _s_formulas = 
+            new Dictionary<TimeRangePreset, Func<DateTime, Interval<DateTime>>>() {
+                { TimeRangePreset.Last5Minutes, now => new Interval<DateTime>(now.AddMinutes(-5), now) },
+                { TimeRangePreset.Last15Minutes, now => new Interval<DateTime>(now.AddMinutes(-15), now) },
+                { TimeRangePreset.Last30Minutes, now => new Interval<DateTime>(now.AddMinutes(-30), now) },
+                { TimeRangePreset.LastHour, now => new Interval<DateTime>(now.AddHours(-1), now) },
+                { TimeRangePreset.Last3Hours, now => new Interval<DateTime>(now.AddHours(-3), now) },
+                { TimeRangePreset.Last4Hours, now => new Interval<DateTime>(now.AddHours(-4), now) },
+                { TimeRangePreset.Last6Hours, now => new Interval<DateTime>(now.AddHours(-6), now) },
+                { TimeRangePreset.Last12Hours, now => new Interval<DateTime>(now.AddHours(-12), now) },
+                { TimeRangePreset.Last24Hours, now => new Interval<DateTime>(now.AddHours(-24), now) },
+                { TimeRangePreset.Last3Days, now => new Interval<DateTime>(now.AddDays(-3), now) },
+                { TimeRangePreset.Last7Days, now => new Interval<DateTime>(now.AddDays(-7), now) },
+                { TimeRangePreset.Last30Days, now => new Interval<DateTime>(now.AddDays(-30), now) },
+                { TimeRangePreset.Last3Months, now => new Interval<DateTime>(now.AddMonths(-3), now) },
+                { TimeRangePreset.Last6Months, now => new Interval<DateTime>(now.AddMonths(-6), now) },
+                { TimeRangePreset.Last12Months, now => new Interval<DateTime>(now.AddMonths(-12), now) },
+                { TimeRangePreset.Today, now => new Interval<DateTime>(now.Date, now.Date.AddDays(1).AddSeconds(-1)) },
+                { TimeRangePreset.Yesterday, now => new Interval<DateTime>(now.Date.AddDays(-1), now.Date.AddSeconds(-1)) },
+                { TimeRangePreset.ThisWeek, now => new Interval<DateTime>(now.StartOfWeek(DayOfWeek.Sunday), now.StartOfWeek(DayOfWeek.Sunday).AddDays(7).AddSeconds(-1)) },
+                { TimeRangePreset.LastWeek, now => new Interval<DateTime>(now.StartOfWeek(DayOfWeek.Sunday), now.StartOfWeek(DayOfWeek.Sunday).AddDays(7).AddSeconds(-1)) },
+                { TimeRangePreset.ThisMonth, now => new Interval<DateTime>(now.StartOfMonth(), now.StartOfMonth().AddMonths(1).AddSeconds(-1)) },
+                { TimeRangePreset.LastMonth, now => new Interval<DateTime>(now.StartOfMonth().AddMonths(-1), now.StartOfMonth().AddSeconds(-1)) },
+                { TimeRangePreset.ThisQuarter, now => new Interval<DateTime>(now.StartOfQuarter(), now.StartOfQuarter().AddMonths(3).AddSeconds(-1)) },
+                { TimeRangePreset.ThisYear, now => new Interval<DateTime>(now.StartOfYear(), now.StartOfYear().AddYears(1).AddSeconds(-1)) },
+                { TimeRangePreset.LastYear, now => new Interval<DateTime>(now.StartOfYear().AddYears(-1), now.StartOfYear().AddSeconds(-1)) },
+                { TimeRangePreset.AllTime, now => new Interval<DateTime>(DateTime.MinValue, now) },
+            };
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static Interval<DateTime> GetIntervalRelativeTo(this TimeRangePreset preset, DateTime utc)
+        {
+            return _s_formulas[preset](utc);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public static IReadOnlyList<TimeRangePreset> AllValues()
+        {
+            return _s_allValues;
+        }
+    }
 }
