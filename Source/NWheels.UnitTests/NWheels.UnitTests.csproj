@@ -86,6 +86,7 @@
     <Compile Include="Authorization\TestingSamples.cs" />
     <Compile Include="AutoTests.cs" />
     <Compile Include="Concurrency\ConcurrentDictionaryTests.cs" />
+    <Compile Include="Concurrency\PerContextResourceConsumerScopeTests.cs" />
     <Compile Include="Concurrency\RealTimeoutManagerTests.cs" />
     <Compile Include="Concurrency\ShuttleServiceTests.cs" />
     <Compile Include="Configuration\ConfigurationSectionConventionTests.cs" />

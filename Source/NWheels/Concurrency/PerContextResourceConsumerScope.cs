@@ -26,17 +26,16 @@ namespace NWheels.Concurrency
         {
             _anchor = anchor;
             _outerScope = anchor.Current;
-            anchor.Current = this;
 
             _externallyOwned = externallyOwned;
             _forceNewResource = forceNewResource;
 
-            if ( _outerScope != null )
+            if (_outerScope != null)
             {
-                if ( forceNewResource )
+                if (forceNewResource)
                 {
-                    _outerScope.NotifyResourceActiveScopeChanged(currentScopeIsActive: false);
                     _resource = resourceFactory(this);
+                    _outerScope.NotifyResourceActiveScopeChanged(currentScopeIsActive: false);
                     this.NotifyResourceActiveScopeChanged(currentScopeIsActive: true);
                 }
                 else
@@ -52,6 +51,8 @@ namespace NWheels.Concurrency
                 _nestingLevel = 0;
                 this.NotifyResourceActiveScopeChanged(currentScopeIsActive: true);
             }
+
+            anchor.Current = this;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
