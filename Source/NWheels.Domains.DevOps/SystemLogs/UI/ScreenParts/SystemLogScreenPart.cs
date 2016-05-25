@@ -1,11 +1,9 @@
 ﻿using System.Runtime.Serialization;
-using NWheels.Domains.DevOps.SystemLogs.Entities;
-using NWheels.Domains.DevOps.SystemLogs.Transactions;
 using NWheels.UI;
 using NWheels.UI.Toolbox;
 using NWheels.UI.Uidl;
 
-namespace NWheels.Domains.DevOps.SystemLogs.UI
+namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
 {
     public class SystemLogScreenPart : ScreenPartBase<SystemLogScreenPart, Empty.Context, Empty.Data, Empty.State>
     {

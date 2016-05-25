@@ -1,13 +1,9 @@
-﻿using NWheels.UI;
-using NWheels.UI.Uidl;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts;
+using NWheels.UI;
 using NWheels.UI.Toolbox;
+using NWheels.UI.Uidl;
 
-namespace NWheels.Domains.DevOps.SystemLogs.UI
+namespace NWheels.Domains.DevOps.SystemLogs.UI.Screens
 {
     public class SystemLogScreen : ScreenBase<SystemLogScreen, Empty.Input, Empty.Data, Empty.State>
     {
@@ -28,6 +24,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
             TabSet.Tabs.Add(LogMessageSummary);
             TabSet.Tabs.Add(LogMessageList);
             TabSet.Tabs.Add(ThreadLogList);
+            TabSet.Tabs.Add(ThreadDetails);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -40,5 +37,6 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
         public LogMessageSummaryScreenPart LogMessageSummary { get; set; }
         public LogMessageListScreenPart LogMessageList { get; set; }
         public ThreadLogListScreenPart ThreadLogList { get; set; }
+        public ThreadLogScreenPart ThreadDetails { get; set; }
     }
 }

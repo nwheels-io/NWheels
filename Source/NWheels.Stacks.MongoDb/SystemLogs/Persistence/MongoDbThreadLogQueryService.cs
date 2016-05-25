@@ -142,6 +142,40 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public Task<IEnumerable<ThreadLogRecord>> QueryThreadLogsAsync(
+            IThreadLogSearchCriteria criteria,
+            CancellationToken cancellation)
+        {
+            var dbCriteria = new List<IMongoQuery>();
+
+            if (!string.IsNullOrEmpty(criteria.Id))
+            {
+                dbCriteria.Add(Query<ThreadLogRecord>.EQ(x => x.LogId, criteria.Id));
+            }
+            else if (!string.IsNullOrEmpty(criteria.CorrelationId))
+            {
+                dbCriteria.Add(Query<ThreadLogRecord>.EQ(x => x.CorrelationId, criteria.CorrelationId));
+            }
+            else
+            {
+                throw new ArgumentException("Either Log ID or Correlation ID must be specified.");
+            }
+
+            //RefineDbQuery<ThreadLogRecord>(dbCriteria, criteria);
+
+            var dbQuery = Query.And(dbCriteria);
+
+            return RunEnvironmentMapReduceQuery<ThreadLogRecord>(
+                environmentFilter: null,
+                queryFunc: (db, environmentName) => {
+                    var collection = db.GetCollection<ThreadLogRecord>(DbNamingConvention.GetThreadLogCollectionName(environmentName));
+                    return collection.Find(dbQuery);
+                },
+                cancellation: cancellation);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void RefineDbQuery<TRecord>(List<IMongoQuery> criteria, ApplicationEntityService.QueryOptions options)
             where TRecord : LogRecordBase
         {

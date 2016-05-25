@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NWheels.Domains.DevOps.SystemLogs.Entities;
+﻿using NWheels.Domains.DevOps.SystemLogs.Entities;
 using NWheels.UI.Toolbox;
 
-namespace NWheels.Domains.DevOps.SystemLogs.UI
+namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
 {
     internal static class Helpers
     {

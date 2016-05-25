@@ -4,11 +4,11 @@ using NWheels.UI;
 using NWheels.UI.Toolbox;
 using NWheels.UI.Uidl;
 
-namespace NWheels.Domains.DevOps.SystemLogs.UI
+namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
 {
-    public class LogMessageSummaryScreenPart : ScreenPartBase<LogMessageSummaryScreenPart, Empty.Context, Empty.Data, Empty.State>
+    public class LogMessageListScreenPart : ScreenPartBase<LogMessageListScreenPart, Empty.Context, Empty.Data, Empty.State>
     {
-        public LogMessageSummaryScreenPart(string idName, UidlApplication parent)
+        public LogMessageListScreenPart(string idName, UidlApplication parent)
             : base(idName, parent)
         {
         }
@@ -17,33 +17,34 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
 
         #region Overrides of ScreenPartBase<SystemLogScreenPart,Input,Data,State>
 
-        protected override void DescribePresenter(PresenterBuilder<LogMessageSummaryScreenPart, Empty.Data, Empty.State> presenter)
+        protected override void DescribePresenter(PresenterBuilder<LogMessageListScreenPart, Empty.Data, Empty.State> presenter)
         {
             ContentRoot = Report;
 
             Report.AutoSubmitOnLoad = true;
             Report.EnableVisualization();
             Report.VisualizationChart.TemplateName = "ChartInline";
-            Report.VisualizationChart.Height = WidgetSize.Large;
+            Report.VisualizationChart.Height = WidgetSize.MediumLarge;
             Report.CriteriaForm.AutoSubmitOnChange = true;
             Report.CriteriaForm.TemplateName = "FormInline";
             Report.CriteriaForm.IsInlineStyle = true;
             Report.CriteriaForm.ConfigureLogTimeRange();
 
             Report.ResultTable
+                .Column(x => x.Timestamp)
                 .Column(x => x.Machine, size: FieldSize.Small)
                 .Column(x => x.Environment)
                 .Column(x => x.Node, size: FieldSize.Small)
-                //.Column(x => x.Instance, size: FieldSize.Small)
-                .Column(x => x.Replica, size: FieldSize.Small)
-                .Column(x => x.Level, size: FieldSize.Small)
+                .Column(x => x.Instance, size: FieldSize.Small)
+                //.Column(x => x.Replica, size: FieldSize.Small)
                 .Column(x => x.Logger)
                 .Column(x => x.MessageId, size: FieldSize.Large)
-                .Column(x => x.ExceptionType)
-                .Column(x => x.Count, size: FieldSize.Small, format: "#,##0")
-                .Column(x => x.CriticalCount, title: "Critical", size: FieldSize.Small, format: "#,##0")
-                .Column(x => x.ErrorCount, title: "Errors", size: FieldSize.Small, format: "#,##0")
-                .Column(x => x.WarningCount, title: "Warnings", size: FieldSize.Small, format: "#,##0");
+                .Column(x => x.ExceptionType, size: FieldSize.Large)
+                //.Column(x => x.ThreadLogId)
+                //.Column(x => x.CorrelationId)
+                .Column(x => x.KeyValues, size: FieldSize.Large);
+
+            Report.ResultTable.UseDetailPane(MessageJson, expanded: false);
 
             presenter.On(base.NavigatedHere)
                 .Broadcast(Report.ContextSetter).WithPayload(vm => vm.Input).TunnelDown();
@@ -52,6 +53,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
                 b.AlterModel(
                     alt => alt.Copy(vm => vm.Input.From).To(vm => vm.State.Criteria.From),
                     alt => alt.Copy(vm => vm.Input.To).To(vm => vm.State.Criteria.Until)));
+
+            MessageJson.ExpandedByDefault = true;
         }
 
         #endregion
@@ -61,7 +64,9 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
         public Report<
             Empty.Context, 
             ILogTimeRangeCriteria, 
-            AbstractLogMessageSummaryTx, 
-            ILogMessageSummaryEntity> Report { get; set; }
+            AbstractLogMessageListTx, 
+            ILogMessageEntity> Report { get; set; }
+
+        public JsonText MessageJson { get; set; }
     }
 }

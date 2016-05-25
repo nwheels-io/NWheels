@@ -8,5 +8,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
         IEntityRepository<ILogMessageSummaryEntity> LogMessageDailySummaries { get; }
         IEntityRepository<ILogMessageEntity> LogMessages { get; }
         IEntityRepository<IThreadLogEntity> ThreadLogs { get; }
+
+        IThreadLogUINodeEntity NewThreadLogNode();
+        IRootThreadLogUINodeEntity NewRootThreadLogNode();
     }
 }

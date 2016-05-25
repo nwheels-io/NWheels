@@ -396,6 +396,7 @@
     <Compile Include="UI\Toolbox\Report.cs" />
     <Compile Include="UI\Toolbox\ReportSelector.cs" />
     <Compile Include="UI\Toolbox\TransactionForm.cs" />
+    <Compile Include="UI\Uidl\WidgetAlertStyle.cs" />
     <Compile Include="UI\Toolbox\WidgetScreenPart.cs" />
     <Compile Include="UI\Toolbox\CrudScreenPart.cs" />
     <Compile Include="UI\Toolbox\Dashboard.cs" />
@@ -415,6 +416,7 @@
     <Compile Include="UI\Uidl\UidlCommandGroup.cs" />
     <Compile Include="UI\Toolbox\ModalUserAlert.cs" />
     <Compile Include="UI\Uidl\UidlUtility.cs" />
+    <Compile Include="UI\Uidl\WidgetAlignment.cs" />
     <Compile Include="UI\Uidl\WidgetSize.cs" />
     <Compile Include="UI\UIOperationContext.cs" />
     <Compile Include="UI\ViewModel.cs" />

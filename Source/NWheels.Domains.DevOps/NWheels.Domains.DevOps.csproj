@@ -61,30 +61,37 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SystemLogs\Entities\IBaseLogDimensionsEntity.cs" />
+    <Compile Include="SystemLogs\Entities\IThreadLogSearchCriteria.cs" />
     <Compile Include="SystemLogs\Entities\ILogTimeRangeCriteria.cs" />
     <Compile Include="SystemLogs\Entities\ISystemLogContext.cs" />
     <Compile Include="SystemLogs\Entities\ILogLevelSummaryEntity.cs" />
     <Compile Include="SystemLogs\Entities\ILogMessageSummaryEntity.cs" />
     <Compile Include="SystemLogs\Entities\ILogMessageEntity.cs" />
     <Compile Include="SystemLogs\Entities\IThreadLogEntity.cs" />
+    <Compile Include="SystemLogs\Entities\IThreadLogUINodeEntity.cs" />
     <Compile Include="SystemLogs\SystemLogFeatureLoader.cs" />
+    <Compile Include="SystemLogs\Transactions\AbstractThreadLogUINodesTx.cs" />
     <Compile Include="SystemLogs\Transactions\AbstractThreadLogListTx.cs" />
     <Compile Include="SystemLogs\Transactions\AbstractLogMessageSummaryTx.cs" />
     <Compile Include="SystemLogs\Transactions\AbstractLogMessageListTx.cs" />
     <Compile Include="SystemLogs\Transactions\AbstractLogLevelSummaryTx.cs" />
     <Compile Include="ModuleLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SystemLogs\UI\Helpers.cs" />
-    <Compile Include="SystemLogs\UI\SystemLogScreen.cs" />
-    <Compile Include="SystemLogs\UI\ThreadLogListScreenPart.cs" />
-    <Compile Include="SystemLogs\UI\LogMessageSummaryScreenPart.cs" />
-    <Compile Include="SystemLogs\UI\LogMessageListScreenPart.cs" />
-    <Compile Include="SystemLogs\UI\SystemLogScreenPart.cs" />
-    <Compile Include="SystemLogs\UI\LogLevelSummaryScreenPart.cs" />
+    <Compile Include="SystemLogs\UI\ScreenParts\Helpers.cs" />
+    <Compile Include="SystemLogs\UI\ScreenParts\ThreadLogScreenPart.cs" />
+    <Compile Include="SystemLogs\UI\Screens\SystemLogScreen.cs" />
+    <Compile Include="SystemLogs\UI\ScreenParts\ThreadLogListScreenPart.cs" />
+    <Compile Include="SystemLogs\UI\ScreenParts\LogMessageSummaryScreenPart.cs" />
+    <Compile Include="SystemLogs\UI\ScreenParts\LogMessageListScreenPart.cs" />
+    <Compile Include="SystemLogs\UI\ScreenParts\SystemLogScreenPart.cs" />
+    <Compile Include="SystemLogs\UI\ScreenParts\LogLevelSummaryScreenPart.cs" />
     <Compile Include="UtilityTools\UnzipTool.cs" />
     <Compile Include="UtilityTools\ZipTool.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="SystemLogs\UI\Web\Templates\" />
+    <Folder Include="SystemLogs\UI\Widgets\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NWheels\NWheels.csproj">
       <Project>{f0ecf554-bf54-4843-b62f-c67c4deb2764}</Project>

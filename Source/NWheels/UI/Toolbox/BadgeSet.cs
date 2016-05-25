@@ -30,7 +30,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public BadgeSet WithBadgeFor<TEntity>(Expression<Func<TEntity, object>> property, BadgeStyle style, string format)
+        public BadgeSet WithBadgeFor<TEntity>(Expression<Func<TEntity, object>> property, WidgetAlertStyle style, string format)
         {
             this.Badges.Add(new Badge(property.ToNormalizedNavigationString()) {
                 Style = style,
@@ -42,7 +42,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public BadgeSet WithBadgeFor<TEntity>(Expression<Func<TEntity, object>> property, BadgeStyle style, object[] valueTextPairs)
+        public BadgeSet WithBadgeFor<TEntity>(Expression<Func<TEntity, object>> property, WidgetAlertStyle style, object[] valueTextPairs)
         {
             this.Badges.Add(new Badge(property.ToNormalizedNavigationString(), valueTextPairs) {
                 Style = style
@@ -89,21 +89,9 @@ namespace NWheels.UI.Toolbox
             [DataMember]
             public string Format { get; set; }
             [DataMember]
-            public BadgeStyle Style { get; set; }
+            public WidgetAlertStyle Style { get; set; }
             [DataMember]
             public Dictionary<object, string> ValueText { get; set; }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        public enum BadgeStyle
-        {
-            Default,
-            Primary,
-            Success,
-            Info,
-            Warning,
-            Danger
         }
     }
 }

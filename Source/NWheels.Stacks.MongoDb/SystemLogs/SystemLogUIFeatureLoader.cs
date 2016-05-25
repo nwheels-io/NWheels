@@ -19,6 +19,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs
             builder.NWheelsFeatures().ObjectContracts().Concretize<ILogMessageSummaryEntity>().With<LogMessageSummaryEntity>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<ILogMessageEntity>().With<LogMessageEntity>();
             builder.NWheelsFeatures().ObjectContracts().Concretize<IThreadLogEntity>().With<ThreadLogEntity>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IThreadLogUINodeEntity>().With<ThreadLogUINodeEntity>();
+            builder.NWheelsFeatures().ObjectContracts().Concretize<IRootThreadLogUINodeEntity>().With<RootThreadLogUINodeEntity>();
 
             //builder.Register(
             //    c => (AbstractLogLevelSummaryChartTx)new LogLevelSummaryChartTx()
@@ -32,11 +34,14 @@ namespace NWheels.Stacks.MongoDb.SystemLogs
             builder.NWheelsFeatures().UI().RegisterEntityHandlerExtension<LogMessageSummaryEntity.HandlerExtension>();
             builder.NWheelsFeatures().UI().RegisterEntityHandlerExtension<LogMessageEntity.HandlerExtension>();
             builder.NWheelsFeatures().UI().RegisterEntityHandlerExtension<ThreadLogEntity.HandlerExtension>();
+            builder.NWheelsFeatures().UI().RegisterEntityHandlerExtension<ThreadLogUINodeEntity.HandlerExtension>();
+            builder.NWheelsFeatures().UI().RegisterEntityHandlerExtension<RootThreadLogUINodeEntity.RootHandlerExtension>();
 
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<AbstractLogLevelSummaryTx, LogLevelSummaryTx>();
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<AbstractLogMessageSummaryTx, LogMessageSummaryTx>();
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<AbstractLogMessageListTx, LogMessageListTx>();
             builder.NWheelsFeatures().Processing().RegisterTransactionScript<AbstractThreadLogListTx, ThreadLogListTx>();
+            builder.NWheelsFeatures().Processing().RegisterTransactionScript<AbstractThreadLogUINodesTx, ThreadLogUINodesTx>();
 
             builder.RegisterType<MongoDbThreadLogQueryService>().AsSelf().SingleInstance();
         }

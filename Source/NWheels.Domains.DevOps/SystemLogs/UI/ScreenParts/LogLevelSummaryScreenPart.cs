@@ -4,7 +4,7 @@ using NWheels.UI;
 using NWheels.UI.Toolbox;
 using NWheels.UI.Uidl;
 
-namespace NWheels.Domains.DevOps.SystemLogs.UI
+namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
 {
     public class LogLevelSummaryScreenPart : ScreenPartBase<LogLevelSummaryScreenPart, Empty.Context, Empty.Data, Empty.State>
     {
@@ -24,7 +24,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI
             LogLevelSummary.AutoSubmitOnLoad = true;
             LogLevelSummary.EnableVisualization();
             LogLevelSummary.VisualizationChart.TemplateName = "ChartInline";
-            LogLevelSummary.VisualizationChart.Height = WidgetSize.Large;
+            LogLevelSummary.VisualizationChart.Height = WidgetSize.MediumLarge;
             LogLevelSummary.CriteriaForm.AutoSubmitOnChange = true;
             LogLevelSummary.CriteriaForm.TemplateName = "FormInline";
             LogLevelSummary.CriteriaForm.IsInlineStyle = true;

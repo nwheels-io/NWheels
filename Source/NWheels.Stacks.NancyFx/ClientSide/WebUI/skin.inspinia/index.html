@@ -224,6 +224,35 @@ HEAD, JS/CSS LINKS
         .compensateZeroPadding {
             padding: 5px 10px 5px 10px;
         }
+        i.jqgDetailPaneIcon.expanded:before {
+            content: "\f068";
+        }     
+        div.jqgDetailPane {
+            display: none;
+        }
+        div.jqgDetailPane.expanded {
+            display: inline-block;
+            width: 100%;
+            margin: 5px 0 -5px 0;
+            padding: 5px;
+            color: black;
+            background-color: #FFFADC;
+        }
+        .ui-jqgrid tr.jqgrow td {
+            vertical-align: top !important;
+        }
+        .jqgrow .ui-icon {
+            background-image: url("app/skin/assets/css/plugins/jQueryUI/images/ui-icons_222222_256x240_jqg.png");
+        }
+        .jqgrow.ui-state-highlight .ui-icon {
+            background-image: url("app/skin/assets/css/plugins/jQueryUI/images/ui-icons_ffffff_256x240_jqg.png");
+        }
+        .jqGrid_wrapper.flat-style .gbox_grid {
+            border: none !important;
+        }
+        .jqGrid_wrapper.flat-style .ui-jqgrid tr.ui-row-ltr td { 
+            border-bottom-style: none; 
+        }
     </style>
 </head>
 <body 
@@ -914,7 +943,7 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - DATA GRID
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/DataGrid">
-        <div class="jqGrid_wrapper">
+        <div class="jqGrid_wrapper" ng-class="{'flat-style': uidl.flatStyle===true}">
             <table id="rdt_{{uniqueWidgetId}}"></table>
             <div id="rdtpager_{{uniqueWidgetId}}"></div>
         </div>
@@ -922,6 +951,9 @@ HEAD, JS/CSS LINKS
     <script type="text/javascript">
         function initWidget_DataGrid($scope) {
             var columnsModel = [];
+            if ($scope.uidl.expandableTreeMode) {
+                columnsModel.push({ name: '$id', index: '$id', width: 1, hidden: true, key: true });
+            }
             $scope.gridColumns.forEach(function (metaColumn, idx) {
                 if (!$scope.isUidlAuthorized(metaColumn)) {
                     return;
@@ -989,6 +1021,12 @@ HEAD, JS/CSS LINKS
                     default:
                         modelItem.searchoptions = {sopt: ['cn']};
                 }
+                if (metaColumn.alignment) {
+                    switch(metaColumn.alignment) {
+                        case 'Center': modelItem.align = 'center'; break;
+                        case 'Right': modelItem.align = 'right'; break;
+                    }
+                }
                 columnsModel.push(modelItem);
             });
             
@@ -1000,6 +1038,38 @@ HEAD, JS/CSS LINKS
                 } else {
                     return '100%';
                 }                
+            };
+            
+            $scope.transformToAdjacentTreeModel = function(localResultSet, serverNode, parentServerNode, level) {
+                var serverSubNodes = serverNode[$scope.uidl.subTreePropertyName];
+
+                serverNode['$treeLevel'] = level;
+                serverNode['$treeParentId'] = (parentServerNode ? parentServerNode['$id'] : null);
+                serverNode['$treeLeaf'] = (serverSubNodes && serverSubNodes.length > 0 ? false : true);
+                serverNode['$treeExpanded'] = false;
+                serverNode['loaded'] = true;
+                localResultSet.push(serverNode);
+
+                if (serverSubNodes) {
+                    for (var i = 0; i < serverSubNodes.length; i++) {
+                        $scope.transformToAdjacentTreeModel(localResultSet, serverSubNodes[i], serverNode, level + 1);
+                    }
+                }
+                
+                serverNode[$scope.uidl.subTreePropertyName] = null;
+            };
+
+            $scope.compileDetailPane = function(rowData, element) {
+                var childScope = $scope.$rootScope.$new(true, $scope);
+                childScope.uidl = $scope.uidl.detailPaneWidget;
+                childScope.data = rowData;
+                //rowData.$detailPaneScope = childScope;
+                var template = '<uidl-widget uidl="uidl" parent-model="data"></uidl-widget>';
+                element.html(template);
+                $scope.$compile(element.contents())(childScope);
+                if (!$scope.uidl.detailPaneExpanded) {
+                    $scope.$digest();
+                }
             };
             
             $scope.onDataReceived = function (event, data) {
@@ -1091,6 +1161,14 @@ HEAD, JS/CSS LINKS
                                         grid[0].grid.endReq();
                                     }
                                     $scope.ResultSet = response.data.ResultSet;
+                                    if ($scope.uidl.expandableTreeMode) {
+                                        var adjacentModel = [ ];
+                                        for (var i = 0; i < $scope.ResultSet.length ; i++) {
+                                            $scope.transformToAdjacentTreeModel(adjacentModel, $scope.ResultSet[i], null, 0);
+                                        }
+                                        response.data.ResultSet = adjacentModel;
+                                        $scope.TreeResultSet = adjacentModel;
+                                    }
                                     $scope.entityService.trackRetrievedEntities(response.data.ResultSet);
                                     var thegrid = $('#' + $scope.tableElementId);
                                     thegrid[0].addJSONData(response.data);
@@ -1122,8 +1200,8 @@ HEAD, JS/CSS LINKS
                         rowList: $scope.uidl.pageSizeOptions || [10, 20, 50],
                         pager: "#rdtpager_" + $scope.uniqueWidgetId,
                         colModel: columnsModel,
-                        viewrecords: true,
-                        rownumbers: true,
+                        viewrecords: !$scope.uidl.expandableTreeMode,
+                        rownumbers: !$scope.uidl.expandableTreeMode,
                         footerrow: ($scope.uidl.enableTotalRow===true),
                         add: false,
                         edit: false,
@@ -1164,6 +1242,8 @@ HEAD, JS/CSS LINKS
                         subGridRowExpanded: function(subgrid_id, row_id) {
                             var rowData = $scope.ResultSet[row_id - 1];
                             var element = $("#" + subgrid_id);
+                            $scope.compileDetailPane(rowData, element);
+                            /*
                             var childScope = $scope.$rootScope.$new(true, $scope);
                             childScope.uidl = $scope.uidl.detailPaneWidget;
                             childScope.data = rowData;
@@ -1174,12 +1254,12 @@ HEAD, JS/CSS LINKS
                             if (!$scope.uidl.detailPaneExpanded) {
                                 $scope.$digest();
                             }
+                            */
                             //var compiledDom = $scope.$compile(template)(childScope);
                             //element.html(compiledDom);
                             //console.log(element.scope());
                             //element.html(template);
                             //$scope.$compile(element.contents())(childScope);
-
                             /*
                             $scope.uidlService.loadTemplateById($scope.uidl.detailPaneWidget.templateName).then(
                                 function(template) {
@@ -1255,6 +1335,42 @@ HEAD, JS/CSS LINKS
                             }
                         }
                     };
+                    if ($scope.uidl.expandableTreeMode) {
+                        gridOptions.ExpandColumn = 'Text';
+                        gridOptions.treeGrid = true;
+                        gridOptions.treeGridModel = 'adjacency';
+                        gridOptions.treeReader = {
+                            level_field: '$treeLevel',
+                            parent_id_field: '$treeParentId', 
+                            leaf_field: '$treeLeaf',
+                            expanded_field: '$treeExpanded'
+                        };
+                        if (gridOptions.subGrid) {
+                            gridOptions.colModel = gridOptions.colModel.slice();
+                            gridOptions.colModel[1].formatter = function (cellValue, options, rowObject) {
+                                return (
+                                    cellValue + 
+                                    '<br/><div class="jqgDetailPane">' +
+                                    'HOORRAAYY!!!!<br/>' +
+                                    'THIS IS THE DETAILS PANE!!!' +
+                                    '</div>'
+                                );
+                            };
+                            gridOptions.colModel.splice(2, 0, { 
+                                name: '$expand', 
+                                index: '$expand', 
+                                label: '...',
+                                width: 25, 
+                                align: 'center',
+                                resizable: false,
+                                sortable: false,
+                                search: false,
+                                formatter: function (cellValue, options, rowObject) {
+                                    return '<i class="fa fa-xs fa-plus jqgDetailPaneIcon" style="cursor:pointer;" onclick="jqgrid_onDetailPaneIconClick(event)"></i>';
+                                }
+                            });
+                        }
+                    }
                     var grid = $('#' + $scope.tableElementId);
                     grid.jqGrid(gridOptions);
                     grid.jqGrid('filterToolbar', { stringResult: true, searchOnEnter: false, defaultSearch: "cn" });
@@ -1264,7 +1380,7 @@ HEAD, JS/CSS LINKS
                         grid.trigger('reloadGrid');
                     });
 
-                    if ($scope.uidl.$skin.deltaWindowHeight) {
+                    if ($scope.uidl.$skin.deltaWindowHeight && !$scope.resizeHandlerInitialized) {
                         $scope.resizeTimer = null;
                         $scope.resizeHandler = function() {
                             clearTimeout($scope.resizeTimer);
@@ -1279,7 +1395,8 @@ HEAD, JS/CSS LINKS
                                 clearTimeout($scope.resizeTimer);
                             }
                             $(window).unbind('resize', $scope.resizeHandler);
-                        });            
+                        });
+                        $scope.resizeHandlerInitialized = true;
                     }
                     
                     $scope.$on($scope.uidl.qualifiedName + ':PageRefreshRequested', function (event, data) {
@@ -1289,6 +1406,22 @@ HEAD, JS/CSS LINKS
             };
             $scope.$on($scope.uidl.qualifiedName + ':RequestPrepared', $scope.onRequestPrepared);
         }
+        function jqgrid_onDetailPaneIconClick(event) {
+            event = (event || window.event);
+            var target = $(event.target || event.srcElement);
+            var rowTr = target.closest('tr');
+            var gridTable = rowTr.closest('table');
+            var paneDiv = rowTr.find('.jqgDetailPane');
+            target.toggleClass('expanded');
+            paneDiv.toggleClass('expanded');
+            var scopeEl = rowTr.closest('.ng-scope');
+            var scope = scopeEl.scope();
+            var rowId = rowTr[0].id;
+            var numericIdPosition = rowId.lastIndexOf('#');
+            var numericId = parseInt(rowId.substring(numericIdPosition + 1));
+            var rowData = scope.TreeResultSet[numericId - 1];
+            scope.compileDetailPane(rowData, paneDiv);
+        };
     </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1661,19 +1794,20 @@ HEAD, JS/CSS LINKS
         </form>
     </script>
     <script type="text/ng-template" id="app/uidl-element-template/FormInline">
-        <form class="form-inline" id="{{::uidl.elementName}}">
+        <form class="form-inline" id="{{::uidl.elementName}}" style="margin-bottom:5px;">
             <!-- PLAIN FIELDS SINGLE COLUMN LAYOUT -->
             <div class="form-group" ng-repeat="field in plainFields" style="margin-bottom:0">
                 <label for="{{::uidl.elementName + '_' + field.propertyName}}" 
                        style="position:relative;margin-right:5px;"
+                       ng-class="{'m-l': !$first}"
                        ng-style="{top: (uidl.$skin.zeroPadding ? '3px' : '-5px')}">{{::translate(field.label, { upperCase: true })}}</label>
                 <uidl-form-field parent-uidl="uidl" uidl="field" entity="model.Data.entity" />
             </div>
             <!-- COMMAND BUTTONS -->
-            <div ng-if="uidl.commands.length && !uidl.autoSubmitOnChange" class="form-group m-l">
+            <div ng-if="uidl.commands.length && !uidl.autoSubmitOnChange" class="form-group m-l" style="margin-top:5px;">
                 <button ng-repeat="command in uidl.commands | reverse"
                         type="button"
-                        class="btn btn-rounded btn-lg pull-right"
+                        class="btn btn-rounded btn-md pull-right"
                         style="margin-right:5px;"
                         ng-disabled="commandInProgress"
                         ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy'}"

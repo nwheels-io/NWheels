@@ -102,6 +102,21 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public int? DefaultPageSize { get; set; }
 
+        [DataMember]
+        public bool ExpandableTreeMode { get; set; }
+
+        [DataMember]
+        public string SubTreePropertyName { get; set; }
+
+        [DataMember]
+        public bool FlatStyle { get; set; }
+
+        [DataMember]
+        public string RowStylePropertyName { get; set; }
+
+        [DataMember]
+        public string RowIconPropertyName { get; set; }
+
         //[DataMember]
         //public string DetailPaneStaticTemplateName { get; set; }
 
@@ -232,10 +247,19 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void SetWidget(WidgetUidlNode widget)
+            public GridColumn SetWidget(WidgetUidlNode widget)
             {
                 this.ColumnType = GridColumnType.Widget;
                 this.NestedWidget = widget;
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public GridColumn BindIconTo<TDataRow>(Expression<Func<TDataRow, object>> iconProperty)
+            {
+                this.IconPropertyName = iconProperty.GetPropertyInfo().Name;
+                return this;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -250,6 +274,8 @@ namespace NWheels.UI.Toolbox
             public FieldSize Size { get; set; }
             [DataMember]
             public string Format { get; set; }
+            [DataMember]
+            public WidgetAlignment Alignment { get; set; }
             [DataMember]
             public string Expression { get; set; }
             [DataMember]
@@ -270,6 +296,8 @@ namespace NWheels.UI.Toolbox
             public UidlAuthorization Authorization { get; set; }
             [DataMember, ManuallyAssigned]
             public WidgetUidlNode NestedWidget { get; set; }
+            [DataMember]
+            public string IconPropertyName { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -553,6 +581,31 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public DataGrid<TDataRow> EnableExpandableTree(Expression<Func<TDataRow, System.Collections.IEnumerable>> subTreeProperty)
+        {
+            this.ExpandableTreeMode = true;
+            this.SubTreePropertyName = subTreeProperty.GetPropertyInfo().Name;
+            return this;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DataGrid<TDataRow> BindRowIconTo(Expression<Func<TDataRow, object>> iconProperty)
+        {
+            this.RowIconPropertyName = iconProperty.GetPropertyInfo().Name;
+            return this;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public DataGrid<TDataRow> BindRowStyleTo(Expression<Func<TDataRow, object>> styleProperty)
+        {
+            this.RowStylePropertyName = styleProperty.GetPropertyInfo().Name;
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         //public DataGrid<TDataRow> UseDetailPane(string staticTemplateName, bool expandOnLoad)
         //{
         //    this.EnableDetailPane = true;
@@ -599,6 +652,7 @@ namespace NWheels.UI.Toolbox
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlNotification<IEnumerable<TDataRow>> DataReceived { get; set; }
+        public UidlNotification<TDataRow> DataRowReceived { get; set; }
         public UidlNotification<ApplicationEntityService.QueryResults> QueryCompleted { get; set; }
         public UidlNotification<IPromiseFailureInfo> QueryFailed { get; set; }
 
