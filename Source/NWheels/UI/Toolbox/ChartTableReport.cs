@@ -55,12 +55,16 @@ namespace NWheels.UI.Toolbox
             CriteriaForm.Commands.Add(DownloadExcel);
             ResultTable.Mode = DataGridMode.Standalone;
             ResultTable.UsePascalCase = true;
-            ResultTable.EnablePaging = true;
             ResultTable.EnableTotalRow = ResultTable.DisplayColumns.Any(c => c.IncludeInTotal);
             ResultTable.TotalRowOnTop = false;//TODO: fix on-top total row in Inspinia skin
             ShowReport.Kind = CommandKind.Submit;
             DownloadExcel.Kind = CommandKind.Submit;
             SummaryChart.BindToModelSetter(this.ChartReady);
+
+            if (!ResultTable.EnablePaging.HasValue)
+            {
+                ResultTable.EnablePaging = true;
+            }
 
             var attribute = typeof(TResultScript).GetCustomAttribute<TransactionScriptAttribute>();
 

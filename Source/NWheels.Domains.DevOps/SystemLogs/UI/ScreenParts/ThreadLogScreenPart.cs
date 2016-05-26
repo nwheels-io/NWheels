@@ -51,6 +51,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
                 .UseDetailPane(ThreadLogJson, expanded: false)
                 .EnableExpandableTree(x => x.SubNodes);
 
+            Report.ResultTable.EnablePaging = false;
+
             presenter.On(base.NavigatedHere)
                 .Broadcast(Report.ContextSetter).WithPayload(vm => vm.Input).TunnelDown();
         }

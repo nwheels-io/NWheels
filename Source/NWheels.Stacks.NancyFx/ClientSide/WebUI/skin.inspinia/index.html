@@ -233,10 +233,20 @@ HEAD, JS/CSS LINKS
         div.jqgDetailPane.expanded {
             display: inline-block;
             width: 100%;
-            margin: 5px 0 -5px 0;
-            padding: 5px;
+            margin: 5px 0 0 0;
+            padding: 0;
             color: black;
+            overflow: scroll;
             background-color: #FFFADC;
+        }
+        div.jqgDetailPane div.jsonText {
+            background-color: #FFFADC;
+        }
+        div.jqgDetailPane div.jsonText .jsonview,
+        div.jqgDetailPane div.jsonText .jsonview li,
+        div.jqgDetailPane div.jsonText .jsonview li a,
+        div.jqgDetailPane div.jsonText .jsonview li span {
+            white-space: nowrap !important;
         }
         .ui-jqgrid tr.jqgrow td {
             vertical-align: top !important;
@@ -943,9 +953,9 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - DATA GRID
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/DataGrid">
-        <div class="jqGrid_wrapper" ng-class="{'flat-style': uidl.flatStyle===true}">
+        <div id="rdtwrapper_{{uniqueWidgetId}}" class="jqGrid_wrapper" ng-class="{'flat-style': uidl.flatStyle===true}">
             <table id="rdt_{{uniqueWidgetId}}"></table>
-            <div id="rdtpager_{{uniqueWidgetId}}"></div>
+            <div ng-if="uidl.enablePaging" id="rdtpager_{{uniqueWidgetId}}"></div>
         </div>
     </script>
     <script type="text/javascript">
@@ -1029,15 +1039,43 @@ HEAD, JS/CSS LINKS
                 }
                 columnsModel.push(modelItem);
             });
+            $scope.needSearchToolbar = (Enumerable.From(columnsModel).Any(function(col) { return (col.search || col.sortable); }));
             
             $scope.uidl.calculateHeight = function() {
-                if ($scope.uidl.mode === 'Standalone') {
-                    var delta = ($scope.uidl.$skin.deltaWindowHeight || 140);
-                    var height = document.documentElement.clientHeight - $('#' + $scope.tableElementId).offset().top - delta;
+                if ($scope.uidl.mode !== 'Standalone') {
+                    return '100%';
+                }      
+                if (!$scope.uidl.$skin.deltaWindowHeight) {
+                    var height = document.documentElement.clientHeight - $('#' + $scope.tableElementId).offset().top - 140;
+                    return height;
+                }
+                var windowClientHeight = document.documentElement.clientHeight;
+                var tableElement = $('#' + $scope.tableElementId); 
+                var tableOffset = tableElement.offset();
+                if (tableOffset.top > 0) {
+                    var height = windowClientHeight - tableOffset.top - 2;
+                    var isVisible = tableElement.is(':visible');
+                    if (!isVisible) {
+                        height -= ($scope.needSearchToolbar ? 45 : 23);
+                    }
+                    if ($scope.uidl.enablePaging) {
+                        var pagerHeight = $('#' + $scope.pagerElementId).height();
+                        if (pagerHeight > 0) {
+                            height -= pagerHeight;
+                        } else {
+                            height -= 32;
+                        }
+                    }
                     return height;
                 } else {
-                    return '100%';
-                }                
+                    return null;
+                }
+            };
+
+            $scope.defineElementIds = function() {
+                $scope.tableElementId = 'rdt_' + $scope.uniqueWidgetId;
+                $scope.pagerElementId = 'rdtpager_' + $scope.uniqueWidgetId;
+                $scope.wrapperElementId = 'rdtwrapper_' + $scope.uniqueWidgetId;
             };
             
             $scope.transformToAdjacentTreeModel = function(localResultSet, serverNode, parentServerNode, level) {
@@ -1073,7 +1111,7 @@ HEAD, JS/CSS LINKS
             };
             
             $scope.onDataReceived = function (event, data) {
-                $scope.tableElementId = 'rdt_' + $scope.uniqueWidgetId;
+                $scope.defineElementIds();
                 $scope.ResultSet = data;
                 for (var  i = 0; i < data.length; i++) {
                     data[i]['$index'] = i;
@@ -1120,7 +1158,7 @@ HEAD, JS/CSS LINKS
             };
             $scope.$on($scope.uidl.qualifiedName + ':DataReceived', $scope.onDataReceived);
             $scope.onRequestPrepared = function (event, request) {
-                $scope.tableElementId = 'rdt_' + $scope.uniqueWidgetId;
+                $scope.defineElementIds();
                 $scope.preparedRequest = request;
                 $scope.$timeout(function () {
                     $('#' + $scope.tableElementId).jqGrid('GridUnload');
@@ -1198,7 +1236,7 @@ HEAD, JS/CSS LINKS
                         rownumWidth: 45,
                         rowNum: ($scope.uidl.defaultPageSize || ($scope.uidl.pageSizeOptions && $scope.uidl.pageSizeOptions.length ? $scope.uidl.pageSizeOptions[0] : ($scope.uidl.mode === 'Standalone' ? 50 : 5))),
                         rowList: $scope.uidl.pageSizeOptions || [10, 20, 50],
-                        pager: "#rdtpager_" + $scope.uniqueWidgetId,
+                        pager: ($scope.uidl.enablePaging ? '#rdtpager_' + $scope.uniqueWidgetId : null),
                         colModel: columnsModel,
                         viewrecords: !$scope.uidl.expandableTreeMode,
                         rownumbers: !$scope.uidl.expandableTreeMode,
@@ -1208,6 +1246,9 @@ HEAD, JS/CSS LINKS
                         hidegrid: false,
                         loadui: 'block',
                         ignoreCase: true,
+                        beforeSelectRow: function(rowid, e) {
+                            return ($scope.uidl.selectionMode !== 'Disabled');
+                        },
                         onSelectRow: function (rowId) {
                             var rowObject = $scope.ResultSet[rowId - 1];
                             if ($scope.uidl.enableAutonomousQuery) {
@@ -1243,40 +1284,8 @@ HEAD, JS/CSS LINKS
                             var rowData = $scope.ResultSet[row_id - 1];
                             var element = $("#" + subgrid_id);
                             $scope.compileDetailPane(rowData, element);
-                            /*
-                            var childScope = $scope.$rootScope.$new(true, $scope);
-                            childScope.uidl = $scope.uidl.detailPaneWidget;
-                            childScope.data = rowData;
-                            //rowData.$detailPaneScope = childScope;
-                            var template = '<uidl-widget uidl="uidl" parent-model="data"></uidl-widget>';
-                            element.html(template);
-                            $scope.$compile(element.contents())(childScope);
-                            if (!$scope.uidl.detailPaneExpanded) {
-                                $scope.$digest();
-                            }
-                            */
-                            //var compiledDom = $scope.$compile(template)(childScope);
-                            //element.html(compiledDom);
-                            //console.log(element.scope());
-                            //element.html(template);
-                            //$scope.$compile(element.contents())(childScope);
-                            /*
-                            $scope.uidlService.loadTemplateById($scope.uidl.detailPaneWidget.templateName).then(
-                                function(template) {
-                                    var childScope = $scope.$rootScope.$new(true, $scope);
-                                    childScope.rowData = rowData;
-                                    element.html(template);
-                                    $scope.$compile(element.contents())(childScope);
-                                },
-                                function(error) {
-                                    element.html("<span style='color:red'>Failed to load</span>");
-                                }
-                            );
-                            */
                         },
                         subGridRowColapsed: function(subgrid_id, row_id) {
-                            //var rowData = $scope.ResultSet[row_id - 1];
-                            //var childScope = rowData.$detailPaneScope = childScope;
                             return !($scope.uidl.detailPaneExpanded===true);
                         },
                         gridComplete: function () {
@@ -1350,10 +1359,7 @@ HEAD, JS/CSS LINKS
                             gridOptions.colModel[1].formatter = function (cellValue, options, rowObject) {
                                 return (
                                     cellValue + 
-                                    '<br/><div class="jqgDetailPane">' +
-                                    'HOORRAAYY!!!!<br/>' +
-                                    'THIS IS THE DETAILS PANE!!!' +
-                                    '</div>'
+                                    '<br/><div class="jqgDetailPane"></div>'
                                 );
                             };
                             gridOptions.colModel.splice(2, 0, { 
@@ -1371,9 +1377,12 @@ HEAD, JS/CSS LINKS
                             });
                         }
                     }
+                    
                     var grid = $('#' + $scope.tableElementId);
                     grid.jqGrid(gridOptions);
-                    grid.jqGrid('filterToolbar', { stringResult: true, searchOnEnter: false, defaultSearch: "cn" });
+                    if ($scope.needSearchToolbar) {
+                        grid.jqGrid('filterToolbar', { stringResult: true, searchOnEnter: false, defaultSearch: "cn" });
+                    }
                     grid.parents('div.ui-jqgrid-bdiv').css('min-height', ($scope.uidl.mode === 'Standalone' ? '200px' : '100px'));
                     
                     $scope.$on($scope.uidl.qualifiedName + ':PageRefreshRequested', function (event, data) {
@@ -1382,12 +1391,28 @@ HEAD, JS/CSS LINKS
 
                     if ($scope.uidl.$skin.deltaWindowHeight && !$scope.resizeHandlerInitialized) {
                         $scope.resizeTimer = null;
+                        $scope.resizeTimerTickHandler = function() {
+                            var newHeight = $scope.uidl.calculateHeight();
+                            if (newHeight) {
+                                $scope.lastCalculatedHeight = newHeight;
+                                $('#' + $scope.tableElementId).setGridHeight(newHeight);
+                            } else if (!$scope.lastCalculatedHeight) {
+                                $scope.resizeTimer = setTimeout($scope.resizeTimerTickHandler, 100);
+                            }
+                        };
                         $scope.resizeHandler = function() {
+                            if (!$('#' + $scope.tableElementId).is(':visible')) {
+                                return;
+                            }
+                            var windowClientHeight = document.documentElement.clientHeight;
+                            var windowClientHeightJq = $(window).height();
+                            if ($scope.lastWindowClientHeight && $scope.lastWindowClientHeight === windowClientHeight && $scope.lastCalculatedHeight) {
+                                return;
+                            }
                             clearTimeout($scope.resizeTimer);
-                            $scope.resizeTimer = setTimeout(function() {
-                                var newHeight = $scope.uidl.calculateHeight();
-                                $('#' + $scope.tableElementId).setGridHeight(newHeight + 46);
-                            }, 100);
+                            $scope.lastWindowClientHeight = windowClientHeight;
+                            $scope.lastCalculatedHeight = null;
+                            $scope.resizeTimer = setTimeout($scope.resizeTimerTickHandler, 100);
                         };
                         $(window).bind('resize', $scope.resizeHandler);
                         $scope.$on("$destroy", function() {
@@ -1408,6 +1433,7 @@ HEAD, JS/CSS LINKS
         }
         function jqgrid_onDetailPaneIconClick(event) {
             event = (event || window.event);
+            event.stopPropagation();
             var target = $(event.target || event.srcElement);
             var rowTr = target.closest('tr');
             var gridTable = rowTr.closest('table');
@@ -1421,6 +1447,8 @@ HEAD, JS/CSS LINKS
             var numericId = parseInt(rowId.substring(numericIdPosition + 1));
             var rowData = scope.TreeResultSet[numericId - 1];
             scope.compileDetailPane(rowData, paneDiv);
+            var ngInclude = paneDiv.children('ng-include');
+            ngInclude.contents().filter(function() { return this.nodeType == 3; /*Node.TEXT_NODE*/ }).remove();
         };
     </script>
 

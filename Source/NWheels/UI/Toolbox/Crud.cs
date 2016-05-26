@@ -139,6 +139,7 @@ namespace NWheels.UI.Toolbox
         {
             this.Grid.UsePascalCase = true;
             this.Grid.Mode = this.Mode;
+            this.Grid.EnablePaging = true;
             this.Save.Icon = "check";
             this.Save.Severity = CommandSeverity.Change;
             this.Save.Kind = CommandKind.Submit;

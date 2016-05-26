@@ -72,8 +72,19 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public DataGridMode Mode { get; set; }
 
+        private bool? _enablePaging;
         [DataMember]
-        public bool EnablePaging { get; set; }
+        public bool? EnablePaging
+        {
+            get
+            {
+                return _enablePaging;
+            }
+            set
+            {
+                _enablePaging = value;
+            }
+        }
 
         [DataMember]
         public bool EnableAutonomousQuery { get; set; }
@@ -101,6 +112,9 @@ namespace NWheels.UI.Toolbox
 
         [DataMember]
         public int? DefaultPageSize { get; set; }
+
+        [DataMember]
+        public DataGridSelectionMode SelectionMode { get; set; }
 
         [DataMember]
         public bool ExpandableTreeMode { get; set; }
@@ -630,7 +644,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DataGrid<TDataRow> UseDetailPane(WidgetUidlNode widget, bool expanded)
+        public DataGrid<TDataRow> UseDetailPane(WidgetUidlNode widget, bool expanded = false)
         {
             this.EnableDetailPane = true;
             this.DetailPaneWidget = widget;
@@ -743,6 +757,15 @@ namespace NWheels.UI.Toolbox
         Inline = 20,
         LookupOne = 30,
         LookupMany = 40
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum DataGridSelectionMode
+    {
+        Single = 0,
+        Multiple = 10,
+        Disabled = 20
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
