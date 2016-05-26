@@ -231,16 +231,17 @@ HEAD, JS/CSS LINKS
             display: none;
         }
         div.jqgDetailPane.expanded {
-            display: inline-block;
-            width: 100%;
-            margin: 5px 0 0 0;
+            display: block;
+            margin-top: 5px;
+            margin-right: 0;
+            margin-bottom: 0;
             padding: 0;
-            color: black;
-            overflow: scroll;
-            background-color: #FFFADC;
+            border-left: 2px solid #DDDDDD;
+            /*background-color: lightgray;*/
+            color: gray;
         }
-        div.jqgDetailPane div.jsonText {
-            background-color: #FFFADC;
+        div.jqgDetailPane > div.jqgDetailPaneScroll {
+            overflow-x: auto;
         }
         div.jqgDetailPane div.jsonText .jsonview,
         div.jqgDetailPane div.jsonText .jsonview li,
@@ -783,6 +784,47 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/JsonText">
         <div id="{{::uidl.elementName}}" class="jsonText" json-view></div>
+    </script>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - PROPERTY GRID
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="app/uidl-element-template/PropertyGrid">
+        <table>
+            <tbody>
+                <tr>
+                    <td>Message</td>
+                    <td>MyLogger.ThisIsMyMessage [Verbose, Log]</td>
+                </tr>
+                <tr>
+                    <td>Timestamp</td>
+                    <td>2016-05-25 15:10:03.234 UTC [thread start + 23 ms]</td>
+                </tr>
+                <tr>
+                    <td colspan="2">Thread</td>
+                </tr>
+                <tr>
+                    <td>Activity Stack</td>
+                    <td>
+                        [+     8 ms] 
+                        [+     1 ms] UidlApplicationController.ApiRequestReplyCommand target [TransactionScript] contractName [MyNamespace.MyTx] operationName [Execute]
+                        [+     0 ms] LoggingAndSessionHandler.SendAsync 
+                    </td>
+                </tr>
+                <tr>
+                    <td>Thread Task</td>
+                    <td>Type [Incoming Request] Activity [HttpApplicationEndpoint.ProcessRequest] verb [GET] path [/mypath/myresource?q=v]</td>
+                </tr>
+                <tr>
+                    <td>Application Unit</td>
+                    <td>App [AffiliatePrograms] Node [AffiliateApp] Instance [Brand_GCMForex] Replica [1:Active]</td>
+                </tr>
+                <tr>
+                    <td>Running At</td>
+                    <td>Machine [UAETYW-1.2.3.4-563739] Process ID [12345]</td>
+                </tr>
+            </tbody>
+        </table>
     </script>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1357,9 +1399,10 @@ HEAD, JS/CSS LINKS
                         if (gridOptions.subGrid) {
                             gridOptions.colModel = gridOptions.colModel.slice();
                             gridOptions.colModel[1].formatter = function (cellValue, options, rowObject) {
+                                var indentPixels = 18 * (rowObject.$treeLevel + 1);
                                 return (
                                     cellValue + 
-                                    '<br/><div class="jqgDetailPane"></div>'
+                                    '<br/><div class="jqgDetailPane" style="margin-left:' + indentPixels + 'px;"><div class="jqgDetailPaneScroll"></div></div>'
                                 );
                             };
                             gridOptions.colModel.splice(2, 0, { 
@@ -1446,8 +1489,9 @@ HEAD, JS/CSS LINKS
             var numericIdPosition = rowId.lastIndexOf('#');
             var numericId = parseInt(rowId.substring(numericIdPosition + 1));
             var rowData = scope.TreeResultSet[numericId - 1];
-            scope.compileDetailPane(rowData, paneDiv);
-            var ngInclude = paneDiv.children('ng-include');
+            var widgetContainerDiv = paneDiv.children('div.jqgDetailPaneScroll');
+            scope.compileDetailPane(rowData, widgetContainerDiv);
+            var ngInclude = widgetContainerDiv.children('ng-include');
             ngInclude.contents().filter(function() { return this.nodeType == 3; /*Node.TEXT_NODE*/ }).remove();
         };
     </script>

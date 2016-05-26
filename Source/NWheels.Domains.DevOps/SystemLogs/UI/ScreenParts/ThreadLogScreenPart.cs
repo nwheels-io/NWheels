@@ -48,7 +48,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
             Report.ResultTable
                 .BindRowStyleTo(x => x.NodeType)
                 .BindRowIconTo(x => x.Icon)
-                .UseDetailPane(ThreadLogJson, expanded: false)
+                .UseDetailPane(MessageDetails, expanded: false)
                 .EnableExpandableTree(x => x.SubNodes);
 
             Report.ResultTable.EnablePaging = false;
@@ -71,7 +71,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
             AbstractThreadLogUINodesTx,
             IRootThreadLogUINodeEntity> Report { get; set; }
 
-        public JsonText ThreadLogJson { get; set; }
+        //public JsonText ThreadLogJson { get; set; }
+        public PropertyGrid<IThreadLogUINodeEntity> MessageDetails { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         

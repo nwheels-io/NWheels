@@ -1,3 +1,40 @@
+Use Cases
+
+UC1. Assess system health
+
+    UC1.1: present a dashboard that summarizes important (recent?) events and metrics
+    UC1.2: alert when exceptional conditions occur that may require manual intervention
+    UC1.3: learn how well new features/modifications perform in production (correctness, stability, performance)
+
+UC2. Investigate an incident
+
+    UC2.1: quickly get to root cause 
+    UC2.2: present detailed information on execution path and data related to the incident.
+    UC2.3: 
+
+UC3. Get assistance in development
+
+    UC3.1: learn existing processes by examining thread logs
+    UC3.2: log and profile execution path on dev machine while coding/testing
+    UC3.3: look for opportunities to enhance and optimize system features
+
+UC4. Generate valuable business metrics
+
+
+
+learn how features work in production
+look for optimization opportunities
+gather summaries valuable for business
+
+
+
+
+
+
+
+
+
+
 
 Use Cases
 ---------------------
