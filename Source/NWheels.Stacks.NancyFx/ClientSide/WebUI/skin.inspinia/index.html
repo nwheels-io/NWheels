@@ -235,13 +235,47 @@ HEAD, JS/CSS LINKS
             margin-top: 5px;
             margin-right: 0;
             margin-bottom: 0;
-            padding: 0;
+            padding: 0 0 0 5px;
             border-left: 2px solid #DDDDDD;
             /*background-color: lightgray;*/
             color: gray;
         }
         div.jqgDetailPane > div.jqgDetailPaneScroll {
             overflow-x: auto;
+            padding: 5px;
+        }
+        table.prop-grid {
+            border-spacing: 1px;
+            border-collapse: separate;
+        }
+        table.prop-grid td {
+            border: none !important;
+            font-size: 0.9em;
+        }
+        table.prop-grid td.prop-grid-section {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: black; 
+        }
+        table.prop-grid td.prop-grid-label {
+            padding:2px 5px 2px 2px;
+            text-align:right;
+            color: gray; 
+            white-space: nowrap;
+        }
+        table.prop-grid td.prop-grid-value {
+            padding: 0;
+            font-family: monospace;
+            font-size: 1.1em;
+            white-space: nowrap;
+        }
+        table.prop-grid td.prop-grid-value pre {
+            margin:0;
+            padding: 2px;
+            font-family: monospace;
+            font-size: 1.0em;
+            white-space: pre;
+            border-radius: 2px;
         }
         div.jqgDetailPane div.jsonText .jsonview,
         div.jqgDetailPane div.jsonText .jsonview li,
@@ -263,6 +297,14 @@ HEAD, JS/CSS LINKS
         }
         .jqGrid_wrapper.flat-style .ui-jqgrid tr.ui-row-ltr td { 
             border-bottom-style: none; 
+        }
+        .threadlog-ThreadSuccess {
+            background-color: green;
+            color: white;
+        }
+        .threadlog-ActivitySuccess {
+            background-color: lghtgreen;
+            color: blue;
         }
     </style>
 </head>
@@ -790,38 +832,36 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - PROPERTY GRID
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/PropertyGrid">
-        <table>
+        <table class="prop-grid">
             <tbody>
                 <tr>
-                    <td>Message</td>
-                    <td>MyLogger.ThisIsMyMessage [Verbose, Log]</td>
+                    <td class="prop-grid-label">Message</td>
+                    <td class="prop-grid-value"><pre>2016-05-25 15:10:03.234 UTC = thread start + 23 ms
+MyLogger.ThisIsMyMessage : Log Verbose</pre></td>
                 </tr>
                 <tr>
-                    <td>Timestamp</td>
-                    <td>2016-05-25 15:10:03.234 UTC [thread start + 23 ms]</td>
+                    <td class="prop-grid-label">Values</td>
+                    <td class="prop-grid-value"><pre>--- this ---
+myKey1=MyValue1
+anotherKey2=AnotherValue2
+--- ServiceBus.DispatchOnCurrentThread ---
+secondMyKey1=SecondMyValue1
+secondAnotherKey2=SecondAnotherValue2
+--- UidlApplicationController.ApiRequestReplyCommand ---
+thirdAnotherKey2=SecondAnotherValue2</pre></td>
                 </tr>
                 <tr>
-                    <td colspan="2">Thread</td>
+                    <td class="prop-grid-label">Activity Stack</td>
+                    <td class="prop-grid-value"><pre>[+     8 ms] ServiceBus.DispatchOnCurrentThread 
+[+     1 ms] UidlApplicationController.ApiRequestReplyCommand : target=TransactionScript, contractName=MyNamespace.MyTx, operationName=Execute
+[+     0 ms] LoggingAndSessionHandler.SendAsync
+[+     0 ms] HttpApplicationEndpoint.ProcessRequest : verb=GET, path=/mypath/myresource?q=v
+[+     0 ms] Thread : taskType = IncomingRequest</pre></td>
                 </tr>
                 <tr>
-                    <td>Activity Stack</td>
-                    <td>
-                        [+     8 ms] 
-                        [+     1 ms] UidlApplicationController.ApiRequestReplyCommand target [TransactionScript] contractName [MyNamespace.MyTx] operationName [Execute]
-                        [+     0 ms] LoggingAndSessionHandler.SendAsync 
-                    </td>
-                </tr>
-                <tr>
-                    <td>Thread Task</td>
-                    <td>Type [Incoming Request] Activity [HttpApplicationEndpoint.ProcessRequest] verb [GET] path [/mypath/myresource?q=v]</td>
-                </tr>
-                <tr>
-                    <td>Application Unit</td>
-                    <td>App [AffiliatePrograms] Node [AffiliateApp] Instance [Brand_GCMForex] Replica [1:Active]</td>
-                </tr>
-                <tr>
-                    <td>Running At</td>
-                    <td>Machine [UAETYW-1.2.3.4-563739] Process ID [12345]</td>
+                    <td class="prop-grid-label">Application Unit</td>
+                    <td class="prop-grid-value"><pre>Application=AffiliatePrograms Node=AffiliateApp Instance=Brand_GCMForex Replica=1:Active
+Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                 </tr>
             </tbody>
         </table>
@@ -1119,6 +1159,18 @@ HEAD, JS/CSS LINKS
                 $scope.pagerElementId = 'rdtpager_' + $scope.uniqueWidgetId;
                 $scope.wrapperElementId = 'rdtwrapper_' + $scope.uniqueWidgetId;
             };
+
+            $scope.getDataByRowId = function(rowId) {
+                if ($.isNumeric(rowId)) {
+                    var rowData = $scope.ResultSet[parseInt(rowId) - 1];
+                    return rowData;
+                } else {
+                    var hashPosition = rowId.lastIndexOf('#');
+                    var numericId = parseInt(rowId.substring(hashPosition + 1));
+                    var rowData = $scope.ResultSet[numericId - 1];
+                    return rowData;
+                }
+            }
             
             $scope.transformToAdjacentTreeModel = function(localResultSet, serverNode, parentServerNode, level) {
                 var serverSubNodes = serverNode[$scope.uidl.subTreePropertyName];
@@ -1247,12 +1299,33 @@ HEAD, JS/CSS LINKS
                                             $scope.transformToAdjacentTreeModel(adjacentModel, $scope.ResultSet[i], null, 0);
                                         }
                                         response.data.ResultSet = adjacentModel;
-                                        $scope.TreeResultSet = adjacentModel;
+                                        $scope.ResultSet = adjacentModel;
                                     }
                                     $scope.entityService.trackRetrievedEntities(response.data.ResultSet);
                                     var thegrid = $('#' + $scope.tableElementId);
                                     thegrid[0].addJSONData(response.data);
                                     $scope.$emit($scope.uidl.qualifiedName + ':QueryCompleted', response.data);
+                                    
+                                    /*if ($scope.uidl.expandableTreeMode) {
+                                        setTimeout(function() {
+                                            console.log('REQUESTING ANOTHER THREAD LOG....');
+                                            $scope.$http.post(
+                                                'http://localhost:9411/app/api/RequestReply/EntityQuery/RootThreadLogUINode/TransactionScript/Transactions.AbstractThreadLogUINodesTx/Execute?$select=Text,TimeText,Node,DurationMs,DbDurationMs,DbCount,CpuTimeMs,LogId,CorrelationId&$take=10000&$page=1',
+                                                {input: {Id: "6ffd600edb974a019f61b043d674c872", CorrelationId: null}}
+                                            ).then(function(response){
+                                                console.log('ADDING ANOTHER THREAD LOG....');
+                                                var newAdjacentModel = [ ];
+                                                for (var i = 0; i < response.data.ResultSet.length ; i++) {
+                                                    $scope.transformToAdjacentTreeModel(newAdjacentModel, response.data.ResultSet[i], null, 0);
+                                                }
+                                                for (var i = 0; i < newAdjacentModel.length ; i++) {
+                                                    var r = newAdjacentModel[i];
+                                                    $scope.ResultSet.push(r);
+                                                    thegrid.jqGrid('addChildNode', r.$id, r.$treeParentId, r);
+                                                }
+                                            });
+                                        }, 5000);
+                                    }*/
                                 },
                                 function(faultResponse){
 									$scope.dataGridQueryInProgress = false;
@@ -1288,6 +1361,9 @@ HEAD, JS/CSS LINKS
                         hidegrid: false,
                         loadui: 'block',
                         ignoreCase: true,
+                        //afterInsertRow: function(rowid, rowdata, rowelem) {
+                        //    console.log('afterInsertRow! ', rowid, rowdata, rowelem);
+                        //},
                         beforeSelectRow: function(rowid, e) {
                             return ($scope.uidl.selectionMode !== 'Disabled');
                         },
@@ -1384,6 +1460,28 @@ HEAD, JS/CSS LINKS
                             {         
                                 $(".jqgfirstrow").css("height","1px");
                             }
+                            if ($scope.uidl.rowStylePropertyName) {
+                                var table = grid[0];
+                                var classColors = { 
+                                    'jqg_row_ThreadSuccess' : 'green',
+                                    'jqg_row_ThreadWarning' : 'yellow',
+                                    'jqg_row_ThreadError' : 'yellow',
+                                };
+                                for (var i = 1; i < table.rows.length; i++) {
+                                    var tr = table.rows[i];
+                                    for (var j = 1; j < tr.cells.length; j++) {
+                                        var td = tr.cells[j];
+                                        var data = $scope.getDataByRowId(tr.id);
+                                        var styleClassName = data[$scope.uidl.rowStylePropertyName];
+                                        if ($scope.uidl.expandableTreeMode && j == 1) {
+                                            var indent = 18 * (data.$treeLevel + 1) + 2; 
+                                            $(td).css('background-image', 'linear-gradient(90deg, transparent ' + indent + 'px, yellow ' + indent + 'px, yellow)');
+                                        } else {
+                                            $(td).addClass(styleClassName);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     };
                     if ($scope.uidl.expandableTreeMode) {
@@ -1399,7 +1497,7 @@ HEAD, JS/CSS LINKS
                         if (gridOptions.subGrid) {
                             gridOptions.colModel = gridOptions.colModel.slice();
                             gridOptions.colModel[1].formatter = function (cellValue, options, rowObject) {
-                                var indentPixels = 18 * (rowObject.$treeLevel + 1);
+                                var indentPixels = 18 * (rowObject.$treeLevel + 1) + 4;
                                 return (
                                     cellValue + 
                                     '<br/><div class="jqgDetailPane" style="margin-left:' + indentPixels + 'px;"><div class="jqgDetailPaneScroll"></div></div>'
@@ -1420,6 +1518,23 @@ HEAD, JS/CSS LINKS
                             });
                         }
                     }
+                    
+                    /*if ($scope.uidl.rowStylePropertyName) {
+                        for (var i = 0; i < gridOptions.colModel.length; i++) {
+                            var col = gridOptions.colModel[i];
+                            if (col.hidden) {
+                                continue;
+                            }
+                            var oldFormatter = col.formatter;
+                            col.formatter = function (cellValue, options, rowObject) {
+                                var formattedValue = (oldFormatter ? oldFormatter(cellValue, options, rowObject) : cellValue);
+                                var rowData = $scope.getDataByRowId(rowObject.$id);
+                                var rowStyle = rowData[$scope.uidl.rowStylePropertyName];
+                                
+                                return '<div class="jqg_row_style ' + rowStyle + '">' + formattedValue + '</div>';
+                            };
+                        }
+                    }*/
                     
                     var grid = $('#' + $scope.tableElementId);
                     grid.jqGrid(gridOptions);
@@ -1486,9 +1601,7 @@ HEAD, JS/CSS LINKS
             var scopeEl = rowTr.closest('.ng-scope');
             var scope = scopeEl.scope();
             var rowId = rowTr[0].id;
-            var numericIdPosition = rowId.lastIndexOf('#');
-            var numericId = parseInt(rowId.substring(numericIdPosition + 1));
-            var rowData = scope.TreeResultSet[numericId - 1];
+            var rowData = scope.getDataByRowId(rowId);
             var widgetContainerDiv = paneDiv.children('div.jqgDetailPaneScroll');
             scope.compileDetailPane(rowData, widgetContainerDiv);
             var ngInclude = widgetContainerDiv.children('ng-include');
