@@ -37,11 +37,12 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
             task.Wait();
 
             var results = new List<IRootThreadLogUINodeEntity>();
+            int treeNodeIndex = 0;
 
             foreach (var record in task.Result.OrderBy(r => r.Timestamp))
             {
                 var result = _framework.NewDomainObject<IRootThreadLogUINodeEntity>().As<RootThreadLogUINodeEntity>();
-                result.CopyFormRecord(record);
+                result.CopyFormRecord(ref treeNodeIndex, record);
                 results.Add(result);
             }
 

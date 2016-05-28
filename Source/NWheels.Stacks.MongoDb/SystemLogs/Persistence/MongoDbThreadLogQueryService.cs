@@ -146,24 +146,26 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             IThreadLogSearchCriteria criteria,
             CancellationToken cancellation)
         {
+            if (string.IsNullOrEmpty(criteria.Id) && string.IsNullOrEmpty(criteria.CorrelationId))
+            {
+                throw new ArgumentException("Either Log ID or Correlation ID must be specified.");
+            }
+
             var dbCriteria = new List<IMongoQuery>();
 
             if (!string.IsNullOrEmpty(criteria.Id))
             {
                 dbCriteria.Add(Query<ThreadLogRecord>.EQ(x => x.LogId, criteria.Id));
             }
-            else if (!string.IsNullOrEmpty(criteria.CorrelationId))
+            
+            if (!string.IsNullOrEmpty(criteria.CorrelationId))
             {
                 dbCriteria.Add(Query<ThreadLogRecord>.EQ(x => x.CorrelationId, criteria.CorrelationId));
-            }
-            else
-            {
-                throw new ArgumentException("Either Log ID or Correlation ID must be specified.");
             }
 
             //RefineDbQuery<ThreadLogRecord>(dbCriteria, criteria);
 
-            var dbQuery = Query.And(dbCriteria);
+            var dbQuery = Query.Or(dbCriteria);
 
             return RunEnvironmentMapReduceQuery<ThreadLogRecord>(
                 environmentFilter: null,

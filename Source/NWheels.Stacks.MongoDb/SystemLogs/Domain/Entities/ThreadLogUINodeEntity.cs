@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using NWheels.Domains.DevOps.SystemLogs.Entities;
 using NWheels.Entities;
@@ -14,9 +15,11 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 {
     public abstract class ThreadLogUINodeEntity : IThreadLogUINodeEntity
     {
+        //private static long _s_nextNodeId;
+
         public void CopyFromSnapshot(ref int id, ThreadLogRecord threadRecord, ThreadLogSnapshot.LogNodeSnapshot snapshot)
         {
-            this.Id = threadRecord + "#" + (++id);
+            this.Id = (++id).ToString();// Interlocked.Increment(ref _s_nextNodeId).ToString();// "T" + threadRecord.LogId + "_" + (++id);
             this.NodeType = GetNodeType(snapshot.Level, snapshot.IsActivity);
             this.Icon = GetNodeIcon(snapshot.Level, snapshot.IsActivity);
             this.Text = BuildSingleLineText(snapshot);
