@@ -1718,6 +1718,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     $timeout(function() {
                         if (validationResult.isValid===true) {
                             scope.$emit(command.qualifiedName + ':Executing');
+                            scope.$emit(scope.uidl.qualifiedName + ':Submitted', scope.model.Data.entity);
                         } else {
                             scope.commandInProgress = false;
                         }

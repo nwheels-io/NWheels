@@ -296,7 +296,10 @@ HEAD, JS/CSS LINKS
             border: none !important;
         }
         .jqGrid_wrapper.flat-style .ui-jqgrid tr.ui-row-ltr td { 
-            border-bottom-style: none; 
+            border-bottom-style: 1px solid black; 
+        }
+        .jqGrid_wrapper.expandable-tree-mode tr.jqgrow:hover > td { 
+            border-bottom: 1px solid red !important; 
         }
         .threadlog-ThreadSuccess {
             background-color: green;
@@ -306,6 +309,20 @@ HEAD, JS/CSS LINKS
             background-color: lghtgreen;
             color: blue;
         }
+        tr.jqg_rowstyle_ThreadSuccess > td { color: #000000; background-color: #D4EFE6; }
+        tr.jqg_rowstyle_ThreadWarning > td { background-color: #FFFFCC; }
+        tr.jqg_rowstyle_ThreadError > td { background-color: #FFCCCC; }
+        tr.jqg_rowstyle_ThreadCritical > td { background-color: #FF99CC; }
+        tr.jqg_rowstyle_ActivitySuccess > td  { color: #000000; background-color: #F0F0F0; }
+        tr.jqg_rowstyle_ActivityWarning > td { background-color: #F0F0F0; }
+        tr.jqg_rowstyle_ActivityError > td { background-color: #F0F0F0; }
+        tr.jqg_rowstyle_ActivityCritical > td { background-color: #F0F0F0; }
+        tr.jqg_rowstyle_LogDebug > td  { color: #A0A0A0; }  
+        tr.jqg_rowstyle_Verbose > td  { color: #808080 ; }
+        tr.jqg_rowstyle_Info > td { color: #000000; }
+        tr.jqg_rowstyle_Warning > td { color: #CC6600; }
+        tr.jqg_rowstyle_Error > td { color: #990000; }
+        tr.jqg_rowstyle_Critical > td { color: #FF3300; }
     </style>
 </head>
 <body 
@@ -923,7 +940,7 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr ng-repeat="row in ::ResultSet" ng-init="thisRowIndex=$index;">
+                                <tr ng-repeat="row in ResultSet" ng-init="thisRowIndex=$index;">
                                     <td ng-repeat="column in ::uidl.displayColumns" ng-class="{'text-left':column.columnType!='Number', 'text-center':column.columnType=='Number'}">
                                         <span ng-if="column.columnType==='Text'||column.columnType==='Enum'"><strong>{{::translate(row[column.expression])}}</strong></span>
                                         <span ng-if="column.columnType==='Number'"><strong>{{::uidlService.formatValue(column.format, row[column.expression])}}</strong></span>
@@ -1035,7 +1052,9 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
     UIDL WIDGET - DATA GRID
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/DataGrid">
-        <div id="rdtwrapper_{{uniqueWidgetId}}" class="jqGrid_wrapper" ng-class="{'flat-style': uidl.flatStyle===true}">
+        <div id="rdtwrapper_{{uniqueWidgetId}}" 
+             class="jqGrid_wrapper" 
+             ng-class="{'flat-style': uidl.flatStyle===true, 'expandable-tree-mode': uidl.expandableTreeMode===true}">
             <table id="rdt_{{uniqueWidgetId}}"></table>
             <div ng-if="uidl.enablePaging" id="rdtpager_{{uniqueWidgetId}}"></div>
         </div>
@@ -1191,6 +1210,40 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                 serverNode[$scope.uidl.subTreePropertyName] = null;
             };
 
+            $scope.applyDataDrivenRowStyles = function(minIndex, maxIndex, minLevel, maxLevel) {
+                minIndex = minIndex || 0;
+                maxIndex = maxIndex || $scope.ResultSet.length;
+                minLevel = minLevel || 0;
+                maxLevel = maxLevel || 1000000;
+                var table = $('#' + $scope.tableElementId)[0];
+                var styleBackColors = { };
+                for (var i = minIndex + 1; i <= maxIndex && i < table.rows.length; i++) {
+                    var tr = table.rows[i];
+                    var data = $scope.getDataByRowId(tr.id);
+                    if ($scope.uidl.expandableTreeMode) {
+                        if (data.$treeLevel < minLevel || data.$treeLevel > maxLevel) {
+                            continue;
+                        }
+                    }
+                    var cssClassName = 'jqg_rowstyle_' + data[$scope.uidl.rowStylePropertyName];
+                    $(tr).addClass(cssClassName);
+                    if ($scope.uidl.expandableTreeMode) {
+                        if (!styleBackColors[cssClassName]) {
+                            styleBackColors[cssClassName] = getCssRulePropertyValue('background-color', 'tr.' + cssClassName + ' > td');
+                        }
+                        var backColor = (styleBackColors[cssClassName] || 'transparent');
+                        var td = $(tr.cells[1]);
+                        td.addClass(cssClassName);
+                        if (backColor !== 'transparent') {
+                            var indent = 18 * (data.$treeLevel + 1) + 4; 
+                            var backStyle = 'linear-gradient(90deg, transparent ' + indent + 'px, ' + backColor + ' ' + indent + 'px, ' + backColor + ')';
+                            td.css('background-color', 'transparent');
+                            td.css('background-image', backStyle);
+                        }
+                    }
+                }
+            };
+            
             $scope.compileDetailPane = function(rowData, element) {
                 var childScope = $scope.$rootScope.$new(true, $scope);
                 childScope.uidl = $scope.uidl.detailPaneWidget;
@@ -1361,6 +1414,7 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                         hidegrid: false,
                         loadui: 'block',
                         ignoreCase: true,
+                        hoverrows: ($scope.uidl.expandableTreeMode!==true),
                         //afterInsertRow: function(rowid, rowdata, rowelem) {
                         //    console.log('afterInsertRow! ', rowid, rowdata, rowelem);
                         //},
@@ -1461,26 +1515,10 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                                 $(".jqgfirstrow").css("height","1px");
                             }
                             if ($scope.uidl.rowStylePropertyName) {
-                                var table = grid[0];
-                                var classColors = { 
-                                    'jqg_row_ThreadSuccess' : 'green',
-                                    'jqg_row_ThreadWarning' : 'yellow',
-                                    'jqg_row_ThreadError' : 'yellow',
-                                };
-                                for (var i = 1; i < table.rows.length; i++) {
-                                    var tr = table.rows[i];
-                                    for (var j = 1; j < tr.cells.length; j++) {
-                                        var td = tr.cells[j];
-                                        var data = $scope.getDataByRowId(tr.id);
-                                        var styleClassName = data[$scope.uidl.rowStylePropertyName];
-                                        if ($scope.uidl.expandableTreeMode && j == 1) {
-                                            var indent = 18 * (data.$treeLevel + 1) + 2; 
-                                            $(td).css('background-image', 'linear-gradient(90deg, transparent ' + indent + 'px, yellow ' + indent + 'px, yellow)');
-                                        } else {
-                                            $(td).addClass(styleClassName);
-                                        }
-                                    }
-                                }
+                                $scope.applyDataDrivenRowStyles(0, $scope.ResultSet.length - 1, 0, 1);
+                                setTimeout(function() {
+                                    $scope.applyDataDrivenRowStyles(1, $scope.ResultSet.length - 1, 2);
+                                }, 500);
                             }
                         }
                     };
@@ -1498,7 +1536,14 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                             gridOptions.colModel = gridOptions.colModel.slice();
                             gridOptions.colModel[1].formatter = function (cellValue, options, rowObject) {
                                 var indentPixels = 18 * (rowObject.$treeLevel + 1) + 4;
+                                var iconHtml = '';
+                                if ($scope.uidl.rowIconPropertyName) {
+                                    var rowData = $scope.getDataByRowId(rowObject.$id);
+                                    var iconNameClass = (rowData[$scope.uidl.rowIconPropertyName] ? 'fa-' + rowData[$scope.uidl.rowIconPropertyName] : '');
+                                    iconHtml = '<i class="fa fa-fw ' + iconNameClass + '">&nbsp;</i>';
+                                }
                                 return (
+                                    iconHtml + 
                                     cellValue + 
                                     '<br/><div class="jqgDetailPane" style="margin-left:' + indentPixels + 'px;"><div class="jqgDetailPaneScroll"></div></div>'
                                 );
@@ -3364,6 +3409,23 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
             }
         }]);
 
+        function getCssRulePropertyValue(stylePropertyName, selector, sheet) {
+            var sheets = typeof sheet !== 'undefined' ? [sheet] : document.styleSheets;
+            for (var i = 0, l = sheets.length; i < l; i++) {
+                var sheet = sheets[i];
+                if (!sheet.cssRules) { 
+                    continue; 
+                }
+                for (var j = 0, k = sheet.cssRules.length; j < k; j++) {
+                    var rule = sheet.cssRules[j];
+                    if (rule.selectorText && rule.selectorText.split(',').indexOf(selector) !== -1) {
+                        return rule.style[stylePropertyName];
+                    }
+                }
+            }
+            return null;
+        }
+        
         /*
         function initWidget_ScreenPart($scope) {
             alert('initWidget_ScreenPart : ' + $scope.uidl.qualifiedName);

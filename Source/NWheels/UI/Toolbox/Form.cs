@@ -311,6 +311,7 @@ namespace NWheels.UI.Toolbox
 
         public UidlNotification<TEntity> ModelSetter { get; set; }
         public UidlNotification StateResetter { get; set; }
+        public UidlNotification<TEntity> Submitted { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
