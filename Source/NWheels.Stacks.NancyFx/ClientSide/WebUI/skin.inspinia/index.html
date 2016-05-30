@@ -2824,8 +2824,13 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
             }
             
             function buildCategoryChart(elementId, serverData) {
+                for (var li = 0 ; li < serverData.Labels.length ; li++) {
+                    serverData.Labels[li] = (serverData.Labels[li] || '').replace(/(?:\r\n|\r|\n)/g, '<br />');
+                }
+                
                 var options = buildCategoryOptions(serverData);
                 var series = buildCategorySeries(serverData);
+                
                 $(elementId).plot(series, options);
             }
             function buildCategorySeries(serverData) {
@@ -2833,7 +2838,7 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                 
                 for (var si = 0; si < serverData.Series.length; si++) {
                     var series = {
-                        label: serverData.Series[si].Label,
+                        label: (serverData.Series[si].Label || '').replace(/(?:\r\n|\r|\n)/g, '<br />'),
                         data: []
                     };
                     for (var xi = 0; xi < serverData.Series[si].Values.length; xi++) {
@@ -2855,14 +2860,19 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                                 colors: [{
                                     opacity: 0.1
                                 }, {
-                                    opacity: 0.35
+                                    opacity: 0.1
                                 }]
                             }
-                        }
+                        },
+                        shadowSize: 0,
                     },
                     xaxis: {
+                        mode: "categories",
                         tickDecimals: 0,
                         ticks: [], 
+                    },
+                    yaxis: {
+                        min: 0,
                     },
                     colors: ["#1ab394"],
                     grid: {
@@ -2877,7 +2887,10 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                     },
                     tooltip: true,
                     tooltipOpts: {
-                        content: "x: %x, y: %y"
+                        content: function(label, xval, yval, flotItem) {
+                            var tickLabel = flotItem.series.xaxis.ticks[xval].label.replace(/<br\s*[\/]?>/gi, ' ');
+                            return '<span style="color:blue">' + tickLabel + '</span>: <strong><span style="color:green;font-size:1.1em">' + yval + '</span></strong>';
+						}
                     }
                 };
                 for (var li = 0; li < serverData.Labels.length; li++) {
