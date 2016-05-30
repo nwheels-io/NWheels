@@ -332,6 +332,10 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 return moment.utc(value, 'YYYY-MM-DD HH:mm:ss').format('DD MMM YYYY');
             case 'y':
                 return moment.utc(value, 'YYYY-MM-DD HH:mm:ss').format('MMMM YYYY');
+            case 'd':
+                return moment.utc(value, 'YYYY-MM-DD HH:mm:ss').format('L');
+            case 'D':
+                return moment.utc(value, 'YYYY-MM-DD HH:mm:ss').format('LL');
             case 'c':
                 return (value ? '$' + parseFloat(value).formatMoney(2, '.', ',') : '');
             case '#,##0':

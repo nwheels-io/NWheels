@@ -2873,6 +2873,7 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                     },
                     yaxis: {
                         min: 0,
+                        tickDecimals: 0,
                     },
                     colors: ["#1ab394"],
                     grid: {
@@ -2889,7 +2890,10 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                     tooltipOpts: {
                         content: function(label, xval, yval, flotItem) {
                             var tickLabel = flotItem.series.xaxis.ticks[xval].label.replace(/<br\s*[\/]?>/gi, ' ');
-                            return '<span style="color:blue">' + tickLabel + '</span>: <strong><span style="color:green;font-size:1.1em">' + yval + '</span></strong>';
+                            var tooltipHtml = 
+                                '<span style="color:blue">' + (label && label.length > 0 ? label + ', ' : '') + tickLabel + '</span>: ' +
+                                '<strong><span style="color:green;font-size:1.1em">' + yval + '</span></strong>';
+                            return tooltipHtml;
 						}
                     }
                 };
