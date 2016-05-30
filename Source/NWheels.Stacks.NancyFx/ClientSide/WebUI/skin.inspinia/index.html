@@ -1522,6 +1522,12 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                             }
                         }
                     };
+                    
+                    if ($scope.defaultSortColumn) {
+                        gridOptions.sortname = $scope.defaultSortColumn.expression;
+                        gridOptions.sortorder = ($scope.defaultSortColumn.defaultSortAscending ? 'asc' : 'desc');
+                    }
+                    
                     if ($scope.uidl.expandableTreeMode) {
                         gridOptions.ExpandColumn = 'Text';
                         gridOptions.treeGrid = true;

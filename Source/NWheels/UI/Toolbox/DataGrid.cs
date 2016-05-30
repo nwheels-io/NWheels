@@ -278,6 +278,15 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public GridColumn SoftByDefault(bool ascending = true)
+            {
+                this.DefaultSort = true;
+                this.DefaultSortAscending = ascending;
+                return this;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             [DataMember]
             public FieldSpecialName SpecialName { get; set; }
             [DataMember]
@@ -312,6 +321,10 @@ namespace NWheels.UI.Toolbox
             public WidgetUidlNode NestedWidget { get; set; }
             [DataMember]
             public string IconPropertyName { get; set; }
+            [DataMember]
+            public bool DefaultSort { get; set; }
+            [DataMember]
+            public bool DefaultSortAscending { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 

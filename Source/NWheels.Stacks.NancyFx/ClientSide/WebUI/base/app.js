@@ -267,19 +267,19 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         
         if (screenQueryValue) {
             m_currentScreen = m_index.screens[screenQueryValue];
-            m_initialScreenInput = $location.search();
             
             if (!$location.search().sticky) {
                 $location.search({ });
             }
-
-            for (var p in m_initialScreenInput){
-                if (m_initialScreenInput.hasOwnProperty(p) && p.length > 0){
-                    m_initialScreenInput[p.charAt(0).toUpperCase() + p.slice(1)] = m_initialScreenInput[p];
-                }
-            }
         } else {
             m_currentScreen = m_index.screens[m_app.initialScreenQualifiedName];
+        }
+        
+        m_initialScreenInput = $location.search();
+        for (var p in m_initialScreenInput){
+            if (m_initialScreenInput.hasOwnProperty(p) && p.length > 0){
+                m_initialScreenInput[p.charAt(0).toUpperCase() + p.slice(1)] = m_initialScreenInput[p];
+            }
         }
     }
 
@@ -651,7 +651,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                             //if (oldScreen) {
                             //    $rootScope.$broadcast(oldScreen.qualifiedName + ':NavigatingAway', input);
                             //}
-                            $rootScope.$broadcast(screenUidl.qualifiedName + ':NavigatedHere', input);
+                            $rootScope.$broadcast(screenUidl.qualifiedName + ':NavigatedHere', input || getInitialScreenInput());
                         });
                     });
                     break;
@@ -1619,6 +1619,10 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             } else {
                 scope.gridColumns = scope.uidl.defaultDisplayColumns;
             }
+            
+            scope.defaultSortColumn = Enumerable.From(scope.gridColumns)
+                .Where(function(c) { return (c.defaultSort===true); })
+                .FirstOrDefault();
             
             if (scope.uidl.enableAutonomousQuery) {
                 $timeout(function() {
