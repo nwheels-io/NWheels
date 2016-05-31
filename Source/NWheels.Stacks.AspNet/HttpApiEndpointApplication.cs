@@ -288,6 +288,28 @@ namespace NWheels.Stacks.AspNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        protected void Application_End()
+        {
+            _s_log.Info("Application_End: privateBinPath=[{0}]", AppDomain.CurrentDomain.SetupInformation.PrivateBinPath);
+
+            try
+            {
+                if (_s_nodeHost != null)
+                {
+                    _s_nodeHost.DeactivateAndUnload();
+                }
+                
+                _s_log.Info("Application_End: SUCCESS");
+            }
+            catch (Exception e)
+            {
+                _s_log.Critical("Application_End: FAILURE! {0}", e.ToString());
+                throw;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private void EnsureNodeHostStarted(BootConfiguration bootConfig, HttpConfiguration globalWebAppConfig)
         {
             if ( !Monitor.TryEnter(_s_nodeHostSyncRoot, 60000) )
