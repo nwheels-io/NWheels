@@ -101,9 +101,14 @@ namespace NWheels.UI.Factories
 
         public static Dictionary<string, string> ExtensionDataToStringDictionary(Dictionary<string, JToken> extensionData)
         {
-            return extensionData.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value.ToStringOrDefault("null"));
+            if (extensionData != null)
+            { 
+                return extensionData.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.ToStringOrDefault("null"));
+            }
+
+            return null;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
