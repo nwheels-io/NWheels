@@ -49,7 +49,10 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
         string[] AdditionalDetails { get; }
 
         [PropertyContract.Calculated]
-        ICollection<IThreadLogUINodeEntity> SubNodes { get; }
+        IList<IThreadLogUINodeEntity> SubNodes { get; }
+
+        [PropertyContract.Calculated]
+        ThreadLogNodeDetails Details { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,6 +86,66 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
 
         [PropertyContract.Calculated]
         DateTime Timestamp { get; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class ThreadLogNodeDetails
+    {
+        public MessageDetails Message { get; set; }
+        public MessageDetails[] Stack { get; set; }
+        public ThreadDetails Thread { get; set; }
+        public ApplicationUnitDetails Application { get; set; }
+        public string Exception { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class MessageDetails
+        {
+            public string Id { get; set; }
+            public LogLevel Level { get; set; }
+            public LogContentTypes ContentTypes { get; set; }
+            public NamedValue[] Values { get; set; }            
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ApplicationUnitDetails
+        {
+            public string Application { get; set; }
+            public string Environment { get; set; }
+            public string Node { get; set; }
+            public string Instance { get; set; }
+            public string Replica { get; set; }
+            public string Machine { get; set; }
+            public int ProcessId { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ThreadDetails
+        {
+            public string LogId { get; set; }
+            public ThreadTaskType TaskType { get; set; }
+            public string CorrelationId { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class NamedValue 
+        {
+            public string Name { get; set; }
+            public object Value { get; set; }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum ThreadLogMessageType
+    {
+        Log,
+        Activity,
+        ThreadRootActivity
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

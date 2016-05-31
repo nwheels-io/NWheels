@@ -10,7 +10,7 @@ using NWheels.UI.Toolbox;
 namespace NWheels.Domains.DevOps.SystemLogs.Transactions
 {
     [TransactionScript(SupportsInitializeInput = true, SupportsPreview = false)]
-    public abstract class AbstractThreadLogUINodesTx : TransactionScript<Empty.Context, IThreadLogSearchCriteria, IQueryable<IRootThreadLogUINodeEntity>>
+    public abstract class AbstractThreadLogUINodesTx : TransactionScript<Empty.Context, IThreadLogSearchCriteria, IQueryable<IThreadLogUINodeEntity>>
     {
         private readonly IFramework _framework;
         private readonly IViewModelObjectFactory _viewModelFactory;

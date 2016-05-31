@@ -13,7 +13,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 {
     public abstract class RootThreadLogUINodeEntity : ThreadLogUINodeEntity, IRootThreadLogUINodeEntity
     {
-        public void CopyFormRecord(ref int treeNodeIndex, ThreadLogRecord record)
+        public void CopyFormRecord(ThreadLogRecord record)
         {
             this.LogId = record.LogId;
             this.CorrelationId = record.CorrelationId;
@@ -25,6 +25,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             this.Timestamp = record.Timestamp;
             this.TaskType = record.TaskType;
 
+            var treeNodeIndex = 0;
             this.CopyFromSnapshot(ref treeNodeIndex, record, record.Snapshot.RootActivity);
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,11 +16,16 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 {
     public abstract class ThreadLogUINodeEntity : IThreadLogUINodeEntity
     {
-        //private static long _s_nextNodeId;
+        private ThreadLogNodeDetails _details;
+        private int _treeNodeIndex;
 
-        public void CopyFromSnapshot(ref int id, ThreadLogRecord threadRecord, ThreadLogSnapshot.LogNodeSnapshot snapshot)
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void CopyFromSnapshot(ref int treeNodeIndex, ThreadLogRecord threadRecord, ThreadLogSnapshot.LogNodeSnapshot snapshot)
         {
-            this.Id = (++id).ToString();// Interlocked.Increment(ref _s_nextNodeId).ToString();// "T" + threadRecord.LogId + "_" + (++id);
+            _treeNodeIndex = (++treeNodeIndex);
+
+            this.Id = threadRecord.LogId + "#" + _treeNodeIndex;
             this.NodeType = GetNodeType(snapshot.Level, snapshot.IsActivity);
             this.Icon = GetNodeIcon(snapshot.Level, snapshot.IsActivity);
             this.Text = BuildSingleLineText(snapshot);
@@ -41,7 +47,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
                 foreach (var subSnapshot in snapshot.SubNodes)
                 {
                     var subNode = Framework.NewDomainObject<IThreadLogUINodeEntity>().As<ThreadLogUINodeEntity>();
-                    subNode.CopyFromSnapshot(ref id, threadRecord, subSnapshot);
+                    subNode.CopyFromSnapshot(ref treeNodeIndex, threadRecord, subSnapshot);
                     this.SubNodes.Add(subNode);
                 }
             }
@@ -64,9 +70,72 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
         public long CpuCycles { get; private set; }
         public string[] KeyValues { get; private set; }
         public string[] AdditionalDetails { get; private set; }
-        public ICollection<IThreadLogUINodeEntity> SubNodes { get; private set; }
+        public IList<IThreadLogUINodeEntity> SubNodes { get; private set; }
 
         #endregion
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [EntityImplementation.CalculatedProperty]
+        public ThreadLogNodeDetails Details
+        {
+            get { return _details; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal bool TryFindTreeNodeByIndex(IThreadLogUINodeEntity queryByExample, out ThreadLogUINodeEntity foundNode)
+        {
+            if (_treeNodeIndex == queryByExample.As<ThreadLogUINodeEntity>()._treeNodeIndex)
+            {
+                foundNode = this;
+                return true;
+            }
+
+            var subNodeList = (SubNodes as List<IThreadLogUINodeEntity>);
+
+            if (subNodeList != null)
+            {
+                var searchIndex = subNodeList.BinarySearch(queryByExample, _s_treeNodeIndexComparer);
+
+                if (searchIndex >= 0)
+                {
+                    foundNode = subNodeList[searchIndex].As<ThreadLogUINodeEntity>();
+                    return true;
+                }
+
+                var subSearchIndex = ~searchIndex;
+
+                if (subSearchIndex > 0 && subSearchIndex <= subNodeList.Count)
+                {
+                    return subNodeList[subSearchIndex - 1].As<ThreadLogUINodeEntity>().TryFindTreeNodeByIndex(queryByExample, out foundNode);
+                }
+            }
+
+            foundNode = null;
+            return false;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal void BuildDetails()
+        {
+            _details = new ThreadLogNodeDetails();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal void SetQueryByExample(int treeNodeIndex)
+        {
+            _treeNodeIndex = treeNodeIndex;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        internal int GetTreeNodeIndex()
+        {
+            return _treeNodeIndex;
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -154,6 +223,10 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static readonly TreeNodeIndexComparer _s_treeNodeIndexComparer = new TreeNodeIndexComparer();
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public class HandlerExtension : ApplicationEntityService.EntityHandlerExtension<IThreadLogUINodeEntity>
         {
             public override bool CanOpenNewUnitOfWork(object txViewModel)
@@ -167,6 +240,20 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             {
                 return null;
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class TreeNodeIndexComparer : IComparer<IThreadLogUINodeEntity>
+        {
+            #region Implementation of IComparer<in IThreadLogUINodeEntity>
+
+            public int Compare(IThreadLogUINodeEntity x, IThreadLogUINodeEntity y)
+            {
+                return ((ThreadLogUINodeEntity)x)._treeNodeIndex.CompareTo(((ThreadLogUINodeEntity)y)._treeNodeIndex);
+            }
+
+            #endregion
         }
     }
 }
