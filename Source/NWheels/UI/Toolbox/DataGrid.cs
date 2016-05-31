@@ -108,6 +108,12 @@ namespace NWheels.UI.Toolbox
         public bool DetailPaneExpanded { get; set; }
 
         [DataMember]
+        public string DetailPaneExpression { get; set; }
+
+        [DataMember]
+        public bool DetailPaneQueryServer { get; set; }
+
+        [DataMember]
         public int[] PageSizeOptions { get; set; }
 
         [DataMember]
@@ -657,13 +663,19 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public DataGrid<TDataRow> UseDetailPane(WidgetUidlNode widget, bool expanded = false)
+        public DataGrid<TDataRow> UseDetailPane(
+            WidgetUidlNode widget, 
+            bool expanded = false, 
+            Expression<Func<TDataRow, object>> expression = null,
+            bool queryServer = false)
         {
             this.EnableDetailPane = true;
             this.DetailPaneWidget = widget;
             //this.DetailPaneStaticTemplateName = null;
             //this.DetailPaneTemplateNameProperty = null;
             this.DetailPaneExpanded = expanded;
+            this.DetailPaneExpression = (expression != null ? expression.ToNormalizedNavigationString(skipSteps: 1) : null);
+            this.DetailPaneQueryServer = queryServer;
             return this;
         }
 

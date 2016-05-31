@@ -947,6 +947,10 @@ namespace NWheels.UI
 
         public class QueryOptions
         {
+            public const string IdPropertyName = "$id";
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public const string TypeParameterKey = "$type";
             public const string SelectParameterKey = "$select";
             public const string IncludeParameterKey = "$include";
@@ -2586,7 +2590,12 @@ namespace NWheels.UI
             {
                 foreach ( var jsonProperty in jsonProperties )
                 {
-                    var metaProperty = GetPropertyByName(metaTypes, jsonProperty.PropertyName);
+                    var metaProperty = TryGetPropertyByName(metaTypes, jsonProperty.PropertyName);
+
+                    if (metaProperty == null)
+                    {
+                        continue;
+                    }
 
                     if ( IsEmbeddedObjectCollectionProperty(metaProperty) )
                     {
@@ -2608,7 +2617,13 @@ namespace NWheels.UI
 
                 foreach ( var originalJsonProperty in properties )
                 {
-                    var metaProperty = GetPropertyByName(metaTypes, originalJsonProperty.PropertyName);
+                    var metaProperty = TryGetPropertyByName(metaTypes, originalJsonProperty.PropertyName);
+
+                    if (metaProperty == null)
+                    {
+                        resultList.Add(originalJsonProperty);
+                        continue;
+                    }
 
                     if ( ShouldExcludeProperty(metaProperty) )
                     {
@@ -2793,7 +2808,7 @@ namespace NWheels.UI
             private JsonProperty CreateEntityIdProperty()
             {
                 return new JsonProperty() {
-                    PropertyName = "$id",
+                    PropertyName = QueryOptions.IdPropertyName,
                     Readable = true,
                     Writable = false,
                     PropertyType = typeof(string),
@@ -2804,7 +2819,7 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private IPropertyMetadata GetPropertyByName(ITypeMetadata[] metaTypes, string propertyName)
+            private IPropertyMetadata TryGetPropertyByName(ITypeMetadata[] metaTypes, string propertyName)
             {
                 foreach ( var metaType in metaTypes )
                 {
@@ -2816,7 +2831,7 @@ namespace NWheels.UI
                     }
                 }
 
-                throw new ArgumentException("Property not found: " + propertyName);
+                return null;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -3445,7 +3460,7 @@ namespace NWheels.UI
 
                     if ( _relatedMetaType.IsEntity )
                     {
-                        var idString = jo["$id"].Value<string>();
+                        var idString = jo[QueryOptions.IdPropertyName].Value<string>();
                         itemToPopulate =
                             existingCollection.FirstOrDefault(obj => obj.As<IPersistableObject>().As<IEntityObject>().GetId().Value.ToString() == idString);
                     }

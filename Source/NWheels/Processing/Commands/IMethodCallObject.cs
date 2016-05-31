@@ -1,4 +1,7 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace NWheels.Processing.Commands
 {
@@ -12,5 +15,7 @@ namespace NWheels.Processing.Commands
         void SetParameterValue(string name, object value);
         MethodInfo MethodInfo { get; }
         object Result { get; }
+        [JsonExtensionData]
+        Dictionary<string, JToken> ExtensionData { get; }
     }
 }

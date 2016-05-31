@@ -8,6 +8,8 @@ using Hapil;
 using Hapil.Operands;
 using Hapil.Toolbox;
 using Hapil.Writers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NWheels.Extensions;
 using NWheels.Processing.Commands.Impl;
 using TT = Hapil.TypeTemplate;
@@ -51,7 +53,7 @@ namespace NWheels.Processing.Commands.Factories
 
             return new IObjectFactoryConvention[] {
                 new ClassNameConvention(conventionsContext),
-                new DefaultConstructorConvention(),
+                new ConstructorConvention(conventionsContext),
                 new ParameterPropertiesConvention(conventionsContext),
                 new ImplementIMethodCallObjectConvention(conventionsContext)
             };
@@ -78,6 +80,7 @@ namespace NWheels.Processing.Commands.Factories
             public ParameterInfo[] Parameters { get; private set; }
             public Field<TT.TProperty>[] ParameterFields { get; private set; }
             public Field<TT.TReturn> ReturnValueField { get; set; }
+            public Field<Dictionary<string, JToken>> ExtensionDataField { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -152,6 +155,36 @@ namespace NWheels.Processing.Commands.Factories
                     _conventionContext.Method.DeclaringType.SimpleQualifiedName().Replace(".", "_"),
                     _conventionContext.Method.Name);
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ConstructorConvention : ImplementationConvention
+        {
+            private readonly MethodCallConventionsContext _context;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ConstructorConvention(MethodCallConventionsContext context)
+                : base(Will.ImplementBaseClass)
+            {
+                _context = context;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of ImplementationConvention
+
+            protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            {
+                _context.ExtensionDataField = writer.Field<Dictionary<string, JToken>>("$extensionData");
+
+                writer.DefaultConstructor(w => {
+                    _context.ExtensionDataField.Assign(w.New<Dictionary<string, JToken>>());
+                });
+            }
+
+            #endregion
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -299,6 +332,12 @@ namespace NWheels.Processing.Commands.Factories
                                 {
                                     gw.Return(_context.ReturnValueField);
                                 }
+                            })
+                        )
+                        .Property(intf => intf.ExtensionData).Implement(
+                            Attributes.Set<JsonExtensionDataAttribute>(),
+                            p => p.Get(gw => {
+                                gw.Return(_context.ExtensionDataField);
                             })
                         );
                 }

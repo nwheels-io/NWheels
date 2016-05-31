@@ -5,6 +5,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using NWheels.Extensions;
 using NWheels.Logging;
@@ -186,6 +188,81 @@ namespace NWheels.UnitTests.Processing.Commands.Factories
             Should.Throw<ArgumentOutOfRangeException>(() => {
                 call.GetParameterValue(1);        
             });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanStoreExtensionDataProperties()
+        {
+            //-- arrange
+
+            var factoryUnderTest = new MethodCallObjectFactory(base.DyamicModule);
+            var methodTwoInfo = typeof(TestTarget).GetMethod("MethodTwo");
+            var call = factoryUnderTest.NewMessageCallObject(methodTwoInfo);
+
+            //-- act & assert
+
+            call.ExtensionData.ShouldNotBeNull();
+            call.ExtensionData.ShouldBeSameAs(call.ExtensionData);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanPopulateFromJson()
+        {
+            //-- arrange
+
+            var factoryUnderTest = new MethodCallObjectFactory(base.DyamicModule);
+            var methodThreeInfo = typeof(TestTarget).GetMethod("MethodThree");
+            var call = factoryUnderTest.NewMessageCallObject(methodThreeInfo);
+            var json = "{num: 123, str: 'ABC'}";
+
+            //-- act 
+
+            JsonConvert.PopulateObject(json, call);
+
+            dynamic callDynamic = call;
+            int numValue = callDynamic.Num;
+            string strValue = callDynamic.Str;
+
+            //-- assert
+
+            numValue.ShouldBe(123);
+            strValue.ShouldBe("ABC");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanPopulateFromJsonAndStoreExtensionData()
+        {
+            //-- arrange
+
+            var factoryUnderTest = new MethodCallObjectFactory(base.DyamicModule);
+            var methodThreeInfo = typeof(TestTarget).GetMethod("MethodThree");
+            var call = factoryUnderTest.NewMessageCallObject(methodThreeInfo);
+            var json = "{num: 123, str: 'ABC', value1: 'one', value2: 222}";
+
+            //-- act 
+
+            JsonConvert.PopulateObject(json, call);
+
+            dynamic callDynamic = call;
+            int numValue = callDynamic.Num;
+            string strValue = callDynamic.Str;
+
+            //-- assert
+
+            numValue.ShouldBe(123);
+            strValue.ShouldBe("ABC");
+
+            call.ExtensionData["value1"].Type.ShouldBe(JTokenType.String);
+            call.ExtensionData["value1"].ToString().ShouldBe("one");
+
+            call.ExtensionData["value2"].Type.ShouldBe(JTokenType.Integer);
+            call.ExtensionData["value2"].ToString().ShouldBe("222");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -263,22 +263,24 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             }
         }
 
-        var screenQueryValue = $location.search().screen;
+        var screenQueryValue = $location.search().$screen;
         
         if (screenQueryValue) {
             m_currentScreen = m_index.screens[screenQueryValue];
             
-            if (!$location.search().sticky) {
+            if (!$location.search().$sticky) {
                 $location.search({ });
             }
         } else {
             m_currentScreen = m_index.screens[m_app.initialScreenQualifiedName];
         }
         
-        m_initialScreenInput = $location.search();
-        for (var p in m_initialScreenInput){
-            if (m_initialScreenInput.hasOwnProperty(p) && p.length > 0){
-                m_initialScreenInput[p.charAt(0).toUpperCase() + p.slice(1)] = m_initialScreenInput[p];
+        m_initialScreenInput = { };
+        var queryString = $location.search();
+        for (var p in queryString){
+            if (queryString.hasOwnProperty(p) && p.length > 0 && p.charAt(0) != '$') {
+                //m_initialScreenInput[p.charAt(0).toUpperCase() + p.slice(1)] = queryString[p];
+                m_initialScreenInput[p] = queryString[p];
             }
         }
     }
@@ -626,7 +628,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 var url = 
                     $location.protocol() + '://' + 
                     $location.host() + ':' + $location.port() + 
-                    '/#/?sticky=1&screen=' + behavior.targetQualifiedName;
+                    '/#/?$sticky=1&screen=' + behavior.targetQualifiedName;
                 
                 var h = parseInt(screen.height * 0.8);
                 var w = parseInt(screen.width * 0.9);
@@ -1636,6 +1638,53 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 });
             }
 
+            scope.beginQueryDetailPaneData = function(rowData) {
+                if (!scope.uidl.detailPaneQueryServer) {
+                    var value = (
+                        scope.uidl.detailPaneExpression ? 
+                        selectValue(rowData, scope.uidl.detailPaneExpression) : 
+                        rowData);
+                    return $q.when(value);
+                } 
+                
+                var queryBuilder = null;
+                var queryData = null;
+                
+                if (scope.preparedRequest) {
+                    queryBuilder = (
+                        scope.preparedRequest.query ? 
+                        scope.preparedRequest.query.clone() : 
+                        new EntityQueryBuilder(scope.uidl.entityName, scope.preparedRequest.url));
+                    queryData = scope.preparedRequest.data;
+                } else {
+                    queryBuilder = new EntityQueryBuilder(scope.uidl.entityName);
+                }
+
+                if (scope.uidl.detailPaneExpression) {
+                    queryBuilder.select(scope.uidl.detailPaneExpression);
+                }
+                queryBuilder.where('$id', rowData.$id);
+                
+                var requestUrl = queryBuilder.getQueryUrl();
+                return $http.post(requestUrl, queryData).then(
+                    function (response) {
+                        if (response.data.ResultSet && response.data.ResultSet.length === 1) {
+                            var record = response.data.ResultSet[0];
+                            var value = (
+                                scope.uidl.detailPaneExpression ? 
+                                selectValue(record, scope.uidl.detailPaneExpression) : 
+                                record);
+                            return $q.when(value);
+                        } else {
+                            return $q.reject(response.data);
+                        }
+                    },
+                    function (fault) {
+                        return $q.reject(fault);
+                    }
+                );
+            };
+            
             //for (var i = 0; i < scope.gridColumns.length; i++) {
             //    var column = scope.gridColumns[i];
             //    column.metaType = scope.uidlService.getMetaType(column.declaringTypeName);
@@ -1752,7 +1801,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 var validateFuncName = 'validateWidget_Form';
                 var validateFunc = window[validateFuncName];
                 if (typeof validateFunc === 'function') {
-                    result = validateFunc($scope);
+                    result = validateFunc(scope);
                 }
 
                 for (var i = 0; i < scope.uidl.fields.length; i++) {

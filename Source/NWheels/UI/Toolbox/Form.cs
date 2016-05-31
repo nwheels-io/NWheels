@@ -489,6 +489,8 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public FormFieldModifiers Modifiers { get; set; }
         [DataMember]
+        public WidgetSize Size { get; set; }
+        [DataMember]
         public int? GroupId { get; set; }
         [DataMember]
         public int? GroupIndex { get; set; }
@@ -940,7 +942,9 @@ namespace NWheels.UI.Toolbox
     {
         Small = 10,
         Medium = 20,
-        Large = 30
+        Large = 30,
+        ExtraLarge = 40,
+        Jumbo = 50
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

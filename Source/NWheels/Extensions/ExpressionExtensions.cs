@@ -106,9 +106,23 @@ namespace NWheels.Extensions
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public static string[] ToNormalizedNavigationStringArray(this LambdaExpression navigationExpression)
+        public static string ToNormalizedNavigationString(this LambdaExpression expression, int skipSteps, params string[] formalParameterNames)
         {
-            var expressionString = navigationExpression.ToNormalizedNavigationString();
+            IEnumerable<string> stepStrings = ToNormalizedNavigationStringArray(expression, formalParameterNames);
+
+            if (skipSteps > 1)
+            {
+                stepStrings = stepStrings.Skip(skipSteps - 1);
+            }
+
+            return string.Join(".", stepStrings);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string[] ToNormalizedNavigationStringArray(this LambdaExpression navigationExpression, params string[] formalParameterNames)
+        {
+            var expressionString = navigationExpression.ToNormalizedNavigationString(formalParameterNames);
             return expressionString.Split('.').Skip(1).ToArray();
         }
 

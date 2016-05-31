@@ -35,5 +35,6 @@ namespace NWheels.TypeModel
         Time,
         Url,
         Xml,
+        ExtensionData
     }
 }

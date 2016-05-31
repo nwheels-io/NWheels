@@ -22,8 +22,10 @@ using System.Web;
 using NWheels.Processing;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NWheels.Authorization.Core;
 using NWheels.Concurrency;
@@ -34,6 +36,7 @@ using NWheels.Entities.Core;
 using NWheels.Processing.Documents;
 using NWheels.TypeModel;
 using NWheels.UI;
+using NWheels.UI.Factories;
 using NWheels.UI.Toolbox;
 
 namespace NWheels.Stacks.AspNet
@@ -1033,7 +1036,8 @@ namespace NWheels.Stacks.AspNet
                 var jsonString = Request.Content.ReadAsStringAsync().Result;
                 var serializerSettings = _context.EntityService.CreateSerializerSettings();
                 JsonConvert.PopulateObject(jsonString, call, serializerSettings);
-                
+
+                TryInjectExtensionData(call);
                 TryInjectUploadedFile(call);
             }
 
@@ -1075,6 +1079,8 @@ namespace NWheels.Stacks.AspNet
             var serializerSettings = _context.EntityService.CreateSerializerSettings();
             
             JsonConvert.PopulateObject(jsonString, call, serializerSettings);
+
+            TryInjectExtensionData(call);
             TryInjectUploadedFile(call);
 
             return new EntityMethodCommandMessage(
@@ -1201,6 +1207,84 @@ namespace NWheels.Stacks.AspNet
             }
             
             httpContextSession.Remove(UploadSessionKey);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void TryInjectExtensionData(IMethodCallObject call)
+        {
+            var viewModel = TryGetViewModelFrom(call);
+
+            if (viewModel == null)
+            {
+                TryInjectExtensionDataWithoutViewModel(call);
+                return;
+            }
+
+            var haveDeserializedCallback = (viewModel as ViewModelObjectFactory.IHaveDeserializedCallback);
+
+            if (haveDeserializedCallback != null)
+            {
+                haveDeserializedCallback.OnDeserialized();
+            }
+
+            if (call.ExtensionData.Count == 0)
+            {
+                return;
+            }
+
+            var metaType = _metadataCache.GetTypeMetadata(viewModel.ContractType);
+            var extensionDataProperty = metaType.Properties.FirstOrDefault(p =>
+                (p.ClrType == typeof(Dictionary<string, JToken>) || p.ClrType == typeof(Dictionary<string, string>)) &&
+                p.SemanticType != null &&
+                p.SemanticType.WellKnownSemantic == WellKnownSemanticType.ExtensionData);
+
+            if (extensionDataProperty == null)
+            {
+                return;
+            }
+
+            if (extensionDataProperty.ClrType == typeof(Dictionary<string, JToken>))
+            {
+                extensionDataProperty.WriteValue(viewModel, call.ExtensionData);
+            }
+            else if (extensionDataProperty.ClrType == typeof(Dictionary<string, string>))
+            {
+                extensionDataProperty.WriteValue(viewModel, ExtensionDataToStringDictionary(call.ExtensionData));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void TryInjectExtensionDataWithoutViewModel(IMethodCallObject call)
+        {
+            if (call.ExtensionData.Count == 0)
+            {
+                return;
+            }
+
+            var parameters = call.MethodInfo.GetParameters();
+
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i].ParameterType == typeof(Dictionary<string, JToken>))
+                {
+                    call.SetParameterValue(i, call.ExtensionData);
+                }
+                else if (parameters[i].ParameterType == typeof(Dictionary<string, string>))
+                {
+                    call.SetParameterValue(i, ExtensionDataToStringDictionary(call.ExtensionData));
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Dictionary<string, string> ExtensionDataToStringDictionary(Dictionary<string, JToken> extensionData)
+        {
+            return extensionData.ToDictionary(
+                kvp => kvp.Key, 
+                kvp => kvp.Value.ToStringOrDefault("null"));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

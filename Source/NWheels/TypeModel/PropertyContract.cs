@@ -467,6 +467,16 @@ namespace NWheels.DataObjects
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public class ExtensionDataAttribute : SemanticAttributeBase
+            {
+                public ExtensionDataAttribute()
+                    : base(typeof(string), WellKnownSemanticType.ExtensionData)
+                {
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public class DisplayNameAttribute : PropertyContractAttribute
             {
                 public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)

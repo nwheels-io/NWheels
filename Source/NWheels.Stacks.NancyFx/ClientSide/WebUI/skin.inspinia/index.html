@@ -298,6 +298,9 @@ HEAD, JS/CSS LINKS
         .jqGrid_wrapper.flat-style .ui-jqgrid tr.ui-row-ltr td { 
             border-bottom-style: 1px solid black; 
         }
+        .jqGrid_wrapper.flat-style .jsonText {
+            background-color: transparent;
+        }
         .jqGrid_wrapper.expandable-tree-mode tr.jqgrow:hover > td { 
             border-bottom: 1px solid red !important; 
         }
@@ -1069,7 +1072,11 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                 if (!$scope.isUidlAuthorized(metaColumn)) {
                     return;
                 }
-                var colWidthPx = (metaColumn.size==='Large' ? 360 : (metaColumn.size==='Small' ? 90 : 180));
+                var colWidthPx = (
+                    metaColumn.size==='Jumbo' ? 720 : (
+                    metaColumn.size==='ExtraLarge' ? 540 : (
+                    metaColumn.size==='Large' ? 360 : (
+                    metaColumn.size==='Small' ? 90 : 180))));
                 var modelItem = {
                     name: metaColumn.expression,
                     label: $scope.translate(metaColumn.title),
@@ -1252,9 +1259,6 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                 var template = '<uidl-widget uidl="uidl" parent-model="data"></uidl-widget>';
                 element.html(template);
                 $scope.$compile(element.contents())(childScope);
-                if (!$scope.uidl.detailPaneExpanded) {
-                    $scope.$digest();
-                }
             };
             
             $scope.onDataReceived = function (event, data) {
@@ -1455,7 +1459,12 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                         subGridRowExpanded: function(subgrid_id, row_id) {
                             var rowData = $scope.ResultSet[row_id - 1];
                             var element = $("#" + subgrid_id);
-                            $scope.compileDetailPane(rowData, element);
+                            $scope.beginQueryDetailPaneData(rowData).then(function(details) {
+                                $scope.compileDetailPane(details, element);
+                                //if (!$scope.uidl.detailPaneExpanded) {
+                                //    $scope.$digest();
+                                //}
+                            });
                         },
                         subGridRowColapsed: function(subgrid_id, row_id) {
                             return !($scope.uidl.detailPaneExpanded===true);
@@ -1654,9 +1663,13 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
             var rowId = rowTr[0].id;
             var rowData = scope.getDataByRowId(rowId);
             var widgetContainerDiv = paneDiv.children('div.jqgDetailPaneScroll');
-            scope.compileDetailPane(rowData, widgetContainerDiv);
-            var ngInclude = widgetContainerDiv.children('ng-include');
-            ngInclude.contents().filter(function() { return this.nodeType == 3; /*Node.TEXT_NODE*/ }).remove();
+            scope.beginQueryDetailPaneData(rowData).then(function(details) {
+                scope.compileDetailPane(details, widgetContainerDiv);
+                scope.$timeout(function() {
+                    var ngInclude = widgetContainerDiv.children('ng-include');
+                    ngInclude.contents().filter(function() { return this.nodeType == 3; /*Node.TEXT_NODE*/ }).remove();
+                });
+            });
         };
     </script>
 
