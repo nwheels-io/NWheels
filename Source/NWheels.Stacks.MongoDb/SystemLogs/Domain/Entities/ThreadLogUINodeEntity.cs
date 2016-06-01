@@ -16,38 +16,50 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 {
     public abstract class ThreadLogUINodeEntity : IThreadLogUINodeEntity
     {
+        private ThreadLogRecord _threadRecord;
+        private ThreadLogSnapshot.LogNodeSnapshot _logRecord;
+        private ThreadLogUINodeEntity _parentNode;
         private ThreadLogNodeDetails _details;
         private int _treeNodeIndex;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void CopyFromSnapshot(ref int treeNodeIndex, ThreadLogRecord threadRecord, ThreadLogSnapshot.LogNodeSnapshot snapshot)
+        public void CopyFromLogRecord(
+            ref int treeNodeIndex, 
+            ThreadLogRecord threadRecord, 
+            ThreadLogSnapshot.LogNodeSnapshot logRecord,
+            ThreadLogUINodeEntity parentNode)
         {
+            _threadRecord = threadRecord;
+            _logRecord = logRecord;
+            _parentNode = parentNode;
             _treeNodeIndex = (++treeNodeIndex);
-
+    
             this.Id = threadRecord.LogId + "#" + _treeNodeIndex;
-            this.NodeType = GetNodeType(snapshot.Level, snapshot.IsActivity);
-            this.Icon = GetNodeIcon(snapshot.Level, snapshot.IsActivity);
-            this.Text = BuildSingleLineText(snapshot);
-            this.TimeText = GetTimeText(threadRecord, snapshot);
-            this.DurationMs = snapshot.Duration;
-            this.CpuTimeMs = snapshot.CpuTime;
-            this.CpuCycles = snapshot.CpuCycles;
+            this.MessageId = logRecord.MessageId;
+            this.Level = logRecord.Level;
+            this.NodeType = GetNodeType(logRecord.Level, logRecord.IsActivity);
+            this.Icon = GetNodeIcon(logRecord.Level, logRecord.IsActivity);
+            this.Text = BuildSingleLineText();
+            this.TimeText = GetTimeText(threadRecord, logRecord);
+            this.DurationMs = logRecord.Duration;
+            this.CpuTimeMs = logRecord.CpuTime;
+            this.CpuCycles = logRecord.CpuCycles;
 
-            if (snapshot.NameValuePairs != null)
+            if (logRecord.NameValuePairs != null)
             {
-                this.KeyValues = snapshot.NameValuePairs.Where(nvp => !nvp.IsDetail).Select(nvp => nvp.Name + "=" + nvp.Value.OrDefaultIfNull("")).ToArray();
-                this.AdditionalDetails = snapshot.NameValuePairs.Where(nvp => nvp.IsDetail).Select(nvp => nvp.Name + "=" + nvp.Value.OrDefaultIfNull("")).ToArray();
+                this.KeyValues = logRecord.NameValuePairs.Where(nvp => !nvp.IsDetail).Select(nvp => nvp.Name + "=" + nvp.Value.OrDefaultIfNull("")).ToArray();
+                this.AdditionalDetails = logRecord.NameValuePairs.Where(nvp => nvp.IsDetail).Select(nvp => nvp.Name + "=" + nvp.Value.OrDefaultIfNull("")).ToArray();
             }
 
             this.SubNodes = new List<IThreadLogUINodeEntity>();
             
-            if (snapshot.SubNodes != null)
+            if (logRecord.SubNodes != null)
             {
-                foreach (var subSnapshot in snapshot.SubNodes)
+                foreach (var subSnapshot in logRecord.SubNodes)
                 {
                     var subNode = Framework.NewDomainObject<IThreadLogUINodeEntity>().As<ThreadLogUINodeEntity>();
-                    subNode.CopyFromSnapshot(ref treeNodeIndex, threadRecord, subSnapshot);
+                    subNode.CopyFromLogRecord(ref treeNodeIndex, threadRecord, subSnapshot, parentNode: this);
                     this.SubNodes.Add(subNode);
                 }
             }
@@ -60,6 +72,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
         public abstract string Id { get; set; }
 
         public ThreadLogNodeType NodeType { get; private set; }
+        public string MessageId { get; private set; }
+        public LogLevel Level { get; private set; }
         public string Icon { get; private set; }
         public string Text { get; private set; }
         public string TimeText { get; private set; }
@@ -121,6 +135,21 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
         internal void BuildDetails()
         {
             _details = new ThreadLogNodeDetails();
+
+            var thisMessage = BuildDetailsMessagePart();
+
+            _details.Message = thisMessage.Message;
+            _details.Time = thisMessage.Time;
+            _details.Values = thisMessage.Values;
+            _details.Session = new ThreadLogNodeDetails.SessionDetails();
+            
+            _details.AllValues = BuildDetailsAllValuesPart();
+            _details.Counters = BuildDetailsCountersPart();
+            _details.Exception = _logRecord.ExceptionDetails;
+            _details.Stack = BuildDetailsBriefStackPart();
+            _details.StackDetailed = BuildDetailsFullStackPart();
+            _details.Thread = BuildDetailsThreadPart();
+            _details.Process = BuildDetailsProcessPart();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -199,18 +228,18 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual string BuildSingleLineText(ThreadLogSnapshot.LogNodeSnapshot snapshot)
+        protected virtual string BuildSingleLineText()
         {
-            var messageIdParts = snapshot.MessageId.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-            var messageIdDisplayPart = (messageIdParts.Length == 2 ? messageIdParts[1] : snapshot.MessageId);
+            var messageIdParts = _logRecord.MessageId.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            var messageIdDisplayPart = (messageIdParts.Length == 2 ? messageIdParts[1] : _logRecord.MessageId);
 
             var text = new StringBuilder();
 
             text.Append(messageIdDisplayPart.SplitPascalCase());
 
-            if (snapshot.NameValuePairs != null)
+            if (_logRecord.NameValuePairs != null)
             {
-                var nonDetailPairs = snapshot.NameValuePairs.Where(p => !p.IsDetail).ToArray();
+                var nonDetailPairs = _logRecord.NameValuePairs.Where(p => !p.IsDetail).ToArray();
 
                 if (nonDetailPairs.Length > 0)
                 {
@@ -232,7 +261,121 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private ThreadLogNodeDetails.MessageDetails BuildDetailsMessagePart()
+        {
+            return new ThreadLogNodeDetails.MessageDetails() {
+                Time = string.Format(
+                    "{0:yyyy-MM-dd HH:mm:ss.fff} UTC | thread start + {1} ms",
+                    _threadRecord.Timestamp.AddMilliseconds(_logRecord.MillisecondsTimestamp),
+                    _logRecord.MillisecondsTimestamp),
+                Message = string.Format(
+                    "{0} | {1}:{2}", 
+                    this.MessageId, 
+                    (_logRecord.IsActivity ? "Activity" : "Log"),
+                    this.Level),
+                Values = _logRecord.NameValuePairs
+                    .Distinct(_s_nameValuePairByNameComparer)
+                    .ToDictionary(nvp => nvp.Name, nvp => nvp.Value)
+            };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Dictionary<string, string> BuildDetailsAllValuesPart()
+        {
+            var values = new Dictionary<string, string>();
+
+            for (var parent = _parentNode; parent != null; parent = parent._parentNode)
+            {
+                foreach (var nvp in parent._logRecord.NameValuePairs)
+                {
+                    if (!values.ContainsKey(nvp.Name))
+                    {
+                        values[nvp.Name] = nvp.Value;
+                    }
+                }
+            }
+
+            return values;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Dictionary<string, decimal> BuildDetailsCountersPart()
+        {
+            if (!_logRecord.IsActivity)
+            {
+                return null;
+            }
+
+            var counters = new Dictionary<string, decimal> {
+                { "Duration", _logRecord.Duration },
+                { "DbCount", 0 },
+                { "DbDurationMs", 0 },
+                { "CpuTimeNs", _logRecord.CpuTime },
+                { "CpuCycles", _logRecord.CpuCycles },
+            };
+
+            return counters;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string[] BuildDetailsBriefStackPart()
+        {
+            var stack = new List<string>();
+
+            for (var parent = _parentNode; parent != null; parent = parent._parentNode)
+            {
+                stack.Add(parent.BuildSingleLineText());
+            }
+
+            return stack.ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private ThreadLogNodeDetails.MessageDetails[] BuildDetailsFullStackPart()
+        {
+            var stack = new List<ThreadLogNodeDetails.MessageDetails>();
+
+            for (var parent = _parentNode; parent != null; parent = parent._parentNode)
+            {
+                stack.Add(parent.BuildDetailsMessagePart());
+            }
+
+            return stack.ToArray();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private ThreadLogNodeDetails.ThreadDetails BuildDetailsThreadPart()
+        {
+            return new ThreadLogNodeDetails.ThreadDetails() {
+                StartedAtUtc = _threadRecord.Timestamp,
+                TaskType = _threadRecord.TaskType,
+                LogId = _threadRecord.LogId,
+                CorrelationId = _threadRecord.CorrelationId,
+            };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private ThreadLogNodeDetails.ProcessDetails BuildDetailsProcessPart()
+        {
+            return new ThreadLogNodeDetails.ProcessDetails() {
+                Environment = _threadRecord.EnvironmentName,
+                Node = _threadRecord.NodeName,
+                Instance = _threadRecord.NodeInstance,
+                Replica = _threadRecord.NodeInstanceReplica,
+                Machine = _threadRecord.MachineName,
+            };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private static readonly TreeNodeIndexComparer _s_treeNodeIndexComparer = new TreeNodeIndexComparer();
+        private static readonly NameValuePairByNameComparer _s_nameValuePairByNameComparer = new NameValuePairByNameComparer();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -260,6 +403,27 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             public int Compare(IThreadLogUINodeEntity x, IThreadLogUINodeEntity y)
             {
                 return ((ThreadLogUINodeEntity)x)._treeNodeIndex.CompareTo(((ThreadLogUINodeEntity)y)._treeNodeIndex);
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private class NameValuePairByNameComparer : IEqualityComparer<ThreadLogSnapshot.NameValuePairSnapshot>
+        {
+            #region Implementation of IEqualityComparer<in NameValuePairSnapshot>
+
+            public bool Equals(ThreadLogSnapshot.NameValuePairSnapshot x, ThreadLogSnapshot.NameValuePairSnapshot y)
+            {
+                return (String.Compare(x.Name, y.Name, StringComparison.Ordinal) == 0);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public int GetHashCode(ThreadLogSnapshot.NameValuePairSnapshot x)
+            {
+                return x.Name.GetHashCode();
             }
 
             #endregion

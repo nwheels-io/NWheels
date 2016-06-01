@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using NWheels.DataObjects;
 using NWheels.Entities;
 using NWheels.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace NWheels.Domains.DevOps.SystemLogs.Entities
 {
@@ -17,6 +19,12 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
 
         [PropertyContract.Calculated]
         ThreadLogNodeType NodeType { get; }
+
+        [PropertyContract.Calculated]
+        string MessageId { get; }
+
+        [PropertyContract.Calculated]
+        LogLevel Level { get; }
 
         [PropertyContract.Calculated]
         string Icon { get; }
@@ -92,32 +100,76 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
 
     public class ThreadLogNodeDetails
     {
-        public MessageDetails Message { get; set; }
-        public MessageDetails[] Stack { get; set; }
-        public ThreadDetails Thread { get; set; }
-        public ApplicationUnitDetails Application { get; set; }
+        [JsonProperty(Order = 1)]
+        public string Time { get; set; }
+
+        [JsonProperty(Order = 2)]
+        public string Message { get; set; }
+
+        [JsonProperty(Order = 3)]
+        public Dictionary<string, string> Values { get; set; }
+
+        [JsonProperty(Order = 4)]
+        public SessionDetails Session { get; set; }
+
+        [JsonProperty(Order = 5)]
+        public Dictionary<string, string> AllValues { get; set; }
+
+        [JsonProperty(Order = 6, DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Exception { get; set; }
+        
+        [JsonProperty(Order = 7, DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Dictionary<string, decimal> Counters { get; set; }
+
+        [JsonProperty(Order = 8)]
+        public string[] Stack { get; set; }
+
+        [JsonProperty(Order = 9)]
+        public MessageDetails[] StackDetailed { get; set; }
+        
+        [JsonProperty(Order = 10)]
+        public ThreadDetails Thread { get; set; }
+        
+        [JsonProperty(Order = 11)]
+        public ProcessDetails Process { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class MessageDetails
         {
-            public string Id { get; set; }
-            public LogLevel Level { get; set; }
-            public LogContentTypes ContentTypes { get; set; }
-            public NamedValue[] Values { get; set; }            
+            [JsonProperty(Order = 1)]
+            public string Time { get; set; }
+
+            [JsonProperty(Order = 2)]
+            public string Message { get; set; }
+            
+            [JsonProperty(Order = 3)]
+            public Dictionary<string, string> Values { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class ApplicationUnitDetails
+        public class ProcessDetails
         {
+            [JsonProperty(Order = 1)]
             public string Application { get; set; }
+
+            [JsonProperty(Order = 2)]
             public string Environment { get; set; }
+
+            [JsonProperty(Order = 3)]
             public string Node { get; set; }
+
+            [JsonProperty(Order = 4, DefaultValueHandling = DefaultValueHandling.Ignore)]
             public string Instance { get; set; }
+
+            [JsonProperty(Order = 5, DefaultValueHandling = DefaultValueHandling.Ignore)]
             public string Replica { get; set; }
+
+            [JsonProperty(Order = 6)]
             public string Machine { get; set; }
+
+            [JsonProperty(Order = 7)]
             public int ProcessId { get; set; }
         }
 
@@ -125,17 +177,37 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
 
         public class ThreadDetails
         {
-            public string LogId { get; set; }
+            [JsonProperty(Order = 1), JsonConverter(typeof(IsoDateTimeConverter))]
+            public DateTime StartedAtUtc { get; set; }
+
+            [JsonProperty(Order = 2)]
             public ThreadTaskType TaskType { get; set; }
+
+            [JsonProperty(Order = 3)]
+            public string LogId { get; set; }
+
+            [JsonProperty(Order = 4)]
             public string CorrelationId { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class NamedValue 
+        public class SessionDetails
         {
-            public string Name { get; set; }
-            public object Value { get; set; }
+            [JsonProperty(Order = 1), JsonConverter(typeof(IsoDateTimeConverter))]
+            public string User { get; set; }
+
+            [JsonProperty(Order = 2), JsonConverter(typeof(IsoDateTimeConverter))]
+            public string[] Claims { get; set; }
+
+            [JsonProperty(Order = 3)]
+            public string SessionId { get; set; }
+
+            [JsonProperty(Order = 4)]
+            public string StartedAtUtc { get; set; }
+
+            [JsonProperty(Order = 5)]
+            public TimeSpan SessionElapsedTime { get; set; }
         }
     }
 

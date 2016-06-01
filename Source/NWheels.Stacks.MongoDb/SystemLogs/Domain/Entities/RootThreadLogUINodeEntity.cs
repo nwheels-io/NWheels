@@ -13,7 +13,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 {
     public abstract class RootThreadLogUINodeEntity : ThreadLogUINodeEntity, IRootThreadLogUINodeEntity
     {
-        public void CopyFormRecord(ThreadLogRecord record)
+        public void CopyFormThreadRecord(ThreadLogRecord record)
         {
             this.LogId = record.LogId;
             this.CorrelationId = record.CorrelationId;
@@ -26,7 +26,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             this.TaskType = record.TaskType;
 
             var treeNodeIndex = 0;
-            this.CopyFromSnapshot(ref treeNodeIndex, record, record.Snapshot.RootActivity);
+            this.CopyFromLogRecord(ref treeNodeIndex, record, record.Snapshot.RootActivity, parentNode: null);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -93,9 +93,9 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected override string BuildSingleLineText(ThreadLogSnapshot.LogNodeSnapshot snapshot)
+        protected override string BuildSingleLineText()
         {
-            return base.BuildSingleLineText(snapshot);
+            return base.BuildSingleLineText();
         }
 
         #endregion

@@ -46,7 +46,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
             foreach (var record in task.Result.OrderBy(r => r.Timestamp))
             {
                 var result = _framework.NewDomainObject<IRootThreadLogUINodeEntity>().As<RootThreadLogUINodeEntity>();
-                result.CopyFormRecord(record);
+                result.CopyFormThreadRecord(record);
                 results.Add(result);
             }
 
