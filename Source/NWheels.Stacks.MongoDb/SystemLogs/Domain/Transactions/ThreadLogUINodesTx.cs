@@ -60,6 +60,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Transactions
                 if (results[0].As<ThreadLogUINodeEntity>().TryFindTreeNodeByIndex(queryByExample, out detailNode))
                 {
                     detailNode.BuildDetails();
+                    detailNode.ClearChildren();
                     return new IThreadLogUINodeEntity[] { detailNode }.AsQueryable();
                 }
             }

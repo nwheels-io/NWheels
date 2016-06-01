@@ -125,6 +125,15 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal void ClearChildren()
+        {
+            this.KeyValues = null;
+            this.AdditionalDetails = null;
+            this.SubNodes = null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal void SetQueryByExample(int treeNodeIndex)
         {
             _treeNodeIndex = treeNodeIndex;
@@ -168,14 +177,14 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             {
                 case LogLevel.Debug:
                 case LogLevel.Verbose:
-                    return (isActivity ? "check" : null);
+                    return (isActivity ? "check" : "angle-right");
                 case LogLevel.Info:
                     return (isActivity ? "check" : "info-circle");
                 case LogLevel.Warning:
                     return (isActivity ? "exclamation" : "exclamation-triangle");
                 case LogLevel.Error:
                 case LogLevel.Critical:
-                    return (isActivity ? "times" : "times-circle-o");
+                    return "times";
                 default:
                     return null;
             }
