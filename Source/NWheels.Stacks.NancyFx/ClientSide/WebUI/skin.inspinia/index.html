@@ -856,32 +856,19 @@ HEAD, JS/CSS LINKS
             <tbody>
                 <tr>
                     <td class="prop-grid-label">Message</td>
-                    <td class="prop-grid-value"><pre>2016-05-25 15:10:03.234 UTC = thread start + 23 ms
-MyLogger.ThisIsMyMessage : Log Verbose</pre></td>
+                    <td class="prop-grid-value"><pre></pre></td>
                 </tr>
                 <tr>
                     <td class="prop-grid-label">Values</td>
-                    <td class="prop-grid-value"><pre>--- this ---
-myKey1=MyValue1
-anotherKey2=AnotherValue2
---- ServiceBus.DispatchOnCurrentThread ---
-secondMyKey1=SecondMyValue1
-secondAnotherKey2=SecondAnotherValue2
---- UidlApplicationController.ApiRequestReplyCommand ---
-thirdAnotherKey2=SecondAnotherValue2</pre></td>
+                    <td class="prop-grid-value"><pre></pre></td>
                 </tr>
                 <tr>
                     <td class="prop-grid-label">Activity Stack</td>
-                    <td class="prop-grid-value"><pre>[+     8 ms] ServiceBus.DispatchOnCurrentThread 
-[+     1 ms] UidlApplicationController.ApiRequestReplyCommand : target=TransactionScript, contractName=MyNamespace.MyTx, operationName=Execute
-[+     0 ms] LoggingAndSessionHandler.SendAsync
-[+     0 ms] HttpApplicationEndpoint.ProcessRequest : verb=GET, path=/mypath/myresource?q=v
-[+     0 ms] Thread : taskType = IncomingRequest</pre></td>
+                    <td class="prop-grid-value"><pre></pre></td>
                 </tr>
                 <tr>
                     <td class="prop-grid-label">Application Unit</td>
-                    <td class="prop-grid-value"><pre>Application=AffiliatePrograms Node=AffiliateApp Instance=Brand_GCMForex Replica=1:Active
-Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
+                    <td class="prop-grid-value"><pre></pre></td>
                 </tr>
             </tbody>
         </table>
@@ -1073,8 +1060,8 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
                     return;
                 }
                 var colWidthPx = (
-                    metaColumn.size==='Jumbo' ? 720 : (
-                    metaColumn.size==='ExtraLarge' ? 540 : (
+                    metaColumn.size==='Jumbo' ? 1040 : (
+                    metaColumn.size==='ExtraLarge' ? 720 : (
                     metaColumn.size==='Large' ? 360 : (
                     metaColumn.size==='Small' ? 90 : 180))));
                 var modelItem = {
@@ -1656,20 +1643,27 @@ Machine=UAETYW-1.2.3.4-563739 Process ID=12345</pre></td>
             var rowTr = target.closest('tr');
             var gridTable = rowTr.closest('table');
             var paneDiv = rowTr.find('.jqgDetailPane');
+            var widgetContainerDiv = paneDiv.children('div.jqgDetailPaneScroll');
             target.toggleClass('expanded');
             paneDiv.toggleClass('expanded');
-            var scopeEl = rowTr.closest('.ng-scope');
-            var scope = scopeEl.scope();
-            var rowId = rowTr[0].id;
-            var rowData = scope.getDataByRowId(rowId);
-            var widgetContainerDiv = paneDiv.children('div.jqgDetailPaneScroll');
-            scope.beginQueryDetailPaneData(rowData).then(function(details) {
-                scope.compileDetailPane(details, widgetContainerDiv);
-                scope.$timeout(function() {
-                    var ngInclude = widgetContainerDiv.children('ng-include');
-                    ngInclude.contents().filter(function() { return this.nodeType == 3; /*Node.TEXT_NODE*/ }).remove();
+            
+            if (target.hasClass('expanded')) {
+                var scopeEl = rowTr.closest('.ng-scope');
+                var scope = scopeEl.scope();
+                var rowId = rowTr[0].id;
+                var rowData = scope.getDataByRowId(rowId);
+                scope.beginQueryDetailPaneData(rowData).then(function(details) {
+                    scope.compileDetailPane(details, widgetContainerDiv);
+                    scope.$timeout(function() {
+                        var ngInclude = widgetContainerDiv.children('ng-include');
+                        ngInclude.contents().filter(function() { return this.nodeType == 3; /*Node.TEXT_NODE*/ }).remove();
+                    });
                 });
-            });
+            } else {
+                var childScope = widgetContainerDiv.scope();
+                childScope.$destroy();
+                widgetContainerDiv.empty();
+            }
         };
     </script>
 

@@ -628,7 +628,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 var url = 
                     $location.protocol() + '://' + 
                     $location.host() + ':' + $location.port() + 
-                    '/#/?$sticky=1&screen=' + behavior.targetQualifiedName;
+                    '/#/?$sticky=1&$screen=' + behavior.targetQualifiedName;
                 
                 var h = parseInt(screen.height * 0.8);
                 var w = parseInt(screen.width * 0.9);
