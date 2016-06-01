@@ -444,12 +444,24 @@ namespace NWheels.Logging.Core
 
             private void ValidateMethodCallSignature()
             {
-                throw new NotSupportedException("LogMethod is not yet supported in this version.");
+                if (_signature.ArgumentCount < 1)
+                {
+                    throw NewContractConventionException(_declaration, "First parameter must be System.Action<...> or System.Func<...> delegate");
+                }
 
-                //if ( _signature.ArgumentCount < 1 )
-                //{
-                //    throw NewContractConventionException(_declaration, "First parameter must be System.Action<...> or System.Func<...> delegate");
-                //}
+                if (_signature.ArgumentCount > 9)
+                {
+                    throw NewContractConventionException(_declaration, "Up to 8 arguments can be passed to System.Action<...> or System.Func<...> delegate");
+                }
+
+                ValidateNoRefOutParameters();
+
+                for (int i = 1 ; i < _signature.ArgumentCount ; i++)
+                {
+                    _isValueArgument[i] = true;
+                    _valueArgumentFormat[i] = FormatAttribute.GetFormatString(_parameters[i]);
+                    _valueArgumentDetails[i] = DetailAttribute.FromParameter(_parameters[i]);
+                }
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -461,13 +473,10 @@ namespace NWheels.Logging.Core
                     throw NewContractConventionException(_declaration, "Method must either be void, return ILogActivity, or return an exception type");
                 }
 
+                ValidateNoRefOutParameters();
+
                 for ( int i = 0 ; i < _signature.ArgumentCount ; i++ )
                 {
-                    if ( _signature.ArgumentIsByRef[i] || _signature.ArgumentIsOut[i] )
-                    {
-                        throw NewContractConventionException(_declaration, "Method cannot have ref or out parameters");
-                    }
-
                     if ( _signature.ArgumentType[i].IsExceptionType() )
                     {
                         _exceptionArgumentIndex.Add(i);
@@ -477,6 +486,19 @@ namespace NWheels.Logging.Core
                         _isValueArgument[i] = true;
                         _valueArgumentFormat[i] = FormatAttribute.GetFormatString(_parameters[i]);
                         _valueArgumentDetails[i] = DetailAttribute.FromParameter(_parameters[i]);
+                    }
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private void ValidateNoRefOutParameters()
+            {
+                for (int i = 0; i < _signature.ArgumentCount; i++)
+                {
+                    if (_signature.ArgumentIsByRef[i] || _signature.ArgumentIsOut[i])
+                    {
+                        throw NewContractConventionException(_declaration, "Method cannot have ref or out parameters");
                     }
                 }
             }

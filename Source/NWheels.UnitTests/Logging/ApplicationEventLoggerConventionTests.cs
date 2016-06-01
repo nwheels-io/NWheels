@@ -9,6 +9,7 @@ using NWheels.Core;
 using NWheels.Logging;
 using NWheels.Logging.Core;
 using NWheels.Testing;
+using Shouldly;
 
 namespace NWheels.UnitTests.Logging
 {
@@ -332,27 +333,27 @@ namespace NWheels.UnitTests.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        //[Test, Ignore("LogMethod is not yet supported")]
-        //public void CanLogVoidMethodCallAsActivity()
-        //{
-        //    //-- Arrange
+        [Test]
+        public void CanLogVoidMethodCallAsActivity()
+        {
+            //-- Arrange
 
-        //    var logger = CreateTestLogger();
-        //    var callCount = 0;
+            var logger = CreateTestLogger();
+            var callCount = 0;
 
-        //    //-- Act
+            //-- Act
 
-        //    logger.ThisIsMyVoidMethod(() => callCount++);
+            logger.ThisIsMyVoidMethod(() => callCount++);
 
-        //    //-- Assert
+            //-- Assert
 
-        //    var log = _logAppender.TakeLog();
+            var log = _logAppender.TakeLog();
 
-        //    Assert.That(callCount, Is.EqualTo(1));
-        //    Assert.That(log.Length, Is.EqualTo(1));
-        //    Assert.That(log[0].SingleLineText, Is.EqualTo("This is my void method"));
-        //    Assert.That(log[0].FullDetailsText, Is.Null);
-        //}
+            callCount.ShouldBe(1);
+            log.Length.ShouldBe(1);
+            log[0].SingleLineText.ShouldBe("This is my void method");
+            log[0].FullDetailsText.ShouldBeNull();
+        }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -429,8 +430,8 @@ namespace NWheels.UnitTests.Logging
                 [Detail] string str,
                 [DataEntityDetail] XElement entityContents);
 
-            //[LogMethod]
-            //void ThisIsMyVoidMethod(Action method);
+            [LogMethod]
+            void ThisIsMyVoidMethod(Action method);
 
             //[LogMethod]
             //void ThisIsMyVoidMethodWithParameters(
@@ -610,13 +611,13 @@ namespace NWheels.UnitTests.Logging
 
             public void ThisIsMyVoidMethod(Action method)
             {
-                using ( ILogActivity activity = new NameValuePairActivityLogNode("Test.ThisIsMyVoidMethod", LogLevel.Debug, LogOptions.None) )
+                using (ILogActivity activity = new NameValuePairActivityLogNode("Test.ThisIsMyVoidMethod", LogLevel.Debug, LogOptions.None))
                 {
                     try
                     {
                         method();
                     }
-                    catch ( Exception e )
+                    catch (Exception e)
                     {
                         activity.Fail(e);
                         throw;

@@ -101,6 +101,14 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool RethrowExceptions
+        {
+            get { return GetLogOption(LogOptions.RethrowExceptions); }
+            set { SetLogOption(LogOptions.RethrowExceptions, value); }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private bool GetLogOption(LogOptions flag)
         {
             return ((Options & flag) != 0);
@@ -225,8 +233,8 @@ namespace NWheels.Logging
 
     public class LogMethodAttribute : LogAttributeBase
     {
-        public LogMethodAttribute()
-            : base(LogLevel.Info, isActivity: true, isThread: false, isMethodCall: true)
+        public LogMethodAttribute(LogLevel level = LogLevel.Verbose, bool rethrowExceptions = true)
+            : base(level, isActivity: true, isThread: false, isMethodCall: true)
         {
         }
     }
