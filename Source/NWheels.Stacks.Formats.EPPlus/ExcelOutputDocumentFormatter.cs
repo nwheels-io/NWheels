@@ -146,6 +146,7 @@ namespace NWheels.Stacks.Formats.EPPlus
                 worksheet.Cells[1, i + 1].Value = queryResults.Columns[i].AliasName;
                 worksheet.Cells[1, i + 1].Style.Font.Bold = true;
             }
+            worksheet.View.FreezePanes(2, 1);
 
             int rowNumber = 2;
 
