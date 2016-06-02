@@ -662,6 +662,9 @@ namespace NWheels.UI.Toolbox
                         widgetClosedType = typeof(DataGrid<>).MakeGenericType(nestedMetaType.ContractType);
                         var dataGridInstance = (DataGrid)Activator.CreateInstance(widgetClosedType, "Nested" + this.PropertyName + "Grid", parent);
                         dataGridInstance.EnableAutonomousQuery = true;
+                        dataGridInstance.EnablePaging = true;
+                        dataGridInstance.DefaultPageSize = 10;
+                        dataGridInstance.PageSizeOptions = new[] { 10, 20, 50, 100 };
                         widgetInstance = dataGridInstance;
                     }
                     break;

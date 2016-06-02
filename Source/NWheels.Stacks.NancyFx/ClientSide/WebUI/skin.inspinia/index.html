@@ -345,7 +345,7 @@ HEAD, JS/CSS LINKS
         <uidl-widget uidl="uidl.modalAlert"></uidl-widget>
         <uidl-ellipsis-lookup-search></uidl-ellipsis-lookup-search>
     </div>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL SCREEN
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -432,7 +432,7 @@ HEAD, JS/CSS LINKS
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <iframe id="iframe_content_download" style="display:none;"></iframe>
-    
+
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL USER ALERT - MODAL
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -2249,6 +2249,13 @@ HEAD, JS/CSS LINKS
                    ng-disabled="!editAuthorized"
                    id="{{::uniqueFieldId}}"
                    name="{{::uniqueFieldId}}">
+            <textarea ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Memo')"
+                      class="form-control" 
+                      ng-class="{'m-b': !uidl.$skin.zeroPadding}"
+                      ng-model="entity[uidl.propertyName]" 
+                      id="{{::uniqueFieldId}}" 
+                      name="{{::uniqueFieldId}}"
+                      style="width:100%;height:100px;resize:vertical;font-family: Consolas, Courier New;font-size: 10pt;"></textarea>
             <!-- PASSWORD -->
             <div ng-if="uidl.fieldType==='Edit' && hasUidlModifier('Password')" ng-class="{'m-b': !uidl.$skin.zeroPadding}">
                 <div>
@@ -3454,6 +3461,18 @@ HEAD, JS/CSS LINKS
                 }
             }
             return null;
+        }
+
+        function initWidget_Screen($scope) {
+            if ($scope.uidl.nativeSnippetBefore) {
+                $scope.domNativeSnippetBefore = $($scope.uidl.nativeSnippetBefore);
+                $('body').prepend($scope.domNativeSnippetBefore);
+                $scope.$on("$destroy", function() {
+                    if ($scope.domNativeSnippetBefore) {
+                        $scope.domNativeSnippetBefore.remove();
+                    }
+                });            
+            }
         }
         
         /*
