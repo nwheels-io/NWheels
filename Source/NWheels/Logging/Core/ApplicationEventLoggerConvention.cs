@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -176,6 +177,7 @@ namespace NWheels.Logging.Core
             private readonly DetailAttribute[] _valueArgumentDetails;
             private readonly bool[] _isValueArgument;
             private readonly List<IOperand> _nameValuePairLocals;
+            private Type _methodCallDelegateType;
             private IOperand<Exception> _exceptionOperand;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -207,7 +209,7 @@ namespace NWheels.Logging.Core
 
                 if (_attribute.IsMethodCall)
                 {
-                    WriteVoidMethodCallLoggedAsActivity();
+                    WriteMethodCallLoggedAsActivity();
                 }
                 else if ( _attribute.IsActivity )
                 {
@@ -357,12 +359,12 @@ namespace NWheels.Logging.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void WriteVoidMethodCallLoggedAsActivity()
+            private void WriteMethodCallLoggedAsActivity()
             {
                 var activityType = ConstructGenericLogNodeType(_s_activityNodeGenericTypeByValueCount[_nameValuePairLocals.Count]);
                 var m = _underlyingWriter;
 
-                using (TT.CreateScope<TT.TItem>(activityType))
+                using (TT.CreateScope<TT.TItem, TT.TArg1, TT.TReturn>(activityType, _methodCallDelegateType, _declaration.ReturnType))
                 {
                     var constructorArguments =
                         new IOperand[] { m.Const(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options) }
@@ -380,16 +382,39 @@ namespace NWheels.Logging.Core
                         _threadLogAppenderField.Void(x => x.AppendActivityNode, activityLocal.CastTo<ActivityLogNode>());
                     }
 
+                    var invokeMethodInfo = GetDelegateInvokeMethodInfo(_methodCallDelegateType);
+                    var delegatedArguments = new List<IOperand>();
+
+                    m.ForEachArgument((arg, index) => {
+                        if (index > 0)
+                        {
+                            delegatedArguments.Add(arg);
+                        }
+                    });
+
                     m.Using(activityLocal.CastTo<IDisposable>()).Do(() => {
                         m.Try(() => {
-                            m.Arg1<Action>().Invoke() 
-
+                            if (_declaration.IsVoid())
+                            {
+                                m.Arg1<TT.TArg1>().Void(invokeMethodInfo, delegatedArguments.ToArray());
+                            }
+                            else
+                            {
+                                var returnValueLocal = m.Local<TT.TReturn>();
+                                returnValueLocal.Assign(m.Arg1<TT.TArg1>().Func<TT.TReturn>(invokeMethodInfo, delegatedArguments.ToArray()));
+                                m.Return(returnValueLocal);
+                            }
                         })
                         .Catch<Exception>(e => {
                             activityLocal.CastTo<ILogActivity>().Void<Exception>(x => x.Fail, e);
-                            if (_attribute.RethrowExceptions)
+                            
+                            if (_attribute.ThrowOnFailure)
                             {
                                 m.Throw();
+                            }
+                            else if (!_declaration.IsVoid())
+                            {
+                                m.Return(m.Default<TT.TReturn>());
                             }
                         });
                     });
@@ -462,6 +487,41 @@ namespace NWheels.Logging.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            private Type ConstructMethodCallDelegateType()
+            {
+                var callArgumentTypes = _parameters.Skip(1).Select(p => p.ParameterType).ToArray();
+
+                if (callArgumentTypes.Length >= _s_genericActionTypeByValueCount.Length || callArgumentTypes.Length >= _s_genericFuncTypeByValueCount.Length)
+                {
+                    throw NewContractConventionException(_declaration, "Up to 8 arguments can be passed in a logged method call");
+                }
+
+                Type openGenericDelegateType;
+                Type[] genericDelegateTypeArguments;
+
+                if (_declaration.IsVoid())
+                {
+                    openGenericDelegateType = _s_genericActionTypeByValueCount[callArgumentTypes.Length];
+                    genericDelegateTypeArguments = callArgumentTypes;
+                }
+                else
+                {
+                    openGenericDelegateType = _s_genericFuncTypeByValueCount[callArgumentTypes.Length];
+                    genericDelegateTypeArguments = callArgumentTypes.ConcatOne(_declaration.ReturnType).ToArray();
+                }
+
+                if (openGenericDelegateType.IsGenericTypeDefinition)
+                {
+                    return openGenericDelegateType.MakeGenericType(genericDelegateTypeArguments);
+                }
+                else
+                {
+                    return openGenericDelegateType;
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             private void ValidateSignature()
             {
                 if ( _attribute == null )
@@ -494,9 +554,11 @@ namespace NWheels.Logging.Core
                     throw NewContractConventionException(_declaration, "First parameter must be System.Action<...> or System.Func<...> delegate");
                 }
 
-                if (_signature.ArgumentCount > 9)
+                _methodCallDelegateType = ConstructMethodCallDelegateType();
+
+                if (_signature.ArgumentType[0] != _methodCallDelegateType)
                 {
-                    throw NewContractConventionException(_declaration, "Up to 8 arguments can be passed to System.Action<...> or System.Func<...> delegate");
+                    throw NewContractConventionException(_declaration, "Signature of logger method does not match the type of delegate");
                 }
 
                 ValidateNoRefOutParameters();
@@ -546,6 +608,20 @@ namespace NWheels.Logging.Core
                         throw NewContractConventionException(_declaration, "Method cannot have ref or out parameters");
                     }
                 }
+            }
+        
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static readonly ConcurrentDictionary<Type, MethodInfo> _s_invokeMethodInfoByDelegateType = 
+                new ConcurrentDictionary<Type, MethodInfo>();
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private static MethodInfo GetDelegateInvokeMethodInfo(Type delegateType)
+            {
+                return _s_invokeMethodInfoByDelegateType.GetOrAdd(
+                    delegateType,
+                    key => key.GetMethod("Invoke"));
             }
         }
     }

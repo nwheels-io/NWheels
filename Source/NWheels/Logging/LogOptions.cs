@@ -19,6 +19,6 @@ namespace NWheels.Logging
         RetainDetails = 0x40,
         RetainThreadLog = 0x80,
         PublishStats = 0x100,
-        RethrowExceptions = 0x200,
+        ThrowOnFailure = 0x200,
     }
 }

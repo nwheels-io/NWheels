@@ -14,7 +14,7 @@ using Shouldly;
 namespace NWheels.UnitTests.Logging
 {
     [TestFixture]
-    public class ApplicationEventLoggerConventionTests : UnitTestBase
+    public class ApplicationEventLoggerConventionTests : DynamicTypeUnitTestBase
     {
         private ConventionObjectFactory _factory;
         private TestThreadLogAppender _logAppender;
@@ -351,8 +351,255 @@ namespace NWheels.UnitTests.Logging
 
             callCount.ShouldBe(1);
             log.Length.ShouldBe(1);
+            log[0].ShouldBeAssignableTo<ActivityLogNode>();
             log[0].SingleLineText.ShouldBe("This is my void method");
-            log[0].FullDetailsText.ShouldBeNull();
+            log[0].Exception.ShouldBeNull();
+            log[0].Level.ShouldBe(LogLevel.Verbose);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanLogVoidMethodCallWithParametersAsActivity()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+            var callCount = 0;
+            string methodLog = null;
+
+            //-- Act
+
+            logger.ThisIsMyVoidMethodWithParameters(
+                (s, n, v) => {
+                    methodLog = string.Format("str={0},num={1},value={2}", s, n, v);
+                    callCount++;
+                }, 
+                str: "ABC", num: 123, value: 1234.567m);
+
+            //-- Assert
+
+            callCount.ShouldBe(1);
+            methodLog.ShouldBe("str=ABC,num=123,value=1234.567");
+
+            var log = _logAppender.TakeLog();
+            log.Length.ShouldBe(1);
+            log[0].ShouldBeAssignableTo<ActivityLogNode>();
+            log[0].SingleLineText.ShouldBe("This is my void method with parameters: str=ABC, num=123");
+            log[0].FullDetailsText.ShouldContain("value=1,234.57");
+            log[0].Exception.ShouldBeNull();
+            log[0].Level.ShouldBe(LogLevel.Warning);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanLogFunctionMethodCallAsActivity()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+            var callCount = 0;
+
+            //-- Act
+
+            var returnValue = logger.ThisIsMyFunction(() =>  {
+                callCount++;
+                return true;
+            });
+
+            //-- Assert
+
+            returnValue.ShouldBe(true);
+            callCount.ShouldBe(1);
+
+            var log = _logAppender.TakeLog();
+            log.Length.ShouldBe(1);
+            log[0].ShouldBeAssignableTo<ActivityLogNode>();
+            log[0].SingleLineText.ShouldBe("This is my function");
+            log[0].Exception.ShouldBeNull();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanLogFunctionMethodCallWithParametersAsActivity()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+            var callCount = 0;
+            string methodLog = null;
+
+            //-- Act
+
+            var returnValue = logger.ThisIsMyFunctionWithParameters(
+                (n, v) => {
+                    methodLog = string.Format("num={0},value={1}", n, v);
+                    callCount++;
+                    return "XYZ";
+                },
+                num: 123, value: 1234.567m);
+
+            //-- Assert
+
+            callCount.ShouldBe(1);
+            methodLog.ShouldBe("num=123,value=1234.567");
+            returnValue.ShouldBe("XYZ");
+
+            var log = _logAppender.TakeLog();
+            log.Length.ShouldBe(1);
+            log[0].ShouldBeAssignableTo<ActivityLogNode>();
+            log[0].SingleLineText.ShouldBe("This is my function with parameters: num=123");
+            log[0].FullDetailsText.ShouldContain("value=1,234.57");
+            log[0].Exception.ShouldBeNull();
+            log[0].Level.ShouldBe(LogLevel.Info);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanLogVoidMethodCallAsActivityWithFailureAndRethrowException()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+            var callCount = 0;
+            TestErrorException thrownException = null;
+
+            //-- Act
+
+            Should.Throw<TestErrorException>(() => {
+                
+                logger.ThisIsMyVoidMethod(() => {
+                    callCount++;
+                    throw (thrownException = new TestErrorException("111"));
+                });
+
+            });
+
+            //-- Assert
+
+            var log = _logAppender.TakeLog();
+
+            callCount.ShouldBe(1);
+            thrownException.ShouldNotBeNull();
+
+            log.Length.ShouldBe(1);
+            log[0].ShouldBeAssignableTo<ActivityLogNode>();
+            log[0].SingleLineText.ShouldBe("This is my void method");
+            log[0].Exception.ShouldBeSameAs(thrownException);
+            log[0].Level.ShouldBe(LogLevel.Error);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanLogVoidMethodCallAsActivityWithFailureAndSwallowException()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+            var callCount = 0;
+            TestErrorException thrownException = null;
+
+            //-- Act
+
+            Should.NotThrow(() => {
+
+                logger.ThisIsMyVoidMethodThatDoesntThrow(() => {
+                    callCount++;
+                    throw (thrownException = new TestErrorException("111"));
+                });
+
+            });
+
+            //-- Assert
+
+            var log = _logAppender.TakeLog();
+
+            callCount.ShouldBe(1);
+            thrownException.ShouldNotBeNull();
+
+            log.Length.ShouldBe(1);
+            log[0].ShouldBeAssignableTo<ActivityLogNode>();
+            log[0].SingleLineText.ShouldBe("This is my void method that doesnt throw");
+            log[0].Exception.ShouldBeSameAs(thrownException);
+            log[0].Level.ShouldBe(LogLevel.Error);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanLogFunctionMethodCallAsActivityWithFailureAndRethrowException()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+            var callCount = 0;
+            TestErrorException thrownException = null;
+
+            //-- Act
+
+            Should.Throw<TestErrorException>(() => {
+
+                logger.ThisIsMyFunction(() => {
+                    callCount++;
+                    throw (thrownException = new TestErrorException("111"));
+                });
+
+            });
+
+            //-- Assert
+
+            var log = _logAppender.TakeLog();
+
+            callCount.ShouldBe(1);
+            thrownException.ShouldNotBeNull();
+
+            log.Length.ShouldBe(1);
+            log[0].ShouldBeAssignableTo<ActivityLogNode>();
+            log[0].SingleLineText.ShouldBe("This is my function");
+            log[0].Exception.ShouldBeSameAs(thrownException);
+            log[0].Level.ShouldBe(LogLevel.Error);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CanLogFunctionMethodCallAsActivityWithFailureAndSwallowException()
+        {
+            //-- Arrange
+
+            var logger = CreateTestLogger();
+            var callCount = 0;
+            TestErrorException thrownException = null;
+            bool? returnValue = null;
+
+            //-- Act
+
+            Should.NotThrow(() => {
+
+                returnValue = logger.ThisIsMyFunctionThatDoesntThrow(() => {
+                    callCount++;
+                    throw (thrownException = new TestErrorException("111"));
+                });
+
+            });
+
+            //-- Assert
+
+            var log = _logAppender.TakeLog();
+
+            callCount.ShouldBe(1);
+            thrownException.ShouldNotBeNull();
+            returnValue.ShouldBe(false);
+
+            log.Length.ShouldBe(1);
+            log[0].ShouldBeAssignableTo<ActivityLogNode>();
+            log[0].SingleLineText.ShouldBe("This is my function that doesnt throw");
+            log[0].Exception.ShouldBeSameAs(thrownException);
+            log[0].Level.ShouldBe(LogLevel.Error);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -433,21 +680,27 @@ namespace NWheels.UnitTests.Logging
             [LogMethod]
             void ThisIsMyVoidMethod(Action method);
 
-            //[LogMethod]
-            //void ThisIsMyVoidMethodWithParameters(
-            //    Action<string, int, decimal> method, 
-            //    string str, 
-            //    int num, 
-            //    [Detail, Format("#,##0.00")] decimal value);
+            [LogMethod(LogLevel.Warning)]
+            void ThisIsMyVoidMethodWithParameters(
+                Action<string, int, decimal> method,
+                string str,
+                int num,
+                [Detail, Format("#,##0.00")] decimal value);
 
-            //[LogMethod]
-            //bool ThisIsMyFunction(Func<bool> method);
+            [LogMethod]
+            bool ThisIsMyFunction(Func<bool> method);
 
-            //[LogMethod]
-            //string ThisIsMyFunctionWithParameters(
-            //    Func<int, decimal, string> method, 
-            //    int num,
-            //    [Detail, Format("#,##0.00")] decimal value);
+            [LogMethod(LogLevel.Info)]
+            string ThisIsMyFunctionWithParameters(
+                Func<int, decimal, string> method,
+                int num,
+                [Detail, Format("#,##0.00")] decimal value);
+
+            [LogMethod(throwOnFailure: false)]
+            void ThisIsMyVoidMethodThatDoesntThrow(Action method);
+
+            [LogMethod(LogLevel.Info, throwOnFailure: false)]
+            bool ThisIsMyFunctionThatDoesntThrow(Func<bool> method);
         }
     
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -686,6 +939,20 @@ namespace NWheels.UnitTests.Logging
                         throw;
                     }
                 }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void ThisIsMyVoidMethodThatDoesntThrow(Action method)
+            {
+                throw new NotImplementedException();
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public bool ThisIsMyFunctionThatDoesntThrow(Func<bool> method)
+            {
+                throw new NotImplementedException();
             }
 
             #endregion
