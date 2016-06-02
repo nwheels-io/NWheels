@@ -205,7 +205,11 @@ namespace NWheels.Logging.Core
             {
                 InitializeNameValuePairs();
 
-                if ( _attribute.IsActivity )
+                if (_attribute.IsMethodCall)
+                {
+                    WriteVoidMethodCallLoggedAsActivity();
+                }
+                else if ( _attribute.IsActivity )
                 {
                     AppendAndReturnActivityLogNode();
                 }
@@ -348,6 +352,47 @@ namespace NWheels.Logging.Core
                     }
 
                     m.Return(activityLocal.CastTo<TT.TReturn>());
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void WriteVoidMethodCallLoggedAsActivity()
+            {
+                var activityType = ConstructGenericLogNodeType(_s_activityNodeGenericTypeByValueCount[_nameValuePairLocals.Count]);
+                var m = _underlyingWriter;
+
+                using (TT.CreateScope<TT.TItem>(activityType))
+                {
+                    var constructorArguments =
+                        new IOperand[] { m.Const(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options) }
+                        .Concat(_nameValuePairLocals)
+                        .ToArray();
+
+                    var activityLocal = m.Local<TT.TItem>(initialValue: m.New<TT.TItem>(constructorArguments));
+
+                    if (_attribute.IsThread)
+                    {
+                        _threadLogAppenderField.Void(x => x.StartThreadLog, m.Const(_attribute.TaskType), activityLocal.CastTo<ActivityLogNode>());
+                    }
+                    else
+                    {
+                        _threadLogAppenderField.Void(x => x.AppendActivityNode, activityLocal.CastTo<ActivityLogNode>());
+                    }
+
+                    m.Using(activityLocal.CastTo<IDisposable>()).Do(() => {
+                        m.Try(() => {
+                            m.Arg1<Action>().Invoke() 
+
+                        })
+                        .Catch<Exception>(e => {
+                            activityLocal.CastTo<ILogActivity>().Void<Exception>(x => x.Fail, e);
+                            if (_attribute.RethrowExceptions)
+                            {
+                                m.Throw();
+                            }
+                        });
+                    });
                 }
             }
 
