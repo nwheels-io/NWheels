@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Hapil;
 using Hapil.Applied.Conventions;
+using NWheels.Conventions.Core;
 using NWheels.Logging.Factories;
 
 namespace NWheels.Hosting.Factories
@@ -18,8 +19,11 @@ namespace NWheels.Hosting.Factories
 
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
+            var staticStrings = new StaticStringsDecorator();
+
             return new IObjectFactoryConvention[] {
-                  
+                staticStrings,
+                new CallLoggingAspectConvention(staticStrings), 
             };
         }
 

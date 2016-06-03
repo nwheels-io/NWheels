@@ -13,10 +13,10 @@ using NWheels.Testing;
 
 namespace NWheels.UnitTests.Logging
 {
-    [TestFixture, Ignore("Moving functionality to ComponentAspectFactory")]
-    public class CallLoggingAspectFactoryTests : NUnitEmittedTypesTestBase
+    [TestFixture]
+    public class CallLoggingAspectConventionTests : NUnitEmittedTypesTestBase
     {
-        private ConventionObjectFactory _factory;
+        private ComponentAspectFactory _factory;
         private TestThreadLogAppender _logAppender;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -253,7 +253,7 @@ namespace NWheels.UnitTests.Logging
                 this._threadLogAppender.AppendActivityNode(activity);
                 try
                 {
-                    string str4 = ((CallLoggingAspectFactoryTests.ITestComponent)this._target).ThisIsMyFunction(num, str);
+                    string str4 = ((CallLoggingAspectConventionTests.ITestComponent)this._target).ThisIsMyFunction(num, str);
                     LogNameValuePair<string> pair3 = new LogNameValuePair<string>
                     {
                         Name = CallLoggingAspectConvention.CallOutputReturnValueName,

@@ -12,7 +12,7 @@ namespace NWheels.Conventions.Core
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public LoggerObjectFactory(DynamicModule module, Pipeline<IThreadLogAppender> appenderPipeline)
-            : base(module, new ApplicationEventLoggerConvention())
+            : base(module)
         {
             _appenderPipeline = appenderPipeline;
         }
@@ -33,5 +33,21 @@ namespace NWheels.Conventions.Core
                 return typeof(IApplicationEventLogger);
             }
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        #region Overrides of ConventionObjectFactory
+
+        protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
+        {
+            var staticStrings = new StaticStringsDecorator();
+
+            return new IObjectFactoryConvention[] {
+                staticStrings,
+                new ApplicationEventLoggerConvention(staticStrings)
+            };
+        }
+
+        #endregion
     }
 }

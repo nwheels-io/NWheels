@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using Hapil;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
+using NWheels.Conventions.Core;
 using NWheels.Core;
 using NWheels.Logging;
 using NWheels.Logging.Core;
@@ -16,7 +17,7 @@ namespace NWheels.UnitTests.Logging
     [TestFixture]
     public class ApplicationEventLoggerConventionTests : DynamicTypeUnitTestBase
     {
-        private ConventionObjectFactory _factory;
+        private LoggerObjectFactory _factory;
         private TestThreadLogAppender _logAppender;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -31,11 +32,12 @@ namespace NWheels.UnitTests.Logging
         [SetUp]
         public void SetUp()
         {
-            _factory = new ConventionObjectFactory(
-                base.CreateDynamicModule(),
-                new ApplicationEventLoggerConvention());
-
             _logAppender = new TestThreadLogAppender(base.Framework);
+            var logAppenderPipeline = new Pipeline<IThreadLogAppender>(new IThreadLogAppender[] { _logAppender }, Resolve<PipelineObjectFactory>());
+
+            _factory = new LoggerObjectFactory(
+                base.CreateDynamicModule(),
+                logAppenderPipeline);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -606,8 +608,7 @@ namespace NWheels.UnitTests.Logging
 
         private ITestLogger CreateTestLogger()
         {
-            var threadLogAppenderPipeline = new Pipeline<IThreadLogAppender>(new IThreadLogAppender[] { _logAppender }, Resolve<PipelineObjectFactory>());
-            return _factory.CreateInstanceOf<ITestLogger>().UsingConstructor<Pipeline<IThreadLogAppender>>(threadLogAppenderPipeline);
+            return _factory.CreateService<ITestLogger>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

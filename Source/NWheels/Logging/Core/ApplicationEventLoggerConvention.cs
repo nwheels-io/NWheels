@@ -8,6 +8,7 @@ using Hapil;
 using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
+using NWheels.Conventions.Core;
 using NWheels.Exceptions;
 using NWheels.Extensions;
 using TT = Hapil.TypeTemplate;
@@ -72,13 +73,15 @@ namespace NWheels.Logging.Core
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private readonly StaticStringsDecorator _staticStrings;
         private Field<IThreadLogAppender> _threadLogAppenderField;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ApplicationEventLoggerConvention()
+        public ApplicationEventLoggerConvention(StaticStringsDecorator staticStrings)
             : base(Will.ImplementPrimaryInterface)
         {
+            _staticStrings = staticStrings;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -106,7 +109,7 @@ namespace NWheels.Logging.Core
 
         private void ImplementLogMethod(TemplateMethodWriter templateMethodWriter)
         {
-            var logMethodWriter = new LogMethodWriter(templateMethodWriter, _threadLogAppenderField);
+            var logMethodWriter = new LogMethodWriter(templateMethodWriter, _threadLogAppenderField, _staticStrings);
             logMethodWriter.Write();
         }
 
@@ -166,6 +169,7 @@ namespace NWheels.Logging.Core
         {
             private readonly TemplateMethodWriter _underlyingWriter;
             private readonly Field<IThreadLogAppender> _threadLogAppenderField;
+            private readonly StaticStringsDecorator _staticStrings;
             private readonly LogAttributeBase _attribute;
             private readonly MethodInfo _declaration;
             private readonly MethodSignature _signature;
@@ -182,10 +186,14 @@ namespace NWheels.Logging.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public LogMethodWriter(TemplateMethodWriter underlyingWriter, Field<IThreadLogAppender> threadLogAppenderField)
+            public LogMethodWriter(
+                TemplateMethodWriter underlyingWriter, 
+                Field<IThreadLogAppender> threadLogAppenderField, 
+                StaticStringsDecorator staticStrings)
             {
                 _underlyingWriter = underlyingWriter;
                 _threadLogAppenderField = threadLogAppenderField;
+                _staticStrings = staticStrings;
                 _declaration = underlyingWriter.OwnerMethod.MethodDeclaration;
                 _signature = underlyingWriter.OwnerMethod.Signature;
                 _parameters = _declaration.GetParameters();
@@ -250,12 +258,12 @@ namespace NWheels.Logging.Core
                     var pairLocal = m.Local<LogNameValuePair<TT.TValue>>();
                     pairLocal.Assign(m.New<LogNameValuePair<TT.TValue>>());
 
-                    pairLocal.Field(x => x.Name).Assign(m.Const(_signature.ArgumentName[argumentIndex]));
+                    pairLocal.Field(x => x.Name).Assign(_staticStrings.GetStaticStringOperand(_signature.ArgumentName[argumentIndex]));
                     pairLocal.Field(x => x.Value).Assign(m.Argument<TT.TValue>(argumentIndex + 1));
 
                     if (_valueArgumentFormat[argumentIndex] != null)
                     {
-                        pairLocal.Field(x => x.Format).Assign(m.Const(_valueArgumentFormat[argumentIndex]));
+                        pairLocal.Field(x => x.Format).Assign(_staticStrings.GetStaticStringOperand(_valueArgumentFormat[argumentIndex]));
                     }
 
                     var details = _valueArgumentDetails[argumentIndex];
@@ -293,7 +301,8 @@ namespace NWheels.Logging.Core
             {
                 var m = _underlyingWriter;
 
-                var exceptionMessageLocal = m.Local<string>(initialValueConst: LogMessageHelper.GetTextFromMessageId(_messageId));
+                var exceptionMessageLocal = m.Local<string>(
+                    initialValue: _staticStrings.GetStaticStringOperand(LogMessageHelper.GetTextFromMessageId(_messageId)));
                 var exceptionAnyAppendedLocal = m.Local<bool>();
                 var nameValuePairIndex = 0;
 
@@ -338,7 +347,7 @@ namespace NWheels.Logging.Core
                 using ( TT.CreateScope<TT.TItem>(activityType) )
                 {
                     var constructorArguments = 
-                        new IOperand[] { m.Const(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options) }
+                        new IOperand[] { _staticStrings.GetStaticStringOperand(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options) }
                         .Concat(_nameValuePairLocals)
                         .ToArray();
 
@@ -367,7 +376,7 @@ namespace NWheels.Logging.Core
                 using (TT.CreateScope<TT.TItem, TT.TArg1, TT.TReturn>(activityType, _methodCallDelegateType, _declaration.ReturnType))
                 {
                     var constructorArguments =
-                        new IOperand[] { m.Const(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options) }
+                        new IOperand[] { _staticStrings.GetStaticStringOperand(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options) }
                         .Concat(_nameValuePairLocals)
                         .ToArray();
 
@@ -453,8 +462,8 @@ namespace NWheels.Logging.Core
 
                 using ( TT.CreateScope<TT.TItem>(nodeType) )
                 {
-                    var constructorArguments = 
-                        new IOperand[] { m.Const(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options), _exceptionOperand }
+                    var constructorArguments =
+                        new IOperand[] { _staticStrings.GetStaticStringOperand(_messageId), m.Const(_attribute.Level), m.Const(_attribute.Options), _exceptionOperand }
                         .Concat(_nameValuePairLocals).ToArray();
 
                     var nodeLocal = m.Local<TT.TItem>(initialValue: m.New<TT.TItem>(constructorArguments));
