@@ -7,6 +7,8 @@ using Hapil.Members;
 using Hapil.Operands;
 using Hapil.Writers;
 using NWheels.Conventions.Core;
+using NWheels.Hosting.Core;
+using NWheels.Hosting.Factories;
 using NWheels.Logging.Core;
 
 namespace NWheels.Logging.Factories
@@ -25,10 +27,10 @@ namespace NWheels.Logging.Factories
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CallLoggingAspectConvention(StaticStringsDecorator staticStrings)
+        public CallLoggingAspectConvention(ComponentAspectFactory.ConventionContext aspectContext)
             : base(Will.DecorateClass | Will.DecorateMethods)
         {
-            _staticStrings = staticStrings;
+            _staticStrings = aspectContext.StaticStrings;
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -90,6 +92,20 @@ namespace NWheels.Logging.Factories
                 .OnAfter(w => {
                     activityLocal.CastTo<ILogActivity>().Void(x => x.Dispose);     
                 });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class AspectProvider : IComponentAspectProvider
+        {
+            #region Implementation of IComponentAspectProvider
+
+            public IObjectFactoryConvention GetAspectConvention(ComponentAspectFactory.ConventionContext context)
+            {
+                return new CallLoggingAspectConvention(context);
+            }
+
+            #endregion
         }
     }
 }

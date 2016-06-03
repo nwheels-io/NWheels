@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using Hapil;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
+using NWheels.Hosting.Core;
 using NWheels.Hosting.Factories;
 using NWheels.Logging;
 using NWheels.Logging.Core;
@@ -14,7 +15,7 @@ using NWheels.Testing;
 namespace NWheels.UnitTests.Logging
 {
     [TestFixture]
-    public class CallLoggingAspectConventionTests : NUnitEmittedTypesTestBase
+    public class CallLoggingAspectConventionTests : DynamicTypeUnitTestBase
     {
         private ComponentAspectFactory _factory;
         private TestThreadLogAppender _logAppender;
@@ -24,7 +25,11 @@ namespace NWheels.UnitTests.Logging
         [TestFixtureSetUp]
         public void TestFixtureSetUp()
         {
-            _factory = new ComponentAspectFactory(base.Module);
+            var aspectPipeline = new Pipeline<IComponentAspectProvider>(new IComponentAspectProvider[] {
+                new CallLoggingAspectConvention.AspectProvider(),
+            });
+
+            _factory = new ComponentAspectFactory(Framework.Components, base.DyamicModule, aspectPipeline);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,7 +37,7 @@ namespace NWheels.UnitTests.Logging
         [SetUp]
         public void SetUp()
         {
-            _logAppender = new TestThreadLogAppender(new TestFramework(base.Module));
+            _logAppender = new TestThreadLogAppender(new TestFramework(base.DyamicModule));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
