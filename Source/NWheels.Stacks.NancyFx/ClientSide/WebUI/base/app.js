@@ -2709,6 +2709,8 @@ function ($timeout, $rootScope, uidlService, entityService) {
             return 'app/uidl-element-template/' + (attrs.templateName || 'EllipsisLookupSearchModal');
         },
         controller: function ($scope) {
+            $scope.$timeout = $timeout;
+            
             $scope.invokeInitFunc = function() {
                 var initFuncName = 'initWidget_EllipsisLookupSearchModal';
                 var initFunc = window[initFuncName];

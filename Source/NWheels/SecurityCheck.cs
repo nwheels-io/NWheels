@@ -55,7 +55,7 @@ namespace NWheels
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void RequireClaim(IPrincipal principal, string claimType, object claimValue)
+        public static void RequireClaim(IPrincipal principal, string claimType, object claimValue)
         {
             if ( principal is SystemPrincipal )
             {
@@ -77,7 +77,7 @@ namespace NWheels
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void RequireAuthentication(IPrincipal principal)
+        public static void RequireAuthentication(IPrincipal principal)
         {
             if ( principal == null || principal.Identity == null || !principal.Identity.IsAuthenticated )
             {
@@ -87,7 +87,7 @@ namespace NWheels
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void RequireUserRole(IPrincipal principal, object userRole)
+        public static void RequireUserRole(IPrincipal principal, object userRole)
         {
             if ( principal == null || !principal.IsInRole(userRole.ToString()) )
             {
@@ -97,14 +97,14 @@ namespace NWheels
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void RequirePermission(IPrincipal principal, object permission)
+        public static void RequirePermission(IPrincipal principal, object permission)
         {
             RequireClaim(principal, OperationPermissionClaim.OperationPermissionClaimTypeString, permission);
         }
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static void RequireEntityAccessRule(IPrincipal principal, Type entityAccessRuleType)
+        public static void RequireEntityAccessRule(IPrincipal principal, Type entityAccessRuleType)
         {
             var claimValue = GetEntityAccessRuleClaimValue(entityAccessRuleType);
             RequireClaim(principal, EntityAccessRuleClaim.EntityAccessRuleClaimTypeString, claimValue);
@@ -112,7 +112,7 @@ namespace NWheels
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private static string GetEntityAccessRuleClaimValue(Type entityAccessRuleType)
+        public static string GetEntityAccessRuleClaimValue(Type entityAccessRuleType)
         {
             // ReSharper disable once InconsistentlySynchronizedField (Hashtable is safe for concurrent reads)
             var existingValue = _s_claimValueByEntityAccessRuleContract[entityAccessRuleType]; 

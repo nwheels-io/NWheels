@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Autofac;
 using Hapil;
 using Hapil.Applied.Conventions;
@@ -31,12 +33,31 @@ namespace NWheels.Hosting.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public object Aspectize(object component, Type[] interfaceTypes = null)
+        public object CreateProxy(object component, Type[] interfaceTypes = null)
         {
             var componentType = component.GetType();
-            var key = new AspectWrapperTypeKey(componentType, interfaceTypes ?? componentType.GetInterfaces());
+            var key = new AspectTypeKey(
+                ImplementationMode.Wrapper,
+                targetType: componentType, 
+                baseType: null, 
+                interfaceTypes: interfaceTypes ?? componentType.GetInterfaces());
+            
             var typeEntry = base.GetOrBuildType(key);
             return typeEntry.CreateInstance<object, object, IComponentContext>(0, component, _components);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public object CreateInheritor(Type componentType)
+        {
+            var key = new AspectTypeKey(
+                ImplementationMode.Inheritor,
+                targetType: null,
+                baseType: componentType,
+                interfaceTypes: componentType.GetInterfaces());
+
+            var typeEntry = base.GetOrBuildType(key);
+            return typeEntry.CreateInstance<object, IComponentContext>(0, _components);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -45,20 +66,30 @@ namespace NWheels.Hosting.Factories
 
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
-            var aspectTypeKey = (AspectWrapperTypeKey)context.TypeKey;
+            var aspectTypeKey = (AspectTypeKey)context.TypeKey;
             var staticStrings = new StaticStringsDecorator();
-            var aspectContext = new ConventionContext(aspectTypeKey.TargetType, staticStrings);
+            var aspectContext = new ConventionContext(
+                staticStrings, 
+                aspectTypeKey.Mode,
+                componentType: aspectTypeKey.TargetType ?? aspectTypeKey.BaseType);
             var conventions = new List<IObjectFactoryConvention>(_aspectPipeline.Count + 3);
 
-            conventions.Add(new TargetDelegationConvention(aspectContext));
-            conventions.Add(staticStrings);
-            
-            for (int i = _aspectPipeline.Count - 1 ; i >= 0 ; i--)
+            switch (aspectContext.ImplementationMode)
             {
-                conventions.Add(_aspectPipeline[i].GetAspectConvention(aspectContext));
+                case ImplementationMode.Wrapper:
+                    conventions.Add(new TargetDelegationConvention(aspectContext));
+                    conventions.Add(staticStrings);
+                    AddAspectConventions(conventions, aspectContext);
+                    conventions.Add(new WrapperConstructorInjectionConvention(aspectContext));
+                    break;
+                case ImplementationMode.Inheritor:
+                    conventions.Add(new BaseDelegationConvention(aspectContext));
+                    conventions.Add(staticStrings);
+                    AddAspectConventions(conventions, aspectContext);
+                    conventions.Add(new BaseConstructorInjectionConvention(aspectContext));
+                    break;
             }
 
-            conventions.Add(new ConstructorInjectionConvention(aspectContext));
             return conventions.ToArray();
         }
 
@@ -73,18 +104,51 @@ namespace NWheels.Hosting.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class AspectWrapperTypeKey : TypeKey
+        private void AddAspectConventions(List<IObjectFactoryConvention> destination, ConventionContext aspectContext)
         {
+            for (int i = _aspectPipeline.Count - 1; i >= 0; i--)
+            {
+                destination.Add(_aspectPipeline[i].GetAspectConvention(aspectContext));
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static void WriteResolveDependencies(ConventionContext context, Argument<IComponentContext> components)
+        {
+            foreach (var dependencyField in context.GetAllDependencyFields())
+            {
+                using (TT.CreateScope<TT.TDependency>(dependencyField.FieldType))
+                {
+                    dependencyField.AsOperand<TT.TDependency>().Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<TT.TDependency>(c), components));
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public enum ImplementationMode
+        {
+            Wrapper,
+            Inheritor
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class AspectTypeKey : TypeKey
+        {
+            private readonly ImplementationMode _mode;
             private readonly Type _targetType;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public AspectWrapperTypeKey(Type targetType, Type[] interfaceTypes)
+            public AspectTypeKey(ImplementationMode mode, Type targetType, Type baseType, Type[] interfaceTypes)
                 : base(
-                    baseType: null,
+                    baseType,
                     primaryInterface: null,
                     secondaryInterfaces: interfaceTypes)
             {
+                _mode = mode;
                 _targetType = targetType;
             }
 
@@ -93,6 +157,13 @@ namespace NWheels.Hosting.Factories
             public Type TargetType
             {
                 get { return _targetType; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ImplementationMode Mode
+            {
+                get { return _mode; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -106,8 +177,10 @@ namespace NWheels.Hosting.Factories
                     throw new NotSupportedException("This type key cannot mutate base type or primary interface.");
                 }
 
-                return new AspectWrapperTypeKey(
+                return new AspectTypeKey(
+                    _mode,
                     _targetType,
+                    this.BaseType,
                     newSecondaryInterfaces ?? this.SecondaryInterfaces);
             }
 
@@ -115,7 +188,7 @@ namespace NWheels.Hosting.Factories
 
             public override bool Equals(TypeKey other)
             {
-                var otherAspectTypeKey = (other as AspectWrapperTypeKey);
+                var otherAspectTypeKey = (other as AspectTypeKey);
 
                 if (otherAspectTypeKey == null)
                 {
@@ -134,7 +207,12 @@ namespace NWheels.Hosting.Factories
 
             public override int GetHashCode()
             {
-                return (base.GetHashCode() ^ _targetType.GetHashCode());
+                if (_targetType != null)
+                {
+                    return (base.GetHashCode() ^ _targetType.GetHashCode());
+                }
+
+                return base.GetHashCode();
             }
 
             #endregion
@@ -149,10 +227,11 @@ namespace NWheels.Hosting.Factories
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ConventionContext(Type componentType, StaticStringsDecorator staticStrings)
+            public ConventionContext(StaticStringsDecorator staticStrings, ImplementationMode implementationMode, Type componentType)
             {
                 _dependencyFieldByType = new Dictionary<Type, FieldMember>();
                 this.StaticStrings = staticStrings;
+                this.ImplementationMode = implementationMode;
                 this.ComponentType = componentType;
             }
 
@@ -190,6 +269,10 @@ namespace NWheels.Hosting.Factories
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
             public Type ComponentType { get; private set; }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ImplementationMode ImplementationMode { get; private set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -224,13 +307,48 @@ namespace NWheels.Hosting.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class ConstructorInjectionConvention : ImplementationConvention
+        public class BaseDelegationConvention : ImplementationConvention
         {
             private readonly ConventionContext _aspectContext;
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ConstructorInjectionConvention(ConventionContext aspectContext)
+            public BaseDelegationConvention(ConventionContext aspectContext)
+                : base(Will.ImplementBaseClass)
+            {
+                _aspectContext = aspectContext;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of ImplementationConvention
+
+            protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
+            {
+                writer.AllMethods().Implement(w => 
+                    w.ProceedToBase()
+                );
+                writer.ReadOnlyProperties().Implement(
+                    p => p.Get(gw => gw.ProceedToBase())
+                );
+                writer.ReadWriteProperties().Implement(
+                    p => p.Get(gw => gw.ProceedToBase()),
+                    p => p.Set((sw, value) => sw.ProceedToBase())
+                );
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class WrapperConstructorInjectionConvention : ImplementationConvention
+        {
+            private readonly ConventionContext _aspectContext;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public WrapperConstructorInjectionConvention(ConventionContext aspectContext)
                 : base(Will.ImplementBaseClass)
             {
                 _aspectContext = aspectContext;
@@ -246,16 +364,55 @@ namespace NWheels.Hosting.Factories
 
                 writer.Constructor<object, IComponentContext>((cw, target, components) => {
                     targetField.Assign(target.CastTo<TT.TBase>());
+                    WriteResolveDependencies(_aspectContext, components);
+                });
+            }
 
-                    foreach (var dependencyField in _aspectContext.GetAllDependencyFields())
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class BaseConstructorInjectionConvention : ImplementationConvention
+        {
+            private readonly ConventionContext _aspectContext;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public BaseConstructorInjectionConvention(ConventionContext aspectContext)
+                : base(Will.ImplementBaseClass)
+            {
+                _aspectContext = aspectContext;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of ImplementationConvention
+
+            protected override void OnImplementBaseClass(ImplementationClassWriter<TT.TBase> writer)
+            {
+                var baseConstructor = _aspectContext.ComponentType
+                    .GetConstructors(BindingFlags.Instance | BindingFlags.Public)
+                    .OrderByDescending(c => c.GetParameters().Length)
+                    .First();
+                var baseConstructorParameters = baseConstructor.GetParameters();
+
+                writer.Constructor<IComponentContext>((cw, components) =>
+                {
+                    var baseConstructorArgumentLocals = new Local<TT.TArgument>[baseConstructorParameters.Length];
+
+                    for (int i = 0; i < baseConstructorParameters.Length; i++)
                     {
-                        using (TT.CreateScope<TT.TDependency>(dependencyField.FieldType))
+                        using (TT.CreateScope<TT.TArgument>(baseConstructorParameters[i].ParameterType))
                         {
-                            dependencyField.AsOperand<TT.TDependency>().Assign(
-                                Static.GenericFunc(c => ResolutionExtensions.Resolve<TT.TDependency>(c), components)
-                            );
+                            baseConstructorArgumentLocals[i] = cw.Local<TT.TArgument>();
+                            baseConstructorArgumentLocals[i].Assign(Static.GenericFunc(c => ResolutionExtensions.Resolve<TT.TArgument>(c), components));
                         }
                     }
+
+                    cw.Base(baseConstructor, baseConstructorArgumentLocals.Cast<IOperand>().ToArray());
+                    
+                    WriteResolveDependencies(_aspectContext, components);
                 });
             }
 

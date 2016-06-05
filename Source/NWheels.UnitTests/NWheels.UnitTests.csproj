@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authorization\Core\AccessControlListCacheTests.cs" />
+    <Compile Include="Authorization\Factories\CallAuthorizationAspectConventionTests.cs" />
     <Compile Include="Authorization\Impl\AccessControlListTests.cs" />
     <Compile Include="Authorization\Impl\EntityAccessControlPipeTests.cs" />
     <Compile Include="Authorization\Impl\TypedEntityAccessControlTests.cs" />

@@ -1780,13 +1780,18 @@ HEAD, JS/CSS LINKS
         function initWidget_EllipsisLookupSearchModal($scope) {
             $scope.unbindDataGridObjectSelected = null;
             $scope.selectedLookupObject = null;
-        
+
             $scope.showLookupSearchModal = function() {
                 $('#divModal_EllipsisLookupSearchModal').modal('show', {backdrop: 'static', keyboard: false});
             };
             $scope.hideLookupSearchModal = function() {
                 $('#divModal_EllipsisLookupSearchModal').modal('hide');
             };
+            $('#divModal_EllipsisLookupSearchModal').on('hidden.bs.modal', function() {
+                $scope.$timeout(function() {
+                    $scope.lookupContext = null;
+                });
+            });
             $scope.isSelectButtonDisabled = function() {
                 return ($scope.selectedLookupObject===null);
             };

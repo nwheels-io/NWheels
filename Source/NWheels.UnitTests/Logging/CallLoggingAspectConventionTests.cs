@@ -48,7 +48,7 @@ namespace NWheels.UnitTests.Logging
 
             //-- Act
             
-            var decoratedComponent = _factory.Aspectize(realComponent);
+            var decoratedComponent = _factory.CreateProxy(realComponent);
 
             //-- Assert
 
@@ -63,7 +63,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var realComponent = new RealComponent(_logAppender);
-            var decoratedComponent = (ITestComponent)_factory.Aspectize(realComponent);
+            var decoratedComponent = (ITestComponent)_factory.CreateProxy(realComponent);
 
             //-- Act
 
@@ -91,7 +91,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var realComponent = new RealComponent(_logAppender);
-            var decoratedComponent = (ITestComponent)_factory.Aspectize(realComponent);
+            var decoratedComponent = (ITestComponent)_factory.CreateProxy(realComponent);
 
             //-- Act
 
@@ -119,7 +119,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var realComponent = new RealComponent(_logAppender);
-            var decoratedComponent = (ITestComponent)_factory.Aspectize(realComponent);
+            var decoratedComponent = (ITestComponent)_factory.CreateProxy(realComponent);
 
             //-- Act
 
@@ -155,7 +155,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var realComponent = new RealComponent(_logAppender);
-            var decoratedComponent = (ITestComponent)_factory.Aspectize(realComponent);
+            var decoratedComponent = (ITestComponent)_factory.CreateProxy(realComponent);
 
             //-- Act
 
@@ -196,7 +196,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var realComponent = new RealComponent(_logAppender);
-            var decoratedComponent = _factory.Aspectize(realComponent);
+            var decoratedComponent = _factory.CreateProxy(realComponent);
 
             //-- Act
 
@@ -221,7 +221,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var realComponent = new RealComponent(_logAppender);
-            var decoratedComponent = (ITestComponent)_factory.Aspectize(realComponent);
+            var decoratedComponent = (ITestComponent)_factory.CreateProxy(realComponent);
 
             //-- Act
 
@@ -244,7 +244,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var realComponent = new RealComponent(_logAppender);
-            var decoratedComponent = (ITestComponent)_factory.Aspectize(realComponent);
+            var decoratedComponent = (ITestComponent)_factory.CreateProxy(realComponent);
 
             System.Action actionDelegate = decoratedComponent.ThisIsMyVoidMethod;
 
@@ -268,7 +268,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var realComponent = new RealComponent(_logAppender);
-            var decoratedComponent = (ITestComponent)_factory.Aspectize(realComponent);
+            var decoratedComponent = (ITestComponent)_factory.CreateProxy(realComponent);
 
             //-- Act
 
@@ -299,7 +299,7 @@ namespace NWheels.UnitTests.Logging
             //-- Arrange
 
             var realComponent = new RealComponent(_logAppender);
-            var decoratedComponent = (ITestComponent)_factory.Aspectize(realComponent);
+            var decoratedComponent = (ITestComponent)_factory.CreateProxy(realComponent);
 
             //-- Act
 
