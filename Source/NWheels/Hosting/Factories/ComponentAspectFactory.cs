@@ -45,8 +45,9 @@ namespace NWheels.Hosting.Factories
 
         protected override IObjectFactoryConvention[] BuildConventionPipeline(ObjectFactoryContext context)
         {
+            var aspectTypeKey = (AspectWrapperTypeKey)context.TypeKey;
             var staticStrings = new StaticStringsDecorator();
-            var aspectContext = new ConventionContext(staticStrings);
+            var aspectContext = new ConventionContext(aspectTypeKey.TargetType, staticStrings);
             var conventions = new List<IObjectFactoryConvention>(_aspectPipeline.Count + 3);
 
             conventions.Add(new TargetDelegationConvention(aspectContext));
@@ -85,6 +86,13 @@ namespace NWheels.Hosting.Factories
                     secondaryInterfaces: interfaceTypes)
             {
                 _targetType = targetType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type TargetType
+            {
+                get { return _targetType; }
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -141,10 +149,11 @@ namespace NWheels.Hosting.Factories
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public ConventionContext(StaticStringsDecorator staticStrings)
+            public ConventionContext(Type componentType, StaticStringsDecorator staticStrings)
             {
                 _dependencyFieldByType = new Dictionary<Type, FieldMember>();
                 this.StaticStrings = staticStrings;
+                this.ComponentType = componentType;
             }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -177,6 +186,10 @@ namespace NWheels.Hosting.Factories
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
             public StaticStringsDecorator StaticStrings { get; private set; }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type ComponentType { get; private set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

@@ -384,6 +384,59 @@ namespace NWheels.UnitTests.Hosting.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void CanRegisterAspectizedComponentInIocContainer()
+        {
+            //-- arrange
+
+            var containerBuilder = new ContainerBuilder();
+
+            containerBuilder.RegisterInstance(base.DyamicModule).AsSelf();
+            containerBuilder.RegisterInstance(_log).AsSelf();
+            containerBuilder.RegisterInstance(Framework.Components.Resolve<PipelineObjectFactory>()).AsSelf();
+
+            containerBuilder.RegisterType<ComponentAspectFactory>();
+            containerBuilder.RegisterPipeline<IComponentAspectProvider>();
+            containerBuilder.RegisterInstance(new TestAspectConvention.AspectProvider("AspectB")).As<IComponentAspectProvider>().LastInPipeline();
+            containerBuilder.RegisterInstance(new TestAspectConvention.AspectProvider("AspectA")).As<IComponentAspectProvider>().FirstInPipeline();
+
+            containerBuilder.RegisterType<TestComponentTwo>().AsSelf();
+            containerBuilder.Register(c => c.Resolve<ComponentAspectFactory>().Aspectize(c.Resolve<TestComponentTwo>())).As<ITestComponent, ITestComponentTwo>().SingleInstance();
+
+            var container = containerBuilder.Build();
+
+            //-- act
+
+            var one = container.Resolve<ITestComponent>();
+            var two = container.Resolve<ITestComponentTwo>();
+            
+            var returnValue1 = one.MethodTwo(num: 123);
+            var returnValue2 = two.MethodFour(num: 456);
+
+            //-- assert
+
+            returnValue1.ShouldBe("ABC");
+            returnValue2.ShouldBe("DEF");
+
+            _log.ShouldBe(new[] {
+                "AspectA:BEFORE:MethodTwo", 
+                "AspectB:BEFORE:MethodTwo", 
+                "COMPONENT:MethodTwo(123)", 
+                "AspectB:AFTER:MethodTwo",
+                "AspectA:AFTER:MethodTwo",
+
+                "AspectA:BEFORE:MethodFour", 
+                "AspectB:BEFORE:MethodFour", 
+                "COMPONENT:MethodFour(456)", 
+                "AspectB:AFTER:MethodFour",
+                "AspectA:AFTER:MethodFour",
+            });
+
+            two.ShouldBeSameAs(one);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private ComponentAspectFactory CreateFactoryUnderTest(params IComponentAspectProvider[] aspectProviders)
         {
             var aspectPipeline = new Pipeline<IComponentAspectProvider>(aspectProviders);

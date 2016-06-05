@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Hapil;
 using Hapil.Decorators;
 using Hapil.Members;
@@ -15,14 +16,14 @@ namespace NWheels.Logging.Factories
 {
     public class CallLoggingAspectConvention : DecorationConvention
     {
+        private readonly ComponentAspectFactory.ConventionContext _aspectContext;
         public static readonly string LoggingCallOutputsMessageId = "CallLoggingAspect.LoggingCallOutputs";
         public static readonly string CallOutputReturnValueName = "return";
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         private readonly StaticStringsDecorator _staticStrings;
-        private TypeKey _typeKey;
-        private DecoratingClassWriter _classWriter;
+        private readonly Dictionary<MethodInfo, MethodInfo> _targetInterfaceMap;
         private Field<IThreadLogAppender> _threadLogAppenderField;
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -30,30 +31,25 @@ namespace NWheels.Logging.Factories
         public CallLoggingAspectConvention(ComponentAspectFactory.ConventionContext aspectContext)
             : base(Will.DecorateClass | Will.DecorateMethods)
         {
+            _aspectContext = aspectContext;
             _staticStrings = aspectContext.StaticStrings;
-        }
+            _targetInterfaceMap = new Dictionary<MethodInfo, MethodInfo>();
 
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override bool ShouldApply(ObjectFactoryContext context)
-        {
-            _typeKey = context.TypeKey;
-            return true;
+            BuildTargetInterfaceMap();
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void OnClass(ClassType classType, DecoratingClassWriter classWriter)
         {
-            _classWriter = classWriter;
-            _threadLogAppenderField = classWriter.DependencyField<IThreadLogAppender>("_threadLogAppender");
+            _threadLogAppenderField = _aspectContext.GetDependencyField<IThreadLogAppender>(classWriter);
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected override void OnMethod(MethodMember member, Func<MethodDecorationBuilder> decorate)
         {
-            var messageId = LogNode.PreserveMessageIdPrefix + _typeKey.PrimaryInterface.Name.TrimPrefix("I") + "." + member.Name;
+            var messageId = LogNode.PreserveMessageIdPrefix + GetQualifiedMemberNameToLog(member);
             var inputLogNodeBuilder = new NameValuePairLogNodeBuilder(shouldBuildActivity: true);
             var outputLogNodeBuilder = new NameValuePairLogNodeBuilder(shouldBuildActivity: false);
                 
@@ -64,7 +60,7 @@ namespace NWheels.Logging.Factories
                     activityLocal = w.Local<ActivityLogNode>();
                 })
                 .OnInputArgument((w, arg) => {
-                    inputLogNodeBuilder.AddNameValuePair(w.Const(arg.Name), arg.OperandType, arg, isDetail: true);
+                    inputLogNodeBuilder.AddNameValuePair(_staticStrings.GetStaticStringOperand(arg.Name), arg.OperandType, arg, isDetail: true);
                 })
                 .OnInspectedInputArguments(w => {
                     activityLocal.Assign(inputLogNodeBuilder.GetNewLogNodeOperand(w, _staticStrings.GetStaticStringOperand(messageId)).CastTo<ActivityLogNode>());
@@ -75,7 +71,7 @@ namespace NWheels.Logging.Factories
                     w.Throw();
                 })
                 .OnOutputArgument((w, arg) => {
-                    outputLogNodeBuilder.AddNameValuePair(w.Const(arg.Name), arg.OperandType, arg, isDetail: true);
+                    outputLogNodeBuilder.AddNameValuePair(_staticStrings.GetStaticStringOperand(arg.Name), arg.OperandType, arg, isDetail: true);
                 })
                 .OnReturnValue((w, retVal) => {
                     outputLogNodeBuilder.AddNameValuePair(
@@ -92,6 +88,64 @@ namespace NWheels.Logging.Factories
                 .OnAfter(w => {
                     activityLocal.CastTo<ILogActivity>().Void(x => x.Dispose);     
                 });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private string GetQualifiedMemberNameToLog(MethodMember member)
+        {
+            string memberName = null;
+            MethodInfo targetMethod;
+
+            if (member.MethodDeclaration != null && _targetInterfaceMap.TryGetValue(member.MethodDeclaration, out targetMethod))
+            {
+                if (targetMethod.Name.IndexOf('.') > 0)
+                {
+                    var nameParts = targetMethod.Name.Split('.');
+                    var isUniqueName = !_targetInterfaceMap.Values.Any(method => 
+                        method != targetMethod &&
+                        GetMemberSimpleName(method.Name) == nameParts[nameParts.Length - 1]);
+                    var qualifierCount = (isUniqueName ? 0 : 1);
+                    memberName = string.Join(".", nameParts.Skip(nameParts.Length - qualifierCount - 1));
+                }
+                else
+                {
+                    memberName = targetMethod.Name;
+                }
+            }
+
+            return (
+                _aspectContext.ComponentType.Name + 
+                "." + 
+                (memberName ?? member.Name));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static string GetMemberSimpleName(string name)
+        {
+            if (name.IndexOf('.') > 0)
+            {
+                var nameParts = name.Split('.');
+                return nameParts[nameParts.Length - 1];
+            }
+
+            return name;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void BuildTargetInterfaceMap()
+        {
+            var allInterfaceMaps = _aspectContext.ComponentType.GetInterfaces().Select(intf => _aspectContext.ComponentType.GetInterfaceMap(intf));
+
+            foreach (var map in allInterfaceMaps)
+            {
+                for (int i = 0; i < map.InterfaceMethods.Length; i++)
+                {
+                    _targetInterfaceMap[map.InterfaceMethods[i]] = map.TargetMethods[i];
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

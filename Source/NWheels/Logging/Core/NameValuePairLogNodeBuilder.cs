@@ -92,11 +92,12 @@ namespace NWheels.Logging.Core
         {
             var constructorArguments = new List<IOperand>();
             constructorArguments.Add(messageId);
+            constructorArguments.Add(logLevelOperand ?? writer.Const(LogLevel.Verbose));
+            constructorArguments.Add(writer.Const(LogOptions.ThreadLog));
 
             if ( !_souldBuildActivity )
             {
-                constructorArguments.Add(logLevelOperand);
-                constructorArguments.Add(exceptionOperand);
+                constructorArguments.Add(exceptionOperand ?? writer.Const<Exception>(null));
             }
 
             for ( int i = 0 ; i < _types.Count ; i++ )
