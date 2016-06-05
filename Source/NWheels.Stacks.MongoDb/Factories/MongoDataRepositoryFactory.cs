@@ -5,6 +5,7 @@ using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using Autofac;
 using Hapil;
 using Hapil.Members;
@@ -61,6 +62,9 @@ namespace NWheels.Stacks.MongoDb.Factories
 
         private const string MongoNativeConnectioinStringPrefix = "mongodb://";
 
+        //TODO: get rid of this lock
+        private static readonly object _s_createInstanceSyncRoot = new object();
+
         public override IApplicationDataRepository NewUnitOfWork(
             IResourceConsumerScopeHandle consumerScope, 
             Type repositoryType, 
@@ -91,16 +95,29 @@ namespace NWheels.Stacks.MongoDb.Factories
                 database = server.GetDatabase(connectionStringBuilder.DatabaseName);
             }
 
-            var dataRepository = (MongoDataRepositoryBase)CreateInstanceOf(repositoryType).UsingConstructor(
-                consumerScope,
-                _components, 
-                _entityFactory, 
-                _metadataCache, 
-                database, 
-                autoCommit);
+            //TODO: get rid of this lock
+            if (!Monitor.TryEnter(_s_createInstanceSyncRoot, 15000))
+            {
+                throw new TimeoutException("Timed out waiting for exclusive lock on unit of work instantiation.");
+            }
+
+            MongoDataRepositoryBase dataRepository;
+
+            try { 
+                dataRepository = (MongoDataRepositoryBase)CreateInstanceOf(repositoryType).UsingConstructor(
+                    consumerScope,
+                    _components, 
+                    _entityFactory, 
+                    _metadataCache, 
+                    database, 
+                    autoCommit);
+            }
+            finally
+            {
+                Monitor.Exit(_s_createInstanceSyncRoot);
+            }
 
             EnsureDatabaseInitialized(dataRepository);
-
             return dataRepository;
         }
 
