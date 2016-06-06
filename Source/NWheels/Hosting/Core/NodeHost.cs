@@ -864,6 +864,7 @@ namespace NWheels.Hosting.Core
                 sequence.Once().OnPerform(LoadConfiguration);
                 sequence.Once().OnPerform(FindLifecycleComponents);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeConfigured);
+                sequence.Once().OnPerform(WriteEffectiveConfigurationXml);
                 sequence.Once().OnPerform(LoadDataRepositories);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentNodeLoading).OnRevert(CallComponentNodeUnloaded);
                 sequence.ForEach(GetLifecycleComponents).OnPerform(CallComponentLoad).OnRevert(CallComponentUnload);
@@ -883,8 +884,6 @@ namespace NWheels.Hosting.Core
                 _suppressDynamicArtifacts = loggingConfiguration.SuppressDynamicArtifacts;
 
                 Directory.CreateDirectory(PathUtility.DynamicArtifactPath());
-
-                WriteEffectiveConfigurationXml(loader);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -936,15 +935,16 @@ namespace NWheels.Hosting.Core
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private void WriteEffectiveConfigurationXml(XmlConfigurationLoader loader)
+            private void WriteEffectiveConfigurationXml()
             {
                 if ( _suppressDynamicArtifacts )
                 {
                     return;
                 }
 
-
+                var loader = OwnerLifetime.LifetimeContainer.Resolve<XmlConfigurationLoader>();
                 var filePath = PathUtility.DynamicArtifactPath("effective-config-dump.xml");
+                
                 _logger.WritingEffectiveConfigurationToDisk(filePath);
 
                 var effectiveConfigurationXml = new XDocument();

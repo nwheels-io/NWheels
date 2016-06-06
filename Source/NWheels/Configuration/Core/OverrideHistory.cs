@@ -88,11 +88,11 @@ namespace NWheels.Configuration.Core
 
                 if ( Value != null )
                 {
-                    return string.Format("'{0}' from {1}#{2}{3}", Value, Source.Level, Source.Name, lineInfoText);
+                    return string.Format("'{0}' from {1}#{2}:{3}:{4}", Value, Source.Level, Source.Type, Source.Name, lineInfoText);
                 }
                 else
                 {
-                    return string.Format("from {1}#{2}{3}", Value, Source.Level, Source.Name, lineInfoText);
+                    return string.Format("from {1}#{2}:{3}:{4}", Value, Source.Level, Source.Type, Source.Name, lineInfoText);
                 }
             }
 
