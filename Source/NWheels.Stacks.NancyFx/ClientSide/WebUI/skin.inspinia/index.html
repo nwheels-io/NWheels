@@ -3434,6 +3434,15 @@ HEAD, JS/CSS LINKS
             $rootScope.beginBrowserDownload = function(url) {
                 document.getElementById('iframe_content_download').src = url;
             };
+            $rootScope.$watch('uidl', function(newValue, oldValue) {
+                if ($rootScope.uidl && !$rootScope.pageCodeSnippetsInserted) {
+                    if ($rootScope.uidl.headerNativeSnippet) {
+                        var snippetDom = $($rootScope.uidl.headerNativeSnippet);
+                        $('body').prepend(snippetDom);
+                    }
+                    $rootScope.pageCodeSnippetsInserted = true;
+                };
+            });
         }]);
 
         angular.module('theApp').directive('jsonView', ['$timeout', function ($timeout) {
@@ -3468,6 +3477,8 @@ HEAD, JS/CSS LINKS
             return null;
         }
 
+        
+        /*
         function initWidget_Screen($scope) {
             if ($scope.uidl.nativeSnippetBefore) {
                 $scope.domNativeSnippetBefore = $($scope.uidl.nativeSnippetBefore);
@@ -3479,12 +3490,9 @@ HEAD, JS/CSS LINKS
                 });            
             }
         }
-        
-        /*
         function initWidget_ScreenPart($scope) {
             alert('initWidget_ScreenPart : ' + $scope.uidl.qualifiedName);
         }
-
         angular.module('theApp').service('skinService', ['$rootScope', '$q', 'uidlService', 
         function($rootScope, $q, uidlService) {
             

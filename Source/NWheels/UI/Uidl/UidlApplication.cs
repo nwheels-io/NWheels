@@ -85,6 +85,11 @@ namespace NWheels.UI.Uidl
         public ModalUserAlert ModalAlert { get; set; }
         [DataMember]
         public string DefaultSkin { get; set; }
+        [DataMember]
+        public string HeaderNativeSnippet { get; set; }
+        [DataMember]
+        public string FooterNativeSnippet { get; set; }
+
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
