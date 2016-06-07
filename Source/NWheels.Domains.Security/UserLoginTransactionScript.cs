@@ -47,7 +47,7 @@ namespace NWheels.Domains.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Result Execute(string loginName, string password)
+        public virtual Result Execute(string loginName, string password)
         {
             IApplicationDataRepository authenticationContext;
             IQueryable<IUserAccountEntity> userAccountQuery;

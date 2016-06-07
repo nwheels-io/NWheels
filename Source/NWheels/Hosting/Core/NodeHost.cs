@@ -46,6 +46,7 @@ using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Configuration.Impls;
 using NWheels.Entities.Migrations;
+using NWheels.Hosting.Factories;
 using NWheels.Processing.Commands.Factories;
 using NWheels.TypeModel;
 using NWheels.UI.Impl;
@@ -308,6 +309,9 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<PresentationObjectFactory>().As<IPresentationObjectFactory>().SingleInstance();
             builder.RegisterType<MethodCallObjectFactory>().As<IMethodCallObjectFactory>().SingleInstance();
             builder.RegisterPipeline<IDomainContextPopulator>();
+
+            builder.RegisterPipeline<IComponentAspectProvider>().SingleInstance();
+            builder.RegisterType<ComponentAspectFactory>().SingleInstance();
 
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();
 

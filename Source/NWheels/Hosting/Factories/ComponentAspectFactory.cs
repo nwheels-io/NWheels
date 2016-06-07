@@ -325,9 +325,9 @@ namespace NWheels.Hosting.Factories
 
             protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
             {
-                writer.AllMethods().Implement(w => 
-                    w.ProceedToBase()
-                );
+                writer.AllMethods().Implement(w => {
+                    w.ProceedToBase();
+                });
                 writer.ReadOnlyProperties().Implement(
                     p => p.Get(gw => gw.ProceedToBase())
                 );

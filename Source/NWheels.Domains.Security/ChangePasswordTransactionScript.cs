@@ -30,7 +30,8 @@ namespace NWheels.Domains.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Execute(
+        [SecurityCheck.AllowAnonymous]
+        public virtual void Execute(
             [PropertyContract.Semantic.LoginName] 
             string loginName,
             [PropertyContract.Semantic.Password] 

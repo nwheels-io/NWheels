@@ -9,6 +9,7 @@ using Autofac.Builder;
 using Autofac.Core;
 using Autofac.Core.Activators.Reflection;
 using Autofac.Core.Lifetime;
+using Hapil;
 using NWheels.Authorization;
 using NWheels.Configuration;
 using NWheels.Conventions;
@@ -25,6 +26,7 @@ using NWheels.Entities.Impl;
 using NWheels.Entities.Migrations;
 using NWheels.Exceptions;
 using NWheels.Hosting;
+using NWheels.Hosting.Factories;
 using NWheels.Logging;
 using NWheels.UI;
 using NWheels.Processing;
@@ -658,6 +660,31 @@ namespace NWheels.Extensions
                 _builder.Register(c => (TAbstract)c.Resolve<TConcrete>()).As<TAbstract, ITransactionScript>();
                 return _builder.RegisterType<TConcrete>();
             }
+
+            ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            //public IRegistrationBuilder<TScript, SimpleActivatorData, SingleRegistrationStyle> RegisterTransactionScript<TScript>()
+            //    where TScript : ITransactionScript
+            //{
+            //    return _builder.Register(c => 
+            //        (TScript)c.Resolve<ComponentAspectFactory>().CreateInheritor(typeof(TScript))
+            //    ).As<TScript, ITransactionScript>();
+            //}
+
+            ////-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            //public IRegistrationBuilder<TConcrete, SimpleActivatorData, SingleRegistrationStyle> RegisterTransactionScript<TAbstract, TConcrete>()
+            //    where TAbstract : ITransactionScript
+            //    where TConcrete : TAbstract
+            //{
+            //    _builder.Register<TAbstract>(c =>
+            //        (TAbstract)c.Resolve<ComponentAspectFactory>().CreateInheritor(typeof(TConcrete))
+            //    ).As<TAbstract, ITransactionScript>();
+
+            //    return _builder.Register<TConcrete>(c =>
+            //        (TConcrete)c.Resolve<ComponentAspectFactory>().CreateInheritor(typeof(TConcrete))
+            //    ).As<TConcrete>();
+            //}
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

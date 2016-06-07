@@ -27,7 +27,7 @@ namespace NWheels.Domains.Security
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Execute()
+        public virtual void Execute()
         {
             var session = Session.Current;
             _sessionManager.CloseCurrentSession();

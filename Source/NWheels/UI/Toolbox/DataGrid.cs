@@ -284,7 +284,7 @@ namespace NWheels.UI.Toolbox
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public GridColumn SoftByDefault(bool ascending = true)
+            public GridColumn SortByDefault(bool ascending = true)
             {
                 this.DefaultSort = true;
                 this.DefaultSortAscending = ascending;

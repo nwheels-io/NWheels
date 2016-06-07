@@ -31,12 +31,13 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
             Report.CriteriaForm.ConfigureLogTimeRange();
 
             Report.ResultTable
-                .Column(x => x.Timestamp)
+                .Column(x => x.Timestamp, setup: c => c.SortByDefault(ascending: false))
                 .Column(x => x.Machine, size: FieldSize.Small)
                 .Column(x => x.Environment)
                 .Column(x => x.Node, size: FieldSize.Small)
                 .Column(x => x.Instance, size: FieldSize.Small)
                 //.Column(x => x.Replica, size: FieldSize.Small)
+                .Column(x => x.Level)
                 .Column(x => x.Logger)
                 .Column(x => x.MessageId, size: FieldSize.Large)
                 .Column(x => x.ExceptionType, size: FieldSize.Large)

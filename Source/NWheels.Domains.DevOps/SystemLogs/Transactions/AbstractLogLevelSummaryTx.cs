@@ -32,8 +32,9 @@ namespace NWheels.Domains.DevOps.SystemLogs.Transactions
             var criteria = _viewModelFactory.NewEntity<ILogTimeRangeCriteria>();
             var now = _framework.UtcNow;
 
-            criteria.From = now.Date;
-            criteria.Until = now.Date.AddDays(1).AddSeconds(-1);
+            var timeRange = TimeRangePreset.Last24Hours.GetIntervalRelativeTo(now);
+            criteria.From = timeRange.LowerBound;
+            criteria.Until = timeRange.UpperBound;
 
             return criteria;
         }

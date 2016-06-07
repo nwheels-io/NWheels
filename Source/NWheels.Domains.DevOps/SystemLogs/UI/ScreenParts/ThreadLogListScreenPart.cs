@@ -1,4 +1,5 @@
-﻿using NWheels.Domains.DevOps.SystemLogs.Entities;
+﻿using System.Text;
+using NWheels.Domains.DevOps.SystemLogs.Entities;
 using NWheels.Domains.DevOps.SystemLogs.Transactions;
 using NWheels.UI;
 using NWheels.UI.Toolbox;
@@ -32,7 +33,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
 
             Report.ResultTable
                 .Column(x => x.Id)
-                .Column(x => x.Timestamp)
+                .Column(x => x.Timestamp, setup: c => c.SortByDefault(ascending: false))
                 .Column(x => x.Machine, size: FieldSize.Small)
                 .Column(x => x.Environment)
                 .Column(x => x.Node, size: FieldSize.Small)
