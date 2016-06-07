@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using System.Web.Http.Dispatcher;
 using System.Web.Http.ExceptionHandling;
 using System.Web.Mvc.Routing;
@@ -265,6 +266,8 @@ namespace NWheels.Stacks.AspNet
 
                 GlobalConfiguration.Configure(
                     config => {
+                        //config.EnableSystemDiagnosticsTracing();
+                        config.EnableCors(new EnableCorsAttribute(origins: "*", headers: "*", methods: "*"));//TODO: provide granular policy 
                         config.Services.Replace(typeof(IHttpControllerTypeResolver), _s_nodeHost.Components.Resolve<DynamicControllerTypeResolver>());
                         //config.Services.Replace(typeof(IHttpControllerSelector), _nodeHost.Components.Resolve<DynamicControllerSelector>());
                         //config.Routes.MapHttpRoute(

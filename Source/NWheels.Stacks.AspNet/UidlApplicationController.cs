@@ -23,6 +23,7 @@ using NWheels.Processing;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Web.Http.Cors;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -41,6 +42,7 @@ using NWheels.UI.Toolbox;
 
 namespace NWheels.Stacks.AspNet
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class UidlApplicationController : ApiController
     {
         private const string UploadSessionKey = "UPLOAD";
