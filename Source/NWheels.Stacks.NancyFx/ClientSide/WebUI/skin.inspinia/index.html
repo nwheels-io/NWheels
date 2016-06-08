@@ -3440,6 +3440,14 @@ HEAD, JS/CSS LINKS
                         var snippetDom = $($rootScope.uidl.headerNativeSnippet);
                         $('body').prepend(snippetDom);
                     }
+                    if ($rootScope.uidl.nativeTriggeredSnippets) {
+                        for (var i = 0 ; i < $rootScope.uidl.nativeTriggeredSnippets.length ; i++) {
+                            var triggeredSnippet = $rootScope.uidl.nativeTriggeredSnippets[i];
+                            $rootScope.$on(triggeredSnippet.trigger, function(event, data) {
+                                eval(triggeredSnippet.snippet);
+                            });
+                        }
+                    }
                     $rootScope.pageCodeSnippetsInserted = true;
                 };
             });

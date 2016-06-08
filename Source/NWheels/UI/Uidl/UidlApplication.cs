@@ -89,6 +89,8 @@ namespace NWheels.UI.Uidl
         public string HeaderNativeSnippet { get; set; }
         [DataMember]
         public string FooterNativeSnippet { get; set; }
+        [DataMember]
+        public List<NativeTriggeredCodeSnippet> NativeTriggeredSnippets { get; set; }
 
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -183,6 +185,14 @@ namespace NWheels.UI.Uidl
             where TContract : class
         {
             this.RequiredDomainContexts.Add(typeof(TContract));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class NativeTriggeredCodeSnippet
+        {
+            public string Trigger { get; set; }
+            public string Snippet { get; set; }
         }
     }
 }
