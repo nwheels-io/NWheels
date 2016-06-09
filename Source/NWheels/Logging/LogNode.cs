@@ -22,7 +22,7 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private readonly string _messageId;
-        private readonly LogOptions _options;
+        private LogOptions _options;
         private LogContentTypes _contentTypes;
         private LogLevel _level;
         private int _indexInLog;
@@ -387,6 +387,13 @@ namespace NWheels.Logging
                     Name = "$exception",
                     Value = this.Exception.Message
                 });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected void BubbleLogOptionsFrom(LogOptions subNodeLogOptions)
+        {
+            _options |= (subNodeLogOptions & LogOptions.RetainThreadLog);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

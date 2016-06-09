@@ -288,6 +288,7 @@ namespace NWheels.Logging
                 throw new InvalidOperationException("Cannot append log node to a closed activity.");
             }
 
+            base.BubbleLogOptionsFrom(child.Options);
             base.BubbleLogLevelFrom(child.Level.NoFailureIf(clearFailure));
             base.BubbleContentTypesFrom(child.ContentTypes);
 

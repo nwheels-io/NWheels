@@ -122,7 +122,10 @@ namespace NWheels.Core
                         effectiveTaskType = threadLog.TaskType;
                     }
 
-                    Thread.CurrentThread.Name = effectiveDescription;
+                    if (Thread.CurrentThread.Name == null)
+                    {
+                        Thread.CurrentThread.Name = effectiveDescription;
+                    }
 
                     try
                     {

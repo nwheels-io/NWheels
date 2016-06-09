@@ -59,6 +59,11 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         private bool ShouldPersistThreadLog(IReadOnlyThreadLog log)
         {
+            if ((log.RootActivity.Options & LogOptions.RetainThreadLog) != 0)
+            {
+                return true;
+            }
+
             switch ( _owner.LoggingConfig.ThreadLogPersistenceLevel )
             {
                 case ThreadLogPersistenceLevel.All:
