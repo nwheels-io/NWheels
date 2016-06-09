@@ -167,6 +167,12 @@ namespace NWheels.Hosting.Core
         [LogActivity]
         ILogActivity InitializingDataRepository(string type);
 
+        [LogActivity]
+        ILogActivity VerifyingConnectionToDatabase(string contextType, string connectionString);
+
+        [LogWarning]
+        void VerifyDatabaseConnectionWildcardConfigNoResolver(string contextType);
+
         [LogCritical]
         void ThreadTerminatedByException(ThreadTaskType taskType, string rootActivity, Exception exception);
     }

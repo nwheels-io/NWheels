@@ -913,25 +913,61 @@ namespace NWheels.Hosting.Core
 
             private void LoadDataRepository(DataRepositoryRegistration registration, IDataRepositoryFactory factory)
             {
-                using ( var repoActivity = _logger.InitializingDataRepository(type: registration.DataRepositoryType.FullName) )
+                using (var repoActivity = _logger.InitializingDataRepository(type: registration.DataRepositoryType.FullName))
                 {
                     try
                     {
                         var dbConfiguration = OwnerLifetime.LifetimeContainer.Resolve<IFrameworkDatabaseConfig>();
-                        var connectionString = dbConfiguration.GetContextConnectionString(registration.DataRepositoryType);
-
-                        if ( string.IsNullOrEmpty(connectionString) || connectionString.Trim().EndsWith("*") )
+                        var contextConfig = dbConfiguration.GetContextConnectionConfig(registration.DataRepositoryType);
+                        if (contextConfig == null)
                         {
                             return;
                         }
 
-                        var unitOfWorkFactory = OwnerLifetime.LifetimeContainer.Resolve<UnitOfWorkFactory>();
-                        var repoInstance = unitOfWorkFactory.NewUnitOfWork(registration.DataRepositoryType, autoCommit: false);
-                        repoInstance.Dispose();
+                        IDbConnectionStringResolver connectionStringResolver;
+
+                        if (!contextConfig.IsWildcard)
+                        {
+                            VerifyDatabaseConnection(contextConfig, contextConfig.ConnectionString);
+                        }
+                        else if (OwnerLifetime.LifetimeContainer.TryResolve<IDbConnectionStringResolver>(out connectionStringResolver))
+                        {
+                            var storageInitializer = OwnerLifetime.LifetimeContainer.Resolve<IStorageInitializer>();
+                            var allConnectionStrings = connectionStringResolver.GetAllConnectionStrings(storageInitializer);
+
+                            foreach (var connectionString in allConnectionStrings)
+                            {
+                                VerifyDatabaseConnection(contextConfig, connectionString);
+                            }
+                        }
+                        else
+                        {
+                            _logger.VerifyDatabaseConnectionWildcardConfigNoResolver(contextConfig.Contract.FriendlyName());
+                        }
                     }
-                    catch ( Exception e )
+                    catch (Exception e)
                     {
                         repoActivity.Fail(e);
+                        throw;
+                    }
+                }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            private void VerifyDatabaseConnection(IFrameworkContextPersistenceConfig contextConfig, string connectionString)
+            {
+                using (var activity = _logger.VerifyingConnectionToDatabase(contextConfig.Contract.FriendlyName(), connectionString))
+                {
+                    try
+                    {
+                        var unitOfWorkFactory = OwnerLifetime.LifetimeContainer.Resolve<UnitOfWorkFactory>();
+                        var repoInstance = unitOfWorkFactory.NewUnitOfWork(contextConfig.Contract, connectionString: connectionString);
+                        repoInstance.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                        activity.Fail(e);
                         throw;
                     }
                 }
