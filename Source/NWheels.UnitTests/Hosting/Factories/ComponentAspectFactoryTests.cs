@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using Autofac;
@@ -41,7 +42,7 @@ namespace NWheels.UnitTests.Hosting.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Wrapper_SingleAspect_Create()
+        public void Proxy_SingleAspect_Create()
         {
             //-- arrange
 
@@ -50,17 +51,17 @@ namespace NWheels.UnitTests.Hosting.Factories
 
             //-- act
 
-            var aspectizedWrapper = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
+            var aspectProxy = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
 
             //-- assert
 
-            aspectizedWrapper.ShouldNotBeNull();
+            aspectProxy.ShouldNotBeNull();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Wrapper_MultipleAspects_Create()
+        public void Proxy_MultipleAspects_Create()
         {
             //-- arrange
 
@@ -73,17 +74,17 @@ namespace NWheels.UnitTests.Hosting.Factories
 
             //-- act
 
-            var aspectizedWrapper = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
+            var aspectProxy = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
 
             //-- assert
 
-            aspectizedWrapper.ShouldNotBeNull();
+            aspectProxy.ShouldNotBeNull();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Wrapper_MultipleInterfaces_Create()
+        public void Proxy_MultipleInterfaces_Create()
         {
             //-- arrange
 
@@ -96,32 +97,32 @@ namespace NWheels.UnitTests.Hosting.Factories
 
             //-- act
 
-            var aspectizedWrapper = factoryUnderTest.CreateProxy(component, new[] {
+            var aspectProxy = factoryUnderTest.CreateProxy(component, new[] {
                 typeof(ITestComponent), 
                 typeof(ITestComponentTwo)
             });
 
             //-- assert
 
-            aspectizedWrapper.ShouldNotBeNull();
-            aspectizedWrapper.ShouldBeAssignableTo<ITestComponent>();
-            aspectizedWrapper.ShouldBeAssignableTo<ITestComponentTwo>();
+            aspectProxy.ShouldNotBeNull();
+            aspectProxy.ShouldBeAssignableTo<ITestComponent>();
+            aspectProxy.ShouldBeAssignableTo<ITestComponentTwo>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Wrapper_SingleAspect_InvokeVoidMethod()
+        public void Proxy_SingleAspect_InvokeVoidMethod()
         {
             //-- arrange
 
             var factoryUnderTest = CreateFactoryUnderTest(new TestAspectConvention.AspectProvider("Test"));
             var component = new TestComponentOne(_log);
-            var aspectizedWrapper = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
+            var aspectProxy = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
 
             //-- act
 
-            aspectizedWrapper.MethodOne();
+            aspectProxy.MethodOne();
 
             //-- assert
 
@@ -135,7 +136,7 @@ namespace NWheels.UnitTests.Hosting.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Wrapper_MultipleAspects_InvokeVoidMethod()
+        public void Proxy_MultipleAspects_InvokeVoidMethod()
         {
             //-- arrange
 
@@ -145,11 +146,11 @@ namespace NWheels.UnitTests.Hosting.Factories
                 new TestAspectConvention.AspectProvider("AspectC")
             );
             var component = new TestComponentOne(_log);
-            var aspectizedWrapper = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
+            var aspectProxy = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
 
             //-- act
 
-            aspectizedWrapper.MethodOne();
+            aspectProxy.MethodOne();
 
             //-- assert
 
@@ -167,7 +168,7 @@ namespace NWheels.UnitTests.Hosting.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Wrapper_MultipleAspects_InvokeVoidMethodWithParameters()
+        public void Proxy_MultipleAspects_InvokeVoidMethodWithParameters()
         {
             //-- arrange
 
@@ -177,16 +178,16 @@ namespace NWheels.UnitTests.Hosting.Factories
             );
             
             var component = new TestComponentTwo(_log);
-            
-            var aspectWrapper = factoryUnderTest.CreateProxy(component, new[] {
+
+            var aspectProxy = factoryUnderTest.CreateProxy(component, new[] {
                 typeof(ITestComponent), 
                 typeof(ITestComponentTwo)
             });
 
             //-- act
 
-            ((ITestComponent)aspectWrapper).MethodOne();
-            ((ITestComponentTwo)aspectWrapper).MethodThree();
+            ((ITestComponent)aspectProxy).MethodOne();
+            ((ITestComponentTwo)aspectProxy).MethodThree();
 
             //-- assert
 
@@ -208,17 +209,17 @@ namespace NWheels.UnitTests.Hosting.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Wrapper_SingleAspect_InvokeFunction()
+        public void Proxy_SingleAspect_InvokeFunction()
         {
             //-- arrange
 
             var factoryUnderTest = CreateFactoryUnderTest(new TestAspectConvention.AspectProvider("Test"));
             var component = new TestComponentOne(_log);
-            var aspectizedWrapper = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
+            var aspectProxy = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
 
             //-- act
 
-            var returnValue = aspectizedWrapper.MethodTwo(num: 123);
+            var returnValue = aspectProxy.MethodTwo(num: 123);
 
             //-- assert
 
@@ -233,7 +234,7 @@ namespace NWheels.UnitTests.Hosting.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Wrapper_MultipleAspects_InvokeFunction()
+        public void Proxy_MultipleAspects_InvokeFunction()
         {
             //-- arrange
 
@@ -243,11 +244,11 @@ namespace NWheels.UnitTests.Hosting.Factories
                 new TestAspectConvention.AspectProvider("AspectC")
             );
             var component = new TestComponentOne(_log);
-            var aspectizedWrapper = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
+            var aspectProxy = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
 
             //-- act
 
-            var returnValue = aspectizedWrapper.MethodTwo(num: 123);
+            var returnValue = aspectProxy.MethodTwo(num: 123);
 
             //-- assert
 
@@ -266,7 +267,7 @@ namespace NWheels.UnitTests.Hosting.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Wrapper_MultipleInterfaces_InvokeFunction()
+        public void Proxy_MultipleInterfaces_InvokeFunction()
         {
             //-- arrange
 
@@ -276,16 +277,16 @@ namespace NWheels.UnitTests.Hosting.Factories
             );
             
             var component = new TestComponentTwo(_log);
-            
-            var aspectWrapper = factoryUnderTest.CreateProxy(component, new[] {
+
+            var aspectProxy = factoryUnderTest.CreateProxy(component, new[] {
                 typeof(ITestComponent), 
                 typeof(ITestComponentTwo)
             });
 
             //-- act
 
-            var returnValue1 = ((ITestComponent)aspectWrapper).MethodTwo(num: 123);
-            var returnValue2 = ((ITestComponentTwo)aspectWrapper).MethodFour(num: 456);
+            var returnValue1 = ((ITestComponent)aspectProxy).MethodTwo(num: 123);
+            var returnValue2 = ((ITestComponentTwo)aspectProxy).MethodFour(num: 456);
 
             //-- assert
 
@@ -310,7 +311,7 @@ namespace NWheels.UnitTests.Hosting.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Wrapper_ModifyInputOutput()
+        public void Proxy_ModifyInputOutput()
         {
             //-- arrange
 
@@ -320,11 +321,11 @@ namespace NWheels.UnitTests.Hosting.Factories
                 new TestAspectConvention.AspectProvider("AspectC")
             );
             var component = new TestComponentOne(_log);
-            var aspectizedWrapper = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
+            var aspectProxy = (ITestComponent)factoryUnderTest.CreateProxy(component, new[] { typeof(ITestComponent) });
 
             //-- act
 
-            var returnValue = aspectizedWrapper.MethodTwo(num: 123);
+            var returnValue = aspectProxy.MethodTwo(num: 123);
 
             //-- assert
 
@@ -338,6 +339,63 @@ namespace NWheels.UnitTests.Hosting.Factories
                 "AspectC:AFTER:MethodTwo",
                 "AspectB:AFTER:MethodTwo",
                 "AspectA:AFTER:MethodTwo",
+            });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Proxy_ExplicitInterfaceImplementations()
+        {
+            //-- arrange
+
+            var factoryUnderTest = CreateFactoryUnderTest(
+                new TestAspectConvention.AspectProvider("AspectA", qualifiedMemberNames: true),
+                new TestAspectConvention.AspectProvider("AspectB", qualifiedMemberNames: true)
+            );
+            var component = new TestComponentFour(_log);
+            var aspectProxy = factoryUnderTest.CreateProxy(component, new[] {
+                typeof(ITestComponent), typeof(ITestComponentTwo), typeof(ITestComponentFour)
+            });
+
+            //-- act
+
+            ((ITestComponent)aspectProxy).MethodOne();
+            var returnValueTwo = ((ITestComponentTwo)aspectProxy).MethodFour(num: 123);
+
+            ((ITestComponentFour)aspectProxy).MethodOne();
+            var returnValueFour = ((ITestComponentFour)aspectProxy).MethodFour(num: 456);
+
+            //-- assert
+
+            returnValueTwo.ShouldBe("DEF");
+            returnValueFour.ShouldBe("XDEF");
+
+            _log.ShouldBe(new[] {
+                "AspectA:BEFORE:ITestComponent.MethodOne", 
+                "AspectB:BEFORE:ITestComponent.MethodOne", 
+                "COMPONENT:MethodOne", 
+                "AspectB:AFTER:ITestComponent.MethodOne",
+                "AspectA:AFTER:ITestComponent.MethodOne",
+
+                "AspectA:BEFORE:ITestComponentTwo.MethodFour", 
+                "AspectB:BEFORE:ITestComponentTwo.MethodFour", 
+                "COMPONENT:MethodFour(123)", 
+                "AspectB:AFTER:ITestComponentTwo.MethodFour",
+                "AspectA:AFTER:ITestComponentTwo.MethodFour",
+
+                "AspectA:BEFORE:ITestComponentFour.MethodOne", 
+                "AspectB:BEFORE:ITestComponentFour.MethodOne", 
+                "COMPONENT:ITestComponentFour.MethodOne", 
+                "AspectB:AFTER:ITestComponentFour.MethodOne",
+                "AspectA:AFTER:ITestComponentFour.MethodOne",
+
+                "AspectA:BEFORE:ITestComponentFour.MethodFour", 
+                "AspectB:BEFORE:ITestComponentFour.MethodFour", 
+                "COMPONENT:ITestComponentFour.MethodFour(456)", 
+                "AspectB:AFTER:ITestComponentFour.MethodFour",
+                "AspectA:AFTER:ITestComponentFour.MethodFour",
+
             });
         }
 
@@ -385,7 +443,7 @@ namespace NWheels.UnitTests.Hosting.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Wrapper_ResolveFromContainer()
+        public void Proxy_ResolveFromContainer()
         {
             //-- arrange
 
@@ -712,21 +770,47 @@ namespace NWheels.UnitTests.Hosting.Factories
             return factoryUnderTest;
         }
 
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static string GetShortMemberName(MemberBase member, bool qualified)
+        {
+            var name = member.Name;
+
+            if (name.Contains('.'))
+            {
+                var nameParts = name.Split('.', '+');
+
+                if (qualified)
+                {
+                    return string.Join(".", nameParts.Skip(nameParts.Length - 2));
+                }
+                else
+                {
+                    return nameParts.Last();
+                }
+            }
+
+            return name;
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class TestAspectConvention : DecorationConvention
         {
             private readonly string _name;
             private readonly ComponentAspectFactory.ConventionContext _aspectContext;
+            private readonly bool _qualifiedMemberNames;
             private Field<List<string>> _logField;
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public TestAspectConvention(string name, ComponentAspectFactory.ConventionContext aspectContext)
+            public TestAspectConvention(string name, ComponentAspectFactory.ConventionContext aspectContext, bool qualifiedMemberNames = false)
                 : base(Will.DecorateMethods)
             {
                 _name = name;
                 _aspectContext = aspectContext;
+                _qualifiedMemberNames = qualifiedMemberNames;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -743,8 +827,14 @@ namespace NWheels.UnitTests.Hosting.Factories
             protected override void OnMethod(MethodMember member, Func<MethodDecorationBuilder> decorate)
             {
                 decorate()
-                    .OnBefore(w => _logField.Add(_aspectContext.StaticStrings.GetStaticStringOperand(_name + ":BEFORE:" + member.Name)))
-                    .OnAfter(w => _logField.Add(_aspectContext.StaticStrings.GetStaticStringOperand(_name + ":AFTER:" + member.Name)));
+                    .OnBefore(w => _logField.Add(_aspectContext.StaticStrings.GetStaticStringOperand(
+                        _name + 
+                        ":BEFORE:" + 
+                        GetShortMemberName(member, _qualifiedMemberNames))))
+                    .OnAfter(w => _logField.Add(_aspectContext.StaticStrings.GetStaticStringOperand(
+                        _name + 
+                        ":AFTER:" + 
+                        GetShortMemberName(member, _qualifiedMemberNames))));
             }
 
             #endregion
@@ -754,12 +844,14 @@ namespace NWheels.UnitTests.Hosting.Factories
             public class AspectProvider : IComponentAspectProvider
             {
                 private readonly string _name;
+                private readonly bool _qualifiedMemberNames;
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-                public AspectProvider(string name)
+                public AspectProvider(string name, bool qualifiedMemberNames = false)
                 {
                     _name = name;
+                    _qualifiedMemberNames = qualifiedMemberNames;
                 }
 
                 //---------------------------------------------------------------------------------------------------------------------------------------------
@@ -768,7 +860,7 @@ namespace NWheels.UnitTests.Hosting.Factories
 
                 public IObjectFactoryConvention GetAspectConvention(ComponentAspectFactory.ConventionContext context)
                 {
-                    return new TestAspectConvention(_name, context);
+                    return new TestAspectConvention(_name, context, _qualifiedMemberNames);
                 }
 
                 #endregion
@@ -807,7 +899,10 @@ namespace NWheels.UnitTests.Hosting.Factories
             {
                 decorate()
                     .OnBefore(w => {
-                        _logField.Add(_aspectContext.StaticStrings.GetStaticStringOperand(_name + ":BEFORE:" + member.Name));
+                        _logField.Add(_aspectContext.StaticStrings.GetStaticStringOperand(
+                            _name + 
+                            ":BEFORE:" + 
+                            GetShortMemberName(member, qualified: false)));
                         w.ForEachArgument((arg, argIndex) => {
                             if (arg.OperandType == typeof(int))
                             {
@@ -824,7 +919,10 @@ namespace NWheels.UnitTests.Hosting.Factories
                         }                            
                     })
                     .OnAfter(w => 
-                        _logField.Add(_aspectContext.StaticStrings.GetStaticStringOperand(_name + ":AFTER:" + member.Name))
+                        _logField.Add(_aspectContext.StaticStrings.GetStaticStringOperand(
+                            _name + 
+                            ":AFTER:" +
+                            GetShortMemberName(member, qualified: false)))
                     );
             }
 
@@ -869,6 +967,14 @@ namespace NWheels.UnitTests.Hosting.Factories
         public interface ITestComponentTwo
         {
             void MethodThree();
+            string MethodFour(int num);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface ITestComponentFour
+        {
+            void MethodOne();
             string MethodFour(int num);
         }
 
@@ -1004,6 +1110,76 @@ namespace NWheels.UnitTests.Hosting.Factories
             {
                 _log.Add("COMPONENT:MethodFour(" + num + ")");
                 return "DEF";
+            }
+
+            #endregion
+        }
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class TestComponentFour : ITestComponent, ITestComponentTwo, ITestComponentFour
+        {
+            private readonly List<string> _log;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public TestComponentFour(List<string> log)
+            {
+                _log = log;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of ITestComponent
+
+            public virtual void MethodOne()
+            {
+                _log.Add("COMPONENT:MethodOne");
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual string MethodTwo(int num)
+            {
+                _log.Add("COMPONENT:MethodTwo(" + num + ")");
+                return "ABC";
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of ITestComponentTwo
+
+            public virtual void MethodThree()
+            {
+                _log.Add("COMPONENT:MethodThree");
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public virtual string MethodFour(int num)
+            {
+                _log.Add("COMPONENT:MethodFour(" + num + ")");
+                return "DEF";
+            }
+
+            #endregion
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Implementation of ITestComponenFour
+
+            void ITestComponentFour.MethodOne()
+            {
+                _log.Add("COMPONENT:ITestComponentFour.MethodOne");
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            string ITestComponentFour.MethodFour(int num)
+            {
+                _log.Add("COMPONENT:ITestComponentFour.MethodFour(" + num + ")");
+                return "XDEF";
             }
 
             #endregion

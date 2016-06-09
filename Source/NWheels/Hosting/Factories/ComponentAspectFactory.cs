@@ -296,10 +296,11 @@ namespace NWheels.Hosting.Factories
             protected override void OnImplementAnyInterface(ImplementationClassWriter<TT.TInterface> writer)
             {
                 var targetField = _aspectContext.GetTargetField(writer);
+                var explicitImpl = writer.ImplementInterfaceExplicitly<TT.TInterface>();
 
-                writer.AllMethods().ImplementPropagate(targetField.CastTo<TT.TInterface>());
-                writer.AllProperties().ImplementPropagate(targetField.CastTo<TT.TInterface>());
-                writer.AllEvents().ImplementPropagate(targetField.CastTo<TT.TInterface>());
+                explicitImpl.AllMethods().ImplementPropagate(targetField.CastTo<TT.TInterface>());
+                explicitImpl.AllProperties().ImplementPropagate(targetField.CastTo<TT.TInterface>());
+                explicitImpl.AllEvents().ImplementPropagate(targetField.CastTo<TT.TInterface>());
             }
 
             #endregion
