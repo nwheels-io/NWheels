@@ -1019,7 +1019,7 @@ namespace NWheels.Stacks.MongoDb
                 }
                 finally
                 {
-                    _logger.DisposingQueryResultEnumerator();
+                    _logger.DisposingQueryResultEnumerator(rowsRead: _rowCount);
                 }
             }
 

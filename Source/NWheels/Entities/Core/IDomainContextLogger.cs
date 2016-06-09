@@ -62,5 +62,8 @@ namespace NWheels.Entities.Core
 
         [LogCritical]
         void StaleUnitOfWorkEncountered(string domainContext, string initializedBy);
+
+        [LogVerbose]
+        void CommittingEntityGroup(Type contract, int count);
     }
 }

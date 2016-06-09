@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
+using Hapil;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
@@ -20,6 +21,7 @@ namespace NWheels.Stacks.MongoDb
     {
         private readonly MongoDatabase _database;
         private readonly IEntityObjectFactory _entityObjectFactory;
+        private readonly IDomainContextLogger _logger;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -34,6 +36,7 @@ namespace NWheels.Stacks.MongoDb
         {
             _database = database;
             _entityObjectFactory = objectFactory;
+            _logger = components.Resolve<IDomainContextLogger>();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -212,14 +215,18 @@ namespace NWheels.Stacks.MongoDb
             IGrouping<Type, IEntityObject> entityGroup,
             Action<IMongoEntityRepository, IEnumerable<IEntityObject>> commitAction)
         {
-            var isPartitionedEntity = (entityGroup.FirstOrDefault() is IPartitionedObject);
+            var entityArray = entityGroup.ToArray();
+            _logger.CommittingEntityGroup(contract: entityGroup.Key, count: entityArray.Length);
+
+            var isPartitionedEntity = (entityArray.Length > 0 && entityArray[0] is IPartitionedObject);
 
             if ( isPartitionedEntity )
             {
                 var singleEntityGroup = new IEntityObject[1];
 
-                foreach ( var entity in entityGroup )
+                for (int i = 0 ; i < entityArray.Length ; i++)
                 {
+                    var entity = entityArray[i];
                     var repository = (IMongoEntityRepository)base.GetEntityRepository(entity);
                     singleEntityGroup[0] = entity;
                     commitAction(repository, singleEntityGroup);
@@ -228,7 +235,7 @@ namespace NWheels.Stacks.MongoDb
             else
             {
                 var repository = (IMongoEntityRepository)base.GetEntityRepository(entityGroup.Key);
-                commitAction(repository, entityGroup);
+                commitAction(repository, entityArray);
             }
         }
 

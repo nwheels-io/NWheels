@@ -27,7 +27,7 @@ namespace NWheels.Stacks.MongoDb
         void EndOfQueryResults(int rowCount);
 
         [LogDebug]
-        void DisposingQueryResultEnumerator();
+        void DisposingQueryResultEnumerator(int rowsRead);
 
         [LogActivity]
         ILogActivity ExecutingInsert(string entityType);

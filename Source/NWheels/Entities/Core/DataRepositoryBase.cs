@@ -95,7 +95,7 @@ namespace NWheels.Entities.Core
             {
                 ValidateState(UnitOfWorkState.Untouched, UnitOfWorkState.Dirty);
 
-                var changeSet = GetCurrentChangeSet().ToArray();
+                //var changeSet = GetCurrentChangeSet().ToArray();
 
                 //ExecuteValidationPhase(changeSet);
                 //ExecuteBeforeSavePhase(changeSet);
