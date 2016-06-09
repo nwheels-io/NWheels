@@ -91,13 +91,6 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             return threadRecord.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff");
         }
 
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-        protected override string BuildSingleLineText()
-        {
-            return base.BuildSingleLineText();
-        }
-
         #endregion
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

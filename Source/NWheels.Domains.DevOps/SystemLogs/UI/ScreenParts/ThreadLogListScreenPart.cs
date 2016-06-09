@@ -40,9 +40,10 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
                 .Column(x => x.Instance, size: FieldSize.Small)
                 //.Column(x => x.Replica, size: FieldSize.Small)
                 .Column(x => x.TaskType, size: FieldSize.Small)
-                .Column(x => x.RootActivity, size: FieldSize.Large)
+                .Column(x => x.RootActivity, size: FieldSize.ExtraLarge)
                 .Column(x => x.DurationMs, size: FieldSize.Small, format: "#,##0")
                 .Column(x => x.Level, title: "Result", size: FieldSize.Small)
+                .Column(x => x.RootMessageId, size: FieldSize.Large)
                 .Column(x => x.ExceptionType, size: FieldSize.Large)
                 //.Column(x => x.ThreadLogId)
                 .Column(x => x.CorrelationId);

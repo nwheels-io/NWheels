@@ -15,6 +15,9 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
         ThreadTaskType TaskType { get; }
 
         [PropertyContract.Calculated]
+        string RootMessageId { get; }
+
+        [PropertyContract.Calculated]
         string RootActivity { get; }
 
         [PropertyContract.Calculated]

@@ -23,7 +23,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             this.Replica = record.NodeInstanceReplica;
             this.Timestamp = record.Timestamp;
             this.TaskType = record.TaskType;
-            this.RootActivity = record.Snapshot.RootActivity.MessageId;
+            this.RootMessageId = record.Snapshot.RootActivity.MessageId;
+            this.RootActivity = record.Snapshot.RootActivity.BuildSingleLineText();
             this.Level = record.Level;
             this.DurationMs = record.Snapshot.RootActivity.Duration;
             this.ExceptionType = record.Snapshot.RootActivity.ExceptionTypeName;
@@ -52,6 +53,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
         public string CorrelationId { get; private set; }
         public DateTime Timestamp { get; private set; }
         public ThreadTaskType TaskType { get; private set; }
+        public string RootMessageId { get; private set; }
         public string RootActivity { get; private set; }
         public long DurationMs { get; private set; }
         public LogLevel Level { get; private set; }

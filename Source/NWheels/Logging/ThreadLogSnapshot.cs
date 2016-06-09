@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Extensions;
 
 namespace NWheels.Logging
 {
@@ -36,6 +37,34 @@ namespace NWheels.Logging
         [DataContract(Namespace = "NWheels.Logging", Name = "Node")]
         public class LogNodeSnapshot
         {
+            public string BuildSingleLineText()
+            {
+                var messageIdParts = this.MessageId.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+                var messageIdDisplayPart = (messageIdParts.Length == 2 ? messageIdParts[1] : this.MessageId);
+
+                var text = new StringBuilder();
+
+                text.Append(messageIdDisplayPart.SplitPascalCase());
+
+                if (this.NameValuePairs != null)
+                {
+                    var nonDetailPairs = this.NameValuePairs.Where(p => !p.IsDetail).ToArray();
+
+                    if (nonDetailPairs.Length > 0)
+                    {
+                        for (int i = 0; i < nonDetailPairs.Length; i++)
+                        {
+                            var pair = nonDetailPairs[i];
+                            text.AppendFormat("{0}{1}={2}", (i > 0 ? ", " : ": "), pair.Name, pair.Value);
+                        }
+                    }
+                }
+
+                return text.ToString();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
             [DataMember]
             public string MessageId { get; set; }
             [DataMember]

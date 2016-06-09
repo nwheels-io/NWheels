@@ -40,7 +40,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             this.Level = logRecord.Level;
             this.NodeType = GetNodeType(logRecord.Level, logRecord.IsActivity);
             this.Icon = GetNodeIcon(logRecord.Level, logRecord.IsActivity);
-            this.Text = BuildSingleLineText();
+            this.Text = logRecord.BuildSingleLineText();
             this.TimeText = GetTimeText(threadRecord, logRecord);
             this.DurationMs = logRecord.Duration;
             this.CpuTimeMs = logRecord.CpuTime;
@@ -228,34 +228,6 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        protected virtual string BuildSingleLineText()
-        {
-            var messageIdParts = _logRecord.MessageId.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-            var messageIdDisplayPart = (messageIdParts.Length == 2 ? messageIdParts[1] : _logRecord.MessageId);
-
-            var text = new StringBuilder();
-
-            text.Append(messageIdDisplayPart.SplitPascalCase());
-
-            if (_logRecord.NameValuePairs != null)
-            {
-                var nonDetailPairs = _logRecord.NameValuePairs.Where(p => !p.IsDetail).ToArray();
-
-                if (nonDetailPairs.Length > 0)
-                {
-                    for (int i = 0; i < nonDetailPairs.Length; i++)
-                    {
-                        var pair = nonDetailPairs[i];
-                        text.AppendFormat("{0}{1}={2}", (i > 0 ? ", " : ": "), pair.Name, pair.Value);
-                    }
-                }
-            }
-
-            return text.ToString();
-        }
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------------
-
         [EntityImplementation.DependencyProperty]
         protected IFramework Framework { get; set; }
 
@@ -327,7 +299,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 
             for (var parent = _parentNode; parent != null; parent = parent._parentNode)
             {
-                stack.Add(parent.BuildSingleLineText());
+                stack.Add(parent._logRecord.BuildSingleLineText());
             }
 
             return stack.ToArray();
