@@ -84,13 +84,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>3rdParty\Gemini.Modules.PropertyGrid.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil, Version=0.9.32.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil, Version=0.9.33.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.32\lib\net45\Hapil.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.33\lib\net45\Hapil.dll</HintPath>
     </Reference>
-    <Reference Include="Hapil.Applied, Version=0.9.32.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
+    <Reference Include="Hapil.Applied, Version=0.9.33.0, Culture=neutral, PublicKeyToken=c3a0c69a5f805c0c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\FelixB.Hapil.0.9.32\lib\net45\Hapil.Applied.dll</HintPath>
+      <HintPath>..\packages\FelixB.Hapil.0.9.33\lib\net45\Hapil.Applied.dll</HintPath>
     </Reference>
     <Reference Include="MahApps.Metro, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
