@@ -6,6 +6,7 @@ using Autofac;
 using Hapil;
 using Hapil.Testing.NUnit;
 using NUnit.Framework;
+using NWheels.Extensions;
 using NWheels.Hosting.Core;
 using NWheels.Hosting.Factories;
 using NWheels.Logging;
@@ -28,7 +29,11 @@ namespace NWheels.UnitTests.Logging
         public void SetUp()
         {
             _logAppender = new TestThreadLogAppender(new TestFramework(base.DyamicModule));
-            Framework.UpdateComponents(b => b.RegisterInstance(_logAppender).As<IThreadLogAppender>());
+            
+            Framework.UpdateComponents(b => {
+                b.RegisterPipeline<IThreadLogAppender>();
+                b.RegisterInstance(_logAppender).As<IThreadLogAppender>();
+            });
 
             var aspectPipeline = new Pipeline<IComponentAspectProvider>(new IComponentAspectProvider[] {
                 new CallLoggingAspectConvention.AspectProvider(),

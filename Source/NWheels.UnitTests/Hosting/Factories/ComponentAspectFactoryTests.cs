@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
@@ -759,6 +760,27 @@ namespace NWheels.UnitTests.Hosting.Factories
 
             two.ShouldBeSameAs(one);
             three.ShouldBeSameAs(one);
+        }
+
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Inheritor_MembersOfSystemObjectAreNotOverridden()
+        {
+            //-- arrange
+
+            var factoryUnderTest = CreateFactoryUnderTest(new TestAspectConvention.AspectProvider("Test"));
+            var aspectized = (TestComponentThree)factoryUnderTest.CreateInheritor(typeof(TestComponentThree));
+
+            //-- act
+
+            var aspectizedType = aspectized.GetType();
+            var toStringMethod = aspectizedType.GetMethod("ToString");
+
+            //-- assert
+
+            toStringMethod.DeclaringType.ShouldBe(typeof(object));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

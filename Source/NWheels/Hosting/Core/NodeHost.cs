@@ -43,10 +43,12 @@ using NWheels.Utilities;
 using Formatting = Newtonsoft.Json.Formatting;
 using NWheels.Entities.Factories;
 using NWheels.Authorization.Core;
+using NWheels.Authorization.Factories;
 using NWheels.Concurrency;
 using NWheels.Configuration.Impls;
 using NWheels.Entities.Migrations;
 using NWheels.Hosting.Factories;
+using NWheels.Logging.Factories;
 using NWheels.Processing.Commands.Factories;
 using NWheels.TypeModel;
 using NWheels.UI.Impl;
@@ -311,6 +313,8 @@ namespace NWheels.Hosting.Core
             builder.RegisterPipeline<IDomainContextPopulator>();
 
             builder.RegisterPipeline<IComponentAspectProvider>().SingleInstance();
+            builder.RegisterType<CallLoggingAspectConvention.AspectProvider>().As<IComponentAspectProvider>().AnchoredFirstInPipeline();
+            builder.RegisterType<CallAuthorizationAspectConvention.AspectProvider>().As<IComponentAspectProvider>().AnchoredFirstInPipeline();
             builder.RegisterType<ComponentAspectFactory>().SingleInstance();
 
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();

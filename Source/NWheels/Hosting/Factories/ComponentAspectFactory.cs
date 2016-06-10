@@ -237,9 +237,10 @@ namespace NWheels.Hosting.Factories
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public Field<T> GetDependencyField<T>(ClassWriterBase writer)
+            public Field<T> GetDependencyField<T>(ClassWriterBase writer, string name = null)
             {
-                var fieldMember = _dependencyFieldByType.GetOrAdd(typeof(T), t => writer.Field<T>("dependency$" + typeof(T).Name));
+                var fieldName = (name ?? ("dependency$" + typeof(T).Name));
+                var fieldMember = _dependencyFieldByType.GetOrAdd(typeof(T), t => writer.Field<T>(fieldName));
                 return fieldMember.AsOperand<T>();
             }
 
@@ -326,7 +327,7 @@ namespace NWheels.Hosting.Factories
 
             protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
             {
-                writer.AllMethods().Implement(w => {
+                writer.AllMethods(m => m.DeclaringType != typeof(object)).Implement(w => {
                     w.ProceedToBase();
                 });
                 writer.ReadOnlyProperties().Implement(

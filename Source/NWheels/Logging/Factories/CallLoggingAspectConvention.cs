@@ -24,12 +24,13 @@ namespace NWheels.Logging.Factories
 
         private readonly StaticStringsDecorator _staticStrings;
         private readonly Dictionary<MethodInfo, MethodInfo> _targetInterfaceMap;
+        private Field<Pipeline<IThreadLogAppender>> _threadLogAppenderPipelineField;
         private Field<IThreadLogAppender> _threadLogAppenderField;
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         public CallLoggingAspectConvention(ComponentAspectFactory.ConventionContext aspectContext)
-            : base(Will.DecorateClass | Will.DecorateMethods)
+            : base(Will.DecorateClass | Will.DecorateConstructors | Will.DecorateMethods)
         {
             _aspectContext = aspectContext;
             _staticStrings = aspectContext.StaticStrings;
@@ -42,7 +43,17 @@ namespace NWheels.Logging.Factories
 
         protected override void OnClass(ClassType classType, DecoratingClassWriter classWriter)
         {
-            _threadLogAppenderField = _aspectContext.GetDependencyField<IThreadLogAppender>(classWriter);
+            _threadLogAppenderPipelineField = _aspectContext.GetDependencyField<Pipeline<IThreadLogAppender>>(classWriter, "$appendersPipeline");
+            _threadLogAppenderField = classWriter.Field<IThreadLogAppender>("$multicastAppender");
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected override void OnConstructor(MethodMember member, Func<ConstructorDecorationBuilder> decorate)
+        {
+            decorate().OnSuccess(w => 
+                _threadLogAppenderField.Assign(_threadLogAppenderPipelineField.Func<IThreadLogAppender>(x => x.AsService))
+            );
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

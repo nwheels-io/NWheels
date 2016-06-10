@@ -643,48 +643,48 @@ namespace NWheels.Extensions
                 return _builder.RegisterType<TActor>().As(messageHandlerInterfaces);
             }
 
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public IRegistrationBuilder<TScript, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterTransactionScript<TScript>()
-                where TScript : ITransactionScript
-            {
-                return _builder.RegisterType<TScript>().As<TScript, ITransactionScript>();
-            }
-
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
-            public IRegistrationBuilder<TConcrete, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterTransactionScript<TAbstract, TConcrete>()
-                where TAbstract : ITransactionScript
-                where TConcrete : TAbstract
-            {
-                _builder.Register(c => (TAbstract)c.Resolve<TConcrete>()).As<TAbstract, ITransactionScript>();
-                return _builder.RegisterType<TConcrete>();
-            }
-
             ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            //public IRegistrationBuilder<TScript, SimpleActivatorData, SingleRegistrationStyle> RegisterTransactionScript<TScript>()
+            //public IRegistrationBuilder<TScript, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterTransactionScript<TScript>()
             //    where TScript : ITransactionScript
             //{
-            //    return _builder.Register(c => 
-            //        (TScript)c.Resolve<ComponentAspectFactory>().CreateInheritor(typeof(TScript))
-            //    ).As<TScript, ITransactionScript>();
+            //    return _builder.RegisterType<TScript>().As<TScript, ITransactionScript>();
             //}
 
             ////-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            //public IRegistrationBuilder<TConcrete, SimpleActivatorData, SingleRegistrationStyle> RegisterTransactionScript<TAbstract, TConcrete>()
+            //public IRegistrationBuilder<TConcrete, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterTransactionScript<TAbstract, TConcrete>()
             //    where TAbstract : ITransactionScript
             //    where TConcrete : TAbstract
             //{
-            //    _builder.Register<TAbstract>(c =>
-            //        (TAbstract)c.Resolve<ComponentAspectFactory>().CreateInheritor(typeof(TConcrete))
-            //    ).As<TAbstract, ITransactionScript>();
-
-            //    return _builder.Register<TConcrete>(c =>
-            //        (TConcrete)c.Resolve<ComponentAspectFactory>().CreateInheritor(typeof(TConcrete))
-            //    ).As<TConcrete>();
+            //    _builder.Register(c => (TAbstract)c.Resolve<TConcrete>()).As<TAbstract, ITransactionScript>();
+            //    return _builder.RegisterType<TConcrete>();
             //}
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IRegistrationBuilder<TScript, SimpleActivatorData, SingleRegistrationStyle> RegisterTransactionScript<TScript>()
+                where TScript : ITransactionScript
+            {
+                return _builder.Register(c =>
+                    (TScript)c.Resolve<ComponentAspectFactory>().CreateInheritor(typeof(TScript))
+                ).As<TScript, ITransactionScript>();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IRegistrationBuilder<TConcrete, SimpleActivatorData, SingleRegistrationStyle> RegisterTransactionScript<TAbstract, TConcrete>()
+                where TAbstract : ITransactionScript
+                where TConcrete : TAbstract
+            {
+                _builder.Register<TAbstract>(c =>
+                    (TAbstract)c.Resolve<ComponentAspectFactory>().CreateInheritor(typeof(TConcrete))
+                ).As<TAbstract, ITransactionScript>();
+
+                return _builder.Register<TConcrete>(c =>
+                    (TConcrete)c.Resolve<ComponentAspectFactory>().CreateInheritor(typeof(TConcrete))
+                ).As<TConcrete>();
+            }
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
