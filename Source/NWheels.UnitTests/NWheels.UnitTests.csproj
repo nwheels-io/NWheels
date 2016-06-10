@@ -104,6 +104,7 @@
     <Compile Include="Hosting\AutofacRegistrationTests.cs" />
     <Compile Include="Hosting\EnvironmentConfigurationTests.cs" />
     <Compile Include="Hosting\Factories\ComponentAspectFactoryTests.cs" />
+    <Compile Include="Logging\AggregationTests.cs" />
     <Compile Include="Logging\ApplicationEventLoggerConventionTests.cs" />
     <Compile Include="Logging\CallLoggingAspectConventionTests.cs" />
     <Compile Include="Logging\LoggingBenchmarkTests.cs" />

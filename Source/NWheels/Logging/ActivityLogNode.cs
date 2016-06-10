@@ -2,12 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using Hapil;
 using NWheels.Logging.Impl;
 
 namespace NWheels.Logging
 {
     public abstract class ActivityLogNode : LogNode, ILogActivity
     {
+        public const int MaxTotalValues = 16;
+        
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static readonly string DbTotalMessageId = "$total.db";
+        public static readonly string CommunicationTotalMessageId = "$total.comm";
+        public static readonly string LockWaitTotalMessageId = "$total.wait";
+        public static readonly string LockHoldTotalMessageId = "$total.hold";
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private ActivityLogNode _parent;
         private LogNode _firstChild = null;
         private LogNode _lastChild = null;
@@ -15,12 +27,21 @@ namespace NWheels.Logging
         private long? _finalMillisecondsDuration = null;
         private ulong? _finalCpuCycles = null;
         private Exception _exception = null;
+        private LogTotal _dbTotal;
+        private LogTotal _communicationTotal;
+        private LogTotal _lockWaitTotal;
+        private LogTotal _lockHoldTotal;
+        private Dictionary<string, LogTotal> _totalByMessageId = null;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected ActivityLogNode(string messageId, LogLevel level, LogOptions options)
             : base(messageId, LogContentTypes.PerformanceStats, level, options)
         {
+            _dbTotal = new LogTotal(DbTotalMessageId, 0, 0);
+            _communicationTotal = new LogTotal(CommunicationTotalMessageId, 0, 0);
+            _lockWaitTotal = new LogTotal(LockWaitTotalMessageId, 0, 0);
+            _lockHoldTotal = new LogTotal(LockHoldTotalMessageId, 0, 0);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -145,6 +166,27 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public LogTotal[] GetTotals(bool includeBuiltIn = true)
+        {
+            if (!includeBuiltIn)
+            {
+                return (_totalByMessageId != null ? _totalByMessageId.Values.ToArray() : null);
+            }
+
+            var builtInTotals = new[] { _dbTotal, _communicationTotal, _lockWaitTotal, _lockHoldTotal };
+
+            if (_totalByMessageId == null)
+            {
+                return builtInTotals;
+            }
+            else
+            {
+                return builtInTotals.Concat(_totalByMessageId.Values).ToArray();
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public virtual string GetStatsGroupKey()
         {
             return MessageId;
@@ -250,6 +292,34 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public LogTotal DbTotal
+        {
+            get { return _dbTotal; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public LogTotal CommunicationTotal
+        {
+            get { return _communicationTotal; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public LogTotal LockWaitTotal
+        {
+            get { return _lockWaitTotal; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public LogTotal LockHoldTotal
+        {
+            get { return _lockHoldTotal; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public Action<ActivityLogNode> Closed { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -259,6 +329,31 @@ namespace NWheels.Logging
             base.BubbleLogLevelFrom(subActivity.Level);
             base.BubbleContentTypesFrom(subActivity.ContentTypes);
             this.BubbleExceptionFrom(subActivity.Exception);
+
+            if (subActivity.Options.HasAggregation())
+            {
+                this.IncrementTotal(subActivity.MessageId, 1, (int)subActivity.MillisecondsDuration, subActivity.Options);
+            }
+
+            this.BubbleTotalsFrom(subActivity);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected void BubbleTotalsFrom(ActivityLogNode subActivity)
+        {
+            LogTotal.Increment(ref _dbTotal, ref subActivity._dbTotal);
+            LogTotal.Increment(ref _communicationTotal, ref subActivity._communicationTotal);
+            LogTotal.Increment(ref _lockWaitTotal, ref subActivity._lockWaitTotal);
+            LogTotal.Increment(ref _lockHoldTotal, ref subActivity._lockHoldTotal);
+
+            if (subActivity._totalByMessageId != null)
+            {
+                foreach (var subTotal in subActivity._totalByMessageId.Values)
+                {
+                    IncrementTotal(subTotal.MessageId, subTotal.Count, subTotal.DurationMs);
+                }
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -291,6 +386,11 @@ namespace NWheels.Logging
             base.BubbleLogOptionsFrom(child.Options);
             base.BubbleLogLevelFrom(child.Level.NoFailureIf(clearFailure));
             base.BubbleContentTypesFrom(child.ContentTypes);
+
+            if (!(child is ActivityLogNode) && child.Options.HasAggregation())
+            {
+                IncrementTotal(child.MessageId, count: 1, durationMs: 0, messageFlags: child.Options); 
+            }
 
             if ( !clearFailure )
             {
@@ -336,12 +436,61 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        internal void IncrementBuiltinTotal(int asIndex, int count, int durationMs)
+        {
+            switch (asIndex)
+            {
+                case LogOptionsExtensions.AggregateAsIndexDbAccess:
+                    _dbTotal = _dbTotal.Increment(count, durationMs);
+                    break;
+                case LogOptionsExtensions.AggregateAsIndexCommunication:
+                    _communicationTotal = _communicationTotal.Increment(count, durationMs);
+                    break;
+                case LogOptionsExtensions.AggregateAsIndexLockWait:
+                    _lockWaitTotal = _lockWaitTotal.Increment(count, durationMs);
+                    break;
+                case LogOptionsExtensions.AggregateAsIndexLockHold:
+                    _lockHoldTotal = _lockHoldTotal.Increment(count, durationMs);
+                    break;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         protected override IEnumerable<ILogNameValuePair> ListNameValuePairs()
         {
             return base.ListNameValuePairs().Concat(new ILogNameValuePair[] {
                 new LogNameValuePair<long> { Name = "$duration", Value = this.MillisecondsDuration },
                 new LogNameValuePair<ulong> { Name = "$cputime", Value = this.MillisecondsCpuTime },
             });
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void IncrementTotal(string messageId, int count, int durationMs, LogOptions messageFlags = LogOptions.None)
+        {
+            if (messageFlags.HasAggregateAs())
+            {
+                IncrementBuiltinTotal(messageFlags.GetAggregateAsIndex(), count, durationMs);
+            }
+            else
+            {
+                if (_totalByMessageId == null)
+                {
+                    _totalByMessageId = new Dictionary<string, LogTotal>(capacity: MaxTotalValues);
+                }
+
+                LogTotal existingTotal;
+
+                if (_totalByMessageId.TryGetValue(messageId, out existingTotal))
+                {
+                    _totalByMessageId[messageId] = existingTotal.Increment(count, durationMs);
+                }
+                else
+                {
+                    _totalByMessageId[messageId] = new LogTotal(messageId, count, durationMs);
+                }
+            }
         }
     }
 }

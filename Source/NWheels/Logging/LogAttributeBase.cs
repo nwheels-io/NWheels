@@ -109,6 +109,14 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool Aggregate
+        {
+            get { return GetLogOption(LogOptions.Aggregate); }
+            set { SetLogOption(LogOptions.Aggregate, value); }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private bool GetLogOption(LogOptions flag)
         {
             return ((Options & flag) != 0);
