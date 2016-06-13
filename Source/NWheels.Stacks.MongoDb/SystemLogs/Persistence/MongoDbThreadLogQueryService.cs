@@ -135,7 +135,12 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
                 environmentFilter,
                 queryFunc: (db, environmentName) => {
                     var collection = db.GetCollection<ThreadLogRecord>(DbNamingConvention.GetThreadLogCollectionName(environmentName));
-                    return collection.Find(dbQuery);
+                    var cursor = collection.Find(dbQuery);
+                    var fields = new FieldsBuilder();
+                    fields.Exclude("Snapshot.RootActivity.SubNodes");
+                    fields.Exclude("Snapshot.RootActivity.ExceptionDetails");
+                    cursor.SetFields(fields);
+                    return cursor;
                 },
                 cancellation: cancellation);
         }
@@ -374,6 +379,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             ExpressionUtility.GetPropertyInfoFrom<IBaseLogDimensionsEntity>(x => x.Instance);
         private static readonly PropertyInfo _s_queryReplicaProperty =
             ExpressionUtility.GetPropertyInfoFrom<IBaseLogDimensionsEntity>(x => x.Replica);
+        private static readonly PropertyInfo _s_threadLogRecordSnapshotProperty =
+            ExpressionUtility.GetPropertyInfoFrom<ThreadLogRecord>(x => x.Snapshot);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

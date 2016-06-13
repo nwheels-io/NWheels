@@ -117,6 +117,46 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool AggregateAsDbAccess
+        {
+            get { return GetLogOption(LogOptions.AggregateAsDbAccess); }
+            set { SetLogOption(LogOptions.AggregateAsDbAccess, value); }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool AggregateAsCommunication
+        {
+            get { return GetLogOption(LogOptions.AggregateAsCommunication); }
+            set { SetLogOption(LogOptions.AggregateAsCommunication, value); }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool AggregateAsLockWait
+        {
+            get { return GetLogOption(LogOptions.AggregateAsLockWait); }
+            set { SetLogOption(LogOptions.AggregateAsLockWait, value); }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool AggregateAsLockHold
+        {
+            get { return GetLogOption(LogOptions.AggregateAsLockHold); }
+            set { SetLogOption(LogOptions.AggregateAsLockHold, value); }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool CompactMode
+        {
+            get { return GetLogOption(LogOptions.CompactMode); }
+            set { SetLogOption(LogOptions.CompactMode, value); }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private bool GetLogOption(LogOptions flag)
         {
             return ((Options & flag) != 0);
