@@ -685,6 +685,32 @@ namespace NWheels.UnitTests.Hosting.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
+        public void Inheritor_NonVirtualMembers_Skip()
+        {
+            //-- arrange
+
+            var factoryUnderTest = CreateFactoryUnderTest(
+                new TestAspectConvention.AspectProvider("AspectA"),
+                new TestAspectConvention.AspectProvider("AspectB")
+            );
+
+            //-- act
+
+            var aspectized = (TestComponentThree)factoryUnderTest.CreateInheritor(typeof(TestComponentThree));
+            var returnValue = aspectized.NonVirtualMethod(123);
+
+            //-- assert
+
+            _log.ShouldBe(new[] {
+                "COMPONENT:NonVirtualMethod(123)", 
+            });
+
+            returnValue.ShouldBe("XYZ");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
         public void Inheritor_ResolveFromContainer()
         {
             //-- arrange
@@ -994,6 +1020,13 @@ namespace NWheels.UnitTests.Hosting.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public interface ITestComponentThree
+        {
+            string NonVirtualMethod(int num);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public interface ITestComponentFour
         {
             void MethodOne();
@@ -1087,7 +1120,7 @@ namespace NWheels.UnitTests.Hosting.Factories
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class TestComponentThree : ITestComponent, ITestComponentTwo
+        public class TestComponentThree : ITestComponent, ITestComponentTwo, ITestComponentThree
         {
             private readonly List<string> _log;
 
@@ -1135,7 +1168,16 @@ namespace NWheels.UnitTests.Hosting.Factories
             }
 
             #endregion
+            
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string NonVirtualMethod(int num)
+            {
+                _log.Add("COMPONENT:NonVirtualMethod(" + num + ")");
+                return "XYZ";
+            }
         }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public class TestComponentFour : ITestComponent, ITestComponentTwo, ITestComponentFour

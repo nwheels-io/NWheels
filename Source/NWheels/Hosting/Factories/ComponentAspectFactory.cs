@@ -327,19 +327,38 @@ namespace NWheels.Hosting.Factories
 
             protected override void OnImplementBaseClass(ImplementationClassWriter<TypeTemplate.TBase> writer)
             {
-                writer.AllMethods(m => m.IsPublic && m.DeclaringType != typeof(object)).Implement(w => {
+                writer.AllMethods(ShouldImplementMethod).Implement(w => {
                     w.ProceedToBase();
                 });
-                writer.ReadOnlyProperties(p => p.GetMethod != null && p.GetMethod.IsPublic).Implement(
+                writer.ReadOnlyProperties(ShouldImplementProperty).Implement(
                     p => p.Get(gw => gw.ProceedToBase())
                 );
-                writer.ReadWriteProperties(p => p.GetMethod != null && p.GetMethod.IsPublic).Implement(
+                writer.ReadWriteProperties(ShouldImplementProperty).Implement(
                     p => p.Get(gw => gw.ProceedToBase()),
                     p => p.Set((sw, value) => sw.ProceedToBase())
                 );
             }
 
             #endregion
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private static bool ShouldImplementMethod(MethodInfo method)
+            {
+                return (
+                    method.IsPublic && 
+                    method.DeclaringType != typeof(object) && 
+                    (method.IsVirtual || method.IsAbstract) &&
+                    !method.IsFinal);
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            private static bool ShouldImplementProperty(PropertyInfo property)
+            {
+                var getter = property.GetMethod;
+                return (getter != null && ShouldImplementMethod(getter));
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
