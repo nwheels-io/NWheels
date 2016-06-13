@@ -2,7 +2,7 @@
 {
     internal class ThreadLogAppender : IThreadLogAppender
     {
-        public const string UnknownThreadMessageId = "ThreadLog.UnknownThread";
+        public static readonly string UnknownThreadMessageId = "ThreadLog.UnknownThread";
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

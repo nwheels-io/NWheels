@@ -25,6 +25,7 @@ namespace NWheels.Logging
         AggregateAsCommunication = LogOptionsExtensions.AggregateAsFlag | 0x1000,
         AggregateAsLockWait = LogOptionsExtensions.AggregateAsFlag | 0x2000,
         AggregateAsLockHold = LogOptionsExtensions.AggregateAsFlag | 0x1000 | 0x2000,
+        CompactMode = 0x10000
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------------------------------

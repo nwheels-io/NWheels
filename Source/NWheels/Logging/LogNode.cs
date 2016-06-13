@@ -274,6 +274,16 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public virtual bool IsImportant
+        {
+            get
+            {
+                return (Level >= LogLevel.Info);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal virtual void AttachToThreadLog(IThreadLog thread, ActivityLogNode parent, int indexInLog)
         {
             _threadLog = thread;

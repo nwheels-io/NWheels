@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using Hapil;
 using NWheels.Logging.Impl;
@@ -21,6 +22,7 @@ namespace NWheels.Logging
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         private ActivityLogNode _parent;
+        private bool _isCompactMode;
         private LogNode _firstChild = null;
         private LogNode _lastChild = null;
         private bool _isClosed = false;
@@ -38,6 +40,7 @@ namespace NWheels.Logging
         protected ActivityLogNode(string messageId, LogLevel level, LogOptions options)
             : base(messageId, LogContentTypes.PerformanceStats, level, options)
         {
+            _isCompactMode = ((options & LogOptions.CompactMode) != 0);
             _dbTotal = new LogTotal(DbTotalMessageId, 0, 0);
             _communicationTotal = new LogTotal(CommunicationTotalMessageId, 0, 0);
             _lockWaitTotal = new LogTotal(LockWaitTotalMessageId, 0, 0);
@@ -292,6 +295,13 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public bool IsCompactMode
+        {
+            get { return _isCompactMode; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public LogTotal DbTotal
         {
             get { return _dbTotal; }
@@ -372,13 +382,18 @@ namespace NWheels.Logging
         {
             base.AttachToThreadLog(threadLog, parent, indexInLog);
             _parent = parent;
+
+            if (parent != null)
+            {
+                _isCompactMode |= parent.IsCompactMode;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal virtual void AppendChildNode(LogNode child, bool clearFailure = false)
+        internal virtual bool AppendChildNode(LogNode child, bool clearFailure = false)
         {
-            if ( _isClosed )
+            if (_isClosed)
             {
                 throw new InvalidOperationException("Cannot append log node to a closed activity.");
             }
@@ -387,27 +402,36 @@ namespace NWheels.Logging
             base.BubbleLogLevelFrom(child.Level.NoFailureIf(clearFailure));
             base.BubbleContentTypesFrom(child.ContentTypes);
 
-            if (!(child is ActivityLogNode) && child.Options.HasAggregation())
+            var isActivity = (child is ActivityLogNode);
+
+            if (!isActivity && child.Options.HasAggregation())
             {
-                IncrementTotal(child.MessageId, count: 1, durationMs: 0, messageFlags: child.Options); 
+                IncrementTotal(child.MessageId, count: 1, durationMs: 0, messageFlags: child.Options);
             }
 
-            if ( !clearFailure )
+            if (!clearFailure)
             {
                 BubbleExceptionFrom(child.Exception);
             }
 
-            if ( _lastChild != null )
+            var shouldInsert = (isActivity || child.IsImportant || !_isCompactMode);
+
+            if (shouldInsert)
             {
-                _lastChild.AttachNextSibling(child);
+                if (_lastChild != null)
+                {
+                    _lastChild.AttachNextSibling(child);
+                }
+
+                _lastChild = child;
+
+                if (_firstChild == null)
+                {
+                    _firstChild = child;
+                }
             }
 
-            _lastChild = child;
-
-            if ( _firstChild == null )
-            {
-                _firstChild = child;
-            }
+            return shouldInsert;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

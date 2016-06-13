@@ -7,6 +7,7 @@ using System.Xml;
 using NUnit.Framework;
 using NWheels.Logging;
 using NWheels.Logging.Core;
+using Shouldly;
 
 namespace NWheels.UnitTests.Logging
 {
@@ -429,6 +430,111 @@ namespace NWheels.UnitTests.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [Test]
+        public void CompactMode_UnimportantNodesOmitted()
+        {
+            //-- Arrange
+
+            var log = CreateThreadLog(rootActivityOptions: LogOptions.CompactMode);
+
+            //-- Act
+
+            log.AppendNode(new NameValuePairLogNode("!M1", LogLevel.Debug, LogOptions.None, exception: null));
+            log.AppendNode(new NameValuePairLogNode("!M2", LogLevel.Warning, LogOptions.None, exception: null));
+
+            var activity = new NameValuePairActivityLogNode("!A1", LogLevel.Verbose, LogOptions.None);
+            log.AppendNode(activity);
+
+            log.AppendNode(new NameValuePairLogNode("!M3", LogLevel.Error, LogOptions.None, new Exception()));
+            log.AppendNode(new NameValuePairLogNode("!M4", LogLevel.Verbose, LogOptions.None, exception: null));
+            log.AppendNode(new NameValuePairLogNode("!M5", LogLevel.Critical, LogOptions.None, new Exception()));
+
+            activity.Close();
+
+            log.AppendNode(new NameValuePairLogNode("!M6", LogLevel.Audit, LogOptions.None, exception: null));
+
+            //-- Assert
+
+            Assert.That(ToTestString(log.RootActivity), Is.EqualTo("AAX:Root{LW:M2;ACX:A1{LEX:M3;LCX:M5};LA:M6}"));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CompactMode_UnimportantNodesAggregated()
+        {
+            //-- Arrange
+
+            var log = CreateThreadLog(rootActivityOptions: LogOptions.CompactMode);
+
+            //-- Act
+
+            log.AppendNode(new NameValuePairLogNode("!MZ", LogLevel.Debug, LogOptions.Aggregate, exception: null));
+            log.AppendNode(new NameValuePairLogNode("!M2", LogLevel.Warning, LogOptions.None, exception: null));
+
+            var activity = new NameValuePairActivityLogNode("!A1", LogLevel.Verbose, LogOptions.None);
+            log.AppendNode(activity);
+
+            log.AppendNode(new NameValuePairLogNode("!M3", LogLevel.Error, LogOptions.None, new Exception()));
+            log.AppendNode(new NameValuePairLogNode("!MZ", LogLevel.Verbose, LogOptions.Aggregate, exception: null));
+            log.AppendNode(new NameValuePairLogNode("!M5", LogLevel.Critical, LogOptions.None, new Exception()));
+
+            activity.Close();
+
+            log.AppendNode(new NameValuePairLogNode("!M6", LogLevel.Audit, LogOptions.None, exception: null));
+
+            //-- Assert
+
+            Assert.That(ToTestString(log.RootActivity), Is.EqualTo("AAX:Root{LW:M2;ACX:A1{LEX:M3;LCX:M5};LA:M6}"));
+
+            var totals = log.RootActivity.GetTotals(includeBuiltIn: false);
+
+            totals.Length.ShouldBe(1);
+            totals[0].MessageId.ShouldBe("!MZ");
+            totals[0].Count.ShouldBe(2);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void CompactModeAtActivityLevel_UnimportantNodesOmitted()
+        {
+            //-- Arrange
+
+            var log = CreateThreadLog(rootActivityOptions: LogOptions.None);
+
+            //-- Act
+
+            log.AppendNode(new NameValuePairLogNode("!Z1", LogLevel.Debug, LogOptions.None, exception: null));
+
+            var activity = new NameValuePairActivityLogNode("!A1", LogLevel.Verbose, LogOptions.CompactMode);
+            log.AppendNode(activity);
+
+            log.AppendNode(new NameValuePairLogNode("!M1", LogLevel.Debug, LogOptions.None, exception: null));
+            log.AppendNode(new NameValuePairLogNode("!M2", LogLevel.Warning, LogOptions.None, exception: null));
+
+            var subActivity = new NameValuePairActivityLogNode("!A2", LogLevel.Verbose, LogOptions.None);
+            log.AppendNode(subActivity);
+
+            log.AppendNode(new NameValuePairLogNode("!M3", LogLevel.Error, LogOptions.None, new Exception()));
+            log.AppendNode(new NameValuePairLogNode("!M4", LogLevel.Verbose, LogOptions.None, exception: null));
+            log.AppendNode(new NameValuePairLogNode("!M5", LogLevel.Critical, LogOptions.None, new Exception()));
+
+            subActivity.Close();
+
+            log.AppendNode(new NameValuePairLogNode("!M6", LogLevel.Audit, LogOptions.None, exception: null));
+
+            activity.Close();
+
+            log.AppendNode(new NameValuePairLogNode("!Z2", LogLevel.Verbose, LogOptions.None, exception: null));
+
+            //-- Assert
+
+            Assert.That(ToTestString(log.RootActivity), Is.EqualTo("AAX:Root{LD:Z1;AAX:A1{LW:M2;ACX:A2{LEX:M3;LCX:M5};LA:M6};LV:Z2}"));
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         #if INCLUDE_MANUAL_TESTS
         [Category("Manual")]
         [TestCase(ThreadTaskType.StartUp, "Node is starting up", true, true)]
@@ -478,9 +584,12 @@ namespace NWheels.UnitTests.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private ThreadLog CreateThreadLog(string rootActivityText = "Root", ThreadTaskType taskType = ThreadTaskType.Unspecified)
+        private ThreadLog CreateThreadLog(
+            string rootActivityText = "Root", 
+            ThreadTaskType taskType = ThreadTaskType.Unspecified, 
+            LogOptions rootActivityOptions = LogOptions.None)
         {
-            var rootActivity = new FormattedActivityLogNode(rootActivityText);
+            var rootActivity = new FormattedActivityLogNode(rootActivityText, LogLevel.Info, rootActivityOptions);
             return new ThreadLog(Framework, Clock, Registry, Anchor, ThreadTaskType.Unspecified, rootActivity);
         }
 

@@ -18,7 +18,8 @@ namespace NWheels.Logging.Core
         private readonly ulong _threadStartCpuCycles;
         private ActivityLogNode _rootActivity;
         private ActivityLogNode _currentActivity;
-        private int _nodeCountInLog;
+        private int _nodeCount;
+        private int _nextNodeIndex;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -35,7 +36,8 @@ namespace NWheels.Logging.Core
             _correlationId = _logId;
             _node = framework.CurrentNode;
             _clock = clock;
-            _nodeCountInLog = 0;
+            _nodeCount = 1;
+            _nextNodeIndex = 1;
 
             if ( ThreadCpuTimeUtility.IsThreadCpuTimeSupported )
             {
@@ -43,7 +45,7 @@ namespace NWheels.Logging.Core
                 _threadStartCpuCycles = clock.ThreadCpuCycles;
             }
 
-            _rootActivity.AttachToThreadLog(this, parent: null, indexInLog: _nodeCountInLog++);
+            _rootActivity.AttachToThreadLog(this, parent: null, indexInLog: 0);
             _registry.ThreadStarted(this);
         }
 
@@ -51,12 +53,15 @@ namespace NWheels.Logging.Core
 
         public void AppendNode(LogNode node, bool clearFailure = false)
         {
-            node.AttachToThreadLog(this, _currentActivity, indexInLog: _nodeCountInLog++);
+            node.AttachToThreadLog(this, _currentActivity, indexInLog: _nextNodeIndex);
             _currentActivity.AppendChildNode(node, clearFailure);
+            
+            _nodeCount++;
+            _nextNodeIndex++;
 
             var nodeAsActivity = (node as ActivityLogNode);
 
-            if ( nodeAsActivity != null )
+            if (nodeAsActivity != null)
             {
                 _currentActivity = nodeAsActivity;
             }
@@ -196,6 +201,16 @@ namespace NWheels.Logging.Core
             get
             {
                 return _currentActivity;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public int NodeCount
+        {
+            get
+            {
+                return _nodeCount;
             }
         }
 
