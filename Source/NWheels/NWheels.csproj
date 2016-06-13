@@ -148,6 +148,7 @@
     <Compile Include="Entities\Migrations\SchemaVersionAttribute.cs" />
     <Compile Include="Entities\UnitOfWorkScopeOption.cs" />
     <Compile Include="Exceptions\ConventionException.cs" />
+    <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Extensions\UidlExtensions.cs" />
     <Compile Include="Hosting\Core\IComponentAspectProvider.cs" />
     <Compile Include="Logging\Factories\CallLoggingAspectConvention.cs" />
