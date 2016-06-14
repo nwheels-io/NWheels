@@ -297,7 +297,7 @@ namespace NWheels.Stacks.MongoDb.Factories
 
                 foreach ( var entity in base.EntitiesInRepository )
                 {
-                    var collectionName = MongoDataRepositoryBase.GetMongoCollectionName(entity.Metadata, null, null);
+                    var collectionName = MongoDataRepositoryBase.GetMongoCollectionName(base.MetadataCache, entity.Metadata, null, null);
 
                     if ( entity.Metadata != null && entity.Metadata.DerivedTypes.Count > 0 && visitedIndexSet.Add("D:" + collectionName) )
                     {

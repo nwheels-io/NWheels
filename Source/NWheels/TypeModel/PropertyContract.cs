@@ -159,6 +159,7 @@ namespace NWheels.DataObjects
             public override void ApplyTo(PropertyMetadataBuilder property, TypeMetadataCache cache)
             {
                 property.IsPartition = true;
+                property.PartitionValuePropertyName = PartitionNameProperty;
             }
 
             #endregion

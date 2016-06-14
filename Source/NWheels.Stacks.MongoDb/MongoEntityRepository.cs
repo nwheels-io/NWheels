@@ -56,7 +56,11 @@ namespace NWheels.Stacks.MongoDb
             _keyPropertyExpression = GetKeyPropertyExpression(_metadata);
             _objectFactory = objectFactory;
             _logger = ownerRepo.Components.Resolve<IMongoDbLogger>();
-            _mongoCollection = ownerRepo.GetCollection<TEntityImpl>(MongoDataRepositoryBase.GetMongoCollectionName(_metadata, partitionValue, partitionNameFunc));
+            _mongoCollection = ownerRepo.GetCollection<TEntityImpl>(MongoDataRepositoryBase.GetMongoCollectionName(
+                _metadataCache, 
+                _metadata, 
+                partitionValue, 
+                partitionNameFunc));
             _queryProvider = null;
         }
 

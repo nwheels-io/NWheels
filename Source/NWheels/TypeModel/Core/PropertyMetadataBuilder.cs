@@ -236,6 +236,7 @@ namespace NWheels.DataObjects.Core
         public bool IsSensitive { get; set; }
         public bool IsCalculated { get; set; }
         public bool IsPartition { get; set; }
+        public string PartitionValuePropertyName { get; set; }
         public int? NumericPrecision { get; set; }
         public List<PropertyContractAttribute> ContractAttributes { get; set; }
         public System.Reflection.PropertyInfo ContractPropertyInfo { get; set; }
@@ -352,6 +353,7 @@ namespace NWheels.DataObjects.Core
             IsSensitive = visitor.VisitAttribute("IsSensitive", IsSensitive);
             IsCalculated = visitor.VisitAttribute("IsCalculated", IsCalculated);
             IsPartition = visitor.VisitAttribute("IsPartition", IsPartition);
+            PartitionValuePropertyName = visitor.VisitAttribute("PartitionValuePropertyName", PartitionValuePropertyName);
 
             Relation = visitor.VisitElement<IRelationMetadata, RelationMetadataBuilder>(Relation);
             Validation = visitor.VisitElement<IPropertyValidationMetadata, PropertyValidationMetadataBuilder>(Validation);

@@ -43,6 +43,7 @@ namespace NWheels.DataObjects
         bool IsReadOnly { get; }
         bool IsCalculated { get; }
         bool IsPartition { get; }
+        string PartitionValuePropertyName { get; }
         int? NumericPrecision { get; }
         IReadOnlyList<PropertyContractAttribute> ContractAttributes { get; }
         PropertyInfo ContractPropertyInfo { get; }

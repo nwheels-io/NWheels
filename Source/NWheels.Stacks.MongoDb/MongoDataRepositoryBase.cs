@@ -1,7 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using Autofac;
 using Hapil;
 using MongoDB.Bson;
@@ -22,6 +24,7 @@ namespace NWheels.Stacks.MongoDb
         private readonly MongoDatabase _database;
         private readonly IEntityObjectFactory _entityObjectFactory;
         private readonly IDomainContextLogger _logger;
+        private static readonly Hashtable _s_mappedObjectNames = new Hashtable();
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -271,24 +274,62 @@ namespace NWheels.Stacks.MongoDb
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        internal static string GetMongoCollectionName(ITypeMetadata metadata, object partitionValue, Func<object, string> partitionNameFunc)
+        internal static string GetMongoCollectionName(
+            ITypeMetadataCache metadataCache, 
+            ITypeMetadata metaType, 
+            object partitionValue, 
+            Func<object, string> partitionNameFunc)
         {
-            if ( metadata.BaseType != null )
+            if ( metaType.BaseType != null )
             {
-                return GetMongoCollectionName(metadata.BaseType, partitionValue, partitionNameFunc);
+                return GetMongoCollectionName(metadataCache, metaType.BaseType, partitionValue, partitionNameFunc);
             }
 
-            var baseName = metadata.Name.TrimLead("Abstract");
+            var baseName = metaType.Name.TrimLead("Abstract");
+            var partitionValueDomainObject = partitionValue.AsOrNull<IDomainObject>();
 
-            if ( partitionValue != null )
+            if (partitionValueDomainObject != null)
             {
-                var nameProperty = partitionValue.GetType().GetProperty("Name");
-                partitionValue = nameProperty.GetValue(partitionValue);
+                var partitionValuePropertyName = metaType.PartitionProperty.PartitionValuePropertyName ?? "Name";
+                var partitionValueMetaType = metadataCache.GetTypeMetadata(partitionValueDomainObject.ContractType);
+                var partitionValueMetaProperty = partitionValueMetaType.GetPropertyByName(partitionValuePropertyName);
+
+                partitionValue = partitionValueMetaProperty.ReadValue(partitionValue);
             }
 
             var partitionSuffix = (partitionValue != null ? "_" + partitionValue.ToString() : "");
+            return GetValidMongoObjectName(baseName + partitionSuffix);
+        }
 
-            return baseName + partitionSuffix;
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetValidMongoObjectName(string proposedName)
+        {
+            string result = (string)_s_mappedObjectNames[proposedName];
+            if (result == null)
+            {
+                StringBuilder sb = new StringBuilder(proposedName.Length * 2);
+                // For now - the restriction is over the path characters.
+                var invalidChars = Path.GetInvalidFileNameChars().ToDictionary(x => x);
+                invalidChars.Add(' ', ' '); // Add space - Databases names cannot contain space.
+                foreach (var c in proposedName)
+                {
+                    if (!invalidChars.ContainsKey(c))
+                    {
+                        sb.Append(c);
+                    }
+                    else
+                    {
+                        sb.Append(((int)c).ToString("X2"));
+                    }
+                }
+                result = sb.ToString();
+                lock (_s_mappedObjectNames.SyncRoot)
+                {
+                    _s_mappedObjectNames[proposedName] = result;
+                }
+            }
+            return result;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
