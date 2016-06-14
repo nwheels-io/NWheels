@@ -14,10 +14,10 @@ namespace NWheels.Configuration.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public CommandLineConfigurationLoader(XmlConfigurationLoader loader, string[] configurationParameters)
+        public CommandLineConfigurationLoader(XmlConfigurationLoader loader, CommandLineParameters commandLine)
         {
             _loader = loader;
-            _configurationParameters = configurationParameters;
+            _configurationParameters = commandLine.Parameters;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -77,6 +77,20 @@ namespace NWheels.Configuration.Core
             value = argBody.Substring(equalsIndex + 1);
 
             return true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class CommandLineParameters
+        {
+            public CommandLineParameters(string[] parameters)
+            {
+                Parameters = parameters;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string[] Parameters { get; private set; }
         }
     }
 }

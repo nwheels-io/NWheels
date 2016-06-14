@@ -114,13 +114,13 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
                         logs.AddRange(collection.Find(query)
                             .SetSortOrder(SortBy.Ascending("Timestamp"))
                             .Select(EnsureCanDeserializeThreadLog)
-                            .Where(record => IsNewThreadLog(record.Snapshot.LogId))
-                            .Select(record => record.Snapshot));
+                            .Where(record => IsNewThreadLog(Guid.Parse(record.LogId)))
+                            .Select(record => record.VolatileSnapshot));
                     }
                 }
                 catch ( Exception e )
                 {
-                    logs.Add(CreateGeneralErrorRecord(e).Snapshot);
+                    logs.Add(CreateGeneralErrorRecord(e).VolatileSnapshot);
                 }
 
                 if ( logs.Count > 0 )
@@ -145,7 +145,7 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
         {
             try
             {
-                var log = record.Snapshot;
+                var log = record.VolatileSnapshot;
                 return record;
             }
             catch ( Exception e )

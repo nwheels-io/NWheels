@@ -13,6 +13,7 @@ namespace NWheels.Logging
         DateTime ThreadStartedAtUtc { get; }
         ulong ThreadStartCpuCycles { get; }
         long ElapsedThreadMilliseconds { get; }
+        long ElapsedThreadMicroseconds { get; }
         ulong UsedThreadCpuCycles { get; }
         ActivityLogNode RootActivity { get; }
     }

@@ -24,6 +24,9 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
         string MessageId { get; }
 
         [PropertyContract.Calculated]
+        DateTime Timestamp { get; }
+
+        [PropertyContract.Calculated]
         LogLevel Level { get; }
 
         [PropertyContract.Calculated]
@@ -36,16 +39,16 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
         string TimeText { get; }
 
         [PropertyContract.Calculated]
-        long DurationMs { get; }
+        long DurationMicroseconds { get; }
 
         [PropertyContract.Calculated]
-        long DbDurationMs { get; }
+        long DbDurationMicroseconds { get; }
 
         [PropertyContract.Calculated]
         long DbCount { get; }
 
         [PropertyContract.Calculated]
-        long CpuTimeMs { get; }
+        long CpuTimeMicroseconds { get; }
 
         [PropertyContract.Calculated]
         long CpuCycles { get; }
@@ -55,6 +58,9 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
 
         [PropertyContract.Calculated]
         string[] AdditionalDetails { get; }
+
+        [PropertyContract.Calculated]
+        string Exception { get; }
 
         [PropertyContract.Calculated]
         IList<IThreadLogUINodeEntity> SubNodes { get; }
@@ -91,9 +97,6 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
 
         [PropertyContract.Calculated]
         string Replica { get; }
-
-        [PropertyContract.Calculated]
-        DateTime Timestamp { get; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,3 +1,4 @@
+using MongoDB.Driver.GridFS;
 using NWheels.Hosting;
 
 namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
@@ -29,6 +30,27 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
         public static string GetThreadLogCollectionName(string environmentName)
         {
             return CollectionNamePrefix + environmentName + ThreadLogCollectionNameSuffix;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static string GetThreadLogGridfsName(string environmentName)
+        {
+            return CollectionNamePrefix + environmentName + ThreadLogCollectionNameSuffix + "FS";
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static MongoGridFSSettings GetThreadLogGridfsSettings(string environmentName)
+        {
+            var settings = new MongoGridFSSettings {
+                UpdateMD5 = false,
+                VerifyMD5 = false,
+                ChunkSize = 1024 * 1024,
+                Root = DbNamingConvention.GetThreadLogGridfsName(environmentName)
+            };
+
+            return settings;
         }
     }
 }

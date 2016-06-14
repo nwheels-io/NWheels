@@ -92,6 +92,7 @@ namespace NWheels.Logging.Core
         {
             return new ThreadLogSnapshot {
                 EnvironmentName = _node.EnvironmentName,
+                EnvironmentType = _node.EnvironmentType,
                 NodeName = _node.NodeName,
                 NodeInstance = _node.InstanceId,
                 MachineName = _s_machineName,
@@ -171,6 +172,16 @@ namespace NWheels.Logging.Core
             get
             {
                 return _clock.ElapsedMilliseconds;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public long ElapsedThreadMicroseconds
+        {
+            get
+            {
+                return _clock.ElapsedMicroseconds;
             }
         }
 

@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using MongoDB.Bson.IO;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using NWheels.Extensions;
 using NWheels.Logging;
@@ -52,7 +55,28 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             if ( _threadLogBatch.Count > 0 )
             {
                 _owner.ThreadLogCollection.InsertBatch(_threadLogBatch, WriteConcern.Acknowledged);
+
+                foreach (var threadLog in _threadLogBatch)
+                {
+                    _owner.ThreadLogGridfs.Upload(SerializeThreadLogSnapshot(threadLog.VolatileSnapshot), threadLog.LogId);
+                }
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private Stream SerializeThreadLogSnapshot(ThreadLogSnapshot snapshot)
+        {
+            var stream = new MemoryStream();
+
+            using (var writer = BsonWriter.Create(stream, new BsonBinaryWriterSettings() { CloseOutput = false }))
+            {
+                BsonSerializer.Serialize(writer, typeof(ThreadLogSnapshot), snapshot);
+                writer.Flush();
+            }
+
+            stream.Position = 0;
+            return stream;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

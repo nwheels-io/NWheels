@@ -21,7 +21,7 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
         string RootActivity { get; }
 
         [PropertyContract.Calculated]
-        long DurationMs { get; }
+        long MicrosecondsDuration { get; }
 
         [PropertyContract.Calculated]
         LogLevel Level { get; }
@@ -30,9 +30,9 @@ namespace NWheels.Domains.DevOps.SystemLogs.Entities
         string ExceptionType { get; }
 
         [PropertyContract.Calculated]
-        string CorrelationId { get; }
+        string ExceptionMessage { get; }
 
         [PropertyContract.Calculated]
-        ThreadLogSnapshot Snapshot { get; }
+        string CorrelationId { get; }
     }
 }

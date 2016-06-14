@@ -35,9 +35,9 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
                 this.IsRootActivity = true;
                 this.TaskType = threadLog.TaskType;
                 this.TimestampText = threadLog.StartedAtUtc.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                this.DurationText = threadLog.RootActivity.Duration.ToString("#,##0");
+                this.DurationText = threadLog.RootActivity.MicrosecondsDuration.ToString("#,##0");
                 this.CpuCyclesText = "+ " + threadLog.RootActivity.CpuCycles.ToString("#,##0");
-                this.CpuTimeText = threadLog.RootActivity.CpuTime.ToString("#,##0");
+                this.CpuTimeText = threadLog.RootActivity.MicrosecondsCpuTime.ToString("#,##0");
 
                 SetNodeKind();
             }
@@ -51,10 +51,10 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
                 this.LogNode = logNode;
                 this.IsRootActivity = false;
                 this.TaskType = null;
-                this.TimestampText = "+ " + logNode.MillisecondsTimestamp.ToString("#,##0");
-                this.DurationText = (logNode.IsActivity ? logNode.Duration.ToString("#,##0") : ""); 
+                this.TimestampText = "+ " + logNode.MicrosecondsTimestamp.ToString("#,##0");
+                this.DurationText = (logNode.IsActivity ? logNode.MicrosecondsDuration.ToString("#,##0") : ""); 
                 this.CpuCyclesText = "+ " + logNode.CpuCycles.ToString("#,##0");
-                this.CpuTimeText = (logNode.IsActivity ? logNode.CpuTime.ToString("#,##0") : "");
+                this.CpuTimeText = (logNode.IsActivity ? logNode.MicrosecondsCpuTime.ToString("#,##0") : "");
 
                 SetNodeKind();
             }
@@ -103,7 +103,7 @@ namespace NWheels.Tools.TestBoard.Modules.LogViewer
                 text.AppendFormat("Started at UTC  = {0:yyyy-MM-dd HH:mm:ss.fff}\r\n", this.ThreadLog.StartedAtUtc);
                 text.AppendFormat("------ {0} {1} ------\r\n", log.IsActivity ? "Activity" : "Log", log.Level);
                 text.AppendFormat("Recorded at UTC = {0:yyyy-MM-dd HH:mm:ss.fff} ({1} ms after thread start)\r\n", 
-                    this.ThreadLog.StartedAtUtc.AddMilliseconds(log.MillisecondsTimestamp), log.MillisecondsTimestamp);
+                    this.ThreadLog.StartedAtUtc.AddMilliseconds(log.MicrosecondsTimestamp), log.MicrosecondsTimestamp);
 
                 if ( !string.IsNullOrEmpty(log.ExceptionTypeName) )
                 {

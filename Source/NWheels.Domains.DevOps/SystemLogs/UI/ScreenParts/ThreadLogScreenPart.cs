@@ -1,5 +1,6 @@
 ﻿using NWheels.Domains.DevOps.SystemLogs.Entities;
 using NWheels.Domains.DevOps.SystemLogs.Transactions;
+using NWheels.Domains.DevOps.SystemLogs.UI.Formatters;
 using NWheels.Logging;
 using NWheels.UI;
 using NWheels.UI.Toolbox;
@@ -35,10 +36,10 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
                     f.Alignment = WidgetAlignment.Right;
                 })
                 //.Column<IRootThreadLogUINodeEntity, string>(x => x.Node, size: FieldSize.Small, setup: DisableSortingAndFiltering)
-                .Column(x => x.DurationMs, size: FieldSize.Small, format: "#,##0", setup: DisableSortingAndFiltering)
-                .Column(x => x.DbDurationMs, size: FieldSize.Small, format: "#,##0", setup: DisableSortingAndFiltering)
+                .Column(x => x.DurationMicroseconds, size: FieldSize.Small, format: "#,##0", setup: DisableSortingAndFiltering)
+                .Column(x => x.DbDurationMicroseconds, size: FieldSize.Small, format: "#,##0", setup: DisableSortingAndFiltering)
                 .Column(x => x.DbCount, size: FieldSize.Small, format: "#,##0", setup: DisableSortingAndFiltering)
-                .Column(x => x.CpuTimeMs, size: FieldSize.Small, format: "#,##0", setup: DisableSortingAndFiltering);
+                .Column(x => x.CpuTimeMicroseconds, size: FieldSize.Small, format: "#,##0", setup: DisableSortingAndFiltering);
                 //.Column<IRootThreadLogUINodeEntity, string>(x => x.LogId, setup: DisableSortingAndFiltering)
                 //.Column<IRootThreadLogUINodeEntity, string>(x => x.CorrelationId, setup: DisableSortingAndFiltering);
 
@@ -50,7 +51,8 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
                 .EnableExpandableTree(x => x.SubNodes);
 
             Report.ResultTable.EnablePaging = false;
-
+            Report.DownloadFormatIdName = ThreadLogTextDocumentFormatter.Format.IdName;
+            
             presenter.On(base.NavigatedHere)
                 .Broadcast(Report.ContextSetter).WithPayload(vm => vm.Input).TunnelDown();
         }

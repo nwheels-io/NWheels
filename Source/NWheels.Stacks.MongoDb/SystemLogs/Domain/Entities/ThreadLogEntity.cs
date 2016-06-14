@@ -23,13 +23,12 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             this.Replica = record.NodeInstanceReplica;
             this.Timestamp = record.Timestamp;
             this.TaskType = record.TaskType;
-            this.RootMessageId = record.Snapshot.RootActivity.MessageId;
-            this.RootActivity = record.Snapshot.RootActivity.BuildSingleLineText();
+            this.RootMessageId = record.RootActivityMessageId;
+            this.RootActivity = record.RootActivityText;
             this.Level = record.Level;
-            this.DurationMs = record.Snapshot.RootActivity.Duration;
-            this.ExceptionType = record.Snapshot.RootActivity.ExceptionTypeName;
+            this.MicrosecondsDuration = record.DurationMicroseconds;
+            this.ExceptionType = record.ExceptionType;
             this.CorrelationId = record.CorrelationId;
-            this.Snapshot = record.Snapshot;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,15 +49,15 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 
         #region Implementation of IThreadLogEntity
 
-        public string CorrelationId { get; private set; }
         public DateTime Timestamp { get; private set; }
         public ThreadTaskType TaskType { get; private set; }
         public string RootMessageId { get; private set; }
         public string RootActivity { get; private set; }
-        public long DurationMs { get; private set; }
+        public long MicrosecondsDuration { get; private set; }
         public LogLevel Level { get; private set; }
         public string ExceptionType { get; private set; }
-        public ThreadLogSnapshot Snapshot { get; private set; }
+        public string ExceptionMessage { get; private set; }
+        public string CorrelationId { get; private set; }
 
         #endregion
 

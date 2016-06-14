@@ -306,10 +306,15 @@ namespace NWheels.Extensions
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public IRegistrationBuilder<TComponent, ConcreteReflectionActivatorData, SingleRegistrationStyle> RegisterLifecycleComponent<TComponent>()
+            public IRegistrationBuilder<TComponent, SimpleActivatorData, SingleRegistrationStyle> RegisterLifecycleComponent<TComponent>()
                 where TComponent : class, ILifecycleEventListener
             {
-                return _builder.RegisterType<TComponent>().As<ILifecycleEventListener>().SingleInstance();
+                return _builder
+                    .Register(c =>
+                        (TComponent)c.Resolve<ComponentAspectFactory>().CreateInheritor(typeof(TComponent))
+                    )
+                    .As<ILifecycleEventListener>()
+                    .SingleInstance();
             }
         }
 
@@ -485,15 +490,15 @@ namespace NWheels.Extensions
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void UseHiloIntegerIdGenerator(int loDigits)
-            {
-                _builder.RegisterType<HiloGeneratorMetadataConvention>().As<IMetadataConvention>().LastInPipeline();
-                _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<HiloIntegerIdGenerator>()
-                    .WithParameter(TypedParameter.From(loDigits))
-                    .As<HiloIntegerIdGenerator, IPropertyValueGenerator, IDomainContextPopulator>()
-                    .FirstInPipeline()
-                    .SingleInstance();
-            }
+            //public void UseHiloIntegerIdGenerator(int loDigits)
+            //{
+            //    _builder.RegisterType<HiloGeneratorMetadataConvention>().As<IMetadataConvention>().LastInPipeline();
+            //    _builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<HiloIntegerIdGenerator>()
+            //        //.WithParameter(TypedParameter.From(loDigits))
+            //        .As<HiloIntegerIdGenerator, IPropertyValueGenerator, IDomainContextPopulator>()
+            //        .FirstInPipeline()
+            //        .SingleInstance();
+            //}
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 

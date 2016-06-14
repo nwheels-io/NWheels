@@ -37,14 +37,16 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
     
             this.Id = threadRecord.LogId + "#" + _treeNodeIndex;
             this.MessageId = logRecord.MessageId;
+            this.Timestamp = threadRecord.Timestamp.AddMilliseconds(logRecord.MicrosecondsTimestamp / 1000);
             this.Level = logRecord.Level;
             this.NodeType = GetNodeType(logRecord.Level, logRecord.IsActivity);
             this.Icon = GetNodeIcon(logRecord.Level, logRecord.IsActivity);
             this.Text = logRecord.BuildSingleLineText();
             this.TimeText = GetTimeText(threadRecord, logRecord);
-            this.DurationMs = logRecord.Duration;
-            this.CpuTimeMs = logRecord.CpuTime;
+            this.DurationMicroseconds = logRecord.MicrosecondsDuration;
+            this.CpuTimeMicroseconds = logRecord.MicrosecondsCpuTime;
             this.CpuCycles = logRecord.CpuCycles;
+            this.Exception = logRecord.ExceptionDetails;
 
             if (logRecord.NameValuePairs != null)
             {
@@ -73,15 +75,17 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 
         public ThreadLogNodeType NodeType { get; private set; }
         public string MessageId { get; private set; }
+        public DateTime Timestamp { get; protected set; }
         public LogLevel Level { get; private set; }
         public string Icon { get; private set; }
         public string Text { get; private set; }
         public string TimeText { get; private set; }
-        public long DurationMs { get; private set; }
-        public long DbDurationMs { get; private set; }
+        public long DurationMicroseconds { get; private set; }
+        public long DbDurationMicroseconds { get; private set; }
         public long DbCount { get; private set; }
-        public long CpuTimeMs { get; private set; }
+        public long CpuTimeMicroseconds { get; private set; }
         public long CpuCycles { get; private set; }
+        public string Exception { get; private set; }
         public string[] KeyValues { get; private set; }
         public string[] AdditionalDetails { get; private set; }
         public IList<IThreadLogUINodeEntity> SubNodes { get; private set; }
@@ -223,7 +227,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
 
         protected virtual string GetTimeText(ThreadLogRecord threadRecord, ThreadLogSnapshot.LogNodeSnapshot snapshot)
         {
-            return "+ " + snapshot.MillisecondsTimestamp.ToString("#,##0");
+            return "+ " + ((decimal)snapshot.MicrosecondsTimestamp / 1000m).ToString("#,##0.00");
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -237,9 +241,9 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
         {
             return new ThreadLogNodeDetails.MessageDetails() {
                 Time = string.Format(
-                    "{0:yyyy-MM-dd HH:mm:ss.fff} UTC | thread start + {1} ms",
-                    _threadRecord.Timestamp.AddMilliseconds(_logRecord.MillisecondsTimestamp),
-                    _logRecord.MillisecondsTimestamp),
+                    "{0:yyyy-MM-dd HH:mm:ss.fff} UTC | thread start + {1:#,##0.00} ms",
+                    _threadRecord.Timestamp.AddMilliseconds(_logRecord.MicrosecondsTimestamp / 1000),
+                    (decimal)_logRecord.MicrosecondsTimestamp / 1000m),
                 Message = string.Format(
                     "{0} | {1}:{2}", 
                     this.MessageId, 
@@ -281,10 +285,10 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             }
 
             var counters = new Dictionary<string, decimal> {
-                { "Duration", _logRecord.Duration },
+                { "Duration", _logRecord.MicrosecondsDuration },
                 { "DbCount", 0 },
                 { "DbDurationMs", 0 },
-                { "CpuTimeNs", _logRecord.CpuTime },
+                { "CpuTimeNs", _logRecord.MicrosecondsCpuTime },
                 { "CpuCycles", _logRecord.CpuCycles },
             };
 

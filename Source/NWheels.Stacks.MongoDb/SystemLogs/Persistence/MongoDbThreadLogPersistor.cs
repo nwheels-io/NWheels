@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using Autofac;
 using MongoDB.Driver;
+using MongoDB.Driver.GridFS;
 using NWheels.Concurrency;
 using NWheels.Core;
 using NWheels.Extensions;
@@ -21,6 +22,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
         private MongoCollection _threadLogCollection;
         private MongoCollection _logMessageCollection;
         private MongoCollection _dailySummaryCollection;
+        private MongoGridFS _threadLogGridfs;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -73,6 +75,13 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public MongoGridFS ThreadLogGridfs
+        {
+            get { return _threadLogGridfs; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public MongoCollection DailySummaryCollection
         {
             get { return _dailySummaryCollection; }
@@ -106,9 +115,10 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
         {
             _database = ConnectToDatabase(_loggingConfig);
 
+            _dailySummaryCollection = _database.GetCollection(DbNamingConvention.GetDailySummaryCollectionName(_framework.CurrentNode.EnvironmentName));
             _logMessageCollection = _database.GetCollection(DbNamingConvention.GetLogMessageCollectionName(_framework.CurrentNode.EnvironmentName));
             _threadLogCollection = _database.GetCollection(DbNamingConvention.GetThreadLogCollectionName(_framework.CurrentNode.EnvironmentName));
-            _dailySummaryCollection = _database.GetCollection(DbNamingConvention.GetDailySummaryCollectionName(_framework.CurrentNode.EnvironmentName));
+            _threadLogGridfs = _database.GetGridFS(DbNamingConvention.GetThreadLogGridfsSettings(_framework.CurrentNode.EnvironmentName));
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -134,6 +144,13 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
         public static string MachineName
         {
             get { return _s_machineName; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static int ProcessId
+        {
+            get { return _s_processId; }
         }
     }
 }

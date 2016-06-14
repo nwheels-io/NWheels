@@ -137,10 +137,9 @@ namespace NWheels.Hosts.Console
         {
             builder.RegisterModule<NWheels.Stacks.Nlog.ModuleLoader>();
             builder.RegisterType<CommandLineConfigurationSource>().As<IConfigurationSource>().LastInPipeline();
-
-            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<CommandLineConfigurationLoader>()
-                .WithParameter(TypedParameter.From(_hostConfig.CommandLineConfigValues.ToArray()))
-                .SingleInstance();
+            
+            builder.RegisterInstance(new CommandLineConfigurationLoader.CommandLineParameters(_hostConfig.CommandLineConfigValues.ToArray()));
+            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<CommandLineConfigurationLoader>();
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

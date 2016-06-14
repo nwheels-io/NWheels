@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -9,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using NWheels.Concurrency;
@@ -16,6 +18,7 @@ using NWheels.DataObjects;
 using NWheels.Domains.DevOps.SystemLogs.Entities;
 using NWheels.Extensions;
 using NWheels.Hosting;
+using NWheels.Logging;
 using NWheels.Logging.Core;
 using NWheels.UI;
 using NWheels.Utilities;
@@ -176,7 +179,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
                 environmentFilter: null,
                 queryFunc: (db, environmentName) => {
                     var collection = db.GetCollection<ThreadLogRecord>(DbNamingConvention.GetThreadLogCollectionName(environmentName));
-                    return collection.Find(dbQuery);
+                    var cursor = collection.Find(dbQuery);
+                    return cursor.Select(record => LoadThreadLogSnapshot(record, environmentName));
                 },
                 cancellation: cancellation);
         }
@@ -333,6 +337,24 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private ThreadLogRecord LoadThreadLogSnapshot(ThreadLogRecord record, string environmentName)
+        {
+            var gridFs = _database.GetGridFS(DbNamingConvention.GetThreadLogGridfsSettings(environmentName));
+            var fileInfo = gridFs.FindOne(record.LogId);
+
+            if (fileInfo != null)
+            {
+                using (var stream = fileInfo.OpenRead())
+                {
+                    record.VolatileSnapshot = BsonSerializer.Deserialize<ThreadLogSnapshot>(stream);
+                }
+            }
+
+            return record;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         private MongoDatabase SafeGetDatabase()
         {
             if (_database == null)
@@ -379,8 +401,6 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             ExpressionUtility.GetPropertyInfoFrom<IBaseLogDimensionsEntity>(x => x.Instance);
         private static readonly PropertyInfo _s_queryReplicaProperty =
             ExpressionUtility.GetPropertyInfoFrom<IBaseLogDimensionsEntity>(x => x.Replica);
-        private static readonly PropertyInfo _s_threadLogRecordSnapshotProperty =
-            ExpressionUtility.GetPropertyInfoFrom<ThreadLogRecord>(x => x.Snapshot);
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

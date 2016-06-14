@@ -28,6 +28,7 @@ namespace NWheels.UI.Toolbox
         {
             base.WidgetType = "Report";
             base.TemplateName = "Report";
+            this.DownloadFormatIdName = "EXCEL";
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,11 +56,13 @@ namespace NWheels.UI.Toolbox
         public Chart VisualizationChart { get; set; }
         [DataMember]
         public bool AutoSubmitOnLoad { get; set; }
+        [DataMember]
+        public string DownloadFormatIdName { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public UidlCommand ShowReport { get; set; }
-        public UidlCommand DownloadExcel { get; set; }
+        public UidlCommand Download { get; set; }
         public UidlNotification<TContext> ContextSetter { get; set; }
         public UidlNotification<ApplicationEntityService.QueryResults> ReportReady { get; set; }
         public UidlNotification<ChartData> VisualizationReady { get; set; }
@@ -76,14 +79,14 @@ namespace NWheels.UI.Toolbox
 
             CriteriaForm.UsePascalCase = true;
             CriteriaForm.Commands.Add(ShowReport);
-            CriteriaForm.Commands.Add(DownloadExcel);
+            CriteriaForm.Commands.Add(Download);
             ResultTable.Mode = DataGridMode.Standalone;
             ResultTable.UsePascalCase = true;
             ResultTable.EnableTotalRow = ResultTable.DisplayColumns.Any(c => c.IncludeInTotal);
             ResultTable.TotalRowOnTop = false;//TODO: fix on-top total row in Inspinia skin
             ResultTable.SelectionMode = DataGridSelectionMode.Disabled;
             ShowReport.Kind = CommandKind.Submit;
-            DownloadExcel.Kind = CommandKind.Submit;
+            Download.Kind = CommandKind.Submit;
 
             if (!ResultTable.EnablePaging.HasValue)
             {
@@ -109,10 +112,10 @@ namespace NWheels.UI.Toolbox
                 .PrepareWaitForReply((script, vm) => script.Execute(vm.State.Criteria))
                 .Then(b => b.Broadcast(ResultTable.RequestPrepared).WithPayload(vm => vm.Input).TunnelDown());
 
-            presenter.On(DownloadExcel)
+            presenter.On(Download)
                 .InvokeTransactionScript<TScript>(entityType: typeof(TResultRow))
                 .SetupEnityQueryFor(ResultTable)
-                .WaitForResultsDownloadReady((script, vm) => script.Execute(vm.State.Criteria), exportFormat: "EXCEL")
+                .WaitForResultsDownloadReady((script, vm) => script.Execute(vm.State.Criteria), exportFormat: DownloadFormatIdName)
                 .Then(
                     onSuccess: b => b
                         .BeginDownloadContent(vm => vm.Input)

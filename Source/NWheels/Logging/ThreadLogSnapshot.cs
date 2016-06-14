@@ -14,6 +14,8 @@ namespace NWheels.Logging
         [DataMember]
         public string EnvironmentName { get; set; }
         [DataMember]
+        public string EnvironmentType { get; set; }
+        [DataMember]
         public string NodeName { get; set; }
         [DataMember]
         public string NodeInstance { get; set; }
@@ -74,9 +76,9 @@ namespace NWheels.Logging
             [DataMember]
             public LogLevel Level { get; set; }
             [DataMember]
-            public long MillisecondsTimestamp { get; set; }
+            public long MicrosecondsTimestamp { get; set; }
             [DataMember]
-            public long Duration { get; set; }
+            public long MicrosecondsDuration { get; set; }
             [DataMember]
             public string ExceptionTypeName { get; set; }
             [DataMember]
@@ -88,7 +90,7 @@ namespace NWheels.Logging
             [DataMember(Order = 2, EmitDefaultValue = false, IsRequired = false)]
             public long CpuCycles { get; set; }
             [DataMember(Order = 2, EmitDefaultValue = false, IsRequired = false)]
-            public long CpuTime { get; set; }
+            public long MicrosecondsCpuTime { get; set; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

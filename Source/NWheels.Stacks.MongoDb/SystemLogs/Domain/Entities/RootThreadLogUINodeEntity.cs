@@ -22,11 +22,16 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             this.Node = record.NodeName;
             this.Instance = record.NodeInstance;
             this.Replica = record.NodeInstanceReplica;
-            this.Timestamp = record.Timestamp;
             this.TaskType = record.TaskType;
 
             var treeNodeIndex = 0;
-            this.CopyFromLogRecord(ref treeNodeIndex, record, record.Snapshot.RootActivity, parentNode: null);
+
+            if (record.VolatileSnapshot != null)
+            {
+                this.CopyFromLogRecord(ref treeNodeIndex, record, record.VolatileSnapshot.RootActivity, parentNode: null);
+            }
+
+            this.Timestamp = record.Timestamp;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -40,7 +45,6 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
         public string Node { get; private set; }
         public string Instance { get; private set; }
         public string Replica { get; private set; }
-        public DateTime Timestamp { get; private set; }
         public ThreadTaskType TaskType { get; private set; }
 
         #endregion

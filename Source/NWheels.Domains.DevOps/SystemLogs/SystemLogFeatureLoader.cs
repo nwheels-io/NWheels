@@ -1,6 +1,8 @@
 ﻿using Autofac;
 using NWheels.Domains.DevOps.SystemLogs.Transactions;
+using NWheels.Domains.DevOps.SystemLogs.UI.Formatters;
 using NWheels.Extensions;
+using NWheels.Processing.Documents.Core;
 
 namespace NWheels.Domains.DevOps.SystemLogs
 {
@@ -10,7 +12,7 @@ namespace NWheels.Domains.DevOps.SystemLogs
 
         protected override void Load(ContainerBuilder builder)
         {
-            // nothing
+            builder.RegisterType<ThreadLogTextDocumentFormatter>().As<IOutputDocumentFormatter>();
         }
 
         #endregion

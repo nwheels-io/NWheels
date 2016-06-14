@@ -26,7 +26,7 @@ namespace NWheels.Logging
         private LogContentTypes _contentTypes;
         private LogLevel _level;
         private int _indexInLog;
-        private long _millisecondsTimestamp;
+        private long _microsecondsTimestamp;
         private ulong _cpuCyclesTimestamp;
         private IThreadLog _threadLog = null;
         private LogNode _nextSibling = null;
@@ -43,7 +43,7 @@ namespace NWheels.Logging
             _contentTypes = contentTypes;
             _level = initialLevel;
             _options = options;
-            _millisecondsTimestamp = -1;
+            _microsecondsTimestamp = -1;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ namespace NWheels.Logging
 
             var snapshot = new ThreadLogSnapshot.LogNodeSnapshot {
                 MessageId = _messageId,
-                MillisecondsTimestamp = _millisecondsTimestamp,
+                MicrosecondsTimestamp = _microsecondsTimestamp,
                 CpuCycles = (long)_cpuCyclesTimestamp,
                 Level = _level,
                 ContentTypes = _contentTypes,
@@ -82,7 +82,7 @@ namespace NWheels.Logging
 
         public DateTime GetUtcTimestamp()
         {
-            return _threadLog.ThreadStartedAtUtc.AddMilliseconds(_millisecondsTimestamp);
+            return _threadLog.ThreadStartedAtUtc.AddMilliseconds(_microsecondsTimestamp / 1000);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -128,7 +128,17 @@ namespace NWheels.Logging
         {
             get
             {
-                return _millisecondsTimestamp;
+                return _microsecondsTimestamp / 1000;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public long MicrosecondsTimestamp
+        {
+            get
+            {
+                return _microsecondsTimestamp;
             }
         }
 
@@ -288,7 +298,7 @@ namespace NWheels.Logging
         {
             _threadLog = thread;
             _indexInLog = indexInLog;
-            _millisecondsTimestamp = thread.ElapsedThreadMilliseconds;
+            _microsecondsTimestamp = thread.ElapsedThreadMicroseconds;
             _cpuCyclesTimestamp = thread.UsedThreadCpuCycles;
         }
 
@@ -354,7 +364,7 @@ namespace NWheels.Logging
             var baseValues = new ILogNameValuePair[] {
                 new LogNameValuePair<DateTime> {
                     Name = "$$time", 
-                    Value = _threadLog.ThreadStartedAtUtc.AddMilliseconds(_millisecondsTimestamp), 
+                    Value = _threadLog.ThreadStartedAtUtc.AddMilliseconds(_microsecondsTimestamp / 1000), 
                     Format = "yyyy-MM-dd HH:mm:ss.fff"
                 },
                 new LogNameValuePair<string> {
