@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<!-- saved from url=(0035)http://jbrantly.github.io/bigtable/ -->
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style>
+            body {
+                height: 100vh;
+                margin: 0;
+                padding: 0;
+                background-color:red;
+            }
+            div.bigtable {
+                width: 100%;
+                height: 100%;
+                overflow-x:auto;
+                overflow-y:scroll;
+            }
+            table {
+                table-layout: fixed;
+                border-collapse: collapse;
+                width: 100%;
+                height: 100%;
+                background-color:lightgreen;
+            }
+            td {
+                overflow: hidden;
+                line-height: 20px;
+                margin: 0;
+                padding: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app_screen_widget_123" class="bigtable">
+            <table cellspacing="0" cellpadding="0" border="0"></table>
+        </div>
+        
+        <script src="jquery-2.1.1.js"></script>
+        
+        <script>
+            var _columns = [
+                {property: 'first', label: 'First Column', width: 100},
+                {property: 'second', label: 'Second Column', width: 200},
+                {property: 'third', label: 'Third Column', width: 100},
+                {property: 'fourth', label: 'Fourth Column', width: 200},
+                {property: 'fifth', label:'Fifth Column', width: 100},
+                {property: 'sixth', label: 'Sixth Column', width: 200},
+                {property: 'seventh', label: 'Seventh Column', width: 100},
+                {property: 'eighth', label: 'Eighth Column', width: 200},
+                {property: 'ninth', label: 'Ninth Column', width: 100},
+            ];
+            var _rowHeight = 20;
+            var _rowCount = 100000;
+        
+            var _lastScrollLeft = -1;
+            var _lastScrollTop = -1;
+            var _lastOffsetWidth = -1;
+            var _lastOffsetHeight = -1;
+
+            var _pageSize = -1;
+            var _visiblePageSize = -1;
+            var _pageTopRowIndex = -1;
+            var _totalHeight = -1;
+            var _pageTrEls = [ ];
+        
+            var _containerElQ;
+            var _tableElQ;
+            var _tableBodyEl;
+            var _topFillerTrEl;
+            var _bottomFillerTrEl;
+            
+            var _scrollHandlerTimer = null;
+        
+            function initializeTable(elementId) {
+                _containerElQ = $('#' + elementId);
+                _tableElQ = _containerElQ.find('table');
+                _tableBodyEl = document.createElement('tbody');
+                _tableElQ[0].appendChild(_tableBodyEl);
+                
+                _topFillerTrEl = document.createElement('tr');
+                _bottomFillerTrEl = document.createElement('tr');
+                
+                _tableBodyEl.appendChild(_topFillerTrEl);
+                _tableBodyEl.appendChild(_bottomFillerTrEl);
+            }
+        
+            function initializePage() {
+                _totalHeight = _rowCount * _rowHeight;
+                _visiblePageSize = Math.floor(_containerElQ[0].offsetHeight / _rowHeight) + 1;
+                _pageSize = _visiblePageSize * 3;
+                
+                if (_pageSize > _rowCount) {
+                    _pageSize = rowCount;
+                }
+                if (_visiblePageSize > _pageSize) {
+                    _visiblePageSize = _pageSize;
+                }
+                
+                if (_pageTrEls.length < _pageSize) {
+                    // add missing rows
+                    var initialLength = _pageTrEls.length;
+                    for (var i = initialLength ; i < _pageSize ; i++) {
+                        var trEl = createBodyTrEl();
+                        _pageTrEls.push(trEl);
+                        _tableBodyEl.insertBefore(trEl, _bottomFillerTrEl);
+                    }
+                } else if  (_pageTrEls.length > _pageSize) {
+                    // or remove redundant rows, if any
+                    for (var i = _pageSize ; i < _pageTrEls.length ; i++) {
+                        _tableBodyEl.removeChild(_pageTrEls[i]);
+                    }
+                    _pageTrEls = _pageTrEls.slice(0, _pageSize);
+                }
+            }
+        
+            function createBodyTrEl() {
+                var trEl = document.createElement('tr');
+                
+                for (var colIndex = 0; colIndex < _columns.length; colIndex++) {
+                    var tdEl = document.createElement('td');
+                    //tdEl.appendChild(document.createTextNode(''));
+                    trEl.appendChild(tdEl);
+                }
+                
+                return trEl;
+                //tdEl.appendChild(document.createTextNode('('+rowIndex+', '+colIndex+')'));
+            }
+            
+            function displayPage() {
+                var topVisibleRowIndex = Math.floor(_containerElQ[0].scrollTop / _rowHeight);
+                _pageTopRowIndex = topVisibleRowIndex - _visiblePageSize;
+                
+                if (_pageTopRowIndex < 0) {
+                    _pageTopRowIndex = 0;
+                }
+                
+                for (var i = 0 ; i < _pageSize && _pageTopRowIndex + i < _rowCount ; i++) {
+                    var trEl = _pageTrEls[i];
+                    var tdEls = trEl.childNodes;
+                    var rowData = getRowData(_pageTopRowIndex + i);
+                    for (var colIndex = 0; colIndex < _columns.length; colIndex++) {
+                        var cellData = rowData[_columns[colIndex].property];
+                        tdEls[colIndex].innerHTML = cellData;
+                    }
+                }
+                
+                _topFillerTrEl.style.height = (_pageTopRowIndex * _rowHeight) + 'px';
+                _bottomFillerTrEl.style.height = (_totalHeight - ((_pageTopRowIndex + _pageSize) * _rowHeight)) + 'px';
+            }
+
+            function attachEventHandlers() {
+                _lastScrollTop = _containerElQ[0].scrollTop;
+                _lastScrollLeft = _containerElQ[0].scrollLeft;
+                _lastOffsetHeight = _containerElQ[0].offsetHeight;
+                _lastOffsetWidth = _containerElQ[0].offsetWidth;
+
+                _containerElQ.scroll(function() {
+                    var newOffsetWidth = _containerElQ[0].offsetWidth;
+                    var newOffsetHeight = _containerElQ[0].offsetHeight;
+                    
+                    if (newOffsetHeight != _lastOffsetHeight) {
+                        initializePage();
+                        _lastOffsetHeight = newOffsetHeight;
+                    }
+                    _lastOffsetWidth = newOffsetWidth;
+
+                    //Handle left/right scroll
+                    var newScrollLeft = _containerElQ[0].scrollLeft;
+                    ///TODO:
+                    //if (_lastScrollLeft != newScrollLeft) {
+                    //    _lastScrollLeft = newScrollLeft;
+                    //    headersEl.scrollLeft(_lastScrollLeft);
+                    //}
+                    _lastScrollLeft = newScrollLeft;
+
+                    // Handle up/down scroll
+                    var newScrollTop = _containerElQ[0].scrollTop;
+                    if (_lastScrollTop != newScrollTop) {
+                        if (_scrollHandlerTimer) {
+                            clearTimeout(_scrollHandlerTimer);
+                        }
+                        _scrollHandlerTimer = setTimeout(displayPage, 50);
+                        _lastScrollTop = newScrollTop;
+                    }
+                });
+            }
+            
+            function getRowData(rowIndex) {
+                return {
+                    first: '(' + rowIndex + ', first)',
+                    second: '(' + rowIndex + ', second)',
+                    third: '(' + rowIndex + ', third)',
+                    fourth: '(' + rowIndex + ', fourth)',
+                    fifth: '(' + rowIndex + ', fifth)',
+                    sixth: '(' + rowIndex + ', sixth)',
+                    seventh: '(' + rowIndex + ', seventh)',
+                    eighth: '(' + rowIndex + ', eighth)',
+                    ninth: '(' + rowIndex + ', ninth)',
+                }
+            }
+        
+            $(document).ready(function() {
+                var elementId = 'app_screen_widget_123';
+                
+                initializeTable(elementId);
+                initializePage();
+                displayPage();
+                attachEventHandlers();
+                
+                //var widgetEl = $('#app_screen_widget_123');
+                //var bodyEl = widgetEl.find('.bigtable-body');
+                //var headersEl = widgetEl.find('.bigtable-headers');
+                
+                //var lastScrollLeft = null;
+            });
+        </script>
+    </body>
+</html>
