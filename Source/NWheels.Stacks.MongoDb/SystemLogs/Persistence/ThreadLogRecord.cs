@@ -7,6 +7,7 @@ using NWheels.Logging;
 
 namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 {
+    [BsonIgnoreExtraElements]
     public class ThreadLogRecord : LogRecordBase
     {
         public ThreadLogRecord(ThreadLogSnapshot snapshot)

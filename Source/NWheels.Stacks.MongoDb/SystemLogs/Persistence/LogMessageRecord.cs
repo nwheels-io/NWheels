@@ -6,6 +6,7 @@ using NWheels.Logging;
 
 namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
 {
+    [BsonIgnoreExtraElements]
     public class LogMessageRecord : LogRecordBase
     {
         public LogMessageRecord(LogNode node)

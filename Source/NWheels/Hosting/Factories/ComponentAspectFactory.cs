@@ -346,7 +346,7 @@ namespace NWheels.Hosting.Factories
             private static bool ShouldImplementMethod(MethodInfo method)
             {
                 return (
-                    method.IsPublic && 
+                    (method.IsPublic || method.IsFamily || method.IsFamilyOrAssembly) && 
                     method.DeclaringType != typeof(object) && 
                     (method.IsVirtual || method.IsAbstract) &&
                     !method.IsFinal);

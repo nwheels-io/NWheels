@@ -316,6 +316,16 @@ namespace NWheels.Extensions
                     .As<ILifecycleEventListener>()
                     .SingleInstance();
             }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public IRegistrationBuilder<TComponent, SimpleActivatorData, SingleRegistrationStyle> RegisterComponent<TComponent>()
+                where TComponent : class
+            {
+                return _builder.Register(c =>
+                    (TComponent)c.Resolve<ComponentAspectFactory>().CreateInheritor(typeof(TComponent))
+                ).AsSelf();
+            }
         }
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------

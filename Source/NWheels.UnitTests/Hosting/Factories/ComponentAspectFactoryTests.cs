@@ -685,7 +685,7 @@ namespace NWheels.UnitTests.Hosting.Factories
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [Test]
-        public void Inheritor_NonVirtualMembers_Skip()
+        public void Inheritor_NonVirtualMembers_DoNotIntercept()
         {
             //-- arrange
 
@@ -706,6 +706,126 @@ namespace NWheels.UnitTests.Hosting.Factories
             });
 
             returnValue.ShouldBe("XYZ");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Inheritor_ProtectedVirtualMembers_InterceptInsideCalls()
+        {
+            //-- arrange
+
+            var factoryUnderTest = CreateFactoryUnderTest(
+                new TestAspectConvention.AspectProvider("AspectA"),
+                new TestAspectConvention.AspectProvider("AspectB")
+            );
+
+            //-- act
+
+            var aspectized = (TestComponentThree)factoryUnderTest.CreateInheritor(typeof(TestComponentThree));
+            var returnValue = aspectized.InvokeProtectedVirtualMethod(123);
+
+            //-- assert
+
+            _log.ShouldBe(new[] {
+                "COMPONENT:InvokeProtectedVirtualMethod(123)", 
+                "AspectA:BEFORE:ProtectedVirtualMethod", 
+                "AspectB:BEFORE:ProtectedVirtualMethod", 
+                "COMPONENT:ProtectedVirtualMethod(123)", 
+                "AspectB:AFTER:ProtectedVirtualMethod",
+                "AspectA:AFTER:ProtectedVirtualMethod",
+                "COMPONENT:InvokeProtectedVirtualMethod=DEF", 
+            });
+
+            returnValue.ShouldBe("DEF");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Inheritor_InternalProtectedVirtualMembers_InterceptOutsideCalls()
+        {
+            //-- arrange
+
+            var factoryUnderTest = CreateFactoryUnderTest(
+                new TestAspectConvention.AspectProvider("AspectA"),
+                new TestAspectConvention.AspectProvider("AspectB")
+            );
+
+            //-- act
+
+            var aspectized = (TestComponentThree)factoryUnderTest.CreateInheritor(typeof(TestComponentThree));
+            var returnValue = aspectized.InternalProtectedVirtualMethod(123);
+
+            //-- assert
+
+            _log.ShouldBe(new[] {
+                "AspectA:BEFORE:InternalProtectedVirtualMethod", 
+                "AspectB:BEFORE:InternalProtectedVirtualMethod", 
+                "COMPONENT:InternalProtectedVirtualMethod(123)", 
+                "AspectB:AFTER:InternalProtectedVirtualMethod",
+                "AspectA:AFTER:InternalProtectedVirtualMethod",
+            });
+
+            returnValue.ShouldBe("DEF");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Inheritor_InternalProtectedVirtualMembers_InterceptInsideCalls()
+        {
+            //-- arrange
+
+            var factoryUnderTest = CreateFactoryUnderTest(
+                new TestAspectConvention.AspectProvider("AspectA"),
+                new TestAspectConvention.AspectProvider("AspectB")
+            );
+
+            //-- act
+
+            var aspectized = (TestComponentThree)factoryUnderTest.CreateInheritor(typeof(TestComponentThree));
+            var returnValue = aspectized.InvokeInternalProtectedVirtualMethod(123);
+
+            //-- assert
+
+            _log.ShouldBe(new[] {
+                "COMPONENT:InvokeInternalProtectedVirtualMethod(123)", 
+                "AspectA:BEFORE:InternalProtectedVirtualMethod", 
+                "AspectB:BEFORE:InternalProtectedVirtualMethod", 
+                "COMPONENT:InternalProtectedVirtualMethod(123)", 
+                "AspectB:AFTER:InternalProtectedVirtualMethod",
+                "AspectA:AFTER:InternalProtectedVirtualMethod",
+                "COMPONENT:InvokeInternalProtectedVirtualMethod=DEF", 
+            });
+
+            returnValue.ShouldBe("DEF");
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [Test]
+        public void Inheritor_InternalVirtualMembers_DoNotIntercept()
+        {
+            //-- arrange
+
+            var factoryUnderTest = CreateFactoryUnderTest(
+                new TestAspectConvention.AspectProvider("AspectA"),
+                new TestAspectConvention.AspectProvider("AspectB")
+            );
+
+            //-- act
+
+            var aspectized = (TestComponentThree)factoryUnderTest.CreateInheritor(typeof(TestComponentThree));
+            var returnValue = aspectized.InternalVirtualMethod(123);
+
+            //-- assert
+
+            _log.ShouldBe(new[] {
+                "COMPONENT:InternalVirtualMethod(123)", 
+            });
+
+            returnValue.ShouldBe("ZZZ");
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1175,6 +1295,52 @@ namespace NWheels.UnitTests.Hosting.Factories
             {
                 _log.Add("COMPONENT:NonVirtualMethod(" + num + ")");
                 return "XYZ";
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string InvokeProtectedVirtualMethod(int num)
+            {
+                _log.Add("COMPONENT:InvokeProtectedVirtualMethod(" + num + ")");
+                var returnValue = ProtectedVirtualMethod(num);
+                _log.Add("COMPONENT:InvokeProtectedVirtualMethod=" + returnValue);
+
+                return returnValue;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public string InvokeInternalProtectedVirtualMethod(int num)
+            {
+                _log.Add("COMPONENT:InvokeInternalProtectedVirtualMethod(" + num + ")");
+                var returnValue = InternalProtectedVirtualMethod(num);
+                _log.Add("COMPONENT:InvokeInternalProtectedVirtualMethod=" + returnValue);
+
+                return returnValue;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            protected virtual string ProtectedVirtualMethod(int num)
+            {
+                _log.Add("COMPONENT:ProtectedVirtualMethod(" + num + ")");
+                return "DEF";
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal virtual string InternalVirtualMethod(int num)
+            {
+                _log.Add("COMPONENT:InternalVirtualMethod(" + num + ")");
+                return "ZZZ";
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            internal protected virtual string InternalProtectedVirtualMethod(int num)
+            {
+                _log.Add("COMPONENT:InternalProtectedVirtualMethod(" + num + ")");
+                return "DEF";
             }
         }
 
