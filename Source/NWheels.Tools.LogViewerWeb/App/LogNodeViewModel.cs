@@ -25,13 +25,13 @@ namespace NWheels.Tools.LogViewerWeb.App
                 this.Text += ": " + string.Join(", ", source.NameValuePairs.Where(p => !p.IsDetail).Select(p => p.Name + "=" + p.Value));
             }
 
-            this.TimeText = "+ " + source.MillisecondsTimestamp.ToString("#,###");
-            this.Timestamp = threadStartedAt.AddMilliseconds(source.MillisecondsTimestamp).ToString("yyyy-MM-dd HH:mm:ss.fff");
+            this.TimeText = "+ " + ((decimal)source.MicrosecondsDuration / 1000m).ToString("#,##0.00");
+            this.Timestamp = threadStartedAt.AddMilliseconds(source.MicrosecondsTimestamp / 1000).ToString("yyyy-MM-dd HH:mm:ss.fff");
             this.NameValuePairs = source.NameValuePairs;
 
             if ( source.IsActivity )
             {
-                this.Duration = (int)source.Duration;
+                this.Duration = (int)(source.MicrosecondsDuration / 1000);
             }
 
             if ( source.SubNodes != null )
