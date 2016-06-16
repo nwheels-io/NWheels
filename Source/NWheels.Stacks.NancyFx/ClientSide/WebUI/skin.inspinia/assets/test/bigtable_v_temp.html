@@ -15,17 +15,26 @@
                 height: 100%;
                 overflow-x:auto;
                 overflow-y:scroll;
+                font-family: "Segoe UI";
+                font-size:9pt;
             }
-            table {
+            .bigtable table {
                 table-layout: fixed;
                 border-collapse: collapse;
+                border-spacing: 0px;
                 width: 100%;
                 height: 100%;
                 background-color:lightgreen;
             }
-            td {
+            .bigtable tr.data:nth-child(odd) {
+                background-color: #81e181;
+            }
+            .bigtable th {
+                height: 0;
+            }
+            .bigtable td {
                 overflow: hidden;
-                line-height: 24px;
+                line-height: 20px;
                 margin: 0;
                 padding: 0;
             }
@@ -40,7 +49,7 @@
         
         <script>
             var _columns = [
-                {property: 'first', label: 'First Column', width: 100},
+                {property: 'first', label: 'First Column', width: 400},
                 {property: 'second', label: 'Second Column', width: 200},
                 {property: 'third', label: 'Third Column', width: 100},
                 {property: 'fourth', label: 'Fourth Column', width: 200},
@@ -50,8 +59,8 @@
                 {property: 'eighth', label: 'Eighth Column', width: 200},
                 {property: 'ninth', label: 'Ninth Column', width: 100},
             ];
-            var _rowHeight = 24;
-            var _rowCount = 1234567;
+            var _rowHeight = 20;
+            var _rowCount = 10000;
         
             var _lastScrollLeft = -1;
             var _lastScrollTop = -1;
@@ -122,6 +131,7 @@
                     var initialLength = _pageTrEls.length;
                     for (var i = initialLength ; i < _pageSize ; i++) {
                         var trEl = createBodyTrEl();
+                        trEl.className = 'data';
                         _pageTrEls.push(trEl);
                         _tableBodyEl.insertBefore(trEl, _bottomFillerTrEl);
                     }
