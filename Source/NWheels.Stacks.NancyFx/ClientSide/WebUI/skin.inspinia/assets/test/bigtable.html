@@ -25,7 +25,7 @@
             }
             td {
                 overflow: hidden;
-                line-height: 20px;
+                line-height: 24px;
                 margin: 0;
                 padding: 0;
             }
@@ -50,8 +50,8 @@
                 {property: 'eighth', label: 'Eighth Column', width: 200},
                 {property: 'ninth', label: 'Ninth Column', width: 100},
             ];
-            var _rowHeight = 20;
-            var _rowCount = 100000;
+            var _rowHeight = 24;
+            var _rowCount = 1234567;
         
             var _lastScrollLeft = -1;
             var _lastScrollTop = -1;
@@ -71,6 +71,7 @@
             var _bottomFillerTrEl;
             
             var _scrollHandlerTimer = null;
+            var _pageRenderCount = 0;
         
             function initializeTable(elementId) {
                 _containerElQ = $('#' + elementId);
@@ -88,7 +89,7 @@
             function initializePage() {
                 _totalHeight = _rowCount * _rowHeight;
                 _visiblePageSize = Math.floor(_containerElQ[0].offsetHeight / _rowHeight) + 1;
-                _pageSize = _visiblePageSize * 3;
+                _pageSize = Math.floor((3 * _containerElQ[0].offsetHeight) / _rowHeight);
                 
                 if (_pageSize > _rowCount) {
                     _pageSize = rowCount;
@@ -127,10 +128,21 @@
                 //tdEl.appendChild(document.createTextNode('('+rowIndex+', '+colIndex+')'));
             }
             
-            function displayPage() {
+            function displayPage(force) {
                 var topVisibleRowIndex = Math.floor(_containerElQ[0].scrollTop / _rowHeight);
-                _pageTopRowIndex = topVisibleRowIndex - _visiblePageSize;
                 
+                if (!force && _pageTopRowIndex <= topVisibleRowIndex && _pageTopRowIndex + _pageSize >= topVisibleRowIndex + _visiblePageSize) {
+                    return;
+                }
+                
+                _pageRenderCount++;
+                document.title = '' + _pageRenderCount + '...0%';
+
+                _pageTopRowIndex = topVisibleRowIndex - _visiblePageSize;
+
+                if (_pageTopRowIndex + _pageSize > _rowCount) {
+                    _pageTopRowIndex = _rowCount - _pageSize;
+                }
                 if (_pageTopRowIndex < 0) {
                     _pageTopRowIndex = 0;
                 }
@@ -141,16 +153,27 @@
                     var rowData = getRowData(_pageTopRowIndex + i);
                     for (var colIndex = 0; colIndex < _columns.length; colIndex++) {
                         var cellData = rowData[_columns[colIndex].property];
+                        //var textNode = tdEls[colIndex].firstChild;
+                        //textNode.textContent = cellData;
                         tdEls[colIndex].innerHTML = cellData;
                     }
                 }
                 
-                _topFillerTrEl.style.height = (_pageTopRowIndex * _rowHeight) + 'px';
-                _bottomFillerTrEl.style.height = (_totalHeight - ((_pageTopRowIndex + _pageSize) * _rowHeight)) + 'px';
+                var topFillerHeight = (_pageTopRowIndex * _rowHeight);
+                var bottomFillerHeight = (_totalHeight - (_pageSize * _rowHeight) - topFillerHeight);
+                
+                if (bottomFillerHeight < 0) {
+                    bottomFillerHeight = 0;
+                }
+                
+                _topFillerTrEl.style.height = topFillerHeight + 'px';
+                _bottomFillerTrEl.style.height = bottomFillerHeight + 'px';
+    
+                document.title = '' + _pageRenderCount + '...100%';
             }
 
             function attachEventHandlers() {
-                _lastScrollTop = _containerElQ[0].scrollTop;
+                _lastScrollTop = _containerElQ[0].scrollTop;    
                 _lastScrollLeft = _containerElQ[0].scrollLeft;
                 _lastOffsetHeight = _containerElQ[0].offsetHeight;
                 _lastOffsetWidth = _containerElQ[0].offsetWidth;
@@ -177,22 +200,24 @@
                     // Handle up/down scroll
                     var newScrollTop = _containerElQ[0].scrollTop;
                     if (_lastScrollTop != newScrollTop) {
+                        _lastScrollTop = newScrollTop;  
                         if (_scrollHandlerTimer) {
                             clearTimeout(_scrollHandlerTimer);
                         }
-                        _scrollHandlerTimer = setTimeout(displayPage, 50);
-                        _lastScrollTop = newScrollTop;
+                        _scrollHandlerTimer = setTimeout(function() {
+                            displayPage();
+                        }, 50);
                     }
                 });
             }
             
             function getRowData(rowIndex) {
                 return {
-                    first: '(' + rowIndex + ', first)',
-                    second: '(' + rowIndex + ', second)',
-                    third: '(' + rowIndex + ', third)',
+                    first: '<img src="icon.png"> (' + rowIndex + ', first)',
+                    second: '<b>(' + rowIndex + ', second)</b>',
+                    third: '<u>(' + rowIndex + ', third)</u>',
                     fourth: '(' + rowIndex + ', fourth)',
-                    fifth: '(' + rowIndex + ', fifth)',
+                    fifth: '<font color="red">(' + rowIndex + ', fifth)</font>',
                     sixth: '(' + rowIndex + ', sixth)',
                     seventh: '(' + rowIndex + ', seventh)',
                     eighth: '(' + rowIndex + ', eighth)',
@@ -205,7 +230,7 @@
                 
                 initializeTable(elementId);
                 initializePage();
-                displayPage();
+                displayPage(true);
                 attachEventHandlers();
                 
                 //var widgetEl = $('#app_screen_widget_123');
