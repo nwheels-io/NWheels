@@ -1029,7 +1029,7 @@ namespace NWheels.UI
                     {
                         Page = Int32.Parse(parameter.Value);
                     }
-                    else if ( parameter.Key.EqualsIgnoreCase(TypeParameterKey) )
+                    else if (parameter.Key.EqualsIgnoreCase(TypeParameterKey) || parameter.Key.EqualsIgnoreCase(TypeParameterKey + EqualOperator))
                     {
                         OfType = parameter.Value;
                     }

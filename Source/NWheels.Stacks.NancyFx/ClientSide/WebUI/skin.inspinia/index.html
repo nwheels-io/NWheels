@@ -1123,6 +1123,21 @@ HEAD, JS/CSS LINKS
                             return '<a target="_blank" href="' + cellvalue + '" style="text-decoration:underline;">' + cellvalue + '</a>';
                         };
                         break;
+                    case 'Type':
+                        var metaType = $scope.uidlService.getMetaType($scope.uidl.entityName);
+                        if (metaType && metaType.derivedTypeNames) {
+                            var optionString = ':(All)';
+                            for (var i = 0 ; i < metaType.derivedTypeNames.length ; i++) {
+                                optionString += ';' + metaType.derivedTypeNames[i] + ':' + metaType.derivedTypeNames[i];
+                            }
+                            modelItem.stype = 'select';
+                            modelItem.searchoptions = { 
+                                sopt: ['eq'],
+                                value: optionString, 
+                                defaultValue: '' 
+                            };
+                        }
+                        break;
                     default:
                         modelItem.searchoptions = {sopt: ['cn']};
                 }

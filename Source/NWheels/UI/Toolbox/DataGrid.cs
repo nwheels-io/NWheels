@@ -547,12 +547,15 @@ namespace NWheels.UI.Toolbox
             FieldSize size = FieldSize.Medium,
             Action<GridColumn> setup = null)
         {
-            var column = new GridColumn(MetaType, FieldSpecialName.Type, title, size);
-
+            var column = new GridColumn(MetaType, FieldSpecialName.Type, title, size, columnType: GridColumnType.Type);
+            
             if (setup != null)
             {
                 setup(column);
             }
+
+            column.IsFilterSupported = true;
+            column.IsSortSupported = false;
 
             this.DisplayColumns.Add(column);
             return this;
@@ -804,6 +807,7 @@ namespace NWheels.UI.Toolbox
         Link = 50,
         Key = 60,
         Widget = 70,
+        Type = 80,
         Hidden = 1000
     }
 }
