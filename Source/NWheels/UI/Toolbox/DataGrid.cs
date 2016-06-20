@@ -72,19 +72,8 @@ namespace NWheels.UI.Toolbox
         [DataMember]
         public DataGridMode Mode { get; set; }
 
-        private bool? _enablePaging;
         [DataMember]
-        public bool? EnablePaging
-        {
-            get
-            {
-                return _enablePaging;
-            }
-            set
-            {
-                _enablePaging = value;
-            }
-        }
+        public bool? EnablePaging { get; set; }
 
         [DataMember]
         public bool EnableAutonomousQuery { get; set; }
@@ -136,6 +125,9 @@ namespace NWheels.UI.Toolbox
 
         [DataMember]
         public string RowIconPropertyName { get; set; }
+
+        [DataMember]
+        public bool HiddenMode { get; set; }
 
         //[DataMember]
         //public string DetailPaneStaticTemplateName { get; set; }

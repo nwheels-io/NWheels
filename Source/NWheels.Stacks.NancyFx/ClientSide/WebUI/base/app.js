@@ -24,6 +24,12 @@ function getQueryStringValue(name) {
 
 //-----------------------------------------------------------------------------------------------------------------
 
+function hasEnumFlag(value, flag) {
+    return (value && (',' + value + ',').indexOf(',' + flag + ',') > -1);
+};
+
+//-----------------------------------------------------------------------------------------------------------------
+
 Number.prototype.formatMoney = function(c, d, t) {
     var n = this, 
         c = isNaN(c = Math.abs(c)) ? 2 : c, 
@@ -480,6 +486,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
     function implementController(scope) {
         scope.translate = translate;
         scope.formatValue = formatValue;
+        scope.hasEnumFlag = hasEnumFlag;
         scope.appScope = $rootScope.appScope;
         scope.model = {
             Data: {},
@@ -1157,6 +1164,9 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 scope.uidl.visualizationChart.$skin = scope.uidl.$skin;
             }
 
+            scope.hasVisualization = (hasEnumFlag(scope.uidl.reportComponents, 'Visualization') && scope.uidl.visualizationChart);
+            scope.hasResultSet = hasEnumFlag(scope.uidl.reportComponents, 'ResultSet');
+            
             scope.model.State.criteria = {};
             scope.model.State.reportInProgress = false;
             
@@ -2577,6 +2587,8 @@ function ($timeout, $rootScope, uidlService, entityService, $http) {
             $scope.$http = $http;
             $scope.uniqueFieldId = $scope.parentUidl.elementName + '_' + $scope.uidl.propertyName;
             $scope.translate = $scope.uidlService.translate;
+            $scope.hasEnumFlag = hasEnumFlag;
+
             $scope.hasUidlModifier = function (modifier) {
                 return ($scope.uidl.modifiers && $scope.uidl.modifiers.indexOf(modifier) > -1);
             };

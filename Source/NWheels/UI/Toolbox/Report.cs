@@ -29,12 +29,14 @@ namespace NWheels.UI.Toolbox
             base.WidgetType = "Report";
             base.TemplateName = "Report";
             this.DownloadFormatIdName = "EXCEL";
+            this.ReportComponents = ReportComponents.ResultSet;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void EnableVisualization()
         {
+            this.ReportComponents |= ReportComponents.Visualization;
             this.VisualizationChart = new Chart("VisualizationChart", this);
             this.VisualizationChart.BindToModelSetter(this.VisualizationReady);
         }
@@ -48,6 +50,8 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        [DataMember]
+        public ReportComponents ReportComponents { get; set; }
         [DataMember]
         public Form<TCriteria> CriteriaForm { get; set; }
         [DataMember]
@@ -85,6 +89,7 @@ namespace NWheels.UI.Toolbox
             ResultTable.EnableTotalRow = ResultTable.DisplayColumns.Any(c => c.IncludeInTotal);
             ResultTable.TotalRowOnTop = false;//TODO: fix on-top total row in Inspinia skin
             ResultTable.SelectionMode = DataGridSelectionMode.Disabled;
+            ResultTable.HiddenMode = !this.ReportComponents.HasFlag(ReportComponents.ResultSet);
             ShowReport.Kind = CommandKind.Submit;
             Download.Kind = CommandKind.Submit;
 
@@ -178,6 +183,15 @@ namespace NWheels.UI.Toolbox
             VisualRangeSelectionHandler(
                 PresenterBuilder<Report<TContext, TCriteria, TScript, TResultRow>, Empty.Data, IReportState>.BehaviorBuilder<Chart.RangeSelection> behavior
             );
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [Flags]
+    public enum ReportComponents
+    {
+        ResultSet = 0x01,
+        Visualization = 0x02
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

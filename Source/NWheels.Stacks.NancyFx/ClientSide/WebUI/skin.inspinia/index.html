@@ -1044,7 +1044,7 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="app/uidl-element-template/DataGrid">
         <div id="rdtwrapper_{{uniqueWidgetId}}" 
              class="jqGrid_wrapper" 
-             ng-class="{'flat-style': uidl.flatStyle===true, 'expandable-tree-mode': uidl.expandableTreeMode===true}">
+             ng-class="{'flat-style': uidl.flatStyle===true, 'expandable-tree-mode': uidl.expandableTreeMode===true, 'ng-hide': uidl.hiddenMode===true}">
             <table id="rdt_{{uniqueWidgetId}}"></table>
             <div ng-if="uidl.enablePaging" id="rdtpager_{{uniqueWidgetId}}"></div>
         </div>
@@ -3206,7 +3206,7 @@ HEAD, JS/CSS LINKS
                 <div ng-class="{'compensateZeroPadding': uidl.$skin.zeroPadding}">
                     <uidl-widget uidl="uidl.criteriaForm"></uidl-widget>
                 </div>
-                <div ng-if="uidl.visualizationChart" class="m-b" ng-class="{'compensateZeroPadding': uidl.$skin.zeroPadding}">
+                <div ng-if="hasVisualization" class="m-b" ng-class="{'compensateZeroPadding': uidl.$skin.zeroPadding}">
                     <uidl-widget uidl="uidl.visualizationChart"></uidl-widget>
                 </div>
                 <uidl-widget uidl="uidl.resultTable"></uidl-widget>
