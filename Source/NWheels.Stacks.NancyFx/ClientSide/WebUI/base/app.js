@@ -245,8 +245,27 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
     var m_dataBindingImplementations = {};
     var m_controllerImplementations = {};
 
+    var m_locationSearch = null;
+    
     //var m_pendingCommands = { };
 
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function getLocationSearchRaw() {
+        if (!m_locationSearch) {
+            var vars = { }, hash;
+            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for(var i = 0; i < hashes.length; i++)
+            {
+                hash = hashes[i].split('=');
+                vars[hash[0]] = hash[1];
+            }
+            m_locationSearch = vars;
+        }
+        
+        return m_locationSearch;
+    }
+    
     //-----------------------------------------------------------------------------------------------------------------
 
     function setDocument(uidlDocument) {
@@ -276,6 +295,13 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         }
         
         m_initialScreenInput = { };
+        
+        var rawQueryString = getLocationSearchRaw();
+        for (var p in rawQueryString){
+            if (rawQueryString.hasOwnProperty(p) && p.length > 0 && p.charAt(0) != '$') {
+                m_initialScreenInput[p] = rawQueryString[p];
+            }
+        }
         var queryString = $location.search();
         for (var p in queryString){
             if (queryString.hasOwnProperty(p) && p.length > 0 && p.charAt(0) != '$') {
@@ -2208,6 +2234,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
     return {
         setDocument: setDocument,
         getApp: getApp,
+        getLocationSearchRaw: getLocationSearchRaw,
         getInitialScreenInput: getInitialScreenInput,
         getCurrentScreen: getCurrentScreen,
         getCurrentLocale: getCurrentLocale,
