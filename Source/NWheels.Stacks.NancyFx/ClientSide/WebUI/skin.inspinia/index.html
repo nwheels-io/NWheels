@@ -1456,6 +1456,14 @@ HEAD, JS/CSS LINKS
                                 }); 
                             }
                         },
+                        ondblClickRow: function(rowId) {
+                            var rowObject = $scope.ResultSet[rowId - 1];
+                            if ($scope.uidl.enableAutonomousQuery) {
+                                $scope.$emit($scope.uidl.qualifiedName + ':EditRequested', rowObject);
+                            } else {
+                                $scope.$emit($scope.uidl.qualifiedName + ':EditRequestedByIndex', rowId - 1);
+                            }
+                        },
                         subGrid: ($scope.uidl.enableDetailPane===true),
                         subGridOptions: { expandOnLoad: ($scope.uidl.detailPaneExpanded===true) },
                         subGridRowExpanded: function(subgrid_id, row_id) {

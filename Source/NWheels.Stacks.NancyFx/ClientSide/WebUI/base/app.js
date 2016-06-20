@@ -1406,6 +1406,27 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 });
             });
 
+            scope.$on(scope.uidl.qualifiedName + ':Grid:EditRequested', function(event, data) {
+                scope.$apply(function() {
+                    scope.selectedEntity = data;
+                    scope.editEntity(scope.selectedEntity);
+                });
+            });
+
+            scope.$on(scope.uidl.qualifiedName + ':Grid:EditRequestedById', function (event, id) {
+                scope.$apply(function() {
+                    scope.selectedEntity = Enumerable.From(scope.resultSet).Where("$.$id == '" + id + "'").First();
+                    scope.editEntity(scope.selectedEntity);
+                });
+            });
+
+            scope.$on(scope.uidl.qualifiedName + ':Grid:EditRequestedByIndex', function (event, index) {
+                scope.$apply(function() {
+                    scope.selectedEntity = scope.resultSet[index];
+                    scope.editEntity(scope.selectedEntity);
+                });
+            });
+            
             scope.editEntity = function (entity) {
                 if (!entity) {
                     return;
