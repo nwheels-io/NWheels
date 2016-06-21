@@ -74,6 +74,8 @@ namespace NWheels.Hosts.Console
             catch ( Exception e )
             {
                 _log.Critical("NODE FAILED TO START! {0}", e.ToString());
+                hostControl.Stop();
+                Environment.Exit(-100);
             }
 
             if ( _hostConfig.IsBatchJob )

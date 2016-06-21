@@ -192,8 +192,15 @@ namespace NWheels.Hosting.Core
         {
             using ( _logger.NodeShuttingDown() )
             {
-                Deactivate();
-                Unload();
+                if (_stateMachine.CurrentState == NodeState.Active)
+                {
+                    Deactivate();
+                }
+
+                if (_stateMachine.CurrentState == NodeState.Standby)
+                {
+                    Unload();
+                }
             }
         }
 
