@@ -118,6 +118,9 @@ namespace NWheels.UI.Toolbox
         public string SubTreePropertyName { get; set; }
 
         [DataMember]
+        public bool IgnoreTreeNodeServerIds { get; set; }
+
+        [DataMember]
         public bool FlatStyle { get; set; }
 
         [DataMember]
@@ -611,8 +614,16 @@ namespace NWheels.UI.Toolbox
 
         public DataGrid<TDataRow> EnableExpandableTree(Expression<Func<TDataRow, System.Collections.IEnumerable>> subTreeProperty)
         {
+            var subTreePropertyInfo = subTreeProperty.GetPropertyInfo();
+            var subTreeMetaProperty = this.MetaType.GetPropertyByDeclaration(subTreePropertyInfo);
+
             this.ExpandableTreeMode = true;
-            this.SubTreePropertyName = subTreeProperty.GetPropertyInfo().Name;
+            this.SubTreePropertyName = subTreePropertyInfo.Name;
+
+            this.IgnoreTreeNodeServerIds = (
+                this.MetaType.IsEntityPart || 
+                (subTreeMetaProperty.Relation != null && subTreeMetaProperty.Relation.RelatedPartyType.IsEntityPart));
+
             return this;
         }
 

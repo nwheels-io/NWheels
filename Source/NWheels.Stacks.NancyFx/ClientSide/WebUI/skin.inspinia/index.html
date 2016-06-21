@@ -1203,8 +1203,12 @@ HEAD, JS/CSS LINKS
             $scope.transformToAdjacentTreeModel = function(localResultSet, serverNode, parentServerNode, level) {
                 var serverSubNodes = serverNode[$scope.uidl.subTreePropertyName];
 
-                serverNode['$treeLevel'] = level;
+                if ($scope.uidl.ignoreTreeNodeServerIds === true) {
+                    serverNode['$id'] = '' + (localResultSet.length + 1);
+                }
+                
                 serverNode['$treeParentId'] = (parentServerNode ? parentServerNode['$id'] : null);
+                serverNode['$treeLevel'] = level;
                 serverNode['$treeLeaf'] = (serverSubNodes && serverSubNodes.length > 0 ? false : true);
                 serverNode['$treeExpanded'] = false;
                 serverNode['loaded'] = true;
@@ -1548,7 +1552,7 @@ HEAD, JS/CSS LINKS
                     }
                     
                     if ($scope.uidl.expandableTreeMode) {
-                        gridOptions.ExpandColumn = 'Text';
+                        gridOptions.ExpandColumn = $scope.gridColumns[0].expression;
                         gridOptions.treeGrid = true;
                         gridOptions.treeGridModel = 'adjacency';
                         gridOptions.treeReader = {
