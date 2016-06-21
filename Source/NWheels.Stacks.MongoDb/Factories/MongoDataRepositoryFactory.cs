@@ -346,7 +346,10 @@ namespace NWheels.Stacks.MongoDb.Factories
                 }
 
                 foreach ( var partProperty in metaType.Properties.Where(
-                    p => p.Relation != null && p.Relation.RelatedPartyType != null && p.Relation.RelatedPartyType.IsEntityPart) )
+                    p => p.Relation != null && 
+                    p.Relation.RelatedPartyType != null && 
+                    p.Relation.RelatedPartyType.IsEntityPart &&
+                    p.Relation.RelatedPartyType != metaType))
                 {
                     WriteCollectionIndexesForType(
                         writer, 
