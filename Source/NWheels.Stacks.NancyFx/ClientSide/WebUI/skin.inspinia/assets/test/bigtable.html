@@ -70,7 +70,7 @@
                 {property: 'seventh', label: 'Lock Hold', width: 150},
             ];
             var _rowHeight = 25;
-            var _rowCount = 1000;
+            var _rowCount = 100000;
         
             var _lastScrollLeft = -1;
             var _lastScrollTop = -1;
@@ -97,13 +97,16 @@
             var _pageScrollCount = 0;
                 
             var _alloweNextRenderPage = true;
+            var _domSupportsNodeRemove = false;
         
             function initializeTable(elementId) {
-                console.group();
-                console.log('BT > initializeTable()');
+                //DEBUG:console.group();
+                //DEBUG:console.log('BT > initializeTable()');
 
                 _containerElQ = $('#' + elementId);
                 _tableEl = document.createElement('table');
+                
+                _domSupportsNodeRemove = (typeof _tableEl.remove === 'function');
                 
                 var tableHeadEl = document.createElement('thead');
                 _headersTrEl = document.createElement('tr');
@@ -121,7 +124,7 @@
                 tableHeadEl.appendChild(_headersTrEl);
                 _tableEl.appendChild(tableHeadEl);
                 
-                console.log('BT > initializeTable(): THEAD done');
+                //DEBUG:console.log('BT > initializeTable(): THEAD done');
 
                 _containerElQ[0].appendChild(_tableEl);
                 _tableBodyEl = document.createElement('tbody');
@@ -133,13 +136,13 @@
                 _tableBodyEl.appendChild(_topFillerTrEl);
                 _tableBodyEl.appendChild(_bottomFillerTrEl);
 
-                console.log('BT > initializeTable() > DONE');
-                console.groupEnd();
+                //DEBUG:console.log('BT > initializeTable() > DONE');
+                //DEBUG:console.groupEnd();
             }
         
             function initializePage() {
-                console.group(); 
-                console.log('BT > initializePage()');
+                //DEBUG:console.group(); 
+                //DEBUG:console.log('BT > initializePage()');
 
                 _totalHeight = _rowCount * _rowHeight;
                 _visiblePageSize = Math.ceil(_containerElQ[0].offsetHeight / _rowHeight);
@@ -152,10 +155,10 @@
                     _visiblePageSize = _pageSize;
                 }
                 
-                console.log('BT > initializePage():', '_totalHeight=' + _totalHeight, '_pageSize=' + _pageSize, '_visiblePageSize=' + _visiblePageSize);
+                //DEBUG:console.log('BT > initializePage():', '_totalHeight=' + _totalHeight, '_pageSize=' + _pageSize, '_visiblePageSize=' + _visiblePageSize);
                 
                 if (_pageTrEls.length < _pageSize) {
-                    console.log('BT > initializePage(): addind missing rows', '_pageTrEls.length' + _pageTrEls.length, '_pageSize=' + _pageSize);
+                    //DEBUG:console.log('BT > initializePage(): addind missing rows', '_pageTrEls.length' + _pageTrEls.length, '_pageSize=' + _pageSize);
                     // add missing rows
                     var initialLength = _pageTrEls.length;
                     for (var i = initialLength ; i < _pageSize ; i++) {
@@ -164,7 +167,7 @@
                         _tableBodyEl.insertBefore(trEl, _bottomFillerTrEl);
                     }
                 } else if  (_pageTrEls.length > _pageSize) {
-                    console.log('BT > initializePage(): removing redundant rows', '_pageTrEls.length' + _pageTrEls.length, '_pageSize=' + _pageSize);
+                    //DEBUG:console.log('BT > initializePage(): removing redundant rows', '_pageTrEls.length' + _pageTrEls.length, '_pageSize=' + _pageSize);
                     // or remove redundant rows, if any
                     for (var i = _pageSize ; i < _pageTrEls.length ; i++) {
                         _tableBodyEl.removeChild(_pageTrEls[i]);
@@ -172,8 +175,8 @@
                     _pageTrEls = _pageTrEls.slice(0, _pageSize);
                 }
 
-                console.log('BT > initializePage() > DONE');
-                console.groupEnd();
+                //DEBUG:console.log('BT > initializePage() > DONE');
+                //DEBUG:console.groupEnd();
             }
         
             function createBodyTrEl() {
@@ -199,37 +202,37 @@
                     var cellData = rowData[_columns[colIndex].property];
                     //var textNode = tdEls[colIndex].firstChild;
                     //textNode.textContent = cellData;
-                    if (colIndex !== 1) { 
+                    //DEBUG:if (colIndex !== 1) { 
                         tdEls[colIndex].innerHTML = cellData;
-                    }
-                    else {
-                        tdEls[colIndex].innerHTML = src;
-                    }
+                    //DEBUG:}
+                    //DEBUG:else {
+                    //DEBUG:    tdEls[colIndex].innerHTML = src;
+                    //DEBUG:}
                 }
             }
             
             function renderPage(force) {
-                console.group(); 
-                console.log('BT > renderPage()', 'force=' + (force ? 'true' : 'false'));
+                //DEBUG:console.group(); 
+                //DEBUG:console.log('BT > renderPage()', 'force=' + (force ? 'true' : 'false'));
             
                 var topVisibleRowIndex = Math.floor(_containerElQ[0].scrollTop / _rowHeight);
 
-                console.log('BT > renderPage():', 'topVisibleRowIndex=' + topVisibleRowIndex);
+                //DEBUG:console.log('BT > renderPage():', 'topVisibleRowIndex=' + topVisibleRowIndex);
 
                 if (!force && !isPageRenderNeeded(topVisibleRowIndex)) { //_pageTopRowIndex <= topVisibleRowIndex && _pageTopRowIndex + _pageSize >= topVisibleRowIndex + _visiblePageSize) {
-                    console.log('BT > renderPage() -> DONE - no need to render and no force');
-                    console.groupEnd(); 
+                    //DEBUG:console.log('BT > renderPage() -> DONE - no need to render and no force');
+                    //DEBUG:console.groupEnd(); 
                     return;
                 }
                 
                 _pageRenderCount++;
                 document.title = '' + _pageRenderCount + '...0%';
 
-                console.log('BT > renderPage():', 'starting render #' + _pageRenderCount);
+                //DEBUG:console.log('BT > renderPage():', 'starting render #' + _pageRenderCount);
 
                 _pageTopRowIndex = topVisibleRowIndex - _visiblePageSize;
 
-                console.log('BT > renderPage():', '_pageTopRowIndex=' + _pageTopRowIndex, '(before fix)');
+                //DEBUG:console.log('BT > renderPage():', '_pageTopRowIndex=' + _pageTopRowIndex, '(before fix)');
                 
                 if (_pageTopRowIndex + _pageSize > _rowCount) {
                     _pageTopRowIndex = _rowCount - _pageSize;
@@ -238,28 +241,35 @@
                     _pageTopRowIndex = 0;
                 }
                 
-                console.log('BT > renderPage():', '_pageTopRowIndex=' + _pageTopRowIndex, '(after fix)');
+                //DEBUG:console.log('BT > renderPage():', '_pageTopRowIndex=' + _pageTopRowIndex, '(after fix)');
 
                 for (var i = 0 ; i < _pageSize && _pageTopRowIndex + i < _rowCount ; i++) {
                     var trEl = _pageTrEls[i];
                     if (i === 0) {
-                        console.log('BT > renderPage(): render rows start: ', '_pageTopRowIndex + i:', _pageTopRowIndex + ' + ' + i + ' === ' + (_pageTopRowIndex + i));
+                        //DEBUG:console.log('BT > renderPage(): render rows start: ', '_pageTopRowIndex + i:', _pageTopRowIndex + ' + ' + i + ' === ' + (_pageTopRowIndex + i));
                     }
                     if (i === _pageSize - 1 || _pageTopRowIndex + i === _rowCount - 1) {
-                        console.log('BT > renderPage(): render rows end..: ', '_pageTopRowIndex + i:', _pageTopRowIndex + ' + ' + i + ' === ' + (_pageTopRowIndex + i));
+                        //DEBUG:console.log('BT > renderPage(): render rows end..: ', '_pageTopRowIndex + i:', _pageTopRowIndex + ' + ' + i + ' === ' + (_pageTopRowIndex + i));
                     }
                     renderRow(trEl, _pageTopRowIndex + i, 'pg+' + i);
                 }
                 
-                console.log('BT > renderPage(): removing _topScrollTrEls', 'count=' + _topScrollTrEls.length);
-                for (var i = _topScrollTrEls.length - 1 ; i >= 0 ; i--) {
-                    _topScrollTrEls[i].remove();
+                if (_domSupportsNodeRemove) {
+                    for (var i = _topScrollTrEls.length - 1 ; i >= 0 ; i--) {
+                        _topScrollTrEls[i].remove();
+                    }
+                    for (var i = 0 ; i < _bottomScrollTrEls.length ; i++) {
+                        _bottomScrollTrEls[i].remove();
+                    }
+                } else {
+                    for (var i = _topScrollTrEls.length - 1 ; i >= 0 ; i--) {
+                        _tableBodyEl.removeChild(_topScrollTrEls[i]);
+                    }
+                    for (var i = 0 ; i < _bottomScrollTrEls.length ; i++) {
+                        _tableBodyEl.removeChild(_bottomScrollTrEls[i]);
+                    }
                 }
 
-                console.log('BT > renderPage(): removing _bottomScrollTrEls', 'count=' + _bottomScrollTrEls.length);
-                for (var i = 0 ; i < _bottomScrollTrEls.length ; i++) {
-                    _bottomScrollTrEls[i].remove();
-                }
                 _topScrollTrEls = [ ];
                 _bottomScrollTrEls = [ ];
                 
@@ -278,23 +288,23 @@
                 */
                 
                 document.title = '' + _pageRenderCount + '...100%';
-                console.log('BT > renderPage > DONE');
-                console.groupEnd(); 
+                //DEBUG:console.log('BT > renderPage > DONE');
+                //DEBUG:console.groupEnd(); 
             }
             
             function scrollPage(oldScrollTop, newScrollTop) {
                 _pageScrollCount++;
                     
-                console.group(); 
-                console.log('BT > scrollPage() #' + _pageScrollCount, 'oldScrollTop=' + oldScrollTop, 'newScrollTop=' + newScrollTop, '[deltaPixels=' + (newScrollTop - oldScrollTop) + ']');
+                //DEBUG:console.group(); 
+                //DEBUG:console.log('BT > scrollPage() #' + _pageScrollCount, 'oldScrollTop=' + oldScrollTop, 'newScrollTop=' + newScrollTop, '[deltaPixels=' + (newScrollTop - oldScrollTop) + ']');
 
                 var newTopVisibleRowIndex = getTopVisibleRowIndex(newScrollTop);
 
-                console.log('BT > scrollPage():', 'newTopVisibleRowIndex=' + newTopVisibleRowIndex);
+                //DEBUG:console.log('BT > scrollPage():', 'newTopVisibleRowIndex=' + newTopVisibleRowIndex);
                 
                 if (!isScrollRenderNeeded(newTopVisibleRowIndex)) {
-                    console.log('BT > scrollPage() -> DONE(true) - no need to scroll-render');
-                    console.groupEnd(); 
+                    //DEBUG:console.log('BT > scrollPage() -> DONE(true) - no need to scroll-render');
+                    //DEBUG:console.groupEnd(); 
                     return true;
                 }
 
@@ -302,54 +312,57 @@
                 var deltaRows = newTopVisibleRowIndex - oldTopVisibleRowIndex;
                 var absDeltaRows = Math.abs(deltaRows);
                 
-                console.log('BT > scrollPage():', 'oldTopVisibleRowIndex=' + oldTopVisibleRowIndex, 'deltaRows=' + deltaRows);
+                //DEBUG:console.log('BT > scrollPage():', 'oldTopVisibleRowIndex=' + oldTopVisibleRowIndex, 'deltaRows=' + deltaRows);
                 
                 if (absDeltaRows === 0 || absDeltaRows > _pageSize / 2) {
                     if (absDeltaRows === 0) {
-                        console.log('BT > scrollPage > DONE(false) - absDeltaRows === 0');
+                        //DEBUG:console.log('BT > scrollPage > DONE(false) - absDeltaRows === 0');
                     }
                     if (absDeltaRows > _pageSize / 2) {
-                        console.log('BT > scrollPage > DONE(false) - absDeltaRows > _pageSize/2 :', absDeltaRows + ' > ' + (_pageSize / 2) + '===' + _pageSize + '/2');
+                        //DEBUG:console.log('BT > scrollPage > DONE(false) - absDeltaRows > _pageSize/2 :', absDeltaRows + ' > ' + (_pageSize / 2) + '===' + _pageSize + '/2');
                     }
-                    console.groupEnd(); 
+                    //DEBUG:console.groupEnd(); 
                     return false;
                 }
 
                 if (deltaRows > 0) {
-                    console.log('BT > scrollPage: scrolling down');
+                    //DEBUG:console.log('BT > scrollPage: scrolling down');
 
                     var oldBottomVisibleRowIndex = oldTopVisibleRowIndex + _visiblePageSize - 1;// + _bottomScrollTrEls.length;
-
-                    console.log('BT > scrollPage:', 'oldBottomVisibleRowIndex=' + oldBottomVisibleRowIndex + ' === oldTopVisibleRowIndex + _visiblePageSize - 1 /+ _bottomScrollTrEls.length/ ===', oldTopVisibleRowIndex + ' + ' + _visiblePageSize + ' - 1');// + ' + _bottomScrollTrEls.length);
+                    var lastRowIndex = _pageTopRowIndex + _pageSize + _bottomScrollTrEls.length;
+                    
+                    //DEBUG:console.log('BT > scrollPage:', 'oldBottomVisibleRowIndex=' + oldBottomVisibleRowIndex + ' === oldTopVisibleRowIndex + _visiblePageSize - 1 /+ _bottomScrollTrEls.length/ ===', oldTopVisibleRowIndex + ' + ' + _visiblePageSize + ' - 1');// + ' + _bottomScrollTrEls.length);
 
                     for (var i = 0 ; i < absDeltaRows ; i++) {
                         if (i === 0) {
-                            console.log('BT > scrollPage(): render rows start: ', 'oldBottomVisibleRowIndex + i + 1:', oldBottomVisibleRowIndex + ' + ' + i + ' + 1 === ' + (oldBottomVisibleRowIndex + i));
+                            //DEBUG:console.log('BT > scrollPage(): render rows start: ', 'oldBottomVisibleRowIndex + i + 1:', oldBottomVisibleRowIndex + ' + ' + i + ' + 1 === ' + (oldBottomVisibleRowIndex + i + 1));
                         }
                         if (i === absDeltaRows - 1) {
-                            console.log('BT > scrollPage(): render rows end..: ', 'oldBottomVisibleRowIndex + i + 1:', oldBottomVisibleRowIndex + ' + ' + i + ' + 1 === ' + (oldBottomVisibleRowIndex + i));
+                            //DEBUG:console.log('BT > scrollPage(): render rows end..: ', 'oldBottomVisibleRowIndex + i + 1:', oldBottomVisibleRowIndex + ' + ' + i + ' + 1 === ' + (oldBottomVisibleRowIndex + i + 1));
                         }
                     
                         var trEl = createBodyTrEl();
-                        renderRow(trEl, oldBottomVisibleRowIndex + i + 1, 'bscr#' + _pageScrollCount + ':' + oldBottomVisibleRowIndex + '+' + i + '+1');
+                        renderRow(trEl, lastRowIndex + i, 'bscr#' + _pageScrollCount + ':' + lastRowIndex + '+' + i);
                         _bottomScrollTrEls.push(trEl);
                         _tableBodyEl.insertBefore(trEl, _bottomFillerTrEl);
                     }
 
                 } else {
-                    console.log('BT > scrollPage: scrolling up');
+                    //DEBUG:console.log('BT > scrollPage: scrolling up');
 
+                    var firstRowIndex = _pageTopRowIndex - _topScrollTrEls.length;
                     var nextInsertBeforeTrEl = (_topScrollTrEls.length > 0 ? _topScrollTrEls[_topScrollTrEls.length - 1] : _pageTrEls[0]);
+                    
                     for (var i = 0 ; i < absDeltaRows ; i++) {
                         if (i === 0) {
-                            console.log('BT > scrollPage(): render rows start: ', 'oldTopVisibleRowIndex - i - 1:', oldTopVisibleRowIndex + ' - ' + i + ' - 1 === ' + (oldTopVisibleRowIndex - i - 1));
+                            //DEBUG:console.log('BT > scrollPage(): render rows start: ', 'oldTopVisibleRowIndex - i - 1:', oldTopVisibleRowIndex + ' - ' + i + ' - 1 === ' + (oldTopVisibleRowIndex - i - 1));
                         }
                         if (i === absDeltaRows - 1) {
-                            console.log('BT > scrollPage(): render rows end..: ', 'oldTopVisibleRowIndex - i - 1:', oldTopVisibleRowIndex + ' - ' + i + ' - 1 === ' + (oldTopVisibleRowIndex - i - 1));
+                            //DEBUG:console.log('BT > scrollPage(): render rows end..: ', 'oldTopVisibleRowIndex - i - 1:', oldTopVisibleRowIndex + ' - ' + i + ' - 1 === ' + (oldTopVisibleRowIndex - i - 1));
                         }
 
                         var trEl = createBodyTrEl();
-                        renderRow(trEl, oldTopVisibleRowIndex - i - 1, 'uscr#' + _pageScrollCount + ':' + oldTopVisibleRowIndex + '-' + i + '-1');
+                        renderRow(trEl, firstRowIndex - i - 1, 'uscr#' + _pageScrollCount + ':' + firstRowIndex + '-' + i + '-1');
                         _topScrollTrEls.push(trEl);
                         _tableBodyEl.insertBefore(trEl, nextInsertBeforeTrEl);
                         nextInsertBeforeTrEl = trEl;
@@ -357,20 +370,20 @@
                 }
                 
                 adjustFillerTrEls();
-                console.log('BT > scrollPage > DONE(true)');
-                console.groupEnd(); 
+                //DEBUG:console.log('BT > scrollPage > DONE(true)');
+                //DEBUG:console.groupEnd(); 
                 return true;
             }
 
             function adjustFillerTrEls() {
-                console.group(); 
-                console.log('BT > adjustFillerTrEls()');
+                //DEBUG:console.group(); 
+                //DEBUG:console.log('BT > adjustFillerTrEls()');
             
                 var topFillerHeight = (_rowHeight * (_pageTopRowIndex - _topScrollTrEls.length));
-                console.log('BT > adjustFillerTrEls(): topFillerHeight(before fix)=' + topFillerHeight, '=== (_rowHeight * (_pageTopRowIndex - _topScrollTrEls.length)) ===', '(' + _rowHeight + ' * (' + _pageTopRowIndex + ' - ' + _topScrollTrEls.length + '))');
+                //DEBUG:console.log('BT > adjustFillerTrEls(): topFillerHeight(before fix)=' + topFillerHeight, '=== (_rowHeight * (_pageTopRowIndex - _topScrollTrEls.length)) ===', '(' + _rowHeight + ' * (' + _pageTopRowIndex + ' - ' + _topScrollTrEls.length + '))');
 
                 var bottomFillerHeight = (_totalHeight - _rowHeight * (_pageTopRowIndex + _pageSize + _bottomScrollTrEls.length));
-                console.log('BT > adjustFillerTrEls(): bottomFillerHeight(before fix)=' + bottomFillerHeight, '=== (_totalHeight - _rowHeight * (_pageTopRowIndex + _pageSize + _bottomScrollTrEls.length)) ===', '(' + _totalHeight + ' - ' + _rowHeight + ' * (' + _pageTopRowIndex + ' + ' + _pageSize + ' + ' + _bottomScrollTrEls.length + '))');
+                //DEBUG:console.log('BT > adjustFillerTrEls(): bottomFillerHeight(before fix)=' + bottomFillerHeight, '=== (_totalHeight - _rowHeight * (_pageTopRowIndex + _pageSize + _bottomScrollTrEls.length)) ===', '(' + _totalHeight + ' - ' + _rowHeight + ' * (' + _pageTopRowIndex + ' + ' + _pageSize + ' + ' + _bottomScrollTrEls.length + '))');
                 
                 if (topFillerHeight < 0) {
                     topFillerHeight = 0;
@@ -379,12 +392,12 @@
                     bottomFillerHeight = 0;
                 }
 
-                console.log('BT > adjustFillerTrEls():', 'topFillerHeight(after fix)=' + topFillerHeight, 'bottomFillerHeight(after fix)=' + bottomFillerHeight);
+                //DEBUG:console.log('BT > adjustFillerTrEls():', 'topFillerHeight(after fix)=' + topFillerHeight, 'bottomFillerHeight(after fix)=' + bottomFillerHeight);
                 
                 _topFillerTrEl.style.height = topFillerHeight + 'px';
                 _bottomFillerTrEl.style.height = bottomFillerHeight + 'px';
 
-                console.groupEnd(); 
+                //DEBUG:console.groupEnd(); 
             }
             
             function getTopVisibleRowIndex(scrollTop) {
@@ -392,11 +405,11 @@
             }
             
             function isPageRenderNeeded(topVisibleRowIndex) {
-                console.group(); 
-                console.log('BT > isPageRenderNeeded()', 'topVisibleRowIndex=' + topVisibleRowIndex);
-                console.log('BT > isPageRenderNeeded():', 'topVisibleRowIndex < _pageTopRowIndex:', topVisibleRowIndex + ' < ' + _pageTopRowIndex, '===' + (topVisibleRowIndex < _pageTopRowIndex));
-                console.log('BT > isPageRenderNeeded():', 'topVisibleRowIndex + _visiblePageSize > _pageTopRowIndex + _pageSize:', topVisibleRowIndex + ' + ' + _visiblePageSize + ' > ' + _pageTopRowIndex + ' + ' + _pageSize, '===' + (topVisibleRowIndex + _visiblePageSize > _pageTopRowIndex + _pageSize));
-                console.groupEnd(); 
+                //DEBUG:console.group(); 
+                //DEBUG:console.log('BT > isPageRenderNeeded()', 'topVisibleRowIndex=' + topVisibleRowIndex);
+                //DEBUG:console.log('BT > isPageRenderNeeded():', 'topVisibleRowIndex < _pageTopRowIndex:', topVisibleRowIndex + ' < ' + _pageTopRowIndex, '===' + (topVisibleRowIndex < _pageTopRowIndex));
+                //DEBUG:console.log('BT > isPageRenderNeeded():', 'topVisibleRowIndex + _visiblePageSize > _pageTopRowIndex + _pageSize:', topVisibleRowIndex + ' + ' + _visiblePageSize + ' > ' + _pageTopRowIndex + ' + ' + _pageSize, '===' + (topVisibleRowIndex + _visiblePageSize > _pageTopRowIndex + _pageSize));
+                //DEBUG:console.groupEnd(); 
             
                 return (
                     topVisibleRowIndex < _pageTopRowIndex || 
@@ -405,11 +418,11 @@
             }
 
             function isScrollRenderNeeded(topVisibleRowIndex) {
-                console.group(); 
-                console.log('BT > isScrollRenderNeeded()', 'topVisibleRowIndex=' + topVisibleRowIndex);
-                console.log('BT > isScrollRenderNeeded():', 'topVisibleRowIndex < _pageTopRowIndex - _topScrollTrEls.length:', topVisibleRowIndex + ' < ' + _pageTopRowIndex + ' - ' + _topScrollTrEls.length, '===' + (topVisibleRowIndex < _pageTopRowIndex - _topScrollTrEls.length));
-                console.log('BT > isScrollRenderNeeded():', 'topVisibleRowIndex + _visiblePageSize > _pageTopRowIndex + _pageSize + _bottomScrollTrEls.length:', topVisibleRowIndex + ' + ' + _visiblePageSize + ' > ' + _pageTopRowIndex + ' + ' + _pageSize + ' + ' + _bottomScrollTrEls.length, '===' + (topVisibleRowIndex + _visiblePageSize > _pageTopRowIndex + _pageSize + _bottomScrollTrEls.length));
-                console.groupEnd(); 
+                //DEBUG:console.group(); 
+                //DEBUG:console.log('BT > isScrollRenderNeeded()', 'topVisibleRowIndex=' + topVisibleRowIndex);
+                //DEBUG:console.log('BT > isScrollRenderNeeded():', 'topVisibleRowIndex < _pageTopRowIndex - _topScrollTrEls.length:', topVisibleRowIndex + ' < ' + _pageTopRowIndex + ' - ' + _topScrollTrEls.length, '===' + (topVisibleRowIndex < _pageTopRowIndex - _topScrollTrEls.length));
+                //DEBUG:console.log('BT > isScrollRenderNeeded():', 'topVisibleRowIndex + _visiblePageSize > _pageTopRowIndex + _pageSize + _bottomScrollTrEls.length:', topVisibleRowIndex + ' + ' + _visiblePageSize + ' > ' + _pageTopRowIndex + ' + ' + _pageSize + ' + ' + _bottomScrollTrEls.length, '===' + (topVisibleRowIndex + _visiblePageSize > _pageTopRowIndex + _pageSize + _bottomScrollTrEls.length));
+                //DEBUG:console.groupEnd(); 
 
                 return (
                     topVisibleRowIndex < _pageTopRowIndex - _topScrollTrEls.length || 
@@ -424,13 +437,13 @@
                 _lastOffsetWidth = _containerElQ[0].offsetWidth;
 
                 _containerElQ.scroll(function() {
-                    console.group();
-                    console.log('BT !!! _containerElQ.scroll');
+                    //DEBUG:console.group();
+                    //DEBUG:console.log('BT !!! _containerElQ.scroll');
 
                     var newOffsetWidth = _containerElQ[0].offsetWidth;
                     var newOffsetHeight = _containerElQ[0].offsetHeight;
 
-                    console.log('BT !!! _containerElQ.scroll:', '_lastOffsetHeight=' + _lastOffsetHeight, 'newOffsetHeight=' + newOffsetHeight, '[deltaOffsetHeight=' + (newOffsetHeight - _lastOffsetHeight) + ']');
+                    //DEBUG:console.log('BT !!! _containerElQ.scroll:', '_lastOffsetHeight=' + _lastOffsetHeight, 'newOffsetHeight=' + newOffsetHeight, '[deltaOffsetHeight=' + (newOffsetHeight - _lastOffsetHeight) + ']');
                     
                     if (newOffsetHeight != _lastOffsetHeight) {
                         initializePage();
@@ -450,31 +463,32 @@
                     // Handle up/down scroll
                     var newScrollTop = _containerElQ[0].scrollTop;
 
-                    console.log('BT !!! _containerElQ.scroll:', '_lastScrollTop=' + _lastScrollTop, 'newScrollTop=' + newScrollTop, '[deltaScrollTop=' + (newScrollTop - _lastScrollTop) + ']');
+                    //DEBUG:console.log('BT !!! _containerElQ.scroll:', '_lastScrollTop=' + _lastScrollTop, 'newScrollTop=' + newScrollTop, '[deltaScrollTop=' + (newScrollTop - _lastScrollTop) + ']');
 
                     if (_lastScrollTop != newScrollTop) {
+                        //renderPage();
                         scrollPage(_lastScrollTop, newScrollTop);
                         _lastScrollTop = newScrollTop;  
                         
                         if (_scrollHandlerTimer) {
-                            console.log('BT !!! _containerElQ.scroll:', 'clearing _scrollHandlerTimer');
+                            //DEBUG:console.log('BT !!! _containerElQ.scroll:', 'clearing _scrollHandlerTimer');
                             clearTimeout(_scrollHandlerTimer);
                         }
 
-                        console.log('BT !!! _containerElQ.scroll:', 'setting up _scrollHandlerTimer');
+                        //DEBUG:console.log('BT !!! _containerElQ.scroll:', 'setting up _scrollHandlerTimer');
                         _scrollHandlerTimer = setTimeout(function() {
                             if (_alloweNextRenderPage) {
-                                console.group();
-                                console.log('BT !!! _scrollHandlerTimer.tick', 'setting up _scrollHandlerTimer');
+                                //DEBUG:console.group();
+                                //DEBUG:console.log('BT !!! _scrollHandlerTimer.tick', 'setting up _scrollHandlerTimer');
                                 renderPage();
-                                console.log('BT !!! _scrollHandlerTimer.tick > DONE');
-                                console.groupEnd();
+                                //DEBUG:console.log('BT !!! _scrollHandlerTimer.tick > DONE');
+                                //DEBUG:console.groupEnd();
                             }
-                        }, 1000);
+                        }, 30);
                     }
 
-                    console.log('BT !!! _containerElQ.scroll > DONE');
-                    console.groupEnd();
+                    //DEBUG:console.log('BT !!! _containerElQ.scroll > DONE');
+                    //DEBUG:console.groupEnd();
                 });
             }
             
@@ -494,7 +508,7 @@
             }
         
             $(document).ready(function() {
-                console.log('BT > $(document).ready');
+                //DEBUG:console.log('BT > $(document).ready');
                 
                 var elementId = 'app_screen_widget_123';
                 
@@ -509,7 +523,7 @@
                 
                 //var lastScrollLeft = null;
 
-                console.log('BT > $(document).ready > DONE');
+                //DEBUG:console.log('BT > $(document).ready > DONE');
             });
         </script>
     </body>
