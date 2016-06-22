@@ -351,6 +351,7 @@ namespace NWheels.UI
             settings.Converters.Add(new ViewModelObjectConverter(this, _viewModelFactory));
             settings.Converters.Add(new FormattedDocumentConverter());
             settings.Converters.Add(new TimeSeriesPointListConverter());
+            settings.Converters.Add(new MetaTypeQualifiedNameConverter(_metadataCache));
 
             foreach ( var extension in _jsonExtensions )
             {
@@ -2356,7 +2357,7 @@ namespace NWheels.UI
             {
                 if ( !string.IsNullOrEmpty(options.OfType) )
                 {
-                    dbQuery = ApplyOfTypeFilter(dbQuery, options.OfType);
+                    dbQuery = dbQuery.OfMetaType(this.MetaType, derivedTypeString: options.OfType);
                 }
 
                 for ( int i = 0 ; i < options.Filter.Count ; )
@@ -2383,23 +2384,24 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-            private IQueryable<TEntity> ApplyOfTypeFilter(IQueryable<TEntity> dbQuery, string typeString)
-            {
-                if ( MetaType.QualifiedName.EqualsIgnoreCase(typeString) )
-                {
-                    return dbQuery;
-                }
+            //-- Moved into QueryableExtensions.OfMetaType
+            //private IQueryable<TEntity> ApplyOfTypeFilter(IQueryable<TEntity> dbQuery, string typeString)
+            //{
+            //    if ( MetaType.QualifiedName.EqualsIgnoreCase(typeString) )
+            //    {
+            //        return dbQuery;
+            //    }
 
-                var filterMetaType = MetaType.DerivedTypes.FirstOrDefault(t => t.QualifiedName.EqualsIgnoreCase(typeString));
+            //    var filterMetaType = MetaType.DerivedTypes.FirstOrDefault(t => t.QualifiedName.EqualsIgnoreCase(typeString));
 
-                if ( filterMetaType == null )
-                {
-                    throw new ArgumentException(
-                        string.Format("Specified entity type '{0}' is not compatible with entity '{1}'.", typeString, MetaType.QualifiedName));
-                }
+            //    if ( filterMetaType == null )
+            //    {
+            //        throw new ArgumentException(
+            //            string.Format("Specified entity type '{0}' is not compatible with entity '{1}'.", typeString, MetaType.QualifiedName));
+            //    }
 
-                return filterMetaType.MakeOfType(dbQuery);
-            }
+            //    return filterMetaType.MakeOfType(dbQuery);
+            //}
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -3654,6 +3656,74 @@ namespace NWheels.UI
             public override bool CanConvert(Type objectType)
             {
                 return objectType == typeof(FormattedDocument);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanRead
+            {
+                get { return true; }
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanWrite
+            {
+                get { return true; }
+            }
+
+            #endregion
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class MetaTypeQualifiedNameConverter : JsonConverter
+        {
+            private readonly ITypeMetadataCache _metadataCache;
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public MetaTypeQualifiedNameConverter(ITypeMetadataCache metadataCache)
+            {
+                _metadataCache = metadataCache;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            #region Overrides of JsonConverter
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                if (value == null)
+                {
+                    writer.WriteNull();
+                    return;
+                }
+
+                var metaType = _metadataCache.GetTypeMetadata((Type)value);
+                writer.WriteValue(metaType.QualifiedName);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                if (reader.Value == null)
+                {
+                    return null;
+                }
+
+                var qualifiedName = reader.Value.ToString();
+                var metaType = _metadataCache.GetTypeMetadata(qualifiedName);
+ 
+                return metaType.ContractType;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public override bool CanConvert(Type objectType)
+            {
+                return typeof(System.Type).IsAssignableFrom(objectType);
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------

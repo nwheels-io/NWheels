@@ -593,6 +593,22 @@ namespace NWheels.UI.Toolbox
                 this.StandardValuesExclusive = MetaProperty.SemanticType.StandardValuesExclusive;
             }
 
+            if (MetaProperty.ClrType == typeof(System.Type) && MetaProperty.Validation != null && MetaProperty.Validation.AncestorClrType != null)
+            {
+                ITypeMetadata ancestorMetaType;
+
+                if (((WidgetUidlNode)_ownerForm).MetadataCache.TryGetTypeMetadata(MetaProperty.Validation.AncestorClrType, out ancestorMetaType))
+                {
+                    this.StandardValues = new List<string>(ancestorMetaType.DerivedTypes.Count + 1);
+                    if (!ancestorMetaType.IsAbstract)
+                    {
+                        this.StandardValues.Add(ancestorMetaType.QualifiedName);
+                    }
+                    this.StandardValues.AddRange(ancestorMetaType.DerivedTypes.Where(t => !t.IsAbstract).Select(t => t.QualifiedName));
+                    this.StandardValuesExclusive = true;
+                }
+            }
+
             if ( shouldSetDefaults )
             {
                 this.Modifiers |= GetDefaultModifiers(this.FieldType);
@@ -726,7 +742,17 @@ namespace NWheels.UI.Toolbox
 
         private bool PropertyHasExclusiveStandardValues()
         {
-            return (MetaProperty.SemanticType != null && MetaProperty.SemanticType.HasStandardValues && MetaProperty.SemanticType.StandardValuesExclusive);
+            if (MetaProperty.SemanticType != null && MetaProperty.SemanticType.HasStandardValues && MetaProperty.SemanticType.StandardValuesExclusive)
+            {
+                return true;
+            }
+
+            if (MetaProperty.ClrType == typeof(System.Type) && MetaProperty.Validation != null && MetaProperty.Validation.AncestorClrType != null)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
