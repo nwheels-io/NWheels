@@ -43,8 +43,8 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
             this.Icon = GetNodeIcon(logRecord.Level, logRecord.IsActivity);
             this.Text = logRecord.BuildSingleLineText();
             this.TimeText = GetTimeText(threadRecord, logRecord);
-            this.DurationMicroseconds = logRecord.MicrosecondsDuration;
-            this.CpuTimeMicroseconds = logRecord.MicrosecondsCpuTime;
+            this.DurationMilliseconds = logRecord.MicrosecondsDuration / 1000m;
+            this.CpuTimeMilliseconds = logRecord.MicrosecondsCpuTime / 1000m;
             this.CpuCycles = logRecord.CpuCycles;
             this.Exception = logRecord.ExceptionDetails;
 
@@ -80,10 +80,10 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Domain.Entities
         public string Icon { get; private set; }
         public string Text { get; private set; }
         public string TimeText { get; private set; }
-        public long DurationMicroseconds { get; private set; }
-        public long DbDurationMicroseconds { get; private set; }
+        public decimal DurationMilliseconds { get; private set; }
+        public decimal DbDurationMilliseconds { get; private set; }
         public long DbCount { get; private set; }
-        public long CpuTimeMicroseconds { get; private set; }
+        public decimal CpuTimeMilliseconds { get; private set; }
         public long CpuCycles { get; private set; }
         public string Exception { get; private set; }
         public string[] KeyValues { get; private set; }

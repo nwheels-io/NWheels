@@ -11,6 +11,7 @@ namespace NWheels.Logging.Impl
     {
         private static readonly IntPtr _s_pseudoHandle = (IntPtr)(-2);
         private static readonly ulong _s_cpuCyclesPerSecond;
+        private static readonly ulong _s_cpuCyclesPerMillisecond;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -21,10 +22,12 @@ namespace NWheels.Logging.Impl
             if ( QueryPerformanceFrequency(out frequency) )
             {
                 _s_cpuCyclesPerSecond = (ulong)frequency;
+                _s_cpuCyclesPerMillisecond = _s_cpuCyclesPerSecond / 1000;
             }
             else
             {
                 _s_cpuCyclesPerSecond = 0;
+                _s_cpuCyclesPerMillisecond = 0;
             }
         }
 
@@ -44,9 +47,47 @@ namespace NWheels.Logging.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public static ulong GetThreadCpuMicroseconds(ulong startCycles, ulong endCycles)
+        {
+            if (_s_cpuCyclesPerMillisecond > 0)
+            {
+                var result = endCycles - startCycles;
+
+                result *= 1000;
+                result /= _s_cpuCyclesPerMillisecond;
+
+                return result;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static ulong GetThreadCpuMicroseconds(ulong usedCycles)
+        {
+            if (_s_cpuCyclesPerMillisecond > 0)
+            {
+                var result = usedCycles;
+
+                result *= 1000;
+                result /= _s_cpuCyclesPerMillisecond;
+
+                return result;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public static ulong GetThreadCpuMilliseconds(ulong startCycles, ulong endCycles)
         {
-            if ( _s_cpuCyclesPerSecond > 0 )
+            if (_s_cpuCyclesPerSecond > 0)
             {
                 var result = endCycles - startCycles;
 
@@ -65,7 +106,7 @@ namespace NWheels.Logging.Impl
 
         public static ulong GetThreadCpuMilliseconds(ulong usedCycles)
         {
-            if ( _s_cpuCyclesPerSecond > 0 )
+            if (_s_cpuCyclesPerSecond > 0)
             {
                 var result = usedCycles;
 

@@ -47,7 +47,7 @@ namespace NWheels.Stacks.MongoDb.SystemLogs.Persistence
             this.RootActivityMessageId = threadLog.RootActivity.MessageId;
             this.RootActivityText = threadLog.RootActivity.SingleLineText;
             this.ContentTypes = threadLog.RootActivity.ContentTypes;
-            this.DurationMicroseconds = threadLog.ElapsedThreadMicroseconds;
+            this.DurationMicroseconds = threadLog.RootActivity.MicrosecondsDuration;
 
             this.VolatileSnapshot = threadLog.TakeSnapshot();
         }

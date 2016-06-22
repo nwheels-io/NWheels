@@ -26,7 +26,7 @@ namespace NWheels.Logging
         private LogNode _firstChild = null;
         private LogNode _lastChild = null;
         private bool _isClosed = false;
-        private long? _finalMillisecondsDuration = null;
+        private long? _finalMicrosecondsDuration = null;
         private ulong? _finalCpuCycles = null;
         private Exception _exception = null;
         private LogTotal _dbTotal;
@@ -100,8 +100,8 @@ namespace NWheels.Logging
 
             snapshot.SubNodes = subNodes;
             snapshot.IsActivity = true;
-            snapshot.MicrosecondsDuration = this.MillisecondsDuration;
-            snapshot.MicrosecondsCpuTime = (long)this.MillisecondsCpuTime;
+            snapshot.MicrosecondsDuration = this.MicrosecondsDuration;
+            snapshot.MicrosecondsCpuTime = (long)this.MicrosecondsCpuTime;
 
             return snapshot;
         }
@@ -247,11 +247,21 @@ namespace NWheels.Logging
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public long MicrosecondsDuration
+        {
+            get
+            {
+                return (_finalMicrosecondsDuration ?? ThreadLog.ElapsedThreadMicroseconds - base.MicrosecondsTimestamp);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public long MillisecondsDuration
         {
             get
             {
-                return (_finalMillisecondsDuration ?? ThreadLog.ElapsedThreadMilliseconds - base.MillisecondsTimestamp);
+                return (this.MicrosecondsDuration / 1000);
             }
         }
 
@@ -261,10 +271,28 @@ namespace NWheels.Logging
         {
             get
             {
-                if ( ThreadCpuTimeUtility.IsThreadCpuTimeSupported )
+                if (ThreadCpuTimeUtility.IsThreadCpuTimeSupported)
                 {
                     var usedCpuCycles = (_finalCpuCycles ?? ThreadLog.UsedThreadCpuCycles);
                     return ThreadCpuTimeUtility.GetThreadCpuMilliseconds(usedCpuCycles);
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ulong MicrosecondsCpuTime
+        {
+            get
+            {
+                if ( ThreadCpuTimeUtility.IsThreadCpuTimeSupported )
+                {
+                    var usedCpuCycles = (_finalCpuCycles ?? ThreadLog.UsedThreadCpuCycles);
+                    return ThreadCpuTimeUtility.GetThreadCpuMicroseconds(usedCpuCycles);
                 }
                 else
                 {
@@ -438,7 +466,7 @@ namespace NWheels.Logging
 
         internal void Close()
         {
-            _finalMillisecondsDuration = ThreadLog.ElapsedThreadMilliseconds - base.MillisecondsTimestamp;
+            _finalMicrosecondsDuration = ThreadLog.ElapsedThreadMicroseconds - base.MicrosecondsTimestamp;
             _finalCpuCycles = ThreadLog.UsedThreadCpuCycles - base.CpuCyclesTimestamp;
             _isClosed = true;
 

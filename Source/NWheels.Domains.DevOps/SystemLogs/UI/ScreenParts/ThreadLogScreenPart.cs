@@ -36,10 +36,10 @@ namespace NWheels.Domains.DevOps.SystemLogs.UI.ScreenParts
                     f.Alignment = WidgetAlignment.Right;
                 })
                 //.Column<IRootThreadLogUINodeEntity, string>(x => x.Node, size: FieldSize.Small, setup: DisableSortingAndFiltering)
-                .Column(x => x.DurationMicroseconds, size: FieldSize.Small, format: "#,##0", setup: DisableSortingAndFiltering)
-                .Column(x => x.DbDurationMicroseconds, size: FieldSize.Small, format: "#,##0", setup: DisableSortingAndFiltering)
+                .Column(x => x.DurationMilliseconds, size: FieldSize.Small, format: "#,##0.00", setup: DisableSortingAndFiltering)
+                .Column(x => x.DbDurationMilliseconds, size: FieldSize.Small, format: "#,##0.00", setup: DisableSortingAndFiltering)
                 .Column(x => x.DbCount, size: FieldSize.Small, format: "#,##0", setup: DisableSortingAndFiltering)
-                .Column(x => x.CpuTimeMicroseconds, size: FieldSize.Small, format: "#,##0", setup: DisableSortingAndFiltering);
+                .Column(x => x.CpuTimeMilliseconds, size: FieldSize.Small, format: "#,##0.000", setup: DisableSortingAndFiltering);
                 //.Column<IRootThreadLogUINodeEntity, string>(x => x.LogId, setup: DisableSortingAndFiltering)
                 //.Column<IRootThreadLogUINodeEntity, string>(x => x.CorrelationId, setup: DisableSortingAndFiltering);
 
