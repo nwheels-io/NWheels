@@ -1147,6 +1147,11 @@ HEAD, JS/CSS LINKS
                         case 'Right': modelItem.align = 'right'; break;
                     }
                 }
+                if (metaColumn.clickable === true) {
+                    modelItem.formatter = function(cellvalue, options, rowObject) {
+                        return '<a href="javascript:void(0);" onclick="jqgrid_onRowCellClick()">' + cellvalue + '</a>';
+                    };
+                }
                 columnsModel.push(modelItem);
             });
             $scope.needSearchToolbar = (Enumerable.From(columnsModel).Any(function(col) { return (col.search || col.sortable); }));
@@ -1691,6 +1696,29 @@ HEAD, JS/CSS LINKS
                 childScope.$destroy();
                 widgetContainerDiv.empty();
             }
+        };
+        function jqgrid_onRowCellClick(event) {
+            event = (event || window.event);
+            event.stopPropagation();
+            var target = $(event.target || event.srcElement);
+            var rowTd = target.closest('td');
+            var rowTr = rowTd.closest('tr');
+            var scopeEl = rowTr.closest('.ng-scope');
+            var scope = scopeEl.scope();
+            var rowId = rowTr[0].id;
+            var rowData = scope.getDataByRowId(rowId);
+            var colIndex = rowTd.index();
+            if (scope.uidl.expandableTreeMode===true) {
+                colIndex--;
+            }
+            if (scope.uidl.enableDetailPane===true) {
+                colIndex--;
+            }
+            var cellClickInfo = {
+                Data: rowData,
+                ColumnExpression: scope.gridColumns[colIndex].expression
+            };
+            scope.$emit(scope.uidl.qualifiedName + ':CellClicked', cellClickInfo);
         };
     </script>
 

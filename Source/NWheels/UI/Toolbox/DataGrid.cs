@@ -326,6 +326,8 @@ namespace NWheels.UI.Toolbox
             public bool DefaultSort { get; set; }
             [DataMember]
             public bool DefaultSortAscending { get; set; }
+            [DataMember]
+            public bool Clickable { get; set; }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -700,6 +702,7 @@ namespace NWheels.UI.Toolbox
         public UidlNotification<TDataRow> DataRowReceived { get; set; }
         public UidlNotification<ApplicationEntityService.QueryResults> QueryCompleted { get; set; }
         public UidlNotification<IPromiseFailureInfo> QueryFailed { get; set; }
+        public UidlNotification<ICellClickInfo> CellClicked { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
         
@@ -777,6 +780,14 @@ namespace NWheels.UI.Toolbox
             }
 
             return value;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public interface ICellClickInfo
+        {
+            TDataRow Data { get; set; }
+            string ColumnExpression { get; set; }
         }
     }
 
