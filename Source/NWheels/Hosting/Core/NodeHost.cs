@@ -325,6 +325,7 @@ namespace NWheels.Hosting.Core
             builder.RegisterType<ComponentAspectFactory>().SingleInstance();
 
             builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<RealTimeoutManager>().As<RealTimeoutManager>();
+            builder.NWheelsFeatures().Logging().RegisterLogger<ITimeoutManagerLogger>();
 
             builder.RegisterType<AccessControlListCache>().SingleInstance();
             builder.RegisterType<LocalTransientSessionManager>().As<ISessionManager, ICoreSessionManager>().SingleInstance();

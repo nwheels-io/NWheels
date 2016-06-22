@@ -107,26 +107,14 @@ namespace NWheels.Core
 
         public void RunThreadCode(Action threadCode, Func<ILogActivity> threadLogFactory, ThreadTaskType? taskType, string description)
         {
-            ThreadTaskType effectiveTaskType = taskType.GetValueOrDefault(ThreadTaskType.Unspecified);
-            string effectiveDescription = description ?? "Framework.RunThreadCode[unspecified]";
             Exception terminatingException = null;
+            ThreadTaskType effectiveTaskType = ThreadTaskType.Unspecified;
+            string effectiveDescription = null;
 
             try
             {
                 using ( var rootActivity = (threadLogFactory != null ? threadLogFactory() : null) )
                 {
-                    if ( threadLogFactory != null )
-                    {
-                        var threadLog = _threadLogAnchor.CurrentThreadLog;
-                        effectiveDescription = threadLog.RootActivity.SingleLineText;
-                        effectiveTaskType = threadLog.TaskType;
-                    }
-
-                    if (Thread.CurrentThread.Name == null)
-                    {
-                        Thread.CurrentThread.Name = effectiveDescription;
-                    }
-
                     try
                     {
                         threadCode();
@@ -135,11 +123,20 @@ namespace NWheels.Core
                     {
                         terminatingException = e0;
 
-                        if ( threadLogFactory != null )
+                        if (threadLogFactory != null)
                         {
                             rootActivity.Fail(terminatingException);
+
+                            var threadLog = _threadLogAnchor.CurrentThreadLog;
+                            effectiveDescription = threadLog.RootActivity.SingleLineText;
+                            effectiveTaskType = threadLog.TaskType;
                         }
-                        
+                        else
+                        {
+                            effectiveTaskType = taskType.GetValueOrDefault(ThreadTaskType.Unspecified);
+                            effectiveDescription = description ?? "Framework.RunThreadCode[unspecified]";
+                        }
+
                         SafeGetComponent(ref _nodeHostLogger).ThreadTerminatedByException(
                             taskType: effectiveTaskType,
                             rootActivity: effectiveDescription,

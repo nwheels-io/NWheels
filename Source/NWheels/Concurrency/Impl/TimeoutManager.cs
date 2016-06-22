@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Timers;
+using Autofac;
+using NWheels.Core;
+using NWheels.Extensions;
 using NWheels.Hosting;
+using NWheels.Logging;
 using Timer = System.Timers.Timer;
 
 namespace NWheels.Concurrency.Impl
@@ -15,6 +19,8 @@ namespace NWheels.Concurrency.Impl
             TimerName = timerName;
             TimerInstanceId = timerInstanceId;
             InitialDueTime = initialDueTime;
+            InvokeDelegate = this.Invoke;
+            ThreadLogFactory = this.CreateThreadLog;
         }
 
         #region Implementation of IDisposable
@@ -38,7 +44,10 @@ namespace NWheels.Concurrency.Impl
         public string TimerName { get; private set; }
         public string TimerInstanceId { get; private set; }
         public TimeSpan InitialDueTime { get; private set; }
+        public Action InvokeDelegate { get; private set; }
+        public Func<ILogActivity> ThreadLogFactory { get; private set; }
         public DateTime DueTimeUtc { get; internal set; }
+        public ITimeoutManagerLogger Logger { get; internal set; }
 
         public void CancelTimer()
         {
@@ -48,9 +57,15 @@ namespace NWheels.Concurrency.Impl
         #endregion
 
         internal int Id { get; set; }
+
         private RealTimeoutManager _relatedManager;
 
         internal abstract void Invoke();
+
+        private ILogActivity CreateThreadLog()
+        {
+            return Logger.TimeoutCallback(TimerName, TimerInstanceId);
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -94,6 +109,8 @@ namespace NWheels.Concurrency.Impl
 
     internal class RealTimeoutManager : LifecycleEventListenerBase
     {
+        private ICoreFramework _framework;
+        private ITimeoutManagerLogger _logger;
         private int _handlersId;
         private Timer _timer;
         private readonly Dictionary<DateTime, Dictionary<int, RealTimeoutHandle>> _timeOutEvents;
@@ -144,6 +161,7 @@ namespace NWheels.Concurrency.Impl
                 {
                     finalTimeOut = _nextTimeToCheck;
                 }
+                timeoutHandle.Logger = _logger;
                 AddFinalTimeOutEvent(finalTimeOut, timeoutHandle);
             }
         }
@@ -228,7 +246,7 @@ namespace NWheels.Concurrency.Impl
 
             try
             {
-                timeoutHandle.Invoke();
+                _framework.RunThreadCode(timeoutHandle.InvokeDelegate, timeoutHandle.ThreadLogFactory);
             }
             catch ( Exception )
             {
@@ -238,6 +256,16 @@ namespace NWheels.Concurrency.Impl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         #region Implementation of LifecycleEventListenerBase
+
+        public override void InjectDependencies(Autofac.IComponentContext components)
+        {
+            base.InjectDependencies(components);
+
+            _framework = components.Resolve<ICoreFramework>();
+            _logger = components.Resolve<ITimeoutManagerLogger>();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override void NodeActivated()
         {

@@ -121,6 +121,7 @@
     <Compile Include="Authorization\AnonymousPincipal.cs" />
     <Compile Include="Authorization\SystemPrincipal.cs" />
     <Compile Include="Concurrency\ContextAnchor.cs" />
+    <Compile Include="Concurrency\Impl\ITimeoutManagerLogger.cs" />
     <Compile Include="Concurrency\Impl\TimeoutManager.cs" />
     <Compile Include="Concurrency\IScopedConsumptionResource.cs" />
     <Compile Include="Concurrency\ITimeoutHandle.cs" />

@@ -12,6 +12,7 @@ namespace NWheels.Logging
         StartUp,
         ShutDown,
         ApiRequest,
+        IncomingMessage,
         QueuedWorkItem,
         ScheduledJob,
         BatchWorker,
