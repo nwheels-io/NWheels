@@ -443,12 +443,16 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         var implResult = impl.execute(scope, behavior, input);
         var promise = null;
 
+        if (implResult === undefined) {
+            implResult = input;
+        }
+        
         if (impl.returnsPromise) {
             promise = implResult;
         }
         else {
             promise = $q(function (resolve, reject) {
-                resolve(input);
+                resolve(implResult);
             });
         }
 
@@ -593,6 +597,20 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
     
     //-----------------------------------------------------------------------------------------------------------------
 
+    function createInputContext(scopeModel, input) {
+        var inputContext = {
+            model: {
+                Data: scopeModel.Data,
+                State: scopeModel.State,
+                Input: input || scopeModel.Input,
+                appState: scopeModel.appState
+            }
+        };
+        return inputContext;
+    };
+    
+    //-----------------------------------------------------------------------------------------------------------------
+
     function writeValueByNavigationPath(obj, navigations, value) {
         var target = obj;
         for (var j = 0; j < navigations.length - 1; j++) {
@@ -619,6 +637,37 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         }
         var lastNavigation = navigations[navigations.length-1];
         return target[lastNavigation];
+    }
+    
+    //-----------------------------------------------------------------------------------------------------------------
+
+    function performModelAlterations(model, alterations) {
+        var context = {
+            model: model
+        };
+        for (var i = 0; i < alterations.length; i++) {
+            var alteration = alterations[i];
+            switch (alteration.type) {
+                case 'Copy':
+                    var value = null;
+                    if (alteration.sourceValue) {
+                        value = alteration.sourceValue;
+                    } else if (alteration.sourceExpression && alteration.sourceExpression!=='null')                         {
+                        value = Enumerable.Return(context).Select('ctx=>ctx.' + alteration.sourceExpression).Single();
+                    }
+                    var target = context;
+                    for (var j = 0; j < alteration.destinationNavigations.length - 1; j++) {
+                        var nextTarget = target[alteration.destinationNavigations[j]];
+                        if (!nextTarget) {
+                            nextTarget = target[alteration.destinationNavigations[j]] = { };
+                        }
+                        target = nextTarget;
+                    }
+                    var lastNavigation = alteration.destinationNavigations[alteration.destinationNavigations.length-1];
+                    target[lastNavigation] = value;
+                    break;
+            }
+        }
     }
     
     //-----------------------------------------------------------------------------------------------------------------
@@ -656,6 +705,11 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         returnsPromise: false,
         execute: function (scope, behavior, input) {
             console.log('run-behavior > navigate', behavior.targetType, behavior.targetQualifiedName);
+            
+            if (input && behavior.inputExpression) {
+                var inputContext = createInputContext(scope.model, input);
+                input = selectValue(inputContext, behavior.inputExpression);
+            }
             
             if (behavior.navigationType == 'Popup' && behavior.targetType == 'Screen') {
                 var url = 
@@ -878,9 +932,9 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         execute: function (scope, behavior, input) {
             console.log('run-behavior > alertModel', behavior.alterations, input);
             scope.model.Input = input;
-            var context = {
-                model: scope.model
-            };
+            performModelAlterations(scope.model, behavior.alterations);
+
+            /*
             for (var i = 0; i < behavior.alterations.length; i++) {
                 var alteration = behavior.alterations[i];
                 switch (alteration.type) {
@@ -904,7 +958,29 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                         break;
                 }
             }
-        },
+            */
+        }
+    };
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_behaviorImplementations['ProjectInput'] = {
+        returnsPromise: false,
+        execute: function (scope, behavior, input) {
+            console.log('run-behavior > projectModel', behavior.alterations, input);
+            var projectedInput = {
+                Source: input,
+                Target: { }
+            };
+            var projectedModel = {
+                State: scope.model.State,
+                Data: scope.model.Data,
+                Input: projectedInput,
+                appState: scope.model.appState
+            }
+            performModelAlterations(projectedModel, behavior.alterations);
+            return projectedModel.Input;
+        }
     };
 
     //-----------------------------------------------------------------------------------------------------------------

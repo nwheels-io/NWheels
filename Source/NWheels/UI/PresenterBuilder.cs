@@ -264,6 +264,23 @@ namespace NWheels.UI
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
 
+            public PromiseBuilder<InputProjection<TInput, TNewInput>> ProjectInputAs<TNewInput>(
+                params Action<AlterModelBehaviorBuilder<InputProjection<TInput, TNewInput>>>[] alterations)
+            {
+                var behavior = new UidlProjectInputBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);
+                SetAndSubscribeBehavior(behavior);
+                var alterationBuilder = new AlterModelBehaviorBuilder<InputProjection<TInput, TNewInput>>(_ownerNode, behavior, _uidl);
+
+                foreach (var alteration in alterations)
+                {
+                    alteration(alterationBuilder);
+                }
+
+                return new PromiseBuilder<InputProjection<TInput, TNewInput>>(_ownerNode, _behavior, _uidl);
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
             public PromiseBuilder<TInput> AlterModel(params Action<AlterModelBehaviorBuilder<TInput>>[] alterations)
             {
                 var behavior = new UidlAlterModelBehavior(_ownerNode.GetUniqueBehaviorId(), _ownerNode);

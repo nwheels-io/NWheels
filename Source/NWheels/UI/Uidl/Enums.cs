@@ -50,6 +50,7 @@ namespace NWheels.UI.Uidl
         InvokeCommand = 50,
         QueryModel = 60,
         QueryAppState = 65,
+        ProjectInput = 67,
         AlterModel = 70,
         BranchByRule = 80,
         ActivateSessionTimeout = 90,

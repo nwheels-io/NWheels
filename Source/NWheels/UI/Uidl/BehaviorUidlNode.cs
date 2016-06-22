@@ -198,7 +198,14 @@ namespace NWheels.UI.Uidl
     public class UidlAlterModelBehavior : BehaviorUidlNode
     {
         public UidlAlterModelBehavior(string idName, ControlledUidlNode parent)
-            : base(idName, BehaviorType.AlterModel, parent)
+            : this(idName, BehaviorType.AlterModel, parent)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected UidlAlterModelBehavior(string idName, BehaviorType behaviorType, ControlledUidlNode parent)
+            : base(idName, behaviorType, parent)
         {
             this.Alterations = new List<Alteration>();
         }
@@ -256,6 +263,22 @@ namespace NWheels.UI.Uidl
 
         [DataMember]
         public object ConstantValue { get; set; }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    [DataContract(Name = "ProjectInputBehavior", Namespace = UidlDocument.DataContractNamespace)]
+    public class UidlProjectInputBehavior : UidlAlterModelBehavior
+    {
+        public UidlProjectInputBehavior(string idName, ControlledUidlNode parent)
+            : base(idName, BehaviorType.ProjectInput, parent)
+        {
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        //TODO:
+        //[DataMember]
+        //public Type ProjectedModelType { get; set; }
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------

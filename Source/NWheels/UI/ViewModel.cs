@@ -19,4 +19,12 @@ namespace NWheels.UI
     {
         public TParent ParentModel { get; set; }
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class InputProjection<TSource, TTarget>
+    {
+        public TSource Source { get; set; }
+        public TTarget Target { get; set; }
+    }
 }
