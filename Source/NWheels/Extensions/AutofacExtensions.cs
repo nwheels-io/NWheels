@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -787,8 +788,33 @@ namespace NWheels.Extensions
             public void RegisterJob<TJob>()
                 where TJob : IApplicationJob
             {
-                _builder.RegisterType<TJob>().As<TJob, IApplicationJob>().InstancePerDependency();
+                _builder
+                    .Register<TJob>(c =>
+                        (TJob)c.Resolve<ComponentAspectFactory>().CreateInheritor(typeof(TJob))
+                    )
+                    .As<TJob, IApplicationJob>()
+                    .InstancePerDependency();
+
+                _builder.RegisterInstance(new ApplicationJobRegistration(typeof(TJob)));
             }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class ApplicationJobRegistration
+        {
+            public ApplicationJobRegistration(Type jobComponentType)
+            {
+                this.JobComponentType = jobComponentType;
+
+                var attribute = jobComponentType.GetCustomAttribute<ApplicationJobAttribute>();
+                this.JobId = (attribute != null ? attribute.IdName : jobComponentType.FullName);
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public Type JobComponentType { get; private set; }
+            public string JobId { get; private set; }
         }
 
         //---------------------------------------------------------------------------------------------------------------------------------------------------------
