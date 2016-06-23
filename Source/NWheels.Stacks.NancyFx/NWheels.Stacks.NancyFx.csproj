@@ -803,7 +803,9 @@
     <Content Include="ClientSide\WebUI\skin.inspinia\assets\js\plugins\wow\wow.min.js" />
     <Content Include="ClientSide\WebUI\skin.inspinia\index.html" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <TypeScriptCompile Include="ClientSide\WebUI\skin.inspinia\assets\test\bigtable.ts" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
