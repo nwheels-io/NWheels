@@ -25,7 +25,17 @@ function getQueryStringValue(name) {
 //-----------------------------------------------------------------------------------------------------------------
 
 function hasEnumFlag(value, flag) {
-    return (value && (',' + value + ',').indexOf(',' + flag + ',') > -1);
+	if (value) {
+		var members = value.split(',');
+		for(var i = 0; i < members.length; i++)
+		{
+			if (members[i].trim() === flag) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 };
 
 //-----------------------------------------------------------------------------------------------------------------
