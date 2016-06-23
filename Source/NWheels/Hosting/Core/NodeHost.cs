@@ -236,6 +236,10 @@ namespace NWheels.Hosting.Core
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public event EventHandler StateChanged;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         internal BootConfiguration BootConfig
         {
             get
@@ -265,6 +269,7 @@ namespace NWheels.Hosting.Core
             _stateMachine = new TransientStateMachine<NodeState, NodeTrigger>(
                 new StateMachineCodeBehind(this),
                 _baseContainer.Resolve<TransientStateMachine<NodeState, NodeTrigger>.ILogger>());
+            _stateMachine.CurrentStateChanged += OnStateChanged;
 
             _logger = _baseContainer.Resolve<INodeHostLogger>();
         }
@@ -283,6 +288,16 @@ namespace NWheels.Hosting.Core
             _dynamicModule = null;
             _stateMachine = null;
             _logger = null;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void OnStateChanged(object sender, EventArgs e)
+        {
+            if (StateChanged != null)
+            {
+                StateChanged(this, e);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

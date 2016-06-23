@@ -28,6 +28,8 @@ namespace NWheels.Hosts.Console
     {
         private readonly ProgramConfig _hostConfig;
         private NodeHost _nodeHost;
+        private HostControl _hostControl;
+        private bool _startedSuccessfully;
         private IPlainLog _log;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -44,6 +46,8 @@ namespace NWheels.Hosts.Console
 
         public bool Start(HostControl hostControl)
         {
+            _hostControl = hostControl;
+
             bool isInConsoleMode = hostControl.IsRunningAsConsole();
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
@@ -130,7 +134,23 @@ namespace NWheels.Hosts.Console
         private void StartNodeHost()
         {
             _nodeHost = new NodeHost(_hostConfig.BootConfig, RegisterHostComponents);
+            _nodeHost.StateChanged += OnNodeHostStateChanged;
             _nodeHost.LoadAndActivate();
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private void OnNodeHostStateChanged(object sender, EventArgs e)
+        {
+            if (_nodeHost.State == NodeState.Active)
+            {
+                _startedSuccessfully = true;
+            }
+            else if (_startedSuccessfully && _nodeHost.State == NodeState.Down)
+            {
+                _log.Info("DONE - STOPPED");
+                _hostControl.Stop();
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -138,10 +158,13 @@ namespace NWheels.Hosts.Console
         private void RegisterHostComponents(ContainerBuilder builder)
         {
             builder.RegisterModule<NWheels.Stacks.Nlog.ModuleLoader>();
-            builder.RegisterType<CommandLineConfigurationSource>().As<IConfigurationSource>().LastInPipeline();
+            builder.RegisterType<CommandLineConfigurationSource>()
+                .WithParameter(TypedParameter.From(_hostConfig.CommandLineConfigValues.ToArray()))
+                .As<IConfigurationSource>()
+                .LastInPipeline();
             
-            builder.RegisterInstance(new CommandLineConfigurationLoader.CommandLineParameters(_hostConfig.CommandLineConfigValues.ToArray()));
-            builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<CommandLineConfigurationLoader>();
+            //builder.RegisterInstance(new CommandLineConfigurationLoader.CommandLineParameters(_hostConfig.CommandLineConfigValues.ToArray()));
+            //builder.NWheelsFeatures().Hosting().RegisterLifecycleComponent<CommandLineConfigurationLoader>().AnchoredFirstInPipeline();
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------

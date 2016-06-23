@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿#if false
+
+//THIS IS A LESS SUCCESSFUL DUPLICATE OF CommandLineConfigurationSource
+
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using NWheels.Hosting;
@@ -94,3 +98,5 @@ namespace NWheels.Configuration.Core
         }
     }
 }
+
+#endif
