@@ -1,3 +1,8 @@
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var UIDL;
 (function (UIDL) {
     var Event = (function () {
@@ -20,6 +25,7 @@ var UIDL;
     }());
     UIDL.Event = Event;
 })(UIDL || (UIDL = {}));
+//---------------------------------------------------------------------------------------------------------------------
 var UIDL;
 (function (UIDL) {
     var Widgets;
@@ -38,23 +44,42 @@ var UIDL;
         }());
         Widgets.UIDLDataGridColumn = UIDLDataGridColumn;
         //-----------------------------------------------------------------------------------------------------------------
-        var DataGridRowsChangedEventArgs = (function () {
-            function DataGridRowsChangedEventArgs() {
+        var DataGridBindingChangedEventArgs = (function () {
+            function DataGridBindingChangedEventArgs() {
             }
-            return DataGridRowsChangedEventArgs;
+            return DataGridBindingChangedEventArgs;
         }());
-        Widgets.DataGridRowsChangedEventArgs = DataGridRowsChangedEventArgs;
+        Widgets.DataGridBindingChangedEventArgs = DataGridBindingChangedEventArgs;
         //-----------------------------------------------------------------------------------------------------------------
-        var LocalDataGridBinding = (function () {
+        var DataGridBindingBase = (function () {
+            function DataGridBindingBase() {
+                this._changed = new UIDL.Event();
+            }
+            //-------------------------------------------------------------------------------------------------------------
+            DataGridBindingBase.prototype.expandRow = function (index, recursive) {
+                if (recursive === void 0) { recursive = false; }
+            };
+            DataGridBindingBase.prototype.collapseRow = function (index) { };
+            DataGridBindingBase.prototype.attachView = function (view) { };
+            //-------------------------------------------------------------------------------------------------------------
+            DataGridBindingBase.prototype.changed = function () {
+                return this._changed;
+            };
+            return DataGridBindingBase;
+        }());
+        Widgets.DataGridBindingBase = DataGridBindingBase;
+        //-----------------------------------------------------------------------------------------------------------------
+        var LocalDataGridBinding = (function (_super) {
+            __extends(LocalDataGridBinding, _super);
             //-------------------------------------------------------------------------------------------------------------
             function LocalDataGridBinding(rows) {
+                _super.call(this);
                 this._rows = rows.slice(0);
             }
             //-------------------------------------------------------------------------------------------------------------
-            LocalDataGridBinding.prototype.attachView = function (view) { };
-            LocalDataGridBinding.prototype.renderRow = function (index, el) { };
-            LocalDataGridBinding.prototype.expandRow = function (index, recursive) { };
-            LocalDataGridBinding.prototype.collapseRow = function (index) { };
+            LocalDataGridBinding.prototype.renderRow = function (index, el) {
+                // nothing
+            };
             //-------------------------------------------------------------------------------------------------------------
             LocalDataGridBinding.prototype.getRowCount = function () {
                 return this._rows.length;
@@ -63,23 +88,20 @@ var UIDL;
             LocalDataGridBinding.prototype.getRowDataAt = function (index) {
                 return this._rows[index];
             };
-            //-------------------------------------------------------------------------------------------------------------
-            LocalDataGridBinding.prototype.onChange = function (handler) { };
             return LocalDataGridBinding;
-        }());
+        }(DataGridBindingBase));
         Widgets.LocalDataGridBinding = LocalDataGridBinding;
         //-----------------------------------------------------------------------------------------------------------------
-        var NestedSetTreeDataGridBinding = (function () {
+        var NestedSetTreeDataGridBinding = (function (_super) {
+            __extends(NestedSetTreeDataGridBinding, _super);
             //-------------------------------------------------------------------------------------------------------------
             function NestedSetTreeDataGridBinding(upper, nestedSetProperty) {
+                _super.call(this);
                 this._upper = upper;
                 this._nestedSetProperty = nestedSetProperty;
             }
             //-------------------------------------------------------------------------------------------------------------
-            NestedSetTreeDataGridBinding.prototype.attachView = function (view) { };
             NestedSetTreeDataGridBinding.prototype.renderRow = function (index, el) { };
-            NestedSetTreeDataGridBinding.prototype.expandRow = function (index, recursive) { };
-            NestedSetTreeDataGridBinding.prototype.collapseRow = function (index) { };
             //-------------------------------------------------------------------------------------------------------------
             NestedSetTreeDataGridBinding.prototype.getRowCount = function () {
                 return this._upper.getRowCount();
@@ -88,11 +110,15 @@ var UIDL;
             NestedSetTreeDataGridBinding.prototype.getRowDataAt = function (index) {
                 return this._upper.getRowDataAt(index);
             };
-            //-------------------------------------------------------------------------------------------------------------
-            NestedSetTreeDataGridBinding.prototype.onChange = function (handler) { };
             return NestedSetTreeDataGridBinding;
-        }());
+        }(DataGridBindingBase));
         Widgets.NestedSetTreeDataGridBinding = NestedSetTreeDataGridBinding;
+        //-----------------------------------------------------------------------------------------------------------------
+        var ExpandedTreeNodeState = (function () {
+            function ExpandedTreeNodeState() {
+            }
+            return ExpandedTreeNodeState;
+        }());
     })(Widgets = UIDL.Widgets || (UIDL.Widgets = {}));
 })(UIDL || (UIDL = {}));
 //# sourceMappingURL=UIDLDataGrid.js.map

@@ -19,6 +19,7 @@ var UIDL;
                     //- assert
                     expect(log).toEqual(['test-handler(ABC)']);
                 });
+                //-------------------------------------------------------------------------------------------------------------
                 it('CanInvokeMultipleHandlers', function () {
                     //- arrange
                     var log = [];
@@ -37,6 +38,7 @@ var UIDL;
                         'test-handler-2(ABC)',
                     ]);
                 });
+                //-------------------------------------------------------------------------------------------------------------
                 it('CanUnbindHandler', function () {
                     //- arrange
                     var log = [];
@@ -88,11 +90,11 @@ var UIDL;
                     //- arrange
                     var dataRows = ["AAA", "BBB", "CCC"];
                     var binding = new Widgets.LocalDataGridBinding(dataRows);
-                    var handler = function (sender, args) {
+                    var handler = function (args) {
                         fail("onChange handler should never be invoked by LocalDataTableBinding!");
                     };
                     //- act & assert
-                    binding.onChange(handler);
+                    binding.changed().bind(handler);
                     dataRows.push("DDD"); // nothing should happen here
                 });
                 //-------------------------------------------------------------------------------------------------------------
@@ -100,10 +102,10 @@ var UIDL;
                     //- arrange
                     var dataRows = ["AAA", "BBB", "CCC"];
                     var binding = new Widgets.LocalDataGridBinding(dataRows);
-                    var handler = function (sender, args) {
+                    var handler = function (args) {
                         fail("onChange handler should never be invoked by LocalDataTableBinding!");
                     };
-                    binding.onChange(handler);
+                    binding.changed().bind(handler);
                     //- act
                     dataRows[1] = "ZZZ";
                     dataRows.push("DDD");
@@ -152,6 +154,16 @@ var UIDL;
                     ];
                 }
                 //-------------------------------------------------------------------------------------------------------------
+                function selectVisibleNodeValues(binding) {
+                    var values = [];
+                    for (var i = 0; i < binding.getRowCount(); i++) {
+                        var rowData = binding.getRowDataAt(i);
+                        var value = rowData.value;
+                        values.push(value);
+                    }
+                    return values;
+                }
+                //-------------------------------------------------------------------------------------------------------------
                 it("IsInitiallyCollapsedToRoots", function () {
                     //- arrange
                     var nodes = createTestTreeData();
@@ -163,6 +175,18 @@ var UIDL;
                     expect(binding.getRowDataAt(0).value).toBe('A1');
                     expect(binding.getRowDataAt(1).value).toBe('A2');
                     expect(binding.getRowDataAt(2).value).toBe('A3');
+                });
+                //-------------------------------------------------------------------------------------------------------------
+                it("CanExpandNodeInTheMiddle", function () {
+                    //- arrange
+                    var nodes = createTestTreeData();
+                    var binding = new Widgets.NestedSetTreeDataGridBinding(new Widgets.LocalDataGridBinding(nodes), 'subNodes');
+                    //- act
+                    binding.expandRow(1);
+                    //- assert
+                    expect(binding.getRowCount()).toBe(5);
+                    var visibleNodeValues = selectVisibleNodeValues(binding);
+                    expect(visibleNodeValues).toEqual(['A1', 'A2', 'A2B1', 'A2B2', 'A3']);
                 });
             });
         })(Tests = Widgets.Tests || (Widgets.Tests = {}));

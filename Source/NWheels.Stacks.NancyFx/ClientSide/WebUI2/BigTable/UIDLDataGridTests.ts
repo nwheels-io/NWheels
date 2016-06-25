@@ -23,6 +23,8 @@ namespace UIDL.Widgets.Tests
             expect(log).toEqual(['test-handler(ABC)']);
         });
 
+        //-------------------------------------------------------------------------------------------------------------
+
         it('CanInvokeMultipleHandlers', () => {
             //- arrange
 
@@ -48,6 +50,8 @@ namespace UIDL.Widgets.Tests
                 'test-handler-2(ABC)',
             ]);
         });
+
+        //-------------------------------------------------------------------------------------------------------------
 
         it('CanUnbindHandler', () => {
             //- arrange
@@ -125,13 +129,13 @@ namespace UIDL.Widgets.Tests
 
             let dataRows = ["AAA", "BBB", "CCC"];
             let binding = new LocalDataGridBinding(dataRows);
-            let handler = (sender: IDataGridBinding, args: DataGridRowsChangedEventArgs) => {
+            let handler = (args: DataGridBindingChangedEventArgs) => {
                 fail("onChange handler should never be invoked by LocalDataTableBinding!");
             };
 
             //- act & assert
 
-            binding.onChange(handler);
+            binding.changed().bind(handler);
             dataRows.push("DDD"); // nothing should happen here
         });
 
@@ -142,10 +146,10 @@ namespace UIDL.Widgets.Tests
 
             let dataRows = ["AAA", "BBB", "CCC"];
             let binding = new LocalDataGridBinding(dataRows);
-            let handler = (sender: IDataGridBinding, args: DataGridRowsChangedEventArgs) => {
+            let handler = (args: DataGridBindingChangedEventArgs) => {
                 fail("onChange handler should never be invoked by LocalDataTableBinding!");
             };
-            binding.onChange(handler);
+            binding.changed().bind(handler);
 
             //- act
 
@@ -208,6 +212,20 @@ namespace UIDL.Widgets.Tests
 
         //-------------------------------------------------------------------------------------------------------------
 
+        function selectVisibleNodeValues(binding: IDataGridBinding): string[] {
+            let values: string[] = [];
+
+            for (let i = 0; i < binding.getRowCount(); i++) {
+                var rowData = binding.getRowDataAt(i);
+                var value = (<TestTreeNode>rowData).value;
+                values.push(value);
+            }
+
+            return values;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
         it("IsInitiallyCollapsedToRoots", () => {
             //- arrange
 
@@ -224,6 +242,27 @@ namespace UIDL.Widgets.Tests
             expect((binding.getRowDataAt(0) as any).value).toBe('A1');
             expect((binding.getRowDataAt(1) as any).value).toBe('A2');
             expect((binding.getRowDataAt(2) as any).value).toBe('A3');
+        });
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        it("CanExpandNodeInTheMiddle", () => {
+            //- arrange
+
+            let nodes = createTestTreeData();
+            let binding = new NestedSetTreeDataGridBinding(new LocalDataGridBinding(nodes), 'subNodes');
+
+            //- act
+
+            binding.expandRow(1);
+
+            //- assert
+
+            expect(binding.getRowCount()).toBe(5);
+
+            let visibleNodeValues = selectVisibleNodeValues(binding);
+
+            expect(visibleNodeValues).toEqual(['A1', 'A2', 'A2B1', 'A2B2', 'A3']);
         });
     });
 }

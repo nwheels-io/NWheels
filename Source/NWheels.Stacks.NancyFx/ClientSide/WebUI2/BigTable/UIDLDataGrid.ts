@@ -23,6 +23,8 @@
     }
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+
 namespace UIDL.Widgets
 {
     export class UIDLDataGrid {
@@ -41,36 +43,59 @@ namespace UIDL.Widgets
     export interface IDataGridBinding {
         attachView(view: UIDLDataGrid);
         renderRow(index: number, el: HTMLTableRowElement): void;
-        expandRow(index: number, recursive: boolean): void;
+        expandRow(index: number, recursive?: boolean): void;
         collapseRow(index: number): void;
         getRowCount(): number;
         getRowDataAt(index: number): Object;
-        onChange(handler: (sender: IDataGridBinding , args: DataGridRowsChangedEventArgs) => void): void;
+        changed(): Event<DataGridBindingChangedEventArgs>;
     }
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    export class DataGridRowsChangedEventArgs {
-
+    export class DataGridBindingChangedEventArgs {
     }
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    export class LocalDataGridBinding implements IDataGridBinding  {
+    export abstract class DataGridBindingBase implements IDataGridBinding {
+        private _changed: Event<DataGridBindingChangedEventArgs> = new Event<DataGridBindingChangedEventArgs>();
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public abstract renderRow(index: number, el: HTMLTableRowElement): void;
+        public abstract getRowCount(): number;
+        public abstract getRowDataAt(index: number): Object;
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public expandRow(index: number, recursive = false): void { }
+        public collapseRow(index: number): void { }
+        public attachView(view: UIDLDataGrid): void { }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public changed(): Event<DataGridBindingChangedEventArgs> {
+            return this._changed;
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    export class LocalDataGridBinding extends DataGridBindingBase  {
         private _rows: Object[];
 
         //-------------------------------------------------------------------------------------------------------------
 
         constructor(rows: Object[]) {
+            super();
             this._rows = rows.slice(0);
         }
 
         //-------------------------------------------------------------------------------------------------------------
 
-        attachView(view: UIDLDataGrid) {}
-        renderRow(index: number, el: HTMLTableRowElement): void {}
-        expandRow(index: number, recursive: boolean): void {}
-        collapseRow(index: number): void {}
+        renderRow(index: number, el: HTMLTableRowElement): void {
+            // nothing
+        }
 
         //-------------------------------------------------------------------------------------------------------------
 
@@ -83,31 +108,25 @@ namespace UIDL.Widgets
         getRowDataAt(index: number): Object {
             return this._rows[index];
         }
-
-        //-------------------------------------------------------------------------------------------------------------
-
-        onChange(handler: (sender: IDataGridBinding, args: DataGridRowsChangedEventArgs) => void): void { }
     }
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    export class NestedSetTreeDataGridBinding implements IDataGridBinding {
+    export class NestedSetTreeDataGridBinding extends DataGridBindingBase {
         private _upper: IDataGridBinding;
         private _nestedSetProperty: string;
 
         //-------------------------------------------------------------------------------------------------------------
 
         constructor(upper: IDataGridBinding, nestedSetProperty: string) {
+            super();
             this._upper = upper;
             this._nestedSetProperty = nestedSetProperty;
         }
 
         //-------------------------------------------------------------------------------------------------------------
 
-        attachView(view: UIDLDataGrid) { }
         renderRow(index: number, el: HTMLTableRowElement): void { }
-        expandRow(index: number, recursive: boolean): void { }
-        collapseRow(index: number): void { }
 
         //-------------------------------------------------------------------------------------------------------------
 
@@ -120,12 +139,11 @@ namespace UIDL.Widgets
         getRowDataAt(index: number): Object {
             return this._upper.getRowDataAt(index);
         }
-
-        //-------------------------------------------------------------------------------------------------------------
-
-        onChange(handler: (sender: IDataGridBinding, args: DataGridRowsChangedEventArgs) => void): void { }
     }
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    class ExpandedTreeNodeState {
+        
+    }
 }                                                                                                                                   
