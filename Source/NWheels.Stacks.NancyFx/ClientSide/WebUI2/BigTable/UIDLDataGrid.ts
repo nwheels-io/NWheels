@@ -86,26 +86,26 @@ namespace UIDL.Widgets
 
         //-------------------------------------------------------------------------------------------------------------
 
-        constructor(rows: Object[]) {
+        public constructor(rows: Object[]) {
             super();
             this._rows = rows.slice(0);
         }
 
         //-------------------------------------------------------------------------------------------------------------
 
-        renderRow(index: number, el: HTMLTableRowElement): void {
+        public renderRow(index: number, el: HTMLTableRowElement): void {
             // nothing
         }
 
         //-------------------------------------------------------------------------------------------------------------
 
-        getRowCount(): number {
+        public getRowCount(): number {
             return this._rows.length;
         }
 
         //-------------------------------------------------------------------------------------------------------------
 
-        getRowDataAt(index: number): Object {
+        public getRowDataAt(index: number): Object {
             return this._rows[index];
         }
     }
@@ -115,35 +115,113 @@ namespace UIDL.Widgets
     export class NestedSetTreeDataGridBinding extends DataGridBindingBase {
         private _upper: IDataGridBinding;
         private _nestedSetProperty: string;
+        private _treeRoot: NodeSubTreeState;
 
         //-------------------------------------------------------------------------------------------------------------
 
-        constructor(upper: IDataGridBinding, nestedSetProperty: string) {
+        public constructor(upper: IDataGridBinding, nestedSetProperty: string) {
             super();
             this._upper = upper;
             this._nestedSetProperty = nestedSetProperty;
+            this._treeRoot = new NodeSubTreeState(this, 0, null);
         }
 
         //-------------------------------------------------------------------------------------------------------------
 
-        renderRow(index: number, el: HTMLTableRowElement): void { }
+        public renderRow(index: number, el: HTMLTableRowElement): void { }
 
         //-------------------------------------------------------------------------------------------------------------
 
-        getRowCount(): number {
+        public getRowCount(): number {
             return this._upper.getRowCount();
         }
 
         //-------------------------------------------------------------------------------------------------------------
 
-        getRowDataAt(index: number): Object {
-            return this._upper.getRowDataAt(index);
+        public getRowDataAt(index: number): Object {
+            return this._treeRoot.tryGetRowDataAt(index, -1);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public getRowDataSubNodes(rowData: Object): Object[] {
+            if (rowData == null) {
+                const topLevelRowData: Object[] = [];
+                const topLevelRowCount = this._upper.getRowCount(); 
+                for (let i = 0; i < topLevelRowCount; i++) {
+                    topLevelRowData.push(this._upper.getRowDataAt(i));
+                }
+                return topLevelRowData;
+            } else if (rowData.hasOwnProperty(this._nestedSetProperty)) {
+                //let rowDataAsAny = (rowData as any);
+                return rowData[this._nestedSetProperty];
+            } else {
+                return null;
+            }
         }
     }
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    class ExpandedTreeNodeState {
-        
+    class NodeSubTreeState {
+        private _ownerBinding: NestedSetTreeDataGridBinding;
+        private _childIndex: number;
+        private _nodeData: Object;
+        private _isExpanded: boolean;
+        private _visibleSubTreeSize: number;
+        private _subTrees: NodeSubTreeState[];
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public constructor(ownerBinding: NestedSetTreeDataGridBinding, childIndex: number, nodeData: Object) {
+            this._ownerBinding = ownerBinding;
+            this._childIndex = childIndex;
+            this._nodeData = nodeData;
+            this._visibleSubTreeSize = 0;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public tryGetRowDataAt(rowIndex: number, thisVisibleAtIndex: number): Object {
+            if (rowIndex === thisVisibleAtIndex) {
+                return this._nodeData;
+            }
+
+            if (rowIndex < thisVisibleAtIndex || rowIndex > thisVisibleAtIndex + this._visibleSubTreeSize) {
+                return null;
+            }
+
+            const subTreeSizeToSkip = rowIndex - thisVisibleAtIndex - 1;
+            let subTreeSizeSkipped = 0;
+            let lastSubtree: NodeSubTreeState = null;
+
+            for (let i = 0; i < this._subTrees.length; i++) {
+                let currentSubree = this._subTrees[i];
+                let siblingsSkippedToCurrentChild = (
+                    lastSubtree !== null
+                    ? currentSubree._childIndex - lastSubtree._childIndex
+                    : currentSubree._childIndex);
+
+                if (subTreeSizeSkipped + siblingsSkippedToCurrentChild >= subTreeSizeToSkip - subTreeSizeSkipped) {
+                    let rowDataSubNodes = this._ownerBinding.getRowDataSubNodes(this._nodeData);
+                    let rowDataIndex = (lastSubtree ? lastSubtree._childIndex + subTreeSizeToSkip - subTreeSizeSkipped : subTreeSizeToSkip);
+                    return rowDataSubNodes[rowDataIndex];
+                }
+
+                subTreeSizeSkipped += siblingsSkippedToCurrentChild;
+
+                var subTreeResult = currentSubree.tryGetRowDataAt(rowIndex, thisVisibleAtIndex + 1 + subTreeSizeSkipped);
+                if (subTreeResult !== null) {
+                    return subTreeResult;
+                }
+
+                subTreeSizeSkipped += (currentSubree._visibleSubTreeSize + 1);
+                lastSubtree = currentSubree;
+            }
+
+            let rowDataSubNodes = this._ownerBinding.getRowDataSubNodes(this._nodeData);
+            let rowDataIndex = (lastSubtree ? lastSubtree._childIndex + subTreeSizeToSkip - subTreeSizeSkipped : subTreeSizeToSkip);
+            return rowDataSubNodes[rowDataIndex];
+        }
     }
 }                                                                                                                                   

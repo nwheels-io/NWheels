@@ -99,6 +99,7 @@ var UIDL;
                 _super.call(this);
                 this._upper = upper;
                 this._nestedSetProperty = nestedSetProperty;
+                this._treeRoot = new NodeSubTreeState(this, 0, null);
             }
             //-------------------------------------------------------------------------------------------------------------
             NestedSetTreeDataGridBinding.prototype.renderRow = function (index, el) { };
@@ -108,16 +109,72 @@ var UIDL;
             };
             //-------------------------------------------------------------------------------------------------------------
             NestedSetTreeDataGridBinding.prototype.getRowDataAt = function (index) {
-                return this._upper.getRowDataAt(index);
+                return this._treeRoot.tryGetRowDataAt(index, -1);
+            };
+            //-------------------------------------------------------------------------------------------------------------
+            NestedSetTreeDataGridBinding.prototype.getRowDataSubNodes = function (rowData) {
+                if (rowData == null) {
+                    var topLevelRowData = [];
+                    var topLevelRowCount = this._upper.getRowCount();
+                    for (var i = 0; i < topLevelRowCount; i++) {
+                        topLevelRowData.push(this._upper.getRowDataAt(i));
+                    }
+                    return topLevelRowData;
+                }
+                else if (rowData.hasOwnProperty(this._nestedSetProperty)) {
+                    //let rowDataAsAny = (rowData as any);
+                    return rowData[this._nestedSetProperty];
+                }
+                else {
+                    return null;
+                }
             };
             return NestedSetTreeDataGridBinding;
         }(DataGridBindingBase));
         Widgets.NestedSetTreeDataGridBinding = NestedSetTreeDataGridBinding;
         //-----------------------------------------------------------------------------------------------------------------
-        var ExpandedTreeNodeState = (function () {
-            function ExpandedTreeNodeState() {
+        var NodeSubTreeState = (function () {
+            //-------------------------------------------------------------------------------------------------------------
+            function NodeSubTreeState(ownerBinding, childIndex, nodeData) {
+                this._ownerBinding = ownerBinding;
+                this._childIndex = childIndex;
+                this._nodeData = nodeData;
+                this._visibleSubTreeSize = 0;
             }
-            return ExpandedTreeNodeState;
+            //-------------------------------------------------------------------------------------------------------------
+            NodeSubTreeState.prototype.tryGetRowDataAt = function (rowIndex, thisVisibleAtIndex) {
+                if (rowIndex === thisVisibleAtIndex) {
+                    return this._nodeData;
+                }
+                if (rowIndex < thisVisibleAtIndex || rowIndex > thisVisibleAtIndex + this._visibleSubTreeSize) {
+                    return null;
+                }
+                var subTreeSizeToSkip = rowIndex - thisVisibleAtIndex - 1;
+                var subTreeSizeSkipped = 0;
+                var lastSubtree = null;
+                for (var i = 0; i < this._subTrees.length; i++) {
+                    var currentSubree = this._subTrees[i];
+                    var siblingsSkippedToCurrentChild = (lastSubtree !== null
+                        ? currentSubree._childIndex - lastSubtree._childIndex
+                        : currentSubree._childIndex);
+                    if (subTreeSizeSkipped + siblingsSkippedToCurrentChild >= subTreeSizeToSkip - subTreeSizeSkipped) {
+                        var rowDataSubNodes_1 = this._ownerBinding.getRowDataSubNodes(this._nodeData);
+                        var rowDataIndex_1 = (lastSubtree ? lastSubtree._childIndex + subTreeSizeToSkip - subTreeSizeSkipped : subTreeSizeToSkip);
+                        return rowDataSubNodes_1[rowDataIndex_1];
+                    }
+                    subTreeSizeSkipped += siblingsSkippedToCurrentChild;
+                    var subTreeResult = currentSubree.tryGetRowDataAt(rowIndex, thisVisibleAtIndex + 1 + subTreeSizeSkipped);
+                    if (subTreeResult !== null) {
+                        return subTreeResult;
+                    }
+                    subTreeSizeSkipped += (currentSubree._visibleSubTreeSize + 1);
+                    lastSubtree = currentSubree;
+                }
+                var rowDataSubNodes = this._ownerBinding.getRowDataSubNodes(this._nodeData);
+                var rowDataIndex = (lastSubtree ? lastSubtree._childIndex + subTreeSizeToSkip - subTreeSizeSkipped : subTreeSizeToSkip);
+                return rowDataSubNodes[rowDataIndex];
+            };
+            return NodeSubTreeState;
         }());
     })(Widgets = UIDL.Widgets || (UIDL.Widgets = {}));
 })(UIDL || (UIDL = {}));

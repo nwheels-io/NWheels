@@ -27,6 +27,7 @@
     <Content Include="Lib\jasmine\boot.js" />
     <Content Include="Lib\jasmine\console.js" />
     <Content Include="Lib\jasmine\jasmine-html.js" />
+    <Content Include="Lib\jasmine\jasmine.css" />
     <Content Include="Lib\jasmine\jasmine.js" />
     <Content Include="web.config" />
   </ItemGroup>
