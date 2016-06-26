@@ -47,6 +47,7 @@ namespace UIDL.Widgets
         collapseRow(index: number): void;
         getRowCount(): number;
         getRowDataAt(index: number): Object;
+        getAllRowsData(): Object[];
         changed(): Event<DataGridBindingChangedEventArgs>;
     }
 
@@ -65,6 +66,7 @@ namespace UIDL.Widgets
         public abstract renderRow(index: number, el: HTMLTableRowElement): void;
         public abstract getRowCount(): number;
         public abstract getRowDataAt(index: number): Object;
+        public abstract getAllRowsData(): Object[];
 
         //-------------------------------------------------------------------------------------------------------------
 
@@ -108,6 +110,12 @@ namespace UIDL.Widgets
         public getRowDataAt(index: number): Object {
             return this._rows[index];
         }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public getAllRowsData(): Object[] {
+            return this._rows;
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -115,7 +123,7 @@ namespace UIDL.Widgets
     export class NestedSetTreeDataGridBinding extends DataGridBindingBase {
         private _upper: IDataGridBinding;
         private _nestedSetProperty: string;
-        private _treeRoot: NodeSubTreeState;
+        private _treeRoot: SubTreeState;
 
         //-------------------------------------------------------------------------------------------------------------
 
@@ -123,7 +131,8 @@ namespace UIDL.Widgets
             super();
             this._upper = upper;
             this._nestedSetProperty = nestedSetProperty;
-            this._treeRoot = new NodeSubTreeState(this, 0, null);
+            this._treeRoot = new SubTreeState(this, null, -1, null);
+            this._treeRoot.expand(false);
         }
 
         //-------------------------------------------------------------------------------------------------------------
@@ -133,84 +142,111 @@ namespace UIDL.Widgets
         //-------------------------------------------------------------------------------------------------------------
 
         public getRowCount(): number {
-            return this._upper.getRowCount();
+            return this._treeRoot.getVisibleSubTreeSize();
         }
 
         //-------------------------------------------------------------------------------------------------------------
 
         public getRowDataAt(index: number): Object {
-            return this._treeRoot.tryGetRowDataAt(index, -1);
+            let locatedNode = this._treeRoot.tryLocateTreeNode(index, -1);
+
+            if (locatedNode) {
+                return locatedNode.getNodeData();
+            } else {
+                return null;
+            }
         }
 
         //-------------------------------------------------------------------------------------------------------------
 
         public getRowDataSubNodes(rowData: Object): Object[] {
             if (rowData == null) {
-                const topLevelRowData: Object[] = [];
-                const topLevelRowCount = this._upper.getRowCount(); 
-                for (let i = 0; i < topLevelRowCount; i++) {
-                    topLevelRowData.push(this._upper.getRowDataAt(i));
-                }
-                return topLevelRowData;
-            } else if (rowData.hasOwnProperty(this._nestedSetProperty)) {
+                return this._upper.getAllRowsData();
+            } else {
                 //let rowDataAsAny = (rowData as any);
                 return rowData[this._nestedSetProperty];
-            } else {
-                return null;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public getAllRowsData(): Object[] {
+            var data: Object[] = [];
+            this._treeRoot.listAllNodesData(data);
+            return data;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public expandRow(index: number, recursive = false): void {
+            let locatedNode = this._treeRoot.tryLocateTreeNode(index, -1);
+            if (locatedNode) {
+                locatedNode.expand(recursive);
             }
         }
     }
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    class NodeSubTreeState {
+    class SubTreeState {
         private _ownerBinding: NestedSetTreeDataGridBinding;
+        private _parentSubTree: SubTreeState;
         private _childIndex: number;
         private _nodeData: Object;
         private _isExpanded: boolean;
         private _visibleSubTreeSize: number;
-        private _subTrees: NodeSubTreeState[];
+        private _subTrees: SubTreeState[];
+        private _updateCount: number;
+        private _visibleSubTreeSizeBeforeUpdate: number;
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public constructor(ownerBinding: NestedSetTreeDataGridBinding, childIndex: number, nodeData: Object) {
+        public constructor(
+            ownerBinding: NestedSetTreeDataGridBinding,
+            parentSubTree: SubTreeState,
+            childIndex: number,
+            nodeData: Object)
+        {
             this._ownerBinding = ownerBinding;
+            this._parentSubTree = parentSubTree;
             this._childIndex = childIndex;
             this._nodeData = nodeData;
             this._visibleSubTreeSize = 0;
+            this._subTrees = [];
+            this._updateCount = 0;
         }
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public tryGetRowDataAt(rowIndex: number, thisVisibleAtIndex: number): Object {
+        public tryLocateTreeNode(rowIndex: number, thisVisibleAtIndex: number): LocatedTreeNode {
             if (rowIndex === thisVisibleAtIndex) {
-                return this._nodeData;
+                return new LocatedTreeNode(this._parentSubTree, this._childIndex, this);
             }
 
-            if (rowIndex < thisVisibleAtIndex || rowIndex > thisVisibleAtIndex + this._visibleSubTreeSize) {
+            if (thisVisibleAtIndex >= 0 &&
+                (rowIndex < thisVisibleAtIndex || rowIndex > thisVisibleAtIndex + this._visibleSubTreeSize))
+            {
                 return null;
             }
 
             const subTreeSizeToSkip = rowIndex - thisVisibleAtIndex - 1;
-            let subTreeSizeSkipped = 0;
-            let lastSubtree: NodeSubTreeState = null;
+            let subTreeSizeSkipped = 0;//(thisVisibleAtIndex >= 0 ? 1 : 0);
+            let lastSubtree: SubTreeState = null;
 
-            for (let i = 0; i < this._subTrees.length; i++) {
-                let currentSubree = this._subTrees[i];
-                let siblingsSkippedToCurrentChild = (
+            for (let currentSubree of this._subTrees) {
+                const siblingsSkippedToCurrentChild = (
                     lastSubtree !== null
-                    ? currentSubree._childIndex - lastSubtree._childIndex
+                    ? currentSubree._childIndex - lastSubtree._childIndex - 1
                     : currentSubree._childIndex);
 
-                if (subTreeSizeSkipped + siblingsSkippedToCurrentChild >= subTreeSizeToSkip - subTreeSizeSkipped) {
-                    let rowDataSubNodes = this._ownerBinding.getRowDataSubNodes(this._nodeData);
-                    let rowDataIndex = (lastSubtree ? lastSubtree._childIndex + subTreeSizeToSkip - subTreeSizeSkipped : subTreeSizeToSkip);
-                    return rowDataSubNodes[rowDataIndex];
+                if (subTreeSizeSkipped + siblingsSkippedToCurrentChild >= subTreeSizeToSkip) {
+                    const childIndex = (lastSubtree ? lastSubtree._childIndex + 1 + subTreeSizeToSkip - subTreeSizeSkipped : subTreeSizeToSkip);
+                    return new LocatedTreeNode(this, childIndex);
                 }
 
                 subTreeSizeSkipped += siblingsSkippedToCurrentChild;
 
-                var subTreeResult = currentSubree.tryGetRowDataAt(rowIndex, thisVisibleAtIndex + 1 + subTreeSizeSkipped);
+                var subTreeResult = currentSubree.tryLocateTreeNode(rowIndex, thisVisibleAtIndex + 1 + subTreeSizeSkipped);
                 if (subTreeResult !== null) {
                     return subTreeResult;
                 }
@@ -219,9 +255,219 @@ namespace UIDL.Widgets
                 lastSubtree = currentSubree;
             }
 
+            const childIndex = (lastSubtree ? lastSubtree._childIndex + 1 + subTreeSizeToSkip - subTreeSizeSkipped : subTreeSizeToSkip);
+            return new LocatedTreeNode(this, childIndex);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public getChildNodeData(childIndex: number): Object  {
             let rowDataSubNodes = this._ownerBinding.getRowDataSubNodes(this._nodeData);
-            let rowDataIndex = (lastSubtree ? lastSubtree._childIndex + subTreeSizeToSkip - subTreeSizeSkipped : subTreeSizeToSkip);
-            return rowDataSubNodes[rowDataIndex];
+            return rowDataSubNodes[childIndex];
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public isLeafNode(nodeData: Object): boolean {
+            let rowDataSubNodes = this._ownerBinding.getRowDataSubNodes(nodeData);
+            return (!rowDataSubNodes || rowDataSubNodes.length === 0);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public listAllNodesData(destination: Object[]): void {
+            destination.push(this._nodeData);
+
+            let subNodesData = this._ownerBinding.getRowDataSubNodes(this._nodeData);
+            let nextChildIndex: number = 0;
+
+            for (let subTree of this._subTrees) {
+                for ( ; nextChildIndex < subTree._childIndex ; nextChildIndex++) {
+                    destination.push(subNodesData[nextChildIndex]);
+                }
+
+                subTree.listAllNodesData(destination);
+                nextChildIndex = subTree._childIndex + 1;
+            }
+
+            for ( ; nextChildIndex < subNodesData.length ; nextChildIndex++) {
+                destination.push(subNodesData[nextChildIndex]);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public createSubTree(childIndex: number): SubTreeState {
+            for (let i = 0; i < this._subTrees.length; i++) {
+                const subTree = this._subTrees[i];
+
+                if (subTree._childIndex === childIndex) {
+                    return subTree;
+                }
+
+                if (subTree._childIndex > childIndex) {
+                    const newSubTree = new SubTreeState(this._ownerBinding, this, childIndex, this.getChildNodeData(childIndex));
+
+                    this._subTrees.splice(i, 0, newSubTree);
+                    return newSubTree;
+                }
+            }
+
+            const newSubTree = new SubTreeState(this._ownerBinding, this, childIndex, this.getChildNodeData(childIndex));
+            this._subTrees.push(newSubTree);
+            return newSubTree;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public expand(recursive: boolean): void {
+            this.beginUpdate();
+
+            try {
+                if (!this._isExpanded) {
+                    let subNodesData = this._ownerBinding.getRowDataSubNodes(this._nodeData);
+                    let visibleSubTreeSize = subNodesData.length;
+
+                    for (let subTree of this._subTrees) {
+                        visibleSubTreeSize += subTree.getVisibleSubTreeSize();
+                    }
+
+                    this._visibleSubTreeSize = visibleSubTreeSize;
+                    this._isExpanded = true;
+                }
+
+                if (recursive) {
+                    this.expandChildren(true);
+                }
+            } finally  {
+                this.endUpdate();
+            } 
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public getVisibleSubTreeSize(): number {
+            return this._visibleSubTreeSize;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        private visibleSubTreeSizeChanged(delta: number): void {
+            this._visibleSubTreeSize += delta;
+
+            if (this._parentSubTree && !this.isUpdating()) {
+                this._parentSubTree.visibleSubTreeSizeChanged(delta);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        private expandChildren(recursive: boolean): void {
+            let subNodesData = this._ownerBinding.getRowDataSubNodes(this._nodeData);
+
+            if (!subNodesData || subNodesData.length === 0) {
+                return;
+            }
+
+            let nextChildIndex = subNodesData.length - 1;
+
+            for (let subTreeIndex = this._subTrees.length - 1; subTreeIndex >= 0; subTreeIndex--) {
+                const subTree = this._subTrees[subTreeIndex];
+
+                for (; nextChildIndex > subTree._childIndex; nextChildIndex--) {
+                    if (!this.isLeafNode(subNodesData[nextChildIndex])) {
+                        const childSubTree = this.createSubTree(nextChildIndex);
+                        childSubTree.expand(recursive);
+                    }
+                }
+
+                subTree.expand(recursive);
+                nextChildIndex--;
+            }
+
+            for (; nextChildIndex >= 0; nextChildIndex--) {
+                if (!this.isLeafNode(subNodesData[nextChildIndex])) {
+                    const childSubTree = this.createSubTree(nextChildIndex);
+                    childSubTree.expand(recursive);
+                }
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        private beginUpdate(): void {
+            if (this._updateCount === 0) {
+                this._visibleSubTreeSizeBeforeUpdate = this._visibleSubTreeSize;
+            }
+
+            this._updateCount++;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        private endUpdate(): void {
+            this._updateCount--;
+
+            if (this._updateCount === 0) {
+                if (this._parentSubTree && this._visibleSubTreeSize !== this._visibleSubTreeSizeBeforeUpdate) {
+                    this._parentSubTree.visibleSubTreeSizeChanged(this._visibleSubTreeSize - this._visibleSubTreeSizeBeforeUpdate);
+                }
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        private isUpdating(): boolean {
+            return (this._updateCount > 0);
         }
     }
-}                                                                                                                                   
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    class LocatedTreeNode {
+        private _parentSubTree: SubTreeState;
+        private _nodeChildIndex: number;
+        private _nodeSubTree: SubTreeState;
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public constructor(parentSubTree: SubTreeState, nodeChildIndex: number, nodeSubTree?: SubTreeState) {
+            this._parentSubTree = parentSubTree;
+            this._nodeChildIndex = nodeChildIndex;
+            this._nodeSubTree = nodeSubTree;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public getParentSubTree(): SubTreeState {
+            return this._parentSubTree;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public getNodeChildIndex(): number {
+            return this._nodeChildIndex;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public getNodeData(): Object {
+            return this._parentSubTree.getChildNodeData(this._nodeChildIndex);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public getNodeSubTree(): SubTreeState {
+            return this._nodeSubTree;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public expand(recursive: boolean): void {
+            if (!this._nodeSubTree) {
+                this._nodeSubTree = this._parentSubTree.createSubTree(this._nodeChildIndex);
+            }
+            this._nodeSubTree.expand(recursive);
+        }
+    }
+}

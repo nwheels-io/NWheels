@@ -20,7 +20,7 @@ namespace NWheels.Globalization.Locales
         [PropertyContract.Required, PropertyContract.Semantic.DisplayName]
         string EnglishName { get; set; }
 
-        [PropertyContract.Relation.Composition, PropertyContract.Storage.EmbeddedInParent(false)]
-        ICollection<IApplicationLocaleEntryEntity> Entries { get; set; }
+        //[PropertyContract.Relation.Composition, PropertyContract.Storage.EmbeddedInParent(false)]
+        //ICollection<IApplicationLocaleEntryEntity> Entries { get; set; }
     }
 }

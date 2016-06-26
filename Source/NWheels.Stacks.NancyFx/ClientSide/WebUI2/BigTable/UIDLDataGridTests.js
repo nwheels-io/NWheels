@@ -188,6 +188,20 @@ var UIDL;
                     var visibleNodeValues = selectVisibleNodeValues(binding);
                     expect(visibleNodeValues).toEqual(['A1', 'A2', 'A2B1', 'A2B2', 'A3']);
                 });
+                //-------------------------------------------------------------------------------------------------------------
+                it("CanExpandNodeInTheMiddleRecursive", function () {
+                    //- arrange
+                    var nodes = createTestTreeData();
+                    var binding = new Widgets.NestedSetTreeDataGridBinding(new Widgets.LocalDataGridBinding(nodes), 'subNodes');
+                    //- act
+                    binding.expandRow(1, true);
+                    //- assert
+                    expect(binding.getRowCount()).toBe(9);
+                    var visibleNodeValues = selectVisibleNodeValues(binding);
+                    expect(visibleNodeValues).toEqual([
+                        'A1', 'A2', 'A2B1', 'A2B1C1', 'A2B1C2', 'A2B2', 'A2B2C1', 'A2B2C1D1', 'A3'
+                    ]);
+                });
             });
         })(Tests = Widgets.Tests || (Widgets.Tests = {}));
     })(Widgets = UIDL.Widgets || (UIDL.Widgets = {}));

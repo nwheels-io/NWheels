@@ -28,6 +28,11 @@ namespace NWheels.Globalization.Locales
 
         public override IQueryable<IApplicationLocaleEntryEntity> Execute(IInput input)
         {
+            if (input == null || input.Locale == null)
+            {
+                return ListLocaleEntriesForUIApplication(localeIsoCode: "EN");
+            }
+
             using (var context = _framework.NewUnitOfWork<IApplicationLocalizationContext>())
             {
                 var localeIsoCode = input.Locale.IsoCode;
@@ -72,7 +77,6 @@ namespace NWheels.Globalization.Locales
         [ViewModelContract]
         public interface IInput
         {
-            [PropertyContract.Required]
             IApplicationLocaleEntity Locale { get; set; }
         }
     }
