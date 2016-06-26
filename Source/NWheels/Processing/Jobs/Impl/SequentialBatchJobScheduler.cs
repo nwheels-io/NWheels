@@ -259,9 +259,9 @@ namespace NWheels.Processing.Jobs.Impl
 
             #region Implementation of IApplicationJobContext
 
-            public void Report(string statusText, decimal percentCompleted)
+            public void Report(string statusText, decimal? percentCompleted = null)
             {
-                _logger.ReportingJobProgress(_job.JobId, statusText, percentCompleted);
+                _logger.ReportingJobProgress(_job.JobId, statusText, percentCompleted.GetValueOrDefault());
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
