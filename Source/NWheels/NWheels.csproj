@@ -152,6 +152,10 @@
     <Compile Include="Extensions\QueryableExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Extensions\UidlExtensions.cs" />
+    <Compile Include="Globalization\Locales\IApplicationLocaleEntity.cs" />
+    <Compile Include="Globalization\Locales\IApplicationLocaleEntryEntity.cs" />
+    <Compile Include="Globalization\Locales\IApplicationLocalizationContext.cs" />
+    <Compile Include="Globalization\Locales\LocaleEntryExportTx.cs" />
     <Compile Include="Hosting\Core\IComponentAspectProvider.cs" />
     <Compile Include="Logging\Factories\CallLoggingAspectConvention.cs" />
     <Compile Include="Logging\LogCallsAttribute.cs" />
@@ -377,6 +381,7 @@
     <Compile Include="UI\ApplicationEntityService.cs" />
     <Compile Include="UI\Core\IJsonSerializationExtension.cs" />
     <Compile Include="UI\Core\IUidlApplicationEndpoint.cs" />
+    <Compile Include="UI\Core\IUidlApplicationContext.cs" />
     <Compile Include="UI\Factories\QueryResultAggregatorObjectFactory.cs" />
     <Compile Include="UI\Core\IQueryResultAggregator.cs" />
     <Compile Include="UI\EntityExportFormat.cs" />

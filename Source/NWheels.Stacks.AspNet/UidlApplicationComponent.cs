@@ -72,14 +72,14 @@ namespace NWheels.Stacks.AspNet
 
         #region IWebModuleContext Members
 
-        UidlDocument IWebModuleContext.Uidl
+        UidlDocument IUidlApplicationContext.Uidl
         {
             get { return _uidl; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        UidlApplication IWebModuleContext.Application
+        UidlApplication IUidlApplicationContext.Application
         {
             get { return _application; }
         }

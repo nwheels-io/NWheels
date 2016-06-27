@@ -371,7 +371,7 @@ namespace NWheels.Stacks.AspNet
             }
 
             using (new UIOperationContext(
-                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command, 
+                _context, ApiCallType.RequestReply, ApiCallResultType.Command, 
                 target, contractName, operationName, entity: entityName))
             { 
                 try
@@ -419,7 +419,7 @@ namespace NWheels.Stacks.AspNet
             }
 
             using (new UIOperationContext(
-                _context.EntityService, ApiCallType.Redirect, ApiCallResultType.Command,
+                _context, ApiCallType.Redirect, ApiCallResultType.Command,
                 target, contractName, operationName, entity: entityName))
             {
                 try
@@ -501,7 +501,7 @@ namespace NWheels.Stacks.AspNet
             var txViewModel = TryGetViewModelFrom(command);
 
             using (new UIOperationContext(
-                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.EntityQuery, 
+                _context, ApiCallType.RequestReply, ApiCallResultType.EntityQuery, 
                 target, contractName, operationName, entity: entityName, query: options))
             {
                 using (_context.EntityService.NewUnitOfWork(entityName, txViewModel, debugPerformStaleCheck: true))
@@ -562,7 +562,7 @@ namespace NWheels.Stacks.AspNet
             var txViewModel = TryGetViewModelFrom(queryCommand);
 
             using (new UIOperationContext(
-                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.EntityQuery, 
+                _context, ApiCallType.RequestReply, ApiCallResultType.EntityQuery, 
                 target, contractName, operationName, entity: entityName, query: options, format: outputFormat))
             {
                 using (_context.EntityService.NewUnitOfWork(entityName, TryGetViewModelFrom(queryCommand), debugPerformStaleCheck: true))
@@ -709,7 +709,7 @@ namespace NWheels.Stacks.AspNet
             }
 
             using (new UIOperationContext(
-                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command, 
+                _context, ApiCallType.RequestReply, ApiCallResultType.Command, 
                 target: null, contract: "ApplicationEntityService", operation: "CheckAuth", entity: entityName))
             { 
                 var checkResults = _context.EntityService.CheckEntityAuthorization(entityName, entityId);
@@ -729,7 +729,7 @@ namespace NWheels.Stacks.AspNet
             }
 
             using (new UIOperationContext(
-                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command, 
+                _context, ApiCallType.RequestReply, ApiCallResultType.Command, 
                 target: null, contract: "ApplicationEntityService", operation: "New", entity: entityName))
             { 
                 var json = _context.EntityService.NewEntityJson(entityName);
@@ -752,7 +752,7 @@ namespace NWheels.Stacks.AspNet
             }
 
             using (new UIOperationContext(
-                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command, 
+                _context, ApiCallType.RequestReply, ApiCallResultType.Command, 
                 target: null, contract: "ApplicationEntityService", operation: "QueryEntity", entity: entityName))
             { 
                 var queryParameters = this.Request.GetQueryString();
@@ -778,7 +778,7 @@ namespace NWheels.Stacks.AspNet
             }
 
             using (new UIOperationContext(
-                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.EntityQuery,
+                _context, ApiCallType.RequestReply, ApiCallResultType.EntityQuery,
                 target: null, contract: "ApplicationEntityService", operation: "QueryImage", entity: entityName))
             {
                 IDomainObject entity;
@@ -811,7 +811,7 @@ namespace NWheels.Stacks.AspNet
             }
 
             using (new UIOperationContext(
-                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command,
+                _context, ApiCallType.RequestReply, ApiCallResultType.Command,
                 target: null, contract: "ApplicationEntityService", operation: "StoreEntity", entity: entityName))
             {
                 var queryString = Request.GetQueryString();
@@ -860,7 +860,7 @@ namespace NWheels.Stacks.AspNet
             }
 
             using (new UIOperationContext(
-                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.Command,
+                _context, ApiCallType.RequestReply, ApiCallResultType.Command,
                 target: null, contract: "ApplicationEntityService", operation: "RecalculateEntity", entity: entityName))
             {
                 var queryString = Request.GetQueryString();
@@ -909,7 +909,7 @@ namespace NWheels.Stacks.AspNet
             }
 
             using (new UIOperationContext(
-                _context.EntityService, ApiCallType.RequestReply, ApiCallResultType.EntityQuery,
+                _context, ApiCallType.RequestReply, ApiCallResultType.EntityQuery,
                 target: null, contract: "ApplicationEntityService", operation: "QueryImage", entity: entityName))
             {
                 var session = Session.Current;

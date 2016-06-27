@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.UI.Core;
 using NWheels.UI.Uidl;
 using NWheels.Utilities;
 
@@ -11,7 +12,7 @@ namespace NWheels.UI
     public class UIOperationContext : IDisposable
     {
         public UIOperationContext(
-            ApplicationEntityService entityService,
+            IUidlApplicationContext appContext,
             ApiCallType callType,
             ApiCallResultType resultType,
             string target,
@@ -28,7 +29,8 @@ namespace NWheels.UI
 
             _s_current = this;
 
-            this.EntityService = entityService;
+            this.AppContext = appContext;
+            this.EntityService = appContext.EntityService;
 
             this.ApiCallType = callType;
             this.ApiResultType = resultType;
@@ -73,6 +75,7 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public IUidlApplicationContext AppContext { get; private set; }
         public ApplicationEntityService EntityService { get; private set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
