@@ -22,18 +22,16 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="app.css" />
     <Content Include="index.html" />
-    <Content Include="Lib\jasmine\boot.js" />
-    <Content Include="Lib\jasmine\console.js" />
-    <Content Include="Lib\jasmine\jasmine-html.js" />
-    <Content Include="Lib\jasmine\jasmine.css" />
-    <Content Include="Lib\jasmine\jasmine.js" />
+    <Content Include="lib\jasmine\boot.js" />
+    <Content Include="lib\jasmine\console.js" />
+    <Content Include="lib\jasmine\jasmine-html.js" />
+    <Content Include="lib\jasmine\jasmine.css" />
+    <Content Include="lib\jasmine\jasmine.js" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="app.ts" />
-    <TypeScriptCompile Include="UIDLDataGridTests.ts" />
+    <TypeScriptCompile Include="test\UIDLDataGridTests.ts" />
     <TypeScriptCompile Include="UIDLDataGrid.ts" />
     <TypeScriptCompile Include="lib\typings\jasmine\jasmine.d.ts" />
   </ItemGroup>
@@ -45,7 +43,9 @@
       <DependentUpon>web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="build\" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
   </PropertyGroup>
@@ -79,10 +79,11 @@
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-    <TypeScriptModuleKind>UMD</TypeScriptModuleKind>
+    <TypeScriptModuleKind>
+    </TypeScriptModuleKind>
     <TypeScriptOutFile>
     </TypeScriptOutFile>
-    <TypeScriptOutDir />
+    <TypeScriptOutDir>build\</TypeScriptOutDir>
     <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
     <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
     <TypeScriptMapRoot />
@@ -95,9 +96,11 @@
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
-    <TypeScriptOutFile>BigTable-out.js</TypeScriptOutFile>
-    <TypeScriptOutDir />
+    <TypeScriptModuleKind>
+    </TypeScriptModuleKind>
+    <TypeScriptOutFile>
+    </TypeScriptOutFile>
+    <TypeScriptOutDir>build\</TypeScriptOutDir>
     <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
     <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
     <TypeScriptMapRoot />

@@ -9,25 +9,11 @@
     <script type="text/javascript" src="lib/Jasmine/jasmine-html.js"></script>
     <script type="text/javascript" src="lib/Jasmine/boot.js"></script>
 
-    <!-- then code under test files... -->
-    <script type="text/javascript" src="UIDLDataGrid.js"></script>
+    <!-- code under test files -->
+    <script type="text/javascript" src="build/UIDLDataGrid.js"></script>
 
-    <!-- include spec files here... -->
-    <script type="text/javascript" src="UIDLDataGridTests.js"></script>
-
-    <!--script type="text/javascript">
-        window.addEventListener("load", function onLoad() {
-            var jasmineEnv = jasmine.getEnv(),
-            reporter = new jasmine.TrivialReporter();
-
-            jasmineEnv.addReporter(reporter);
-            setTimeout(function () {
-                jasmineEnv.execute();
-                // Without this setTimeout, the specs don't always get execute in webKit browsers, I don't know why
-            }, 10);
-            window.removeEventListener("load", onLoad, true);
-        }, true);
-    </!script-->
+    <!-- test specs -->
+    <script type="text/javascript" src="build/test/UIDLDataGridTests.js"></script>
 
 </head>
 <body>

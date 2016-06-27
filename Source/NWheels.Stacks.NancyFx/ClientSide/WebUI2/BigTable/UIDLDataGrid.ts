@@ -184,6 +184,15 @@ namespace UIDL.Widgets
                 locatedNode.expand(recursive);
             }
         }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public collapseRow(index: number): void {
+            let locatedNode = this._treeRoot.tryLocateTreeNode(index, -1);
+            if (locatedNode) {
+                locatedNode.collapse();
+            }
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -239,7 +248,7 @@ namespace UIDL.Widgets
                     ? currentSubree._childIndex - lastSubtree._childIndex - 1
                     : currentSubree._childIndex);
 
-                if (subTreeSizeSkipped + siblingsSkippedToCurrentChild >= subTreeSizeToSkip) {
+                if (subTreeSizeSkipped + siblingsSkippedToCurrentChild > subTreeSizeToSkip) {
                     const childIndex = (lastSubtree ? lastSubtree._childIndex + 1 + subTreeSizeToSkip - subTreeSizeSkipped : subTreeSizeToSkip);
                     return new LocatedTreeNode(this, childIndex);
                 }
@@ -342,6 +351,15 @@ namespace UIDL.Widgets
 
         //-------------------------------------------------------------------------------------------------------------
 
+        public collapse(): void {
+            if (this._isExpanded) {
+                this.visibleSubTreeSizeChanged(-this._visibleSubTreeSize);
+                this._isExpanded = false;
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
         public getVisibleSubTreeSize(): number {
             return this._visibleSubTreeSize;
         }
@@ -403,7 +421,7 @@ namespace UIDL.Widgets
 
             const newSubTree = new SubTreeState(this._ownerBinding, this, childIndex, childNodeData);
 
-            if (atSubTreeIndex) {
+            if (atSubTreeIndex !== undefined) {
                 this._subTrees.splice(atSubTreeIndex, 0, newSubTree);
             } else {
                 this._subTrees.push(newSubTree);
@@ -447,6 +465,7 @@ namespace UIDL.Widgets
         private _parentSubTree: SubTreeState;
         private _nodeChildIndex: number;
         private _nodeSubTree: SubTreeState;
+        private _nodeSubTreeInitialized: boolean;
 
         //-------------------------------------------------------------------------------------------------------------
 
@@ -454,6 +473,7 @@ namespace UIDL.Widgets
             this._parentSubTree = parentSubTree;
             this._nodeChildIndex = nodeChildIndex;
             this._nodeSubTree = nodeSubTree;
+            this._nodeSubTreeInitialized = false;
         }
 
         //-------------------------------------------------------------------------------------------------------------
@@ -483,10 +503,22 @@ namespace UIDL.Widgets
         //-------------------------------------------------------------------------------------------------------------
 
         public expand(recursive: boolean): void {
-            if (!this._nodeSubTree) {
+            if (!this._nodeSubTreeInitialized && !this._nodeSubTree) {
                 this._nodeSubTree = this._parentSubTree.createSubTree(this._nodeChildIndex);
+                this._nodeSubTreeInitialized = true;
             }
-            this._nodeSubTree.expand(recursive);
+
+            if (this._nodeSubTree) {
+                this._nodeSubTree.expand(recursive);
+            }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public collapse(): void {
+            if (this._nodeSubTree) {
+                this._nodeSubTree.collapse();
+            }
         }
     }
 }
