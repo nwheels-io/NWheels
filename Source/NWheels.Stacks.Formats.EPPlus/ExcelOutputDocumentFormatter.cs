@@ -19,16 +19,6 @@ namespace NWheels.Stacks.Formats.EPPlus
 {
     public class ExcelOutputDocumentFormatter : IOutputDocumentFormatter
     {
-        public class CustomExportParameter
-        {
-            public ApplicationEntityService.EntityCursor Cursor { get; set; }
-            public DocumentDesign Design { get; set; }
-            public ExcelPackage Package { get; set; }
-            public ExcelWorksheet Worksheet { get; set; }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         #region Implementation of IOutputDocumentFormatter
 
         public FormattedDocument FormatReportDocument(IObject criteria, ApplicationEntityService.EntityCursor queryResults, DocumentDesign design)
@@ -81,12 +71,7 @@ namespace NWheels.Stacks.Formats.EPPlus
 
             if (design.CustomExport != null)
             {
-                design.CustomExport(new CustomExportParameter {
-                    Cursor = cursor,
-                    Design = design,
-                    Package = package,
-                    Worksheet = worksheet
-                });
+                design.CustomExport(new CustomExportContext(cursor, design, package, worksheet));
                 return;
             }
 
@@ -175,6 +160,26 @@ namespace NWheels.Stacks.Formats.EPPlus
             }
 
             return -1;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+        
+        public class CustomExportContext
+        {
+            public CustomExportContext(ApplicationEntityService.EntityCursor cursor, DocumentDesign design, ExcelPackage package, ExcelWorksheet worksheet)
+            {
+                Cursor = cursor;
+                Design = design;
+                Package = package;
+                Worksheet = worksheet;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public ApplicationEntityService.EntityCursor Cursor { get; private set; }
+            public DocumentDesign Design { get; private set; }
+            public ExcelPackage Package { get; private set; }
+            public ExcelWorksheet Worksheet { get; private set; }
         }
     }
 }

@@ -266,6 +266,7 @@ namespace UIDL.Widgets
             return rowDataSubNodes[childIndex];
         }
 
+
         //-------------------------------------------------------------------------------------------------------------
 
         public isLeafNode(nodeData: Object): boolean {
@@ -306,16 +307,11 @@ namespace UIDL.Widgets
                 }
 
                 if (subTree._childIndex > childIndex) {
-                    const newSubTree = new SubTreeState(this._ownerBinding, this, childIndex, this.getChildNodeData(childIndex));
-
-                    this._subTrees.splice(i, 0, newSubTree);
-                    return newSubTree;
+                    return this.createSubTreeChecked(childIndex, i);
                 }
             }
 
-            const newSubTree = new SubTreeState(this._ownerBinding, this, childIndex, this.getChildNodeData(childIndex));
-            this._subTrees.push(newSubTree);
-            return newSubTree;
+            return this.createSubTreeChecked(childIndex);
         }
 
         //-------------------------------------------------------------------------------------------------------------
@@ -377,7 +373,9 @@ namespace UIDL.Widgets
                 for (; nextChildIndex > subTree._childIndex; nextChildIndex--) {
                     if (!this.isLeafNode(subNodesData[nextChildIndex])) {
                         const childSubTree = this.createSubTree(nextChildIndex);
-                        childSubTree.expand(recursive);
+                        if (childSubTree) {
+                            childSubTree.expand(recursive);
+                        }
                     }
                 }
 
@@ -388,9 +386,30 @@ namespace UIDL.Widgets
             for (; nextChildIndex >= 0; nextChildIndex--) {
                 if (!this.isLeafNode(subNodesData[nextChildIndex])) {
                     const childSubTree = this.createSubTree(nextChildIndex);
-                    childSubTree.expand(recursive);
+                    if (childSubTree) {
+                        childSubTree.expand(recursive);
+                    }
                 }
             }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        private createSubTreeChecked(childIndex: number, atSubTreeIndex?: number): SubTreeState {
+            const childNodeData = this.getChildNodeData(childIndex);
+            if (this.isLeafNode(childNodeData)) {
+                return null;
+            }
+
+            const newSubTree = new SubTreeState(this._ownerBinding, this, childIndex, childNodeData);
+
+            if (atSubTreeIndex) {
+                this._subTrees.splice(atSubTreeIndex, 0, newSubTree);
+            } else {
+                this._subTrees.push(newSubTree);
+            }
+
+            return newSubTree;
         }
 
         //-------------------------------------------------------------------------------------------------------------

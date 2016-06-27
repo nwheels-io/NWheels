@@ -10,6 +10,5 @@ namespace NWheels.Globalization.Locales
     public interface IApplicationLocalizationContext : IApplicationDataRepository
     {
         IEntityRepository<IApplicationLocaleEntity> Locales { get; }
-        IEntityRepository<IApplicationLocaleEntryEntity> LocaleEntries { get; }
     }
 }

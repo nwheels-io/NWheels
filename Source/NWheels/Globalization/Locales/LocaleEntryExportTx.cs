@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if false
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +13,7 @@ namespace NWheels.Globalization.Locales
 {
     [TransactionScript(SupportsInitializeInput = false, SupportsPreview = false)]
     [SecurityCheck.AllowAnonymous]
-    public class LocaleEntryExportTx : TransactionScript<Empty.Context, LocaleEntryExportTx.IInput, IQueryable<IApplicationLocaleEntryEntity>>
+    public class LocaleEntryExportTx : TransactionScript<Empty.Context, LocaleEntryExportTx.IInput, IQueryable<IApplicationLocaleEntryEntityPart>>
     {
         private readonly IFramework _framework;
 
@@ -26,7 +28,7 @@ namespace NWheels.Globalization.Locales
 
         #region Overrides of TransactionScript<Context,IInput,IQueryable<IApplicationLocaleEntryEntity>>
 
-        public override IQueryable<IApplicationLocaleEntryEntity> Execute(IInput input)
+        public override IQueryable<IApplicationLocaleEntryEntityPart> Execute(IInput input)
         {
             if (input == null || input.Locale == null)
             {
@@ -55,12 +57,12 @@ namespace NWheels.Globalization.Locales
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private IQueryable<IApplicationLocaleEntryEntity> ListLocaleEntriesForUIApplication(string localeIsoCode)
+        private IQueryable<IApplicationLocaleEntryEntityPart> ListLocaleEntriesForUIApplication(string localeIsoCode)
         {
             var locale = UIOperationContext.Current.AppContext.Uidl.Locales.Values.First();
             var entries = locale.Translations
                 .Select(kvp => {
-                    var entry = _framework.NewDomainObject<IApplicationLocaleEntryEntity>();
+                    var entry = _framework.NewDomainObject<IApplicationLocaleEntryEntityPart>();
                     entry.EntryId = kvp.Key;
                     entry.LocaleIsoCode = localeIsoCode;
                     entry.Translation = kvp.Value;
@@ -81,3 +83,6 @@ namespace NWheels.Globalization.Locales
         }
     }
 }
+
+#endif
+

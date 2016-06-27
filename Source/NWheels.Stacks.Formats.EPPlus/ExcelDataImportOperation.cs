@@ -32,20 +32,6 @@ namespace NWheels.Stacks.Formats.EPPlus
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public class CustomImportParameter
-        {
-            public DocumentDesign Design { get; set; }
-            public ExcelPackage Package { get; set; }
-            public ExcelWorksheet Worksheet { get; set; }
-            public ApplicationEntityService EntityService { get; set; }
-            public ApplicationEntityService.EntityHandler EntityHandler { get; set; }
-            public IApplicationDataRepository DomainContext { get; set; }
-            public ApplicationEntityService.EntityCursorMetadata MetaCursor { get; set; }
-            public ApplicationEntityService.EntityCursorRow[] CursorBuffer { get; set; }
-        }
-
-        //-----------------------------------------------------------------------------------------------------------------------------------------------------
-
         public ExcelDataImportOperation(FormattedDocument document, DocumentDesign design, ApplicationEntityService entityService)
         {
             if (document == null)
@@ -130,16 +116,16 @@ namespace NWheels.Stacks.Formats.EPPlus
         {
             if (_design.CustomImport != null)
             {
-                _design.CustomImport(new CustomImportParameter {
-                    Design = _design,
-                    Package = _package,
-                    Worksheet = _worksheet,
-                    EntityService = _entityService,
-                    EntityHandler = _entityHandler,
-                    DomainContext = _domainContext,
-                    MetaCursor = _metaCursor,
-                    CursorBuffer = _cursorBuffer
-                });
+                _design.CustomImport(new CustomImportContext(
+                    _design,
+                    _package,
+                    _worksheet,
+                    _entityService,
+                    _entityHandler,
+                    _domainContext,
+                    _metaCursor,
+                    _cursorBuffer
+                ));
                 return;
             }
 
@@ -286,6 +272,42 @@ namespace NWheels.Stacks.Formats.EPPlus
 
             faultSubCode = null;
             return true;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class CustomImportContext
+        {
+            public CustomImportContext(
+                DocumentDesign design, 
+                ExcelPackage package, 
+                ExcelWorksheet worksheet, 
+                ApplicationEntityService entityService, 
+                ApplicationEntityService.EntityHandler entityHandler, 
+                IApplicationDataRepository domainContext, 
+                ApplicationEntityService.EntityCursorMetadata metaCursor, 
+                ApplicationEntityService.EntityCursorRow[] cursorBuffer)
+            {
+                Design = design;
+                Package = package;
+                Worksheet = worksheet;
+                EntityService = entityService;
+                EntityHandler = entityHandler;
+                DomainContext = domainContext;
+                MetaCursor = metaCursor;
+                CursorBuffer = cursorBuffer;
+            }
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public DocumentDesign Design { get; private set; }
+            public ExcelPackage Package { get; private set; }
+            public ExcelWorksheet Worksheet { get; private set; }
+            public ApplicationEntityService EntityService { get; private set; }
+            public ApplicationEntityService.EntityHandler EntityHandler { get; private set; }
+            public IApplicationDataRepository DomainContext { get; private set; }
+            public ApplicationEntityService.EntityCursorMetadata MetaCursor { get; private set; }
+            public ApplicationEntityService.EntityCursorRow[] CursorBuffer { get; private set; }
         }
     }
 }

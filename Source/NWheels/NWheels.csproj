@@ -152,9 +152,11 @@
     <Compile Include="Extensions\QueryableExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Extensions\UidlExtensions.cs" />
+    <Compile Include="Globalization\Locales\ApplicationLocaleEntrySource.cs" />
     <Compile Include="Globalization\Locales\IApplicationLocaleEntity.cs" />
-    <Compile Include="Globalization\Locales\IApplicationLocaleEntryEntity.cs" />
+    <Compile Include="Globalization\Locales\IApplicationLocaleEntryEntityPart.cs" />
     <Compile Include="Globalization\Locales\IApplicationLocalizationContext.cs" />
+    <Compile Include="Globalization\Locales\LocaleCrudScreenPart.cs" />
     <Compile Include="Globalization\Locales\LocaleEntryExportTx.cs" />
     <Compile Include="Hosting\Core\IComponentAspectProvider.cs" />
     <Compile Include="Logging\Factories\CallLoggingAspectConvention.cs" />

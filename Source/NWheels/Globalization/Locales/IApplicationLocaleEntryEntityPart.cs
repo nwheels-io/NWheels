@@ -9,14 +9,9 @@ using NWheels.Entities;
 
 namespace NWheels.Globalization.Locales
 {
-    [EntityContract]
-    public interface IApplicationLocaleEntryEntity
+    [EntityPartContract]
+    public interface IApplicationLocaleEntryEntityPart
     {
-        [PropertyContract.Required, 
-            PropertyContract.Relation.LinkToEntity(typeof(IApplicationLocaleEntity)), 
-            PropertyContract.Relation.CompositionParent]
-        string LocaleIsoCode { get; set; }
-
         [PropertyContract.Required]
         string EntryId { get; set; }
 

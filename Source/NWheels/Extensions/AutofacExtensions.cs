@@ -26,6 +26,7 @@ using NWheels.Entities.Core;
 using NWheels.Entities.Impl;
 using NWheels.Entities.Migrations;
 using NWheels.Exceptions;
+using NWheels.Globalization.Locales;
 using NWheels.Hosting;
 using NWheels.Hosting.Factories;
 using NWheels.Logging;
@@ -110,6 +111,13 @@ namespace NWheels.Extensions
         public static CommunicationFeature Communication(this NWheelsFeatureRegistrations features)
         {
             return new CommunicationFeature(((IHaveContainerBuilder)features).Builder);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static GlobalizatiobFeature Globalization(this NWheelsFeatureRegistrations features)
+        {
+            return new GlobalizatiobFeature(((IHaveContainerBuilder)features).Builder);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -348,6 +356,28 @@ namespace NWheels.Extensions
                 where TLogger : class, IApplicationEventLogger
             {
                 _builder.Register(ctx => ctx.Resolve<LoggerObjectFactory>().CreateService<TLogger>()).As<TLogger>();
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public class GlobalizatiobFeature
+        {
+            private readonly ContainerBuilder _builder;
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public GlobalizatiobFeature(ContainerBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RegisterLocaleEntrySource<TApp>()
+                where TApp : UidlApplication
+            {
+                _builder.RegisterInstance(new ApplicationLocaleEntrySource(typeof(TApp)));
             }
         }
 
