@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Concurrency;
+using NWheels.Concurrency.Impl;
 
 namespace NWheels.Extensions
 {
@@ -34,6 +36,13 @@ namespace NWheels.Extensions
             {
                 collection.Add(itemFactory());
             }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public static IWriteOnlyCollection<T> AsWriteOnly<T>(this ICollection<T> collection)
+        {
+            return new WriteOnlyCollectionWrapper<T>(collection);
         }
     }
 }
