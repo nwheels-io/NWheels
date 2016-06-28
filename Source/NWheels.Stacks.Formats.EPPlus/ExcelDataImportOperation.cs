@@ -4,11 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NWheels.Concurrency;
 using NWheels.Entities;
 using NWheels.Entities.Core;
 using NWheels.Exceptions;
 using NWheels.Extensions;
+using NWheels.Logging;
 using NWheels.Processing.Documents;
+using NWheels.Processing.Documents.Core;
 using NWheels.UI;
 using NWheels.UI.Impl;
 using OfficeOpenXml;
@@ -22,6 +25,7 @@ namespace NWheels.Stacks.Formats.EPPlus
         private readonly DocumentDesign.TableElement _tableDesign;
         private readonly int[] _keyColumnIndex;
         private readonly ApplicationEntityService _entityService;
+        private readonly IWriteOnlyCollection<DocumentImportIssue> _issues;
         private readonly ApplicationEntityService.EntityHandler _entityHandler;
         private IApplicationDataRepository _domainContext;
         private ApplicationEntityService.EntityCursorRow[] _cursorBuffer;
@@ -32,7 +36,11 @@ namespace NWheels.Stacks.Formats.EPPlus
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ExcelDataImportOperation(FormattedDocument document, DocumentDesign design, ApplicationEntityService entityService)
+        public ExcelDataImportOperation(
+            FormattedDocument document, 
+            DocumentDesign design, 
+            ApplicationEntityService entityService, 
+            IWriteOnlyCollection<DocumentImportIssue> issues)
         {
             if (document == null)
             {
@@ -48,6 +56,7 @@ namespace NWheels.Stacks.Formats.EPPlus
             }
 
             _entityService = entityService;
+            _issues = issues;
             _document = document;
             _design = design;
             _tableDesign = (design.Contents as DocumentDesign.TableElement);
@@ -74,9 +83,12 @@ namespace NWheels.Stacks.Formats.EPPlus
                 ExcelImportExportFault? formatValidationFault;
                 if (!ValidateFormatSignature(_package, _design, out formatValidationFault))
                 {
-                    throw new DomainFaultException<EntityImportExportFault, ExcelImportExportFault>(
-                        EntityImportExportFault.BadInputDocumentFormat,
-                        formatValidationFault.Value);
+                    _issues.Add(new DocumentImportIssue(
+                        SeverityLevel.Error,
+                        formatValidationFault.ToString(),
+                        text: string.Format("Document failed to validate (code '{0}'). Expected document format: '{1}'.", formatValidationFault, _design.IdName)));
+
+                    return;
                 }
 
                 using (_domainContext = (IApplicationDataRepository)_entityHandler.NewUnitOfWork())
@@ -114,9 +126,9 @@ namespace NWheels.Stacks.Formats.EPPlus
 
         private void ImportDataRows()
         {
-            if (_design.CustomImport != null)
+            if (_design.Options.CustomImport != null)
             {
-                _design.CustomImport(new CustomImportContext(
+                _design.Options.CustomImport(new CustomImportContext(
                     _design,
                     _package,
                     _worksheet,
@@ -124,7 +136,8 @@ namespace NWheels.Stacks.Formats.EPPlus
                     _entityHandler,
                     _domainContext,
                     _metaCursor,
-                    _cursorBuffer
+                    _cursorBuffer,
+                    _issues
                 ));
                 return;
             }
@@ -248,27 +261,30 @@ namespace NWheels.Stacks.Formats.EPPlus
 
         private bool ValidateFormatSignature(ExcelPackage package, DocumentDesign design, out ExcelImportExportFault? faultSubCode)
         {
-            if (package.Workbook.Worksheets.Count != 1)
+            if (package.Workbook.Worksheets.Count != 1 && !(design.Options.PagePerDataRow && design.Options.CustomImport != null))
             {
                 faultSubCode = ExcelImportExportFault.WrongNumberOfWorksheets;
                 return false;
             }
 
-            _worksheet = package.Workbook.Worksheets[1];
-
-            var formatIdName = package.Workbook.Worksheets[1].Cells[1, 2].Value as string;
-
-            if (string.IsNullOrEmpty(formatIdName))
+            foreach (var worksheet in package.Workbook.Worksheets)
             {
-                faultSubCode = ExcelImportExportFault.MissingFormatSignature;
-                return false;
+                var formatIdName = worksheet.Cells[1, 2].Value as string;
+
+                if (string.IsNullOrEmpty(formatIdName))
+                {
+                    faultSubCode = ExcelImportExportFault.MissingFormatSignature;
+                    return false;
+                }
+
+                if (formatIdName != design.IdName)
+                {
+                    faultSubCode = ExcelImportExportFault.FormatSignatureMismatch;
+                    return false;
+                }
             }
 
-            if (formatIdName != design.IdName)
-            {
-                faultSubCode = ExcelImportExportFault.FormatSignatureMismatch;
-                return false;
-            }
+            _worksheet = package.Workbook.Worksheets.FirstOrDefault();
 
             faultSubCode = null;
             return true;
@@ -286,16 +302,18 @@ namespace NWheels.Stacks.Formats.EPPlus
                 ApplicationEntityService.EntityHandler entityHandler, 
                 IApplicationDataRepository domainContext, 
                 ApplicationEntityService.EntityCursorMetadata metaCursor, 
-                ApplicationEntityService.EntityCursorRow[] cursorBuffer)
+                ApplicationEntityService.EntityCursorRow[] cursorBuffer,
+                IWriteOnlyCollection<DocumentImportIssue> issues)
             {
-                Design = design;
-                Package = package;
-                Worksheet = worksheet;
-                EntityService = entityService;
-                EntityHandler = entityHandler;
-                DomainContext = domainContext;
-                MetaCursor = metaCursor;
-                CursorBuffer = cursorBuffer;
+                this.Design = design;
+                this.Package = package;
+                this.Worksheet = worksheet;
+                this.EntityService = entityService;
+                this.EntityHandler = entityHandler;
+                this.DomainContext = domainContext;
+                this.MetaCursor = metaCursor;
+                this.CursorBuffer = cursorBuffer;
+                this.Issues = issues;
             }
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -308,6 +326,7 @@ namespace NWheels.Stacks.Formats.EPPlus
             public IApplicationDataRepository DomainContext { get; private set; }
             public ApplicationEntityService.EntityCursorMetadata MetaCursor { get; private set; }
             public ApplicationEntityService.EntityCursorRow[] CursorBuffer { get; private set; }
+            public IWriteOnlyCollection<DocumentImportIssue> Issues { get; private set; }
         }
     }
 }

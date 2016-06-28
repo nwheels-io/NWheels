@@ -69,9 +69,9 @@ namespace NWheels.Stacks.Formats.EPPlus
         {
             var worksheet = package.Workbook.Worksheets.Add(cursor.PrimaryEntity.QualifiedName);
 
-            if (design.CustomExport != null)
+            if (design.Options.CustomExport != null)
             {
-                design.CustomExport(new CustomExportContext(cursor, design, package, worksheet));
+                design.Options.CustomExport(new CustomExportContext(cursor, design, package, worksheet));
                 return;
             }
 
