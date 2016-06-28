@@ -1,31 +1,4 @@
-﻿namespace UIDL
-{
-    export class Event<T> {
-        private _handlers: ((args: T) => void)[] = [ ];
-
-        //-------------------------------------------------------------------------------------------------------------
-
-        bind(handler: (args: T) => void): void {
-            this._handlers.push(handler);
-        }
-
-        //-------------------------------------------------------------------------------------------------------------
-
-        unbind(handler: (args: T) => void): void {
-            this._handlers = this._handlers.filter(h => h !== handler);
-        }
-
-        //-------------------------------------------------------------------------------------------------------------
-
-        raise(args: T) {
-            this._handlers.slice(0).forEach(h => h(args));
-        }
-    }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-
-namespace UIDL.Widgets
+﻿namespace UIDL.Widgets
 {
     export class UIDLDataGrid {
         columns: UIDLDataGridColumn[];
@@ -48,18 +21,55 @@ namespace UIDL.Widgets
         getRowCount(): number;
         getRowDataAt(index: number): Object;
         getAllRowsData(): Object[];
-        changed(): Event<DataGridBindingChangedEventArgs>;
+        changed(): UIDLEvent<DataGridRowsChangedEventArgs>;
     }
 
     //-----------------------------------------------------------------------------------------------------------------
 
-    export class DataGridBindingChangedEventArgs {
+    export class DataGridRowsChangedEventArgs {
+        private _changeType: DataGridRowsChangeType;
+        private _startIndex: number;
+        private _count: number;
+
+        //--------------------------------------------------------------------------------------------------------------
+
+        public constructor(changeType: DataGridRowsChangeType, startIndex: number, count: number) {
+            this._changeType = changeType;
+            this._startIndex = startIndex;
+            this._count = count;
+        }
+
+        //--------------------------------------------------------------------------------------------------------------
+
+        public changeType(): DataGridRowsChangeType {
+            return this._changeType;
+        }
+
+        //--------------------------------------------------------------------------------------------------------------
+
+        public startIndex(): number {
+            return this._startIndex;
+        }
+
+        //--------------------------------------------------------------------------------------------------------------
+
+        public count(): number {
+            return this._count;
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------
+
+    export enum DataGridRowsChangeType {
+        inserted,
+        updated,
+        deleted
     }
 
     //-----------------------------------------------------------------------------------------------------------------
 
     export abstract class DataGridBindingBase implements IDataGridBinding {
-        private _changed: Event<DataGridBindingChangedEventArgs> = new Event<DataGridBindingChangedEventArgs>();
+        private _changed: UIDLEvent<DataGridRowsChangedEventArgs> = new UIDLEvent<DataGridRowsChangedEventArgs>();
 
         //-------------------------------------------------------------------------------------------------------------
 
@@ -76,7 +86,7 @@ namespace UIDL.Widgets
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public changed(): Event<DataGridBindingChangedEventArgs> {
+        public changed(): UIDLEvent<DataGridRowsChangedEventArgs> {
             return this._changed;
         }
     }

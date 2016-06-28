@@ -31,8 +31,11 @@
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="test\UIDLDataGridTests.ts" />
-    <TypeScriptCompile Include="UIDLDataGrid.ts" />
+    <TypeScriptCompile Include="src\UIDLError.ts" />
+    <TypeScriptCompile Include="src\UIDLEvent.ts" />
+    <TypeScriptCompile Include="test\UIDLEventTests.ts" />
+    <TypeScriptCompile Include="test\widgets\UIDLDataGridTests.ts" />
+    <TypeScriptCompile Include="src\widgets\UIDLDataGrid.ts" />
     <TypeScriptCompile Include="lib\typings\jasmine\jasmine.d.ts" />
   </ItemGroup>
   <ItemGroup>
@@ -75,7 +78,7 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
-    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptTarget>ES6</TypeScriptTarget>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>

@@ -1,91 +1,67 @@
-﻿///<reference path="../UIDLDataGrid.ts" />
-///<reference path="../lib/typings/jasmine/jasmine.d.ts" />
+﻿///<reference path="../../lib/typings/jasmine/jasmine.d.ts" />
 
 namespace UIDL.Widgets.Tests
 {
-    describe("Event", () => {
-        it('CanInvokeSingleHandler', () => {
-            //- arrange
-
-            let log: string[] = [];
-            let event = new Event<string>();
-
-            event.bind((arg: string) => {
-                log.push(`test-handler(${arg})`);
-            });
-
-            //- act
-
-            event.raise('ABC');
-
-            //- assert
-
-            expect(log).toEqual(['test-handler(ABC)']);
-        });
+    class TestDataGridBinding extends DataGridBindingBase {
+        private _data: string[];
 
         //-------------------------------------------------------------------------------------------------------------
 
-        it('CanInvokeMultipleHandlers', () => {
-            //- arrange
+        public constructor(rowCount: number) {
+            super();
 
-            let log: string[] = [];
-            let event = new Event<string>();
+            let data = [];
+            for (let i = 0; i < rowCount; i++) {
+                this._data.push(`original#${i}`);
+            }
 
-            event.bind((arg: string) => {
-                log.push(`test-handler-1(${arg})`);
-            });
-
-            event.bind((arg: string) => {
-                log.push(`test-handler-2(${arg})`);
-            });
-
-            //- act
-
-            event.raise('ABC');
-
-            //- assert
-
-            expect(log).toEqual([
-                'test-handler-1(ABC)',
-                'test-handler-2(ABC)',
-            ]);
-        });
+            this._data = data;
+        }
 
         //-------------------------------------------------------------------------------------------------------------
 
-        it('CanUnbindHandler', () => {
-            //- arrange
+        public renderRow(index: number, el: HTMLTableRowElement): void {
+            el.cells[0].innerHTML = this.getRowDataAt(index).toString();
+        }
 
-            let log: string[] = [];
-            let event = new Event<string>();
+        //-------------------------------------------------------------------------------------------------------------
 
-            var handler1 = ((arg: string) => {
-                log.push(`test-handler-1(${arg})`);
-            });
-            var handler2 = ((arg: string) => {
-                log.push(`test-handler-2(${arg})`);
-            });
-            var handler3 = ((arg: string) => {
-                log.push(`test-handler-3(${arg})`);
-            });
+        public getRowCount(): number {
+            return this._data.length;
+        }
 
-            event.bind(handler1);
-            event.bind(handler2);
-            event.bind(handler3);
+        //-------------------------------------------------------------------------------------------------------------
 
-            //- act
+        public getRowDataAt(index: number): Object {
+            return this._data[index];
+        }
 
-            event.unbind(handler2);
-            event.raise('ABC');
+        //-------------------------------------------------------------------------------------------------------------
 
-            //- assert
+        public getAllRowsData(): Object[] {
+            return this._data;
+        }
 
-            expect(log).toEqual([
-                'test-handler-1(ABC)',
-                'test-handler-3(ABC)',
-            ]);
-        });
-    });
+        //-------------------------------------------------------------------------------------------------------------
+
+        public InsertRows(atIndex: number, count: number, prefix: string) {
+            let newData: string[] = [];
+
+            for (let i = 0; i < atIndex; i++) {
+                newData.push(this._data[i]);
+            }
+            for (let i = 0; i < count; i++) {
+                newData.push(`${prefix}#${newData.length}`);
+            }
+            for (let i = atIndex; i < this._data.length; i++) {
+                newData.push(this._data[i]);
+            }
+
+            this._data = newData;
+            let args = new DataGridRowsChangedEventArgs(DataGridRowsChangeType.inserted, atIndex, count);
+            super.changed().raise(args);
+        }
+    }
 
     //-----------------------------------------------------------------------------------------------------------------
 
@@ -129,7 +105,7 @@ namespace UIDL.Widgets.Tests
 
             let dataRows = ["AAA", "BBB", "CCC"];
             let binding = new LocalDataGridBinding(dataRows);
-            let handler = (args: DataGridBindingChangedEventArgs) => {
+            let handler = (args: DataGridRowsChangedEventArgs) => {
                 fail("onChange handler should never be invoked by LocalDataTableBinding!");
             };
 
@@ -146,7 +122,7 @@ namespace UIDL.Widgets.Tests
 
             let dataRows = ["AAA", "BBB", "CCC"];
             let binding = new LocalDataGridBinding(dataRows);
-            let handler = (args: DataGridBindingChangedEventArgs) => {
+            let handler = (args: DataGridRowsChangedEventArgs) => {
                 fail("onChange handler should never be invoked by LocalDataTableBinding!");
             };
             binding.changed().bind(handler);
