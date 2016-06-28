@@ -66,6 +66,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Entity.Design" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -184,6 +185,7 @@
     <Compile Include="Processing\Documents\DocumentMetadata.cs" />
     <Compile Include="Processing\Documents\Core\IOutputDocumentFormatter.cs" />
     <Compile Include="Processing\DocumentFormattersFeatureLoader.cs" />
+    <Compile Include="Processing\Documents\Impl\ZipInputDocumentParser.cs" />
     <Compile Include="Processing\ICommandProcessedEvent.cs" />
     <Compile Include="Processing\IPushEvent.cs" />
     <Compile Include="Processing\IServerCommand.cs" />

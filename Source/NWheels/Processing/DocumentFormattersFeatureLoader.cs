@@ -22,6 +22,7 @@ namespace NWheels.Processing
         {
             builder.NWheelsFeatures().Processing().RegisterActor<DocumentFormatActor>().SingleInstance();
             builder.RegisterType<CsvOutputDocumentFormatter>().As<IOutputDocumentFormatter>();
+            builder.RegisterType<ZipInputDocumentParser>().As<IInputDocumentParser>();
         }
 
         #endregion
