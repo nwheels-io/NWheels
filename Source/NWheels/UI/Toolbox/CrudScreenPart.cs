@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.Processing.Documents;
+using NWheels.Processing.Documents.Core;
 using NWheels.UI.Impl;
 using NWheels.UI.Uidl;
 
@@ -51,12 +52,30 @@ namespace NWheels.UI.Toolbox
                 Export.Icon = "download";
 
                 ImportForm.AttachAsPopupTo(presenter, Import);
+                ImportForm.UseOutputForm();
                 ImportForm.Execute.Text = "Import";
                 ImportForm.Reset.Text = "Cancel";
                 ImportForm.InputForm.Field(x => x.Format);
                 ImportForm.InputForm.Field(x => x.File, type: FormFieldType.FileUpload);
                 ImportForm.InputForm.LookupSource(x => x.Format, x => x.AvailableFormats);
                 ImportForm.ContextEntityType = typeof(TEntity);
+
+                if (ImportForm.OutputForm != null)
+                {
+                    ImportForm.OutputForm.Field(
+                        x => x.ImportIssues, label: "MessagesAndIssues", type: FormFieldType.InlineGrid, modifiers: FormFieldModifiers.Tab | FormFieldModifiers.FlatStyle, 
+                        setup: f => {
+                            var issuesCrud = (Crud<IDocumentImportIssue>)f.NestedWidget;
+                            issuesCrud.DisableAuthorizationChecks = true;
+                            issuesCrud.DisableToolBar = true;
+                            issuesCrud.DisableForm = true;
+                            issuesCrud.Grid.EnablePaging = false;
+                            issuesCrud.Grid
+                                .Column(x => x.Severity, size: FieldSize.Small)
+                                .Column(x => x.Text, size: FieldSize.Large, title: "Message")
+                                .Column(x => x.Location, size: FieldSize.Medium);
+                        });
+                }
                 
                 ExportForm.AttachAsPopupTo(presenter, Export);
                 ExportForm.Execute.Text = "Export";
@@ -98,8 +117,9 @@ namespace NWheels.UI.Toolbox
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public TransactionForm<CrudEntityImportTx.IContext, CrudEntityImportTx.IInput, CrudEntityImportTx, Empty.Output> ImportForm { get; set; }
+        public TransactionForm<CrudEntityImportTx.IContext, CrudEntityImportTx.IInput, CrudEntityImportTx, CrudEntityImportTx.IOutput> ImportForm { get; set; }
         public TransactionForm<CrudEntityExportTx.IContext, CrudEntityExportTx.IInput, CrudEntityExportTx, DocumentFormatReplyMessage> ExportForm { get; set; }
+        public DataGrid<IDocumentImportIssue> ImportIssues { get; set; }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 

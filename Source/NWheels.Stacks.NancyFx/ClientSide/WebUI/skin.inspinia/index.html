@@ -963,7 +963,7 @@ HEAD, JS/CSS LINKS
     <script type="text/ng-template" id="app/uidl-element-template/Crud">
         <div class="row">
             <div ng-hide="uiShowCrudForm" class="col-lg-12">
-                <div class="ibox-title" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
+                <div  ng-if="!uidl.disableToolBar" class="ibox-title" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
                     <button class="btn btn-primary btn-circle btn-outline" ng-class="{'btn-lg':uidl.mode==='Standalone', 'btn-md':uidl.mode!=='Standalone'}" style="margin-right:5px" type="button" ng-click="newEntity();" ng-disabled="commandInProgress" ng-show="entityAuth.create" title="Add New">
                         <i class="fa fa-plus"></i>
                     </button>
@@ -998,9 +998,10 @@ HEAD, JS/CSS LINKS
                         ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
                     ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                 </div>
-                <div class="ibox-content" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
+                <div ng-if="!parentFormFieldHasModifier('FlatStyle')" class="ibox-content" ng-class="{'standalone':uidl.mode==='Standalone', 'nested':uidl.mode!=='Standalone'}">
                     <uidl-widget uidl="uidl.grid" parent-model="model"></uidl-widget>
                 </div>
+                <uidl-widget ng-if="parentFormFieldHasModifier('FlatStyle')" uidl="uidl.grid" parent-model="model"></uidl-widget>
             </div>
             
             <div ng-if="uiShowCrudForm" class="col-lg-12">
@@ -1970,10 +1971,10 @@ HEAD, JS/CSS LINKS
                             {{translate(uidl.text)}}
                         </h6>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" ng-hide="model.State.Output">
                         <uidl-widget uidl="uidl.inputForm" parent-model="model.State.Input"></uidl-widget>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer" ng-hide="model.State.Output">
                         <button 
                             ng-repeat="command in uidl.commands"
                             type="button"
@@ -1983,6 +1984,17 @@ HEAD, JS/CSS LINKS
                             ng-click="invokeCommand(command)"
                             ng-class="{'btn-success':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
                         ><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
+                    </div>
+                    <div class="modal-body" ng-if="uidl.outputForm" ng-show="model.State.Output">
+                        <uidl-widget uidl="uidl.outputForm" parent-model="model.State.Output"></uidl-widget>
+                    </div>
+                    <div class="modal-footer" ng-if="uidl.outputForm" ng-show="model.State.Output">
+                        <button 
+                            type="button"
+                            class="btn btn-w-m btn-success btn-md"
+                            style="margin-left:5px;"
+                            ng-click="hideModal()"
+                        ><i class="fa fa-check">&nbsp;</i>{{::translate('Close')}}</button>
                     </div>
                 </div>
             </div>
@@ -2061,7 +2073,7 @@ HEAD, JS/CSS LINKS
                 </div>
             </div>
             <!-- TABS -->
-            <div ng-if="tabSetFields.length" class="tabs-container" style="margin-top:20px;">
+            <div ng-if="tabSetFields.length && uidl.fields.length > 1" class="tabs-container" style="margin-top:20px;">
                 <ul class="nav nav-tabs">
                     <li ng-class="{active: $index == tabSetIndex}" ng-repeat="field in tabSetFields"><a ng-click="selectTab($index)">{{translate(field.label)}}</a></li>
                 </ul>
@@ -2072,6 +2084,11 @@ HEAD, JS/CSS LINKS
                         </div>
                     </div>
                 </div>
+            </div>
+            <!-- TAB FLATTENED (when it is the only field in the form) -->
+            <div ng-if="tabSetFields.length && uidl.fields.length == 1" ng-init="singleTabField=tabSetFields[0]">
+                {{::translate(singleTabField.label)}}
+                <uidl-widget ng-if="singleTabField.nestedWidget" uidl="singleTabField.nestedWidget" parent-uidl="singleTabField" parent-model="model.Data.entity"></uidl-widget>
             </div>
             <!-- COMMAND BUTTONS -->
             <div ng-if="uidl.commands.length && !uidl.autoSubmitOnChange" class="form-group">

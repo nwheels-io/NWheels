@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NWheels.DataObjects;
+using NWheels.Extensions;
+using NWheels.Logging;
 using NWheels.Processing;
 using NWheels.Processing.Documents;
 using NWheels.Processing.Documents.Core;
@@ -12,7 +14,7 @@ using NWheels.UI.Factories;
 namespace NWheels.UI.Impl
 {
     [TransactionScript(SupportsInitializeInput = true)]
-    public class CrudEntityImportTx : ITransactionScript<CrudEntityImportTx.IContext, CrudEntityImportTx.IInput, Empty.Output>
+    public class CrudEntityImportTx : ITransactionScript<CrudEntityImportTx.IContext, CrudEntityImportTx.IInput, CrudEntityImportTx.IOutput>
     {
         private readonly IFramework _framework;
         private readonly IViewModelObjectFactory _viewModelFactory;
@@ -46,25 +48,40 @@ namespace NWheels.UI.Impl
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
-        
-        public Empty.Output Preview(IInput input)
+
+        public IOutput Preview(IInput input)
         {
             throw new NotSupportedException();
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public Empty.Output Execute(IInput input)
+        public IOutput Execute(IInput input)
         {
             IEntityExportFormat importFormat;
 
             var uiContext = UIOperationContext.Current;
             var inputParser = _formatSet.GetInputParser(input.Format, out importFormat);
             var document = new FormattedDocument(new DocumentMetadata(inputParser.MetaFormat), input.File);
-            
-            inputParser.ImportDataFromReportDocument(document, importFormat.DocumentDesign, uiContext.EntityService);
-            
-            return new Empty.Output();
+            var issues = new List<DocumentImportIssue>();
+
+            inputParser.ImportDataFromReportDocument(document, importFormat.DocumentDesign, uiContext.EntityService, issues.AsWriteOnly());
+
+            if (issues.Count == 0)
+            {
+                issues.Add(DocumentImportIssue.NoneReported());
+            }
+            else
+            {
+                var errorCount = issues.Count(x => x.Severity >= SeverityLevel.Error);
+                var warningCount = issues.Count(x => x.Severity == SeverityLevel.Warning);
+                
+                issues.Insert(0, DocumentImportIssue.Done(errorCount, warningCount));
+            }
+
+            var output = _viewModelFactory.NewEntity<IOutput>();
+            output.ImportIssues = issues.Cast<IDocumentImportIssue>().ToList();
+            return output;
         }
 
         #endregion
@@ -89,6 +106,14 @@ namespace NWheels.UI.Impl
 
             [PropertyContract.Required, PropertyContract.Semantic.FileUpload]
             byte[] File { get; set; }
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [ViewModelContract]
+        public interface IOutput
+        {
+            ICollection<IDocumentImportIssue> ImportIssues { get; set; }
         }
     }
 }

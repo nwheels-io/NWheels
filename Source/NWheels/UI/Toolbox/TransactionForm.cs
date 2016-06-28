@@ -18,7 +18,12 @@ namespace NWheels.UI.Toolbox
         where TScript : ITransactionScript<TContext, TInput, TOutput>
         where TContext : class
         where TInput : class
+        where TOutput : class
     {
+        private UidlBuilder _builder;
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public TransactionForm(string idName, ControlledUidlNode parent)
             : base(idName, parent)
         {
@@ -31,6 +36,19 @@ namespace NWheels.UI.Toolbox
             var formOrTypeSelector = UidlUtility.CreateFormOrTypeSelector(InputMetaType, "InputForm", this, isInline: false);
             this.InputForm = formOrTypeSelector as Form<TInput>;
             this.InputFormTypeSelector = formOrTypeSelector as TypeSelector;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void UseOutputForm()
+        {
+            this.OutputForm = new Form<TOutput>("Output", this);
+            this.OutputForm.Commands.Clear();
+
+            if (_builder != null)
+            {
+                _builder.BuildManuallyInstantiatedNodes(OutputForm);
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,6 +76,11 @@ namespace NWheels.UI.Toolbox
             this.InputForm.Commands.Clear();
             this.InputForm.IsModalPopup = true;
             this.IsPopupContent = true;
+
+            if (this.OutputForm != null)
+            {
+                this.OutputForm.IsModalPopup = true;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -68,13 +91,19 @@ namespace NWheels.UI.Toolbox
             this.InputForm.IsInlineStyle = true;
             this.InputForm.TemplateName = "FormInline";
             this.InputForm.AutoSubmitOnChange = true;
+
+            if (this.OutputForm != null)
+            {
+                this.OutputForm.IsInlineStyle = true;
+                this.OutputForm.TemplateName = "FormInline";
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
-            return base.GetNestedWidgets().ConcatOneIf(InputForm).ConcatOneIf(InputFormTypeSelector);
+            return base.GetNestedWidgets().ConcatOneIf(InputForm).ConcatOneIf(InputFormTypeSelector).ConcatOneIf(OutputForm);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -85,6 +114,8 @@ namespace NWheels.UI.Toolbox
         public TypeSelector InputFormTypeSelector { get; set; }
         [DataMember]
         public UserAlertDisplayMode UserAlertDisplayMode { get; set; }
+        [DataMember, ManuallyAssigned]
+        public Form<TOutput> OutputForm { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -112,8 +143,10 @@ namespace NWheels.UI.Toolbox
 
         protected override void OnBuild(UidlBuilder builder)
         {
+            _builder = builder;
+
             base.OnBuild(builder);
-            builder.BuildManuallyInstantiatedNodes(InputForm, InputFormTypeSelector);
+            builder.BuildManuallyInstantiatedNodes(InputForm, InputFormTypeSelector, OutputForm);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -180,12 +213,13 @@ namespace NWheels.UI.Toolbox
                             .AlterModel(alt => alt.Copy(vm => vm.Input).To(vm => vm.State.Output))
                             .Then(bb => bb.Broadcast(OutputReady).WithPayload(vm => vm.Input).BubbleUp()
                             .Then(bbb => InvokeFormStateResetter(bbb)
+                            .ThenIf(this.OutputForm != null, b2 => b2.Broadcast(OutputForm.ModelSetter).WithPayload(vm => vm.Input).TunnelDown()
                             .Then(bbbb => bbbb.UserAlertFrom<ITransactionUserAlerts>().Show<Empty.Payload>(UserAlertDisplayMode, (alerts, vm) => alerts.SuccessfullyCompleted())
                             .ThenIf(this.RefreshUponCompletion, bbbbb => bbbbb
                                 .InvokeTransactionScript<TScript>(ContextEntityType, ApiCallResultType.Command)
                                 .WaitForReply((script, vm) => script.InitializeInput(null))
                                 .Then(b6 => b6.AlterModel(alt => alt.Copy(m => m.Input).To(m => m.State.Input))
-                                .Then(InvokeFormModelSetter)))))),
+                                .Then(InvokeFormModelSetter))))))),
                         onFailure: b => b
                             .Broadcast(OperationFailed).WithPayload(vm => vm.Input).BubbleUp()
                             .Then(bb => bb.UserAlertFrom<ITransactionUserAlerts>().Show<TOutput>(UserAlertDisplayMode, (alerts, vm) => alerts.FailedToCompleteRequestedAction(), faultInfo: vm => vm.Input)
@@ -282,6 +316,7 @@ namespace NWheels.UI.Toolbox
     public class TransactionForm<TInput, TScript, TOutput> : TransactionForm<Empty.Context, TInput, TScript, TOutput>
         where TScript : ITransactionScript<Empty.Context, TInput, TOutput>
         where TInput : class
+        where TOutput : class
     {
         public TransactionForm(string idName, ControlledUidlNode parent)
             : base(idName, parent)

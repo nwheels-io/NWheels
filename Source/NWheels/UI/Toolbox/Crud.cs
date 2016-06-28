@@ -37,6 +37,11 @@ namespace NWheels.UI.Toolbox
             this.StaticCommands = new List<UidlCommand>();
 
             CreateForm();
+
+            if (MetaType.IsViewModel)
+            {
+                this.DisableAuthorizationChecks = true;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -116,6 +121,12 @@ namespace NWheels.UI.Toolbox
         public List<UidlCommand> EntityCommands { get; set; }
         [DataMember]
         public bool UpdateCommandsOnSelection { get; set; }
+        [DataMember]
+        public bool DisableAuthorizationChecks { get; set; }
+        [DataMember]
+        public bool DisableToolBar { get; set; }
+        [DataMember]
+        public bool DisableForm { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -139,7 +150,7 @@ namespace NWheels.UI.Toolbox
         {
             this.Grid.UsePascalCase = true;
             this.Grid.Mode = this.Mode;
-            this.Grid.EnablePaging = true;
+            this.Grid.EnablePaging = this.Grid.EnablePaging.GetValueOrDefault(true);
             this.Save.Icon = "check";
             this.Save.Severity = CommandSeverity.Change;
             this.Save.Kind = CommandKind.Submit;

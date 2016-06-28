@@ -1400,6 +1400,10 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             };
             
             scope.requestAuthorization = function (optionalEntityId) {
+                if (scope.uidl.disableAuthorizationChecks) {
+                    return $q.when({ CanRetrieve: true, CanCreate: false, CanUpdate: false, CanDelete: false });
+                }
+                
                 return scope.entityService.checkAuthorization(scope.uidl.grid.entityName, optionalEntityId).then(
                     function(response) {
                         scope.entityAuth = response;
@@ -1524,7 +1528,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
             });
             
             scope.editEntity = function (entity) {
-                if (!entity) {
+                if (!entity || scope.uidl.disableForm) {
                     return;
                 }
 
@@ -2098,7 +2102,9 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                     $timeout(function() {
                         if (validationResult.isValid===true) {  
                             scope.$emit(command.qualifiedName + ':Executing');
-                            scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
+                            if (!scope.uidl.outputForm) {
+                                scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
+                            }
                         } else {
                             scope.commandInProgress = false;
                         }
@@ -2106,6 +2112,10 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
                 } else {
                     scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
                 }
+            };
+
+            scope.hideModal = function(command) {
+                scope.$broadcast(scope.uidl.qualifiedName + ':HideModal');
             };
         }
     };
@@ -2556,6 +2566,13 @@ function (uidlService, entityService, commandService, $timeout, $http, $compile,
             $scope.entityService = entityService;
             $scope.commandService = commandService;
             $scope.inlineUserAlert = { current: null };
+            
+            $scope.parentFormFieldHasModifier = function(modifier) {
+                if ($scope.parentUidl && $scope.parentUidl.modifiers) {
+                    return hasEnumFlag($scope.parentUidl.modifiers, modifier);
+                }
+                return false;
+            };
             
             $scope.isUidlAuthorized = function(uidlElement) {
                 if (!uidlElement.authorization || uidlElement.authorization.requiredClaims.length == 0) {
