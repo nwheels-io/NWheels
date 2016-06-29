@@ -69,7 +69,7 @@ namespace NWheels.UI.Toolbox
                             issuesCrud.DisableAuthorizationChecks = true;
                             issuesCrud.DisableToolBar = true;
                             issuesCrud.DisableForm = true;
-                            issuesCrud.Grid.EnablePaging = false;
+                            //issuesCrud.Grid.EnablePaging = false;
                             issuesCrud.Grid
                                 .Column(x => x.Severity, size: FieldSize.Small)
                                 .Column(x => x.Text, size: FieldSize.Large, title: "Message")

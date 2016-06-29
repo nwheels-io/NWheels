@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NWheels.Extensions;
@@ -47,6 +48,11 @@ namespace NWheels.UI
             builder.DescribeNodePresenters(this.PopupContents.Cast<AbstractUidlNode>().ToArray());
 
             this.Text = this.Text.TrimTail("ScreenPart");
+
+            if (PostDescribingPresenter != null)
+            {
+                PostDescribingPresenter(new PresenterBuilder<TScreenPart, TData, TState>(builder, this));
+            }
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
@@ -55,6 +61,10 @@ namespace NWheels.UI
         {
             return base.GetTranslatables().Concat(base.PopupContents.SelectMany(popup => popup.GetTranslatables()));
         }
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public event Action<PresenterBuilder<TScreenPart, TData, TState>> PostDescribingPresenter;
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 

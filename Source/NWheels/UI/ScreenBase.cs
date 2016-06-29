@@ -33,11 +33,18 @@ namespace NWheels.UI
         {
             DescribePresenter(new PresenterBuilder<TScreen, TData, TState>(builder, this));
             builder.DescribeNodePresenters(this.ContentRoot);
+            PostDescribePresenter(new PresenterBuilder<TScreen, TData, TState>(builder, this));
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
         protected abstract void DescribePresenter(PresenterBuilder<TScreen, TData, TState> presenter);
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------------
+
+        protected virtual void PostDescribePresenter(PresenterBuilder<TScreen, TData, TState> presenter)
+        {
+        }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------------
 
