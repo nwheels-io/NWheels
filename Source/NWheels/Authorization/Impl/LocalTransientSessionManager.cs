@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security;
@@ -66,7 +67,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public ISession AuthorieSession(IPrincipal principal)
+        public ISession AuthorizeSession(IPrincipal principal)
         {
             var currentSession = Session.Current;
 
@@ -164,7 +165,31 @@ namespace NWheels.Authorization.Impl
         {
             return _sessionById[sessionId];
         }
-        
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public void SetSessionUserInfo(string sessionId, CultureInfo newCulture = null, TimeZoneInfo newTimeZone = null)
+        {
+            Session session;
+
+            if (_sessionById.TryGetValue(sessionId, out session))
+            {
+                if (newCulture != null)
+                {
+                    session.Culture = newCulture;
+                }
+                
+                if (newTimeZone != null)
+                {
+                    session.TimeZone = newTimeZone;
+                }
+            }
+            else
+            {
+                throw _logger.SessionNotFound(sessionId);
+            }
+        }
+
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public void CloseCurrentSession()

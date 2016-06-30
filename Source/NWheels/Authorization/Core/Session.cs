@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Security.Principal;
 using System.Threading;
 using NWheels.Concurrency;
@@ -33,6 +34,8 @@ namespace NWheels.Authorization.Core
             UserPrincipal = userPrincipal;
             UserIdentity = (userPrincipal as IIdentityInfo);
             Endpoint = originatorEndpoint;
+            Culture = CultureInfo.InvariantCulture;
+            TimeZone = TimeZoneInfo.Utc;
             OpenedAtUtc = _framework.UtcNow;
 
             Touch();
@@ -78,6 +81,8 @@ namespace NWheels.Authorization.Core
         public IPrincipal UserPrincipal { get; private set; }
         public IIdentityInfo UserIdentity { get; private set; }
         public IEndpoint Endpoint { get; private set; }
+        public CultureInfo Culture { get; internal set; }
+        public TimeZoneInfo TimeZone { get; internal set; }
         public DateTime OpenedAtUtc { get; private set; }
         public DateTime? ExpiresAtUtc { get; private set; }
         
@@ -163,10 +168,12 @@ namespace NWheels.Authorization.Core
             if ( currentScopeIsActive )
             {
                 Thread.CurrentPrincipal = this.UserPrincipal;
+                Thread.CurrentThread.CurrentCulture = this.Culture;
             }
             else
             {
                 Thread.CurrentPrincipal = null;
+                Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             }
         }
 
