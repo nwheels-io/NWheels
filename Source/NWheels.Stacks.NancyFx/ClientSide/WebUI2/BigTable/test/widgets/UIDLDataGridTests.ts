@@ -2,20 +2,14 @@
 
 namespace UIDL.Widgets.Tests
 {
-    class TestDataGridBinding extends DataGridBindingBase {
-        private _data: string[];
+    class TestDataGridBinding<T> extends DataGridBindingBase {
+        private _data: T[];
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public constructor(rowCount: number) {
+        public constructor(data: T[]) {
             super();
-
-            let data = [];
-            for (let i = 0; i < rowCount; i++) {
-                this._data.push(`original#${i}`);
-            }
-
-            this._data = data;
+            this._data = data.slice(0);
         }
 
         //-------------------------------------------------------------------------------------------------------------
@@ -44,22 +38,42 @@ namespace UIDL.Widgets.Tests
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public InsertRows(atIndex: number, count: number, prefix: string) {
-            let newData: string[] = [];
+        public insertRows(atIndex: number, data: T[]) {
+            let newData: T[] = [];
 
             for (let i = 0; i < atIndex; i++) {
                 newData.push(this._data[i]);
             }
-            for (let i = 0; i < count; i++) {
-                newData.push(`${prefix}#${newData.length}`);
+            for (let i = 0; i < data.length; i++) {
+                newData.push(data[i]);
             }
             for (let i = atIndex; i < this._data.length; i++) {
                 newData.push(this._data[i]);
             }
 
             this._data = newData;
-            let args = new DataGridRowsChangedEventArgs(DataGridRowsChangeType.inserted, atIndex, count);
-            super.changed().raise(args);
+            let args = new DataGridRowsChangedEventArgs(DataGridRowsChangeType.inserted, atIndex, data.length);
+            this.changed().raise(args);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public updateRows(atIndex: number, data: T[]) {
+            for (let i = 0; i < data.length; i++) {
+                this._data[atIndex + i] = data[i];
+            }
+
+            let args = new DataGridRowsChangedEventArgs(DataGridRowsChangeType.updated, atIndex, data.length);
+            this.changed().raise(args);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public deleteRows(atIndex: number, count: number) {
+            this._data.splice(atIndex, count);
+
+            let args = new DataGridRowsChangedEventArgs(DataGridRowsChangeType.deleted, atIndex, count);
+            this.changed().raise(args);
         }
     }
 
@@ -84,6 +98,7 @@ namespace UIDL.Widgets.Tests
         //-------------------------------------------------------------------------------------------------------------
 
         it("CanGetRowAtIndex", () => {
+
             //- arrange
 
             let dataRows = ["AAA", "BBB", "CCC"];
@@ -550,6 +565,7 @@ namespace UIDL.Widgets.Tests
                 'A1', 'A2', 'A3', 'A3B1', 'A3B1C1', 'A3B1C2', 'A3B2', 'A3B2C1'
             ]);
         });
+
         //-------------------------------------------------------------------------------------------------------------
 
         it("PreservesExpandedStateOfNodesInCollapsedSubtree", () => {
@@ -579,6 +595,37 @@ namespace UIDL.Widgets.Tests
 
             expect(visibleNodeValuesAfter).toEqual([
                 'A1', 'A2', 'A2B1', 'A2B1C1', 'A2B1C2', 'A2B2', 'A2B2C1', 'A3'
+            ]);
+        });
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        it("CanInsertNewRootNodesFromUpstreamBinding", () => {
+            //- arrange
+
+            const nodes = createTestTreeData();
+            const upstreamBinding = new TestDataGridBinding(nodes);
+            const binding = new NestedSetTreeDataGridBinding(upstreamBinding, 'subNodes');
+
+            let visibleNodeValuesBefore = selectVisibleNodeValues(binding);
+
+            //- act
+
+            upstreamBinding.insertRows(3, [
+                new TestTreeNode('A4', []),
+                new TestTreeNode('A5', [])
+            ]);
+
+            //- assert
+
+            let visibleNodeValuesAfter = selectVisibleNodeValues(binding);
+
+            expect(visibleNodeValuesBefore).toEqual([
+                'A1', 'A2', 'A3'
+            ]);
+
+            expect(visibleNodeValuesAfter).toEqual([
+                'A1', 'A2', 'A3', 'A4', 'A5'
             ]);
         });
     });

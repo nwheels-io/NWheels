@@ -131,18 +131,26 @@
     //-----------------------------------------------------------------------------------------------------------------
 
     export class NestedSetTreeDataGridBinding extends DataGridBindingBase {
-        private _upper: IDataGridBinding;
+        private _upstream: IDataGridBinding;
         private _nestedSetProperty: string;
         private _treeRoot: SubTreeState;
+        private _lastRootNodeCount: number;
+        private _lastGetRowDataIndex: number;
+        private _lastGetRowDataNode: LocatedTreeNode;
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public constructor(upper: IDataGridBinding, nestedSetProperty: string) {
+        public constructor(upstream: IDataGridBinding, nestedSetProperty: string) {
             super();
-            this._upper = upper;
+            this._upstream = upstream;
             this._nestedSetProperty = nestedSetProperty;
             this._treeRoot = new SubTreeState(this, null, -1, null);
             this._treeRoot.expand(false);
+            this._lastRootNodeCount = upstream.getRowCount();
+            this._lastGetRowDataIndex = -1;
+            this._lastGetRowDataNode = null;
+
+            upstream.changed().bind((args) => this.onUpstreamBindingChanged(args));
         }
 
         //-------------------------------------------------------------------------------------------------------------
@@ -158,7 +166,16 @@
         //-------------------------------------------------------------------------------------------------------------
 
         public getRowDataAt(index: number): Object {
-            let locatedNode = this._treeRoot.tryLocateTreeNode(index, -1);
+            let locatedNode: LocatedTreeNode;
+
+            if (index === this._lastGetRowDataIndex + 1 && this._lastGetRowDataNode) {
+                locatedNode = this._lastGetRowDataNode.walkOneStep();
+            } else {
+                locatedNode = this._treeRoot.tryLocateTreeNode(index, -1);
+            }
+
+            this._lastGetRowDataIndex = index;
+            this._lastGetRowDataNode = locatedNode;
 
             if (locatedNode) {
                 return locatedNode.getNodeData();
@@ -171,7 +188,7 @@
 
         public getRowDataSubNodes(rowData: Object): Object[] {
             if (rowData == null) {
-                return this._upper.getAllRowsData();
+                return this._upstream.getAllRowsData();
             } else {
                 //let rowDataAsAny = (rowData as any);
                 return rowData[this._nestedSetProperty];
@@ -203,6 +220,27 @@
                 locatedNode.collapse();
             }
         }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        private onUpstreamBindingChanged(args: DataGridRowsChangedEventArgs) {
+            if (args.changeType() !== DataGridRowsChangeType.inserted ||
+                args.startIndex() !== this._lastRootNodeCount)
+            {
+                throw UIDLError.factory().generalNotSupported(
+                    'NestedSetTreeDataGridBinding',
+                    'UpstreamDeleteUpdateInsertAtNonTail');
+            }
+
+            this._lastRootNodeCount = this._upstream.getRowCount();
+
+            const downstreamArgs = new DataGridRowsChangedEventArgs(
+                args.changeType(),
+                this._treeRoot.getVisibleSubTreeSize(),
+                args.count());
+
+            this.changed().raise(downstreamArgs);
+        }
     }
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -233,6 +271,12 @@
             this._visibleSubTreeSize = 0;
             this._subTrees = [];
             this._updateCount = 0;
+
+            if (!parentSubTree) {
+                ownerBinding.changed().bind(args => {
+                    this._visibleSubTreeSize += args.count();
+                });
+            }
         }
 
         //-------------------------------------------------------------------------------------------------------------
@@ -285,6 +329,12 @@
             return rowDataSubNodes[childIndex];
         }
 
+        //-------------------------------------------------------------------------------------------------------------
+
+        public getChildNodeCount(): Object {
+            let rowDataSubNodes = this._ownerBinding.getRowDataSubNodes(this._nodeData);
+            return rowDataSubNodes.length;
+        }
 
         //-------------------------------------------------------------------------------------------------------------
 
@@ -372,6 +422,33 @@
 
         public getVisibleSubTreeSize(): number {
             return this._visibleSubTreeSize;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public isExpanded(): boolean {
+            return this._isExpanded;
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        //public handleUpstreamChange(changeType: DataGridRowsChangeType, startIndex: number, count: number): void {
+        //    let subNodesData = this._ownerBinding.getRowDataSubNodes(this._nodeData);
+
+        //    if (this._parentSubTree != null ||
+        //        changeType !== DataGridRowsChangeType.inserted ||
+        //        startIndex != subNodesData.length)
+        //    {
+        //        return; //TODO: support more cases
+        //    }
+
+            
+        //}
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public walkOneStep(origin: LocatedTreeNode) {
+                
         }
 
         //-------------------------------------------------------------------------------------------------------------
@@ -475,14 +552,21 @@
         private _parentSubTree: SubTreeState;
         private _nodeChildIndex: number;
         private _nodeSubTree: SubTreeState;
+        private _nodeSubtreeIndex: number;
         private _nodeSubTreeInitialized: boolean;
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public constructor(parentSubTree: SubTreeState, nodeChildIndex: number, nodeSubTree?: SubTreeState) {
+        public constructor(
+            parentSubTree: SubTreeState,
+            nodeChildIndex: number,
+            nodeSubTree?: SubTreeState,
+            nodeSubtreeIndex?: number)
+        {
             this._parentSubTree = parentSubTree;
             this._nodeChildIndex = nodeChildIndex;
             this._nodeSubTree = nodeSubTree;
+            this._nodeSubtreeIndex = nodeSubtreeIndex || -1;
             this._nodeSubTreeInitialized = false;
         }
 
@@ -529,6 +613,20 @@
             if (this._nodeSubTree) {
                 this._nodeSubTree.collapse();
             }
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public walkOneStep(): LocatedTreeNode {
+            if (this._nodeSubTree && this._nodeSubTree.isExpanded()) {
+                return this._nodeSubTree.tryLocateTreeNode(0, 1);
+            }
+
+            if (this._parentSubTree) {
+                if (this._nodeChildIndex < this._parentSubTree.getChildNodeCount() - 1) {
+                    return new LocatedTreeNode(this._parentSubTree, this._nodeChildIndex + 1, 
+                }
+            } 
         }
     }
 }

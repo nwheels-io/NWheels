@@ -28,11 +28,17 @@
     <Content Include="lib\jasmine\jasmine-html.js" />
     <Content Include="lib\jasmine\jasmine.css" />
     <Content Include="lib\jasmine\jasmine.js" />
+    <Content Include="lib\smartFormat\SmartFormat.core.js" />
+    <Content Include="lib\smartFormat\SmartFormat.mootools.js" />
+    <Content Include="lib\smartFormat\SmartFormat.pluralRules.js" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="lib\typings\smartFormat\smartFormat.d.ts" />
     <TypeScriptCompile Include="src\UIDLError.ts" />
     <TypeScriptCompile Include="src\UIDLEvent.ts" />
+    <TypeScriptCompile Include="test\lib\SmartFormatTests.ts" />
+    <TypeScriptCompile Include="test\UIDLErrorTests.ts" />
     <TypeScriptCompile Include="test\UIDLEventTests.ts" />
     <TypeScriptCompile Include="test\widgets\UIDLDataGridTests.ts" />
     <TypeScriptCompile Include="src\widgets\UIDLDataGrid.ts" />
@@ -78,12 +84,11 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
-    <TypeScriptTarget>ES6</TypeScriptTarget>
+    <TypeScriptTarget>ES5</TypeScriptTarget>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-    <TypeScriptModuleKind>
-    </TypeScriptModuleKind>
+    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
     <TypeScriptOutFile>
     </TypeScriptOutFile>
     <TypeScriptOutDir>build\</TypeScriptOutDir>
