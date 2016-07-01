@@ -252,7 +252,12 @@
         private _nodeData: Object;
         private _isExpanded: boolean;
         private _visibleSubTreeSize: number;
-        private _subTrees: SubTreeState[];
+        private _subTrees: { [index: number]: SubTreeState };
+        private _subTreeCount: number;
+        private _firstSubTree: SubTreeState;
+        private _lastSubTree: SubTreeState;
+        private _nextSibling: SubTreeState;
+        private _prevSibling: SubTreeState;
         private _updateCount: number;
         private _visibleSubTreeSizeBeforeUpdate: number;
 
@@ -269,7 +274,12 @@
             this._childIndex = childIndex;
             this._nodeData = nodeData;
             this._visibleSubTreeSize = 0;
-            this._subTrees = [];
+            this._subTrees = {};
+            this._subTreeCount = 0;
+            this._firstSubTree = null;
+            this._lastSubTree = null;
+            this._nextSibling = null;
+            this._prevSibling = null;
             this._updateCount = 0;
 
             if (!parentSubTree) {
@@ -296,11 +306,11 @@
             let subTreeSizeSkipped = 0;//(thisVisibleAtIndex >= 0 ? 1 : 0);
             let lastSubtree: SubTreeState = null;
 
-            for (let currentSubree of this._subTrees) {
+            for (let currentSubtree = this._firstSubTree; currentSubtree != null; currentSubtree = currentSubtree._nextSibling) {
                 const siblingsSkippedToCurrentChild = (
                     lastSubtree !== null
-                    ? currentSubree._childIndex - lastSubtree._childIndex - 1
-                    : currentSubree._childIndex);
+                    ? currentSubtree._childIndex - lastSubtree._childIndex - 1
+                    : currentSubtree._childIndex);
 
                 if (subTreeSizeSkipped + siblingsSkippedToCurrentChild > subTreeSizeToSkip) {
                     const childIndex = (lastSubtree ? lastSubtree._childIndex + 1 + subTreeSizeToSkip - subTreeSizeSkipped : subTreeSizeToSkip);
@@ -309,13 +319,13 @@
 
                 subTreeSizeSkipped += siblingsSkippedToCurrentChild;
 
-                var subTreeResult = currentSubree.tryLocateTreeNode(rowIndex, thisVisibleAtIndex + 1 + subTreeSizeSkipped);
+                var subTreeResult = currentSubtree.tryLocateTreeNode(rowIndex, thisVisibleAtIndex + 1 + subTreeSizeSkipped);
                 if (subTreeResult !== null) {
                     return subTreeResult;
                 }
 
-                subTreeSizeSkipped += (currentSubree._visibleSubTreeSize + 1);
-                lastSubtree = currentSubree;
+                subTreeSizeSkipped += (currentSubtree._visibleSubTreeSize + 1);
+                lastSubtree = currentSubtree;
             }
 
             const childIndex = (lastSubtree ? lastSubtree._childIndex + 1 + subTreeSizeToSkip - subTreeSizeSkipped : subTreeSizeToSkip);
@@ -331,7 +341,7 @@
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public getChildNodeCount(): Object {
+        public getChildNodeCount(): number {
             let rowDataSubNodes = this._ownerBinding.getRowDataSubNodes(this._nodeData);
             return rowDataSubNodes.length;
         }
@@ -351,7 +361,7 @@
             let subNodesData = this._ownerBinding.getRowDataSubNodes(this._nodeData);
             let nextChildIndex: number = 0;
 
-            for (let subTree of this._subTrees) {
+            for (let subTree = this._firstSubTree; subTree != null; subTree = subTree._nextSibling) {
                 for ( ; nextChildIndex < subTree._childIndex ; nextChildIndex++) {
                     destination.push(subNodesData[nextChildIndex]);
                 }
@@ -368,19 +378,21 @@
         //-------------------------------------------------------------------------------------------------------------
 
         public createSubTree(childIndex: number): SubTreeState {
-            for (let i = 0; i < this._subTrees.length; i++) {
-                const subTree = this._subTrees[i];
+            let lastSubTree = null;
 
+            for (let subTree = this._firstSubTree; subTree != null; subTree = subTree._nextSibling) {
                 if (subTree._childIndex === childIndex) {
                     return subTree;
                 }
 
                 if (subTree._childIndex > childIndex) {
-                    return this.createSubTreeChecked(childIndex, i);
+                    return this.createSubTreeChecked(childIndex, undefined, subTree);
                 }
+
+                lastSubTree = subTree;
             }
 
-            return this.createSubTreeChecked(childIndex);
+            return this.createSubTreeChecked(childIndex, lastSubTree, undefined);
         }
 
         //-------------------------------------------------------------------------------------------------------------
@@ -393,7 +405,7 @@
                     let subNodesData = this._ownerBinding.getRowDataSubNodes(this._nodeData);
                     let visibleSubTreeSize = subNodesData.length;
 
-                    for (let subTree of this._subTrees) {
+                    for (let subTree = this._firstSubTree; subTree != null; subTree = subTree._nextSibling) {
                         visibleSubTreeSize += subTree.getVisibleSubTreeSize();
                     }
 
@@ -447,8 +459,15 @@
 
         //-------------------------------------------------------------------------------------------------------------
 
-        public walkOneStep(origin: LocatedTreeNode) {
-                
+        public walkOneStep(originChildIndex: number): LocatedTreeNode {
+            const childNodeCount = this.getChildNodeCount();
+
+            if (originChildIndex < childNodeCount - 1) {
+                const nextSubTree = this._subTrees[originChildIndex + 1];
+                return new LocatedTreeNode(this, originChildIndex + 1, nextSubTree);
+            } else if (this._parentSubTree) {
+                return this._parentSubTree.walkOneStep(this._childIndex);
+            }
         }
 
         //-------------------------------------------------------------------------------------------------------------
@@ -472,9 +491,7 @@
 
             let nextChildIndex = subNodesData.length - 1;
 
-            for (let subTreeIndex = this._subTrees.length - 1; subTreeIndex >= 0; subTreeIndex--) {
-                const subTree = this._subTrees[subTreeIndex];
-
+            for (let subTree = this._lastSubTree; subTree != null; subTree = subTree._prevSibling) {
                 for (; nextChildIndex > subTree._childIndex; nextChildIndex--) {
                     if (!this.isLeafNode(subNodesData[nextChildIndex])) {
                         const childSubTree = this.createSubTree(nextChildIndex);
@@ -500,7 +517,7 @@
 
         //-------------------------------------------------------------------------------------------------------------
 
-        private createSubTreeChecked(childIndex: number, atSubTreeIndex?: number): SubTreeState {
+        private createSubTreeChecked(childIndex: number, prevSibling?: SubTreeState, nextSibling?: SubTreeState): SubTreeState {
             const childNodeData = this.getChildNodeData(childIndex);
             if (this.isLeafNode(childNodeData)) {
                 return null;
@@ -508,11 +525,31 @@
 
             const newSubTree = new SubTreeState(this._ownerBinding, this, childIndex, childNodeData);
 
-            if (atSubTreeIndex !== undefined) {
-                this._subTrees.splice(atSubTreeIndex, 0, newSubTree);
+            if (prevSibling) {
+                newSubTree._prevSibling = prevSibling;
+                newSubTree._nextSibling = prevSibling._nextSibling;
+                prevSibling._nextSibling = newSubTree;
+                if (newSubTree._nextSibling) {
+                    newSubTree._nextSibling._prevSibling = newSubTree;
+                } else {
+                    this._lastSubTree = newSubTree;
+                }
+            } else if (nextSibling) {
+                newSubTree._nextSibling = nextSibling;
+                newSubTree._prevSibling = nextSibling._prevSibling;
+                nextSibling._prevSibling = newSubTree;
+                if (newSubTree._prevSibling) {
+                    newSubTree._prevSibling._nextSibling = newSubTree;
+                } else {
+                    this._firstSubTree = newSubTree;
+                }
             } else {
-                this._subTrees.push(newSubTree);
+                this._firstSubTree = newSubTree;
+                this._lastSubTree = newSubTree;
             }
+
+            this._subTrees[childIndex] = newSubTree;
+            this._subTreeCount++;
 
             return newSubTree;
         }
@@ -552,7 +589,6 @@
         private _parentSubTree: SubTreeState;
         private _nodeChildIndex: number;
         private _nodeSubTree: SubTreeState;
-        private _nodeSubtreeIndex: number;
         private _nodeSubTreeInitialized: boolean;
 
         //-------------------------------------------------------------------------------------------------------------
@@ -560,13 +596,11 @@
         public constructor(
             parentSubTree: SubTreeState,
             nodeChildIndex: number,
-            nodeSubTree?: SubTreeState,
-            nodeSubtreeIndex?: number)
+            nodeSubTree?: SubTreeState)
         {
             this._parentSubTree = parentSubTree;
             this._nodeChildIndex = nodeChildIndex;
             this._nodeSubTree = nodeSubTree;
-            this._nodeSubtreeIndex = nodeSubtreeIndex || -1;
             this._nodeSubTreeInitialized = false;
         }
 
@@ -618,15 +652,17 @@
         //-------------------------------------------------------------------------------------------------------------
 
         public walkOneStep(): LocatedTreeNode {
+            let nextNode: LocatedTreeNode = null;
+
             if (this._nodeSubTree && this._nodeSubTree.isExpanded()) {
-                return this._nodeSubTree.tryLocateTreeNode(0, 1);
+                nextNode = this._nodeSubTree.tryLocateTreeNode(1, 0);
             }
 
-            if (this._parentSubTree) {
-                if (this._nodeChildIndex < this._parentSubTree.getChildNodeCount() - 1) {
-                    return new LocatedTreeNode(this._parentSubTree, this._nodeChildIndex + 1, 
-                }
-            } 
+            if (!nextNode && this._parentSubTree) {
+                nextNode = this._parentSubTree.walkOneStep(this._nodeChildIndex);
+            }
+
+            return nextNode;
         }
     }
 }
