@@ -597,6 +597,15 @@ HEAD, JS/CSS LINKS
     </script>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    UIDL WIDGET - LANGUAGE SELECTOR
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <script type="text/ng-template" id="app/uidl-element-template/LanguageSelector">
+        <a href="" ng-click="$emit(uidl.qualifiedName + ':LogOut:Executing')">
+            <i class="fa fa-sign-out"></i> {{translate('LogOut')}}
+        </a>
+    </script>
+    
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     UIDL WIDGET - PROFILE PHOTO
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/UserProfilePhoto">
@@ -754,7 +763,7 @@ HEAD, JS/CSS LINKS
 								ng-class="{'btn-default':command.severity=='Read','btn-primary':command.severity=='Change','btn-warning':command.severity=='Loose','btn-danger':command.severity=='Destroy','btn-lg':uidl.mode=='Standalone','btn-md':uidl.mode!='Standalone'}"
 							><i ng-if="command.icon" class="fa fa-{{::command.icon}}">&nbsp;</i>{{::translate(command.text)}}</button>
                         </li>
-                        <li ng-repeat="widget in uidl.statusBar.containedWidgets">
+                        <li ng-repeat="widget in uidl.statusBar.containedWidgets" ng-class="{'dropdown': widget.border==='DropDown'}">
                             <uidl-widget uidl="widget"></uidl-widget>
                         </li>
                      </ul>

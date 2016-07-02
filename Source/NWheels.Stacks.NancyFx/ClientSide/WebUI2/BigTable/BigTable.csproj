@@ -37,10 +37,17 @@
     <TypeScriptCompile Include="lib\typings\smartFormat\smartFormat.d.ts" />
     <TypeScriptCompile Include="src\UIDLError.ts" />
     <TypeScriptCompile Include="src\UIDLEvent.ts" />
+    <TypeScriptCompile Include="src\widgets\dataGrid\DataGridBindingBase.ts" />
+    <TypeScriptCompile Include="src\widgets\dataGrid\VirtualDataGridBinding.ts" />
+    <TypeScriptCompile Include="src\widgets\dataGrid\LocalDataGridBinding.ts" />
+    <TypeScriptCompile Include="src\widgets\dataGrid\NestedSetTreeDataGridBinding.ts" />
     <TypeScriptCompile Include="test\lib\SmartFormatTests.ts" />
     <TypeScriptCompile Include="test\UIDLErrorTests.ts" />
     <TypeScriptCompile Include="test\UIDLEventTests.ts" />
-    <TypeScriptCompile Include="test\widgets\UIDLDataGridTests.ts" />
+    <TypeScriptCompile Include="test\widgets\dataGrid\TestDataGridBinding.ts" />
+    <TypeScriptCompile Include="test\widgets\dataGrid\VirtualDataGridBindingTests.ts" />
+    <TypeScriptCompile Include="test\widgets\dataGrid\LocalDataGridBindingTests.ts" />
+    <TypeScriptCompile Include="test\widgets\dataGrid\NestedSetTreeDataGridBindingTests.ts" />
     <TypeScriptCompile Include="src\widgets\UIDLDataGrid.ts" />
     <TypeScriptCompile Include="lib\typings\jasmine\jasmine.d.ts" />
   </ItemGroup>
