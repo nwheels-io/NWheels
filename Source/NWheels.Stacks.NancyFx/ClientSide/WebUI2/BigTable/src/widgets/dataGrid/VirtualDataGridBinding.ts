@@ -20,6 +20,13 @@
 
         //-------------------------------------------------------------------------------------------------------------
 
+        public attachView(view: UIDLDataGrid): void {
+            super.attachView(view);
+            view.verticalScroll().bind((args) => this.onViewVerticalScroll(args));
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
         public renderRow(index: number, el: HTMLTableRowElement): void {
             // nothing
         }
@@ -59,15 +66,21 @@
 
         //-------------------------------------------------------------------------------------------------------------
 
-        private onUpstreamBindingChanged(args: DataGridRowsChangedEventArgs) {
-            //this._realRowCount = (args.virtualPage ? args.virtualPage().);
+        private onUpstreamBindingChanged(args: DataGridRowsChangedEventArgs): void {
+            this._realRowCount = this._upstream.getRealRowCount();
 
-            //const downstreamArgs = new DataGridRowsChangedEventArgs(
-            //    args.changeType(),
-            //    args.startIndex,
-            //    args.count());
+            const downstreamArgs = new DataGridRowsChangedEventArgs(
+                args.changeType(),
+                args.startIndex() - this._pageStart,
+                args.count());
 
-            //this.changed().raise(downstreamArgs);
+            this.changed().raise(downstreamArgs);
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        private onViewVerticalScroll(args: ScrollEventArgs): void {
+            this._pageStart += (args.newPosition() - args.oldPosition());
         }
     }
 }

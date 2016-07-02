@@ -1,12 +1,20 @@
 ﻿namespace UIDL.Widgets
 {
     export class UIDLDataGrid {
+        private _binding: DataGrid.IDataGridBinding;
         private _verticalScroll: UIDLEvent<ScrollEventArgs>;
 
         //-------------------------------------------------------------------------------------------------------------
 
         public constructor() {
             this._verticalScroll = new UIDLEvent<ScrollEventArgs>();
+        }
+
+        //-------------------------------------------------------------------------------------------------------------
+
+        public setBinding(binding: DataGrid.IDataGridBinding): void {
+            this._binding = binding;
+            binding.attachView(this);
         }
 
         //-------------------------------------------------------------------------------------------------------------

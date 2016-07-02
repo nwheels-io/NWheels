@@ -44,6 +44,7 @@
     <TypeScriptCompile Include="test\lib\SmartFormatTests.ts" />
     <TypeScriptCompile Include="test\UIDLErrorTests.ts" />
     <TypeScriptCompile Include="test\UIDLEventTests.ts" />
+    <TypeScriptCompile Include="test\widgets\dataGrid\TestDataGridView.ts" />
     <TypeScriptCompile Include="test\widgets\dataGrid\TestDataGridBinding.ts" />
     <TypeScriptCompile Include="test\widgets\dataGrid\VirtualDataGridBindingTests.ts" />
     <TypeScriptCompile Include="test\widgets\dataGrid\LocalDataGridBindingTests.ts" />
