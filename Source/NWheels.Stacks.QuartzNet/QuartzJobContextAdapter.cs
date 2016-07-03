@@ -34,7 +34,7 @@ namespace NWheels.Stacks.QuartzNet
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void Report(string statusText, decimal percentCompleted)
+        public void Report(string statusText, decimal? percentCompleted = null)
         {
             //
         }
