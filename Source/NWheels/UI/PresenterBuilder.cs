@@ -63,6 +63,13 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public BehaviorBuilder<TArg> On<TArg>(UidlCommand<TArg> command)
+        {
+            return new BehaviorBuilder<TArg>(_ownerNode, command.Executing, _uidl);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         public BehaviorBuilder<TItem> On<TItem>(UidlCommandGroup<TItem> commandGroup)
         {
             return new BehaviorBuilder<TItem>(_ownerNode, commandGroup.Executing, _uidl);

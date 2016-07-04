@@ -13,6 +13,7 @@ HEAD, JS/CSS LINKS
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
     
     <link href="app/skin/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="app/skin/assets/css/languages/languages.min.css" rel="stylesheet">
     <link href="app/skin/assets/font-awesome/css/font-awesome.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
     <link href="app/skin/assets/css/plugins/datetimepicker/bootstrap-datetimepicker.min.css" rel="stylesheet">
@@ -494,6 +495,13 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - SPLASH
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/Splash">
+        <div ng-if="uidl.utilityBar" class="row border-bottom" style="padding:10px;border:none !important;">
+            <ul class="nav navbar-top-links navbar-right">
+                <li class="dropdown" ng-repeat="widget in uidl.utilityBar.containedWidgets" style="margin-right:20px;">
+                    <uidl-widget uidl="widget" ></uidl-widget>
+                </li>
+            </ul>
+         </div>
         <div>
             <h1 class="logo-name" style="text-align:center">{{::translate(uidl.text)}}</h1>
             <h2 class="logo-name" style="text-align:center;margin-bottom:40px;">{{::translate(uidl.helpText)}}</h2>
@@ -600,9 +608,14 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - LANGUAGE SELECTOR
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/LanguageSelector">
-        <a href="" ng-click="$emit(uidl.qualifiedName + ':LogOut:Executing')">
-            <i class="fa fa-sign-out"></i> {{translate('LogOut')}}
-        </a>
+        <div ng-init="langList=['ar','be','de','es']">
+            <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
+                <span class="lang-sm lang-lbl-full" lang="en"></span>
+            </a>
+            <ul class="dropdown-menu">
+                <li ng-repeat="lang in langList"><a ng-click="$emit(uidl.qualifiedName + ':Select:Executing', lang)"><span class="lang-sm lang-lbl-full" lang="{{lang}}"></span></a></li>
+            </ul>
+        </div>
     </script>
     
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -21,7 +21,9 @@ namespace NWheels.Authorization.Core
             IPrincipal userPrincipal,
             IEndpoint originatorEndpoint,
             TimeSpan? slidingExpiration,
-            TimeSpan? absoluteExpiration)
+            TimeSpan? absoluteExpiration,
+            CultureInfo culture = null,
+            TimeZoneInfo timeZone = null)
         {
             _absoluteExpiration = absoluteExpiration;
             _slidingExpiration = slidingExpiration;
@@ -34,8 +36,8 @@ namespace NWheels.Authorization.Core
             UserPrincipal = userPrincipal;
             UserIdentity = (userPrincipal as IIdentityInfo);
             Endpoint = originatorEndpoint;
-            Culture = CultureInfo.InvariantCulture;
-            TimeZone = TimeZoneInfo.Utc;
+            Culture = culture ?? _s_fallbackCulture;
+            TimeZone = timeZone ?? _s_fallbackTimeZone;
             OpenedAtUtc = _framework.UtcNow;
 
             Touch();
@@ -173,7 +175,7 @@ namespace NWheels.Authorization.Core
             else
             {
                 Thread.CurrentPrincipal = null;
-                Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+                Thread.CurrentThread.CurrentCulture = _s_fallbackCulture;
             }
         }
 
@@ -184,6 +186,11 @@ namespace NWheels.Authorization.Core
             this.UserPrincipal = userPrincipal;
             this.UserIdentity = (IIdentityInfo)userPrincipal.Identity;
         }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        private static readonly CultureInfo _s_fallbackCulture = CultureInfo.GetCultureInfo("en-US");
+        private static readonly TimeZoneInfo _s_fallbackTimeZone = TimeZoneInfo.Utc;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

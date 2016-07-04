@@ -8,8 +8,11 @@ namespace NWheels.Globalization
 {
     public interface ILocalizationProvider
     {
+        ILocale GetDefaultLocale();
         ILocale GetCurrentLocale();
+        ILocale[] GetAllSupportedLocales();
         ILocale GetLocale(CultureInfo culture);
+        ILocale GetLocale(string isoCode);
     }
 
     //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -20,6 +23,7 @@ namespace NWheels.Globalization
         string Translate(string stringId);
         void AppendListItem(StringBuilder output, string item);
         string MakeKeyValuePair(string key, string value);
+        CultureInfo Culture { get; }
         string ListSeparator { get; }
         string EqualitySign { get; }
     }
@@ -28,6 +32,17 @@ namespace NWheels.Globalization
 
     public class VoidLocalizationProvider : ILocalizationProvider, ILocale
     {
+        private readonly CultureInfo _enUS = CultureInfo.GetCultureInfo("en-US");
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        ILocale ILocalizationProvider.GetDefaultLocale()
+        {
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         ILocale ILocalizationProvider.GetCurrentLocale()
         {
             return this;
@@ -35,7 +50,21 @@ namespace NWheels.Globalization
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        public ILocale[] GetAllSupportedLocales()
+        {
+            return new ILocale[] { this };
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         ILocale ILocalizationProvider.GetLocale(CultureInfo culture)
+        {
+            return this;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public ILocale GetLocale(string isoCode)
         {
             return this;
         }
@@ -78,6 +107,13 @@ namespace NWheels.Globalization
         public string MakeKeyValuePair(string key, string value)
         {
             return key + " = " + value;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public CultureInfo Culture
+        {
+            get { return _enUS; }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

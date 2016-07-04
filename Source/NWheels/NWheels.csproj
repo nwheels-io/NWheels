@@ -156,6 +156,10 @@
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Extensions\UidlExtensions.cs" />
     <Compile Include="Globalization\Locales\ApplicationLocaleEntrySource.cs" />
+    <Compile Include="Globalization\Locales\ChangeSessionLanguageTx.cs" />
+    <Compile Include="Globalization\Locales\DbBasedLocale.cs" />
+    <Compile Include="Globalization\Locales\DbBasedLocalizationProvider.cs" />
+    <Compile Include="Globalization\Locales\LocalizationProviderBase.cs" />
     <Compile Include="Globalization\Locales\IApplicationLocaleEntity.cs" />
     <Compile Include="Globalization\Locales\IApplicationLocaleEntryEntityPart.cs" />
     <Compile Include="Globalization\Locales\IApplicationLocalizationContext.cs" />
@@ -403,6 +407,7 @@
     <Compile Include="UI\Impl\EntityImportExportFault.cs" />
     <Compile Include="UI\Impl\EntityImportExportFormatSet.cs" />
     <Compile Include="UI\Toolbox\JsonText.cs" />
+    <Compile Include="UI\Toolbox\LanguageSelector.cs" />
     <Compile Include="UI\Toolbox\PropertyGrid.cs" />
     <Compile Include="UI\Toolbox\TabbedScreenPartSet.cs" />
     <Compile Include="UI\Toolbox\TabSet.cs" />
@@ -442,6 +447,7 @@
     <Compile Include="UI\Toolbox\ModalUserAlert.cs" />
     <Compile Include="UI\Uidl\UidlUtility.cs" />
     <Compile Include="UI\Uidl\WidgetAlignment.cs" />
+    <Compile Include="UI\Uidl\WidgetBorder.cs" />
     <Compile Include="UI\Uidl\WidgetSize.cs" />
     <Compile Include="UI\UIOperationContext.cs" />
     <Compile Include="UI\ViewModel.cs" />

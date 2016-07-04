@@ -79,7 +79,7 @@ namespace NWheels.Domains.Security
                     _sessionManager.OpenAnonymous(currentSession.Endpoint);
                 }
 
-                var session = _sessionManager.As<ICoreSessionManager>().AuthorieSession(principal);
+                var session = _sessionManager.As<ICoreSessionManager>().AuthorizeSession(principal);
                 _logger.UserLoggedIn(principal.LoginName, principal.UserId, principal.EmailAddress, session.Id);
 
                 var result = new Result(principal, currentSession.Endpoint, _metadataCache);

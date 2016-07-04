@@ -7,15 +7,18 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Threading;
+using Autofac;
 using NWheels.Authorization.Core;
 using NWheels.Concurrency;
 using NWheels.Endpoints.Core;
 using NWheels.Extensions;
+using NWheels.Globalization;
 
 namespace NWheels.Authorization.Impl
 {
     public class LocalTransientSessionManager : ISessionManager, ICoreSessionManager
     {
+        private readonly IComponentContext _components;
         private readonly IFramework _framework;
         private readonly ISessionEventLogger _logger;
         private readonly ConcurrentDictionary<string, Session> _sessionById;
@@ -25,11 +28,13 @@ namespace NWheels.Authorization.Impl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         public LocalTransientSessionManager(
+            IComponentContext components,
             IFramework framework, 
             AnonymousPrincipal anonymousPrincipal, 
             SystemPrincipal systemPrincipal,
             ISessionEventLogger logger)
         {
+            _components = components;
             _framework = framework;
             _logger = logger;
             _sessionById = new ConcurrentDictionary<string, Session>();
@@ -52,7 +57,14 @@ namespace NWheels.Authorization.Impl
 
         public ISession OpenSession(IPrincipal userPrincipal, IEndpoint originatorEndpoint)
         {
-            var newSession = new Session(_framework, userPrincipal, originatorEndpoint, slidingExpiration: null, absoluteExpiration: null);
+            var defaultLocale = _components.Resolve<ILocalizationProvider>().GetDefaultLocale();
+            var newSession = new Session(
+                _framework, 
+                userPrincipal, 
+                originatorEndpoint, 
+                slidingExpiration: null, 
+                absoluteExpiration: null,
+                culture: defaultLocale.Culture);
             
             _sessionById.AddOrUpdate(
                 newSession.Id, 

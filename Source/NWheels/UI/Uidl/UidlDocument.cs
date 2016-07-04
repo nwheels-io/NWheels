@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
+using System.Linq;
 using System.Runtime.Serialization;
 using NWheels.DataObjects;
 using NWheels.Entities;
@@ -27,6 +29,31 @@ namespace NWheels.UI.Uidl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private UidlDocument(
+            List<UidlApplication> applications, 
+            Dictionary<string, UidlLocale> locales, 
+            Dictionary<string, UidlMetaType> metaTypes,
+            string localeIdName)
+        {
+            this.Applications = applications;
+            this.Locales = locales;
+            this.MetaTypes = metaTypes;
+            this.DefaultLocaleIdName = localeIdName;
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        public UidlDocument ForCurrentUser()
+        {
+            return new UidlDocument(
+                this.Applications, 
+                this.Locales.Values.Select(locale => locale.ForCurrentUser()).ToDictionary(locale => locale.IdName),
+                this.MetaTypes,
+                CultureInfo.CurrentCulture.Name);
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
         [DataMember]
         public List<UidlApplication> Applications { get; set; }
 
@@ -39,5 +66,10 @@ namespace NWheels.UI.Uidl
 
         [DataMember]
         public Dictionary<string, UidlMetaType> MetaTypes { get; set; }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+        [DataMember]
+        public string DefaultLocaleIdName { get; set; }
     }
 }

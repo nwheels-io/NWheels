@@ -26,6 +26,7 @@ using NWheels.Entities.Core;
 using NWheels.Entities.Impl;
 using NWheels.Entities.Migrations;
 using NWheels.Exceptions;
+using NWheels.Globalization;
 using NWheels.Globalization.Locales;
 using NWheels.Hosting;
 using NWheels.Hosting.Factories;
@@ -374,10 +375,21 @@ namespace NWheels.Extensions
 
             //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-            public void RegisterLocaleEntrySource<TApp>()
-                where TApp : UidlApplication
+            public void RegisterLocaleEntrySource<TUidlApp>()
+                where TUidlApp : UidlApplication
             {
-                _builder.RegisterInstance(new ApplicationLocaleEntrySource(typeof(TApp)));
+                _builder.RegisterType<UidlApplicationLocaleEntrySource>()
+                    .WithParameter(TypedParameter.From(typeof(TUidlApp)))
+                    .As<ApplicationLocaleEntrySource>()
+                    .InstancePerDependency();
+            }
+
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+            public void RegisterLocalizationProvider<TProvider>()
+                where TProvider : class, ILocalizationProvider
+            {
+                _builder.RegisterType<TProvider>().As<ILocalizationProvider>().AsSelf().SingleInstance();
             }
         }
 

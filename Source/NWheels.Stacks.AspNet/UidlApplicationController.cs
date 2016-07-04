@@ -266,7 +266,8 @@ namespace NWheels.Stacks.AspNet
         {
             if ( string.IsNullOrEmpty(elementType) )
             {
-                return Json(_context.Uidl, _uidlJsonSettings);
+                var uidlForCurrentuser = _context.Uidl.ForCurrentUser();
+                return Json(uidlForCurrentuser, _uidlJsonSettings);
             }
 
             object element;

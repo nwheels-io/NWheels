@@ -63,14 +63,16 @@ namespace NWheels.UI
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        public void AddLocale(CultureInfo culture, Dictionary<string, string> translations)
+        public void AddLocale(ILocale locale, IEnumerable<string> translationEntryIds)
         {
+            var culture = locale.Culture;
+
             _document.Locales.Add(culture.Name, new UidlLocale() {
                 IdName = culture.Name,
                 FullName = culture.DisplayName,
                 IsRightToLeft = culture.TextInfo.IsRightToLeft,
                 ListSeparator = culture.TextInfo.ListSeparator,
-                Translations = translations
+                Translations = locale.GetAllLocalStrings(translationEntryIds)
             });
         }
 
@@ -245,7 +247,7 @@ namespace NWheels.UI
             if ( parentAsControlled != null )
             {
                 parentAsControlled.Behaviors.AddRange(instantiatedNodes.OfType<BehaviorUidlNode>());
-                parentAsControlled.Commands.AddRange(instantiatedNodes.OfType<UidlCommand>());
+                parentAsControlled.Commands.AddRange(instantiatedNodes.OfType<UidlCommandBase>());
                 parentAsControlled.DataBindings.AddRange(instantiatedNodes.OfType<DataBindingUidlNode>());
             }
         }
@@ -345,8 +347,12 @@ namespace NWheels.UI
             var builder = new UidlBuilder(metadataCache, components.Resolve<IDomainObjectFactory>(), components.Resolve<IEntityObjectFactory>());
             builder.AddApplication(application);
 
-            var localStrings = localizationProvider.GetCurrentLocale().GetAllLocalStrings(builder.GetTranslatables());
-            builder.AddLocale(CultureInfo.CurrentUICulture, localStrings);
+            var allTranslatables = builder.GetTranslatables().ToArray();
+
+            foreach (var locale in localizationProvider.GetAllSupportedLocales())
+            {
+                builder.AddLocale(locale, allTranslatables);
+            }
 
             return builder.GetDocument();
         }

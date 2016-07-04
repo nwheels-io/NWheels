@@ -40,6 +40,8 @@ namespace NWheels.UI.Uidl
         public string TemplateName { get; set; }
         [DataMember]
         public bool IsApplicationTemplate { get; set; }
+        [DataMember]
+        public WidgetBorder Border { get; set; }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 

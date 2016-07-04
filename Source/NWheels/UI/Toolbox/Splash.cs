@@ -18,6 +18,7 @@ namespace NWheels.UI.Toolbox
         public override IEnumerable<WidgetUidlNode> GetNestedWidgets()
         {
             yield return InsideContent;
+            yield return UtilityBar;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,6 +43,7 @@ namespace NWheels.UI.Toolbox
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-
+        [DataMember]
+        public Container UtilityBar { get; set; }
     }
 }

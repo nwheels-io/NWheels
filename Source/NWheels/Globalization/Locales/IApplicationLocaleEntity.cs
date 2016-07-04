@@ -57,18 +57,12 @@ namespace NWheels.Globalization.Locales
             var components = Framework.As<ICoreFramework>().Components;
             var entrySources = components.Resolve<IEnumerable<ApplicationLocaleEntrySource>>();
 
-            var allEntryIdsInUse = new HashSet<string>();
-
             foreach (var source in entrySources)
             {
-                var application = (UidlApplication)components.Resolve(source.UidlApplicationType);
-                var uidl = UidlBuilder.GetApplicationDocument(application, MetadataCache, LocalizationProvider, components);
+                var allEntryKeys = source.GetAllEntryKeys();
 
-                var defaultLocale = uidl.Locales.Values.First();
-                allEntryIdsInUse.UnionWith(defaultLocale.Translations.Keys);
-
-                HandleRemovedEntries(defaultLocale);
-                HandleAddedEntries(defaultLocale);
+                HandleRemovedEntries(allEntryKeys);
+                HandleAddedEntries(allEntryKeys);
             }
 
             this.LastEntriesUpdate = Framework.UtcNow;
@@ -109,9 +103,9 @@ namespace NWheels.Globalization.Locales
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void HandleAddedEntries(UidlLocale defaultLocale)
+        private void HandleAddedEntries(string[] entryKeysInUse)
         {
-            var addedEntryIds = new HashSet<string>(defaultLocale.Translations.Keys);
+            var addedEntryIds = new HashSet<string>(entryKeysInUse);
             addedEntryIds.ExceptWith(this.Entries.Keys);
 
             foreach (var addedId in addedEntryIds.OrderBy(id => id))
@@ -122,12 +116,12 @@ namespace NWheels.Globalization.Locales
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        private void HandleRemovedEntries(UidlLocale defaultLocale)
+        private void HandleRemovedEntries(string[] entryKeysInUse)
         {
             //var entryById = this.Entries.Distinct(new EntryIdEqualityComparer()).ToDictionary(e => e.EntryId);
             
             var removedEntryIds = new HashSet<string>(this.Entries.Keys);
-            removedEntryIds.ExceptWith(defaultLocale.Translations.Keys);
+            removedEntryIds.ExceptWith(entryKeysInUse);
 
             foreach (var removedId in removedEntryIds)
             {
