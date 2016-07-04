@@ -13,7 +13,7 @@ namespace NWheels.UI.Uidl
     {
         public UidlLocale ForCurrentUser()
         {
-            if (this.IdName == CultureInfo.CurrentCulture.Name)
+            if (this.IdName == CultureInfo.CurrentUICulture.Name)
             {
                 // return full
                 return this;

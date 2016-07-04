@@ -54,7 +54,7 @@ namespace NWheels
 
         public override string ToString()
         {
-            return ToString("C", CultureInfo.CurrentCulture);
+            return ToString("C", CultureInfo.CurrentUICulture);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

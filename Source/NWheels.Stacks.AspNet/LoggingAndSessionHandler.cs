@@ -64,7 +64,7 @@ namespace NWheels.Stacks.AspNet
                     //    response.Content.ReadAsStringAsync().Wait();
                     //}
 
-                    //SetResponseSessionCookie(request, response);
+                    SetResponseSessionCookie(request, response);
                     Session.Clear();
                     return response;
                     //}
@@ -84,9 +84,12 @@ namespace NWheels.Stacks.AspNet
 
         private void SetResponseSessionCookie(HttpRequestMessage request, HttpResponseMessage response)
         {
-            if ( Session.Current != null && Session.Current.UserIdentity.IsAuthenticated )
+            var session = Session.Current;
+            var httpSession = HttpContext.Current.Session;
+
+            if (session != null && httpSession != null && !httpSession.IsReadOnly && httpSession[_sessionCookieName] == null)
             {
-                HttpContext.Current.Session[_sessionCookieName] = Session.Current.Id;
+                httpSession[_sessionCookieName] = session.Id;
             }
         }
 

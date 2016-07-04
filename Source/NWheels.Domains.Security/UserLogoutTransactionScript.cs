@@ -30,7 +30,11 @@ namespace NWheels.Domains.Security
         public virtual void Execute()
         {
             var session = Session.Current;
+            
             _sessionManager.CloseCurrentSession();
+            _sessionManager.As<ISessionManager>().OpenAnonymous(session.Endpoint);
+            _sessionManager.As<ICoreSessionManager>().SetSessionUserInfo(Session.Current.Id, newCulture: session.Culture);
+
             _logger.UserLoggedOut(session.UserIdentity.LoginName, session.UserIdentity.UserId, session.UserIdentity.EmailAddress, session.Id);
         }
     }

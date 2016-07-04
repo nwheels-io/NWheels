@@ -51,7 +51,7 @@ namespace NWheels.Logging
 
             if ( Format != null && formattable != null )
             {
-                return formattable.ToString(Format, CultureInfo.CurrentCulture);
+                return formattable.ToString(Format, CultureInfo.InvariantCulture);
             }
             else if ( !typeof(T).IsValueType && (object)Value == null )
             {

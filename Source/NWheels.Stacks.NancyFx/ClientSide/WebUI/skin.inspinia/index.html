@@ -608,12 +608,12 @@ HEAD, JS/CSS LINKS
     UIDL WIDGET - LANGUAGE SELECTOR
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <script type="text/ng-template" id="app/uidl-element-template/LanguageSelector">
-        <div ng-init="langList=['ar','be','de','es']">
+        <div>
             <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
-                <span class="lang-sm lang-lbl-full" lang="en"></span>
+                <span class="lang-sm lang-lbl-full" lang="{{currentLanguage}}"></span>
             </a>
             <ul class="dropdown-menu">
-                <li ng-repeat="lang in langList"><a ng-click="$emit(uidl.qualifiedName + ':Select:Executing', lang)"><span class="lang-sm lang-lbl-full" lang="{{lang}}"></span></a></li>
+                <li ng-repeat="lang in allLanguages"><a ng-click="$emit(uidl.qualifiedName + ':Select:Executing', lang)"><span class="lang-sm lang-lbl-full" lang="{{lang}}"></span></a></li>
             </ul>
         </div>
     </script>

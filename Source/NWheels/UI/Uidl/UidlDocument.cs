@@ -49,7 +49,7 @@ namespace NWheels.UI.Uidl
                 this.Applications, 
                 this.Locales.Values.Select(locale => locale.ForCurrentUser()).ToDictionary(locale => locale.IdName),
                 this.MetaTypes,
-                CultureInfo.CurrentCulture.Name);
+                CultureInfo.CurrentUICulture.Name);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

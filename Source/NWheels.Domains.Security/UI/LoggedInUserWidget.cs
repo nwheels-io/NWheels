@@ -20,7 +20,7 @@ namespace NWheels.Domains.Security.UI
         protected override void DescribePresenter(PresenterBuilder<LoggedInUserWidget, ILogUserOutRequest, IState> presenter)
         {
             presenter.On(LogOut)
-                .InvokeTransactionScript<UserLogoutTransactionScript>().FireAndForget((logout, vm) => logout.Execute())
+                .InvokeTransactionScript<UserLogoutTransactionScript>().WaitForCompletion((logout, vm) => logout.Execute())
                 .Then(
                     onSuccess: b => b.Broadcast(UserLoggedOut).BubbleUp(),
                     onFailure: b => b.UserAlertFrom<IAlerts>().ShowInline((x, vm) => x.LogoutOperationFailed(vm.Input.FaultReason), faultInfo: vm => vm.Input)

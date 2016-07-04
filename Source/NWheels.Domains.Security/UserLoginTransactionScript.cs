@@ -80,6 +80,7 @@ namespace NWheels.Domains.Security
                 }
 
                 var session = _sessionManager.As<ICoreSessionManager>().AuthorizeSession(principal);
+                _sessionManager.As<ICoreSessionManager>().SetSessionUserInfo(session.Id, newCulture: currentSession.Culture);
                 _logger.UserLoggedIn(principal.LoginName, principal.UserId, principal.EmailAddress, session.Id);
 
                 var result = new Result(principal, currentSession.Endpoint, _metadataCache);

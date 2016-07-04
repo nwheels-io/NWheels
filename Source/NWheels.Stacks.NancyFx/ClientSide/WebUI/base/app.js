@@ -532,6 +532,12 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
 
     //-----------------------------------------------------------------------------------------------------------------
 
+    function getDocument() {
+        return m_uidl;
+    }
+    
+    //-----------------------------------------------------------------------------------------------------------------
+
     function getApp() {
         return m_app;
     }
@@ -1153,6 +1159,32 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
         },
     };
 
+    //-----------------------------------------------------------------------------------------------------------------
+
+    m_controllerImplementations['LanguageSelector'] = {
+        implement: function (scope) {
+            function getNeutralCulture(name) {
+                var hyphenPos = name.indexOf('-');
+                if (hyphenPos > 0) {
+                    return name.substr(0, hyphenPos);
+                }
+                return name;
+            };
+
+            var uidlDoc = scope.uidlService.getDocument();
+            var allLocales = uidlDoc.locales;
+            var allNames = [];
+            for (var locale in allLocales) {
+                if (allLocales.hasOwnProperty(locale) && locale !== uidlDoc.currentLocaleIdName) {
+                    allNames.push(getNeutralCulture(locale));
+                }
+            }
+            
+            scope.allLanguages = allNames;
+            scope.currentLanguage = getNeutralCulture(uidlDoc.currentLocaleIdName);
+        }
+    };
+    
     //-----------------------------------------------------------------------------------------------------------------
 
     m_controllerImplementations['ModalUserAlert'] = {
@@ -2359,6 +2391,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
     //-----------------------------------------------------------------------------------------------------------------
 
     return {
+        getDocument: getDocument,
         setDocument: setDocument,
         getApp: getApp,
         getLocationSearchRaw: getLocationSearchRaw,

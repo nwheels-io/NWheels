@@ -272,7 +272,10 @@ namespace NWheels.Authorization.Impl
         
         public string SessionIdCookieName
         {
-            get { return "nw"; }
+            get
+            {
+                return _s_sessionIdCookieName;
+            }
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -289,6 +292,7 @@ namespace NWheels.Authorization.Impl
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
+        private static readonly string _s_sessionIdCookieName = "nw";
         protected static readonly RijndaelManaged CryptoProvider;
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

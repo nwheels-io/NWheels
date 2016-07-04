@@ -21,6 +21,7 @@ using Autofac;
 using Autofac.Integration.WebApi;
 using Hapil;
 using NWheels.Authorization;
+using NWheels.Authorization.Core;
 using NWheels.Endpoints.Core;
 using NWheels.Extensions;
 using NWheels.Hosting;
@@ -44,6 +45,7 @@ namespace NWheels.Stacks.AspNet
         private static readonly object _s_nodeHostSyncRoot = new object();
         private static readonly IPlainLog _s_log;
         private static NodeHost _s_nodeHost;
+        private static ISessionManager _s_sessionManager;
         private static string _s_bootConfigFilePath;
         private static UidlApplication _s_uidlApplication;
 
@@ -176,8 +178,11 @@ namespace NWheels.Stacks.AspNet
 
         private void SessionModule_OnStart(object sender, EventArgs eventArgs)
         {
-            var sessionId = Session.SessionID;
+           var sessionId = Session.SessionID;
             Session.Timeout = 40;
+
+            _s_sessionManager.OpenAnonymous(HttpContext.Current.ApplicationInstance as IEndpoint);
+            Session[_s_sessionManager.As<ICoreSessionManager>().SessionIdCookieName] = NWheels.Authorization.Core.Session.Current.Id;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -337,6 +342,7 @@ namespace NWheels.Stacks.AspNet
 
                     _s_nodeHost.LoadAndActivate();
                     _s_nodeHost.Components.TryResolve<UidlApplication>(out _s_uidlApplication);
+                    _s_nodeHost.Components.TryResolve<ISessionManager>(out _s_sessionManager);
                 }
             }
             finally

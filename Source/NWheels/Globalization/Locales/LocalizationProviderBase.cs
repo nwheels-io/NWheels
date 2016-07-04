@@ -39,7 +39,7 @@ namespace NWheels.Globalization.Locales
         public ILocale GetCurrentLocale()
         {
             EnsureInitialized();
-            return _localeByCultureName.GetValueOrDefault(Thread.CurrentThread.CurrentCulture.Name, _fallbackLocale);
+            return _localeByCultureName.GetValueOrDefault(Thread.CurrentThread.CurrentUICulture.Name, _fallbackLocale);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

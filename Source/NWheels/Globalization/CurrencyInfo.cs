@@ -68,7 +68,7 @@ namespace NWheels.Globalization
 
         public IFormatProvider GetFormatProvider()
         {
-            return new CurrencyFormatProvider(this, CultureInfo.CurrentCulture);
+            return new CurrencyFormatProvider(this, CultureInfo.CurrentUICulture);
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------

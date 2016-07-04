@@ -170,12 +170,12 @@ namespace NWheels.Authorization.Core
             if ( currentScopeIsActive )
             {
                 Thread.CurrentPrincipal = this.UserPrincipal;
-                Thread.CurrentThread.CurrentCulture = this.Culture;
+                Thread.CurrentThread.CurrentUICulture = this.Culture;
             }
             else
             {
                 Thread.CurrentPrincipal = null;
-                Thread.CurrentThread.CurrentCulture = _s_fallbackCulture;
+                Thread.CurrentThread.CurrentUICulture = _s_fallbackCulture;
             }
         }
 
