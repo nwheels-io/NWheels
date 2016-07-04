@@ -104,15 +104,30 @@ namespace NWheels.Stacks.MongoDb.Factories
             MutableOperand<TT.TProperty> contractValue, 
             IOperand<TT.TValue> storageValue)
         {
-            contractValue.Assign(
-                Static.Func(MongoDataRepositoryBase.ResolveFrom, 
-                    _componentsField,
-                    _conventionContext.ContextImplTypeField
-                )
-                .Func<TT.TValue, TT.TProperty>(
-                    x => x.LazyLoadById<TT.TProperty, TT.TValue>, storageValue
-                )
-            );
+            Action writeLazyLoad = () => {
+                contractValue.Assign(
+                    Static.Func(MongoDataRepositoryBase.ResolveFrom,
+                        _componentsField,
+                        _conventionContext.ContextImplTypeField
+                    )
+                    .Func<TT.TValue, TT.TProperty>(
+                        x => x.LazyLoadById<TT.TProperty, TT.TValue>, storageValue
+                    )
+                );
+            };
+
+            if (this.StorageType.IsValueType)
+            {
+                writeLazyLoad();
+            }
+            else
+            {
+                method.If(storageValue.CastTo<TT.TValue>().IsNotNull()).Then(() => {
+                    writeLazyLoad();
+                }).Else(() => {
+                    contractValue.Assign(method.Const<TT.TProperty>(null));
+                });
+            }
         }
 
         #endregion
