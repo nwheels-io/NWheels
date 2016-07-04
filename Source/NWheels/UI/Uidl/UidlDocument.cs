@@ -38,7 +38,7 @@ namespace NWheels.UI.Uidl
             this.Applications = applications;
             this.Locales = locales;
             this.MetaTypes = metaTypes;
-            this.DefaultLocaleIdName = localeIdName;
+            this.CurrentLocaleIdName = localeIdName;
         }
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -70,6 +70,6 @@ namespace NWheels.UI.Uidl
         //-----------------------------------------------------------------------------------------------------------------------------------------------------
 
         [DataMember]
-        public string DefaultLocaleIdName { get; set; }
+        public string CurrentLocaleIdName { get; set; }
     }
 }

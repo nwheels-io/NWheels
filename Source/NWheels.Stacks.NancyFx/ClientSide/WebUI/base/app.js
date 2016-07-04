@@ -551,7 +551,7 @@ function ($q, $http, $rootScope, $timeout, $location, $templateCache, commandSer
     //-----------------------------------------------------------------------------------------------------------------
 
     function getCurrentLocale() {
-        return m_uidl.locales['en-US'];
+        return m_uidl.locales[m_uidl.currentLocaleIdName];
     }
 
     //-----------------------------------------------------------------------------------------------------------------

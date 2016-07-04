@@ -71,7 +71,10 @@ namespace NWheels.Globalization.Locales
                 return locale;
             }
 
-            locale = _localeByCultureName.Where(kvp => kvp.Key.StartsWith(isoCode + "-")).Select(kvp => kvp.Value).FirstOrDefault();
+            locale = _localeByCultureName
+                .Where(kvp => kvp.Key.StartsWith(isoCode + "-", StringComparison.OrdinalIgnoreCase))
+                .Select(kvp => kvp.Value).FirstOrDefault();
+            
             return (locale ?? _fallbackLocale);
         }
 
